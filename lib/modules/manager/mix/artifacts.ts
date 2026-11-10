@@ -166,8 +166,7 @@ export async function updateArtifacts({
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
         constraint:
-          (await resolveToolConstraint(config, 'erlang')) ??
-          `^${erlangVersion}`,
+          (await resolveToolConstraint(config, 'erlang')) ?? erlangVersion,
       },
       {
         toolName: 'elixir',

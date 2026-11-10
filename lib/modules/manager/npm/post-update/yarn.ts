@@ -28,6 +28,7 @@ import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
+import { hasPackageManager } from '../extract/common/package-file.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -100,11 +101,10 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return (
-    (upgrade.depType === 'packageManager' ||
-      upgrade.depType === 'devEngines.packageManager') &&
-    upgrade.depName === 'yarn'
-  );
+  const isPackageManagerDepType =
+    upgrade.depType === 'packageManager' ||
+    upgrade.depType === 'devEngines.packageManager';
+  return isPackageManagerDepType && upgrade.depName === 'yarn';
 }
 
 export async function generateLockFile(
@@ -149,11 +149,15 @@ export async function generateLockFile(
     };
 
     // check first upgrade, see #17786
-    const hasPackageManager =
+    let packageManagerDeclared =
       !!config.managerData?.hasPackageManager ||
       !!upgrades[0]?.managerData?.hasPackageManager;
+    // dep-level managerData can shadow the flag (e.g. nested resolutions), see #25853
+    if (!isYarn1 && !packageManagerDeclared) {
+      packageManagerDeclared = await hasPackageManager(lockFileDir);
+    }
 
-    if (!isYarn1 && hasPackageManager) {
+    if (!isYarn1 && packageManagerDeclared) {
       toolConstraints.push({
         toolName: 'corepack',
         constraint: await resolveToolConstraint(config, 'corepack'),

@@ -25,9 +25,23 @@ export const presets: Record<string, Preset> = {
       'workarounds:ubuntuDockerVersioning',
       'workarounds:groupings',
       'workarounds:helmDocs',
+      'workarounds:guavaVariants',
+      'workarounds:aospTagVersioning',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
+    ],
+  },
+  aospTagVersioning: {
+    description: 'Use regex versioning for AOSP submodule tags.',
+    packageRules: [
+      {
+        matchDatasources: ['git-refs'],
+        matchManagers: ['git-submodules'],
+        matchSourceUrls: ['https://android.googlesource.com/**'],
+        versioning:
+          'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
+      },
     ],
   },
   bitnamiDockerImageVersioning: {
@@ -147,6 +161,27 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['npm'],
         matchPackageNames: ['@commander-js/extra-typings', 'commander'],
         matchUpdateTypes: ['major'],
+      },
+      {
+        description:
+          'Group SimpleWebAuthn major updates to keep browser and server compatible.',
+        groupName: 'SimpleWebAuthn',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          '@simplewebauthn/browser',
+          '@simplewebauthn/server',
+        ],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
+  guavaVariants: {
+    description: 'Keep Guava on its `-jre` or `-android` variant.',
+    packageRules: [
+      {
+        matchDatasources: ['maven', 'sbt-package'],
+        matchPackageNames: ['com.google.guava:guava'],
+        versionCompatibility: '^(?<version>.+)-(?<compatibility>jre|android)$',
       },
     ],
   },
@@ -396,6 +431,7 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel7**',
           'registry.access.redhat.com/rhel8/**',
           'registry.access.redhat.com/rhel9/**',
+          'registry.access.redhat.com/rhel10/**',
           'registry.access.redhat.com/rhscl/**',
           'registry.access.redhat.com/ubi*{,/}**',
           'redhat/**',

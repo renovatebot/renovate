@@ -69,7 +69,7 @@ export class GoDatasource extends Datasource {
           config.packageName,
           constraintsFilteringKey,
         ),
-        cacheable: isPublicGoPackage(config.packageName),
+        public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -143,7 +143,7 @@ export class GoDatasource extends Datasource {
       {
         namespace: `datasource-${GoDatasource.id}`,
         key: buildCacheKey('getDigest', config.packageName, newValue),
-        cacheable: isPublicGoPackage(config.packageName),
+        public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getDigest(config, newValue),

@@ -377,6 +377,12 @@ if (match?.groups) {
 }
 ```
 
+Before writing a regex, check whether a shared helper already covers the check:
+
+- Versions: use the versioning API from `lib/modules/versioning/` (`get(id)` from `lib/modules/versioning/index.ts`, or a versioning's own exports like `isPseudoVersion()` in `gomod`) instead of patterns like `/^\d+\.\d+\.\d+$/`. If no versioning offers the check, add it to the matching versioning. The `renovate/prefer-versioning-helpers` lint rule flags hand-written version regexes.
+- User-provided regex or glob patterns: `matchRegexOrGlob()` and `getRegexPredicate()` from `lib/util/string-match.ts`.
+- URLs: the helpers in `lib/util/url.ts`, such as `parseUrl()` and `trimTrailingSlash()`.
+
 ## Windows
 
 We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your Git config.

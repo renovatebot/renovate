@@ -301,6 +301,183 @@ describe('workers/repository/process/fetch', () => {
       expect(lookupUpdates).not.toHaveBeenCalled();
     });
 
+    it('keeps skipping a lockfile-only dep which no vulnerability alert matches', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['other-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping a lockfile-only dep which only a rule enables', async () => {
+      // the rule says the dependency is wanted, but only a vulnerability fix
+      // has any use for a dependency which is not declared anywhere
+      config.packageRules = [{ matchDatasources: ['pypi'], enabled: true }];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('looks up a lockfile-only dep which a vulnerability alert matches', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['transitive-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).not.toHaveProperty('skipReason');
+      expect(packageFiles.pep621[0].deps[0]).not.toHaveProperty('skipStage');
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          depName: 'transitive-dep',
+          isVulnerabilityAlert: true,
+        }),
+      );
+    });
+
+    it('matches a vulnerability alert against a lockfile-only dep using the datasource versioning', async () => {
+      // `2024.1.1` is a version under pypi's own versioning, but not under the
+      // default one, so the alert only matches once the datasource default has
+      // been applied
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['transitive-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '2024.1.1',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping a lockfile-only dep which the user disabled', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['transitive-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+        { matchPackageNames: ['transitive-dep'], enabled: false },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'disabled',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       // @ts-expect-error -- intentionally using invalid constraint names
@@ -742,7 +919,72 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       });
+      expect(packageFiles.maven[0].deps[0]).not.toHaveProperty('lookupFailed');
     });
+
+    it('throws external host errors for onboarded repos', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
+          },
+        ],
+      };
+      const err = new ExternalHostError(new Error('some error'));
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await expect(
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
+      ).rejects.toThrow(err);
+    });
+
+    it.each`
+      repoIsOnboarded
+      ${true}
+      ${false}
+    `(
+      'marks the dependency as failed for dependency-only external host errors (repoIsOnboarded=$repoIsOnboarded)',
+      async ({ repoIsOnboarded }: { repoIsOnboarded: boolean }) => {
+        config.rangeStrategy = 'auto';
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        const err = new ExternalHostError(
+          new Error('some error'),
+          undefined,
+          true,
+        );
+        lookupUpdates.mockRejectedValueOnce(err);
+
+        await fetchUpdates({ ...config, repoIsOnboarded }, packageFiles);
+
+        expect(packageFiles.maven[0].deps[0]).toMatchObject({
+          depName: 'bbb',
+          updates: [],
+          lookupFailed: true,
+          warnings: [{ topic: 'Lookup Error', message: 'bbb: some error' }],
+        });
+      },
+    );
 
     it('removes URL credentials from external host warnings', async () => {
       config.rangeStrategy = 'auto';

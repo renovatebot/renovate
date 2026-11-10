@@ -315,6 +315,32 @@ function isWithinHost(matchHost: string, adminMatchHost: string): boolean {
   return hostRules.matchesHost(url, adminMatchHost, { prefixOnly: true });
 }
 
+function isWithinAdminHost(
+  matchHost: string,
+  adminHost: string | null,
+): boolean {
+  return adminHost !== null && isWithinHost(matchHost, adminHost);
+}
+
+/**
+ * Whether the admin granted `allowInternal` for every host `matchHost` can reach. A `null` entry is a grant without host restriction.
+ */
+function isCoveredByAdminHosts(
+  adminHosts: Set<string | null> | undefined,
+  matchHost: string | undefined,
+): boolean {
+  if (!adminHosts) {
+    return false;
+  }
+  if (adminHosts.has(null)) {
+    return true;
+  }
+  return (
+    !!matchHost &&
+    [...adminHosts].some((adminHost) => isWithinAdminHost(matchHost, adminHost))
+  );
+}
+
 /**
  * Migrate a config, tolerating a migration which throws.
  *
@@ -434,10 +460,8 @@ function withoutAdminSuppliedValues(
             // a host-less rule reaches every host, so only a host-less admin header (above) can exempt it
             return !(
               rule.matchHost &&
-              [...adminHosts].some(
-                (adminHost) =>
-                  adminHost !== null &&
-                  isWithinHost(rule.matchHost!, adminHost),
+              [...adminHosts].some((adminHost) =>
+                isWithinAdminHost(rule.matchHost!, adminHost),
               )
             );
           }),
@@ -449,16 +473,7 @@ function withoutAdminSuppliedValues(
         const adminHosts = admin.internalGrants.get(
           filtered.allowInternal.toString(),
         );
-        const covered =
-          adminHosts &&
-          (adminHosts.has(null) ||
-            (!!filtered.matchHost &&
-              [...adminHosts].some(
-                (adminHost) =>
-                  adminHost !== null &&
-                  isWithinHost(filtered.matchHost!, adminHost),
-              )));
-        if (covered) {
+        if (isCoveredByAdminHosts(adminHosts, filtered.matchHost)) {
           delete filtered.allowInternal;
         }
       }
@@ -892,7 +907,7 @@ async function logShallowConfig(
     await presets.resolveConfigPresets(
       clone(decryptedConfig),
       clone(config),
-      [],
+      config.ignorePresets,
       [],
       false,
     );

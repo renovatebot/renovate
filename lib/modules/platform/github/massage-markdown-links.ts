@@ -18,6 +18,11 @@ const urlRegexSource =
   '(?:https?:)?(?:\\/\\/)?(?:www\\.)?(?<apiPrefix>api\\.)?(?:to)?github\\.com\\/[-a-z0-9]+\\/[-_a-z0-9.]+\\/(?:discussions|issues|pull)\\/[0-9]+(?:#[-_a-z0-9]+)?';
 const urlRegex = regEx(urlRegexSource, 'i');
 
+// Commit messages are plain text, so only URLs with a scheme are rewritten, which also skips `api.` and `redirect.` hosts
+const commitMessageUrlRegex = regEx(
+  /https?:\/\/(?:www\.)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+/gi,
+);
+
 function massageLink(input: string): string {
   return input.replace(
     regEx(/(?:to|redirect\.|www\.)?github\.com/i),
@@ -81,4 +86,11 @@ export function massageMarkdownLinks(content: string): string {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;
   }
+}
+
+/**
+ * Replaces the host of all GitHub Discussion, Issue and Pull Request URLs in commit message with `redirect.github.com`.
+ */
+export function massageCommitMessageLinks(message: string): string {
+  return message.replace(commitMessageUrlRegex, (url) => massageLink(url));
 }

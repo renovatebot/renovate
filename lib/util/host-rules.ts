@@ -426,7 +426,10 @@ function parseUserinfoUrl(url: string): URL | null {
     return null;
   }
   const parsed = parseUrl(url);
-  if (!parsed || !isHttpUrl(parsed) || (!parsed.username && !parsed.password)) {
+  if (!parsed || !isHttpUrl(parsed)) {
+    return null;
+  }
+  if (!parsed.username && !parsed.password) {
     return null;
   }
   // a rule for the placeholder would supply it as a credential and stop the lookup which resolves the real one
@@ -658,11 +661,12 @@ export function matchesHost(
     const { href } = parsedMatchHost!;
     // ignore any userinfo (`user:pass@`) on the searched URL, so a `matchHost` without credentials still matches
     // a `matchHost` ending with a slash also matches the URL of that path itself, without the slash
+    if (stripUrlCredentials(parsedUrl).startsWith(href)) {
+      return true;
+    }
     return (
-      stripUrlCredentials(parsedUrl).startsWith(href) ||
-      (!prefixOnly &&
-        ensureTrailingSlash(`${parsedUrl.origin}${parsedUrl.pathname}`) ===
-          href)
+      !prefixOnly &&
+      ensureTrailingSlash(`${parsedUrl.origin}${parsedUrl.pathname}`) === href
     );
   }
 
@@ -689,7 +693,8 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
 }
 
 function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
-  if ((hostType || readOnly) && matchHost) {
+  const isScoped = !!hostType || !!readOnly;
+  if (isScoped && matchHost) {
     return 3;
   }
 
@@ -890,9 +895,11 @@ export function hosts({ hostType }: { hostType: string }): string[] {
 }
 
 export function hostType({ url }: { url: string }): string | null {
+  const matchingRules = configuredRules().filter(
+    (rule) => rule.matchHost && matchesHost(url, rule.matchHost),
+  );
   return (
-    configuredRules()
-      .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
+    matchingRules
       .sort(fromShorterToLongerMatchHost)
       .map((rule) => rule.hostType)
       .filter(isTruthy)

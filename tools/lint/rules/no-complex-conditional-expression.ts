@@ -33,6 +33,18 @@ function skipTransparentParents(node: Node): Node | null {
   return parent;
 }
 
+function isLogicalOperator(
+  node: Node | null,
+): node is ESTree.LogicalExpression | ESTree.AssignmentExpression {
+  if (node?.type === 'LogicalExpression') {
+    return true;
+  }
+  return (
+    node?.type === 'AssignmentExpression' &&
+    logicalAssignmentOperators.has(node.operator)
+  );
+}
+
 function isConditionallyEvaluated(child: Node, parent: Node): boolean {
   if (parent.type === 'ConditionalExpression') {
     return parent.consequent === child || parent.alternate === child;
@@ -61,11 +73,7 @@ export default defineRule({
     return {
       ConditionalExpression(node) {
         const parent = skipTransparentParents(node);
-        if (
-          parent?.type === 'LogicalExpression' ||
-          (parent?.type === 'AssignmentExpression' &&
-            logicalAssignmentOperators.has(parent.operator))
-        ) {
+        if (isLogicalOperator(parent)) {
           context.report({
             node,
             messageId: 'ternaryInLogical',

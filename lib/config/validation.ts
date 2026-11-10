@@ -115,6 +115,13 @@ const tzRe = regEx(/^:timezone\((?<timezone>.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 
+function isRepoRootPath(parentPath: string | undefined): boolean {
+  if (!parentPath) {
+    return false;
+  }
+  return parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath);
+}
+
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
@@ -379,12 +386,9 @@ export async function validateConfig(
           }
           let parentName = parentOptionName;
           if (is.undefined(parentName)) {
-            parentName =
-              parentPath &&
-              (parentPath === 'onboardingConfig' ||
-                repoEntryRe.test(parentPath))
-                ? '.'
-                : getParentName(parentPath);
+            parentName = isRepoRootPath(parentPath)
+              ? '.'
+              : getParentName(parentPath);
           }
           if (
             !isPreset &&
@@ -783,13 +787,18 @@ export async function validateConfig(
                     }
                   }
                 }
+                const isSelectorKey =
+                  selectors.includes(key) ||
+                  key === 'matchCurrentVersion' ||
+                  key === 'matchCurrentValue';
+                // top level in a preset
+                const isStringPathOrNotPreset =
+                  isString(parentPath) || !isPreset;
                 if (
-                  (selectors.includes(key) ||
-                    key === 'matchCurrentVersion' ||
-                    key === 'matchCurrentValue') &&
+                  isSelectorKey &&
                   // TODO: can be undefined ? #22198
                   !rulesRe.test(parentPath!) && // Inside a packageRule
-                  (isString(parentPath) || !isPreset) // top level in a preset
+                  isStringPathOrNotPreset
                 ) {
                   errors.push({
                     topic: ConfigValidationTopic.Error,

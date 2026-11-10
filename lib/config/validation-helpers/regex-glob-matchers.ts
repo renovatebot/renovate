@@ -13,10 +13,8 @@ export function check({
   const res: ValidationMessage[] = [];
 
   if (isArray(matchers, isString)) {
-    if (
-      (matchers.includes('*') || matchers.includes('**')) &&
-      matchers.length > 1
-    ) {
+    const hasWildcard = matchers.includes('*') || matchers.includes('**');
+    if (hasWildcard && matchers.length > 1) {
       res.push({
         topic: ConfigValidationTopic.Error,
         message: `${currentPath}: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.`,

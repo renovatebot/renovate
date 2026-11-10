@@ -97,6 +97,11 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
       },
     ]);
+    // both are read as text, so equal content compares equal
+    expect(fs.readLocalFile.mock.calls).toEqual([
+      ['Cargo.lock', 'utf8'],
+      ['Cargo.lock', 'utf8'],
+    ]);
   });
 
   it('returns updated Cargo.lock', async () => {
@@ -105,6 +110,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -133,6 +139,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -151,7 +158,13 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).resolves.toEqual([
-      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -173,6 +186,7 @@ describe('modules/manager/cargo/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
         depName: 'pprof',
@@ -192,7 +206,13 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).resolves.toEqual([
-      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -208,6 +228,7 @@ describe('modules/manager/cargo/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
         depName: 'pprof',
@@ -234,7 +255,13 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).resolves.toEqual([
-      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -266,6 +293,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(execError);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -369,6 +397,7 @@ describe('modules/manager/cargo/artifacts', () => {
 
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce(lockfileAfterIter1);
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
 
     // run updateArtifacts
 
@@ -404,7 +433,13 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).resolves.toEqual([
-      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
     ]);
 
     expect(execSnapshots.slice(0, 2)).toMatchObject([
@@ -444,6 +479,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -479,6 +515,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -506,6 +543,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     await expect(
       cargo.updateArtifacts({
@@ -532,6 +570,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -549,7 +588,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -597,6 +636,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -614,7 +654,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -700,6 +740,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -717,7 +758,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -779,6 +820,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -796,7 +838,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -840,6 +882,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -857,7 +900,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -905,6 +948,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -922,7 +966,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -956,6 +1000,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
@@ -973,7 +1018,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).resolves.toEqual([
       {
         file: {
-          contents: undefined,
+          contents: 'New Cargo.lock',
           path: 'Cargo.lock',
           type: 'addition',
         },
@@ -1007,6 +1052,7 @@ describe('modules/manager/cargo/artifacts', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {

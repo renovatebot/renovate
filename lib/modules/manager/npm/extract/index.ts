@@ -180,7 +180,8 @@ export async function extractPackageFile(
         !!dep.currentValue?.startsWith('file:') ||
         !!dep.currentValue?.startsWith('npm:'),
     );
-    if ((hasFancyRefs && !!lockFiles.npmLock) || yarnZeroInstall) {
+    const hasFancyRefsWithNpmLock = hasFancyRefs && !!lockFiles.npmLock;
+    if (hasFancyRefsWithNpmLock || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references

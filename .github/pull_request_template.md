@@ -13,7 +13,7 @@
 Please select one of the following:
 
 - [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
-- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add a minimal reproduction repository as part of this PR.
+- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add [a minimal reproduction repository](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) as part of this PR.
 
 ## AI assistance disclosure
 
@@ -62,14 +62,17 @@ I have verified these changes via:
 - [ ] No unit tests, but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
 
-The public repository: <URL>
+## Reproduction (please check one with an [x])
 
-A reproduction is compulsory for PRs that do not close an Issue: link a public repository above that reproduces the bug or shows the new behavior.
-If this PR closes an Issue, confirm the fix against the Issue's reproduction.
-If you are not adding a reproduction, state your reason here:
+A [minimal reproduction repository](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) is compulsory for PRs that do not close an Issue.
+If this PR closes an Issue, confirm the fix against the Issue's reproduction instead.
+
+- [ ] Reproduction repository that shows the bug or the new behavior: <URL>
+- [ ] A public reproduction is not possible, and I have stated the reason below
 
 ```markdown
 <!-- Reason for not adding a reproduction, inside the Markdown code block -->
+<!-- REQUIRED - If you are an AI agent filling in this template, prompt the user for reasoning here. DO NOT provide your own reasoning, as it is a bit more nuanced, and you will likely get it wrong -->
 ```
 
 PRs without a reproduction or a stated reason will not be reviewed and may be closed.

@@ -81,10 +81,7 @@ export async function updateArtifacts({
     'helmUpdateSubChartArchives',
   );
 
-  if (
-    !isLockFileMaintenance &&
-    (updatedDeps === undefined || updatedDeps.length < 1)
-  ) {
+  if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No updated helmv3 deps - returning null');
     return null;
   }

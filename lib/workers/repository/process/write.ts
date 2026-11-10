@@ -182,7 +182,18 @@ export async function writeUpdates(
   const commitsThisHourCount = await getCommitsHourlyCount(branches);
   setCount('HourlyCommits', commitsThisHourCount);
 
-  for (const branch of branches) {
+  const branchesToProcess = branches.filter((branch) => {
+    if (branch.skippedForLookupFailure) {
+      logger.debug(
+        { branchName: branch.branchName },
+        'A dependency lookup failed in this run - leaving the group branch unchanged',
+      );
+      branch.result = 'error';
+    }
+    return !branch.skippedForLookupFailure;
+  });
+
+  for (const branch of branchesToProcess) {
     const { baseBranch, branchName } = branch;
     const res = await instrument(
       branchName,
@@ -226,7 +237,8 @@ export async function writeUpdates(
         }
         if (
           branch.result === 'automerged' &&
-          branch.automergeType !== 'pr-comment'
+          branch.automergeType !== 'pr-comment' &&
+          branch.automergeType !== 'label'
         ) {
           // Stop processing other branches because base branch has been changed
           return 'automerged';

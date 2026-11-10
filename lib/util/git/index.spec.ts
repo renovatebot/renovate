@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
+import { execa } from 'execa';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import type { PushResult, SimpleGit as SimpleGitApi } from 'simple-git';
@@ -64,13 +65,24 @@ const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
 };
 
+async function configureGit(
+  repo: SimpleGitApi,
+  key: string,
+  value: string,
+): Promise<void> {
+  const gitDir = (await repo.revparse(['--absolute-git-dir'])).trim();
+
+  // simple-git delays completion of quiet commands, including config writes.
+  await execa('git', ['--git-dir', gitDir, 'config', '--local', key, value]);
+}
+
 // Avoids flakiness when cleaning up temp directories
 async function disableGitAutoMaintenance(
   repo: ReturnType<typeof simpleGit>,
 ): Promise<void> {
-  await repo.addConfig('gc.auto', '0');
-  await repo.addConfig('maintenance.auto', 'false');
-  await repo.addConfig('receive.autogc', 'false');
+  await configureGit(repo, 'gc.auto', '0');
+  await configureGit(repo, 'maintenance.auto', 'false');
+  await configureGit(repo, 'receive.autogc', 'false');
 }
 
 // `base` is the repository the describes below clone from. They run in file
@@ -88,10 +100,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.init();
     await disableGitAutoMaintenance(repo);
     defaultBranch = (await repo.raw('branch', '--show-current')).trim();
-    await repo.addConfig('user.email', 'Jest@example.com');
-    await repo.addConfig('user.name', 'Jest');
+    await configureGit(repo, 'user.email', 'Jest@example.com');
+    await configureGit(repo, 'user.name', 'Jest');
     await fs.writeFile(`${base.path}/past_file`, 'past');
-    await repo.addConfig('commit.gpgsign', 'false');
+    await configureGit(repo, 'commit.gpgsign', 'false');
     await repo.add(['past_file']);
     await repo.commit('past message');
 
@@ -122,13 +134,14 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.checkoutBranch('renovate/custom_author', defaultBranch);
     await fs.writeFile(`${base.path}/custom_file`, 'custom');
     await repo.add(['custom_file']);
-    await repo.addConfig('user.email', 'custom@example.com');
+    await configureGit(repo, 'user.email', 'custom@example.com');
     await repo.commit('custom message');
 
     await repo.checkoutBranch('renovate/custom_author_brackets', defaultBranch);
     await fs.writeFile(`${base.path}/custom_brackets_file`, 'custom');
     await repo.add(['custom_brackets_file']);
-    await repo.addConfig(
+    await configureGit(
+      repo,
       'user.email',
       '29139614+renovate[bot]@users.noreply.github.com',
     );
@@ -139,7 +152,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await fs.writeFile(`${base.path}/bin/nested`, 'nested');
     await fs.writeFile(`${base.path}/root`, 'root');
     await repo.add(['root', 'bin/nested']);
-    await repo.addConfig('user.email', 'custom@example.com');
+    await configureGit(repo, 'user.email', 'custom@example.com');
     await repo.commit('nested message');
 
     await repo.checkout(['-b', 'renovate/hidden-unicode', defaultBranch]);
@@ -161,16 +174,16 @@ describe('util/git/index', { timeout: 30000 }, () => {
       'renovate/branch_with_multiple_authors',
       defaultBranch,
     );
-    await repo.addConfig('user.email', 'author1@example.com');
+    await configureGit(repo, 'user.email', 'author1@example.com');
     await repo.commit('first commit', undefined, { '--allow-empty': null });
-    await repo.addConfig('user.email', 'author2@example.com');
+    await configureGit(repo, 'user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
     await repo.checkoutBranch('renovate/deeply/nested', defaultBranch);
 
     // Renovate author, foreign committer (e.g. rebase/amend by someone else)
     await repo.checkoutBranch('renovate/different_committer', defaultBranch);
-    await repo.addConfig('user.email', 'Jest@example.com');
+    await configureGit(repo, 'user.email', 'Jest@example.com');
     await fs.writeFile(`${base.path}/committer_file`, 'test');
     await repo.add(['committer_file']);
     await repo
@@ -179,7 +192,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     // Renovate author, GitHub platformCommit committer
     await repo.checkoutBranch('renovate/platform_commit', defaultBranch);
-    await repo.addConfig('user.email', 'Jest@example.com');
+    await configureGit(repo, 'user.email', 'Jest@example.com');
     await fs.writeFile(`${base.path}/platform_commit_file`, 'test');
     await repo.add(['platform_commit_file']);
     await repo
@@ -349,7 +362,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const repo = simpleGit(origin.path);
       await repo.clone(base.path, '.', ['--bare']);
       await disableGitAutoMaintenance(repo);
-      await repo.addConfig('commit.gpgsign', 'false');
+      await configureGit(repo, 'commit.gpgsign', 'false');
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.initRepo({ url: origin.path });
@@ -359,9 +372,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       setNoVerify([]);
       await git.syncGit();
       const local = simpleGit(tmpDir.path);
-      await local.addConfig('commit.gpgsign', 'false');
-      await local.addConfig('user.name', 'Jest');
-      await local.addConfig('user.email', 'Jest@example.com');
+      await configureGit(local, 'commit.gpgsign', 'false');
+      await configureGit(local, 'user.name', 'Jest');
+      await configureGit(local, 'user.email', 'Jest@example.com');
       await disableGitAutoMaintenance(local);
     });
 
@@ -874,13 +887,13 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const repo = simpleGit(origin.path);
       await repo.clone(base.path, '.', ['--bare']);
       await disableGitAutoMaintenance(repo);
-      await repo.addConfig('commit.gpgsign', 'false');
+      await configureGit(repo, 'commit.gpgsign', 'false');
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.initRepo({ url: origin.path });
       await git.syncGit();
       const local = simpleGit(tmpDir.path);
-      await local.addConfig('commit.gpgsign', 'false');
+      await configureGit(local, 'commit.gpgsign', 'false');
       await disableGitAutoMaintenance(local);
     });
 
@@ -896,8 +909,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
       // `syncGit()` leaves local git config alone, and `writeGitAuthor()` may
       // have changed the author in the previous test
       const local = simpleGit(tmpDir.path);
-      await local.addConfig('user.name', 'Jest');
-      await local.addConfig('user.email', 'Jest@example.com');
+      await configureGit(local, 'user.name', 'Jest');
+      await configureGit(local, 'user.email', 'Jest@example.com');
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
       updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
     });
@@ -1006,6 +1019,35 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(pushSpy).not.toHaveBeenCalled();
       });
 
+      it('should merge a local branch without fetching from origin', async () => {
+        await git.prepareCommit({
+          branchName: 'renovate/unpushed_branch',
+          message: 'unpushed commit',
+          files: [
+            { type: 'addition', path: 'unpushed_file', contents: 'local' },
+          ],
+        });
+        // Reset working tree back to default branch so the file is not present yet
+        const local = simpleGit(tmpDir.path);
+        await local.checkout(defaultBranch);
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/unpushed_file`),
+        ).resolves.toBeFalse();
+        const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+        await git.mergeToLocal('renovate/unpushed_branch', {
+          localBranch: true,
+        });
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/unpushed_file`),
+        ).resolves.toBeTrue();
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(pushSpy).not.toHaveBeenCalled();
+      });
+
       it('should throw', async () => {
         await expect(git.mergeToLocal('not_found')).rejects.toThrow(
           "fatal: couldn't find remote ref not_found",
@@ -1099,8 +1141,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     describe('diffCommitTree', () => {
       it('returns renames as deletion and addition entries', async () => {
         const repo = simpleGit(tmpDir.path);
-        await repo.addConfig('user.email', 'Jest@example.com');
-        await repo.addConfig('user.name', 'Jest');
+        await configureGit(repo, 'user.email', 'Jest@example.com');
+        await configureGit(repo, 'user.name', 'Jest');
         const parentCommit = git.getBranchCommit(defaultBranch)!;
 
         await repo.raw(['mv', 'master_file', 'renamed_master_file']);
@@ -1175,7 +1217,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const repo = simpleGit(origin.path);
       await repo.clone(base.path, '.', ['--bare']);
       await disableGitAutoMaintenance(repo);
-      await repo.addConfig('commit.gpgsign', 'false');
+      await configureGit(repo, 'commit.gpgsign', 'false');
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.initRepo({
@@ -1188,9 +1230,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await git.syncGit();
       // override some local git settings for better testing
       const local = simpleGit(tmpDir.path);
-      await local.addConfig('commit.gpgsign', 'false');
-      await local.addConfig('user.name', 'Jest');
-      await local.addConfig('user.email', 'Jest@example.com');
+      await configureGit(local, 'commit.gpgsign', 'false');
+      await configureGit(local, 'user.name', 'Jest');
+      await configureGit(local, 'user.email', 'Jest@example.com');
       await disableGitAutoMaintenance(local);
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
       updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
@@ -1217,9 +1259,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
           const submodule = simpleGit(submoduleBasePath);
           await submodule.init();
           await disableGitAutoMaintenance(submodule);
-          await submodule.addConfig('user.email', 'Jest@example.com');
-          await submodule.addConfig('user.name', 'Jest');
-          await submodule.addConfig('commit.gpgsign', 'false');
+          await configureGit(submodule, 'user.email', 'Jest@example.com');
+          await configureGit(submodule, 'user.name', 'Jest');
+          await configureGit(submodule, 'commit.gpgsign', 'false');
 
           await fs.writeFile(`${submoduleBasePath}/init_file`, 'init');
           await submodule.add('init_file');
@@ -1306,7 +1348,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         // causing the branches to diverge
         const local = simpleGit(tmpDir.path);
         await local.checkout(defaultBranch);
-        await local.addConfig('user.email', 'other-dev@example.com');
+        await configureGit(local, 'user.email', 'other-dev@example.com');
         await fs.writeFile(`${tmpDir.path}/diverge_file`, 'diverge');
         await local.add(['diverge_file']);
         await local.commit('diverge commit');
@@ -2226,7 +2268,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     describe('syncGit()', () => {
       it('should clone a specified base branch', async () => {
-        tmpDir = await tmp.dir({ unsafeCleanup: true });
+        await fs.emptyDir(tmpDir.path);
         GlobalConfig.set({
           baseBranchPatterns: ['develop'],
           localDir: tmpDir.path,
@@ -2245,7 +2287,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
         // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
-        tmpDir = await tmp.dir({ unsafeCleanup: true });
+        await fs.emptyDir(tmpDir.path);
         GlobalConfig.set({ localDir: tmpDir.path });
         vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', 'true');
         await git.initRepo({
@@ -2446,10 +2488,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
         const defaultUpsBranch = (
           await upstream.raw('branch', '--show-current')
         ).trim();
-        await upstream.addConfig('user.email', 'other@example.com');
-        await upstream.addConfig('user.name', 'Other');
+        await configureGit(upstream, 'user.email', 'other@example.com');
+        await configureGit(upstream, 'user.name', 'Other');
         await fs.writeFile(`${upstreamBase.path}/past_file`, 'past');
-        await upstream.addConfig('commit.gpgsign', 'false');
+        await configureGit(upstream, 'commit.gpgsign', 'false');
         await upstream.add(['past_file']);
         await upstream.commit('past message');
         await upstream.raw(['checkout', '-B', defaultUpsBranch]);
@@ -2460,7 +2502,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         const upstreamRepo = simpleGit(upstreamOrigin.path);
         await upstreamRepo.clone(upstreamBase.path, '.', ['--bare']);
         await disableGitAutoMaintenance(upstreamRepo);
-        await upstreamRepo.addConfig('commit.gpgsign', 'false');
+        await configureGit(upstreamRepo, 'commit.gpgsign', 'false');
       });
 
       afterAll(async () => {

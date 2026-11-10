@@ -91,7 +91,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   erlang: {
     datasource: 'github-releases',
     packageName: 'containerbase/erlang-prebuild',
-    versioning: 'semver-coerced',
+    versioning: 'semver-extended',
   },
   elixir: {
     datasource: 'github-releases',
@@ -146,7 +146,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   jb: {
     datasource: 'github-releases',
     packageName: 'containerbase/jb-prebuild',
-    versioning: 'loose',
+    versioning: 'semver-extended',
   },
   kustomize: {
     datasource: 'github-releases',
@@ -178,6 +178,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     datasource: 'npm',
     packageName: 'npm',
     versioning: 'npm',
+  },
+  paket: {
+    datasource: 'nuget',
+    packageName: 'paket',
+    versioning: 'paket',
   },
   pdm: {
     datasource: 'github-releases',
@@ -443,10 +448,19 @@ export async function generateInstallCommands(
       resolvedTools[toolName] = toolVersion;
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
-        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+        // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
+        const parentActive = isToolName(parent)
+          ? memCache.get<string | undefined>(
+              buildCacheKey('containerbase-active', parent),
+            )
+          : undefined;
+        const active = parentActive
+          ? `${toolVersion}@${parent}:${parentActive}`
+          : toolVersion;
+        if (memCache.get<string | undefined>(cacheKey) === active) {
           continue;
         }
-        memCache.set(cacheKey, toolVersion);
+        memCache.set(cacheKey, active);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
