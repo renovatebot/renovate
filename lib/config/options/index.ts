@@ -1771,7 +1771,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     allowString: true,
-    suggestedValues: [
+    allowedValues: [
       ...AllManagersListLiteral,
       ...CustomManagersListLiteral.map(
         (manager: string) => `custom.${manager}`,

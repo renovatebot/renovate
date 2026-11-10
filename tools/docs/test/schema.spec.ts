@@ -335,7 +335,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       repoSchema = await compileSchema();
     }, 30000);
 
-    it('suggests the managers we know about, without rejecting a pattern', () => {
+    it('allows the managers we know about, or a pattern', () => {
       expect(
         schemaErrors(repoSchema, {
           packageRules: [{ matchManagers: ['npm', 'custom.regex'] }],
@@ -344,9 +344,17 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
       expect(
         schemaErrors(repoSchema, {
-          packageRules: [{ matchManagers: ['/^npm$/', 'not-a-manager'] }],
+          packageRules: [
+            { matchManagers: ['/^npm$/', '!npm', 'custom.*', 'pip{,env}'] },
+          ],
         }),
       ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchManagers: 'regex' }],
+        }),
+      ).toContain('must match exactly one schema in oneOf');
 
       expect(
         schemaErrors(repoSchema, { packageRules: [{ matchManagers: [123] }] }),

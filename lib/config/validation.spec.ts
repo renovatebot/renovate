@@ -681,7 +681,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            matchManagers: 'string not an array',
+            matchManagers: 'npm',
             enabled: true,
           },
         ],
@@ -2963,7 +2963,7 @@ describe('config/validation', () => {
         },
         packageRules: [
           {
-            matchManagers: ['regex'],
+            matchManagers: ['custom.regex'],
             env: {
               SOME_VAR: 'some_value',
             },
@@ -3560,6 +3560,28 @@ describe('config/validation', () => {
           message: expect.stringContaining(
             'Invalid packageRules[2].matchUpdateTypes: matchUpdateTypes had invalid values `["!majr","unknown"]`',
           ),
+        },
+      ]);
+    });
+
+    it('errors for unknown managers in matchManagers', async () => {
+      const config: Record<string, unknown> = {
+        packageRules: [
+          { matchManagers: ['npm', 'custom.regex', '!pipenv'], enabled: false },
+          { matchManagers: ['/^custom\\./', 'pip*'], enabled: false },
+          { matchManagers: ['jsonata', 'not-a-manager'], enabled: false },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid packageRules[2].matchManagers: matchManagers had invalid values `["jsonata","not-a-manager"]` which are not part of the allowedValues, which are listed at https://docs.renovatebot.com/configuration-options/#packagerulesmatchmanagers',
         },
       ]);
     });
