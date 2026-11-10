@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
@@ -20,14 +21,19 @@ interface NpmEnforcesMinimumReleaseAgeConfig extends UpdateArtifactsConfig {
 }
 
 /**
- * Whether npm enforces the minimum release age when it regenerates the lock file of the package file in `config`.
+ * Whether npm enforces the minimum release age when it regenerates the lock file of the package file in `config`, or the package file has no lock file which lock file maintenance could update.
  */
 export async function enforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
 ): Promise<boolean> {
-  const { managerData } = config;
-  const npmLock = managerData?.npmLock;
-  if (!npmLock || managerData.yarnLock || managerData.pnpmLockFile) {
+  const { npmLock, pnpmLockFile, yarnLock } = coerceObject(config.managerData);
+  if (!npmLock && !pnpmLockFile && !yarnLock) {
+    logger.debug(
+      `${config.packageFile}: no lock file, so lock file maintenance changes nothing`,
+    );
+    return true;
+  }
+  if (!npmLock || yarnLock || pnpmLockFile) {
     return false;
   }
 

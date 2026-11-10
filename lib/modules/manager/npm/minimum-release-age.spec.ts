@@ -14,6 +14,25 @@ describe('modules/manager/npm/minimum-release-age', () => {
       managerData
       ${undefined}
       ${{}}
+      ${{ hasPackageManager: true }}
+    `(
+      'returns true without a lock file: $managerData',
+      async ({ managerData }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData,
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '3 days',
+            packageFile: 'some-dir/package.json',
+          }),
+        ).resolves.toBeTrue();
+      },
+    );
+
+    it.each`
+      managerData
+      ${{ yarnLock: 'some-dir/yarn.lock' }}
+      ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
       ${{ ...npmLockManagerData, yarnLock: 'some-dir/yarn.lock' }}
       ${{ ...npmLockManagerData, pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
     `(

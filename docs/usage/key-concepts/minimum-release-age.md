@@ -160,6 +160,8 @@ npm enforces the minimum release age during lock file maintenance of a `package-
 - Renovate passes `--before`, or the project's `.npmrc` has a `before=<date>` setting, or
 - the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the `constraints` config or the `packageManager`, `devEngines` or `engines` field of the `package.json` only allow npm v11.10.0 or later, which added `min-release-age`
 
+A `package.json` without a lock file does not hold back the lock file maintenance branch, as lock file maintenance changes nothing for it.
+
 For example, with this config:
 
 ```json
