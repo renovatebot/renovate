@@ -5623,6 +5623,29 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('should not check the merge queue if the PR has no target branch', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [{ ...pullsListItem, base: { sha: '1234' } }])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, {
+          message:
+            'At least 1 approving review is required by reviewers with write access.',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeFalse();
+    });
+
     it('should add PR to the merge queue when the direct merge is refused', async () => {
       const scope = httpMock.scope(githubApiHost);
       mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });

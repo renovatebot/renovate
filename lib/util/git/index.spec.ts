@@ -1537,6 +1537,21 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(commit).not.toBeNull();
       });
 
+      it('skips the diff check when force is set', async () => {
+        const file: FileChange = {
+          type: 'addition',
+          path: 'some-forced-file',
+          contents: 'some new-contents',
+        };
+        const commit = await git.prepareCommit({
+          branchName: 'renovate/past_branch',
+          files: [file],
+          message: 'Create something',
+          force: true,
+        });
+        expect(commit).not.toBeNull();
+      });
+
       it('link file', async () => {
         const file: FileChange = {
           type: 'addition',

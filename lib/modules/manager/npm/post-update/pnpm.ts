@@ -67,7 +67,7 @@ export async function generateLockFile(
     });
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
-      constraint: pnpmConstraint ?? null,
+      constraint: pnpmConstraint,
     };
 
     const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
