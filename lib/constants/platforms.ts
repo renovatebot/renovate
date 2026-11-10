@@ -9,6 +9,7 @@ export const PLATFORM_HOST_TYPES = [
   'github',
   'gitlab',
   'local',
+  'oci',
   'scm-manager',
 ] as const;
 
@@ -22,7 +23,7 @@ export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
  * datasource and a web UI layout.
  *
  * Every family is a `PlatformId`, but not every platform is a family:
- * `codecommit`, `gerrit`, `local` and `scm-manager` are never recognized from a
+ * `codecommit`, `gerrit`, `local`, `oci` and `scm-manager` are never recognized from a
  * URL, so they have nothing to describe here.
  */
 const PLATFORM_FAMILY_IDS = [

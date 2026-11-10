@@ -30,6 +30,7 @@ async function getResolver(platform: PlatformId): Promise<ResolverOrNull> {
     case 'bitbucket':
     case 'bitbucket-server':
     case 'gerrit':
+    case 'oci':
       return local;
     case 'codecommit':
     case 'local':

@@ -269,6 +269,10 @@ This feature is useful for users who want Renovate to only work on repositories 
 The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
+On OCI DevOps, this option instead takes exact project OCIDs, not patterns or project names.
+Renovate discovers repositories within each specified project.
+Alternatively, set `OCI_COMPARTMENT_ID` to discover repositories within one compartment.
+
 ## `autodiscoverRepoOrder`
 
 The order method for autodiscover server side repository search.

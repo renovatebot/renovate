@@ -1301,6 +1301,7 @@ const options: Readonly<RenovateOptions>[] = [
       'azure',
       'bitbucket',
       'bitbucket-server',
+      'oci',
       'scm-manager',
     ],
     globalOnly: true,
@@ -1310,7 +1311,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Password for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
+    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server', 'oci'],
     globalOnly: true,
   },
   {
@@ -1386,13 +1387,13 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'autodiscoverProjects',
     description:
-      'Filter the list of autodiscovered repositories by project names.',
+      'Filter the list of autodiscovered repositories by project names (project OCIDs for OCI).',
     stage: 'global',
     type: 'array',
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'oci'],
     patternMatch: true,
   },
   {
@@ -3782,6 +3783,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gitea',
       'github',
       'gitlab',
+      'oci',
       'scm-manager',
     ],
     allowedValues: ['default', 'ssh', 'endpoint'],

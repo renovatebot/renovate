@@ -100,6 +100,24 @@ describe('config/presets/local/index', () => {
       expect(content).toEqual({ resolved: 'preset' });
     });
 
+    it('forwards to OCI', async () => {
+      GlobalConfig.set({
+        platform: 'oci',
+        endpoint: 'https://devops.eu-milan-1.oci.oraclecloud.com/20210630/',
+      });
+
+      const content = await local.getPreset({
+        repo: 'ocid1.devopsrepository.example',
+      });
+
+      expect(platform.getRawFile).toHaveBeenCalledExactlyOnceWith(
+        'default.json',
+        'ocid1.devopsrepository.example',
+        undefined,
+      );
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
     it('forwards to custom bitbucket-server', async () => {
       GlobalConfig.set({
         platform: 'bitbucket-server',
