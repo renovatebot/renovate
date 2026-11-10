@@ -44,7 +44,7 @@ For charts from an OCI registry, Renovate logs in with `helm registry login` fir
 }
 ```
 
-**Note:** To prevent Renovate from updating dependencies in the expanded charts, you'll need to manually exclude the folders from Helm managers.
+**Note:** To prevent Renovate from updating dependencies in the expanded charts, you will need to manually exclude the folders from Helm managers.
 For example:
 
 ```json

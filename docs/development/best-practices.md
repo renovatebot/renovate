@@ -1,12 +1,12 @@
 # Best practices
 
 This document explains our best practices.
-Follow these best practices when you're working on our code.
+Follow these best practices when you are working on our code.
 
 ## Git branch names
 
 Branch names should start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
-If you're closing an issue with your PR then put the issue number after the scope.
+If you are closing an issue with your PR then put the issue number after the scope.
 Finally, describe the changes in the branch in a few words.
 
 Some good branch names:
@@ -18,7 +18,7 @@ Some good branch names:
 
 Avoid branch names like `patch-1`.
 
-If you don't know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
+If you do not know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
 
 If you forgot to pick a good branch name when you started work, then rename the branch before creating the pull request.
 Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch) to learn how to rename your branch on GitHub.
@@ -78,7 +78,7 @@ Source: [Google TypeScript Style Guide, function declarations](https://google.gi
 ### Write understandable code
 
 Write code that is easier to read, review and maintain.
-Avoid "clever" code that's hard to understand.
+Avoid "clever" code that is hard to understand.
 
 Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
 For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops.
@@ -163,7 +163,7 @@ For `WARN`, `ERROR` and `FATAL` log messages use logger metadata.
 Also use logger metadata the result is a complex metadata object needing a multiple-line pretty stringification.
 
 For `INFO` and `DEBUG` log messages inline the metadata into the log message where feasible.
-It is OK to not inline metadata if it's complex, but in that case first think whether that much information really needs to be logged.
+It is OK to not inline metadata if it is complex, but in that case first think whether that much information really needs to be logged.
 
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a static `msg` component, so they can be automatically grouped or associated.
@@ -301,7 +301,7 @@ if (end) {
   - Avoid overwriting functions, for example: (`func = vi.fn();`)
 - Use plain `vi.mock('./module.ts', ()=>({ defaut: vi.fn(), some: vi.fn() }))` when only a few exports are touched, and stub them explicitly
 - Use `vi.mock('./module.ts', () => mockDeep())` only when the module is pulled in transitively and hand-stubbing every export is impractical
-  - `mockDeep` returns a mock for any property access, so typos in mocked names won't fail the test
+  - `mockDeep` returns a mock for any property access, so typos in mocked names will not fail the test
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
 - Do not use snapshot matchers (`toMatchSnapshot`, `toMatchInlineSnapshot`, `toThrowErrorMatchingSnapshot`), write explicit assertions instead

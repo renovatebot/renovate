@@ -18,8 +18,8 @@ title: Maintaining AUR packages with Renovate
   They obviously like Renovate, and want you to use it.
 
 One big advantage that Arch Linux has over other distributions, apart from being able to say “BTW I use Arch.”, is the Arch User Repository (AUR).
-It’s a community-driven repository with over 80,000 packages.
-If you’re looking for a package, chances are you'll find it in the AUR.
+It is a community-driven repository with over 80,000 packages.
+If you are looking for a package, chances are you will find it in the AUR.
 
 Keeping all those packages up to date, takes a lot of manual effort by a lot of volunteers.
 People have created and used tools, like [`urlwatch`](https://github.com/thp/urlwatch) and [`aurpublish`](https://github.com/eli-schwartz/aurpublish), to let them know when upstream releases are cut and automate some parts of the process.
@@ -30,13 +30,13 @@ I think [Renovate](https://github.com/renovatebot/renovate/) can help here.
 ## Updating versions with Renovate
 
 Renovate is an automated dependency update tool.
-You might have seen it opening pull requests on GitHub and making updates for npm or other package managers, but it’s a lot more powerful than just that.
+You might have seen it opening pull requests on GitHub and making updates for npm or other package managers, but it is a lot more powerful than just that.
 
 Renovate has a couple of concepts that I need to explain first: [datasources](../modules/datasource/index.md) and [managers](../modules/manager/index.md).
 Datasources define where to look for new versions of a dependency.
 Renovate comes with over 50 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](../modules/datasource/git-tags/index.md).
 Managers are the Renovate concept for package managers.
-There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](../modules/manager/regex/index.md) that I can use.
+There is not an AUR or `PKGBUILD` manager, but there is a [regex manager](../modules/manager/regex/index.md) that I can use.
 
 I can create a `renovate.json` configuration with the following custom manager configuration:
 
@@ -61,19 +61,19 @@ Breaking that down:
 - The `matchStrings` is the regex format to extract the version, datasource, and dependency name from the `PKGBUILD`
 - The `extractVersionTemplate` is to handle a “v” in front of any version number that is sometimes added to Git tags
 
-And here’s an extract from the PKGBUILD for the [bicep-bin](https://aur.archlinux.org/packages/bicep-bin) AUR package that I maintain:
+And here is an extract from the PKGBUILD for the [bicep-bin](https://aur.archlinux.org/packages/bicep-bin) AUR package that I maintain:
 
 ```bash
 pkgver=0.15.31 # renovate: datasource=github-tags depName=Azure/bicep
 ```
 
-Here I’m configuring Renovate to use the [`github-tags`](../modules/datasource/github-tags/index.md) datasource and to look in the [`Azure/bicep` GitHub repository](https://github.com/Azure/bicep) for new versions.
-That means it’ll look in the [list of tags for the `Azure/bicep` repository](https://github.com/Azure/bicep/tags) for any new versions.
-If Renovate finds any new versions, it’ll automatically update the `PKGBUILD` and open a pull request with the updated version.
+Here I am configuring Renovate to use the [`github-tags`](../modules/datasource/github-tags/index.md) datasource and to look in the [`Azure/bicep` GitHub repository](https://github.com/Azure/bicep) for new versions.
+That means it will look in the [list of tags for the `Azure/bicep` repository](https://github.com/Azure/bicep/tags) for any new versions.
+If Renovate finds any new versions, it will automatically update the `PKGBUILD` and open a pull request with the updated version.
 
-So I’ve automated the `PKGBUILD` update, but that’s only half of the work.
+So I have automated the `PKGBUILD` update, but that is only half of the work.
 The checksums and `.SRCINFO` must be updated before pushing to the AUR.
-Unfortunately, Renovate can’t do that (yet, see [Renovate issue #16923](https://github.com/renovatebot/renovate/issues/16923)), but GitHub Actions can!
+Unfortunately, Renovate cannot do that (yet, see [Renovate issue #16923](https://github.com/renovatebot/renovate/issues/16923)), but GitHub Actions can!
 
 ## Updating checksums and `.SRCINFO` with GitHub Actions
 
@@ -93,7 +93,7 @@ on:
       - main
 ```
 
-Next, I’m going to need to check out the entire history of the repository, so I can compare the files changed in the latest commit with the Git history.
+Next, I am going to need to check out the entire history of the repository, so I can compare the files changed in the latest commit with the Git history.
 
 ```yaml
 jobs:
@@ -118,10 +118,10 @@ Getting the package that changed in a pull request requires a little bit of shel
     echo "pkgbuild=$(git diff --name-only origin/main origin/${GITHUB_HEAD_REF} "*PKGBUILD" | head -1 | xargs dirname)" >> $GITHUB_ENV
 ```
 
-Now I’ve found the package that changed in the Renovate pull request, I can update the files.
+Now I have found the package that changed in the Renovate pull request, I can update the files.
 
 This step in the workflow uses a private GitHub Action that I have in my `aur-packages` repository.
-I’m not going to break it down here, but at its core it runs `updpkgsums` and `makepkg --printsrcinfo > .SRCINFO` with a little extra configuration required to run Arch Linux on GitHub Actions runners.
+I am not going to break it down here, but at its core it runs `updpkgsums` and `makepkg --printsrcinfo > .SRCINFO` with a little extra configuration required to run Arch Linux on GitHub Actions runners.
 You can [check out the full code on GitHub](https://github.com/JamieMagee/aur-packages/tree/main/.github/actions/aur).
 
 ```yaml
@@ -146,7 +146,7 @@ Finally, once the `PKGBUILD` and `.SRCINFO` are updated I need to commit that ch
 Check out [this pull request for `bicep-bin`](https://github.com/JamieMagee/aur-packages/pull/62) where Renovate opened a pull request, and my GitHub Actions workflow updated the `b2sums` in the `PKGBUILD` and updated the `.SRCINFO`.
 
 But why stop there?
-Let’s talk about publishing.
+Next is publishing.
 
 ## Publishing to the AUR
 

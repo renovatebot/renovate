@@ -444,7 +444,7 @@ Renovate will then parse your file from your current folder to access it.
 
 Sometimes all you have is a directory with files, and a HTTP server that can generate directory listings.
 
-Let's use nginx itself as an example:
+Use nginx itself as an example:
 
 ```json
 {
