@@ -431,6 +431,7 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel7**',
           'registry.access.redhat.com/rhel8/**',
           'registry.access.redhat.com/rhel9/**',
+          'registry.access.redhat.com/rhel10/**',
           'registry.access.redhat.com/rhscl/**',
           'registry.access.redhat.com/ubi*{,/}**',
           'redhat/**',
