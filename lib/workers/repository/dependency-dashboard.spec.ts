@@ -450,11 +450,13 @@ describe('workers/repository/dependency-dashboard', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
+          upgrades: [partial<BranchUpgradeConfig>()],
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           dependencyDashboardApproval: false,
+          upgrades: [partial<BranchUpgradeConfig>()],
         },
       ];
       await dependencyDashboard.ensureDependencyDashboard(

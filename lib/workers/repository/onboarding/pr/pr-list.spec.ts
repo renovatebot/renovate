@@ -5,6 +5,7 @@ import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
 
 function createBranch(letter: string): BranchConfig {
   return partial<BranchConfig>({
+    schedule: [],
     prTitle: `Update ${letter} to v1`,
     branchName: `renovate/${letter}-1.x`,
     baseBranch: 'base',
@@ -84,6 +85,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('handles multiple', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin dependencies',
           baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
@@ -106,6 +108,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ] as never,
         },
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '', // handles case where baseBranch name is falsy
@@ -163,6 +166,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('deduplicates identical upgrade lines within a branch', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a',
           branchName: 'renovate/a',
           baseBranch: 'base',
@@ -192,6 +196,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows commitHourlyLimit message when limit is low', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -206,6 +211,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -231,6 +237,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not show commitHourlyLimit message when limit is high', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -253,6 +260,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows only commitHourlyLimit message when both limits are set', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -267,6 +275,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -343,6 +352,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not count security updates towards the concurrent limit, and notes they bypass it', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -357,6 +367,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -371,6 +382,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
@@ -385,6 +397,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for d',
           branchName: 'renovate/d-cve',
           baseBranch: 'base',
@@ -414,6 +427,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not count multiple security updates towards the concurrent limit, and notes they bypass it (plural)', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -428,6 +442,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -442,6 +457,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
@@ -456,6 +472,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for d',
           branchName: 'renovate/d-cve',
           baseBranch: 'base',
@@ -471,6 +488,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for e',
           branchName: 'renovate/e-cve',
           baseBranch: 'base',
@@ -502,6 +520,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not count security updates towards the hourly limit, and notes they bypass it (plural)', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -516,6 +535,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -530,6 +550,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for c',
           branchName: 'renovate/c-cve',
           baseBranch: 'base',
@@ -545,6 +566,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for d',
           branchName: 'renovate/d-cve',
           baseBranch: 'base',
@@ -573,6 +595,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not show a security bypass note when there are no security updates', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -587,6 +610,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -635,6 +659,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('handles different updateTypes', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin dependencies',
           baseBranch: '',
           branchName: 'renovate/pin-dependencies',
@@ -657,6 +682,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ] as never,
         },
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
@@ -676,6 +702,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Replace node with nodejs',
           branchName: 'renovate/node-replacement',
           baseBranch: '',
@@ -792,6 +819,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('includes the base branch if there are multiple being tracked', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin dependencies',
           baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
@@ -816,6 +844,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '', // the default branch
@@ -857,6 +886,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('includes the limits when using multiple base branches', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin dependencies',
           baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
@@ -881,6 +911,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v2',
           branchName: 'renovate/b-2.x',
           baseBranch: '',
@@ -896,6 +927,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '', // the default branch
@@ -944,6 +976,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('sorts multiple named base branches alphabetically after the default branch', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
@@ -959,6 +992,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Pin b',
           branchName: 'renovate/pin-b',
           baseBranch: 'beta-branch',
@@ -974,6 +1008,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Pin c',
           branchName: 'renovate/pin-c',
           baseBranch: 'alpha-branch',
@@ -1012,6 +1047,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('uses the plural form when a base branch has multiple PRs', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin a',
           branchName: 'renovate/pin-a',
           baseBranch: 'base',
@@ -1027,6 +1063,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Pin b',
           branchName: 'renovate/pin-b',
           baseBranch: 'base',
@@ -1042,6 +1079,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Pin c',
           branchName: 'renovate/pin-c',
           baseBranch: '',
@@ -1089,6 +1127,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('handles uncommon types of updates as other', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
@@ -1139,6 +1178,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('handles updates with a different number of dependencies being updated', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin dependencies',
           baseBranch: '',
           branchName: 'renovate/pin-dependencies',
@@ -1163,6 +1203,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
@@ -1217,6 +1258,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('handles many different updateTypes', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Pin dependencies',
           baseBranch: '',
           branchName: 'renovate/pin-dependencies',
@@ -1239,6 +1281,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
@@ -1254,6 +1297,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update a to 1.3.0',
           branchName: 'renovate/a-1.3',
           baseBranch: '',
@@ -1269,6 +1313,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update a to 1.1.1',
           branchName: 'renovate/a-1.1',
           baseBranch: '',
@@ -1311,6 +1356,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       it('and are split over multiple lines if there are multiple package files', () => {
         const branches = partial<BranchConfig>([
           {
+            schedule: [],
             prTitle: 'Update a to v2',
             branchName: 'renovate/a-2.x',
             baseBranch: '',
@@ -1328,6 +1374,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             ]),
           },
           {
+            schedule: [],
             prTitle: 'Update a to 1.3.0',
             branchName: 'renovate/a-1.3',
             baseBranch: '',
@@ -1347,6 +1394,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
           // multiple updates to the same file are grouped
           {
+            schedule: [],
             prTitle: 'Update a to 1.1.1',
             branchName: 'renovate/a-1.1',
             baseBranch: '',
@@ -1364,6 +1412,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             ]),
           },
           {
+            schedule: [],
             prTitle: 'Update a to 1.1.1',
             branchName: 'renovate/a-1.1',
             baseBranch: '',
@@ -1410,6 +1459,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       it('when the same package is updated across different files with different managers', () => {
         const branches = partial<BranchConfig>([
           {
+            schedule: [],
             prTitle: 'Update c to 1.1.1',
             branchName: 'renovate/c-1.1',
             baseBranch: '',
@@ -1427,6 +1477,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             ]),
           },
           {
+            schedule: [],
             prTitle: 'Update c to 1.1.1',
             branchName: 'renovate/c-1.1',
             baseBranch: '',
@@ -1471,6 +1522,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       it('falls back to prTitle when the first upgrade has no depName', () => {
         const branches = partial<BranchConfig>([
           {
+            schedule: [],
             prTitle: 'Update something',
             branchName: 'renovate/something',
             baseBranch: '',
@@ -1496,6 +1548,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       it('falls back to "unknown" when the first upgrade has no updateType', () => {
         const branches = partial<BranchConfig>([
           {
+            schedule: [],
             prTitle: 'Update a',
             branchName: 'renovate/a',
             baseBranch: '',
@@ -1543,6 +1596,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         it('on one upgrade', () => {
           const branches = partial<BranchConfig>([
             {
+              schedule: [],
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
               baseBranch: '',
@@ -1584,6 +1638,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         it('on one upgrade, and an upgrade with a packageFile', () => {
           const branches = partial<BranchConfig>([
             {
+              schedule: [],
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
               baseBranch: '',
@@ -1601,6 +1656,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               ]),
             },
             {
+              schedule: [],
               prTitle: 'Update c to 1.1.1',
               branchName: 'renovate/c-1.1',
               baseBranch: '',
@@ -1644,6 +1700,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         it('across multiple branches with different managers, lists all managers', () => {
           const branches = partial<BranchConfig>([
             {
+              schedule: [],
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
               baseBranch: '',
@@ -1660,6 +1717,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               ]),
             },
             {
+              schedule: [],
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
               baseBranch: '',
@@ -1703,6 +1761,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows commitHourlyLimit message when limit is low', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -1717,6 +1776,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -1742,6 +1802,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not show commitHourlyLimit message when limit is high', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -1764,6 +1825,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows only commitHourlyLimit message when both limits are set', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -1778,6 +1840,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -1802,6 +1865,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows commitHourlyLimit message with plurals when limit is greater than 1', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -1816,6 +1880,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -1830,6 +1895,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
@@ -1853,6 +1919,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows there is no limit when both commitHourlyLimit and prHourlyLimit are set to 0 (unlimited)', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -1867,6 +1934,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -1957,6 +2025,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('shows the branchConcurrentLimit message with plurals when limit is greater than 1', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -1971,6 +2040,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -1985,6 +2055,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
@@ -2008,6 +2079,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not count a single security update towards the concurrent limit, and notes it bypasses it', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -2022,6 +2094,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -2036,6 +2109,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
@@ -2050,6 +2124,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for d',
           branchName: 'renovate/d-cve',
           baseBranch: 'base',
@@ -2079,6 +2154,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('suggests vulnerabilityAlerts.prConcurrentLimit when security updates alone exceed prConcurrentLimit', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
@@ -2094,6 +2170,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for b',
           branchName: 'renovate/b-cve',
           baseBranch: 'base',
@@ -2119,6 +2196,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not suggest vulnerabilityAlerts.prConcurrentLimit when prConcurrentLimit is unlimited', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
@@ -2134,6 +2212,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for b',
           branchName: 'renovate/b-cve',
           baseBranch: 'base',
@@ -2157,6 +2236,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('notes when vulnerabilityAlerts.prConcurrentLimit is already configured and would throttle security updates', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
@@ -2172,6 +2252,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for b',
           branchName: 'renovate/b-cve',
           baseBranch: 'base',
@@ -2200,6 +2281,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('pluralises the vulnerabilityAlerts.prConcurrentLimit note when the limit is more than one', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
@@ -2215,6 +2297,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for b',
           branchName: 'renovate/b-cve',
           baseBranch: 'base',
@@ -2230,6 +2313,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for c',
           branchName: 'renovate/c-cve',
           baseBranch: 'base',
@@ -2257,6 +2341,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not note vulnerabilityAlerts.prConcurrentLimit when it is configured but not exceeded', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
@@ -2282,6 +2367,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('prefers vulnerabilityAlerts.branchConcurrentLimit over prConcurrentLimit when it is explicitly set and more restrictive', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
@@ -2297,6 +2383,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for b',
           branchName: 'renovate/b-cve',
           baseBranch: 'base',
@@ -2325,6 +2412,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     it('does not count multiple security updates towards the hourly limit, and notes they bypass it (plural)', () => {
       const branches = partial<BranchConfig>([
         {
+          schedule: [],
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
@@ -2339,6 +2427,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
@@ -2353,6 +2442,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for c',
           branchName: 'renovate/c-cve',
           baseBranch: 'base',
@@ -2368,6 +2458,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
         {
+          schedule: [],
           prTitle: 'CVE fix for d',
           branchName: 'renovate/d-cve',
           baseBranch: 'base',

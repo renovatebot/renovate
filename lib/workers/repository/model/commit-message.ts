@@ -63,10 +63,7 @@ export abstract class CommitMessage {
 
   set subject(value: string) {
     this._subject = this.normalizeInput(value);
-    this._subject = this._subject?.replace(
-      CommitMessage.EXTRA_WHITESPACES,
-      ' ',
-    );
+    this._subject = this._subject.replace(CommitMessage.EXTRA_WHITESPACES, ' ');
   }
 
   formatSubject(): string {

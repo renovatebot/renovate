@@ -120,12 +120,12 @@ function haveReachedLimits(): boolean {
 /* istanbul ignore next */
 function checkEnv(): void {
   const range = pkg.engines.node;
-  if (process.release?.name !== 'node' || !process.versions?.node) {
+  if (process.release.name !== 'node' || !process.versions.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.',
     );
-  } else if (!semver.satisfies(process.versions?.node, range)) {
+  } else if (!semver.satisfies(process.versions.node, range)) {
     logger.error(
       { versions: process.versions, range },
       'Unsupported node environment detected. Please update your node version.',
@@ -153,7 +153,7 @@ export async function start(): Promise<number> {
       { err: regexEngineStatus.err },
       'RE2 not usable, falling back to RegExp',
     );
-  } else if (regexEngineStatus.type === 'ignored') {
+  } else {
     logger.debug('RE2 regex engine is ignored via RENOVATE_X_IGNORE_RE2');
   }
 
@@ -270,6 +270,7 @@ export async function start(): Promise<number> {
     } else {
       logger.fatal({ err }, 'Unknown error');
     }
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- config is unassigned when reading it throws
     if (!config!) {
       // return early if we can't parse config options
       logger.debug(`Missing config`);

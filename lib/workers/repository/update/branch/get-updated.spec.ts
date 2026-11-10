@@ -57,12 +57,12 @@ function expectPipCompilePackageAndLockFile(
     (updateArtifactsSpy) => {
       return updateArtifactsSpy.mock.calls.some((args: any[]) => {
         const updateArtifact: UpdateArtifact = args[0];
-        const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
+        const updateArtifactLockfiles = updateArtifact.config.lockFiles;
         return (
-          updateArtifact?.packageFileName === expectedPackageFileName &&
+          updateArtifact.packageFileName === expectedPackageFileName &&
           isArray(updateArtifactLockfiles) &&
-          updateArtifactLockfiles?.length === 1 &&
-          updateArtifactLockfiles?.[0] === expectedLockFileName
+          updateArtifactLockfiles.length === 1 &&
+          updateArtifactLockfiles[0] === expectedLockFileName
         );
       });
     },

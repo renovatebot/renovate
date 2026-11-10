@@ -73,7 +73,7 @@ function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
 
 function getUpdatedLockFileContent(
   updatedDeps: BranchUpgradeConfig[],
-  updatedFileContents: Record<string, string>,
+  updatedFileContents: Partial<Record<string, string>>,
 ): string | undefined {
   for (const upgrade of updatedDeps) {
     const lockFiles = [upgrade.lockFile, ...coerceArray(upgrade.lockFiles)];
@@ -206,7 +206,7 @@ export async function getUpdatedPackageFiles(
     // TODO: fix types, can be undefined (#22198)
     const newVersion = upgrade.newVersion!;
     const currentVersion = upgrade.currentVersion!;
-    const updateLockedDependency = get(manager, 'updateLockedDependency')!;
+    const updateLockedDependency = get(manager, 'updateLockedDependency');
     managerPackageFiles[manager] ??= new Set<string>();
     managerPackageFiles[manager].add(packageFile);
     packageFileUpdatedDeps[packageFile] ??= [];
@@ -241,7 +241,7 @@ export async function getUpdatedPackageFiles(
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
-      const { status, files } = await updateLockedDependency({
+      const { status, files } = await updateLockedDependency!({
         ...upgrade,
         depName,
         newVersion,
@@ -593,7 +593,7 @@ function patchConfigForArtifactsUpdate(
   delete updatedConfig.lockFiles;
   if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
-      updatedConfig.packageFiles?.[manager];
+      updatedConfig.packageFiles[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );

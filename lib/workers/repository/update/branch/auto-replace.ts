@@ -16,7 +16,7 @@ export async function confirmIfDepUpdated(
   newContent: string,
 ): Promise<boolean> {
   const { manager, packageFile, depIndex } = upgrade;
-  let newUpgrade: PackageDependency;
+  let newUpgrade: PackageDependency | undefined;
   try {
     const newExtract = await extractPackageFile(
       manager,
@@ -37,7 +37,7 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (!newExtract.deps?.length) {
+    if (!newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has no deps array. Did the autoreplace make the file unparseable?`,
       );
@@ -56,7 +56,7 @@ export async function confirmIfDepUpdated(
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
-  if (!newUpgrade!) {
+  if (!newUpgrade) {
     logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
   }

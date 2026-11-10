@@ -212,10 +212,7 @@ describe('workers/repository/update/branch/index', () => {
       config.updateNotScheduled = false;
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 5,
-          state: 'open',
-        }),
+        partial<Pr>({ title: 'some title', number: 5, state: 'open' }),
       );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
@@ -433,9 +430,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
       scm.branchExists.mockResolvedValue(true);
-      const branchPr = partial<Pr>({
-        state: 'open',
-      });
+      const branchPr = partial<Pr>({ title: 'some title', state: 'open' });
       platform.getBranchPr.mockResolvedValueOnce(branchPr);
       scm.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
@@ -446,7 +441,11 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('passes the fetched branch PR to the branch automerge', async () => {
-      const branchPr = partial<Pr>({ number: 42, state: 'open' });
+      const branchPr = partial<Pr>({
+        title: 'some title',
+        number: 42,
+        state: 'open',
+      });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(branchPr);
       scm.isBranchModified.mockResolvedValueOnce(false);
@@ -473,10 +472,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 13,
-          state: 'closed',
-        }),
+        partial<Pr>({ title: 'some title', number: 13, state: 'closed' }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -488,10 +484,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 13,
-          state: 'closed',
-        }),
+        partial<Pr>({ title: 'some title', number: 13, state: 'closed' }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -504,10 +497,7 @@ describe('workers/repository/update/branch/index', () => {
       config.automerge = true;
       config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 13,
-          state: 'merged',
-        }),
+        partial<Pr>({ title: 'some title', number: 13, state: 'merged' }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -517,10 +507,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       scm.branchExists.mockResolvedValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 13,
-          state: 'closed',
-        }),
+        partial<Pr>({ title: 'some title', number: 13, state: 'closed' }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -529,6 +516,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('allows branch even if merged PR found', async () => {
       const pr = partial<Pr>({
+        title: 'some title',
         number: 13,
         state: 'merged',
       });
@@ -547,9 +535,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'merged',
-        }),
+        partial<Pr>({ title: 'some title', state: 'merged' }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -561,10 +547,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'open',
-          labels: ['rebase'],
-        }),
+        partial<Pr>({ title: 'some title', state: 'open', labels: ['rebase'] }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
@@ -577,9 +560,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('skips branch if edited PR found', async () => {
-      const pr = partial<Pr>({
-        state: 'open',
-      });
+      const pr = partial<Pr>({ title: 'some title', state: 'open' });
       const ensureCommentConfig = partial<EnsureCommentConfig>({
         number: pr.number,
         topic: 'Edited/Blocked Notification',
@@ -605,6 +586,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if tagretBranch of update PR is changed by user', async () => {
       const pr = partial<Pr>({
+        title: 'some title',
         state: 'open',
         targetBranch: 'new_base',
         bodyStruct: partial<PrBodyStruct>({
@@ -636,9 +618,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('skips branch if edited PR found without commenting', async () => {
-      const pr = partial<Pr>({
-        state: 'open',
-      });
+      const pr = partial<Pr>({ title: 'some title', state: 'open' });
       schedule.isScheduledNow.mockReturnValueOnce(false);
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
@@ -660,9 +640,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('skips branch if target branch changed', async () => {
-      const pr = partial<Pr>({
-        state: 'open',
-      });
+      const pr = partial<Pr>({ title: 'some title', state: 'open' });
       const ensureCommentConfig = partial<EnsureCommentConfig>({
         number: pr.number,
         topic: 'Edited/Blocked Notification',
@@ -671,6 +649,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           state: 'open',
           targetBranch: 'v6',
           bodyStruct: partial<PrBodyStruct>({
@@ -710,7 +689,9 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValue(commitSha);
-      platform.findPr.mockResolvedValueOnce(partial<Pr>({ sha: commitSha }));
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ title: 'some title', sha: commitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -724,7 +705,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       platform.findPr.mockResolvedValueOnce(
-        partial<Pr>({ sha: fakeSha('def456') }),
+        partial<Pr>({ title: 'some title', sha: fakeSha('def456') }),
       );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
@@ -844,10 +825,7 @@ describe('workers/repository/update/branch/index', () => {
       // limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 5,
-          state: 'open',
-        }),
+        partial<Pr>({ title: 'some title', number: 5, state: 'open' }),
       );
       await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
@@ -878,6 +856,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('does not return if commits per run limit exceeded but rebase requested via PR checkbox', async () => {
       const pr = partial<Pr>({
+        title: 'some title',
         number: 5,
         state: 'open',
         bodyStruct: {
@@ -948,6 +927,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('does not return if commits hourly limit exceeded but rebase requested via PR checkbox', async () => {
       const pr = partial<Pr>({
+        title: 'some title',
         number: 5,
         state: 'open',
         bodyStruct: {
@@ -1019,10 +999,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 5,
-          state: 'open',
-        }),
+        partial<Pr>({ title: 'some title', number: 5, state: 'open' }),
       );
       config.pendingChecks = true;
       await expect(branchWorker.processBranch(config)).resolves.toEqual({
@@ -1043,6 +1020,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           state: 'open',
           bodyStruct: {
@@ -1100,6 +1078,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           state: 'open',
           bodyStruct: {
@@ -1143,10 +1122,7 @@ describe('workers/repository/update/branch/index', () => {
         });
         scm.branchExists.mockResolvedValue(true);
         platform.getBranchPr.mockResolvedValueOnce(
-          partial<Pr>({
-            number: 5,
-            state: 'open',
-          }),
+          partial<Pr>({ title: 'some title', number: 5, state: 'open' }),
         );
         const inconfig = partial<BranchConfig>({
           ...config,
@@ -1175,6 +1151,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           state: 'open',
           bodyStruct: {
@@ -1209,6 +1186,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           state: 'open',
           bodyStruct: {
@@ -1238,10 +1216,7 @@ describe('workers/repository/update/branch/index', () => {
         });
         scm.branchExists.mockResolvedValue(true);
         platform.getBranchPr.mockResolvedValueOnce(
-          partial<Pr>({
-            number: 5,
-            state: 'open',
-          }),
+          partial<Pr>({ title: 'some title', number: 5, state: 'open' }),
         );
         scm.isBranchModified.mockResolvedValueOnce(false);
         const inconfig = partial<BranchConfig>({
@@ -1578,7 +1553,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 5 }),
+        pr: partial<Pr>({ title: 'some title', number: 5 }),
       });
       platform.getBranchStatusCheck.mockResolvedValue(null);
       await branchWorker.processBranch({
@@ -1910,7 +1885,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 123 }),
+        pr: partial<Pr>({ title: 'some title', number: 123 }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1962,7 +1937,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 5 }),
+        pr: partial<Pr>({ title: 'some title', number: 5 }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1986,7 +1961,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 5 }),
+        pr: partial<Pr>({ title: 'some title', number: 5 }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -2014,7 +1989,11 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 5, labels: ['keep-not-updated'] }),
+        pr: partial<Pr>({
+          title: 'some title',
+          number: 5,
+          labels: ['keep-not-updated'],
+        }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -2079,7 +2058,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('off schedule');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 5 }),
+        pr: partial<Pr>({ title: 'some title', number: 5 }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -2107,7 +2086,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ number: 5 }),
+        pr: partial<Pr>({ title: 'some title', number: 5 }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -2356,6 +2335,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('rebases branch onto new basebranch if baseBranch changed by user', async () => {
       const pr = partial<Pr>({
+        title: 'some title',
         state: 'open',
         targetBranch: 'old_base',
         bodyStruct: partial<PrBodyStruct>({
@@ -2394,6 +2374,7 @@ describe('workers/repository/update/branch/index', () => {
         contents: 'pom.xml file contents',
       };
       const pr = partial<Pr>({
+        title: 'some title',
         state: 'open',
         targetBranch: 'old_base',
         bodyStruct: partial<PrBodyStruct>({
@@ -2429,6 +2410,7 @@ describe('workers/repository/update/branch/index', () => {
     // for coverage
     it('rebases branch onto new basebranch if no fingerprint found - 2', async () => {
       const pr = partial<Pr>({
+        title: 'some title',
         state: 'open',
         targetBranch: 'old_base',
         bodyStruct: partial<PrBodyStruct>({
@@ -2491,9 +2473,7 @@ describe('workers/repository/update/branch/index', () => {
     it('closed pr (dry run)', async () => {
       scm.branchExists.mockResolvedValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'closed',
-        }),
+        partial<Pr>({ title: 'some title', state: 'closed' }),
       );
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await expect(branchWorker.processBranch(config)).resolves.toEqual({
@@ -2504,10 +2484,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('branch pr no rebase (dry run)', async () => {
-      const pr = partial<Pr>({
-        state: 'open',
-        number: 1,
-      });
+      const pr = partial<Pr>({ title: 'some title', state: 'open', number: 1 });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(true);
@@ -2700,6 +2677,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.getBranchCommit.mockResolvedValue(fakeSha('111')); //TODO:not needed?
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2840,6 +2818,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['modified_file'],
           not_added: [],
           deleted: ['deleted_file'],
@@ -2944,6 +2923,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['modified_file'],
           not_added: [],
           deleted: ['deleted_file'],
@@ -3030,6 +3010,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['modified_file'],
           not_added: [],
           deleted: ['deleted_file'],
@@ -3126,6 +3107,7 @@ describe('workers/repository/update/branch/index', () => {
       git.getRepoStatus
         .mockResolvedValueOnce(
           partial<StatusResult>({
+            renamed: [],
             modified: ['modified_file', 'modified_then_deleted_file'],
             not_added: [],
             deleted: ['deleted_file', 'deleted_then_created_file'],
@@ -3133,6 +3115,7 @@ describe('workers/repository/update/branch/index', () => {
         )
         .mockResolvedValueOnce(
           partial<StatusResult>({
+            renamed: [],
             modified: ['modified_file', 'deleted_then_created_file'],
             not_added: [],
             deleted: ['deleted_file', 'modified_then_deleted_file'],
@@ -3292,6 +3275,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['modified_file', 'modified_then_deleted_file'],
           not_added: [],
           deleted: ['deleted_file', 'deleted_then_created_file'],
@@ -3422,6 +3406,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['modified_file', 'modified_then_deleted_file'],
           not_added: [],
           deleted: ['deleted_file', 'deleted_then_created_file'],
@@ -3527,6 +3512,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['modified_file', 'modified_then_deleted_file'],
           not_added: [],
           deleted: ['deleted_file', 'deleted_then_created_file'],
@@ -3719,6 +3705,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
@@ -3758,6 +3745,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
@@ -3832,6 +3820,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          title: 'some title',
           number: 5,
           state: 'open',
           bodyStruct: { hash: hashBody('') },
@@ -3973,7 +3962,9 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValueOnce(commitSha);
-      platform.findPr.mockResolvedValueOnce(partial<Pr>({ sha: commitSha }));
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ title: 'some title', sha: commitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
@@ -3995,9 +3986,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [partial<FileChange>()],
       });
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'open',
-        }),
+        partial<Pr>({ title: 'some title', state: 'open' }),
       );
       vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -4051,10 +4040,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 123,
-          state: 'open',
-        }),
+        partial<Pr>({ title: 'some title', number: 123, state: 'open' }),
       );
       prWorker.getPlatformPrOptions.mockReturnValue({
         usePlatformAutomerge: true,
@@ -4075,10 +4061,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 123,
-          state: 'open',
-        }),
+        partial<Pr>({ title: 'some title', number: 123, state: 'open' }),
       );
       prWorker.getPlatformPrOptions.mockReturnValue({
         usePlatformAutomerge: true,

@@ -37,7 +37,7 @@ export function setReconfigureBranchCache(
 export function deleteReconfigureBranchCache(): void {
   const cache = getCache();
 
-  if (cache?.reconfigureBranchCache) {
+  if (cache.reconfigureBranchCache) {
     logger.debug('Delete reconfigure branch cache');
     delete cache.reconfigureBranchCache;
   }
