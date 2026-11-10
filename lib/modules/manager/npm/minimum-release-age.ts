@@ -152,14 +152,19 @@ async function yarnEnforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   yarnLock: string,
 ): Promise<boolean> {
-  const constraint = await resolveToolConstraint(config, 'yarn');
+  // the status checks run before the base branch is checked out, so the Yarn
+  // constraint and settings of the lock file come from the extraction, which
+  // copies them to every package file of the lock file
+  const settings = coerceObject(config.managerData?.yarnMinimalAgeGate);
+  const constraint = await resolveToolConstraint(
+    config,
+    'yarn',
+    () => settings.yarnConstraint,
+  );
   if (!isSubsetOf(npmVersioning, constraint, minimumReleaseAgeYarnRange)) {
     return false;
   }
 
-  // the status checks run before the base branch is checked out, so the
-  // .yarnrc.yml settings come from the extraction
-  const settings = coerceObject(config.managerData?.yarnMinimalAgeGate);
   // lock file maintenance keeps the `npmPreapprovedPackages` of the
   // .yarnrc.yml, which Yarn installs without a minimum release age
   if (settings.hasNpmPreapprovedPackages) {

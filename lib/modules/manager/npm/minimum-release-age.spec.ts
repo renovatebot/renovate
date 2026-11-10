@@ -31,13 +31,11 @@ describe('modules/manager/npm/minimum-release-age', () => {
 
     it.each`
       managerData
-      ${{ yarnLock: 'some-dir/yarn.lock' }}
-      ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
       ${{ ...npmLockManagerData, yarnLock: 'some-dir/yarn.lock' }}
       ${{ ...npmLockManagerData, pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
       ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml', yarnLock: 'some-dir/yarn.lock' }}
     `(
-      'returns false without a single lock file: $managerData',
+      'returns false with several lock files: $managerData',
       async ({ managerData }) => {
         await expect(
           enforcesMinimumReleaseAge({
@@ -419,6 +417,36 @@ describe('modules/manager/npm/minimum-release-age', () => {
         ).resolves.toBe(expected);
       },
     );
+
+    it('reads the Yarn constraint of the lock file for a package file without its own', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: {
+            ...yarnLockManagerData,
+            yarnMinimalAgeGate: { yarnConstraint: '4.12.0' },
+          },
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          packageFile: 'some-dir/.yarnrc.yml',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('prefers the configured Yarn constraint over the one of the lock file', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: {
+            ...yarnLockManagerData,
+            yarnMinimalAgeGate: { yarnConstraint: '4.12.0' },
+          },
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          constraints: { yarn: '4.9.4' },
+        }),
+      ).resolves.toBeFalse();
+    });
 
     it('does not read the .yarnrc.yml in the working tree', async () => {
       fs.readLocalFile.mockResolvedValue(

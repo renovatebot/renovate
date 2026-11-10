@@ -268,7 +268,7 @@ export function getYarnMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the Yarn minimum release age to the package files of each Yarn lock file, from the `.yarnrc.yml` next to it or the Yarn default, and keeps the `npmMinimalAgeGate` settings in `managerData`.
+ * Adds `packageRules` with the Yarn minimum release age to the package files of each Yarn lock file, from the `.yarnrc.yml` next to it or the Yarn default, and keeps the settings of the lock file in the `managerData` of each of its package files.
  *
  * Yarn 1 has no minimum release age.
  */
@@ -303,18 +303,15 @@ export async function setYarnMinimumReleaseAge(
     const settings = await readYarnrcMinimalAgeGate(yarnLock);
     const { npmMinimalAgeGate, npmScopes } = settings;
     const hasNpmPreapprovedPackages = !!settings.npmPreapprovedPackages?.length;
-    if (
-      npmMinimalAgeGate !== undefined ||
-      npmScopes ||
-      hasNpmPreapprovedPackages
-    ) {
-      for (const packageFile of lockFilePackageFiles) {
-        packageFile.managerData!.yarnMinimalAgeGate = {
-          npmMinimalAgeGate,
-          npmScopes,
-          ...(hasNpmPreapprovedPackages && { hasNpmPreapprovedPackages }),
-        };
-      }
+    // the .yarnrc.yml has no Yarn constraint of its own, so the root
+    // package.json sets it for every package file of the lock file
+    for (const packageFile of lockFilePackageFiles) {
+      packageFile.managerData!.yarnMinimalAgeGate = {
+        npmMinimalAgeGate,
+        npmScopes,
+        ...(hasNpmPreapprovedPackages && { hasNpmPreapprovedPackages }),
+        yarnConstraint,
+      };
     }
     // a Yarn range which allows a version with a default gets it, as Renovate
     // may install that version

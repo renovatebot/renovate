@@ -284,13 +284,38 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
       expect(
         packageFiles.map((p) => p.managerData?.yarnMinimalAgeGate),
       ).toEqual([
-        { npmMinimalAgeGate: 4320 },
-        { npmMinimalAgeGate: 4320 },
+        { npmMinimalAgeGate: 4320, yarnConstraint: '4.12.0' },
+        { npmMinimalAgeGate: 4320, yarnConstraint: '4.12.0' },
         undefined,
         undefined,
       ]);
       // the .yarnrc.yml is read once per lock file
       expect(fs.readLocalFile).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the Yarn constraint of the root package.json for every package file of the lock file', async () => {
+      mockYarnrc(null);
+      const packageFiles = [
+        packageFile('some-dir/.yarnrc.yml', { yarnLock: 'some-dir/yarn.lock' }),
+        packageFile('some-dir/pkgs/a/package.json', {
+          yarnLock: 'some-dir/yarn.lock',
+        }),
+        packageFile(
+          'some-dir/package.json',
+          { yarnLock: 'some-dir/yarn.lock' },
+          '4.12.0',
+        ),
+      ];
+
+      await setYarnMinimumReleaseAge(packageFiles);
+
+      expect(
+        packageFiles.map((p) => p.managerData?.yarnMinimalAgeGate),
+      ).toEqual([
+        { yarnConstraint: '4.12.0' },
+        { yarnConstraint: '4.12.0' },
+        { yarnConstraint: '4.12.0' },
+      ]);
     });
 
     it('reads the Yarn constraint of another package file without a root package.json', async () => {
@@ -388,6 +413,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         expect(packageFiles[0].managerData?.yarnMinimalAgeGate).toEqual({
           npmMinimalAgeGate: 4320,
           npmScopes: { myorg: null },
+          yarnConstraint: yarn,
         });
       },
     );
@@ -429,9 +455,9 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
 
     it.each`
       content                                 | expected
-      ${'npmPreapprovedPackages:\n  - foo\n'} | ${{ hasNpmPreapprovedPackages: true }}
-      ${'npmPreapprovedPackages: []\n'}       | ${undefined}
-      ${'nodeLinker: node-modules\n'}         | ${undefined}
+      ${'npmPreapprovedPackages:\n  - foo\n'} | ${{ hasNpmPreapprovedPackages: true, yarnConstraint: '4.15.0' }}
+      ${'npmPreapprovedPackages: []\n'}       | ${{ yarnConstraint: '4.15.0' }}
+      ${'nodeLinker: node-modules\n'}         | ${{ yarnConstraint: '4.15.0' }}
     `(
       'keeps whether npmPreapprovedPackages has entries: $content',
       async ({ content, expected }) => {
