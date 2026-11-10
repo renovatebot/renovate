@@ -68,4 +68,12 @@ Renovate also does _not_ support version constraints built from variables or int
 spec.add_dependency 'foo', "~> #{FooVersion::MAJOR}.0"
 ```
 
+Renovate does _not_ support gem names written as percent literals, or names and constraints with `.freeze`, which is the style that `gem build` writes into generated gemspecs.
+Renovate lists those dependencies as skipped with the reason `unsupported`:
+
+```ruby
+s.add_runtime_dependency(%q<rack>.freeze, ['>= 0'.freeze])
+s.add_dependency 'rack'.freeze, '~> 3.1'
+```
+
 If your `.gemspec` file uses any of these patterns, then update those dependencies manually.

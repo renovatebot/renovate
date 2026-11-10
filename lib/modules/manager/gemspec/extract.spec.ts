@@ -282,6 +282,33 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
+  it.each`
+    declaration
+    ${'s.add_runtime_dependency(%q<rack>.freeze, [">= 0".freeze])'}
+    ${'s.add_runtime_dependency %q<rack>, [">= 0"]'}
+    ${'s.add_runtime_dependency(%q(rack).freeze, ">= 0")'}
+    ${'s.add_runtime_dependency %q(rack), ">= 0"'}
+    ${'s.add_runtime_dependency(%Q{rack}.freeze, ">= 0")'}
+    ${'s.add_runtime_dependency %Q[rack], ">= 0"'}
+    ${'s.add_runtime_dependency %<rack>, ">= 0"'}
+    ${'s.add_runtime_dependency "rack".freeze, ">= 0"'}
+    ${'s.add_runtime_dependency "rack", ">= 0".freeze'}
+  `(
+    'skips `$declaration` as unsupported',
+    async ({ declaration }: { declaration: string }) => {
+      const res = await extractPackageFile(declaration);
+
+      expect(res?.deps).toEqual([
+        {
+          depName: 'rack',
+          depType: 'runtime',
+          datasource: 'rubygems',
+          skipReason: 'unsupported',
+        },
+      ]);
+    },
+  );
+
   it('ignores declarations whose name is not a string literal', async () => {
     const content = codeBlock`
       spec.add_dependency gem_name, "~> 1.0"
