@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { DockerDatasource } from '../../../datasource/docker/index.ts';
+import { splitImageParts } from '../../dockerfile/extract.ts';
 import type { ActionSchema, KnownActionConfig } from '../types.ts';
 import { parseImageValue, parseValue } from './utils.ts';
 
@@ -14,14 +15,15 @@ const RenovateGithubActionWith: ActionSchema = z
     'renovate-image': z.string().optional(),
   })
   .transform(({ 'renovate-version': version, 'renovate-image': image }) => {
-    const [packageName, currentDigest] = (
-      image ?? renovateGithubActionDefaultImage
-    ).split('@');
+    // `renovate-image` may itself be tag- and/or digest-pinned (e.g.
+    // `ghcr.io/renovatebot/renovate:44.104.2@sha256:...`), in which case its
+    // own tag takes priority over the separate `renovate-version` input.
+    const dep = splitImageParts(image ?? renovateGithubActionDefaultImage);
     return [
       {
-        packageName,
-        ...(currentDigest ? { currentDigest } : {}),
-        ...parseValue(version),
+        depType: 'uses-with',
+        ...dep,
+        ...(dep.currentValue ? {} : parseValue(version)),
       },
     ];
   });

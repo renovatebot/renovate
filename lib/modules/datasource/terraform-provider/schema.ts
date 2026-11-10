@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
-import { regEx } from '../../../util/regex.ts';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -43,7 +43,7 @@ const OpenTofuProviderVersion = z
     published: MaybeTimestamp,
   })
   .transform((version): Release => ({
-    version: version.id.replace(regEx(/^v/), ''),
+    version: stripVersionPrefix(version.id),
     releaseTimestamp: version.published,
   }));
 

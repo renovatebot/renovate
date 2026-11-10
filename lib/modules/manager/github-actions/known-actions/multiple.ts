@@ -93,8 +93,7 @@ const GraalvmSetupWith: ActionSchema = z
   });
 
 // Runtimes installable by `pnpm/setup`, keyed by the name used in its
-// `runtime:` input. `bun` and `deno` reuse the datasources of their respective
-// `setup-*` actions below.
+// `runtime:` input. `bun` and `deno` versions are resolved through npm.
 const pnpmRuntimes: Record<string, PackageDependency | undefined> = {
   node: { datasource: NodeVersionDatasource.id, packageName: 'node' },
   bun: { datasource: NpmDatasource.id, packageName: 'bun' },
@@ -133,6 +132,33 @@ const PnpmSetupWith: ActionSchema = z
     ...parsePnpmRuntime(runtime),
   ]);
 
+const SetupVpWith: ActionSchema = z
+  .object({
+    version: z.string().optional(),
+    'node-version': z.string().optional(),
+  })
+  .transform(({ version, 'node-version': nodeVersion }) => {
+    const deps: PackageDependency[] = [];
+
+    if (version) {
+      deps.push({
+        datasource: NpmDatasource.id,
+        packageName: 'vite-plus',
+        ...parseValue(version),
+      });
+    }
+
+    if (nodeVersion) {
+      deps.push({
+        datasource: NodeVersionDatasource.id,
+        packageName: 'node',
+        ...parseValue(nodeVersion),
+      });
+    }
+
+    return deps;
+  });
+
 /**
  * Entries whose emitted dependencies span more than one datasource, so no
  * single-datasource file (or its structural "same datasource" test) applies.
@@ -154,5 +180,11 @@ export const multipleActions: Record<string, KnownActionConfig> = {
     datasource: NpmDatasource.id,
     packageName: 'pnpm',
     withSchema: PnpmSetupWith,
+  },
+  // https://github.com/voidzero-dev/setup-vp
+  'voidzero-dev/setup-vp': {
+    datasource: DATASOURCE_DETERMINED_DYNAMICALLY,
+    packageName: '', // determined per dependency: `version`, `node-version`
+    withSchema: SetupVpWith,
   },
 };

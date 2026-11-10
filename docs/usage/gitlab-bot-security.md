@@ -11,7 +11,7 @@ Make sure you understand GitLab's security model before you run Renovate against
 
 ## Mend-hosted Renovate
 
-In July 2026, Mend relaunched its hosted Renovate app for GitLab.com.
+In July 2026, Mend relaunched the Mend Renovate app for GitLab.com.
 You can set it up [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
 
 !!! tip
@@ -37,8 +37,8 @@ This is why we retired the original Mend-hosted GitLab app: a pipeline run for o
 
 GitLab introduced a [CI/CD job token allowlist](https://docs.gitlab.com/ci/jobs/ci_job_token/) in GitLab 15.9 (2023-02): a job token from one project can no longer authenticate against another project's API just because the triggering user has access to both.
 The target project must explicitly add the source project, or group, to its allowlist first, and the triggering user must still have their own permission to perform the action.
-As of GitLab 18.0 (2025-05), this allowlist is enabled and enforced for every project on GitLab.com, including projects created before the allowlist existed, and can't be disabled there.
-If you administer a GitLab Self-Managed or Dedicated instance, note that admins can still disable this instance-wide setting even on GitLab 18.0+, so confirm it's actually enforced rather than switched off.
+As of GitLab 18.0 (2025-05), this allowlist is enabled and enforced for every project on GitLab.com, including projects created before the allowlist existed, and cannot be disabled there.
+If you administer a GitLab Self-Managed or Dedicated instance, note that admins can still disable this instance-wide setting even on GitLab 18.0+, so confirm it is actually enforced rather than switched off.
 
 Even with the allowlist enabled, public and internal projects still expose some resources, such as artifacts, the container/package registry, releases, and repository contents, to a job token from any project, allowlisted or not.
 So the advice below still applies regardless of allowlist status.
@@ -47,8 +47,8 @@ If you run Renovate yourself inside your own GitLab CI pipelines, you should sti
 You should also remember that when accounts are invited into projects or groups on GitLab, acceptance happens automatically.
 If you are running a shared self-hosted Renovate service, we recommend you:
 
-- Run a shared service only within projects where all users already have equivalent visibility/access to each other's data, or where there's a low risk that a user would try to gain access to a private project they don't otherwise have access to
-- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that Renovate can't be invited to projects or groups you don't intend
+- Run a shared service only within projects where all users already have equivalent visibility/access to each other's data, or where there is a low risk that a user would try to gain access to a private project they do not otherwise have access to
+- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that Renovate cannot be invited to projects or groups you do not intend
 
 ### Running as an OAuth app
 

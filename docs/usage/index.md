@@ -1,11 +1,14 @@
-<object class="renovate-banner" type="image/svg+xml" data="./assets/images/mend-renovate-call-to-action.svg" width="756" height="250" loading="lazy">
-Renovate banner
-</object>
-
 # Renovate documentation
 
 Automated dependency updates.
 Multi-platform and multi-language.
+
+<object class="renovate-banner renovate-banner-light" type="image/svg+xml" data="./assets/images/mend-renovate-call-to-action.svg" width="756" height="250" loading="lazy">
+Renovate banner
+</object>
+<object class="renovate-banner renovate-banner-dark" type="image/svg+xml" data="./assets/images/mend-renovate-call-to-action-dark.svg" width="756" height="250" loading="lazy">
+Renovate banner
+</object>
 
 ## Why use Renovate?
 
@@ -115,7 +118,7 @@ You can run Renovate as:
 - a [pre-built Open Source image on GitHub Container Registry](https://github.com/renovatebot/renovate/pkgs/container/renovate)
 - a [pre-built Open Source image on Docker Hub](https://hub.docker.com/r/renovate/renovate)
 
-Or you can use [the Mend Renovate App](https://github.com/marketplace/renovate) which is hosted by [Mend](https://www.mend.io/).
+Or you can use [the Mend Renovate app](https://github.com/marketplace/renovate) which is hosted by [Mend](https://www.mend.io/).
 
 [Install the Mend Renovate app for GitHub](https://github.com/marketplace/renovate){ .md-button .md-button--primary }
 [Check out our tutorial](https://github.com/renovatebot/tutorial){ .md-button }

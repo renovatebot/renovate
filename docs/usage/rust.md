@@ -26,6 +26,8 @@ Renovate can find private registry URLs in these Cargo configuration files:
 - `.cargo/config.toml`
 - `.cargo/config` (legacy)
 
+If both files exist, Renovate reads `.cargo/config`, like cargo.
+
 Renovate can also find private registry URLs via a `CARGO_REGISTRIES_<name>_INDEX` environment variable.
 Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/reference/environment-variables.html#configuration-environment-variables) to learn more.
 
@@ -34,7 +36,7 @@ Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/refer
 You as user can set authentication for private crates by adding a `hostRules` configuration to your `renovate.json` file.
 
 All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, etc.) and host rules without a `hostType` will be automatically setup for authentication.
-You can also configure a `hostRules` that's only for Cargo authentication (e.g. `hostType: 'crate'`).
+You can also configure a `hostRules` that is only for Cargo authentication (e.g. `hostType: 'crate'`).
 
 ```js title="Example of authentication for a private GitHub and Cargo registry:"
 module.exports = {

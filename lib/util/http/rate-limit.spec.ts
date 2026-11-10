@@ -7,7 +7,6 @@ import {
 
 describe('util/http/rate-limit', () => {
   beforeEach(() => {
-    hostRules.clear();
     setHttpRateLimits([], []);
   });
 

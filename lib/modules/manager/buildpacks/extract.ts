@@ -84,8 +84,7 @@ export function extractPackageFile(
   ) {
     const dep = getDockerDep(
       descriptor.io.buildpacks.builder.replace(DOCKER_PREFIX, ''),
-      true,
-      config.registryAliases,
+      { registryAliases: config.registryAliases },
     );
     logger.trace(
       {
@@ -105,11 +104,9 @@ export function extractPackageFile(
   ) {
     for (const group of descriptor.io.buildpacks.group) {
       if (isBuildpackByURI(group) && isDockerRef(group.uri)) {
-        const dep = getDockerDep(
-          group.uri.replace(DOCKER_PREFIX, ''),
-          true,
-          config.registryAliases,
-        );
+        const dep = getDockerDep(group.uri.replace(DOCKER_PREFIX, ''), {
+          registryAliases: config.registryAliases,
+        });
         logger.trace(
           {
             depName: dep.depName,

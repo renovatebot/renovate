@@ -89,6 +89,13 @@ describe('workers/repository/update/pr/body/changelogs', () => {
           branchName: 'some-branch',
           hasReleaseNotes: true,
         },
+        {
+          manager: 'some-manager',
+          depName: 'some/repo',
+          repoName: 'some/repo',
+          branchName: 'some-branch',
+          hasReleaseNotes: true,
+        },
       ],
       hasReleaseNotes: true,
     });
@@ -102,6 +109,7 @@ describe('workers/repository/update/pr/body/changelogs', () => {
       some/repo (dep-2)
       some/repo (dep-3)
       other/repo (dep-4)
+      some/repo
 
       "
     `);

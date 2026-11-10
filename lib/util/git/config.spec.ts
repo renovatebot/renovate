@@ -19,6 +19,7 @@ describe('util/git/config', () => {
         allowUnsafeAskPass: true,
         allowUnsafeSshCommand: true,
         allowUnsafeConfigEnvCount: true,
+        allowUnsafeUrlRewrite: true,
       },
     });
   });
@@ -35,6 +36,7 @@ describe('util/git/config', () => {
         allowUnsafeAskPass: true,
         allowUnsafeSshCommand: true,
         allowUnsafeConfigEnvCount: true,
+        allowUnsafeUrlRewrite: true,
       },
     });
   });

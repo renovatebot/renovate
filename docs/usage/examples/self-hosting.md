@@ -34,8 +34,8 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
 docker run --rm renovate/renovate:44
-docker run --rm renovate/renovate:44.104
-docker run --rm renovate/renovate:44.104.2
+docker run --rm renovate/renovate:44.133
+docker run --rm renovate/renovate:44.133.0
 ```
 
 !!! warning
@@ -70,7 +70,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:44.104.2
+              image: renovate/renovate:44.133.0
               args:
                 - user/repo
               # Environment Variables
@@ -129,7 +129,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:44.104.2
+            - image: renovate/renovate:44.133.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -223,7 +223,7 @@ Renovate's cache, and the caches(s) for npm, Yarn, Composer, and so on, are stor
 
 ### Overriding the default directory
 
-If you don't want to use the default `tmp/renovate` directory you can:
+If you do not want to use the default `tmp/renovate` directory you can:
 
 - Set a value for `baseDir` in `config.js`
 - Use an environment variable `RENOVATE_BASE_DIR`
@@ -258,7 +258,7 @@ module.exports = {
 Here change the `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
-If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
+If you are running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
@@ -281,7 +281,7 @@ Only add the script to `cron` after you checked it works.
 
 !!! note
   The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
-  You don't need to add it if you are already running Renovate against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
+  You do not need to add it if you are already running Renovate against github.com, but you do need to add it if you are using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
 
@@ -373,7 +373,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:44.104.2
+              image: renovate/renovate:44.133.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -389,7 +389,7 @@ spec:
 
 ## Logging
 
-If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
+If you are ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
 Debug logging is usually needed for any debugging, while JSON format will mean that the output is parsable.
 
 ### About the log level numbers
@@ -429,7 +429,7 @@ On Ubuntu/Debian and many Linux-based systems, this can be done by:
 
 ### Renovate Docker image
 
-If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
+If you are using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
 
 ```dockerfile title="Example of a Dockerfile that uses a self-signed certificate"
 FROM renovate/renovate

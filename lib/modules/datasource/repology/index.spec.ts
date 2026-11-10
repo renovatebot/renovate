@@ -61,10 +61,6 @@ const fixtureJdk = Fixtures.get(`openjdk.json`);
 const fixturePython = Fixtures.get(`python.json`);
 
 describe('modules/datasource/repology/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {

@@ -1,10 +1,15 @@
 import { deduplicateArray } from '../../../util/array.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -15,6 +20,8 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
+import { configFileLocations, getConfigFilePattern } from './config-files.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
@@ -27,15 +34,14 @@ export const lockFileNames = ['mise.lock'];
 export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://mise.jdx.dev';
 
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  mise: {
+    note: 'mise has its own `minimum_release_age` setting, which Renovate does not read yet.',
+  },
+};
+
 export const defaultConfig = {
-  managerFilePatterns: [
-    '**/{,.}mise{,.*}.toml',
-    '**/{,.}mise/config{,.*}.toml',
-    '**/.config/mise{,.*}.toml',
-    '**/.config/mise/{mise,config}{,.*}.toml',
-    '**/.config/mise/conf.d/*.toml',
-    '**/.rtx{,.*}.toml',
-  ],
+  managerFilePatterns: configFileLocations.map(getConfigFilePattern),
   pinDigests: false,
 };
 
@@ -52,6 +58,7 @@ const backendDatasources = {
   asdf: asdfSupportedDatasources,
   aqua: [GithubTagsDatasource.id],
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
+  conda: [CondaDatasource.id],
   dotnet: [NugetDatasource.id],
   gem: [RubygemsDatasource.id],
   github: [GithubReleasesDatasource.id],
@@ -59,11 +66,23 @@ const backendDatasources = {
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
+  pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
   // not supported
   vfox: [],
 };
+
+// datasources of remote `include` entries and git task files
+const remoteReferenceDatasources = [
+  BitbucketTagsDatasource.id,
+  DockerDatasource.id,
+  GitRefsDatasource.id,
+  GitTagsDatasource.id,
+  GithubDigestDatasource.id,
+  GithubTagsDatasource.id,
+  GitlabTagsDatasource.id,
+];
 
 /**
  * Backends that are definitely supported out-of-the-box with Renovate.
@@ -81,6 +100,7 @@ export const maybeSupportedBackendDatasources = new Set<string>(
   ),
 );
 
-export const supportedDatasources = deduplicateArray(
-  Object.values(backendDatasources).flat(),
-).sort();
+export const supportedDatasources = deduplicateArray([
+  ...Object.values(backendDatasources).flat(),
+  ...remoteReferenceDatasources,
+]).sort();

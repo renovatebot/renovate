@@ -9,6 +9,7 @@ import type { ChartDefinition, Repository } from './types.ts';
 export function parseRepository(
   depName: string,
   repositoryURL: string,
+  registryAliases?: Record<string, string>,
 ): PackageDependency {
   const res: PackageDependency = {};
 
@@ -20,7 +21,7 @@ export function parseRepository(
   }
   switch (url.protocol) {
     case 'oci:':
-      return getOciChartDep(repositoryURL, depName);
+      return getOciChartDep(repositoryURL, depName, registryAliases);
     case 'file:':
       res.skipReason = 'local-dependency';
       break;
@@ -75,6 +76,18 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
     dedup.add(el.repository);
     return !duplicate;
   });
+}
+
+/**
+ * Checks whether a chart reference points at a chart in the repository instead
+ * of a remote registry.
+ *
+ * @param path chart reference to check
+ *
+ * @returns `true` if the reference is a relative or absolute local path
+ */
+export function isLocalChartPath(path: string): boolean {
+  return ['./', '../', '/'].some((localPrefix) => path.startsWith(localPrefix));
 }
 
 export function isAlias(repository: string): boolean {

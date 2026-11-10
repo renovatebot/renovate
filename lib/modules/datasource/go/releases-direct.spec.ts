@@ -56,6 +56,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v2.0.0', version: 'v2.0.0' },
         ],
+        effectiveDatasource: 'github-tags',
         sourceUrl: 'https://github.com/golang/text',
       });
     });
@@ -117,6 +118,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v0.2.1',
           },
         ],
+        effectiveDatasource: 'forgejo-tags',
         sourceUrl: 'https://code.forgejo.org/go-chi/cache',
       });
     });
@@ -139,6 +141,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'gitlab-tags',
         sourceUrl: 'https://gitlab.com/golang/text',
       });
     });
@@ -200,6 +203,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v0.2.1',
           },
         ],
+        effectiveDatasource: 'gitea-tags',
         sourceUrl: 'https://gitea.com/go-chi/cache',
       });
     });
@@ -229,6 +233,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v2.0.0',
           },
         ],
+        effectiveDatasource: 'git-tags',
         sourceUrl: null,
       });
     });
@@ -252,6 +257,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'gitlab-tags',
         sourceUrl: 'https://my.custom.domain/golang/myrepo',
       });
     });
@@ -275,6 +281,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'bitbucket-tags',
         sourceUrl: 'https://bitbucket.org/golang/text',
       });
     });
@@ -301,6 +308,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v2.0.0', version: 'v2.0.0' },
         ],
+        effectiveDatasource: 'github-tags',
         sourceUrl: 'https://git.enterprise.com/example/module',
       });
       expect(githubGetTags.mock.calls).toMatchObject([
@@ -357,6 +365,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'gitlab-tags',
         sourceUrl: 'https://gitlab.com/group/subgroup/repo',
       });
     });
@@ -417,10 +426,18 @@ describe('modules/datasource/go/releases-direct', () => {
 
       await expect(
         datasource.getReleases({ packageName: 'github.com/x/text/a' }),
-      ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
+      ).resolves.toEqual({
+        releases,
+        sourceUrl: 'https://github.com/x/text',
+        effectiveDatasource: 'github-tags',
+      });
       await expect(
         datasource.getReleases({ packageName: 'github.com/x/text/b' }),
-      ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
+      ).resolves.toEqual({
+        releases,
+        sourceUrl: 'https://github.com/x/text',
+        effectiveDatasource: 'github-tags',
+      });
     });
 
     it('works for nested modules on github v2+ major upgrades', async () => {

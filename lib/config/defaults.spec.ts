@@ -1,3 +1,4 @@
+import { partial } from '../../test/util.ts';
 import { getConfig, getDefault } from './defaults.ts';
 import type { RenovateOptions } from './types.ts';
 
@@ -16,6 +17,7 @@ describe('config/defaults', () => {
         type: 'array',
         description: 'thing',
         name: 'thing',
+        scopes: ['repo'],
       };
       const array1 = getDefault(option);
       const array2 = getDefault(option);
@@ -30,6 +32,7 @@ describe('config/defaults', () => {
         type: 'boolean',
         description: 'thing',
         name: 'thing',
+        scopes: ['repo'],
       };
       const val = getDefault(option);
 
@@ -39,11 +42,12 @@ describe('config/defaults', () => {
     it.each(['string', 'object', 'integer'])(
       'returns null for %s values',
       (type: string) => {
-        const option: RenovateOptions = {
+        const option = partial<RenovateOptions>({
           type: type as 'string' | 'object' | 'integer',
           description: 'thing',
           name: 'thing',
-        };
+          scopes: ['repo'],
+        });
         const val = getDefault(option);
 
         expect(val).toBeNull();

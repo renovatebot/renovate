@@ -17,7 +17,7 @@ export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
 /**
  * The platform families Renovate can recognize from a URL.
  *
- * A family groups every flavour of one platform - the vendor's public instance
+ * A family groups every flavor of one platform - the vendor's public instance
  * plus any self-hosted installation - because they share an API, a tags
  * datasource and a web UI layout.
  *

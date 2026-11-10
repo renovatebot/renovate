@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
 import { type RenovateConfig, logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import type { PackageRuleInputConfig } from '../../../config/types.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
@@ -35,6 +36,17 @@ vi.mock('@renovatebot/osv-offline', () => {
 });
 
 describe('workers/repository/process/vulnerabilities', () => {
+  beforeEach(() => {
+    // `unstubEnvs` restores both after each test
+    vi.stubEnv('OSV_OFFLINE_ROOT_DIR', undefined);
+    vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', undefined);
+    GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('create()', () => {
     beforeEach(resetOsv);
 
@@ -54,11 +66,67 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 
+  describe('osv-offline directory', () => {
+    beforeEach(() => {
+      resetOsv();
+      createMock.mockResolvedValue({});
+    });
+
+    it('keeps a configured root directory', async () => {
+      vi.stubEnv('OSV_OFFLINE_ROOT_DIR', '/custom/osv');
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe('/custom/osv');
+    });
+
+    it('keeps the osv-offline default when downloads are disabled', async () => {
+      vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', 'TRUE');
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBeUndefined();
+    });
+
+    it('uses a directory in cacheDir by default', async () => {
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe(
+        '/tmp/renovate/cache/osv-offline',
+      );
+    });
+  });
+
+  describe('cleanup()', () => {
+    beforeEach(resetOsv);
+
+    it('disposes the shared databases once', async () => {
+      const dispose = vi.fn();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+        [Symbol.dispose]: dispose,
+      });
+      await Vulnerabilities.create();
+
+      await Vulnerabilities.cleanup();
+      await Vulnerabilities.cleanup();
+
+      expect(dispose).toHaveBeenCalledOnce();
+    });
+
+    it('does nothing when the databases were never opened', async () => {
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+
+    it('ignores a failed initialization', async () => {
+      createMock.mockRejectedValue(new Error());
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
+
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+  });
+
   describe('fetchVulnerabilities()', () => {
     let config: RenovateConfig;
     let vulnerabilities: Vulnerabilities;
 
     beforeAll(async () => {
+      GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
       resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
@@ -76,7 +144,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+              {
+                depName: 'django',
+                packageName: 'django',
+                currentValue: '3.2',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -737,6 +810,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'drupal/ai',
+                packageName: 'drupal/ai',
                 currentValue: '1.0.6',
                 datasource: 'packagist',
               },
@@ -787,6 +861,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'drupal/ai',
+                packageName: 'drupal/ai',
                 currentValue: '1.0.6',
                 datasource: 'packagist',
               },
@@ -850,6 +925,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     };
 
     beforeAll(async () => {
+      GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
       resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
@@ -866,7 +942,9 @@ describe('workers/repository/process/vulnerabilities', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         dockerfile: [
           {
-            deps: [{ depName: 'node', datasource: 'docker' }],
+            deps: [
+              { depName: 'node', packageName: 'node', datasource: 'docker' },
+            ],
             packageFile: 'some-file',
           },
         ],
@@ -886,7 +964,9 @@ describe('workers/repository/process/vulnerabilities', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
-            deps: [{ depName: 'lodash', datasource: 'npm' }],
+            deps: [
+              { depName: 'lodash', packageName: 'lodash', datasource: 'npm' },
+            ],
             packageFile: 'some-file',
           },
         ],
@@ -908,7 +988,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -933,7 +1018,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -964,6 +1054,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '#4.17.11',
                 datasource: 'npm',
               },
@@ -993,6 +1084,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '4.17.11',
                 datasource: 'npm',
               },
@@ -1021,6 +1113,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '4.17.11',
                 datasource: 'npm',
               },
@@ -1067,7 +1160,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'fake',
+                packageName: 'fake',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1097,7 +1195,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'fake',
+                packageName: 'fake',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1131,7 +1234,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'fake', currentValue: '1.5.1', datasource: 'npm' },
+              {
+                depName: 'fake',
+                packageName: 'fake',
+                currentValue: '1.5.1',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1174,7 +1282,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         gomod: [
           {
             deps: [
-              { depName: 'stdlib', currentValue: '1.7.5', datasource: 'go' },
+              {
+                depName: 'stdlib',
+                packageName: 'stdlib',
+                currentValue: '1.7.5',
+                datasource: 'go',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1246,6 +1359,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'toolchain',
                 currentValue: '1.23.6',
                 datasource: 'golang-version',
@@ -1308,6 +1422,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'golang',
                 currentValue: '1.26.0',
                 datasource: 'golang-version',
@@ -1315,6 +1430,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               },
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'toolchain',
                 currentValue: '1.26.5',
                 datasource: 'golang-version',
@@ -1400,6 +1516,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'golang',
                 currentValue: '1.23.5',
                 datasource: 'golang-version',
@@ -1425,6 +1542,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 depType: 'dependencies',
                 currentValue: '4.17.10',
                 datasource: 'npm',
@@ -1461,6 +1579,8 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName:
+                  'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                packageName:
                   'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
                 currentValue: '3.4.0',
                 datasource: 'maven',
@@ -1525,6 +1645,78 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('preserves poetry versioning when generating vulnerability package rules', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              {
+                depName: 'weasyprint',
+                packageName: 'weasyprint',
+                currentValue: '^69.0',
+                currentVersion: '69.0',
+                lockedVersion: '69.0',
+                versioning: 'poetry',
+                datasource: 'pypi',
+              },
+            ],
+            packageFile: 'pyproject.toml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jf6q-chmf-3h3v',
+          modified: '',
+          aliases: ['CVE-2026-1234'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'PyPI',
+                name: 'weasyprint',
+                purl: 'pkg:pypi/weasyprint',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '70.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-jf6q-chmf-3h3v affects weasyprint 69.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'pypi',
+          versioning: 'poetry',
+        },
+        'Setting allowed version >= 70.0 to fix vulnerability GHSA-jf6q-chmf-3h3v in weasyprint 69.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['weasyprint'],
+          matchCurrentVersion: '69.0',
+          allowedVersions: '>= 70.0',
+          versioning: 'poetry',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
     it('proposes a fresh security fix immediately despite minimumReleaseAge', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         maven: [
@@ -1532,6 +1724,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'org.example:lib',
+                packageName: 'org.example:lib',
                 currentValue: '1.0.0',
                 datasource: 'maven',
               },
@@ -1615,7 +1808,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+              {
+                depName: 'django',
+                packageName: 'django',
+                currentValue: '3.2',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1687,7 +1885,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+              {
+                depName: 'django',
+                packageName: 'django',
+                currentValue: '3.2',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1756,7 +1959,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1778,6 +1986,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'tiny_http',
+                packageName: 'tiny_http',
                 currentValue: '0.1.2',
                 datasource: 'crate',
               },
@@ -1880,7 +2089,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1942,6 +2156,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'aeson',
+                packageName: 'aeson',
                 currentValue: '0.4.0.0',
                 datasource: 'hackage',
               },
@@ -1997,7 +2212,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'quokka', currentValue: '1.2.3', datasource: 'pypi' },
+              {
+                depName: 'quokka',
+                packageName: 'quokka',
+                currentValue: '1.2.3',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -2042,6 +2262,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'com.guicedee.services:log4j-core',
+                packageName: 'com.guicedee.services:log4j-core',
                 currentValue: '1.0.10.1',
                 datasource: 'maven',
               },
@@ -2054,6 +2275,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'SharpZipLib',
+                packageName: 'SharpZipLib',
                 currentValue: '1.3.0',
                 datasource: 'nuget',
               },
@@ -2066,6 +2288,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '4.17.15',
                 datasource: 'npm',
               },
@@ -2167,6 +2390,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'com.guicedee.services:log4j-core',
+                packageName: 'com.guicedee.services:log4j-core',
                 currentValue: '1.0.10.1',
                 datasource: 'maven',
               },
@@ -2271,7 +2495,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '0.5.0', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '0.5.0',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -2350,6 +2579,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'django-mfa2',
+                packageName: 'django-mfa2',
                 currentValue: '2.5.0',
                 datasource: 'pypi',
               },
@@ -2434,6 +2664,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'mattermost-desktop',
+                packageName: 'mattermost-desktop',
                 currentValue: '5.8.0',
                 datasource: 'npm',
               },
@@ -2524,7 +2755,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -2588,6 +2824,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'sys-info',
+                packageName: 'sys-info',
                 currentValue: '0.6.0',
                 datasource: 'crate',
               },

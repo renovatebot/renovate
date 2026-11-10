@@ -75,7 +75,7 @@ describe('util/git/errors', () => {
 
     it('still silently aborts on generic workflow-file push rejection', () => {
       // Sanity check: non-GH013 workflow rejection should still be
-      // swallowed so we do not regress the existing behaviour where
+      // swallowed so we do not regress the existing behavior where
       // App tokens without the `workflows` scope abort quietly.
       const err = new Error(codeBlock`
         remote rejected refs/renovate/branches/foo

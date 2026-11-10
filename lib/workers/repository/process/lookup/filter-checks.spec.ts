@@ -324,7 +324,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         expect(res.pendingChecks).toBeFalse();
         expect(res.pendingReleases).toHaveLength(0);
         expect(res.release?.version).toBe('1.0.4');
-        // the release is not recorded against either behaviour, so neither is reported
+        // the release is not recorded against either behavior, so neither is reported
         expect(logger.logger.once.warn).not.toHaveBeenCalledWith(
           expect.stringContaining(
             'minimumReleaseAgeBehaviour=timestamp-optional',

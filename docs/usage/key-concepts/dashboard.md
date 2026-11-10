@@ -108,9 +108,9 @@ You can mix and match these options as well.
 
 We do not recommend that you require approval for _all_ updates.
 When you require prior approval, you need to check the dashboard issue regularly to check for important updates.
-You'll probably forget to check often enough, and out of sight means out of mind!
+You will probably forget to check often enough, and out of sight means out of mind!
 
-Maybe you find Renovate too noisy, and want to opt-out of getting automatic updates whenever they're ready.
+Maybe you find Renovate too noisy, and want to opt-out of getting automatic updates whenever they are ready.
 
 In this case, you can tell Renovate to wait for your approval before making any pull requests.
 This means that you have full control over when you get updates.
@@ -130,7 +130,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 Major updates often have breaking changes which require manual changes in your code before they can be merged.
 So maybe you only want to get major updates when you have sufficient time to check them carefully.
 
-Dependency Dashboard Approval is far superior to disabling major updates because at least you can fully see what's pending on the dashboard, instead of updates being totally invisible.
+Dependency Dashboard Approval is far superior to disabling major updates because at least you can fully see what is pending on the dashboard, instead of updates being totally invisible.
 
 If you want to require approval for major updates, set `dependencyDashboardApproval` to `true` within a `major` object:
 
@@ -146,7 +146,7 @@ If you want to require approval for major updates, set `dependencyDashboardAppro
 
 Sometimes you only want to update specific packages when you say so.
 
-Maybe a package doesn't follow Semantic Versioning, and has breaking changes on every new release, so you want to update on your terms.
+Maybe a package does not follow Semantic Versioning, and has breaking changes on every new release, so you want to update on your terms.
 
 Or maybe you have a package that updates too rapidly for you to keep up with, and you want to update once in a while manually.
 

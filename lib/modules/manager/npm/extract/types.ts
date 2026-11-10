@@ -25,14 +25,10 @@ export type NpmPackage = PackageJson & {
     overrides?: PackageJson.Dependency;
   };
   devEngines?: {
+    runtime?: DevEngineItem | DevEngineItem[];
     packageManager?: DevEngineItem | DevEngineItem[];
   };
 };
-
-export type LockFileEntry = Record<
-  string,
-  { version: string; integrity?: boolean }
->;
 
 export interface LockFile {
   lockedVersions?: Record<string, string>;

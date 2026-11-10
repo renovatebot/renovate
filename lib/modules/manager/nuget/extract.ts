@@ -45,7 +45,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     const { name, attr } = child;
 
     if (name === 'ContainerBaseImage') {
-      const { depName, ...dep } = getDep(child.val, true);
+      const { depName, ...dep } = getDep(child.val);
 
       // v8 ignore else -- needs a ContainerBaseImage element with a blank value
       if (isNonEmptyStringAndNotWhitespace(depName)) {

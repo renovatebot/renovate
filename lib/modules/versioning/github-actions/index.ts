@@ -3,6 +3,7 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'github-actions';
@@ -38,7 +39,7 @@ function hasCompatibleComponentPrefix(
 }
 
 function massageValue(input: string): string {
-  return splitComponentPrefix(input).version.replace(regEx(/^v/i), '');
+  return stripVersionPrefix(splitComponentPrefix(input).version);
 }
 
 function parseVersion(input: string): SemVer | null {
@@ -391,10 +392,11 @@ function getShortestMatchingVersion(
 }
 
 function isCompatible(version: string, current?: string): boolean {
-  return (
-    isValid(version) &&
-    (!current || hasCompatibleComponentPrefix(version, current))
-  );
+  if (!isValid(version)) {
+    return false;
+  }
+
+  return !current || hasCompatibleComponentPrefix(version, current);
 }
 
 function isBreaking(version: string, current: string): boolean {

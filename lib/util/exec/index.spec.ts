@@ -1184,7 +1184,7 @@ describe('util/exec/index', () => {
     await exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
     expect(logger.logger.once.debug).toHaveBeenCalledWith(
       { toolConstraints: [{ toolName: 'npm' }] },
-      'Ignoring tool contraints because of `binarySource=global`',
+      'Ignoring tool constraints because of `binarySource=global`',
     );
   });
 

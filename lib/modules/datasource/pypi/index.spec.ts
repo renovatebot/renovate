@@ -144,7 +144,6 @@ describe('modules/datasource/pypi/index', () => {
 
   describe('getReleases', () => {
     beforeEach(() => {
-      hostRules.clear();
       vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 

@@ -1,14 +1,18 @@
 // TODO #22198
-import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
-import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import {
+  applyDatasourceDefaultConfig,
+  getManagerConfig,
+  mergeChildConfig,
+} from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
-import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import type {
   PackageDependency,
   PackageFile,
+  PackageFileContent,
 } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { clone } from '../../../util/clone.ts';
@@ -16,11 +20,40 @@ import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import * as p from '../../../util/promises.ts';
 import { Result } from '../../../util/result.ts';
 import { LookupStats } from '../../../util/stats.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import { PackageFiles } from '../package-files.ts';
 import { lookupUpdates } from './lookup/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
 
 type LookupResult = Result<PackageDependency>;
+
+/**
+ * Merge the constraints which a manager extracted into `target`, without ever letting them override a value which was configured.
+ *
+ * `overrides` holds the values which must win over the extracted ones: the repository config for a package file, the package file config for a dependency. They cannot be read from `target`, because `mergeChildConfig()` has already merged `constraintsVersioning` from `extracted` into it, the other way round.
+ */
+function mergeExtractedConstraints(
+  target: RenovateConfig,
+  extracted: Pick<
+    PackageFileContent,
+    'extractedConstraints' | 'constraintsVersioning'
+  >,
+  overrides: Pick<RenovateConfig, 'constraints' | 'constraintsVersioning'>,
+): void {
+  if (extracted.extractedConstraints) {
+    target.constraints = {
+      ...extracted.extractedConstraints,
+      ...overrides.constraints,
+    };
+  }
+  const constraintsVersioning = {
+    ...extracted.constraintsVersioning,
+    ...overrides.constraintsVersioning,
+  };
+  if (Object.keys(constraintsVersioning).length > 0) {
+    target.constraintsVersioning = constraintsVersioning;
+  }
+}
 
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
@@ -30,19 +63,22 @@ async function lookup(
 
   dep.updates = [];
 
-  if (isString(dep.depName)) {
-    dep.depName = dep.depName.trim();
-  }
-
-  dep.packageName ??= dep.depName;
-
   // `unknown-registry` says the manager could not work out where to look, which
   // `applyPackageRules()` clears when config supplies a registry. Such a dep has
   // to reach the rules to be given one, so it is dropped afterwards rather than
   // here - unless its manager already gave it a registry it could not use.
   const mayBeGivenARegistry =
     dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
-  if (dep.skipReason && !mayBeGivenARegistry) {
+
+  // A `lockfile-only` dependency is skipped for routine updates, because it is
+  // not declared anywhere for an update to change. A vulnerability fix still
+  // has to be able to reach it.
+  // Whether an alert matches is not known until the package rules have been
+  // applied, so the dependency passes through to them, and is skipped again
+  // below if none did.
+  const mayBeAVulnerabilityAlert = dep.skipReason === 'lockfile-only';
+
+  if (dep.skipReason && !mayBeGivenARegistry && !mayBeAVulnerabilityAlert) {
     return Result.ok(dep);
   }
 
@@ -59,17 +95,10 @@ async function lookup(
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  if (dep.extractedConstraints) {
-    depConfig.constraints = {
-      ...dep.extractedConstraints,
-      ...depConfig.constraints,
-    };
-  }
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
-  depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
+  mergeExtractedConstraints(depConfig, dep, packageFileConfig);
+  depConfig = await applyDatasourceDefaultConfig(depConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-  depConfig.packageName ??= depConfig.depName;
 
   if (mayBeGivenARegistry) {
     if (depConfig.skipReason === 'unknown-registry') {
@@ -83,11 +112,38 @@ async function lookup(
     delete dep.skipStage;
   }
 
+  if (mayBeAVulnerabilityAlert) {
+    if (!depConfig.isVulnerabilityAlert) {
+      return Result.ok(dep);
+    }
+
+    logger.debug(
+      `Dependency: ${depName!}, is only in a lock file, but a vulnerability alert matches it - looking it up`,
+    );
+    delete dep.skipReason;
+    delete dep.skipStage;
+  }
+
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
     return Result.ok(dep);
+  }
+
+  // A manager may disable a dependency by default, but a vulnerability fix
+  // still goes through - unless a package rule disabled it as well
+  if (
+    depConfig.enabled === false &&
+    dep.enabled === false &&
+    depConfig.isVulnerabilityAlert &&
+    depConfig.skipReason !== 'package-rules'
+  ) {
+    logger.debug(
+      `Dependency: ${depName!}, is disabled by default, but has a vulnerability alert`,
+    );
+    depConfig.enabled = true;
+    dep.enabled = true;
   }
 
   if (depConfig.enabled === false) {
@@ -116,9 +172,12 @@ async function lookup(
         );
       })
       .catch((err): Result<UpdateResult> => {
+        if (!(err instanceof ExternalHostError)) {
+          return Result.err(err);
+        }
         if (
-          packageFileConfig.repoIsOnboarded === true ||
-          !(err instanceof ExternalHostError)
+          packageFileConfig.repoIsOnboarded === true &&
+          !err.onlyThisDependencyAffected
         ) {
           return Result.err(err);
         }
@@ -126,10 +185,11 @@ async function lookup(
         const cause = err.err;
         return Result.ok({
           updates: [],
+          ...(err.onlyThisDependencyAffected && { lookupFailed: true }),
           warnings: [
             {
               topic: 'Lookup Error',
-              message: `${depName}: ${cause.message}`,
+              message: withoutUrlCredentials(`${depName}: ${cause.message}`),
             },
           ],
         });
@@ -145,19 +205,7 @@ async function fetchManagerPackagerFileUpdates(
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
-  }
-  const mergedConstraintsVersioning = {
-    ...pFile.constraintsVersioning,
-    ...config.constraintsVersioning,
-  };
-  if (Object.keys(mergedConstraintsVersioning).length > 0) {
-    packageFileConfig.constraintsVersioning = mergedConstraintsVersioning;
-  }
+  mergeExtractedConstraints(packageFileConfig, pFile, config);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => async (): Promise<PackageDependency> => {

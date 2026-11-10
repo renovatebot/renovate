@@ -17,7 +17,10 @@ export function mergeChildConfig<
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
 
   // Ensure highest severity survives parent / child merge
-  if (config?.isVulnerabilityAlert) {
+  const hasSeverity =
+    parent.vulnerabilitySeverity !== undefined ||
+    child.vulnerabilitySeverity !== undefined;
+  if (config.isVulnerabilityAlert && hasSeverity) {
     config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
       parent,
       child,

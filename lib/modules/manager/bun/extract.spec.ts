@@ -1,4 +1,6 @@
 import { fs } from '~test/util.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { stripNpmrc } from '../npm/npmrc.ts';
 import { extractAllPackageFiles } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -322,6 +324,29 @@ describe('modules/manager/bun/extract', () => {
     });
   });
 
+  it.each([false, true])(
+    'extracts the devEngines bun constraint with array form: %s',
+    async (arrayForm) => {
+      const runtime = { name: 'bun', version: '1.4.0' };
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          engines: { bun: '1.2.0' },
+          devEngines: {
+            runtime: arrayForm ? [runtime] : runtime,
+          },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+
+      expect(packageFiles).toMatchObject([
+        { extractedConstraints: { bun: '1.4.0' } },
+      ]);
+    },
+  );
+
   it('extracts .npmrc from sibling or parent directory', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('package.json');
     fs.findLocalSiblingOrParent.mockImplementation(
@@ -353,5 +378,44 @@ describe('modules/manager/bun/extract', () => {
     expect(packageFiles[0].npmrc).toBe(
       'registry=https://custom.registry.com\n',
     );
+    expect(packageFiles[0].managerData?.repoNpmrc).toMatchObject({
+      fileName: '.npmrc',
+      content: 'registry=https://custom.registry.com\n',
+    });
+    expect(packageFiles[0].managerData?.npmrcFileName).toBe('.npmrc');
+  });
+
+  it('marks an unreadable repository .npmrc to be read from disk again', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockResolvedValue('.npmrc');
+    fs.readLocalFile
+      .mockResolvedValueOnce(
+        JSON.stringify({ name: 'test', dependencies: { dep1: '1.0.0' } }),
+      )
+      .mockResolvedValueOnce(null);
+
+    const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+
+    expect(packageFiles[0]).not.toHaveProperty('npmrc');
+    expect(stripNpmrc(packageFiles)[0].managerData).toMatchObject({
+      npmrcFileName: '.npmrc',
+      uncachedNpmrcFileName: '.npmrc',
+    });
+  });
+
+  it('does not store a repository .npmrc when there is none', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockResolvedValue(null);
+    fs.readLocalFile.mockResolvedValueOnce(
+      JSON.stringify({ name: 'test', dependencies: { dep1: '1.0.0' } }),
+    );
+
+    const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+
+    expect(packageFiles).toHaveLength(1);
+    expect(
+      Object.keys(coerceObject(packageFiles[0].managerData)),
+    ).not.toContain('repoNpmrc');
+    expect(packageFiles[0].managerData?.npmrcFileName).toBeNull();
   });
 });

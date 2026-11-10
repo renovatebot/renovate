@@ -3,6 +3,14 @@ import path from 'node:path';
 import type { Context, ESTree } from '@oxlint/plugins';
 import { defineRule } from '@oxlint/plugins';
 
+function isTypeImportSpecifier(
+  specifier: ESTree.ImportDeclaration['specifiers'][number],
+): boolean {
+  return (
+    specifier.type === 'ImportSpecifier' && specifier.importKind === 'type'
+  );
+}
+
 /** Every literal node oxc emits, all of which share `type: 'Literal'`. */
 type Literal = Extract<ESTree.Node, { type: 'Literal' }>;
 
@@ -55,11 +63,7 @@ export default defineRule({
         }
         if (
           node.specifiers.length > 0 &&
-          node.specifiers.every(
-            (specifier) =>
-              specifier.type === 'ImportSpecifier' &&
-              specifier.importKind === 'type',
-          )
+          node.specifiers.every(isTypeImportSpecifier)
         ) {
           return;
         }

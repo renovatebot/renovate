@@ -11,6 +11,7 @@ import {
   isOCIRegistry,
   removeOCIPrefix,
 } from '../helmv3/oci.ts';
+import { isLocalChartPath } from '../helmv3/utils.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -28,12 +29,6 @@ function isValidChartName(name: string | undefined, oci: boolean): boolean {
     return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
   }
   return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
-}
-
-function isLocalPath(possiblePath: string): boolean {
-  return ['./', '../', '/'].some((localPrefix) =>
-    possiblePath.startsWith(localPrefix),
-  );
 }
 
 export async function extractPackageFile(
@@ -80,7 +75,7 @@ export async function extractPackageFile(
       let repoName: string | null = null;
 
       // If it starts with ./ ../ or / then it's a local path
-      if (isLocalPath(dep.chart)) {
+      if (isLocalChartPath(dep.chart)) {
         if (
           kustomizationsKeysUsed(dep) ||
           (await localChartHasKustomizationsYaml(dep, packageFile))

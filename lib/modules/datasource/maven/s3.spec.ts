@@ -36,7 +36,6 @@ describe('modules/datasource/maven/s3', () => {
 
   afterEach(() => {
     s3mock.reset();
-    hostRules.clear();
   });
 
   describe('S3', () => {
