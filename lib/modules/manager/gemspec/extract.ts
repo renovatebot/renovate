@@ -1,6 +1,8 @@
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import { extractLockFileEntries } from '../bundler/locked-version.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { findGemspecLockFile } from './lockfile.ts';
 
 const methodRegex = regEx(
   `^\\s*[\\w:.]+\\.add_(?<type>runtime_|development_)?dependency\\s*\\(?\\s*` +
@@ -18,10 +20,7 @@ function stripTail(rest: string): string {
     .trimEnd();
 }
 
-export function extractPackageFile(
-  content: string,
-  _packageFile?: string,
-): PackageFileContent | null {
+function extractDeps(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const line of content.split(newlineRegex)) {
     const match = methodRegex.exec(line);
@@ -45,8 +44,35 @@ export function extractPackageFile(
     }
     deps.push(dep);
   }
+  return deps;
+}
+
+export async function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): Promise<PackageFileContent | null> {
+  const deps = extractDeps(content);
   if (!deps.length) {
     return null;
   }
-  return { deps };
+
+  const res: PackageFileContent = { deps };
+  if (!packageFile) {
+    return res;
+  }
+
+  const lockFile = await findGemspecLockFile(packageFile, content);
+  if (!lockFile) {
+    return res;
+  }
+
+  res.lockFiles = [lockFile.lockFile];
+  const lockedVersions = extractLockFileEntries(lockFile.lockFileContent);
+  for (const dep of deps) {
+    const lockedVersion = lockedVersions.get(dep.depName!);
+    if (lockedVersion) {
+      dep.lockedVersion = lockedVersion;
+    }
+  }
+  return res;
 }

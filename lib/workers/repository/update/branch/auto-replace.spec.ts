@@ -533,7 +533,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           spec.add_dependency "rails", "~> 6.0"
         end
       `;
-      const deps = extractGemspec(gemspec)!.deps;
+      const deps = (await extractGemspec(gemspec))!.deps;
       upgrade.manager = 'gemspec';
       upgrade.baseDeps = deps;
       upgrade.depName = deps[0].depName;
@@ -559,7 +559,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           spec.add_runtime_dependency "activesupport", "~> 4.2", "< 5.5", ">= 4.2.1"
         end
       `;
-      const deps = extractGemspec(gemspec)!.deps;
+      const deps = (await extractGemspec(gemspec))!.deps;
       upgrade.manager = 'gemspec';
       upgrade.baseDeps = deps;
       upgrade.depName = deps[0].depName;

@@ -17,6 +17,10 @@ Renovate reads this from the lock file: Bundler records a gem loaded from the lo
 Renovate matches that entry against the literal `spec.name` of the `*.gemspec` file, or else against its file name.
 If there is no such entry, then Renovate only updates the `*.gemspec` file.
 
+When the lock file belongs to the `*.gemspec` file, Renovate reads each dependency's locked version from it.
+With the default `rangeStrategy` of `auto`, which resolves to `update-lockfile`, a release that still satisfies the constraint only updates `Gemfile.lock`.
+A release outside the constraint replaces the constraint in the `*.gemspec` file and refreshes `Gemfile.lock`.
+
 The `gemspec` manager does not perform [lock file maintenance](../../../configuration-options.md#lockfilemaintenance).
 A `gemspec` directive only works inside a `Gemfile`, so the `bundler` manager already maintains the same `Gemfile.lock`.
 

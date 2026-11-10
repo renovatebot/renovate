@@ -1,15 +1,18 @@
 import { codeBlock } from 'common-tags';
+import { fs } from '~test/util.ts';
 import { extractPackageFile } from './extract.ts';
 
+vi.mock('../../../util/fs/index.ts');
+
 describe('modules/manager/gemspec/extract', () => {
-  it('returns null when there are no dependencies', () => {
-    expect(extractPackageFile('')).toBeNull();
-    expect(
+  it('returns null when there are no dependencies', async () => {
+    await expect(extractPackageFile('')).resolves.toBeNull();
+    await expect(
       extractPackageFile('Gem::Specification.new { |s| s.name = "x" }'),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
-  it('extracts runtime, development and bare dependencies', () => {
+  it('extracts runtime, development and bare dependencies', async () => {
     const content = codeBlock`
       Gem::Specification.new do |gem|
         gem.add_runtime_dependency "semantic_logger", "~> 4.11"
@@ -18,7 +21,7 @@ describe('modules/manager/gemspec/extract', () => {
       end
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res).toEqual({
       deps: [
@@ -44,11 +47,11 @@ describe('modules/manager/gemspec/extract', () => {
     });
   });
 
-  it('captures multi-part restriction constraints in full', () => {
+  it('captures multi-part restriction constraints in full', async () => {
     const content =
       'spec.add_runtime_dependency "activesupport", "~> 4.2", "!= 4.2.5", ">= 4.2.1"';
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps[0]).toEqual({
       depName: 'activesupport',
@@ -58,12 +61,12 @@ describe('modules/manager/gemspec/extract', () => {
     });
   });
 
-  it('handles parentheses and trailing comments', () => {
+  it('handles parentheses and trailing comments', async () => {
     const content = codeBlock`
       spec.add_dependency("graphql", "~> 1.9.19") # pinned intentionally
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps[0]).toEqual({
       depName: 'graphql',
@@ -73,14 +76,14 @@ describe('modules/manager/gemspec/extract', () => {
     });
   });
 
-  it('skips dependencies without a literal version', () => {
+  it('skips dependencies without a literal version', async () => {
     const content = codeBlock`
       spec.add_dependency "rake"
       spec.add_runtime_dependency "foo", Foo::VERSION
       spec.add_dependency "bar", "~> 1.0", Bar::VERSION
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps).toEqual([
       {
@@ -104,13 +107,13 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
-  it('skips interpolated version strings', () => {
+  it('skips interpolated version strings', async () => {
     const content = codeBlock`
       spec.add_dependency "foo", "~> #{Foo::VERSION}"
       spec.add_runtime_dependency 'bar', "= #{version}"
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps).toEqual([
       {
@@ -128,14 +131,14 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
-  it('skips interpolated dependency names', () => {
+  it('skips interpolated dependency names', async () => {
     const content = codeBlock`
       %w[core model controller].each do |variant|
         spec.add_dependency "my-framework-#{variant}", '~> 1.0'
       end
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps).toEqual([
       {
@@ -147,7 +150,7 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
-  it('ignores commented-out dependency declarations', () => {
+  it('ignores commented-out dependency declarations', async () => {
     const content = codeBlock`
       Gem::Specification.new do |spec|
         # spec.add_dependency "foo", "~> 1.0"
@@ -155,7 +158,7 @@ describe('modules/manager/gemspec/extract', () => {
       end
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps).toEqual([
       {
@@ -167,14 +170,14 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
-  it('skips semicolon-joined declarations without updating either', () => {
+  it('skips semicolon-joined declarations without updating either', async () => {
     const content = codeBlock`
       Gem::Specification.new do |spec|
         spec.add_dependency "foo", "~> 1.0"; spec.add_dependency "bar", "~> 2.0"
       end
     `;
 
-    const res = extractPackageFile(content);
+    const res = await extractPackageFile(content);
 
     expect(res?.deps).toEqual([
       {
@@ -184,5 +187,73 @@ describe('modules/manager/gemspec/extract', () => {
         skipReason: 'unspecified-version',
       },
     ]);
+  });
+
+  describe('with a sibling Gemfile.lock', () => {
+    const gemspec = codeBlock`
+      Gem::Specification.new do |spec|
+        spec.name = "foo"
+        spec.add_dependency "rack", "~> 3.1"
+        spec.add_development_dependency "rspec", "~> 3.13"
+      end
+    `;
+
+    function lockFile(remote: string): string {
+      return codeBlock`
+        PATH
+          remote: ${remote}
+          specs:
+            foo (1.0.0)
+              rack (~> 3.1)
+
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            rack (3.1.8)
+
+        PLATFORMS
+          ruby
+      `;
+    }
+
+    beforeEach(() => {
+      fs.getSiblingFileName.mockImplementation(
+        (_packageFile, otherFile) => `sub/${otherFile}`,
+      );
+    });
+
+    it('sets lockFiles and lockedVersion when the lock file locks the gemspec', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFile('.'));
+
+      const res = await extractPackageFile(gemspec, 'sub/foo.gemspec');
+
+      expect(res).toEqual({
+        lockFiles: ['sub/Gemfile.lock'],
+        deps: [
+          {
+            depName: 'rack',
+            depType: 'runtime',
+            datasource: 'rubygems',
+            currentValue: '"~> 3.1"',
+            lockedVersion: '3.1.8',
+          },
+          {
+            depName: 'rspec',
+            depType: 'development',
+            datasource: 'rubygems',
+            currentValue: '"~> 3.13"',
+          },
+        ],
+      });
+    });
+
+    it('ignores a lock file that does not lock the gemspec', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFile('engines/foo'));
+
+      const res = await extractPackageFile(gemspec, 'sub/foo.gemspec');
+
+      expect(res?.lockFiles).toBeUndefined();
+      expect(res?.deps[0].lockedVersion).toBeUndefined();
+    });
   });
 });
