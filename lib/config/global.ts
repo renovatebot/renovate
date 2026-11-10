@@ -67,10 +67,18 @@ export class GlobalConfig {
     's3Endpoint',
     's3PathStyle',
     'toolSettings',
+    'urlReplacements',
     'userAgent',
   ] as const satisfies readonly (
     keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions
   )[];
+
+  /**
+   * The options of `OPTIONS` which a `repositories[]` entry can't override.
+   */
+  static NON_REPOSITORY_OPTIONS = [
+    'urlReplacements',
+  ] as const satisfies readonly (typeof GlobalConfig.OPTIONS)[number][];
 
   private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
 
@@ -128,6 +136,7 @@ export function setHttpGlobalConfig(
     endpoint: config.endpoint,
     internalHostAccess: config.internalHostAccess,
     platform: config.platform,
+    urlReplacements: config.urlReplacements,
     userAgent: config.userAgent,
   });
 }
