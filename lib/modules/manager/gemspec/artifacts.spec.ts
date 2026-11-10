@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
 import * as _lock from '../bundler/lock.ts';
 import type { UpdateArtifact } from '../types.ts';
@@ -15,6 +16,14 @@ const updateArtifact: UpdateArtifact = {
   config: {},
 };
 
+const ownLockFile = codeBlock`
+  PATH
+    remote: .
+    specs:
+      foo (1.0.0)
+        rack (~> 3.1)
+`;
+
 describe('modules/manager/gemspec/artifacts', () => {
   beforeEach(() => {
     fs.getSiblingFileName.mockImplementation(
@@ -23,81 +32,27 @@ describe('modules/manager/gemspec/artifacts', () => {
   });
 
   it('returns null when there is no sibling Gemfile.lock', async () => {
-    fs.localPathExists.mockResolvedValue(false);
+    fs.readLocalFile.mockResolvedValueOnce(null);
 
-    await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
-    expect(fs.readLocalFile).not.toHaveBeenCalled();
+    const res = await updateArtifacts(updateArtifact);
+
+    expect(res).toBeNull();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
 
-  it('returns null when there is no sibling Gemfile', async () => {
-    fs.localPathExists.mockResolvedValue(true);
-    fs.readLocalFile.mockResolvedValue(null);
-
-    await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
-    expect(lock.runBundlerLock).not.toHaveBeenCalled();
-  });
-
-  it('returns null when the Gemfile has no gemspec directive', async () => {
-    fs.localPathExists.mockResolvedValue(true);
-    fs.readLocalFile.mockResolvedValue(
-      "source 'https://rubygems.org'\n# gemspec\ngem 'rack'\n",
+  it('returns null when the Gemfile.lock does not lock the gemspec', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      ownLockFile.replace('remote: .', 'remote: engines/foo'),
     );
 
-    await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
+    const res = await updateArtifacts(updateArtifact);
+
+    expect(res).toBeNull();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
 
-  it.each`
-    directive
-    ${"gemspec name: 'bar'"}
-    ${'gemspec :name => "bar"'}
-    ${"gemspec path: 'other'"}
-    ${"gemspec name: 'foo', path: '../foo'"}
-  `(
-    'returns null when `$directive` targets a different gemspec',
-    async ({ directive }: { directive: string }) => {
-      fs.localPathExists.mockResolvedValue(true);
-      fs.readLocalFile.mockResolvedValue(
-        `source 'https://rubygems.org'\n\n${directive}\n`,
-      );
-
-      const res = await updateArtifacts(updateArtifact);
-
-      expect(res).toBeNull();
-      expect(lock.runBundlerLock).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each`
-    directive
-    ${'gemspec'}
-    ${"gemspec name: 'foo'"}
-    ${'gemspec(:name => "foo", :path => ".")'}
-    ${"gemspec path: './', development_group: :test"}
-  `(
-    'delegates to runBundlerLock when `$directive` targets the gemspec',
-    async ({ directive }: { directive: string }) => {
-      fs.localPathExists.mockResolvedValue(true);
-      fs.readLocalFile.mockResolvedValue(
-        `source 'https://rubygems.org'\n\n${directive}\n`,
-      );
-      lock.runBundlerLock.mockResolvedValue(null);
-
-      await updateArtifacts(updateArtifact);
-
-      expect(lock.runBundlerLock).toHaveBeenCalledWith(
-        updateArtifact,
-        'sub/Gemfile.lock',
-      );
-    },
-  );
-
-  it('delegates to runBundlerLock when the Gemfile uses the gemspec directive', async () => {
-    fs.localPathExists.mockResolvedValue(true);
-    fs.readLocalFile.mockResolvedValue(
-      "source 'https://rubygems.org'\n\ngemspec name: 'foo'\n",
-    );
+  it('delegates to runBundlerLock when the Gemfile.lock locks the gemspec', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(ownLockFile);
     const result = [
       {
         file: {
@@ -107,9 +62,11 @@ describe('modules/manager/gemspec/artifacts', () => {
         },
       },
     ];
-    lock.runBundlerLock.mockResolvedValue(result);
+    lock.runBundlerLock.mockResolvedValueOnce(result);
 
-    await expect(updateArtifacts(updateArtifact)).resolves.toBe(result);
+    const res = await updateArtifacts(updateArtifact);
+
+    expect(res).toBe(result);
     expect(lock.runBundlerLock).toHaveBeenCalledWith(
       updateArtifact,
       'sub/Gemfile.lock',
