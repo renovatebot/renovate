@@ -75,8 +75,7 @@ function getMinutes(
   const minutes = parseYarnDurationMinutes(value);
   if (minutes === null) {
     logger.debug(
-      { yarnrcFile, value },
-      `Invalid ${setting} in .yarnrc.yml, ignoring`,
+      `Invalid ${setting} ${JSON.stringify(value)} in ${yarnrcFile}, ignoring`,
     );
   }
   return minutes;
@@ -128,9 +127,7 @@ export async function readYarnrcMinimalAgeGate(
 }
 
 /**
- * Whether Renovate runs Yarn 1 for the Yarn constraint, as it does for a constraint which is no valid range or allows Yarn 1.
- *
- * A Yarn 1 lock file gives no constraint, unless the `package.json` sets one.
+ * Whether Renovate runs Yarn 1 for the Yarn constraint, which is the case for a missing constraint, a constraint which is no valid range, or one which allows Yarn 1.
  */
 export function isYarn1Constraint(
   yarnConstraint: string | null | undefined,
@@ -154,9 +151,7 @@ export function getYarnMinimalAgeGateMinutes(
 }
 
 /**
- * The `npmMinimalAgeGate` in minutes of each scope of `npmScopes`, which Yarn applies to the packages of that scope instead of the global value.
- *
- * With `includeDefault`, a scope without its own value gets the Yarn default.
+ * Returns the `npmMinimalAgeGate` in minutes of each scope of `npmScopes`, which Yarn applies to the packages of that scope instead of the global value, with the Yarn default for a scope without its own value if `includeDefault` is set.
  */
 export function getYarnScopeMinimalAgeGateMinutes(
   settings: YarnMinimalAgeGateSettings,
@@ -176,9 +171,7 @@ export function getYarnScopeMinimalAgeGateMinutes(
 }
 
 /**
- * Parses the `npmPreapprovedPackages` entries of a `.yarnrc.yml` like Yarn, which accepts a package name or glob, optionally with a semver range like `foo@^1.0.0`.
- *
- * Yarn and `matchPackageNames` match globs the same way, as `*` does not match `/` in either.
+ * Parses the `npmPreapprovedPackages` entries of a `.yarnrc.yml` like Yarn, which accepts a package name or glob, where `*` does not match `/` as in `matchPackageNames`, optionally with a semver range like `foo@^1.0.0`.
  */
 export function parseYarnPreapprovedPackages(
   entries: string[] | undefined,
@@ -228,9 +221,7 @@ export function isYarnPreapproved(
 }
 
 /**
- * The `packageRules` for a Yarn minimum release age, which Yarn applies to npm packages only, with the age of `npmScopes` for the packages of a scope, and which `npmPreapprovedPackages` lifts for every version of the packages it names.
- *
- * Entries with a range get no rule, as Renovate does not look up other versions with a different age.
+ * Returns the `packageRules` for a Yarn minimum release age of npm packages, with the age of `npmScopes` for the packages of a scope, and with `npmPreapprovedPackages` entries without a range lifting it for the packages they name.
  */
 export function getYarnMinimumReleaseAgeRules(
   minutes: number | undefined,
@@ -268,9 +259,7 @@ export function getYarnMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the Yarn minimum release age to the package files of each Yarn lock file, from the `.yarnrc.yml` next to it or the Yarn default, and keeps the settings of the lock file in the `managerData` of each of its package files.
- *
- * Yarn 1 has no minimum release age.
+ * Adds `packageRules` with the Yarn minimum release age to the package files of each Yarn lock file, from the `.yarnrc.yml` next to it or the Yarn default, and keeps the settings of the lock file in the `managerData` of each of its package files, except for Yarn 1, which has no minimum release age.
  */
 export async function setYarnMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
