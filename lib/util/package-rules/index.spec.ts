@@ -1,4 +1,4 @@
-import { hostRules } from '~test/util.ts';
+import { hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
@@ -1586,6 +1586,84 @@ describe('util/package-rules/index', () => {
     const res = await applyPackageRules(config);
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
+  });
+
+  describe('replacements', () => {
+    it('warns when the replacement fields come from different matching rules', async () => {
+      const config: TestConfig = {
+        depName: 'q',
+        packageName: 'q',
+        packageRules: [
+          { matchPackageNames: ['q'], replacementName: 'r' },
+          { matchPackageNames: ['q'], replacementVersion: '2.0.0' },
+        ],
+      };
+
+      const res = await applyPackageRules(config);
+
+      expect(res).toMatchObject({
+        replacementName: 'r',
+        replacementVersion: '2.0.0',
+      });
+      expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
+        { depName: 'q', packageName: 'q' },
+        'The `replacement*` fields come from multiple matching `packageRules`, which may result in an invalid replacement. See the debug logs for the rules which set each field',
+      );
+      expect(logger.logger.once.debug).toHaveBeenCalledExactlyOnceWith(
+        {
+          depName: 'q',
+          packageName: 'q',
+          replacementRules: {
+            replacementName: {
+              ruleIndex: 0,
+              matchPackageNames: ['q'],
+              replacementName: 'r',
+            },
+            replacementVersion: {
+              ruleIndex: 1,
+              matchPackageNames: ['q'],
+              replacementVersion: '2.0.0',
+            },
+          },
+        },
+        'Rules which set each `replacement*` field',
+      );
+    });
+
+    it('does not warn when a later rule overrides all of the replacement fields', async () => {
+      const config: TestConfig = {
+        depName: 'q',
+        packageName: 'q',
+        packageRules: [
+          { matchPackageNames: ['q'], replacementName: 'r' },
+          { matchPackageNames: ['q'], replacementName: 'r-overridden' },
+        ],
+      };
+
+      const res = await applyPackageRules(config);
+
+      expect(res).toMatchObject({ replacementName: 'r-overridden' });
+      expect(logger.logger.once.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not warn when a single matching rule configures a replacement', async () => {
+      const config: TestConfig = {
+        depName: 'q',
+        packageName: 'q',
+        packageRules: [
+          {
+            matchPackageNames: ['q'],
+            replacementName: 'r',
+            replacementVersion: '2.0.0',
+          },
+          { matchPackageNames: ['other'], replacementName: 'unrelated' },
+        ],
+      };
+
+      await applyPackageRules(config);
+
+      expect(logger.logger.once.warn).not.toHaveBeenCalled();
+    });
   });
 
   it('propagates fetchChangeLogs from matching packageRule', async () => {
