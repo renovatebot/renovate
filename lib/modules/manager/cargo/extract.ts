@@ -46,7 +46,7 @@ function extractFromSection(
     if (dep.managerData?.registryName) {
       const registryUrl =
         getCargoIndexEnv(dep.managerData.registryName) ??
-        cargoRegistries[dep.managerData?.registryName];
+        cargoRegistries[dep.managerData.registryName];
       if (registryUrl) {
         if (registryUrl !== DEFAULT_REGISTRY_URL) {
           registryUrls = [registryUrl];

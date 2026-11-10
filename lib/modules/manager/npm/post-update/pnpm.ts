@@ -110,7 +110,7 @@ export async function generateLockFile(
     // `--recursive` will install un-wanted project.
     // we should avoid this.
     if (await localPathExists(pnpmWorkspaceFilePath)) {
-      const pnpmWorkspace = parseSingleYaml<PnpmWorkspaceFile>(
+      const pnpmWorkspace = parseSingleYaml<Partial<PnpmWorkspaceFile> | null>(
         (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!,
       );
       if (pnpmWorkspace?.packages?.length) {
@@ -205,7 +205,7 @@ export async function getConstraintFromLockFile(
       return null;
     }
     // TODO: use schema (#9610)
-    const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
+    const pnpmLock = parseSingleYaml<PnpmLockFile | null>(lockfileContent);
     if (
       !isNumber(pnpmLock?.lockfileVersion) &&
       !isNumericString(pnpmLock?.lockfileVersion)

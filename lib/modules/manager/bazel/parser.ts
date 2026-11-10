@@ -83,7 +83,7 @@ const kwParams = q
       startsWith: '[',
       endsWith: ']',
       preHandler: (ctx, tree) => {
-        const parentRecord = currentFragment(ctx) as RecordFragment;
+        const parentRecord = currentFragment(ctx);
         // v8 ignore else -- type narrowing only
         if (
           parentRecord.type === 'record' &&
@@ -135,7 +135,7 @@ const kwParams = q
               // v8 ignore else -- type narrowing only
               if (
                 ruleFragment.type === 'record' &&
-                ruleFragment.children._function
+                '_function' in ruleFragment.children
               ) {
                 ruleFragment.children._function.value += `.${value}`;
               }
@@ -161,7 +161,7 @@ const kwParams = q
               .str((ctx, { value: subRecordValue, offset }) => {
                 const argIndex = ctx.argIndex ?? 0;
 
-                const subRecordKey = ctx.subRecordKey! ?? argIndex.toString();
+                const subRecordKey = ctx.subRecordKey ?? argIndex.toString();
                 const ruleFragment = currentFragment(ctx);
                 // v8 ignore else -- type narrowing only
                 if (ruleFragment.type === 'record') {
@@ -323,7 +323,9 @@ export function parse(
 ): RecordFragment[] | null {
   const cacheKey = getCacheKey(input);
 
-  const cachedResult = memCache.get<RecordFragment[] | null>(cacheKey);
+  const cachedResult = memCache.get<RecordFragment[] | null | undefined>(
+    cacheKey,
+  );
   // istanbul ignore if
   if (cachedResult === null || cachedResult) {
     return cachedResult;

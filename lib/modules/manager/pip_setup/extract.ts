@@ -55,7 +55,7 @@ function depStringHandler(
     datasource: PypiDatasource.id,
   };
 
-  if (currentValue?.startsWith('==')) {
+  if (currentValue.startsWith('==')) {
     dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
   }
 
@@ -91,5 +91,5 @@ export function extractPackageFile(
   _config: ExtractConfig,
 ): PackageFileContent | null {
   const res = python.query<Context, parser.Node>(content, query, { deps: [] });
-  return res?.deps?.length ? res : null;
+  return res?.deps.length ? res : null;
 }

@@ -70,13 +70,9 @@ export async function updateArtifacts({
     // add modified vendir archives to artifacts
     logger.debug("Adding Sync'd files to git");
     const status = await getRepoStatus();
-    if (status) {
-      fileChanges.push(
-        ...fileChangesToArtifactResults(await collectFileChanges(status)),
-      );
-    } else {
-      logger.error('Failed to get git status');
-    }
+    fileChanges.push(
+      ...fileChangesToArtifactResults(await collectFileChanges(status)),
+    );
 
     return fileChanges.length ? fileChanges : null;
   } catch (err) {

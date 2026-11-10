@@ -51,7 +51,7 @@ export async function extractPackageFile(
     if (doc.repositories) {
       registryData = {};
       for (const repo of doc.repositories) {
-        if (repo.url?.startsWith('git+')) {
+        if (repo.url.startsWith('git+')) {
           logger.debug(
             { repo, packageFile },
             `Skipping unsupported helm-git repository.`,
@@ -100,7 +100,7 @@ export async function extractPackageFile(
         } else {
           repoName = dep.chart;
         }
-        const registry = registryData[repoName];
+        const registry = registryData[repoName] as HelmRepository | undefined;
         if (registry?.oci) {
           ociDep = getOciChartDep(
             registry.url,

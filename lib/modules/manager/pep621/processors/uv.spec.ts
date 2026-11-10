@@ -345,6 +345,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       // Cannot be expressed in pyproject.toml, as the schema only emits the
       // known source shapes. Exercises the defensive fallback.
       const uv = partial<NonNullable<NonNullable<PyProject['tool']>['uv']>>({
+        'dev-dependencies': [],
         sources: { dep1: [partial<UvSource>({})] },
       });
       const pyproject = partial<PyProject>({ tool: { uv } });

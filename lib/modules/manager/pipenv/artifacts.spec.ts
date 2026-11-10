@@ -106,6 +106,9 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: [] }),
+    );
 
     // python
     datasource.getPkgReleases.mockResolvedValueOnce({

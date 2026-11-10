@@ -181,9 +181,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should preserve ranges', () => {
       function select(depSet: PackageFileContent) {
-        return depSet?.deps
-          ? selectDep(depSet.deps, 'org.example:hard-range')
-          : null;
+        return selectDep(depSet.deps, 'org.example:hard-range');
       }
       const oldContent = extractPackage(simpleContent, 'some-file', {});
       const dep = select(oldContent!);

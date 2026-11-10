@@ -124,7 +124,7 @@ export function getLockedTool(
   depName: string,
 ): MiseLockTool[] | undefined {
   // Try full name first (for non-registry tools like ubi:, aqua:)
-  let lockedTools = lockFileData.tools[depName];
+  let lockedTools = lockFileData.tools[depName] as MiseLockTool[] | undefined;
 
   // If not found and has backend prefix, try stripped name (for registry tools)
   if (!lockedTools) {

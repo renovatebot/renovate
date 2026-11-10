@@ -347,7 +347,7 @@ export const UvLockfile = Toml.pipe(
       }
     }
 
-    const locked = packages[name];
+    const locked = packages[name] as UvLockedPackage | undefined;
     // A package can be locked at several versions, e.g. for different Python
     // versions or platforms. Use the lowest one, so updates are not missed.
     if (!locked) {

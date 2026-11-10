@@ -139,8 +139,8 @@ export const Repos = z
   .transform((repos) => {
     let packagist = true;
     const repoUrls: string[] = [];
-    const gitRepos: Record<string, GitRepo> = {};
-    const pathRepos: Record<string, PathRepo> = {};
+    const gitRepos: Partial<Record<string, GitRepo>> = {};
+    const pathRepos: Partial<Record<string, PathRepo>> = {};
 
     for (const repo of repos) {
       if (repo.type === 'composer') {

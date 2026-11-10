@@ -271,20 +271,20 @@ export async function extractAllPackageFiles(
   unifyCatalogSharedVariableNames(extractedDeps);
 
   for (const dep of extractedDeps) {
-    dep.fileReplacePosition = dep?.managerData?.fileReplacePosition; // #8224
+    dep.fileReplacePosition = dep.managerData?.fileReplacePosition; // #8224
 
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      let pkgFile: PackageFile<GradleManagerData> = packageFilesByName[key];
-      // istanbul ignore if: won't happen if "apply from" processes only initially known files
-      if (!pkgFile) {
-        pkgFile = {
-          packageFile: key,
-          datasource: mavenDatasource,
-          deps: [],
-        };
-      }
+      let pkgFile = packageFilesByName[key] as
+        PackageFile<GradleManagerData> | undefined;
+      /* v8 ignore start -- won't happen if "apply from" processes only initially known files */
+      pkgFile ??= {
+        packageFile: key,
+        datasource: mavenDatasource,
+        deps: [],
+      };
+      /* v8 ignore stop */
 
       dep.datasource ??= mavenDatasource;
 

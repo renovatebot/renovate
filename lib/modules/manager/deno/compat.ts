@@ -57,7 +57,7 @@ export async function detectNodeCompatWorkspaces({
 
   // npm workspace
   if (isNonEmptyArray(managerData?.workspaces)) {
-    filters = managerData?.workspaces;
+    filters = managerData.workspaces;
   }
 
   // findPackages() matches every package.json below the directory when it is given no patterns

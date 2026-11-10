@@ -67,7 +67,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
         dep.registryUrls = [`https://${source.groups.hostname}`];
         dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
       } else {
-        dep.packageName = dep.managerData?.source;
+        dep.packageName = dep.managerData.source;
         const foundLocks = locks.filter(
           (lock) => lock.packageName === dep.packageName,
         );

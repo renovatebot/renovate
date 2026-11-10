@@ -153,7 +153,7 @@ export function extractPackageJson(
       const items = Array.isArray(value) ? value : [value];
       const depType = `devEngines.${subKey}`;
       for (let i = 0; i < items.length; i += 1) {
-        const item = items[i];
+        const item = items[i] as (typeof items)[number] | null;
         if (!item?.name || !item.version) {
           continue;
         }
@@ -199,8 +199,8 @@ export async function hasPackageManager(
   const packageJsonResult = await loadPackageJson(packageJsonDir);
 
   if (
-    isNonEmptyString(packageJsonResult?.packageManager?.name) &&
-    isNonEmptyString(packageJsonResult?.packageManager?.version)
+    isNonEmptyString(packageJsonResult.packageManager?.name) &&
+    isNonEmptyString(packageJsonResult.packageManager.version)
   ) {
     return true;
   }

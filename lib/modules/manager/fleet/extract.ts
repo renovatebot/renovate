@@ -22,7 +22,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
     datasource: GitTagsDatasource.id,
   };
 
-  const repo = doc.spec?.repo;
+  const repo = doc.spec.repo;
   if (!repo) {
     return {
       ...dep,

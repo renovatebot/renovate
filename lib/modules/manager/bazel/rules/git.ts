@@ -16,7 +16,9 @@ function githubPackageName(input: string): string | undefined {
   if (!isHttpUrl(input)) {
     logger.once.info({ url: input }, `Bazel: non-https git_repository URL`);
   }
-  return parseGithubUrl(input)?.match(githubUrlRegex)?.groups?.packageName;
+  // the types of github-url-from-git omit the undefined result
+  const githubUrl = parseGithubUrl(input) as string | undefined;
+  return githubUrl?.match(githubUrlRegex)?.groups?.packageName;
 }
 
 export const gitRules = [

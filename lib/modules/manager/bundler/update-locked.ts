@@ -12,7 +12,7 @@ export function updateLockedDependency(
   );
   try {
     const locked = extractLockFileEntries(lockFileContent ?? '');
-    if (locked.get(depName ?? '') === newVersion) {
+    if (locked.get(depName) === newVersion) {
       return { status: 'already-updated' };
     }
     return { status: 'unsupported' };

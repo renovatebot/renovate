@@ -161,7 +161,9 @@ const githubRemoteRegex = regEx(
   /^https:\/\/github\.com\/(?<packageName>[^/]+\/.+)$/,
 );
 function githubPackageName(remote: string): string | undefined {
-  return parseGithubUrl(remote)?.match(githubRemoteRegex)?.groups?.packageName;
+  // the types of github-url-from-git omit the undefined result
+  const githubUrl = parseGithubUrl(remote) as string | undefined;
+  return githubUrl?.match(githubRemoteRegex)?.groups?.packageName;
 }
 
 function collectByModule(

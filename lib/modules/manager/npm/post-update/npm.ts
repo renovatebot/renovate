@@ -370,7 +370,7 @@ export async function generateLockFile(
           // TODO #22198
           // v8 ignore else -- TODO: add test #40625
           if (
-            lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
+            lockFileParsed.packages['']?.[depType]?.[lockUpdate.packageName!]
           ) {
             lockFileParsed.packages[''][depType][lockUpdate.packageName!] =
               lockUpdate.newValue!;

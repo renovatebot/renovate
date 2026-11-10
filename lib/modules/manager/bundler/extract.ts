@@ -133,7 +133,7 @@ export async function extractPackageFile(
 
     const variableMatch = variableMatchRegex.exec(line);
     if (variableMatch?.groups?.key) {
-      variables[variableMatch.groups?.key] = variableMatch.groups?.value;
+      variables[variableMatch.groups.key] = variableMatch.groups.value;
     }
 
     const gemMatch = gemMatchRegex.exec(line)?.groups;

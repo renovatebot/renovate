@@ -9,7 +9,7 @@ export function extractPackageFile(
   content: string,
   packageFile?: string,
 ): PackageFileContent | null {
-  let doc: TravisYaml;
+  let doc: TravisYaml | null;
   try {
     // TODO: use schema (#9610)
     doc = parseSingleYaml(content);
@@ -27,7 +27,7 @@ export function extractPackageFile(
   }
 
   // Handle the matrix syntax
-  let matrix_include: TravisMatrixItem[] | undefined;
+  let matrix_include: (TravisMatrixItem | null)[] | undefined;
   if (doc?.jobs?.include) {
     matrix_include = doc.jobs.include;
   } else if (doc?.matrix?.include) {

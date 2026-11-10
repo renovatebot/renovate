@@ -1,7 +1,7 @@
 export interface WoodpeckerConfig {
-  pipeline?: Record<string, WoodpeckerStep>;
-  steps?: Record<string, WoodpeckerStep>;
-  clone?: Record<string, WoodpeckerStep>;
+  pipeline?: Record<string, WoodpeckerStep | null>;
+  steps?: Record<string, WoodpeckerStep | null>;
+  clone?: Record<string, WoodpeckerStep | null>;
 }
 
 export interface WoodpeckerStep {
