@@ -11,6 +11,7 @@ import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import { intersectsWith } from '../../../versioning/common.ts';
 import { api as npmVersioning } from '../../../versioning/npm/index.ts';
 import type { ExtractedPackageRule, PackageFile } from '../../types.ts';
+import { DAY_MS, MINUTE_MS } from '../constants.ts';
 import { YarnrcMinimalAgeGate } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import type {
@@ -18,6 +19,7 @@ import type {
   YarnPreapprovedPackage,
   YarnrcMinimalAgeGateSettings,
 } from './types.ts';
+import { groupByLockFile } from './utils.ts';
 
 // Yarn defaults `npmMinimalAgeGate` to 1 day since v4.15.0
 export const yarnDefaultMinimalAgeGateRange = '>=4.15.0';
@@ -27,15 +29,13 @@ export const yarnDefaultMinimalAgeGateMinutes = 1440;
 // applies the default of 1 day to each listed scope without its own value
 export const yarnScopeMinimalAgeGateRange = '>=4.17.0';
 
-const minuteMs = 60 * 1000;
-
 const durationUnitMs: Record<string, number> = {
   ms: 1,
   s: 1000,
-  m: minuteMs,
-  h: 60 * minuteMs,
-  d: 24 * 60 * minuteMs,
-  w: 7 * 24 * 60 * minuteMs,
+  m: MINUTE_MS,
+  h: 60 * MINUTE_MS,
+  d: DAY_MS,
+  w: 7 * DAY_MS,
 };
 const durationRegex = regEx(/^(?<num>\d*\.?\d+)(?<unit>ms|s|m|h|d|w)?$/);
 
@@ -61,7 +61,7 @@ export function parseYarnDurationMinutes(value: unknown): number | null {
   if (!match.unit) {
     return num;
   }
-  return (num * durationUnitMs[match.unit]) / minuteMs;
+  return (num * durationUnitMs[match.unit]) / MINUTE_MS;
 }
 
 function getMinutes(
@@ -275,28 +275,12 @@ export function getYarnMinimumReleaseAgeRules(
 export async function setYarnMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
 ): Promise<void> {
-  const packageFilesByLockFile = new Map<
-    string,
-    Partial<PackageFile<NpmManagerData>>[]
-  >();
-  for (const packageFile of packageFiles) {
-    const yarnLock = packageFile.managerData?.yarnLock;
-    if (yarnLock) {
-      const lockFilePackageFiles = packageFilesByLockFile.get(yarnLock);
-      if (lockFilePackageFiles) {
-        lockFilePackageFiles.push(packageFile);
-      } else {
-        packageFilesByLockFile.set(yarnLock, [packageFile]);
-      }
-    }
-  }
-  for (const [yarnLock, lockFilePackageFiles] of packageFilesByLockFile) {
-    const rootPackageFile = upath.join(upath.dirname(yarnLock), 'package.json');
-    const root =
-      lockFilePackageFiles.find(
-        (packageFile) => packageFile.packageFile === rootPackageFile,
-      ) ?? lockFilePackageFiles[0];
-    const yarnConstraint = root.extractedConstraints?.yarn;
+  for (const {
+    lockFile: yarnLock,
+    packageFiles: lockFilePackageFiles,
+    root,
+  } of groupByLockFile(packageFiles, 'yarnLock')) {
+    const yarnConstraint = root?.extractedConstraints?.yarn;
     if (isYarn1Constraint(yarnConstraint)) {
       continue;
     }
