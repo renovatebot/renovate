@@ -1241,6 +1241,51 @@ describe('modules/manager/npm/post-update/npm', () => {
         ]);
       });
 
+      it('skips --before when .npmrc has a min-release-age with a unit', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+          'min-release-age=7d\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('sets --before to now for a minimumReleaseAge of 0 days', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '0 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-15T12:00:00.000Z',
+          },
+        ]);
+      });
+
       it('retries without --before on ETARGET with "with a date before"', async () => {
         const etargetError = new ExecError('npm error code ETARGET', {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
@@ -1790,6 +1835,34 @@ describe('modules/manager/npm/post-update/npm', () => {
         ]);
       });
 
+      it('sets --before when .npmrc has a min-release-age with a unit, which npm ignores', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              datasource: 'npm',
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          'min-release-age=7d\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
       it('skips --before when .npmrc has min-release-age to avoid npm conflict', async () => {
         await npmHelper.generateLockFile(
           'some-dir',
@@ -1938,58 +2011,6 @@ describe('modules/manager/npm/post-update/npm', () => {
           stderr: etargetError.stderr,
         });
         expect(execSnapshots).toHaveLength(1);
-      });
-    });
-  });
-
-  describe('parseNpmrcCooldownDate', () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
-    describe('returns null', () => {
-      it.each`
-        content
-        ${null}
-        ${''}
-        ${'registry=https://registry.npmjs.org\n'}
-        ${'before=not-a-date\n'}
-        ${'before=2026-13-99T00:00:00.000Z\n'}
-        ${'min-release-age=not-a-number\n'}
-      `('for: $content', ({ content }: { content: string | null }) => {
-        expect(npmHelper.parseNpmrcCooldownDate(content)).toBeNull();
-      });
-    });
-
-    describe('parses before= key', () => {
-      it.each`
-        input
-        ${'before=2026-06-01T00:00:00.000Z\n'}
-        ${'before="2026-06-01T00:00:00.000Z"\n'}
-        ${'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z # some comment\naudit=false\n'}
-      `('$input', ({ input }: { input: string }) => {
-        const result = npmHelper.parseNpmrcCooldownDate(input);
-        expect(result?.date.toISO()).toBe('2026-06-01T00:00:00.000Z');
-        expect(result?.source).toBe('before');
-      });
-    });
-
-    describe('parses min-release-age= key', () => {
-      it.each`
-        input
-        ${'min-release-age=30\n'}
-        ${'min-release-age="30"\n'}
-        ${'min-release-age=30 # 30 days\n'}
-        ${'registry=https://registry.npmjs.org\nmin-release-age=30 # 30 days\n'}
-      `('$input', ({ input }: { input: string }) => {
-        const result = npmHelper.parseNpmrcCooldownDate(input);
-        expect(result?.date.toISO()).toBe('2026-05-16T12:00:00.000Z');
-        expect(result?.source).toBe('min-release-age');
       });
     });
   });

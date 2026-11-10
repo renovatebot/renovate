@@ -8,11 +8,20 @@ import { NpmrcCooldown as NpmrcCooldownSchema } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { NpmrcCooldown } from './types.ts';
 
+function parseNpmrcDays(value: string, lenient: boolean): number {
+  if (lenient) {
+    return parseInt(value, 10);
+  }
+  // npm reads the setting as a number, and ignores values like `7d`
+  return isNumericString(value) ? parseFloat(value) : Number.NaN;
+}
+
 /**
- * Parses the `before` or `min-release-age` setting of an `.npmrc`, preferring a valid `before`.
+ * Parses the `before` or `min-release-age` setting of an `.npmrc`, preferring a valid `before`. With `lenient`, a `min-release-age` which starts with a whole number, like `7d`, counts as that number of days.
  */
 export function parseNpmrcCooldown(
   npmrcContent: string | null | undefined,
+  lenient = false,
 ): NpmrcCooldown | null {
   if (!npmrcContent) {
     return null;
@@ -31,10 +40,7 @@ export function parseNpmrcCooldown(
 
   const minReleaseAge = parsed['min-release-age'];
   if (isNonEmptyString(minReleaseAge)) {
-    // npm reads the setting as a number, and ignores values like `7d`
-    const days = isNumericString(minReleaseAge)
-      ? parseFloat(minReleaseAge)
-      : Number.NaN;
+    const days = parseNpmrcDays(minReleaseAge, lenient);
     if (Number.isFinite(days) && days >= 0) {
       return { source: 'min-release-age', days };
     }

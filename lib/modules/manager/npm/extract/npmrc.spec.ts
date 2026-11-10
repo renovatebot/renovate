@@ -75,6 +75,16 @@ describe('modules/manager/npm/extract/npmrc', () => {
         days,
       });
     });
+
+    it.each`
+      input                               | expected
+      ${'min-release-age=7d\n'}           | ${{ source: 'min-release-age', days: 7 }}
+      ${'min-release-age=1.5\n'}          | ${{ source: 'min-release-age', days: 1 }}
+      ${'min-release-age=not-a-number\n'} | ${null}
+      ${'min-release-age=-1\n'}           | ${null}
+    `('parses min-release-age leniently from $input', ({ input, expected }) => {
+      expect(parseNpmrcCooldown(input, true)).toEqual(expected);
+    });
   });
 
   describe('getNpmrcMinimumReleaseAge()', () => {
