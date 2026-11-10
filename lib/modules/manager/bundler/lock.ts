@@ -26,7 +26,7 @@ import {
 const hostConfigVariablePrefix = 'BUNDLE_';
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
-  // istanbul ignore if: doesn't happen in practice
+  /* v8 ignore if -- findAllAuthenticatable only returns rules with a resolvedHost */
   if (!hostRule.resolvedHost) {
     return {};
   }
@@ -70,7 +70,6 @@ export async function runBundlerLock(
     updateArtifact;
   logger.debug(`bundler.runBundlerLock(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
-  // istanbul ignore if
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);
