@@ -55,7 +55,7 @@ function additionalConstraintProperties(): Record<string, unknown> {
   } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
     properties[name] = {
       type: 'string',
-      // prioritise contraint definitions, as they're more useful than the generated one
+      // prioritize contraint definitions, as they're more useful than the generated one
       /* v8 ignore next -- every current `additionalConstraintDefinitions` entry has a description, but the type allows one to be added without one */
       description: description ?? `A constraint for \`${name}\``,
     };

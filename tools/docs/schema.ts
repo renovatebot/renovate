@@ -242,7 +242,7 @@ function createSingleConfig(
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritize contraint definitions, as they're more useful than the generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -258,7 +258,7 @@ function createSingleConfig(
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritize contraint definitions, as they're more useful than the generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }

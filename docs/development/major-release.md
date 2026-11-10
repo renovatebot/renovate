@@ -14,7 +14,7 @@
 
 ### Draft release notes
 
-It is worthwhile drafting the release notes ahead of time, ideally on a GitHub Discussion or Issue, so you can preview what GitHub Flavoured Markdown would render as.
+It is worthwhile drafting the release notes ahead of time, ideally on a GitHub Discussion or Issue, so you can preview what GitHub Flavored Markdown would render as.
 
 For example see [how v42 release notes were drafted](https://github.com/renovatebot/renovate/discussions/38841#discussioncomment-14770478).
 
@@ -32,7 +32,7 @@ When in the days before the release is ready to land:
 
 - Mark these as closed by the PR by setting them in the PR sidebar's "Development - Successfully merging this pull request may close these issues."
 
-1. For each planned breaking change PR, rebase them + finalise the Git commit history
+1. For each planned breaking change PR, rebase them + finalize the Git commit history
 
 - Adding the `Closes #...` isn't necessary, as we've set this at a PR level
 

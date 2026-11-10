@@ -26,7 +26,7 @@ Take the following steps on an incoming feature request:
 1. If poster is asking a configuration question, or has not made a convincing case that it's really a feature request, then convert to a "Ask a question" discussion, add either a response or at least a note that it's been converted.
 1. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
 1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
-1. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
+1. Make a best-effort judgment if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
 
 ## Creating new issues from discussions
 

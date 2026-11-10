@@ -687,7 +687,7 @@ export interface RenovateOptionBase {
    *
    * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
    *
-   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   * After this check has been performed, additional filtering (for defense in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
    */
   requiresCheckAtTrustBoundary?: boolean;
 

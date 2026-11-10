@@ -290,7 +290,7 @@ const Versions = LooseArray(
 ### Use `Nullish` and `DeepNullish` to handle null as absent
 
 External APIs sometimes return `null` for fields that are conceptually absent rather than intentionally null.
-`Nullish` and `DeepNullish` normalise this by converting `null` (and `undefined`) to `undefined`, which Zod then treats as absent.
+`Nullish` and `DeepNullish` normalize this by converting `null` (and `undefined`) to `undefined`, which Zod then treats as absent.
 
 #### `Nullish` — single field
 

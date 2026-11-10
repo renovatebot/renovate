@@ -2989,7 +2989,7 @@ Example:
   Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
   This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
 
-If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
+If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behavior can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).

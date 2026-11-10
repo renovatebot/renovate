@@ -67,7 +67,7 @@ For example, to keep pinning action digests but leave reusable workflow calls on
 !!! warning "This feature is flagged as experimental"
   Experimental features might be changed at any time.
   <br /> <br />
-  Due to GitHub classing this functionality as a "public preview", there may be changes to Renovate's functionality - in a possibly breaking manner - while GitHub work to stabilise the feature.
+  Due to GitHub classing this functionality as a "public preview", there may be changes to Renovate's functionality - in a possibly breaking manner - while GitHub work to stabilize the feature.
 
 Renovate keeps the [GitHub Actions dependency lockfile](https://github.com/github/actions-lockfile) in sync.
 The lockfile is an alternative to inline digest pinning: your workflows keep readable tags like `actions/checkout@v4.3.1`, and `.github/workflows/actions.lock` records the commit each tag resolved to.

@@ -162,7 +162,7 @@ By default Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.ts`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
-Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
+Behavior wise this config is similar to the file config, except that it has higher priority than the default config file.
 
 Some config is global-only, meaning that either it is only applicable to the administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).

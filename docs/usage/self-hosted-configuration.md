@@ -1045,7 +1045,7 @@ The inherited config may include all valid repository config and these config op
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 
 Configured `hostRules` in inherited config are treated as if they are repository configuration, when applying precedence and whether [`internalHostAccess`](#internalhostaccess) can be configured.
-If you trust each organisation onboarded to this Renovate deployment to be able to specify at an organisation level whether they should be able to access internal hosts, you can set [`inheritConfigTrusted=true`](#inheritconfigtrusted).
+If you trust each organization onboarded to this Renovate deployment to be able to specify at an organization level whether they should be able to access internal hosts, you can set [`inheritConfigTrusted=true`](#inheritconfigtrusted).
 
 We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
 This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
@@ -1671,7 +1671,7 @@ Some cloud providers offer services to receive metadata about the current instan
 You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
 
 !!! note
-  This should only be set via an environment variable, as it is used before Renovate initialises its global configuration.
+  This should only be set via an environment variable, as it is used before Renovate initializes its global configuration.
 
 ## `userAgent`
 
