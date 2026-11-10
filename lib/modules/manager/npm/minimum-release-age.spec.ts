@@ -71,6 +71,16 @@ describe('modules/manager/npm/minimum-release-age', () => {
       },
     );
 
+    it('returns false without minimumReleaseAgePackageManagerSync', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: npmLockManagerData,
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeRepository: '3 days',
+        }),
+      ).resolves.toBeFalse();
+    });
+
     it('reads the repository minimumReleaseAge outside lock file maintenance', async () => {
       await expect(
         enforcesMinimumReleaseAge({
