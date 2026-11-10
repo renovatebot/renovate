@@ -1,3 +1,4 @@
+import semver from 'semver';
 import { coerceArray } from '../../../util/array.ts';
 import type { PackageRule } from '../../types.ts';
 import { presets } from './replacements.preset.ts';
@@ -29,12 +30,15 @@ function hasVersion(rule: ReplacementRule): boolean {
 }
 
 /**
- * Groups the rules by each datasource and literal package name they match,
+ * Groups the rules which configure a replacement by each datasource and literal package name they match,
  * which is the key that `packageRules` would be merged on for a dependency.
  */
 function groupByPackage(rules: PresetRule[]): Map<string, PresetRule[]> {
   const groups = new Map<string, PresetRule[]>();
   for (const presetRule of rules) {
+    if (!hasName(presetRule.rule) && !hasVersion(presetRule.rule)) {
+      continue;
+    }
     for (const datasource of coerceArray(presetRule.rule.matchDatasources)) {
       for (const name of coerceArray(presetRule.rule.matchPackageNames)) {
         if (isLiteralName(name)) {
@@ -45,6 +49,15 @@ function groupByPackage(rules: PresetRule[]): Map<string, PresetRule[]> {
     }
   }
   return groups;
+}
+
+function mayOverlap(a: ReplacementRule, b: ReplacementRule): boolean {
+  const rangeA = semver.validRange(a.matchCurrentVersion);
+  const rangeB = semver.validRange(b.matchCurrentVersion);
+  if (!a.matchCurrentVersion || !b.matchCurrentVersion || !rangeA || !rangeB) {
+    return true;
+  }
+  return semver.intersects(rangeA, rangeB);
 }
 
 describe('config/presets/internal/replacements.preset', () => {
@@ -83,6 +96,20 @@ describe('config/presets/internal/replacements.preset', () => {
       );
 
       expect(nameOnly.length === 0 || versionOnly.length === 0).toBeTrue();
+    },
+  );
+
+  it.each(groups)(
+    '%s is not replaced by multiple rules which may match the same version',
+    (_key, group) => {
+      const overlapping = group.flatMap((a, i) =>
+        group
+          .slice(i + 1)
+          .filter((b) => mayOverlap(a.rule, b.rule))
+          .map((b) => [a.presetName, b.presetName]),
+      );
+
+      expect(overlapping).toBeEmptyArray();
     },
   );
 });
