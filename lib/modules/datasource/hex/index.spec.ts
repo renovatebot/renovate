@@ -78,9 +78,10 @@ async function makeV2Response(
 ): Promise<Buffer> {
   const payload = await encodePackage(pkg);
   let signature = options.signature;
-  signature ??= options.privateKey
-    ? signPayload('RSA-SHA512', payload, options.privateKey)
-    : Buffer.from('fake-sig');
+  if (options.privateKey) {
+    signature ??= signPayload('RSA-SHA512', payload, options.privateKey);
+  }
+  signature ??= Buffer.from('fake-sig');
   const signed = await encodeSigned({
     payload,
     signature,

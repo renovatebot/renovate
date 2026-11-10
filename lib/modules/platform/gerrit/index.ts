@@ -477,7 +477,10 @@ export async function getRawFile(
   }
   // v8 ignore next -- TODO: add test #40625
   let branch = branchOrTag;
-  branch ??= repo === config.repository ? (config.head ?? 'HEAD') : 'HEAD';
+  if (repo === config.repository) {
+    branch ??= config.head;
+  }
+  branch ??= 'HEAD';
   const result = await client.getFile(repo, branch, fileName);
   return result;
 }

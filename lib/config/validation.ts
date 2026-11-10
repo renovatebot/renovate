@@ -378,11 +378,14 @@ export async function validateConfig(
             }
           }
           let parentName = parentOptionName;
-          parentName ??=
-            parentPath &&
-            (parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath))
-              ? '.'
-              : getParentName(parentPath);
+          if (is.undefined(parentName)) {
+            parentName =
+              parentPath &&
+              (parentPath === 'onboardingConfig' ||
+                repoEntryRe.test(parentPath))
+                ? '.'
+                : getParentName(parentPath);
+          }
           if (
             !isPreset &&
             parentName &&

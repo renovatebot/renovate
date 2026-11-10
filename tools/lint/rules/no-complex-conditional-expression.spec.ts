@@ -15,6 +15,9 @@ ruleTester.run('no-complex-conditional-expression', rule, {
     `const x = a ? b && c : d;`,
     // ternaries nested deeper than a direct operand
     `const x = a && foo(b ? c : d);`,
+    // plain and arithmetic assignments are not logical operators
+    `x = a ? b : c;`,
+    `x += a ? b : c;`,
     // await in positions that always run
     `async function f() { const x = (await a) ? b : c; }`,
     `async function f() { const x = (await a) && b; }`,
@@ -37,6 +40,18 @@ ruleTester.run('no-complex-conditional-expression', rule, {
     {
       code: `const x = a ?? ((b ? c : d) as string);`,
       errors: [{ messageId: 'ternaryInLogical', data: { operator: '??' } }],
+    },
+    {
+      code: `x ??= a || b ? c : undefined;`,
+      errors: [{ messageId: 'ternaryInLogical', data: { operator: '??=' } }],
+    },
+    {
+      code: `x ||= (a ? b : c)!;`,
+      errors: [{ messageId: 'ternaryInLogical', data: { operator: '||=' } }],
+    },
+    {
+      code: `x &&= a ? b : c;`,
+      errors: [{ messageId: 'ternaryInLogical', data: { operator: '&&=' } }],
     },
     {
       code: `async function f() { return a ? await b : c; }`,

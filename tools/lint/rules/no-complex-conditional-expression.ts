@@ -12,6 +12,8 @@ const transparentTypes = new Set([
   'TSTypeAssertion',
 ]);
 
+const logicalAssignmentOperators = new Set(['&&=', '||=', '??=']);
+
 function isScopeBoundary(node: Node): boolean {
   return (
     node.type === 'ArrowFunctionExpression' ||
@@ -59,7 +61,11 @@ export default defineRule({
     return {
       ConditionalExpression(node) {
         const parent = skipTransparentParents(node);
-        if (parent?.type === 'LogicalExpression') {
+        if (
+          parent?.type === 'LogicalExpression' ||
+          (parent?.type === 'AssignmentExpression' &&
+            logicalAssignmentOperators.has(parent.operator))
+        ) {
           context.report({
             node,
             messageId: 'ternaryInLogical',

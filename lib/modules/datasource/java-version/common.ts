@@ -17,11 +17,14 @@ export function parsePackage(packageName: string): PackageConfig {
   const useSystem = u.searchParams.get('system') === 'true';
   const useGraalvmDefaults = vendor === 'oracle-graalvm' && !useSystem;
   let architecture: Nullish<string> = u.searchParams.get('architecture');
-  architecture ??= useGraalvmDefaults
-    ? 'x86_64'
-    : getSystemArchitecture(useSystem, vendor);
   let os: Nullish<string> = u.searchParams.get('os');
-  os ??= useGraalvmDefaults ? 'linux' : getSystemOs(useSystem, vendor);
+  if (useGraalvmDefaults) {
+    architecture ??= 'x86_64';
+    os ??= 'linux';
+  } else {
+    architecture ??= getSystemArchitecture(useSystem, vendor);
+    os ??= getSystemOs(useSystem, vendor);
+  }
   return {
     vendor,
     imageType: getImageType(pathname),
