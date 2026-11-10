@@ -4,6 +4,7 @@ import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
@@ -14,7 +15,10 @@ import type {
   ExtractedPackageRule,
   NpmrcPackageFile,
 } from '../../types.ts';
-import { PnpmWorkspaceMinimumReleaseAge } from '../schema.ts';
+import {
+  PnpmWorkspaceMinimumReleaseAge,
+  PnpmWorkspaceMinimumReleaseAgeSettings,
+} from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { parseNpmrcPnpmMinimumReleaseAge } from './npmrc.ts';
 import { resolvePnpmConstraint } from './pnpm.ts';
@@ -54,6 +58,17 @@ export async function readPnpmWorkspaceMinimumReleaseAge(
     return {};
   }
   return parsed.data;
+}
+
+/**
+ * Returns the minimum release age settings of the parsed content of a `pnpm-workspace.yaml`, or none if it is no mapping.
+ */
+export function getPnpmWorkspaceMinimumReleaseAge(
+  workspace: unknown,
+): PnpmWorkspaceMinimumReleaseAge {
+  return coerceObject(
+    PnpmWorkspaceMinimumReleaseAgeSettings.safeParse(workspace).data,
+  );
 }
 
 /**
