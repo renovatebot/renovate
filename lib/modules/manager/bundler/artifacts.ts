@@ -17,6 +17,7 @@ import {
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { artifactErrorResult } from '../util.ts';
 import {
   getBundlerConstraint,
   getLockFilePath,
@@ -251,14 +252,7 @@ export async function updateArtifacts(
       );
     }
 
-    logger.info({ err }, 'Gemfile.lock update failed due to an unknown reason');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
-        },
-      },
-    ];
+    logger.info({ err }, 'Gemfile.lock update failed');
+    return artifactErrorResult(lockFileName, err);
   }
 }
