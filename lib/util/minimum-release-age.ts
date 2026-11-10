@@ -107,39 +107,24 @@ function findPackageManagerUpdate({
 }
 
 /**
- * Whether the update which `calculatePackageManagerMinimumReleaseAgeMs()` reads
- * enables `minimumReleaseAgePackageManagerSync`.
- */
-export function isPackageManagerSyncEnabled(
-  options: PackageManagerMinimumReleaseAgeOptions,
-): boolean {
-  return (
-    findPackageManagerUpdate(options).minimumReleaseAgePackageManagerSync ===
-    true
-  );
-}
-
-/**
  * Calculates the minimum release age in milliseconds which Renovate passes to
  * a package manager when it updates the lock file of `packageFile`: `0` if any
  * update of the lock file is a security update, the own `minimumReleaseAge` for
- * lock file maintenance, else `minimumReleaseAgeRepository`.
- *
- * It reads the values from an update of `manager`, preferring lock file
- * maintenance, in `upgrades`, then in the upgrades of the branch for
- * `packageFile`, then from `config`. If that update does not enable
- * `minimumReleaseAgePackageManagerSync`, it returns the `minimumReleaseAge` of
- * `config`.
+ * lock file maintenance, else `minimumReleaseAgeRepository`. Returns `null` if
+ * the update of `manager` does not enable `minimumReleaseAgePackageManagerSync`.
  */
 export function calculatePackageManagerMinimumReleaseAgeMs(
   options: PackageManagerMinimumReleaseAgeOptions,
-): number {
-  const { config, upgrades } = options;
+): number | null {
   const update = findPackageManagerUpdate(options);
   if (!update.minimumReleaseAgePackageManagerSync) {
-    return durationToMs(config.minimumReleaseAge);
+    return null;
   }
-  if ([...upgrades, update].some((upgrade) => upgrade.isVulnerabilityAlert)) {
+  if (
+    [...options.upgrades, update].some(
+      (upgrade) => upgrade.isVulnerabilityAlert,
+    )
+  ) {
     return 0;
   }
   return durationToMs(

@@ -8,7 +8,6 @@ import {
   calculatePackageManagerMinimumReleaseAgeMs,
   checkMinimumReleaseAge,
   getMinimumReleaseAgeExemption,
-  isPackageManagerSyncEnabled,
 } from './minimum-release-age.ts';
 import { toMs } from './pretty-time.ts';
 import type { Timestamp } from './timestamp.ts';
@@ -109,7 +108,7 @@ describe('util/minimum-release-age', () => {
     function calculate(
       upgrades: PackageManagerMinimumReleaseAgeConfig[],
       config: PackageManagerMinimumReleaseAgeOptions['config'] = {},
-    ): number {
+    ): number | null {
       return calculatePackageManagerMinimumReleaseAgeMs({
         config,
         manager,
@@ -133,23 +132,32 @@ describe('util/minimum-release-age', () => {
         minimumReleaseAgePackageManagerSync: false,
       };
 
-      it('returns minimumReleaseAge of the config', () => {
+      it('returns null', () => {
         expect(
           calculate([offUpdate], { ...update, minimumReleaseAge: '1 week' }),
-        ).toBe(toMs('1 week'));
+        ).toBeNull();
       });
 
-      it('returns minimumReleaseAge of the config for security updates', () => {
+      it('returns null for security updates', () => {
         expect(
           calculate([{ ...offUpdate, isVulnerabilityAlert: true }], {
             isVulnerabilityAlert: true,
             minimumReleaseAge: '1 week',
           }),
-        ).toBe(toMs('1 week'));
+        ).toBeNull();
       });
 
-      it('returns 0 without minimumReleaseAge of the config', () => {
-        expect(calculate([], {})).toBe(0);
+      it('returns null without minimumReleaseAge of the config', () => {
+        expect(calculate([], {})).toBeNull();
+      });
+
+      it('reads the first upgrade of the manager', () => {
+        expect(
+          calculate([
+            { manager: 'pep621', minimumReleaseAgePackageManagerSync: true },
+            offUpdate,
+          ]),
+        ).toBeNull();
       });
     });
 
@@ -261,48 +269,6 @@ describe('util/minimum-release-age', () => {
 
     it('returns 0 if the branch config is a security update', () => {
       expect(calculate([], { ...update, isVulnerabilityAlert: true })).toBe(0);
-    });
-  });
-
-  describe('.isPackageManagerSyncEnabled()', () => {
-    const update = {
-      manager: 'poetry',
-      packageFile: 'pyproject.toml',
-      minimumReleaseAgePackageManagerSync: true,
-    };
-
-    function isEnabled(
-      upgrades: PackageManagerMinimumReleaseAgeConfig[],
-      config: PackageManagerMinimumReleaseAgeOptions['config'] = {},
-    ): boolean {
-      return isPackageManagerSyncEnabled({
-        config,
-        manager: 'poetry',
-        packageFile: 'pyproject.toml',
-        upgrades,
-      });
-    }
-
-    it('reads the first upgrade of the manager', () => {
-      expect(
-        isEnabled([
-          { manager: 'pep621', minimumReleaseAgePackageManagerSync: false },
-          update,
-        ]),
-      ).toBeTrue();
-    });
-
-    it('reads the branch config if no upgrade belongs to the manager', () => {
-      expect(isEnabled([], update)).toBeTrue();
-    });
-
-    it('returns false without minimumReleaseAgePackageManagerSync', () => {
-      expect(
-        isEnabled(
-          [{ ...update, minimumReleaseAgePackageManagerSync: undefined }],
-          update,
-        ),
-      ).toBeFalse();
     });
   });
 
