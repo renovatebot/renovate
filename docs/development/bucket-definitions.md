@@ -98,7 +98,7 @@ Not this bucket:
 
 **Test:** does delivering this require a platform's API (GitHub, GitLab, Azure DevOps, Bitbucket, Gerrit, Forgejo, Gitea, etc) - feature parity, platform-specific behavior, a new platform, or a migration forced by a platform deprecation?
 
-Git-layer work (clone and fetch behavior, Large File Storage (LFS), commit signing, push and branch handling) also lives here: it's where VCS hosts live, and there is too little of it for a bucket of its own.
+Git-layer work (clone and fetch behavior, Large File Storage (LFS), commit signing, push and branch handling) also lives here: it is where VCS hosts live, and there is too little of it for a bucket of its own.
 
 Belongs here:
 
@@ -110,8 +110,8 @@ Belongs here:
 
 Not this bucket:
 
-- [#38789](https://github.com/renovatebot/renovate/issues/38789) "Renovate incorrectly reads GitLab CODEOWNERS" → `bug-fix` (names a platform, but it's broken supported behavior)
-- A bug in platform code (e.g. a `fix(platform/azure)` PR) is `bug-fix` only; add `platform` only when the fix needs a platform-API capability Renovate doesn't use yet. The `platform:*` area labels already give a per-platform view
+- [#38789](https://github.com/renovatebot/renovate/issues/38789) "Renovate incorrectly reads GitLab CODEOWNERS" → `bug-fix` (names a platform, but it is broken supported behavior)
+- A bug in platform code (e.g. a `fix(platform/azure)` PR) is `bug-fix` only; add `platform` only when the fix needs a platform-API capability Renovate does not use yet. The `platform:*` area labels already give a per-platform view
 - [#35956](https://github.com/renovatebot/renovate/discussions/35956) "Option to mark PRs as draft" → `workflow-fit` (config plumbing over a capability every platform already has)
 - [#44758](https://github.com/renovatebot/renovate/discussions/44758) "Add a pause before creating MR on GitLab to work around a GitLab bug" → a request for a workaround option is `workflow-fit`; the underlying defect itself ([#44498](https://github.com/renovatebot/renovate/issues/44498)) is `bug-fix`. Ask whether the item reports the defect or asks for a knob
 - [#12413](https://github.com/renovatebot/renovate/discussions/12413) "Bitbucket Server: onboarding option to work around a platform limitation" → `platform`. A knob that works around platform _slowness or flakiness_ is `workflow-fit` (as [#44758](https://github.com/renovatebot/renovate/discussions/44758)); a knob that works around a platform _limitation_ needs platform thinking, so it stays here
@@ -151,9 +151,9 @@ For a repository that means grouping, scheduling, limits, automerge conditions, 
 For an instance it means how the Renovate deployment reaches things: credentials and host rules, tool installation (`binarySource`, install mirrors), cache backends, autodiscovery filters and fleet-level limits.
 The audience label tells the two apart: `workflow-fit` with `audience:operator` is for a self-hosted administrator (or operator who supports the deployment) view.
 
-The mechanism is almost always a config option - the motivation is because "Renovate is flexible, so you don't have to be", and aims to work within the way the user wants to work.
+The mechanism is almost always a config option - the motivation is because "Renovate is flexible, so you do not have to be", and aims to work within the way the user wants to work.
 
-This shouldn't include anything security-specific - that's `security-supply-chain`.
+This should not include anything security-specific - that is `security-supply-chain`.
 A request that only exists because a credential or host rule is _silently ignored or misparsed_ is `predictability`.
 
 Belongs here:
@@ -173,14 +173,14 @@ Not this bucket:
 
 **Test:** would this make Renovate do the expected thing, or fail loudly instead of silently - validation catching more earlier, config discovery, config migration, clearer warnings or log levels?
 
-A "bug report" for an issue where Renovate doesn't give the user any feedback is here, not a `bug-fix`.
+A "bug report" for an issue where Renovate does not give the user any feedback is here, not a `bug-fix`.
 
 Belongs here:
 
 - [#43741](https://github.com/renovatebot/renovate/discussions/43741) - Regexes not wrapped in `/…/` fail silently
-- [#36695](https://github.com/renovatebot/renovate/discussions/36695) - Trailing comma (invalid JSON) doesn't error, times out after 30 minutes
+- [#36695](https://github.com/renovatebot/renovate/discussions/36695) - Trailing comma (invalid JSON) does not error, times out after 30 minutes
 - [#38570](https://github.com/renovatebot/renovate/discussions/38570) - `renovate-config-validator` flag to auto-migrate a config
-- [#42501](https://github.com/renovatebot/renovate/issues/42501) - Validator doesn't detect an invalid preset value
+- [#42501](https://github.com/renovatebot/renovate/issues/42501) - Validator does not detect an invalid preset value
 - [#41663](https://github.com/renovatebot/renovate/issues/41663) - Config warning when overriding manager `registryUrl`s
 - [#38060](https://github.com/renovatebot/renovate/discussions/38060) / [#42367](https://github.com/renovatebot/renovate/discussions/42367) - Config _discovery_: which file names and directories Renovate looks in (`.jsonc`, `.config/`, `.<platform>/`). Anything silently not picked up is here, and usually also `rough-edge`
 - [#12272](https://github.com/renovatebot/renovate/issues/12272) - `renovate-config-validator` ignores configured credentials for private presets (one of Renovate's own tools not doing the expected thing)
@@ -253,7 +253,7 @@ Belongs here:
 Not this bucket:
 
 - "X fails with no warning / silently does nothing" → `predictability`
-- "Renovate doesn't support X's new format" → `ecosystem-depth` (capability gap, not defect)
+- "Renovate does not support X's new format" → `ecosystem-depth` (capability gap, not defect)
 - "Renovate handles X wrongly" where X is a layout, syntax or setting the Manager never modeled (quoted versions, a wrapper version taken from a catalog, an OCI source for a tool that only knew HTTP) → `ecosystem-depth`. It is a `bug-fix` only if the same input used to work, or the docs say it is supported
 - Changing a Manager's default to match how its ecosystem works (carries `breaking`) → `ecosystem-depth`, even when titled `fix(…)`
 
@@ -281,7 +281,7 @@ Not this bucket:
 
 Generated reference material counts as `docs` even when the fix is in code (e.g. option metadata or types), because what ships is documentation. Work on the docs _build_ or site tooling is `engineering-health`.
 
-If the confusion is better fixed by a validation error or warning, it's `predictability` instead.
+If the confusion is better fixed by a validation error or warning, it is `predictability` instead.
 
 Belongs here:
 
@@ -302,24 +302,24 @@ Not this bucket:
 
 **Test:** Updates to Renovate's own dependency tree - via `renovate[bot]`.
 
-As this is fully automated, we exclude it from every incoming-work view - it's unplanned, but expected, work.
+As this is fully automated, we exclude it from every incoming-work view - it is unplanned, but expected, work.
 
 Human work on the dependency tree (e.g. [#42864](https://github.com/renovatebot/renovate/issues/42864) "Reduce dependencies") is `engineering-health`, not this.
 
-## Items that don't get a bucket
+## Items that do not get a bucket
 
 Buckets describe _work_.
-Leave an item without a bucket (and don't force-fit `bug-fix`) when it is:
+Leave an item without a bucket (and do not force-fit `bug-fix`) when it is:
 
 - a usage question or support request with no defect or feature in it (many "Request Help" discussions)
-- an item whose _kind_ of work can't be determined until missing logs, a reproduction or details arrive
+- an item whose _kind_ of work cannot be determined until missing logs, a reproduction or details arrive
 - a maintainer or contributor announcement, or a feedback megathread
 
 `auto:needs-details`, `auto:reproduction` and `auto:logs` are a status, not a reason to skip bucketing.
 If the kind of work is already clear (e.g. [#41734](https://github.com/renovatebot/renovate/discussions/41734) "Support maven model 4.1.0" is plainly `ecosystem-depth`), bucket it by its content.
 
 A "Request Help" discussion only gets a bucket once a maintainer has acted on it - converting it to an Issue or Idea, linking it to one, applying `auto:bug-to-idea` or `auto:docs-improvements`, closing it as a duplicate of a bucketed item, or confirming the defect.
-Don't bucket it from reading the discussion alone.
+Do not bucket it from reading the discussion alone.
 
 The same applies whichever category a question was filed in: an Idea that asks "how do I…" with no feature in it is treated like a Request Help thread.
 
@@ -329,12 +329,12 @@ Mend Hosted Request discussions get `audience:mend-hosted`, and a bucket only if
 
 - PRs and issues authored by `renovate[bot]` (its update PRs, the Dependency Dashboard issue) are `dependency-updates`, with no further judgment.
 - For other PRs, use the bucket of the item they deliver - including an item the body references with "part of #X" or "as noted in #X", not only `closes #X`.
-  If there's no linked issue or discussion, infer it from the Conventional Commit type and scope: `docs` → `docs`, `chore`/`ci`/`test`/`refactor`/`build` → `engineering-health`, `perf` → `performance-scale`, `feat(presets)`/`feat(replacements)`/`fix(presets)` → `ecosystem-data`, `feat(manager/…)`/`feat(datasource/…)`/`feat(versioning/…)` → `ecosystem-depth` (or `new-ecosystem` for a new module for an ecosystem Renovate extracts nothing from), `feat(platform/…)` → `platform`, and `fix(…)` → `bug-fix`, including `fix(platform/…)`.
+  If there is no linked issue or discussion, infer it from the Conventional Commit type and scope: `docs` → `docs`, `chore`/`ci`/`test`/`refactor`/`build` → `engineering-health`, `perf` → `performance-scale`, `feat(presets)`/`feat(replacements)`/`fix(presets)` → `ecosystem-data`, `feat(manager/…)`/`feat(datasource/…)`/`feat(versioning/…)` → `ecosystem-depth` (or `new-ecosystem` for a new module for an ecosystem Renovate extracts nothing from), `feat(platform/…)` → `platform`, and `fix(…)` → `bug-fix`, including `fix(platform/…)`.
 - The body wins over the type when they plainly disagree: a `chore` that adds a warning users will see is `predictability`; a `refactor` that adds spans or log fields is `observability`; a `fix(…)` whose body describes support that never existed (e.g. `fix(nix): support flake input updates`) is `ecosystem-depth`; a `fix(…)` that only reduces API calls or memory is `performance-scale`; a `fix(…)` that corrects the JSON schema or option reference is `docs`; a `docs:` PR that changes the docs build is `engineering-health`.
 - The `presets` inference only holds for presets that encode knowledge of the package world (monorepos, replacements, package lists). Presets that encode Renovate behavior - schedules such as `schedule:officeHours`, `:semanticPrefixFixDepsChoreOthers`, `config:*` semantics - take the bucket of that behavior, usually `workflow-fit` or `predictability`.
-  A _new_ `customManagers:*` preset (a regex or JSONata manager for a tool) encodes extraction logic, not package-world data: `ecosystem-depth` if the tool already has a Manager, `new-ecosystem` if it doesn't. _Correcting_ an existing one (e.g. [#36711](https://github.com/renovatebot/renovate/discussions/36711), widening the `matchStrings` in `customManagers:dockerfileVersions`) is `ecosystem-data`, like any other entry correction. A `lib/data` file that only adds entries stays `ecosystem-data`; one that enables new manager behavior takes that manager's bucket.
+  A _new_ `customManagers:*` preset (a regex or JSONata manager for a tool) encodes extraction logic, not package-world data: `ecosystem-depth` if the tool already has a Manager, `new-ecosystem` if it does not. _Correcting_ an existing one (e.g. [#36711](https://github.com/renovatebot/renovate/discussions/36711), widening the `matchStrings` in `customManagers:dockerfileVersions`) is `ecosystem-data`, like any other entry correction. A `lib/data` file that only adds entries stays `ecosystem-data`; one that enables new manager behavior takes that manager's bucket.
 - A duplicate (a discussion closed as `DUPLICATE`, or one with the `duplicate` label) takes the same bucket as its canonical item, so it can still be counted. Do not count a duplicate as separate work in a bucket total. Only `new-ecosystem` counts repeat asks as a signal.
-  When the canonical item isn't visible from the thread, bucket the duplicate by its own content; the counting rule still applies.
+  When the canonical item is not visible from the thread, bucket the duplicate by its own content; the counting rule still applies.
 
 ## `lifecycle` (cross-cutting flag)
 
@@ -363,9 +363,9 @@ Not lifecycle:
 
 1. the irritation comes from one of Renovate's _own surfaces_ - config discovery and validation, PR/commit presentation, the Dependency Dashboard, logs and messages, the CLI, defaults, docs, or the changes it makes to files it already manages - behaving below reasonable expectation. A gap in _ecosystem or platform_ coverage (including a missing data entry) is not a rough edge, however small
 1. users hit it _repeatedly in ordinary use_
-1. it's _irritating, not blocking_ - a workaround exists or you live with it, and there are no failed runs, data loss or security exposure
+1. it is _irritating, not blocking_ - a workaround exists or you live with it, and there are no failed runs, data loss or security exposure
 
-If any one fails it isn't a rough edge.
+If any one fails it is not a rough edge.
 Applied alongside a bucket, not instead of one.
 
 The size of the fix is not a test: a rough edge may need a design decision, or touch several platforms.
@@ -373,13 +373,13 @@ Record effort separately (e.g. `good first issue`) - "quick wins" are rough edge
 
 For (1), ask "whose surface is this?".
 For example, `.jsonc` config files not being discovered ([#38060](https://github.com/renovatebot/renovate/discussions/38060)) reads like "add support for a filename", but config discovery is often the first interaction a user has with Renovate: a user reasonably expects `renovate.jsonc` to work, and Renovate silently ignores it so the repo looks unconfigured.
-Renovate also silently ignores bun catalogs ([#36886](https://github.com/renovatebot/renovate/discussions/36886)), but that silence is about an ecosystem Renovate doesn't yet model, so it's a coverage gap.
+Renovate also silently ignores bun catalogs ([#36886](https://github.com/renovatebot/renovate/discussions/36886)), but that silence is about an ecosystem Renovate does not yet model, so it is a coverage gap.
 The fix may well be a new config option, but the flag applies when the irritation comes from Renovate's own surface.
 
-Many `predictability` items (e.g. silently ignoring something) will also be rough edges almost by definition - that's expected, and `rough-edge` with `predictability` is where the highest-value fixes tend to sit.
+Many `predictability` items (e.g. silently ignoring something) will also be rough edges almost by definition - that is expected, and `rough-edge` with `predictability` is where the highest-value fixes tend to sit.
 
 Evidence for (2) can be reactions, upvotes, comment count, duplicate asks, or a maintainer recognizing it as a common irritation.
-Most items have little engagement, so low engagement alone doesn't disqualify an item - judge whether ordinary use would hit it repeatedly.
+Most items have little engagement, so low engagement alone does not disqualify an item - judge whether ordinary use would hit it repeatedly.
 PRs have no engagement signal, so judge them on the same three tests as the issue they fix.
 
 For (2), "repeatedly in ordinary use" means in the normal update loop.
@@ -392,13 +392,13 @@ Only _exposure_ excludes a security-themed item: a non-blocking irritation from 
 
 Flag it on:
 
-- [#45092](https://github.com/renovatebot/renovate/discussions/45092) - `commitMessageSuffix` gets an auto-inserted space you can't suppress
+- [#45092](https://github.com/renovatebot/renovate/discussions/45092) - `commitMessageSuffix` gets an auto-inserted space you cannot suppress
 - [#35156](https://github.com/renovatebot/renovate/discussions/35156) - "Compare Source" links use `...` instead of `..`
 - [#41466](https://github.com/renovatebot/renovate/issues/41466) / [#41467](https://github.com/renovatebot/renovate/issues/41467) - hidden-unicode warning fires on binary files and spams the dashboard
-- [#40144](https://github.com/renovatebot/renovate/issues/40144) / [#40143](https://github.com/renovatebot/renovate/issues/40143) - `--help` doesn't show defaults or allowed values
+- [#40144](https://github.com/renovatebot/renovate/issues/40144) / [#40143](https://github.com/renovatebot/renovate/issues/40143) - `--help` does not show defaults or allowed values
 - [#38060](https://github.com/renovatebot/renovate/discussions/38060) / [#40868](https://github.com/renovatebot/renovate/discussions/40868) - `.jsonc` config files not discovered (config discovery is Renovate's own surface)
 - [#42367](https://github.com/renovatebot/renovate/discussions/42367) - config file in a `.config/` directory not discovered
-- [#37150](https://github.com/renovatebot/renovate/discussions/37150) - `postUpdateOptions` can't be set by an environment variable
+- [#37150](https://github.com/renovatebot/renovate/discussions/37150) - `postUpdateOptions` cannot be set by an environment variable
 - [#39050](https://github.com/renovatebot/renovate/discussions/39050) - autoclosed PRs get "- autoclosed" in the title instead of a label (needs a design decision, but the irritation is current behavior)
 - [#35164](https://github.com/renovatebot/renovate/discussions/35164) - hard-coded config migration commit message (the fix is a new option, but the irritation is current behavior)
 - [#35344](https://github.com/renovatebot/renovate/discussions/35344) - gomod updates touch the `go`/`toolchain` directives (Renovate already acts here, and acts annoyingly)

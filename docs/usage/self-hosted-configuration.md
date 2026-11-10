@@ -32,7 +32,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## `allowShellExecutorForPostUpgradeCommands`
 
-Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in a shell.
+Enabling this allows `postUpgradeTasks`' `commands` to execute as if they are in a shell.
 
 This takes effect if you are using shell semantics, such as:
 
@@ -119,7 +119,7 @@ For more details on the syntax and supported patterns, see Renovate's [String Pa
 
 ## `allowedHeaders`
 
-`allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
+`allowedHeaders` can be useful when a registry uses a authentication system that is not covered by Renovate's default credential handling in `hostRules`.
 By default, all headers starting with "X-" are allowed.
 If needed, you can allow additional headers with the `allowedHeaders` option.
 Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
@@ -251,7 +251,7 @@ For example:
 ```
 
 !!! note
-  On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
+  On Gitea/Forgejo, you cannot use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
   Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
 
 ## `autodiscoverProjects`
@@ -439,7 +439,7 @@ In this example:
 
 Namespaces of special interest follow the pattern `datasource-{datasource}`.
 When releases for a datasource are fetched, they are stored in this namespace.
-Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
+Whether caching is enabled for a particular datasource depends on whether it is private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
 
 Other valid cache namespaces are as follows:
 
@@ -465,7 +465,7 @@ Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/
 
 A list of filenames where repository config can be stored.
 
-This list doesn't replace the existing list of default config filenames used internally, instead these filenames are prepended to the list.
+This list does not replace the existing list of default config filenames used internally, instead these filenames are prepended to the list.
 
 Example:
 
@@ -544,7 +544,7 @@ The process that runs Renovate must have the correct permissions to delete the c
 
 The purpose of this config option is to allow you (as an administrator) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
 
-This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+This config option is disabled by default because it may prove surprising or undesirable for some users who do not expect Renovate to go into their home directory and import registry or credential information.
 
 Currently this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
 If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
@@ -564,7 +564,7 @@ Hyphens (`-`) in datasource or host name must be replaced with double underscore
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 !!! note
-  You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+  You cannot use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
   In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
@@ -693,7 +693,7 @@ Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 If you use `binarySource=docker|install` read the section below.
 
-If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you'll get in trouble with missing file and directory permissions.
+If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you will get in trouble with missing file and directory permissions.
 Like this:
 
 ```
@@ -770,7 +770,7 @@ Setting this to `true` also allows for variable substitution in `.npmrc` files.
 ## `force`
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository.
-For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently inactive.
+For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that is currently inactive.
 
 In practice, it is implemented by converting the `force` configuration into a `packageRule` that matches all packages.
 
@@ -791,9 +791,9 @@ This configuration option lets you choose an organization you want repositories 
 It must be set to a GitHub Organization name and not a GitHub user account.
 When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
 
-This can be used if you're migrating from user-based forks to organization-based forks.
+This can be used if you are migrating from user-based forks to organization-based forks.
 
-If you've set a `forkOrg` then Renovate will:
+If you have set a `forkOrg` then Renovate will:
 
 1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
 1. If no fork exists: it will be created in the `forkOrg`, not the user account
@@ -825,12 +825,12 @@ For PGP, it should be an armored private key, so the type you get from running `
 Replace the newlines with `\n` before adding the resulting single-line value to your self-hosted config.
 
 !!! note
-  The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
+  The private key cannot be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before) when using PGP
+1. Run `gpg import` (if you have not before) when using PGP
 1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
 1. Run `git config push.gpgSign if-asked` when using PGP with Gerrit
 
@@ -873,7 +873,7 @@ Possible values:
 
 By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
-Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
+Disabling the warning is helpful for self-hosted environments that cannot access the `github.com` domain, because the warning is useless in these environments.
 
 ## `globalExtends`
 
@@ -903,7 +903,7 @@ See [`hostRules`](./configuration-options.md#hostrules) for the rest of the avai
 
 When Renovate prepares outgoing HTTP traffic, it considers:
 
-> could this outbound HTTP call lead to configuration being included? (i.e. it's part of an `extends`, but _not_ part of i.e. `customDatasources`)
+> could this outbound HTTP call lead to configuration being included? (i.e. it is part of an `extends`, but _not_ part of i.e. `customDatasources`)
 
 If it is, Renovate treats it more cautiously, alongside the current configuration for [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess).
 
@@ -928,9 +928,9 @@ If it is, Renovate treats it more cautiously, alongside the current configuratio
 | No                          | `internalHostAccess=allow`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
 | No                          | `internalHostAccess=allow`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, no warning      | Already allowed - no host rule needed                                                                                      |
 
-<sup>1</sup>: a "trusted" host rule is one that's configured by the self-hosted administrator
+<sup>1</sup>: a "trusted" host rule is one that is configured by the self-hosted administrator
 
-<sup>2</sup>: under `internalHostAccess=warn`, the request is allowed either way - the host rule only silences the WARN log, it isn't required for the request to go through
+<sup>2</sup>: under `internalHostAccess=warn`, the request is allowed either way - the host rule only silences the WARN log, it is not required for the request to go through
 
 ### `hostRules.allowInternal`
 
@@ -1016,7 +1016,7 @@ Value of `0` means no caching.
 
 ## `ignorePrAuthor`
 
-This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate App to self-hosted.
+This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate app to self-hosted.
 An additional use case is for GitLab users of project or group access tokens who need to rotate them.
 
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
@@ -1047,7 +1047,7 @@ This way organizations can change/control the default behavior, like whether con
 Configured `hostRules` in inherited config are treated as if they are repository configuration, when applying precedence and whether [`internalHostAccess`](#internalhostaccess) can be configured.
 If you trust each organization onboarded to this Renovate deployment to be able to specify at an organization level whether they should be able to access internal hosts, you can set [`inheritConfigTrusted=true`](#inheritconfigtrusted).
 
-We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
+We disabled `inheritConfig` in the Mend Renovate app to avoid wasting millions of API calls per week.
 This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
 We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
 
@@ -1064,7 +1064,7 @@ The repository must be on the same platform and endpoint, and Renovate's token m
 ## `inheritConfigStrict`
 
 By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
-When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if Renovate can't find the inherited config.
+When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if Renovate cannot find the inherited config.
 
 !!! warning
   Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
@@ -1074,7 +1074,7 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 !!! warning
   Only set this to `true` if everyone who can push to the `inheritConfigRepoName` repositories are trusted to control these additional settings.
   This trust is transitive: `hostRules` defined in any preset the inherited config `extends` are trusted at the same level, so everyone who can change those preset sources must be trusted too.
-  If you're running a multi-tenant platform, it is recommended you leave this disabled.
+  If you are running a multi-tenant platform, it is recommended you leave this disabled.
 
 ### Host Rules
 
@@ -1110,7 +1110,7 @@ This applies whether the URL names an IP address directly, or a hostname which r
 - `allow`: requests to internal hosts are permitted, and not logged
 
 The default will become `block` in a future major release, so treat the warnings as the work to do before then.
-Hosted platforms, such as the Mend Renovate App, may run with `block` regardless of this setting.
+Hosted platforms, such as the Mend Renovate app, may run with `block` regardless of this setting.
 
 !!! warning
   `allow` is a migration escape hatch, and we plan to remove it in a future major release.
@@ -1215,7 +1215,7 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 Only set this to `false` if all three statements are true:
 
-- You've configured Renovate entirely on the admin side (e.g. empty `renovate.json` in repositories)
+- You have configured Renovate entirely on the admin side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository Renovate has access to
 - You want to skip all onboarding PRs
 
@@ -1231,7 +1231,7 @@ By default this option is set to `null`.
   This setting is independent of `branchPrefix`.
 
 For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
-If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+If you have an existing Renovate installation and you change `onboardingBranch` then it is possible that you will get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## `onboardingCommitMessage`
 
@@ -1316,7 +1316,7 @@ When this feature is enabled, resolved presets will be cached in Renovate's pack
 TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
 
 !!! warning
-  Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+  Doing so improves efficiency because shared presets do not need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
   You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## `privateKey`
@@ -1428,7 +1428,7 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 !!! note
   You could use public key encryption with earlier versions of Renovate.
   We deprecated this approach and removed the documentation for it.
-  If you're _still_ using public key encryption then we recommend that you use private keys instead.
+  If you are _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## `privateKeyOld`
 
@@ -1486,7 +1486,7 @@ Example: `renovate --rebase-all-open-branches=true renovate-reproductions/checke
 ## `redisPrefix`
 
 If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
-It's only used if `redisUrl` is configured.
+It is only used if `redisUrl` is configured.
 
 ## `redisUrl`
 
@@ -1573,7 +1573,7 @@ Therefore, Renovate supports all the authentication methods supported by the AWS
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 !!! tip
-  If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+  If you are storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
   For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 !!! note
@@ -1592,11 +1592,11 @@ You can choose any of these settings:
 This feature is closely related to the `onboarding` config option.
 The combinations of `requireConfig` and `onboarding` are:
 
-|                          | `onboarding=true`                                                                                                                                       | `onboarding=false`                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
-| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
-| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
+|                          | `onboarding=true`                                                                                                                                        | `onboarding=false`                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there is no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
+| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there is no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
+| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                      | Repository is processed, any config file is ignored.          |
 
 ## `s3Endpoint`
 
@@ -1681,13 +1681,13 @@ Supports `{{renovateVersion}}` as a template variable for the current Renovate v
 ## `username`
 
 The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
-You don't need to configure `username` directly if you have already configured `token`.
-Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
+You do not need to configure `username` directly if you have already configured `token`.
+Renovate will use the token to discover its username on the platform, including if you are running Renovate as a GitHub App.
 
 ## `variables`
 
 Variables may be configured by an administrator in `config.js`, which will then make them available for templating within repository configs.
-This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
+This config option behaves exactly like [secrets](#secrets), except that it will not be masked in the logs.
 For example, to configure a `SOME_VARIABLE` to be accessible by all repositories:
 
 ```js

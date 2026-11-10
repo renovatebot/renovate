@@ -9,7 +9,7 @@
 
 ## Preparing
 
-- Determine what's in the next release by looking at the [Milestones view](https://github.com/renovatebot/renovate/milestones)
+- Determine what is in the next release by looking at the [Milestones view](https://github.com/renovatebot/renovate/milestones)
 - Look through [breaking changes in the Issues backlog](https://github.com/renovatebot/renovate/issues?q=is%3Aissue%20state%3Aopen%20label%3Abreaking) or in [the PRs list](https://github.com/renovatebot/renovate/pulls?q=is%3Aopen+is%3Apr+label%3Abreaking)
 
 ### Draft release notes
@@ -34,7 +34,7 @@ When in the days before the release is ready to land:
 
 1. For each planned breaking change PR, rebase them + finalize the Git commit history
 
-- Adding the `Closes #...` isn't necessary, as we've set this at a PR level
+- Adding the `Closes #...` is not necessary, as we have set this at a PR level
 
 1. For each planned breaking change PR, change the base branch to `next-major`
 1. For each planned breaking change PR, approve + merge them into the `next-major` branch
@@ -49,7 +49,7 @@ When in the days before the release is ready to land:
 1. Once `main` is looking quiet, `next-major` is up-to-date, and CI is fully passing, you can proceed
 1. Use `git` CLI to push all commits from release branch to main
 
-- **NOTE** that this is a "I'm going to `git push` and bypass branch protection requirements" rather than `git push --force`
+- **NOTE** that this is a "I am going to `git push` and bypass branch protection requirements" rather than `git push --force`
 - This needs to be separate commits, so they each get their own note in the CHANGELOG
 - For v42 release, we:
 

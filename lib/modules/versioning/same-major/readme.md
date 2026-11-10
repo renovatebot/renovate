@@ -4,7 +4,7 @@ Specifically, the case where the version say, `X.Y.Z` signifies a range of compa
 This process uses Semver-Coerced versioning beneath the surface, single versions (e.g., `X.Y.Z`) are converted to a range like `X+1` and then passed to the corresponding semver-coerced method.
 
 This method is handy when managing dependencies like dotnet-sdk's rollForward settings.
-Let's say a project uses dotnet-sdk version `3.1.0`.
+Say a project uses dotnet-sdk version `3.1.0`.
 It needs to be compatible with any version in the `3.x.x` range but _not_ with versions in the next major version, like `4.x.x`.
 
 For example:

@@ -55,7 +55,7 @@ For example, use `status:requirements` to mean that an issue is not yet ready fo
 
 Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
-Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
+Only use `type:refactor` for code changes, do not use `type:refactor` for documentation type changes.
 
 All issues should have a `type:*` label.
 Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) to find issues without a `type:*` label.
@@ -133,9 +133,9 @@ Use `lifecycle` as a cross-cutting flag for a judgment about a dependency's life
 The mechanism is metadata _about_ the dependency, not a version bump of it.
 Apply it alongside a `bucket:*` label, not instead of one.
 
-Don't use `lifecycle` for `minimumReleaseAge`/release-age gating (that's `bucket:security-supply-chain`, age as an attack window rather than dependency health), or for changelog fetching (that's about the update, not the dependency's life).
+Do not use `lifecycle` for `minimumReleaseAge`/release-age gating (that is `bucket:security-supply-chain`, age as an attack window rather than dependency health), or for changelog fetching (that is about the update, not the dependency's life).
 
-This is kept as a single cross-cutting label rather than its own bucket because it's a small share of volume (around 3% of ideas) scattered across several buckets: promote it to a full `bucket:*` label if that share grows.
+This is kept as a single cross-cutting label rather than its own bucket because it is a small share of volume (around 3% of ideas) scattered across several buckets: promote it to a full `bucket:*` label if that share grows.
 
 ### Rough edge
 
@@ -146,8 +146,8 @@ This is kept as a single cross-cutting label rather than its own bucket because 
 
 </details>
 
-Use `rough-edge` as a cross-cutting flag when all three hold: the irritation comes from one of Renovate's own surfaces (config discovery, PR/commit presentation, the dashboard, logs, the CLI, defaults, docs) behaving below reasonable expectation, rather than a gap in ecosystem or platform coverage, users hit it repeatedly in ordinary use, and it's irritating rather than blocking (a workaround exists or you live with it, with no failed runs, data loss or security exposure).
-If any one fails, don't apply it.
+Use `rough-edge` as a cross-cutting flag when all three hold: the irritation comes from one of Renovate's own surfaces (config discovery, PR/commit presentation, the dashboard, logs, the CLI, defaults, docs) behaving below reasonable expectation, rather than a gap in ecosystem or platform coverage, users hit it repeatedly in ordinary use, and it is irritating rather than blocking (a workaround exists or you live with it, with no failed runs, data loss or security exposure).
+If any one fails, do not apply it.
 Apply it alongside a `bucket:*` label, not instead of one.
 The size of the fix is not a test: record effort separately (e.g. `good first issue`).
 
@@ -296,20 +296,20 @@ Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/P
 
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
-Don't use it for long-standing or contentious issues, or for areas where we'd expect someone familiar with Renovate to contribute.
+Do not use it for long-standing or contentious issues, or for areas where we'd expect someone familiar with Renovate to contribute.
 
 Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
-However, this is not a case of "we'll definitely merge the first PR that solves this", considering the barrier to contribute is considerably lower with widespread access to Large Language Models (LLMs) and AI Agents.
+However, this is not a case of "we will definitely merge the first PR that solves this", considering the barrier to contribute is considerably lower with widespread access to Large Language Models (LLMs) and AI Agents.
 
 Add a label `auto:bad-vibes` to any discussion containing rude comments such as excessive criticism or ungratefulness.
 
 Add a label `auto:discussion-closed` to close a discussion which had persistent or very bad vibes.
 
-Add a label `auto:discussion-first` to any PR which needs discussing first, such as when the requirements are unclear, or the scope and intent of the linked issue haven't yet been agreed with a maintainer.
+Add a label `auto:discussion-first` to any PR which needs discussing first, such as when the requirements are unclear, or the scope and intent of the linked issue have not yet been agreed with a maintainer.
 
 Add a label `auto:format-code` to any Discussion which needs code formatting.
 
-Add a label `auto:logs` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
+Add a label `auto:logs` to indicate that there is a problem with the logs, and the contributor needs to do one of these things:
 
 1. Provide logs (if there are none yet)
 1. Provide more logs (in case current logs are insufficient)

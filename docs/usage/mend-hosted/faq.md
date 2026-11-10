@@ -1,12 +1,12 @@
 # Frequently Asked Questions
 
-## I'm hitting a `timeout` / `kernel-out-of-memory` limit with a `pnpm`/`yarn` project
+## I am hitting a `timeout` / `kernel-out-of-memory` limit with a `pnpm`/`yarn` project
 
-If you're seeing that your jobs are regularly hitting a `timeout` / `kernel-out-of-memory`, this might be due to a package manager trying to update a large set of dependencies.
+If you are seeing that your jobs are regularly hitting a `timeout` / `kernel-out-of-memory`, this might be due to a package manager trying to update a large set of dependencies.
 
 On Mend-hosted apps, it is recommended to use the repo-level configuration, [`toolSettings.nodeMaxMemory`](../configuration-options.md#toolsettingsnodemaxmemory), to tune the maximum memory available for the `pnpm`/`yarn` commands to use this.
 
-Mend-hosted apps don't set a maximum allowed `nodeMaxMemory`, so you can use [the upper limit of memory from your plan](./overview.md#resources-and-scheduling) as the maximum limit.
+Mend-hosted apps do not set a maximum allowed `nodeMaxMemory`, so you can use [the upper limit of memory from your plan](./overview.md#resources-and-scheduling) as the maximum limit.
 
 It is recommended to set this between 1.5GB and 2.5GB but may require tweaking according to your repository.
 
@@ -20,10 +20,10 @@ This is to prevent both an ["insider attack"](../security-and-permissions.md#exe
 ../configuration-options.md#toolsettingsnodemaxmemory
 
 Often, Renovate is a central service within a company, where there is _some level_ of trust in its users.
-However, with Mend-hosted Renovate we're hosting a mix of users on the public Internet that we can't necessarily trust.
+However, with Mend-hosted Renovate we are hosting a mix of users on the public Internet that we cannot necessarily trust.
 
 Although we harden Mend-hosted infrastructure more than a typical Renovate deployment, we still do not allow arbitrary command execution through `postUpgradeTasks`.
-Depending on which plan of Renovate Cloud you're using, we may make it possible to allowlist command(s) you wish to run.
+Depending on which plan of Renovate Cloud you are using, we may make it possible to allowlist command(s) you wish to run.
 
 ### Community (Free) users
 
@@ -55,7 +55,7 @@ RENOVATE_ALLOWED_COMMANDS=["^make tidy$"]
 However, note that by calling a `make` task, other arbitrary command execution can occur.
 
 !!! tip
-  There is currently no validation pre-save to confirm if you're entering values that are valid Renovate configuration.
+  There is currently no validation pre-save to confirm if you are entering values that are valid Renovate configuration.
   <br>
   After making a change to variable(s), we recommend triggering a new job to ensure that the job does not fail with `config-validation`.
 
