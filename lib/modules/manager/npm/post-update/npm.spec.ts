@@ -1373,6 +1373,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1401,6 +1402,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true, minimumReleaseAge: '14 days' },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1427,6 +1429,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true, minimumReleaseAge: '3 days' },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1452,6 +1455,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1479,6 +1483,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               isLockFileMaintenance: true,
@@ -1510,6 +1515,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             minimumReleaseAgeRepository: '14 days',
             upgrades: [
               {
+                datasource: 'npm',
                 manager: 'npm',
                 minimumReleaseAgePackageManagerSync: true,
                 packageFile: 'other-dir/package.json',
@@ -1517,6 +1523,7 @@ describe('modules/manager/npm/post-update/npm', () => {
                 minimumReleaseAge: '1 day',
               },
               {
+                datasource: 'npm',
                 manager: 'npm',
                 minimumReleaseAgePackageManagerSync: true,
                 packageFile: 'some-dir/package.json',
@@ -1543,6 +1550,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               depName: 'some-dep',
@@ -1574,6 +1582,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               depName: 'mycorp-lib',
@@ -1596,6 +1605,34 @@ describe('modules/manager/npm/post-update/npm', () => {
         ]);
       });
 
+      it('keeps --before for a young update of another datasource', async () => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              datasource: 'node-version',
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              depName: 'node',
+              newVersion: '24.0.0',
+              isLockfileUpdate: false,
+              minimumReleaseAge: null,
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
+
+        expect(res.minimumReleaseAgeNotice).toBeUndefined();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
       it('keeps --before for an update older than minimumReleaseAgeRepository', async () => {
         const res = await npmHelper.generateLockFile(
           'some-dir',
@@ -1604,6 +1641,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               depName: 'some-dep',
@@ -1641,6 +1679,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             { skipInstalls: true },
             [
               {
+                datasource: 'npm',
                 manager: 'npm',
                 minimumReleaseAgePackageManagerSync: true,
                 depName: 'some-dep',
@@ -1676,6 +1715,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1704,6 +1744,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1731,6 +1772,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1756,6 +1798,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1802,6 +1845,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1842,6 +1886,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               packageName: 'some-dep',
@@ -1879,6 +1924,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           { skipInstalls: true },
           [
             {
+              datasource: 'npm',
               manager: 'npm',
               minimumReleaseAgePackageManagerSync: true,
               isLockFileMaintenance: true,
