@@ -15,6 +15,13 @@ Guidelines:
 - Use `ize` instead of `ise` in words like customize and analyze
 - Drop the British `u` in words like behavior
 
+[Vale](https://vale.sh/) enforces American English in Markdown files and in code comments in CI.
+The rule is `.vale/styles/Renovate/British.yml`, and it lists the British spellings and their American replacements.
+To run it locally, install Vale with `mise install vale` and run `pnpm lint-prose`.
+Vale is not part of `pnpm lint`, so contributors without Vale can still run the other checks.
+For feedback while you type, use the Vale VS Code extension or `vale-ls` in your editor.
+Both read the `.vale.ini` in the repository root.
+
 ## One sentence per line
 
 In Markdown files, use one sentence per line.

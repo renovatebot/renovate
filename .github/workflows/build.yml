@@ -298,6 +298,20 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
+      - name: Install mise
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          # don't run `mise install`, but do install a version of `mise` itself
+          install: false
+
+      - name: Install Vale
+        run: |
+          mise install vale
+          dirname "$(mise which vale)" >> "$GITHUB_PATH"
+
+      - name: Lint prose
+        run: pnpm lint-prose
+
   lint-other:
     needs:
       - setup-build

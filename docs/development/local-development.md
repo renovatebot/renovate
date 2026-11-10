@@ -25,6 +25,7 @@ For building the documentation, you also need:
 We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
 After installing Mise, run `mise install` from the repository root.
 This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
+This includes [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
 
 #### Linux
 
