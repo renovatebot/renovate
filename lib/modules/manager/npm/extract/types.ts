@@ -69,13 +69,17 @@ export type NpmrcCooldown =
   | { source: 'min-release-age'; days: number };
 
 /**
- * The settings of a `pnpm-workspace.yaml` which decide whether pnpm enforces the minimum release age, with `minimumReleaseAge` in minutes.
+ * The settings of a pnpm lock file which decide whether pnpm enforces the minimum release age, from its `pnpm-workspace.yaml` and its root `package.json`, with the ages in minutes.
  */
-export interface PnpmWorkspaceMinimumReleaseAgeSettings {
+export interface PnpmManagerDataMinimumReleaseAge {
   minimumReleaseAge?: number;
   minimumReleaseAgeStrict?: boolean;
   /** whether `minimumReleaseAgeExclude` lets pnpm install versions of some packages which are too new */
   hasMinimumReleaseAgeExclude?: boolean;
+  /** the pnpm constraint from the `constraints` config, the root `package.json` or the `lockfileVersion` of the lock file */
+  pnpmConstraint?: string;
+  /** the `minimum-release-age` of the `.npmrc` of the root `package.json`, which pnpm reads before v11 */
+  npmrcMinimumReleaseAge?: number;
 }
 
 /**

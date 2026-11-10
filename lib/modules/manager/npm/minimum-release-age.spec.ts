@@ -249,7 +249,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
           enforcesMinimumReleaseAge({
             managerData: {
               ...pnpmLockManagerData,
-              pnpmWorkspaceMinimumReleaseAge: workspace,
+              pnpmMinimumReleaseAge: workspace,
             },
             minimumReleaseAgePackageManagerSync: true,
             isLockFileMaintenance: true,
@@ -276,25 +276,57 @@ describe('modules/manager/npm/minimum-release-age', () => {
     });
 
     it.each`
-      pnpm         | npmrc                           | expected
-      ${'10.17.0'} | ${'minimum-release-age=1440\n'} | ${true}
-      ${'10.17.0'} | ${'minimum-release-age=0\n'}    | ${false}
-      ${'10.17.0'} | ${undefined}                    | ${false}
-      ${'11.0.4'}  | ${'minimum-release-age=1440\n'} | ${false}
+      pnpm         | npmrcMinimumReleaseAge | expected
+      ${'10.17.0'} | ${1440}                | ${true}
+      ${'10.17.0'} | ${0}                   | ${false}
+      ${'10.17.0'} | ${undefined}           | ${false}
+      ${'11.0.4'}  | ${1440}                | ${false}
     `(
-      'returns $expected for pnpm $pnpm with npmrc=$npmrc and no minimumReleaseAge',
-      async ({ pnpm, npmrc, expected }) => {
+      'returns $expected for pnpm $pnpm with the .npmrc minimum-release-age $npmrcMinimumReleaseAge and no minimumReleaseAge',
+      async ({ pnpm, npmrcMinimumReleaseAge, expected }) => {
         await expect(
           enforcesMinimumReleaseAge({
-            managerData: pnpmLockManagerData,
+            managerData: {
+              ...pnpmLockManagerData,
+              pnpmMinimumReleaseAge: { npmrcMinimumReleaseAge },
+            },
             minimumReleaseAgePackageManagerSync: true,
             isLockFileMaintenance: true,
-            npmrc,
             constraints: { pnpm },
           }),
         ).resolves.toBe(expected);
       },
     );
+
+    it('reads the pnpm constraint of the lock file for a package file without its own', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: {
+            ...pnpmLockManagerData,
+            pnpmMinimumReleaseAge: { pnpmConstraint: '10.17.0' },
+          },
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          packageFile: 'some-dir/pkgs/a/package.json',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('prefers the configured pnpm constraint over the one of the lock file', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: {
+            ...pnpmLockManagerData,
+            pnpmMinimumReleaseAge: { pnpmConstraint: '10.17.0' },
+          },
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          constraints: { pnpm: '10.16.0' },
+        }),
+      ).resolves.toBeFalse();
+    });
 
     it('does not derive the pnpm constraint from the package.json in the working tree', async () => {
       fs.readLocalFile.mockResolvedValue(

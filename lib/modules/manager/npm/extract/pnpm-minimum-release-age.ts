@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -59,27 +59,23 @@ export async function readPnpmWorkspaceMinimumReleaseAge(
 /**
  * The `minimumReleaseAge` in minutes which pnpm configures itself.
  *
- * The `pnpm-workspace.yaml` wins over the `.npmrc`, which pnpm reads only before v11.
+ * The `pnpm-workspace.yaml` wins over the `minimum-release-age` of the `.npmrc` in `npmrcMinutes`, which pnpm reads only before v11.
  * With `includeDefault`, the pnpm default applies if neither sets it and the pnpm version may be v11 or later.
  * An unknown pnpm version counts as the latest pnpm.
  */
 export function getPnpmMinimumReleaseAgeMinutes(
-  workspace: PnpmWorkspaceMinimumReleaseAge,
-  npmrcContent: string | null | undefined,
+  workspace: Pick<PnpmWorkspaceMinimumReleaseAge, 'minimumReleaseAge'>,
+  npmrcMinutes: number | null | undefined,
   pnpmConstraint: string | null | undefined,
   includeDefault = false,
 ): number | undefined {
   if (workspace.minimumReleaseAge !== undefined) {
     return workspace.minimumReleaseAge;
   }
-  const npmrcMinutes = isSubsetOf(
-    npmVersioning,
-    pnpmConstraint,
-    pnpmNpmrcMinimumReleaseAgeRange,
-  )
-    ? parseNpmrcPnpmMinimumReleaseAge(npmrcContent)
-    : null;
-  if (npmrcMinutes !== null) {
+  if (
+    isNumber(npmrcMinutes) &&
+    isSubsetOf(npmVersioning, pnpmConstraint, pnpmNpmrcMinimumReleaseAgeRange)
+  ) {
     return npmrcMinutes;
   }
   const isKnownVersion =
@@ -206,7 +202,7 @@ export function getPnpmMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the `minimum-release-age` of the merged `.npmrc` (the `npmrc` option and the repository `.npmrc`), or the pnpm v11 default, and keeps the `pnpm-workspace.yaml` settings in `managerData`.
+ * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the `minimum-release-age` of the merged `.npmrc` (the `npmrc` option and the repository `.npmrc`), or the pnpm v11 default, and keeps the settings of the lock file in the `managerData` of each of its package files.
  *
  * The pnpm version comes from the configured `constraints`, the root `package.json` or the lock file, like for the lock file update.
  */
@@ -231,23 +227,6 @@ export async function setPnpmMinimumReleaseAge(
   }
   for (const [pnpmLockFile, lockFilePackageFiles] of packageFilesByLockFile) {
     const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
-    const { minimumReleaseAge, minimumReleaseAgeStrict } = workspace;
-    const hasMinimumReleaseAgeExclude = isNonEmptyArray(
-      workspace.minimumReleaseAgeExclude,
-    );
-    if (
-      minimumReleaseAge !== undefined ||
-      minimumReleaseAgeStrict !== undefined ||
-      hasMinimumReleaseAgeExclude
-    ) {
-      for (const packageFile of lockFilePackageFiles) {
-        packageFile.managerData!.pnpmWorkspaceMinimumReleaseAge = {
-          minimumReleaseAge,
-          minimumReleaseAgeStrict,
-          ...(hasMinimumReleaseAgeExclude && { hasMinimumReleaseAgeExclude }),
-        };
-      }
-    }
     // the pnpm-workspace.yaml has no .npmrc or pnpm constraint of its own, so
     // the root package.json sets them for every package file of the lock file
     const rootPackageFile = upath.join(
@@ -263,9 +242,22 @@ export async function setPnpmMinimumReleaseAge(
       pnpmLockFile,
       () => root?.extractedConstraints?.pnpm,
     );
+    const npmrcMinimumReleaseAge = parseNpmrcPnpmMinimumReleaseAge(root?.npmrc);
+    const hasMinimumReleaseAgeExclude = isNonEmptyArray(
+      workspace.minimumReleaseAgeExclude,
+    );
+    for (const packageFile of lockFilePackageFiles) {
+      packageFile.managerData!.pnpmMinimumReleaseAge = {
+        minimumReleaseAge: workspace.minimumReleaseAge,
+        minimumReleaseAgeStrict: workspace.minimumReleaseAgeStrict,
+        ...(hasMinimumReleaseAgeExclude && { hasMinimumReleaseAgeExclude }),
+        pnpmConstraint,
+        ...(npmrcMinimumReleaseAge !== null && { npmrcMinimumReleaseAge }),
+      };
+    }
     const minutes = getPnpmMinimumReleaseAgeMinutes(
       workspace,
-      root?.npmrc,
+      npmrcMinimumReleaseAge,
       pnpmConstraint,
       true,
     );
