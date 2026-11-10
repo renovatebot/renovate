@@ -18,6 +18,7 @@ const dayMs = 24 * 60 * 60 * 1000;
 interface NpmEnforcesMinimumReleaseAgeConfig extends UpdateArtifactsConfig {
   managerData?: NpmManagerData;
   npmrc?: string;
+  packageFile?: string;
 }
 
 /**
