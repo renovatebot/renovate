@@ -1,31 +1,33 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { isSkipComment } from '../../../util/ignore';
-import { regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { upgradeableTooling } from './upgradeable-tooling';
+import { isFunction, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { isSkipComment } from '../../../util/ignore.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { StaticTooling } from './types.ts';
+import { upgradeableTooling } from './upgradeable-tooling.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`asdf.extractPackageFile()`);
 
   const regex = regEx(
-    /^(?<toolName>([\w_-]+)) +(?<version>[^\s#]+)(?: +[^\s#]+)* *(?: #(?<comment>.*))?$/gm,
+    /^(?<toolName>(?:[\w_-]+)) +(?<version>[^\s#]+)(?: +[^\s#]+)* *(?: #(?<comment>.*))?$/gm,
   );
 
   const deps: PackageDependency[] = [];
 
   for (const groups of [...content.matchAll(regex)]
     .map((m) => m.groups)
-    .filter(is.truthy)) {
+    .filter(isTruthy)) {
     const depName = groups.toolName.trim();
     const version = groups.version.trim();
 
     const toolConfig = upgradeableTooling[depName];
-    const toolDefinition = toolConfig
-      ? typeof toolConfig.config === 'function'
+    let toolDefinition: StaticTooling | undefined;
+    if (toolConfig) {
+      toolDefinition = isFunction(toolConfig.config)
         ? toolConfig.config(version)
-        : toolConfig.config
-      : undefined;
+        : toolConfig.config;
+    }
 
     if (toolDefinition) {
       const dep: PackageDependency = {

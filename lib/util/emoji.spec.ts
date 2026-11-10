@@ -1,5 +1,5 @@
 import { fromCodepointToUnicode, fromHexcodeToCodepoint } from 'emojibase';
-import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji';
+import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji.ts';
 
 describe('util/emoji', () => {
   beforeEach(() => {
@@ -75,8 +75,9 @@ describe('util/emoji', () => {
   });
 
   describe('stripEmojis', () => {
-    const makeEmoji = (hexCode: string): string =>
-      fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode));
+    function makeEmoji(hexCode: string): string {
+      return fromCodepointToUnicode(fromHexcodeToCodepoint(hexCode));
+    }
 
     it('is independent of config option', () => {
       const x: string = makeEmoji('26A0-FE0F');

@@ -1,11 +1,7 @@
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency } from '../types';
-import type { ExtractionResult, TerraformManagerData } from './types';
-import { keyValueExtractionRegex } from './util';
-
-export const sourceExtractionRegex = regEx(
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,
-);
+import { newlineRegex } from '../../../util/regex.ts';
+import type { PackageDependency } from '../types.ts';
+import type { ExtractionResult, TerraformManagerData } from './types.ts';
+import { keyValueExtractionRegex } from './util.ts';
 
 function extractBracesContent(content: string): number {
   const stack: string[] = [];

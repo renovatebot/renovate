@@ -1,14 +1,11 @@
-import { PoetrySectionSchema, PoetrySources } from './schema';
+import { PoetryPyProject, PoetrySection, PoetrySources } from './schema.ts';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
-    expect(
-      PoetrySectionSchema.parse({ version: '1.2.3' }).packageFileVersion,
-    ).toBe('1.2.3');
+    expect(PoetrySection.parse({ version: '1.2.3' }).version).toBe('1.2.3');
 
     expect(
-      PoetrySectionSchema.parse({ version: { some: 'value' } })
-        .packageFileVersion,
+      PoetrySection.parse({ version: { some: 'value' } }).version,
     ).toBeUndefined();
   });
 
@@ -125,11 +122,6 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://some-vcs.com/primary',
         },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
       ]);
     });
 
@@ -168,7 +160,10 @@ describe('modules/manager/poetry/schema', () => {
       ]);
     });
 
-    it('source with priority="primary"', () => {
+    it('source with priority="primary" disables the implicit PyPI source', () => {
+      // A configured primary source is sufficient to disable the implicit
+      // PyPI source, matching Poetry's own resolution behaviour:
+      // https://python-poetry.org/docs/1.8/repositories/#default-package-source-deprecated
       expect(
         PoetrySources.parse([
           {
@@ -183,15 +178,10 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://foo.bar/simple/',
         },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
       ]);
     });
 
-    it('source with implicit priority="primary"', () => {
+    it('source with implicit priority="primary" disables the implicit PyPI source', () => {
       expect(
         PoetrySources.parse([
           {
@@ -205,10 +195,42 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://foo.bar/simple/',
         },
+      ]);
+    });
+
+    it('multiple non-default sources with one primary disable the implicit PyPI source', () => {
+      expect(
+        PoetrySources.parse([
+          {
+            name: 'pypi-mirror',
+            priority: 'primary',
+            url: 'https://example.com/pypi-remote/simple',
+          },
+          {
+            name: 'internal',
+            priority: 'supplemental',
+            url: 'https://example.com/internal/simple',
+          },
+          {
+            name: 'extra',
+            url: 'https://example.com/extra/simple',
+          },
+        ]),
+      ).toEqual([
         {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
+          name: 'pypi-mirror',
+          priority: 'primary',
+          url: 'https://example.com/pypi-remote/simple',
+        },
+        {
+          name: 'extra',
+          priority: 'primary',
+          url: 'https://example.com/extra/simple',
+        },
+        {
+          name: 'internal',
+          priority: 'supplemental',
+          url: 'https://example.com/internal/simple',
         },
       ]);
     });
@@ -290,7 +312,7 @@ describe('modules/manager/poetry/schema', () => {
       ]);
     });
 
-    it('unordered sources with implicit PyPI priority="secondary"', () => {
+    it('unordered sources with a primary source suppress the implicit PyPI source', () => {
       expect(
         PoetrySources.parse([
           {
@@ -313,11 +335,6 @@ describe('modules/manager/poetry/schema', () => {
           name: 'foo',
           priority: 'secondary',
           url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
         },
       ]);
     });
@@ -366,6 +383,36 @@ describe('modules/manager/poetry/schema', () => {
           url: 'https://explicit.com/simple/',
         },
       ]);
+    });
+  });
+
+  describe('PoetryPyProject', () => {
+    it('filters out invalid build-system requirements', () => {
+      const input = `
+[tool.poetry]
+name = "test"
+version = "1.0.0"
+
+[build-system]
+requires = ["poetry-core>=2", "@@invalid@@", "wheel"]
+build-backend = "poetry.masonry.api"
+`;
+      const result = PoetryPyProject.parse(input);
+      expect(result.poetryRequirement).toBe('>=2');
+    });
+
+    it('handles build-system without poetry requirement', () => {
+      const input = `
+[tool.poetry]
+name = "test"
+version = "1.0.0"
+
+[build-system]
+requires = ["wheel"]
+build-backend = "poetry.masonry.api"
+`;
+      const result = PoetryPyProject.parse(input);
+      expect(result.poetryRequirement).toBeUndefined();
     });
   });
 });

@@ -1,6 +1,6 @@
-import { minimatch } from '../../../util/minimatch';
-import { matchRegexOrGlobList } from '../../../util/string-match';
-import { defaultConfig } from './default-config';
+import { minimatch } from '../../../util/minimatch.ts';
+import { matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { defaultConfig } from './default-config.ts';
 
 describe('modules/manager/hermit/default-config', () => {
   describe('excludeCommitPaths', () => {

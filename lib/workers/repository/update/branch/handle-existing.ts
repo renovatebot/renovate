@@ -1,14 +1,14 @@
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { emojify } from '../../../../util/emoji';
-import * as template from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
+} from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export async function handleClosedPr(
   config: BranchConfig,
@@ -42,7 +42,7 @@ export async function handleClosedPr(
     }
     if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would delete branch ' + config.branchName);
+        logger.info(`DRY-RUN: Would delete branch ${config.branchName}`);
       } else {
         await scm.deleteBranch(config.branchName);
       }
@@ -59,10 +59,7 @@ export async function handleModifiedPr(
   }
 
   const editedPrCommentTopic = 'Edited/Blocked Notification';
-  const content =
-    'Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\n' +
-    'You can manually request rebase by checking the rebase/retry box above.\n\n' +
-    emojify(' :warning: **Warning**: custom changes will be lost.');
+  const content = `Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\nYou can manually request rebase by checking the rebase/retry box above.\n\n${emojify(' :warning: **Warning**: custom changes will be lost.')}`;
 
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];

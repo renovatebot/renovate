@@ -1,12 +1,13 @@
 import type { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import mavenVersion from '../../versioning/maven';
-import * as mavenVersioning from '../../versioning/maven';
-import { compare } from '../../versioning/maven/compare';
-import { Datasource } from '../datasource';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { compare } from '../../versioning/maven/compare.ts';
+import mavenVersion, * as mavenVersioning from '../../versioning/maven/index.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -14,9 +15,9 @@ import type {
   RegistryStrategy,
   Release,
   ReleaseResult,
-} from '../types';
-import { MAVEN_REPO } from './common';
-import type { MavenDependency, MetadataResults } from './types';
+} from '../types.ts';
+import { MAVEN_CENTRAL_URLS, MAVEN_REPO } from './common.ts';
+import type { MavenDependency, MetadataResults } from './types.ts';
 import {
   createUrlForDependencyPom,
   downloadMaven,
@@ -24,10 +25,10 @@ import {
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
-} from './util';
+} from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -49,6 +50,16 @@ function extractVersions(metadata: XmlDocument): MetadataResults {
     return res;
   }
   res.versions = elements.map((el) => el.val);
+  const latest = metadata.descendantWithPath('versioning.latest');
+  if (latest?.val) {
+    res.tags ??= {};
+    res.tags.latest = latest.val;
+  }
+  const release = metadata.descendantWithPath('versioning.release');
+  if (release?.val) {
+    res.tags ??= {};
+    res.tags.release = release.val;
+  }
 
   return res;
 }
@@ -60,7 +71,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
@@ -73,8 +86,8 @@ export class MavenDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` tags in the results.';
 
-  constructor(id = MavenDatasource.id) {
-    super(id);
+  constructor(id = MavenDatasource.id, http?: Http) {
+    super(id, http);
   }
 
   async fetchVersionsFromMetadata(
@@ -97,13 +110,28 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
+
+    const isGradlePlugin =
+      // groupId
+      packageName.includes('.gradle.plugin:') ||
+      // artifactId
+      packageName.endsWith('.gradle.plugin');
+    if (
+      isGradlePlugin &&
+      MAVEN_CENTRAL_URLS.some((url) => repoUrl === ensureTrailingSlash(url))
+    ) {
+      logger.debug(
+        `Maven: skipping Maven Central for suspected Gradle plugin "${packageName}"`,
+      );
+      return null;
+    }
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
@@ -134,9 +162,13 @@ export class MavenDatasource extends Datasource {
     };
     if (metadata.tags) {
       result.tags = metadata.tags;
+      if (result.tags.latest) {
+        logger.debug(`Setting respectLatest=false for maven ${packageName}`);
+        result.respectLatest = false;
+      }
     }
 
-    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
       result.isPrivate = true;
     }
 
@@ -148,18 +180,22 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = versionOrig
-      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
-      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
+    const cacheKey = buildCacheKey(
+      'postprocessRelease',
+      registryUrl,
+      packageName,
+      versionOrig,
+      version,
+    );
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven:postprocess-reject',
       cacheKey,
     );
 
-    /* v8 ignore start: hard to test */
+    /* v8 ignore if: hard to test */
     if (cachedResult) {
       return cachedResult;
-    } /* v8 ignore stop */
+    }
 
     if (!packageName || !registryUrl) {
       return release;

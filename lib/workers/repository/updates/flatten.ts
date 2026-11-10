@@ -1,25 +1,32 @@
+import { isUndefined } from '@sindresorhus/is';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
-} from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultConfig } from '../../../modules/datasource';
-import { get } from '../../../modules/manager';
-import { detectSemanticCommits } from '../../../util/git/semantic';
-import { applyPackageRules } from '../../../util/package-rules';
-import { regEx } from '../../../util/regex';
-import * as template from '../../../util/template';
-import { parseUrl } from '../../../util/url';
-import type { BranchUpgradeConfig } from '../../types';
-import { generateBranchName } from './branch-name';
+} from '../../../config/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { get } from '../../../modules/manager/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { detectSemanticCommits } from '../../../util/git/semantic.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as template from '../../../util/template/index.ts';
+import { parseUrl, withoutUrlCredentials } from '../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { replacementAlreadyExists } from '../common.ts';
+import { generateBranchName } from './branch-name.ts';
 
-const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substring(1);
+function upper(str: string): string {
+  return str.charAt(0).toUpperCase() + str.substring(1);
+}
 
 export function sanitizeDepName(depName: string): string {
-  return depName
+  return withoutUrlCredentials(depName)
+    .replace(regEx(/\$\{[^}]+\}\/?/g), '')
+    .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
@@ -70,10 +77,32 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   return updateConfig;
 }
 
+// packageRules can set `isVulnerabilityAlert` without forcing `vulnerabilityAlerts`,
+// so the security concurrency limits are applied here
+function applyVulnerabilityConcurrentLimits(
+  updateConfig: BranchUpgradeConfig,
+): void {
+  if (!updateConfig.isVulnerabilityAlert) {
+    return;
+  }
+  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
+  // `branchConcurrentLimit`, even though both are valid nested options
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+  const vulnerabilityAlerts = updateConfig.vulnerabilityAlerts as
+    RenovateConfig | undefined;
+  if (!isUndefined(vulnerabilityAlerts?.prConcurrentLimit)) {
+    updateConfig.prConcurrentLimit = vulnerabilityAlerts.prConcurrentLimit;
+  }
+  if (!isUndefined(vulnerabilityAlerts?.branchConcurrentLimit)) {
+    updateConfig.branchConcurrentLimit =
+      vulnerabilityAlerts.branchConcurrentLimit;
+  }
+}
+
 export async function flattenUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, any[]>,
-): Promise<RenovateConfig[]> {
+  packageFiles: Record<string, PackageFile[]>,
+): Promise<BranchUpgradeConfig[]> {
   const updates = [];
   const updateTypes = [
     'major',
@@ -87,13 +116,16 @@ export async function flattenUpdates(
   for (const [manager, files] of Object.entries(packageFiles)) {
     const managerConfig = getManagerConfig(config, manager);
     for (const packageFile of files) {
-      const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
+      const packageFileConfig: BranchUpgradeConfig = mergeChildConfig(
+        managerConfig,
+        packageFile,
+      ) as never;
       const packagePath = packageFile.packageFile?.split('/');
+      // `split` always yields at least one element, so there is always a file
+      // name to drop here
+      packagePath.splice(-1, 1);
       if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
-      if (packagePath.length > 0) {
-        packageFileConfig.parentDir = packagePath[packagePath.length - 1];
+        packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
@@ -101,26 +133,36 @@ export async function flattenUpdates(
       }
       let depIndex = 0;
       for (const dep of packageFile.deps) {
-        if (dep.updates.length) {
+        if (dep.updates!.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
+          // @ts-expect-error -- not easily typed
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
-          for (const update of dep.updates) {
+          for (const update of dep.updates!) {
+            if (
+              update.updateType === 'replacement' &&
+              update.newName &&
+              replacementAlreadyExists(packageFile.deps, dep, update.newName)
+            ) {
+              logger.debug(
+                { fileName: packageFile.packageFile },
+                `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
+              );
+              continue;
+            }
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {
+              // @ts-expect-error -- not easily typed
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
             if (updateConfig.updateTypes) {
               updateConfig.updateTypes.forEach((updateType: string) => {
+                // @ts-expect-error -- not easily typed
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
-            // apply config from datasource
-            const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource,
-            );
-            updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
+            updateConfig = await applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,
               'datasource-merge',
@@ -128,9 +170,11 @@ export async function flattenUpdates(
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
+              // @ts-expect-error -- not easily typed
               updateConfig[updateConfig.updateType],
             );
             for (const updateType of updateTypes) {
+              // @ts-expect-error -- not easily typed
               delete updateConfig[updateType];
             }
             // Apply again in case any were added by the updateType config
@@ -138,9 +182,14 @@ export async function flattenUpdates(
               updateConfig,
               'update-type-merge',
             );
+            applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
+
+            // make sure that we use the dependency's current state of attestation, rather than using the new update's value
+            updateConfig.hasAttestation = depConfig.hasAttestation;
+
             updates.push(updateConfig);
           }
         }
@@ -148,12 +197,12 @@ export async function flattenUpdates(
       }
       if (
         get(manager, 'supportsLockFileMaintenance') &&
-        packageFileConfig.lockFileMaintenance.enabled
+        packageFileConfig.lockFileMaintenance!.enabled
       ) {
         // Apply lockFileMaintenance config before packageRules
         let lockFileConfig = mergeChildConfig(
           packageFileConfig,
-          packageFileConfig.lockFileMaintenance,
+          packageFileConfig.lockFileMaintenance!,
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
@@ -164,7 +213,7 @@ export async function flattenUpdates(
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,
-          lockFileConfig.lockFileMaintenance,
+          lockFileConfig.lockFileMaintenance!,
         );
         lockFileConfig = await applyPackageRules(
           lockFileConfig,
@@ -172,15 +221,17 @@ export async function flattenUpdates(
         );
         // Remove unnecessary objects
         for (const updateType of updateTypes) {
+          // @ts-expect-error -- not easily typed
           delete lockFileConfig[updateType];
         }
         delete lockFileConfig.packageRules;
+        // @ts-expect-error -- not easily typed
         delete lockFileConfig.deps;
         generateBranchName(lockFileConfig);
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles ?? []) {
+        for (const lockFile of coerceArray(packageFileConfig.lockFiles)) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]
@@ -219,7 +270,8 @@ export async function flattenUpdates(
   }
   const filteredUpdates = updates
     .filter((update) => update.enabled !== false)
-    .map(({ vulnerabilityAlerts, ...update }) => update)
+    .filter((update) => isUndefined(update.skipReason))
+    .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {
     logger.debug(

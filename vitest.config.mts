@@ -1,4 +1,3 @@
-import tsconfigPaths from 'vite-tsconfig-paths';
 import type { ViteUserConfig } from 'vitest/config';
 import {
   coverageConfigDefaults,
@@ -6,13 +5,18 @@ import {
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
-import { testShards } from './tools/test/shards.js';
-import {
-  getCoverageIgnorePatterns,
-  normalizePattern,
-} from './tools/test/utils.js';
+import { testShards } from './tools/test/shards.ts';
+import { normalizePattern } from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
+const agentHook = !!process.env.RENOVATE_AGENT_HOOK;
+
+let reporters: string[] = ['default'];
+if (ci) {
+  reporters = ['default', 'github-actions', 'junit'];
+} else if (agentHook) {
+  reporters = ['minimal'];
+}
 
 /**
  * Generates Vitest config for sharded test run.
@@ -62,6 +66,7 @@ function configureShardingOrFallbackTo(
     test: {
       include,
       exclude,
+      outputFile: `./coverage/shard/${shardKey}/junit.xml`,
       coverage: {
         reportsDirectory,
       },
@@ -73,7 +78,8 @@ function configureShardingOrFallbackTo(
 export default defineConfig(() =>
   mergeConfig(
     {
-      plugins: [tsconfigPaths()],
+      resolve: { tsconfigPaths: true },
+      oxc: { include: /\.(?:[cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
@@ -83,32 +89,41 @@ export default defineConfig(() =>
           './test/setup.ts',
           'test/to-migrate.ts',
         ],
-        reporters: ci ? ['default', 'github-actions'] : ['default'],
+        reporters,
         mockReset: true,
+        unstubEnvs: true,
+        deps: {
+          // Import CommonJS packages like Node does, without copying default exports onto namespaces
+          interopDefault: false,
+        },
+        // Inlined so specs can mock `node:fs/promises` for these packages
+        server: {
+          deps: { inline: ['@renovatebot/base-image', '@containerbase/base'] },
+        },
         coverage: {
           provider: 'v8',
-          ignoreEmptyLines: true,
           skipFull: !ci,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']
-            : ['text-summary', 'html', 'json'],
+            : ['text-summary', '@containerbase/istanbul-reports-html', 'json'],
           enabled: true,
           exclude: [
             ...coverageConfigDefaults.exclude,
-            ...getCoverageIgnorePatterns(),
             '**/*.spec.ts', // should work from defaults
             'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
             'lib/**/types.ts',
             'lib/types/**',
+            'test/**',
             'tools/**',
             '+(config.js)',
             '__mocks__/**',
             // fully ignored files
+            '*.config.{mts,mjs}',
+            '*.json',
             'lib/config-validator.ts',
             'lib/constants/category.ts',
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
-            'lib/util/cache/package/redis.ts',
             'lib/util/http/legacy.ts',
             'lib/workers/repository/cache.ts',
           ],
@@ -117,7 +132,14 @@ export default defineConfig(() =>
     } satisfies ViteUserConfig,
     configureShardingOrFallbackTo({
       test: {
-        exclude: [...defaultExclude, 'tools/docs/test/**/*.test.mjs'],
+        exclude: [
+          ...defaultExclude,
+          'dist/**/*',
+          'tools/docs/test/**/*.test.mjs',
+          '.worktrees/**/*',
+          '.claude/worktrees/**/*',
+          '.pnpm-store/**/*',
+        ],
       },
     }),
   ),

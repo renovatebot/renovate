@@ -1,13 +1,19 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
-import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../config/types';
-import { getProblems, logger } from '../logger';
-import type { BranchCache } from '../util/cache/repository/types';
-import { writeSystemFile } from '../util/fs';
-import { getS3Client, parseS3Url } from '../util/s3';
-import type { ExtractResult } from '../workers/repository/process/extract-update';
-import type { LibYearsWithStatus, Report } from './types';
+import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
+import { GlobalConfig } from '../config/global.ts';
+import type { RenovateConfig } from '../config/types.ts';
+import { prettier } from '../expose.ts';
+import { getProblems, logger } from '../logger/index.ts';
+import { sanitizeValue } from '../logger/utils.ts';
+import type { Pr } from '../modules/platform/index.ts';
+import type { BranchCache } from '../util/cache/repository/types.ts';
+import { getInheritedOrGlobal } from '../util/common.ts';
+import { writeSystemFile } from '../util/fs/index.ts';
+import { getS3Client, parseS3Url } from '../util/s3.ts';
+import type { ExtractResult } from '../workers/repository/process/extract-update.ts';
+import type { ProcessStatus } from '../workers/repository/result.ts';
+import type { LibYearsWithStatus, Report } from './types.ts';
 
 const report: Report = {
   problems: [],
@@ -27,7 +33,7 @@ export function addBranchStats(
   config: RenovateConfig,
   branchesInformation: Partial<BranchCache>[],
 ): void {
-  if (is.nullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(config.reportType)) {
     return;
   }
 
@@ -35,11 +41,49 @@ export function addBranchStats(
   report.repositories[config.repository!].branches = branchesInformation;
 }
 
+export function addRepositoryMetadata(
+  config: RenovateConfig,
+  configFileName: string | undefined,
+  prList: Pr[],
+): void {
+  if (isNullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  const repoReport = report.repositories[config.repository!];
+  repoReport.platform = GlobalConfig.get('platform');
+  repoReport.defaultBranch = config.defaultBranch;
+  repoReport.dependencyDashboardIssue = config.dependencyDashboardIssue ?? null;
+  // Omit when there is no in-repo config file (cache stores an empty string).
+  if (configFileName) {
+    repoReport.configFileName = configFileName;
+  }
+
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
+  const onboardingPr = prList.find(
+    (pr) => pr.sourceBranch === onboardingBranch && pr.state === 'open',
+  );
+  repoReport.onboardingPrNumber = onboardingPr?.number ?? null;
+}
+
+export function addRepositoryStatus(
+  config: RenovateConfig,
+  status: ProcessStatus,
+): void {
+  if (isNullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  report.repositories[config.repository!].status = status;
+}
+
 export function addExtractionStats(
   config: RenovateConfig,
   extractResult: ExtractResult,
 ): void {
-  if (is.nullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(config.reportType)) {
     return;
   }
 
@@ -52,7 +96,7 @@ export function addLibYears(
   config: RenovateConfig,
   libYearsWithDepCount: LibYearsWithStatus,
 ): void {
-  if (is.nullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(config.reportType)) {
     return;
   }
 
@@ -77,9 +121,20 @@ export function finalizeReport(): void {
   }
 }
 
+/**
+ * Returns the report as JSON, sanitized like a log record.
+ */
+async function getReportBody(config: RenovateConfig): Promise<string> {
+  const json = JSON.stringify(sanitizeValue(report));
+  if (!config.reportFormatting) {
+    return json;
+  }
+  return prettier().format(json, { parser: 'json' });
+}
+
 export async function exportStats(config: RenovateConfig): Promise<void> {
   try {
-    if (is.nullOrUndefined(config.reportType)) {
+    if (isNullOrUndefined(config.reportType)) {
       return;
     }
 
@@ -90,14 +145,15 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
 
     if (config.reportType === 'file') {
       const path = config.reportPath!;
-      await writeSystemFile(path, JSON.stringify(report));
+      await writeSystemFile(path, await getReportBody(config));
       logger.debug({ path }, 'Writing report');
       return;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (config.reportType === 's3') {
       const s3Url = parseS3Url(config.reportPath!);
-      if (is.nullOrUndefined(s3Url)) {
+      if (isNullOrUndefined(s3Url)) {
         logger.warn(
           { reportPath: config.reportPath },
           'Failed to parse s3 URL',
@@ -108,7 +164,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
       const s3Params: PutObjectCommandInput = {
         Bucket: s3Url.Bucket,
         Key: s3Url.Key,
-        Body: JSON.stringify(report),
+        Body: await getReportBody(config),
         ContentType: 'application/json',
       };
 
@@ -126,7 +182,7 @@ export function getReport(): Report {
 }
 
 function coerceRepo(repository: string): void {
-  if (!is.undefined(report.repositories[repository])) {
+  if (!isUndefined(report.repositories[repository])) {
     return;
   }
 

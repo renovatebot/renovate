@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { getDatasources } from '../../lib/modules/datasource';
-import { readFile, updateFile } from '../utils';
-import type { OpenItems } from './github-query-items';
-import { generateFeatureAndBugMarkdown } from './github-query-items';
+import { getDatasources } from '../../lib/modules/datasource/index.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import type { OpenItems } from './github-query-items.ts';
+import { generateFeatureAndBugMarkdown } from './github-query-items.ts';
 import {
   formatDescription,
   formatUrls,
   getDisplayName,
   getModuleLink,
   replaceContent,
-} from './utils';
+} from './utils.ts';
 
 export async function generateDatasources(
   dist: string,
@@ -23,13 +23,13 @@ export async function generateDatasources(
       id,
       urls,
       defaultConfig,
-      customRegistrySupport,
       defaultVersioning,
       releaseTimestampSupport,
       releaseTimestampNote,
       sourceUrlSupport,
       sourceUrlNote,
     } = definition;
+    const customRegistrySupport = definition.supportsCustomRegistry(id);
     const displayName = getDisplayName(datasource, definition);
     datasourceContent += `* ${getModuleLink(
       datasource,
@@ -61,15 +61,12 @@ export async function generateDatasources(
     tableContent += `| Release timestamp support | ${releaseTimestampSupport ? 'Yes' : 'No'} | ${releaseTimestampNote ?? ''} |\n`;
     tableContent += `| Source URL support | ${sourceUrlSupport === 'none' ? 'No' : 'Yes'} | ${sourceUrlNote ?? ''} |\n`;
 
-    md += tableContent + '\n';
+    md += `${tableContent}\n`;
     md += formatUrls(urls);
     md += await formatDescription('datasource', datasource);
 
     if (defaultConfig) {
-      md +=
-        '## Default configuration\n\n```json\n' +
-        JSON.stringify(defaultConfig, undefined, 2) +
-        '\n```\n';
+      md += `## Default configuration\n\n\`\`\`json\n${JSON.stringify(defaultConfig, undefined, 2)}\n\`\`\`\n`;
     }
 
     md += generateFeatureAndBugMarkdown(datasourceIssuesMap, datasource);

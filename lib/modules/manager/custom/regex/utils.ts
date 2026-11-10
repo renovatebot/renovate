@@ -1,16 +1,18 @@
-import { URL } from 'node:url';
-import is from '@sindresorhus/is';
-import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
-import { logger } from '../../../../logger';
-import * as template from '../../../../util/template';
-import type { PackageDependency } from '../../types';
-import type { ValidMatchFields } from '../utils';
-import { validMatchFields } from '../utils';
+import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
+import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
+import { logger } from '../../../../logger/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
+import * as template from '../../../../util/template/index.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { ValidMatchFields } from '../types.ts';
+import { validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
+  PackageFileInfo,
   RegexManagerConfig,
   RegexManagerTemplates,
-} from './types';
+} from './types.ts';
 
 function updateDependency(
   dependency: PackageDependency,
@@ -18,20 +20,21 @@ function updateDependency(
   value: string,
 ): void {
   switch (field) {
-    case 'registryUrl':
+    case 'registryUrl': {
       // check if URL is valid and pack inside an array
-      try {
-        const url = new URL(value).toString();
+      const url = parseUrl(value)?.toString();
+      if (url) {
         dependency.registryUrls = [url];
-      } catch {
+      } else {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
       break;
+    }
     case 'datasource':
       dependency.datasource = migrateDatasource(value);
       break;
     case 'indentation':
-      dependency.indentation = is.emptyStringOrWhitespace(value) ? value : '';
+      dependency.indentation = isEmptyStringOrWhitespace(value) ? value : '';
       break;
     default:
       dependency[field] = value;
@@ -42,17 +45,23 @@ function updateDependency(
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: RegexManagerConfig,
+  packageFileInfo: PackageFileInfo,
   dep?: PackageDependency,
 ): PackageDependency | null {
-  const dependency = dep ?? {};
+  const dependency = coerceObject(dep);
   const { groups, replaceString } = extractionTemplate;
+  const { packageFileName, packageFileDir } = packageFileInfo;
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
-        const compiled = template.compile(tmpl, groups, false);
+        const compiled = template.compile(
+          tmpl,
+          { ...groups, packageFile: packageFileName, packageFileDir },
+          false,
+        );
         updateDependency(dependency, field, compiled);
       } catch {
         logger.warn(

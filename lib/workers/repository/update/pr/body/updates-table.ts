@@ -1,7 +1,7 @@
-import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
-import * as template from '../../../../../util/template';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import * as template from '../../../../../util/template/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../../types.ts';
 
 interface TableDefinition {
   header: string;
@@ -29,14 +29,16 @@ function getNonEmptyColumns(
   const res: string[] = [];
   for (const header of prBodyColumns) {
     for (const row of rows) {
-      if (row[header]?.length) {
-        if (!res.includes(header)) {
-          res.push(header);
-        }
+      if (row[header]?.length && !res.includes(header)) {
+        res.push(header);
       }
     }
   }
   return res;
+}
+
+function getHeaderLabel(header: string, config: BranchConfig): string {
+  return config.prBodyHeadingDefinitions?.[header] ?? header;
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
@@ -86,8 +88,10 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   const tableValues = Object.values(tableKeyValuePairs);
   const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
-  res += '| ' + tableColumns.join(' | ') + ' |\n';
-  res += '|' + tableColumns.map(() => '---|').join('') + '\n';
+  const headerCells = tableColumns.map((col) => getHeaderLabel(col, config));
+
+  res += `| ${headerCells.join(' | ')} |\n`;
+  res += `|${tableColumns.map(() => '---|').join('')}\n`;
   const rows = [];
   for (const row of tableValues) {
     let val = '|';

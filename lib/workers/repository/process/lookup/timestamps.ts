@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../../logger';
+import { logger } from '../../../../logger/index.ts';
 import type {
   Release,
   ReleaseResult,
-} from '../../../../modules/datasource/types';
-import type { VersioningApi } from '../../../../modules/versioning/types';
-import { asTimestamp } from '../../../../util/timestamp';
+} from '../../../../modules/datasource/types.ts';
+import type { VersioningApi } from '../../../../modules/versioning/types.ts';
+import { asTimestamp } from '../../../../util/timestamp.ts';
 
 /**
  * Calculates the `mostRecentTimestamp` value for a set of releases.

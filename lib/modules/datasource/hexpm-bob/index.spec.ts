@@ -1,8 +1,8 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { datasource, defaultRegistryUrl } from './common';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
 
 describe('modules/datasource/hexpm-bob/index', () => {
   describe('getReleases', () => {
@@ -24,12 +24,12 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .scope(defaultRegistryUrl)
         .get('/builds/elixir/builds.txt')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'elixir',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -37,12 +37,12 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .scope(defaultRegistryUrl)
         .get('/builds/elixir/builds.txt')
         .reply(200, '');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'elixir',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns empty list for empty 200 OK', async () => {
@@ -50,12 +50,12 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .scope(defaultRegistryUrl)
         .get('/builds/elixir/builds.txt')
         .reply(200, '');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'elixir',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -170,12 +170,12 @@ describe('modules/datasource/hexpm-bob/index', () => {
     });
 
     it('returns empty list for invalid package name', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'invalid',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
   });
 });

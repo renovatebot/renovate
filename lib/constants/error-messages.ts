@@ -2,6 +2,11 @@
 export const SYSTEM_INSUFFICIENT_DISK_SPACE = 'disk-space';
 export const SYSTEM_INSUFFICIENT_MEMORY = 'out-of-memory';
 
+export const SystemErrors = [
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  SYSTEM_INSUFFICIENT_MEMORY,
+] as const;
+
 // Platform Error
 export const PLATFORM_AUTHENTICATION_ERROR = 'authentication-error';
 export const PLATFORM_BAD_CREDENTIALS = 'bad-credentials';
@@ -10,6 +15,16 @@ export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 export const PLATFORM_UNKNOWN_ERROR = 'platform-unknown-error';
+
+export const PlatformErrors = [
+  PLATFORM_AUTHENTICATION_ERROR,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_GPG_FAILED,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_NOT_FOUND,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
+] as const;
 
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';
@@ -20,6 +35,17 @@ export const CONFIG_VARIABLES_INVALID = 'config-variables-invalid';
 export const CONFIG_GIT_URL_UNAVAILABLE = 'config-git-url-unavailable';
 export const CONFIG_INHERIT_NOT_FOUND = 'config-inherit-not-found';
 export const CONFIG_INHERIT_PARSE_ERROR = 'config-inherit-parse-error';
+
+export const ConfigErrors = [
+  CONFIG_VALIDATION,
+  CONFIG_PRESETS_INVALID,
+  CONFIG_SECRETS_EXPOSED,
+  CONFIG_SECRETS_INVALID,
+  CONFIG_VARIABLES_INVALID,
+  CONFIG_GIT_URL_UNAVAILABLE,
+  CONFIG_INHERIT_NOT_FOUND,
+  CONFIG_INHERIT_PARSE_ERROR,
+] as const;
 
 // Repository Errors - causes repo to be considered as disabled
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
@@ -37,13 +63,42 @@ export const REPOSITORY_FORKED = 'fork';
 export const REPOSITORY_MIRRORED = 'mirror';
 export const REPOSITORY_NOT_FOUND = 'not-found';
 export const REPOSITORY_NO_PACKAGE_FILES = 'no-package-files';
+export const REPOSITORY_PENDING_DELETION = 'pending-deletion';
 export const REPOSITORY_RENAMED = 'renamed';
 export const REPOSITORY_UNINITIATED = 'uninitiated';
+
+/** cause repo to be considered as disabled */
+export const RepositoryErrors = [
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_BLOCKED,
+  REPOSITORY_CANNOT_FORK,
+  REPOSITORY_DISABLED,
+  REPOSITORY_CLOSED_ONBOARDING,
+  REPOSITORY_DISABLED_BY_CONFIG,
+  REPOSITORY_NO_CONFIG,
+  REPOSITORY_EMPTY,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
+  REPOSITORY_FORKED,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_PENDING_DELETION,
+  REPOSITORY_RENAMED,
+  REPOSITORY_UNINITIATED,
+] as const;
 
 // Temporary Error
 export const REPOSITORY_CHANGED = 'repository-changed';
 export const TEMPORARY_ERROR = 'temporary-error';
 export const NO_VULNERABILITY_ALERTS = 'no-vulnerability-alerts';
+
+export const TemporaryErrors = [
+  REPOSITORY_CHANGED,
+  TEMPORARY_ERROR,
+  NO_VULNERABILITY_ALERTS,
+] as const;
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
@@ -52,10 +107,14 @@ export const FILE_ACCESS_VIOLATION_ERROR = 'file-access-violation-error';
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
 export const IGNORABLE_HOST_ERROR = 'ignorable-host-error';
+export const HOST_BLOCKED = 'host-blocked';
 export const HOST_DISABLED = 'host-disabled';
 
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
+
+// PR Error
+export const PR_ALREADY_IN_MERGE_QUEUE = 'pr-already-in-merge-queue';
 
 // Bundler Error
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
@@ -71,3 +130,6 @@ export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
 
 // Missing API required credentials
 export const MISSING_API_CREDENTIALS = 'missing-api-credentials';
+
+/** Logger not initialized */
+export const LOGGER_NOT_INITIALIZED = 'logger-not-initialized';

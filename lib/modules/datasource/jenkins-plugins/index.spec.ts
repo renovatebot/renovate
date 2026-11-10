@@ -1,12 +1,12 @@
-import { getPkgReleases } from '..';
-import type { Timestamp } from '../../../util/timestamp';
-import * as versioning from '../../versioning/docker';
+import * as httpMock from '~test/http-mock.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import * as versioning from '../../versioning/maven/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { JenkinsPluginsDatasource } from './index.ts';
 import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
-} from './types';
-import { JenkinsPluginsDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+} from './schema.ts';
 
 const jenkinsPluginsInfo: JenkinsPluginsInfoResponse = {
   plugins: {
@@ -63,7 +63,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .get('/current/update-center.actual.json')
         .reply(200, jenkinsPluginsInfo);
 
-      expect(await getPkgReleases(newparams)).toBeNull();
+      await expect(getPkgReleases(newparams)).resolves.toBeNull();
     });
 
     it('returns package releases for a hit for info and releases', async () => {
@@ -125,7 +125,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .get('/current/update-center.actual.json')
         .reply(200, {});
 
-      expect(await getPkgReleases(params)).toBeNull();
+      await expect(getPkgReleases(params)).resolves.toBeNull();
     });
 
     it('returns package releases from a custom registry', async () => {

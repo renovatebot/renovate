@@ -1,105 +1,82 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNumber,
+  isPlainObject,
+  isPrimitive,
+  isString,
+} from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { toArray } from '../array';
-import { getChildEnv } from '../exec/utils';
-import { regEx } from '../regex';
+import { GlobalConfig } from '../../config/global.ts';
+import { pkg } from '../../expose.ts';
+import { logger } from '../../logger/index.ts';
+import { toArray } from '../array.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { regEx } from '../regex.ts';
 
 // Missing in handlebars
 type Options = HelperOptions & {
   lookupProperty: (element: unknown, key: unknown) => unknown;
 };
 
-handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
-handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
+const helpers: Record<string, handlebars.HelperDelegate> = {
+  encodeURIComponent,
+  decodeURIComponent,
+  encodeBase64: (str: string) => Buffer.from(str ?? '').toString('base64'),
+  decodeBase64: (str: string) => Buffer.from(str ?? '', 'base64').toString(),
+  stringToPrettyJSON: (input: string): string =>
+    JSON.stringify(JSON.parse(input), null, 2),
+  toJSON: (input: unknown): string => JSON.stringify(input),
+  toArray: (...args: unknown[]): unknown[] => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args;
+  },
+  toObject: (...args: unknown[]): unknown => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
 
-handlebars.registerHelper('encodeBase64', (str: string) =>
-  Buffer.from(str ?? '').toString('base64'),
-);
+    if (args.length % 2 !== 0) {
+      throw new Error(`Must contain an even number of elements`);
+    }
 
-handlebars.registerHelper('decodeBase64', (str: string) =>
-  Buffer.from(str ?? '', 'base64').toString(),
-);
+    const keys = args.filter((_, index) => index % 2 === 0);
+    const values = args.filter((_, index) => index % 2 === 1);
 
-handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
-  JSON.stringify(JSON.parse(input), null, 2),
-);
-
-handlebars.registerHelper('toJSON', (input: unknown): string =>
-  JSON.stringify(input),
-);
-
-handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
-  // Need to remove the 'options', as last parameter
-  // https://handlebarsjs.com/api-reference/helpers.html
-  args.pop();
-  return args;
-});
-
-handlebars.registerHelper('toObject', (...args: unknown[]): unknown => {
-  // Need to remove the 'options', as last parameter
-  // https://handlebarsjs.com/api-reference/helpers.html
-  args.pop();
-
-  if (args.length % 2 !== 0) {
-    throw new Error(`Must contain an even number of elements`);
-  }
-
-  const keys = args.filter((_, index) => index % 2 === 0);
-  const values = args.filter((_, index) => index % 2 === 1);
-
-  return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
-});
-
-handlebars.registerHelper('replace', (find, replace, context) =>
-  (context ?? '').replace(regEx(find, 'g'), replace),
-);
-
-handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
-
-handlebars.registerHelper('containsString', (str, subStr) =>
-  str?.includes(subStr),
-);
-
-handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
-
-handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
-  if (is.array(arg1, is.string) && is.string(arg2)) {
-    return arg1.includes(arg2);
-  }
-
-  return false;
-});
-
-handlebars.registerHelper(
-  'split',
-  (str: unknown, separator: unknown): string[] => {
-    if (is.string(str) && is.string(separator)) {
+    return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+  },
+  replace: (find, replace, context) =>
+    (context ?? '').replace(regEx(find, 'g'), replace),
+  lowercase: (str: string) => str?.toLowerCase(),
+  uppercase: (str: string) => str?.toUpperCase(),
+  containsString: (str, subStr) => str?.includes(subStr),
+  equals: (arg1, arg2) => arg1 === arg2,
+  includes: (arg1: string[], arg2: string) => {
+    if (isArray(arg1, isString) && isString(arg2)) {
+      return arg1.includes(arg2);
+    }
+    return false;
+  },
+  split: (str: unknown, separator: unknown): string[] => {
+    if (isString(str) && isString(separator)) {
       return str.split(separator);
     }
     return [];
   },
-);
-
-handlebars.registerHelper({
-  and(...args) {
-    // Need to remove the 'options', as last parameter
+  and: (...args: unknown[]) => {
+    // Need to remove the 'options', as the last parameter
     // https://handlebarsjs.com/api-reference/helpers.html
     args.pop();
     return args.every(Boolean);
   },
-  or(...args) {
-    // Need to remove the 'options', as last parameter
+  or: (...args: unknown[]) => {
+    // Need to remove the 'options', as the last parameter
     // https://handlebarsjs.com/api-reference/helpers.html
     args.pop();
     return args.some(Boolean);
   },
-});
-
-handlebars.registerHelper(
-  'lookupArray',
-  (obj: unknown, key: unknown, options: Options): unknown[] => {
+  lookupArray: (obj: unknown, key: unknown, options: Options): unknown[] => {
     return (
       toArray(obj)
         // skip elements like #with does
@@ -108,26 +85,47 @@ handlebars.registerHelper(
         .filter((value) => value !== undefined)
     );
   },
-);
+  distinct: (obj: unknown): unknown[] => {
+    const seen = new Set<string>();
 
-handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
-  const seen = new Set<string>();
+    return toArray(obj).filter((value) => {
+      const str = JSON.stringify(value);
 
-  return toArray(obj).filter((value) => {
-    const str = JSON.stringify(value);
+      if (seen.has(str)) {
+        return false;
+      }
 
-    if (seen.has(str)) {
-      return false;
+      seen.add(str);
+      return true;
+    });
+  },
+  add: (a, b) => {
+    if (isNumber(a) && isNumber(b)) {
+      return a + b;
     }
 
-    seen.add(str);
-    return true;
-  });
-});
+    throw new Error('add: inputs are not valid');
+  },
+};
 
+// Register all helpers from the single source of truth
+for (const [name, fn] of Object.entries(helpers)) {
+  handlebars.registerHelper(name, fn);
+}
+
+// Export helper names derived from the same source used to register them
+export const templateHelperNames = Object.keys(helpers) as readonly string[];
+
+/**
+ * Config options whose **values** are exposed as template variables.
+ * e.g. `groupName` is in this list because you can write `{{groupName}}` inside a template.
+ * This is distinct from `supportsTemplating`, which marks options whose values
+ * are themselves *compiled* as Handlebars templates via `template.compile()`.
+ */
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
+  'allowedVersions',
   'branchName',
   'branchPrefix',
   'branchTopic',
@@ -155,6 +153,11 @@ export const exposedConfigOptions = [
   'sourceDirectory',
 ];
 
+/**
+ * Runtime-generated fields available as template variables.
+ * These are not config options — they are computed during Renovate's run
+ * (e.g. `depName`, `newVersion`, `isMajor`) and made available in templates.
+ */
 export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
   body: 'The body of the release notes',
@@ -179,6 +182,8 @@ export const allowedFields = {
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
+  effectiveDatasource:
+    'The datasources used to fetch releases after delegation',
   hasReleaseNotes: 'true if the upgrade has release notes',
   indentation: 'The indentation of the dependency being updated',
   isGroup: 'true if the upgrade is part of a group',
@@ -198,7 +203,7 @@ export const allowedFields = {
   manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
   newDigestShort:
-    'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
+    'A shortened version of newDigest, for use when the full digest is too long to be conveniently displayed',
   newMajor:
     'The major version of the new version. e.g. "3" if the new version is "3.1.0"',
   newMinor:
@@ -213,6 +218,12 @@ export const allowedFields = {
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   newVersionAgeInDays: 'The age of the new version in days',
+  major:
+    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
+  minor:
+    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
+  patch:
+    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
@@ -231,6 +242,7 @@ export const allowedFields = {
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
   releaseTimestamp: 'The timestamp of the release',
+  renovateVersion: 'The currently running Renovate version.',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceRepo: 'The repository in the sourceUrl, if present',
@@ -251,15 +263,24 @@ export const allowedFields = {
     'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
-type CompileInput = Record<string, unknown>;
+type CompileInput<T = Record<string, unknown>> = T;
 
+/**
+ * The complete set of field names that may be referenced inside a Handlebars template.
+ * Union of runtime fields (`allowedFields`) and config options (`exposedConfigOptions`).
+ * Used by the compile proxy to warn on unknown variable references.
+ */
 const allowedTemplateFields = new Set([
   ...Object.keys(allowedFields),
   ...exposedConfigOptions,
 ]);
 
 class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
-  constructor(private warnVariables: Set<string>) {}
+  private warnVariables: Set<string>;
+
+  constructor(warnVariables: Set<string>) {
+    this.warnVariables = warnVariables;
+  }
 
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {
@@ -278,15 +299,15 @@ class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
       return value;
     }
 
-    if (is.array(value)) {
+    if (isArray(value)) {
       return value.map((element) =>
-        is.primitive(element)
+        isPrimitive(element)
           ? element
           : proxyCompileInput(element as CompileInput, this.warnVariables),
       );
     }
 
-    if (is.plainObject(value)) {
+    if (isPlainObject(value)) {
       return proxyCompileInput(value, this.warnVariables);
     }
 
@@ -304,20 +325,27 @@ export function proxyCompileInput(
   );
 }
 
-export function compile(
+export function compile<T>(
   template: string,
-  input: CompileInput,
+  input: CompileInput<T>,
   filterFields = true,
 ): string {
   const env = getChildEnv({});
-  const data = { ...GlobalConfig.get(), ...input, env };
+  const data = {
+    ...GlobalConfig.get(),
+    renovateVersion: pkg.version,
+    ...input,
+    env,
+  };
   const warnVariables = new Set<string>();
   const filteredInput = filterFields
     ? proxyCompileInput(data, warnVariables)
     : data;
 
   logger.trace({ template, filteredInput }, 'Compiling template');
-  const result = handlebars.compile(template)(filteredInput);
+  const result = handlebars.compile(template, { noEscape: true })(
+    filteredInput,
+  );
 
   if (warnVariables.size > 0) {
     logger.info(
@@ -329,9 +357,9 @@ export function compile(
   return result;
 }
 
-export function safeCompile(
+export function safeCompile<T>(
   template: string,
-  input: CompileInput,
+  input: CompileInput<T>,
   filterFields = true,
 ): string {
   try {
@@ -340,4 +368,13 @@ export function safeCompile(
     logger.warn({ err, template }, 'Error compiling template');
     return '';
   }
+}
+
+/**
+ * Validate that the template is a valid Handlebars template string.
+ *
+ * NOTE: Does not validate that fields are set to valid field names.
+ */
+export function validate(template: string): void {
+  handlebars.parse(template);
 }

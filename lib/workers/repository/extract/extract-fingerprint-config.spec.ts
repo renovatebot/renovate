@@ -1,7 +1,7 @@
-import { mergeChildConfig } from '../../../config';
-import { getConfig } from '../../../config/defaults';
-import { allManagersList } from '../../../modules/manager';
-import { generateFingerprintConfig } from './extract-fingerprint-config';
+import { getConfig } from '../../../config/defaults.ts';
+import { mergeChildConfig } from '../../../config/index.ts';
+import { allManagersList } from '../../../modules/manager/index.ts';
+import { generateFingerprintConfig } from './extract-fingerprint-config.ts';
 
 describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {
@@ -42,6 +42,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       managerFilePatterns: [
         '/(^|/)package\\.json$/',
         '/(^|/)pnpm-workspace\\.yaml$/',
+        '/(^|/)\\.yarnrc\\.yml$/',
         '/hero.json/',
       ],
       ignorePaths: ['ignore-path-2'],
@@ -92,6 +93,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       managerFilePatterns: [
         '/(^|/)package\\.json$/',
         '/(^|/)pnpm-workspace\\.yaml$/',
+        '/(^|/)\\.yarnrc\\.yml$/',
         '/hero.json/',
       ],
       ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
@@ -124,5 +126,32 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex'),
     ).toBeUndefined();
+  });
+
+  describe('hasVulnerabilityAlertsRules', () => {
+    it('is omitted when no vulnerability alerts are configured', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['npm'],
+      });
+
+      const fingerprintConfig = generateFingerprintConfig(config);
+
+      expect(fingerprintConfig.managers[0]).not.toHaveProperty(
+        'hasVulnerabilityAlertsRules',
+      );
+    });
+
+    it('is set for every manager when vulnerability alerts are configured', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['npm', 'dockerfile'],
+        osvVulnerabilityAlerts: true,
+      });
+
+      const fingerprintConfig = generateFingerprintConfig(config);
+
+      expect(fingerprintConfig.managers).toSatisfyAll(
+        (manager) => manager.hasVulnerabilityAlertsRules === true,
+      );
+    });
   });
 });

@@ -1,11 +1,11 @@
-import is from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import type { LegacyHostRule } from '../../../util/host-rules';
-import { massageHostUrl } from '../../../util/url';
-import { AbstractMigration } from '../base/abstract-migration';
-import { migrateDatasource } from './datasource-migration';
+import { isString } from '@sindresorhus/is';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import type { LegacyHostRule } from '../../../util/host-rules.ts';
+import { massageHostUrl } from '../../../util/url.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+import { migrateDatasource } from './datasource-migration.ts';
 
 export class HostRulesMigration extends AbstractMigration {
   override readonly propertyName = 'hostRules';
@@ -18,21 +18,24 @@ export class HostRulesMigration extends AbstractMigration {
 
       for (const [key, value] of Object.entries(hostRule)) {
         if (key === 'platform') {
-          if (is.string(value)) {
+          // v8 ignore else -- TODO: add test #40625
+          if (isString(value)) {
             newRule.hostType ??= value;
           }
           continue;
         }
 
         if (key === 'matchHost') {
-          if (is.string(value)) {
+          // v8 ignore else -- TODO: add test #40625
+          if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }
           continue;
         }
 
         if (key === 'hostType') {
-          if (is.string(value)) {
+          // v8 ignore else -- TODO: add test #40625
+          if (isString(value)) {
             newRule.hostType ??= migrateDatasource(value);
           }
           continue;
@@ -45,7 +48,8 @@ export class HostRulesMigration extends AbstractMigration {
           key === 'hostName' ||
           key === 'domainName'
         ) {
-          if (is.string(value)) {
+          // v8 ignore else -- TODO: add test #40625
+          if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }
           continue;
@@ -97,7 +101,7 @@ function removeUndefinedFields(
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key of Object.keys(obj)) {
-    if (is.string(obj[key])) {
+    if (isString(obj[key])) {
       result[key] = obj[key];
     }
   }

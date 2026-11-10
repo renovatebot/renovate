@@ -1,11 +1,13 @@
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { getEnabledManagersList } from '../../../modules/manager';
-import { isCustomManager } from '../../../modules/manager/custom';
-import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
-import type { CustomExtractConfig } from '../../../modules/manager/custom/types';
-import { validMatchFields } from '../../../modules/manager/custom/utils';
-import type { WorkerExtractConfig } from '../../types';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { isCustomManager } from '../../../modules/manager/custom/index.ts';
+import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types.ts';
+import type { CustomExtractConfig } from '../../../modules/manager/custom/types.ts';
+import { validMatchFields } from '../../../modules/manager/custom/utils.ts';
+import { getEnabledManagersList } from '../../../modules/manager/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import type { WorkerExtractConfig } from '../../types.ts';
+import { hasVulnerabilityAlertsRules } from './vulnerability-alerts.ts';
 
 export interface FingerprintExtractConfig {
   managerList: Set<string>;
@@ -43,8 +45,13 @@ function getFilteredManagerConfig(
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,
-    ignorePaths: config.ignorePaths ?? [],
-    includePaths: config.includePaths ?? [],
+    // Omitted when false, so repos with no vulnerability alerts keep the config
+    // hash they already have, and do not re-extract once on upgrade
+    ...(config.hasVulnerabilityAlertsRules && {
+      hasVulnerabilityAlertsRules: true,
+    }),
+    ignorePaths: coerceArray(config.ignorePaths),
+    includePaths: coerceArray(config.includePaths),
     skipInstalls: config.skipInstalls,
     registryAliases: config.registryAliases,
     fileList: [],
@@ -56,21 +63,27 @@ export function generateFingerprintConfig(
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
   const managerList = new Set(getEnabledManagersList(config.enabledManagers));
+  const hasAlertRules = hasVulnerabilityAlertsRules(config);
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
-      const filteredCustomManagers = (config.customManagers ?? []).filter(
+      const filteredCustomManagers = coerceArray(config.customManagers).filter(
         (mgr) => mgr.customType === manager,
       );
       for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
           ...mergeChildConfig(managerConfig, customManager),
+          hasVulnerabilityAlertsRules: hasAlertRules,
           fileList: [],
         });
       }
     } else {
-      managerExtractConfigs.push({ ...managerConfig, fileList: [] });
+      managerExtractConfigs.push({
+        ...managerConfig,
+        hasVulnerabilityAlertsRules: hasAlertRules,
+        fileList: [],
+      });
     }
   }
 

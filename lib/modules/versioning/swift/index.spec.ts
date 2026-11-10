@@ -1,4 +1,4 @@
-import swift from '.';
+import swift from './index.ts';
 
 const {
   getNewValue,
@@ -41,6 +41,7 @@ describe('modules/versioning/swift/index', () => {
     ${' "1.2.3" ..< "1.2.4" '} | ${true}
     ${'..<"1.2.4"'}            | ${true}
     ${' ..< "1.2.4" '}         | ${true}
+    ${'..<"1.2.4.5.6"'}        | ${false}
     ${'17.04.0'}               | ${false}
     ${'1.2.3'}                 | ${true}
     ${'v1.2.3'}                | ${true}

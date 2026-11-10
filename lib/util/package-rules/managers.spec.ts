@@ -1,4 +1,4 @@
-import { ManagersMatcher } from './managers';
+import { ManagersMatcher } from './managers.ts';
 
 describe('util/package-rules/managers', () => {
   const managersMatcher = new ManagersMatcher();

@@ -1,11 +1,12 @@
-import is from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types';
-import { TerraformProviderExtractor } from '../../base';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
+import { TerraformProviderExtractor } from '../../base.ts';
 import type {
   TerraformDefinitionFile,
   TerraformRequiredProvider,
-} from '../../hcl/types';
-import type { ProviderLock } from '../../lockfile/types';
+} from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
+import type { TerraformManagerData } from '../../types.ts';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
   getCheckList(): string[] {
@@ -15,16 +16,17 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
   extract(
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
+    config: ExtractConfig,
   ): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
-    if (is.nullOrUndefined(terraformBlocks)) {
+    if (isNullOrUndefined(terraformBlocks)) {
       return [];
     }
 
     const dependencies: PackageDependency[] = [];
     for (const terraformBlock of terraformBlocks) {
       const requiredProviders = terraformBlock.required_providers;
-      if (is.nullOrUndefined(requiredProviders)) {
+      if (isNullOrUndefined(requiredProviders)) {
         continue;
       }
 
@@ -32,8 +34,8 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
         requiredProviders.flatMap(Object.entries);
       for (const [requiredProviderName, value] of entries) {
         // name = version declaration method
-        let dep: PackageDependency;
-        if (is.string(value)) {
+        let dep: PackageDependency<TerraformManagerData>;
+        if (isString(value)) {
           dep = {
             currentValue: value,
             managerData: {
@@ -51,7 +53,12 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
           };
         }
         dependencies.push(
-          this.analyzeTerraformProvider(dep, locks, 'required_provider'),
+          this.analyzeTerraformProvider(
+            dep,
+            locks,
+            'required_provider',
+            config,
+          ),
         );
       }
     }

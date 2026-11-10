@@ -1,62 +1,98 @@
-import type { RenovateConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types.ts';
 
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
+  ConfigErrors,
+  EXTERNAL_HOST_ERROR,
+  MANAGER_LOCKFILE_ERROR,
   MISSING_API_CREDENTIALS,
-  REPOSITORY_ACCESS_FORBIDDEN,
-  REPOSITORY_ARCHIVED,
-  REPOSITORY_BLOCKED,
-  REPOSITORY_CLOSED_ONBOARDING,
-  REPOSITORY_DISABLED,
-  REPOSITORY_DISABLED_BY_CONFIG,
-  REPOSITORY_EMPTY,
-  REPOSITORY_FORKED,
-  REPOSITORY_FORK_MODE_FORKED,
-  REPOSITORY_MIRRORED,
-  REPOSITORY_NOT_FOUND,
-  REPOSITORY_NO_CONFIG,
-  REPOSITORY_NO_PACKAGE_FILES,
-  REPOSITORY_RENAMED,
-  REPOSITORY_UNINITIATED,
-} from '../../constants/error-messages';
-import { logger } from '../../logger';
+  PlatformErrors,
+  RepositoryErrors,
+  SystemErrors,
+  TemporaryErrors,
+  UNKNOWN_ERROR,
+} from '../../constants/error-messages.ts';
+
+import { addRepositoryStatus } from '../../instrumentation/reporting.ts';
+import { logger } from '../../logger/index.ts';
 
 export type ProcessStatus =
+  /**
+   * The repository has been disabled, and will not be processed.
+   *
+   * See {@link RepositoryErrors} for information on which statuses lead to this.
+   */
   | 'disabled'
+  /**
+   * The repository has onboarded to Renovate, so will see PRs and/or branches raised by Renovate.
+   *
+   * The repository has not yet merged any PRs, or the repository performs branch-based automerge and those have not been detected (TODO #40635).
+   */
   | 'onboarded'
+  /**
+   * The repository has onboarded to Renovate, and has merged at least 1 Renovate PR.
+   *
+   * The repository may also perform branch-based automerge which has not been detected (TODO #40635).
+   */
   | 'activated'
+  /**
+   * The repository has an onboarding PR from Renovate that has not yet been reviewed and merged.
+   */
   | 'onboarding'
   | 'unknown';
 
 export interface ProcessResult {
-  res: string;
+  res: RepositoryResult;
   status: ProcessStatus;
   enabled: boolean | undefined;
   onboarded: boolean | undefined;
+  /** the process exit code this result maps to, used when `exitCodeForErrors` is enabled */
+  exitCode: number;
+}
+
+/** a strong type for any repository result status that Renovate may report */
+export type RepositoryResult =
+  /** repository was processed successfully */
+  | 'done'
+  /** Renovate performed branch-based automerge on one branch during its run */
+  | 'automerged'
+  /** the repository is not yet onboarded, and its onboarding PR was processed during this run */
+  | 'onboarding'
+  // common set of errors
+  | (typeof SystemErrors)[number]
+  | (typeof RepositoryErrors)[number]
+  | (typeof TemporaryErrors)[number]
+  | (typeof ConfigErrors)[number]
+  | (typeof PlatformErrors)[number]
+  // other errors
+  | typeof EXTERNAL_HOST_ERROR
+  | typeof MISSING_API_CREDENTIALS
+  | typeof MANAGER_LOCKFILE_ERROR
+  | typeof UNKNOWN_ERROR;
+
+/**
+ * Exit code per known error group, used when `exitCodeForErrors` is enabled.
+ *
+ * `RepositoryErrors` are deliberately absent: they mean the repository is disabled, not that the run failed.
+ */
+const exitCodes: [readonly string[], number][] = [
+  [SystemErrors, 3],
+  [PlatformErrors, 4],
+  [ConfigErrors, 5],
+  [TemporaryErrors, 6],
+  [[EXTERNAL_HOST_ERROR, MANAGER_LOCKFILE_ERROR, MISSING_API_CREDENTIALS], 7],
+  [[UNKNOWN_ERROR], 8],
+];
+
+function getExitCode(res: RepositoryResult): number {
+  return exitCodes.find(([errors]) => errors.includes(res))?.[1] ?? 0;
 }
 
 export function processResult(
   config: RenovateConfig,
-  res: string,
+  res: RepositoryResult,
 ): ProcessResult {
-  const disabledStatuses = [
-    REPOSITORY_ACCESS_FORBIDDEN,
-    REPOSITORY_ARCHIVED,
-    REPOSITORY_BLOCKED,
-    REPOSITORY_CLOSED_ONBOARDING,
-    REPOSITORY_DISABLED,
-    REPOSITORY_DISABLED_BY_CONFIG,
-    REPOSITORY_EMPTY,
-    REPOSITORY_FORK_MODE_FORKED,
-    REPOSITORY_FORKED,
-    REPOSITORY_MIRRORED,
-    REPOSITORY_NOT_FOUND,
-    REPOSITORY_NO_CONFIG,
-    REPOSITORY_NO_PACKAGE_FILES,
-    REPOSITORY_RENAMED,
-    REPOSITORY_UNINITIATED,
-  ];
   const enabledStatuses = [
     CONFIG_SECRETS_EXPOSED,
     CONFIG_VALIDATION,
@@ -66,7 +102,7 @@ export function processResult(
   let enabled: boolean | undefined;
   let onboarded: boolean | undefined;
   // istanbul ignore next
-  if (disabledStatuses.includes(res)) {
+  if (RepositoryErrors.includes(res as (typeof RepositoryErrors)[number])) {
     status = 'disabled';
     enabled = false;
   } else if (config.repoIsActivated) {
@@ -89,5 +125,6 @@ export function processResult(
     // TODO: types (#22198)
     `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`,
   );
-  return { res, status, enabled, onboarded };
+  addRepositoryStatus(config, status);
+  return { res, status, enabled, onboarded, exitCode: getExitCode(res) };
 }

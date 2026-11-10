@@ -1,7 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { detectPlatform, parseJson } from './common';
-import * as hostRules from './host-rules';
-import { logger } from '~test/util';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../config/global.ts';
+import { InheritConfig } from '../config/inherit.ts';
+import { PLATFORM_FAMILIES } from '../constants/index.ts';
+import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
+import * as hostRules from './host-rules.ts';
 
 const validJsonString = `
 {
@@ -38,8 +41,6 @@ const validJsoncString = `
 `;
 
 describe('util/common', () => {
-  beforeEach(() => hostRules.clear());
-
   describe('detectPlatform', () => {
     it.each`
       url                                                                    | hostType
@@ -51,6 +52,7 @@ describe('util/common', () => {
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.example.com/some-org/some-repo'}                  | ${'bitbucket-server'}
       ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
+      ${'https://gitea.example.com/semantic-release/gitlab'}                 | ${'gitea'}
       ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'forgejo'}
       ${'https://codeberg.org/forgejo/forgejo'}                              | ${'forgejo'}
       ${'https://codefloe.com/some-org/some-repo'}                           | ${'forgejo'}
@@ -62,7 +64,19 @@ describe('util/common', () => {
       expect(detectPlatform(url)).toBe(hostType);
     });
 
+    it.each(
+      Object.entries(PLATFORM_FAMILIES).flatMap(([family, { knownHosts }]) =>
+        knownHosts.map((host) => ({ family, host })),
+      ),
+    )('knows $host as $family', ({ family, host }) => {
+      expect(detectPlatform(`https://${host}/some-org/some-repo`)).toBe(family);
+    });
+
     it('uses host rules', () => {
+      hostRules.add({
+        hostType: 'azure',
+        matchHost: 'az.example.com',
+      });
       hostRules.add({
         hostType: 'bitbucket',
         matchHost: 'bb.example.com',
@@ -87,7 +101,9 @@ describe('util/common', () => {
         hostType: 'unknown',
         matchHost: 'f.example.com',
       });
-
+      expect(detectPlatform('https://az.example.com/chalk/chalk')).toBe(
+        'azure',
+      );
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket',
       );
@@ -139,7 +155,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid json', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow(
+        "JSON5: invalid character '\\\"' at 7:3",
+      );
     });
 
     it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
@@ -149,6 +167,7 @@ describe('util/common', () => {
         city: 'San Francisco',
         isMarried: false,
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { context: 'renovate.json' },
         'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
@@ -176,7 +195,115 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid jsonc', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow(
+        'Parse error: Expected comma on line 6 column 47',
+      );
+    });
+  });
+
+  describe('getInheritedOrGlobal', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+      InheritConfig.reset();
+    });
+
+    it('returns undefined if not set', () => {
+      expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
+
+    it('returns inherited value if only inherited value is set', () => {
+      InheritConfig.set({
+        configFileNames: ['inherited'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
+    });
+
+    it('returns global value if only global value is set', () => {
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['global']);
+    });
+
+    it('returns inherited value - when both global + inherited are set', () => {
+      InheritConfig.set({
+        configFileNames: ['inherited'],
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
+    });
+
+    // is not possiblle as config validation will error out: only for coverage
+    it('handles null inherited values', () => {
+      InheritConfig.set({
+        configFileNames: null as never,
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toBeNull();
+    });
+
+    // is not possiblle as config validation will error out: only for coverage
+    it('handles undefined inherited values', () => {
+      InheritConfig.set({
+        configFileNames: undefined,
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
+
+    describe('when requesting onboardingAutoCloseAge, do not allow inherit config to override global config', () => {
+      it('returns inherited value when inherited < global', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns global value when inherited > global value', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns inherited value when inherited == global', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns inherited value when global value is not set', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: undefined,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
+      });
+
+      it('returns global value when inherited value is not set', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
+      });
     });
   });
 });

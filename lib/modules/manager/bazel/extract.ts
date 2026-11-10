@@ -1,11 +1,11 @@
-import type { PackageDependency, PackageFileContent } from '../types';
-import { parse } from './parser';
-import { extractDepsFromFragment } from './rules';
-import { dockerRules } from './rules/docker';
-import { gitRules } from './rules/git';
-import { goRules } from './rules/go';
-import { ociRules } from './rules/oci';
-import type { RecordFragment } from './types';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { parse } from './parser.ts';
+import { dockerRules } from './rules/docker.ts';
+import { gitRules } from './rules/git.ts';
+import { goRules } from './rules/go.ts';
+import { extractDepsFromFragment } from './rules/index.ts';
+import { ociRules } from './rules/oci.ts';
+import type { RecordFragment } from './types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -27,10 +27,12 @@ export function extractPackageFile(
       // functionality work correctly.
       const rules = [...dockerRules, ...ociRules, ...gitRules, ...goRules];
       const replaceString = fragment.value;
-      if (rules.some((rule) => replaceString.startsWith(rule))) {
-        if (dep.currentValue && dep.currentDigest) {
-          dep.replaceString = replaceString;
-        }
+      if (
+        rules.some((rule) => replaceString.startsWith(rule)) &&
+        dep.currentValue &&
+        dep.currentDigest
+      ) {
+        dep.replaceString = replaceString;
       }
 
       deps.push(dep);

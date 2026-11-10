@@ -2,11 +2,10 @@ import type {
   RepositoryCacheConfig,
   RepositoryCacheType,
   UpdateType,
-} from '../../../config/types';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { RepoInitConfig } from '../../../workers/repository/init/types';
-import type { ExtractResult } from '../../../workers/repository/process/extract-update';
-import type { PrBlockedBy } from '../../../workers/types';
+} from '../../../config/types.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
+import type { PrBlockedBy } from '../../../workers/types.ts';
 
 export interface BaseBranchCache {
   revision?: number;
@@ -23,16 +22,18 @@ export interface BranchUpgradeCache {
   depName?: string;
   depType?: string;
   displayPending?: unknown;
+  manager?: string;
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   sourceUrl?: string;
   packageFile?: string;
   remediationNotPossible?: unknown;
   updateType?: UpdateType;
+  isVulnerabilityAlert?: boolean;
 }
 
 export interface OnboardingBranchCache {
@@ -47,7 +48,9 @@ export interface OnboardingBranchCache {
 export interface ReconfigureBranchCache {
   reconfigureBranchSha: string;
   isConfigValid: boolean;
-  extractResult?: ExtractResult;
+  extractionSucceeded?: boolean;
+  /** @deprecated Written by earlier versions, migrated to `extractionSucceeded` when the cache is read. */
+  extractResult?: unknown;
 }
 
 export interface PrCache {
@@ -80,6 +83,11 @@ export interface BranchCache {
    */
   branchFingerprint?: string; // Defunct
   commitFingerprint?: string; // Actively used
+  /**
+   * The branch's most recent commit timestamp (ISO string)
+   * Used for commitHourlyLimit tracking
+   */
+  commitTimestamp?: string;
   /**
    * Branch name
    */
@@ -125,21 +133,29 @@ export interface BranchCache {
   result?: string;
 }
 
+/**
+ * Repository cache shared by the platforms which speak the Gitea API.
+ */
+export interface GiteaLikePlatformCache {
+  /**
+   * To avoid circular dependency problem, we use `unknown` type here.
+   */
+  pullRequestsCache?: unknown;
+  orgs?: Record<string, boolean>;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
   httpCache?: Record<string, unknown>;
+  httpCacheHead?: Record<string, unknown>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    forgejo?: {
-      pullRequestsCache?: unknown;
-    };
-    gitea?: {
-      pullRequestsCache?: unknown;
-    };
+    forgejo?: GiteaLikePlatformCache;
+    gitea?: GiteaLikePlatformCache;
     github?: {
       /**
        * To avoid circular dependency problem, we use `unknown` type here.
@@ -154,7 +170,10 @@ export interface RepoCacheData {
     gitlab?: {
       pullRequestsCache?: unknown;
     };
-    bitbucketServer?: {
+    'bitbucket-server'?: {
+      pullRequestsCache?: unknown;
+    };
+    gerrit?: {
       pullRequestsCache?: unknown;
     };
   };

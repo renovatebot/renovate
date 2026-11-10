@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { MaybeTimestamp } from '../../../util/timestamp';
+import { z } from 'zod/v4';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
-export const ReleaseResultZodSchema = z.object({
+export const ReleaseResultZod = z.object({
   releases: z.array(
     z
       .object({
@@ -10,6 +10,7 @@ export const ReleaseResultZodSchema = z.object({
         releaseTimestamp: MaybeTimestamp,
         sourceUrl: z.string().optional(),
         sourceDirectory: z.string().optional(),
+        changelogContent: z.string().optional().catch(undefined),
         changelogUrl: z.string().optional(),
         digest: z.string().optional(),
         isStable: z.boolean().optional(),

@@ -1,33 +1,31 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { detectPlatform } from '../../../util/common';
-import { parseGitUrl } from '../../../util/git/url';
-import { GithubHttp } from '../../../util/http/github';
-import { fromBase64 } from '../../../util/string';
-import { joinUrlParts } from '../../../util/url';
-import { GithubContentResponse } from '../../platform/github/schema';
-import semver from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { BitriseStepFile } from './schema';
+import { isArray } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { GithubContentResponse } from '../../platform/github/schema.ts';
+import semver from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { BitriseStepFile } from './schema.ts';
 
-export class BitriseDatasource extends Datasource {
+export class BitriseDatasource extends Datasource<GithubHttp> {
   static readonly id = 'bitrise';
 
-  override readonly http: GithubHttp;
-
   constructor() {
-    super(BitriseDatasource.id);
-
-    this.http = new GithubHttp(this.id);
+    super(BitriseDatasource.id, new GithubHttp(BitriseDatasource.id));
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/bitrise-io/bitrise-steplib.git',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/bitrise-io/bitrise-steplib.git'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -36,16 +34,11 @@ export class BitriseDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
-  @cache({
-    namespace: `datasource-${BitriseDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      `${registryUrl}/${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -53,7 +46,8 @@ export class BitriseDatasource extends Datasource {
     const parsedUrl = parseGitUrl(registryUrl);
     if (detectPlatform(registryUrl) !== 'github') {
       logger.once.warn(
-        `${parsedUrl.source} is not a supported Git hoster for this datasource`,
+        { source: parsedUrl.source },
+        'Unsupported Git hoster for this datasource',
       );
       return null;
     }
@@ -80,7 +74,7 @@ export class BitriseDatasource extends Datasource {
       GithubContentResponse,
     );
 
-    if (!is.array(packageRaw)) {
+    if (!isArray(packageRaw)) {
       logger.warn(
         { data: packageRaw, url: packageUrl },
         'Got unexpected response for Bitrise package location',
@@ -128,5 +122,15 @@ export class BitriseDatasource extends Datasource {
       ...result,
       homepage: `https://bitrise.io/integrations/steps/${packageName}`,
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

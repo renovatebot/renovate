@@ -1,6 +1,6 @@
-import type { Category } from '../../../constants';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
 
@@ -13,3 +13,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [GitlabTagsDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

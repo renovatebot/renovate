@@ -1,13 +1,15 @@
-import * as versionings from '../../../modules/versioning';
-import { matchRegexOrGlob } from '../../../util/string-match';
-import { presets } from './workarounds';
+import * as versionings from '../../../modules/versioning/index.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import { matchRegexOrGlob } from '../../../util/string-match.ts';
+import type { PackageRule, PackageRuleInputConfig } from '../../types.ts';
+import { presets } from './workarounds.preset.ts';
 
 describe('config/presets/internal/workarounds', () => {
   describe('bitnamiDockerImageVersioning', () => {
     const preset = presets.bitnamiDockerImageVersioning;
     const packageRule = preset.packageRules![0];
 
-    const versioning = versionings.get(packageRule.versioning as string);
+    const versioning = versionings.get(packageRule.versioning);
     const matchCurrentValue = packageRule.matchCurrentValue!;
 
     it.each`
@@ -41,13 +43,89 @@ describe('config/presets/internal/workarounds', () => {
     });
   });
 
+  describe('clamavDockerImageVersioning', () => {
+    const preset = presets.clamavDockerImageVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+
+    it.each`
+      input              | expected
+      ${'latest'}        | ${false}
+      ${'latest_base'}   | ${false}
+      ${'stable'}        | ${false}
+      ${'stable_base'}   | ${false}
+      ${'unstable'}      | ${false}
+      ${'unstable_base'} | ${false}
+      ${'20'}            | ${false}
+      ${'20_base'}       | ${false}
+      ${'1.24'}          | ${true}
+      ${'1.24_base'}     | ${true}
+      ${'1.24.0'}        | ${true}
+      ${'1.24.0_base'}   | ${true}
+      ${'1.5.1-17'}      | ${true}
+      ${'1.5.1-17_base'} | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
+    });
+  });
+
+  describe('grafanaDockerImageVersioning', () => {
+    const preset = presets.grafanaDockerImageVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+    const matchPackageNames = packageRule.matchPackageNames!;
+
+    it.each`
+      input                          | expected
+      ${'latest'}                    | ${false}
+      ${'main'}                      | ${false}
+      ${'13'}                        | ${false}
+      ${'13.0'}                      | ${false}
+      ${'13.0.1'}                    | ${true}
+      ${'13.0.1-security-01'}        | ${true}
+      ${'13.0.1-security-01-fips'}   | ${true}
+      ${'13.0.1-security-01-ubi'}    | ${true}
+      ${'13.0.1-security-01-ubuntu'} | ${true}
+      ${'13.0.2'}                    | ${true}
+      ${'13.0.2-ubuntu'}             | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
+    });
+
+    it.each`
+      input                          | expected
+      ${'grafana/grafana'}           | ${true}
+      ${'docker.io/grafana/grafana'} | ${true}
+      ${'grafana/loki'}              | ${false}
+      ${'ghcr.io/grafana/grafana'}   | ${false}
+    `('matchPackageNames("$input") == "$expected"', ({ input, expected }) => {
+      expect(
+        matchPackageNames.some((pattern) => matchRegexOrGlob(input, pattern)),
+      ).toEqual(expected);
+    });
+
+    it.each`
+      version                        | current                        | expected
+      ${'13.0.1-security-01'}        | ${'13.0.1'}                    | ${true}
+      ${'13.0.2'}                    | ${'13.0.1-security-01'}        | ${true}
+      ${'13.0.1-security-01-ubuntu'} | ${'13.0.1-ubuntu'}             | ${true}
+      ${'13.0.2-ubuntu'}             | ${'13.0.1-security-01-ubuntu'} | ${true}
+      ${'13.0.1-security-01-ubuntu'} | ${'13.0.1-security-01'}        | ${false}
+    `(
+      'isGreaterThan("$version", "$current") == "$expected"',
+      ({ version, current, expected }) => {
+        expect(versioning.isGreaterThan(version, current)).toEqual(expected);
+      },
+    );
+  });
+
   describe('libericaJdkDockerVersioning', () => {
     const preset = presets.libericaJdkDockerVersioning;
 
     describe('Liberica JDK Lite', () => {
       const packageRule = preset.packageRules![0];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -85,7 +163,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JDK', () => {
       const packageRule = preset.packageRules![1];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -123,7 +201,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JRE', () => {
       const packageRule = preset.packageRules![2];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -161,11 +239,119 @@ describe('config/presets/internal/workarounds', () => {
 
   describe('javaLTSVersions', () => {
     const preset = presets.javaLTSVersions;
+    const packageRules = preset.packageRules!;
+    // Indices: 0 regex+names, 1 regex+deps, 2 docker major-only+names, 3 docker major-only+deps, 4 mise partial, 5 liberica
+    const regexPackageRule = packageRules[0];
+    const majorOnlyPackageRule = packageRules[2];
+    const majorOnlyDepRule = packageRules[3];
+    const libericaRule = packageRules[5];
+    const javaRegexVersioning = regexPackageRule.versioning;
+
+    describe('major-only docker tag override', () => {
+      const matchCurrentValue = majorOnlyPackageRule.matchCurrentValue!;
+
+      it.each`
+        input                      | expected
+        ${'21'}                    | ${true}
+        ${'21-jre'}                | ${true}
+        ${'21-jre-jammy'}          | ${true}
+        ${'25-jre'}                | ${true}
+        ${'8-jdk'}                 | ${true}
+        ${'8-jdk-alpine'}          | ${true}
+        ${'21.0'}                  | ${false}
+        ${'21.0-jre'}              | ${false}
+        ${'21.0.11_10-jre'}        | ${false}
+        ${'21.0.11_10-jre-alpine'} | ${false}
+        ${'jdk-21-slim-musl'}      | ${false}
+        ${'latest'}                | ${false}
+      `('matchCurrentValue("$input") == "$expected"', ({ input, expected }) => {
+        expect(matchRegexOrGlob(input, matchCurrentValue)).toEqual(expected);
+      });
+
+      it('uses docker versioning for major-only package and dep rules', () => {
+        expect(majorOnlyPackageRule.versioning).toEqual('docker');
+        expect(majorOnlyDepRule.versioning).toEqual('docker');
+        expect(majorOnlyDepRule.matchCurrentValue).toEqual(matchCurrentValue);
+      });
+
+      it('applies docker versioning for major-only current values', async () => {
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
+          datasource: 'docker',
+          depName: 'eclipse-temurin',
+          packageName: 'eclipse-temurin',
+          currentValue: '21-jre',
+          packageRules,
+        });
+
+        expect(res.versioning).toEqual('docker');
+        expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
+      });
+
+      it('keeps regex versioning for full-precision current values', async () => {
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
+          datasource: 'docker',
+          depName: 'eclipse-temurin',
+          packageName: 'eclipse-temurin',
+          currentValue: '21.0.9_10-jre',
+          packageRules,
+        });
+
+        expect(res.versioning).toEqual(javaRegexVersioning);
+        expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
+      });
+
+      it('keeps regex versioning for java-version values in other managers', async () => {
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
+          datasource: 'java-version',
+          depName: 'java',
+          manager: 'asdf',
+          packageName: 'java-jdk',
+          currentValue: '21',
+          packageRules,
+        });
+
+        expect(res.versioning).toEqual(javaRegexVersioning);
+      });
+
+      it.each`
+        manager             | currentValue | expectedVersioning
+        ${'mise'}           | ${'21'}      | ${'semver-partial'}
+        ${'mise'}           | ${'21.0'}    | ${'semver-partial'}
+        ${'mise'}           | ${'21.0.9'}  | ${javaRegexVersioning}
+        ${'github-actions'} | ${'21'}      | ${'semver-partial'}
+        ${'github-actions'} | ${'21.0'}    | ${'semver-partial'}
+        ${'github-actions'} | ${'21.0.9'}  | ${javaRegexVersioning}
+      `(
+        'uses $expectedVersioning versioning for $manager Java version $currentValue',
+        async ({ manager, currentValue, expectedVersioning }) => {
+          const res = await applyPackageRules<
+            PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+          >({
+            datasource: 'java-version',
+            depName: 'java',
+            manager,
+            packageName: 'java-jdk',
+            currentValue,
+            packageRules,
+            versioning: 'semver-partial',
+          });
+
+          expect(res.versioning).toEqual(expectedVersioning);
+          expect(res.allowedVersions).toEqual(
+            '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
+          );
+        },
+      );
+    });
 
     describe('bellsoft/liberica-runtime-container', () => {
-      const packageRule = preset.packageRules![2];
-
-      const allowedVersions = packageRule.allowedVersions as string;
+      const allowedVersions = libericaRule.allowedVersions!;
 
       it.each`
         input                           | expected
@@ -184,6 +370,21 @@ describe('config/presets/internal/workarounds', () => {
       `('allowedVersisons("$input") == "$expected"', ({ input, expected }) => {
         expect(matchRegexOrGlob(input, allowedVersions)).toEqual(expected);
       });
+    });
+  });
+
+  describe('helmDocs', () => {
+    const preset = presets.helmDocs;
+
+    const allowedVersions = preset.packageRules![0].allowedVersions!;
+    it.each`
+      input        | expected
+      ${'19.0614'} | ${false}
+      ${'19.0110'} | ${false}
+      ${'v0.1.0'}  | ${true}
+      ${'v1.13.1'} | ${true}
+    `('allowedVersions("$input") == "$expected"', ({ input, expected }) => {
+      expect(matchRegexOrGlob(input, allowedVersions)).toEqual(expected);
     });
   });
 });

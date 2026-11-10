@@ -1,22 +1,24 @@
+import { isObject } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../constants/error-messages';
-import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
-import * as _repositoryCache from '../cache/repository';
-import type { RepoCacheData } from '../cache/repository/types';
-import * as hostRules from '../host-rules';
-import { GithubHttp, setBaseUrl } from './github';
-import type { GraphqlPageCache } from './github';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases/index.ts';
+import * as _repositoryCache from '../cache/repository/index.ts';
+import type { RepoCacheData } from '../cache/repository/types.ts';
+import * as hostRules from '../host-rules.ts';
+import type { GraphqlPageCache } from './github.ts';
+import { GithubHttp, isPrAlreadyExistsError, setBaseUrl } from './github.ts';
 
-vi.mock('../cache/repository');
+vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
@@ -52,7 +54,7 @@ describe('util/http/github', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
-    delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+    vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', undefined);
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     repoCache = {};
@@ -60,22 +62,25 @@ describe('util/http/github', () => {
   });
 
   afterEach(() => {
-    hostRules.clear();
+    GlobalConfig.reset();
   });
 
   describe('HTTP', () => {
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
-      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            accept: 'some-accept, application/vnd.github.v3+json',
+            authorization: 'Bearer 123test',
+          },
+        })
+        .get('/some-url')
+        .reply(200);
       await githubApi.get('/some-url', {
         headers: { accept: 'some-accept' },
       });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'some-accept, application/vnd.github.machine-man-preview+json',
-      );
-      expect(req.headers.authorization).toBe('token 123test');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('supports different datasources', async () => {
@@ -85,11 +90,14 @@ describe('util/http/github', () => {
         hostType: GithubReleasesDatasource.id,
         token: 'def',
       });
-      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: { authorization: 'token def' },
+        })
+        .get('/some-url')
+        .reply(200);
       await githubApiDatasource.get('/some-url');
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.authorization).toBe('token def');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('paginates', async () => {
@@ -108,6 +116,128 @@ describe('util/http/github', () => {
         .reply(200, ['e']);
       const res = await githubApi.getJsonUnchecked(url, { paginate: true });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('paginates cursor links', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&after=cursor-2>; rel="next", <${url}&before=cursor-1>; rel="prev"`,
+        })
+        .get(`${url}&after=cursor-2`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('limits cursor pagination', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&after=cursor-2>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, {
+        paginate: true,
+        pageLimit: 2,
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('paginates all cursor links', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&after=cursor-2>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-2`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJsonUnchecked(url, {
+        paginate: 'all',
+        pageLimit: 2,
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('limits full cursor pagination', async () => {
+      const url = '/some-url?per_page=1';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .times(100)
+        .reply(200, ['a'], {
+          link: `<${url}>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: 'all' });
+      expect(res.body).toHaveLength(100);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { maxPages: 100 },
+        'GitHub cursor pagination limit reached',
+      );
+    });
+
+    it('does not follow cursor pagination links to a different origin', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: '<https://attacker.example.com/some-url?after=cursor-2>; rel="next"',
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'https://attacker.example.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
+    it('does not follow cursor pagination links to a different protocol on the same host', async () => {
+      // Same host, but a different scheme still counts as a different origin
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: '<http://api.github.com/some-url?after=cursor-2>; rel="next"',
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'http://api.github.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
     });
 
     it('uses paginationField', async () => {
@@ -232,7 +362,7 @@ describe('util/http/github', () => {
     });
 
     it('rebases GHE Server pagination links', async () => {
-      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', '1');
       // The origin and base URL which Renovate uses (from its config) to reach GHE:
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
@@ -283,14 +413,14 @@ describe('util/http/github', () => {
     });
 
     it('preserves pagination links for github.com', async () => {
-      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', '1');
       const baseUrl = 'https://api.github.com/';
 
       setBaseUrl(baseUrl);
       const apiUrl = 'some-url?per_page=2';
       httpMock
         .scope(baseUrl)
-        .get('/' + apiUrl)
+        .get(`/${apiUrl}`)
         .reply(200, ['a', 'b'], {
           link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
         })
@@ -306,16 +436,53 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
+    it('does not follow pagination links to a different origin', async () => {
+      // If a misconfigured/malicious host suggests pagination links across origins, ignore them by default
+      // In this case, only the first page of results is fetched, and a warning message is logged
+      const url = '/some-url?per_page=2';
+      httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
+        link: `<https://attacker.example.com/some-url?per_page=2&page=2>; rel="next", <https://attacker.example.com/some-url?per_page=2&page=3>; rel="last"`,
+      });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'https://attacker.example.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
+    it('does not follow pagination links to a different protocol on the same host', async () => {
+      // Same host, but a different scheme still counts as a different origin
+      const url = '/some-url?per_page=2';
+      httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
+        link: `<http://api.github.com/some-url?per_page=2&page=2>; rel="next", <http://api.github.com/some-url?per_page=2&page=3>; rel="last"`,
+      });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'http://api.github.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
     describe('handleGotError', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
           fail(401, { message: 'Some unauthorized' }),
-        ).rejects.toThrow('Response code 401 (Some unauthorized)');
+        ).rejects.toThrow(
+          'Request failed with status code 401 (Some unauthorized): GET https://api.github.com/some-url',
+        );
         expect(logger.logger.once.warn).toHaveBeenCalled();
       });
       async function fail(
         code: number,
-        body: any = undefined,
+        body?: any,
         headers: httpMock.ReplyHeaders = {},
       ) {
         const url = '/some-url';
@@ -324,9 +491,11 @@ describe('util/http/github', () => {
           .get(url)
           .reply(
             code,
+            // nock's reply callback binds `this.req` to the request object, requires regular function
+            // eslint-disable-next-line prefer-arrow-callback
             function reply() {
               // https://github.com/nock/nock/issues/1979
-              if (typeof body === 'object' && 'message' in body) {
+              if (isObject(body) && 'message' in body) {
                 (this.req as any).response.statusMessage = body?.message;
               }
               return body;
@@ -347,7 +516,7 @@ describe('util/http/github', () => {
 
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
-          'Response code 404 (Not Found)',
+          'Request failed with status code 404 (Not Found): GET https://api.github.com/some-url',
         );
       });
 
@@ -355,7 +524,7 @@ describe('util/http/github', () => {
         await expect(
           fail(410, { message: 'Issues are disabled for this repo' }),
         ).rejects.toThrow(
-          'Response code 410 (Issues are disabled for this repo)',
+          'Request failed with status code 410 (Issues are disabled for this repo): GET https://api.github.com/some-url',
         );
       });
 
@@ -366,6 +535,103 @@ describe('util/http/github', () => {
               'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
           }),
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      });
+
+      it('when the rate limit is exceeded, and host rules are set for GitHub.com, a warn is logged', async () => {
+        hostRules.add({
+          matchHost: 'api.github.com',
+          token: 'x-access-token:123test',
+        });
+
+        await expect(
+          fail(403, {
+            message:
+              'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'Rate limit exceeded for api.github.com, even though we are authenticated',
+        );
+      });
+
+      it('when the rate limit is exceeded, but no host rules are set for GitHub.com, a warn is logged', async () => {
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
+        );
+      });
+
+      it('uses productLinks.documentation in rate limit warn URL', async () => {
+        GlobalConfig.set({
+          productLinks: { documentation: 'https://custom.example.com/' },
+        });
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          {
+            documentationUrl:
+              'https://custom.example.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
+        );
+      });
+
+      it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
+        async function fail(
+          code: number,
+          body?: any,
+          headers: httpMock.ReplyHeaders = {},
+        ) {
+          const url = '/some-url';
+          httpMock
+            .scope('https://github.enterprise.example.com') // using our Enterprise URL
+            .get(url)
+            .reply(
+              code,
+              // nock's reply callback binds `this.req` to the request object, requires regular function
+              // eslint-disable-next-line prefer-arrow-callback
+              function reply() {
+                // https://github.com/nock/nock/issues/1979
+                if (isObject(body) && 'message' in body) {
+                  (this.req as any).response.statusMessage = body?.message;
+                }
+                return body;
+              },
+              headers,
+            );
+          await githubApi.getJsonUnchecked(url);
+        }
+
+        setBaseUrl('https://github.enterprise.example.com');
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { host: 'github.enterprise.example.com' },
+          'Rate limit exceeded, as no hostRules set for this host',
+        );
       });
 
       it('should throw secondary rate limit exceeded', async () => {
@@ -451,6 +717,24 @@ describe('util/http/github', () => {
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
 
+      it('should throw on repository change with a non-array error with code `invalid`', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: { code: 'invalid' },
+          }),
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+
+      it('should throw platform failure on 422 response with an unrecognized non-array errors', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: 'Validation Failed',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
       it('should throw original error when failed to add reviewers', async () => {
         await expect(
           fail(422, {
@@ -497,6 +781,28 @@ describe('util/http/github', () => {
           'Validation Failed',
         );
       });
+    });
+  });
+
+  describe('isPrAlreadyExistsError', () => {
+    const prExists = { errors: [{ message: 'A pull request already exists' }] };
+
+    it('detects the PR already exists error', () => {
+      expect(
+        isPrAlreadyExistsError({
+          response: { statusCode: 422, body: prExists },
+        }),
+      ).toBeTrue();
+    });
+
+    it.each`
+      response
+      ${undefined}
+      ${{ statusCode: 500, body: prExists }}
+      ${{ statusCode: 422 }}
+      ${{ statusCode: 422, body: { errors: [{ message: 'Other' }] } }}
+    `('returns false for $response', ({ response }) => {
+      expect(isPrAlreadyExistsError({ response })).toBeFalse();
     });
   });
 
@@ -572,25 +878,21 @@ describe('util/http/github', () => {
         .post('/api/graphql')
         .reply(200, { data: { repository } });
       await githubApi.requestGraphql(graphqlQuery, { token: 'abc' });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
-        .scope(githubApiHost)
+        .scope(githubApiHost, {
+          reqheaders: { accept: 'application/vnd.github.v3+json' },
+        })
         .post('/graphql')
         .reply(200, { data: { repository: { testItem: 'XXX' } } });
       await githubApi.queryRepoField(graphqlQuery, 'testItem', {
         paginate: false,
       });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json',
-      );
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('returns empty array for undefined data', async () => {
@@ -602,11 +904,11 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
         }),
-      ).toEqual([]);
+      ).resolves.toEqual([]);
     });
 
     it('returns empty array for undefined data.', async () => {
@@ -616,11 +918,11 @@ describe('util/http/github', () => {
         .reply(200, {
           data: { repository: { otherField: 'someval' } },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
         }),
-      ).toEqual([]);
+      ).resolves.toEqual([]);
     });
 
     it('throws errors for invalid responses', async () => {
@@ -629,7 +931,9 @@ describe('util/http/github', () => {
         githubApi.queryRepoField(graphqlQuery, 'someItem', {
           paginate: false,
         }),
-      ).rejects.toThrow("Response code 418 (I'm a Teapot)");
+      ).rejects.toThrow(
+        "Request failed with status code 418 (I'm a Teapot): POST https://api.github.com/graphql",
+      );
     });
 
     it('halves node count and retries request', async () => {
@@ -642,9 +946,29 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem'),
-      ).toMatchInlineSnapshot(`[]`);
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem'),
+      ).resolves.toMatchInlineSnapshot(`[]`);
+    });
+
+    it('throws when an app installation exhausts its GraphQL budget', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMIT',
+              code: 'graphql_rate_limit',
+              message:
+                'API rate limit already exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem'),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
     it('queryRepo', async () => {

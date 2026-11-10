@@ -1,10 +1,11 @@
-import { logger } from '../../../../logger';
-import { DotnetVersionDatasource } from '../../../datasource/dotnet-version';
-import { NugetDatasource } from '../../../datasource/nuget';
-import type { PackageDependency, PackageFileContent } from '../../types';
-import { GlobalJson } from '../schema';
-import type { NugetPackageDependency, Registry } from '../types';
-import { applyRegistries } from '../util';
+import { logger } from '../../../../logger/index.ts';
+import type { ConstraintName } from '../../../../util/exec/types.ts';
+import { DotnetVersionDatasource } from '../../../datasource/dotnet-version/index.ts';
+import { NugetDatasource } from '../../../datasource/nuget/index.ts';
+import type { PackageDependency, PackageFileContent } from '../../types.ts';
+import { GlobalJson } from '../schema.ts';
+import type { NugetPackageDependency, Registry } from '../types.ts';
+import { applyRegistries } from '../util.ts';
 
 export function extractMsbuildGlobalManifest(
   content: string,
@@ -13,7 +14,7 @@ export function extractMsbuildGlobalManifest(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: GlobalJson;
-  let extractedConstraints: Record<string, string> | undefined;
+  let extractedConstraints: Partial<Record<ConstraintName, string>> | undefined;
   try {
     manifest = GlobalJson.parse(content);
   } catch {

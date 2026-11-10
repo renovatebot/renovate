@@ -1,10 +1,13 @@
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { id as semverVersioning } from '../../versioning/semver';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency } from '../types';
-import { extractAllPackageFiles } from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { id as semverVersioning } from '../../versioning/semver/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageDependency } from '../types.ts';
+import { extractAllPackageFiles } from './index.ts';
 
 const fixturesDir = 'lib/modules/manager/batect/__fixtures__';
 
@@ -22,7 +25,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
   };
 }
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
 };
 
@@ -39,19 +42,15 @@ describe('modules/manager/batect/extract', () => {
     });
 
     it('returns empty array for empty configuration file', async () => {
-      expect(
-        await extractAllPackageFiles(config, [
-          `${fixturesDir}/empty/batect.yml`,
-        ]),
-      ).toEqual([]);
+      await expect(
+        extractAllPackageFiles(config, [`${fixturesDir}/empty/batect.yml`]),
+      ).resolves.toEqual([]);
     });
 
     it('returns empty array for non-object configuration file', async () => {
-      expect(
-        await extractAllPackageFiles(config, [
-          `${fixturesDir}/invalid/batect.yml`,
-        ]),
-      ).toEqual([]);
+      await expect(
+        extractAllPackageFiles(config, [`${fixturesDir}/invalid/batect.yml`]),
+      ).resolves.toEqual([]);
     });
 
     it('returns an a package file with no dependencies for configuration file without containers or includes', async () => {

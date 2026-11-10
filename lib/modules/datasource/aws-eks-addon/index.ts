@@ -1,30 +1,26 @@
 import { DescribeAddonVersionsCommand, EKSClient } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { cache } from '../../../util/cache/package/decorator';
-import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { EksAddonsFilter } from './schema';
+import { isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { EksAddonsFilter } from './schema.ts';
 
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
   override readonly defaultVersioning = awsEksAddonVersioning.id;
-  override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
 
   constructor() {
     super(AwsEKSAddonDataSource.id);
   }
 
-  @cache({
-    namespace: `datasource-${AwsEKSAddonDataSource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res = EksAddonsFilter.safeParse(serializedFilter);
@@ -50,7 +46,7 @@ export class AwsEKSAddonDataSource extends Datasource {
         .flatMap((addon) => {
           return addon.addonVersions;
         })
-        .filter(is.truthy)
+        .filter(isTruthy)
         .map((versionInfo) => ({
           version: versionInfo.addonVersion ?? '',
           default:
@@ -70,14 +66,34 @@ export class AwsEKSAddonDataSource extends Datasource {
     };
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey('getReleases', config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
+  }
+
   private getClient({ region, profile }: EksAddonsFilter): EKSClient {
-    const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
-    if (!(cacheKey in this.clients)) {
-      this.clients[cacheKey] = new EKSClient({
+    const clientKey = `${region ?? 'default'}#${profile ?? 'default'}`;
+    if (!(clientKey in this.clients)) {
+      const { password, token, username } = hostRules.find({
+        hostType: AwsEKSAddonDataSource.id,
+      });
+      this.clients[clientKey] = new EKSClient({
         ...(region && { region }),
-        credentials: fromNodeProviderChain(profile ? { profile } : undefined),
+        credentials:
+          username && password
+            ? {
+                accessKeyId: username,
+                secretAccessKey: password,
+                sessionToken: token,
+              }
+            : fromNodeProviderChain(profile ? { profile } : undefined),
       });
     }
-    return this.clients[cacheKey];
+    return this.clients[clientKey];
   }
 }

@@ -51,9 +51,8 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
+  The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
 
 If you want to disable the badges in the Mend Renovate App, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
 
@@ -87,6 +86,12 @@ Similar to a search engine's algorithm, we plan to adjust and improve it over ti
 
 We plan to expose much more of the data via a companion website, such as number of users of a package and popular repositories which already updated to the version in question.
 
+## Merge Confidence Workflows
+
+If you are a paying Mend customer, or you are an Open Source project who has access to Mend Renovate Community (OSS) Cloud, you will have access to [Merge Confidence Workflows](https://docs.mend.io/wsk/smart-merge-control).
+
+This makes it possible to introduce more intelligent workflows, such as "only raise a PR once the update is in High confidence" or "automerge Very High confidence updates".
+
 ## Explanations
 
 ### Package ranking
@@ -101,4 +106,4 @@ This means those values aren't _raw_ percentages.
 
 ## Questions and feedback
 
-You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
+If you have any feedback about Merge Confidence, please [add it to our feedback megathread](https://github.com/renovatebot/renovate/discussions/43119).

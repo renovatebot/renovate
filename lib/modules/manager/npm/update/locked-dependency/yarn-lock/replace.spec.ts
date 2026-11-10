@@ -1,6 +1,6 @@
 import * as Diff from 'diff';
-import { replaceConstraintVersion } from './replace';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { replaceConstraintVersion } from './replace.ts';
 
 const yarnLock1 = Fixtures.get('express.yarn.lock');
 const yarnLock2 = Fixtures.get('2.yarn.lock');
@@ -119,6 +119,19 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
           integrity sha512-nOqH59deCq9SRHlxq1Aw85Jnt4w6KvLKqWVik6oA9ZklXLNIOlqg4F2yrT1MVaTjAqvVwdfeZ7w7aCvJD7ugkw==
         "
       `);
+    });
+
+    it('replaces a non-leading selector', () => {
+      const res = replaceConstraintVersion(
+        yarnLock2,
+        'string-width',
+        '^2.0.0',
+        '2.2.0',
+      );
+
+      expect(res).toContain(
+        '"string-width@^1.0.1 || ^2.0.0", string-width@^2.0.0:\n  version "2.2.0"\n  dependencies:',
+      );
     });
 
     it('handles quoted', () => {

@@ -1,22 +1,22 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { HelmsmanDocument } from './types';
+} from '../types.ts';
+import type { HelmsmanDocument } from './types.ts';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
 function createDep(
   key: string,
   doc: HelmsmanDocument,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency | null {
   const dep: PackageDependency = {
     depName: key,
@@ -34,10 +34,11 @@ function createDep(
   dep.currentValue = anApp.version;
 
   // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-  if (isOCIRegistry(anApp.chart)) {
-    dep.datasource = DockerDatasource.id;
-    dep.packageName = removeOCIPrefix(anApp.chart!);
-    return dep;
+  if (anApp.chart && isOCIRegistry(anApp.chart)) {
+    return {
+      ...dep,
+      ...getOciChartDep(anApp.chart, undefined, registryAliases),
+    };
   }
 
   const regexResult = anApp.chart ? chartRegex.exec(anApp.chart) : null;
@@ -46,14 +47,14 @@ function createDep(
     return dep;
   }
 
-  if (!is.nonEmptyString(regexResult.groups.packageName)) {
+  if (!isNonEmptyString(regexResult.groups.packageName)) {
     dep.skipReason = 'invalid-name';
     return dep;
   }
   dep.packageName = regexResult.groups.packageName;
 
   const registryUrl = doc.helmRepos[regexResult.groups.registryRef];
-  if (!is.nonEmptyString(registryUrl)) {
+  if (!isNonEmptyString(registryUrl)) {
     dep.skipReason = 'no-repository';
     return dep;
   }
@@ -65,7 +66,7 @@ function createDep(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   try {
     // TODO: use schema (#9610)
@@ -76,8 +77,8 @@ export function extractPackageFile(
     }
 
     const deps = Object.keys(doc.apps)
-      .map((key) => createDep(key, doc))
-      .filter(is.truthy); // filter null values
+      .map((key) => createDep(key, doc, config.registryAliases))
+      .filter(isTruthy); // filter null values
 
     if (deps.length === 0) {
       return null;

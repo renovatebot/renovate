@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import { newlineRegex } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   addDepAsBitbucketTag,
   addDepAsDockerImage,
@@ -12,7 +12,7 @@ import {
   dockerImageObjectRegex,
   dockerImageRegex,
   pipeRegex,
-} from './util';
+} from './util.ts';
 
 export function extractPackageFile(
   content: string,
@@ -23,8 +23,8 @@ export function extractPackageFile(
 
   try {
     const lines = content
-      .replaceAll(/^\s*\r?\n/gm, '') // replace empty lines
-      .replaceAll(/^\s*#.*\r?\n/gm, '') // replace comment lines
+      .replaceAll(regEx(/^\s*\r?\n/gm), '') // replace empty lines
+      .replaceAll(regEx(/^\s*#.*\r?\n/gm), '') // replace comment lines
       .split(newlineRegex);
     const len = lines.length;
     for (let lineIdx = 0; lineIdx < len; lineIdx++) {

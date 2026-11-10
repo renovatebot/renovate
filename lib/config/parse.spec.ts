@@ -1,5 +1,6 @@
+import { codeBlock } from 'common-tags';
 import jsonValidator from 'json-dup-key-validator';
-import { parseFileConfig } from './parse';
+import { parseFileConfig } from './parse.ts';
 
 vi.mock('json-dup-key-validator', { spy: true });
 
@@ -9,6 +10,32 @@ describe('config/parse', () => {
       expect(parseFileConfig('config.json', '{}')).toEqual({
         success: true,
         parsedContents: {},
+      });
+    });
+
+    it('parses jsonc with trailing comma', () => {
+      const content = codeBlock`
+        // comment
+        {
+          "extends": ["config:best-practices"],
+        }
+      `;
+      expect(parseFileConfig('config.jsonc', content)).toEqual({
+        success: true,
+        parsedContents: { extends: ['config:best-practices'] },
+      });
+    });
+
+    it('keeps commas inside strings', () => {
+      const content = codeBlock`
+        {
+          "foo": "a,]",
+          "bar": "b,}",
+        }
+      `;
+      expect(parseFileConfig('config.jsonc', content)).toEqual({
+        success: true,
+        parsedContents: { foo: 'a,]', bar: 'b,}' },
       });
     });
 

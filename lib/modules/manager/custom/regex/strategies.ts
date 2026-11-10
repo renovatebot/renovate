@@ -1,45 +1,49 @@
-import is from '@sindresorhus/is';
-import { regEx } from '../../../../util/regex';
-import type { PackageDependency } from '../../types';
-import { checkIsValidDependency } from '../utils';
-import type { RecursionParameter, RegexManagerConfig } from './types';
+import { isTruthy } from '@sindresorhus/is';
+import { coerceObject } from '../../../../util/object.ts';
+import { regEx } from '../../../../util/regex.ts';
+import type { PackageDependency } from '../../types.ts';
+import { checkIsValidDependency } from '../utils.ts';
+import type {
+  PackageFileInfo,
+  RecursionParameter,
+  RegexManagerConfig,
+} from './types.ts';
 import {
   createDependency,
   mergeExtractionTemplate,
   mergeGroups,
   regexMatchAll,
-} from './utils';
+} from './utils.ts';
 
 export function handleAny(
-  content: string,
-  packageFile: string,
   config: RegexManagerConfig,
+  packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
+  const { content, packageFile } = packageFileInfo;
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
         {
-          groups:
-            matchResult.groups ??
-            /* istanbul ignore next: can this happen? */ {},
+          groups: coerceObject(matchResult.groups),
           replaceString: matchResult[0],
         },
         config,
+        packageFileInfo,
       ),
     )
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
 export function handleCombination(
-  content: string,
-  packageFile: string,
   config: RegexManagerConfig,
+  packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
+  const { content, packageFile } = packageFileInfo;
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
@@ -50,38 +54,38 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
+      groups: coerceObject(match.groups),
       replaceString:
         (match?.groups?.currentValue ?? match?.groups?.currentDigest)
           ? match[0]
           : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config)]
-    .filter(is.truthy)
+  return [createDependency(extraction, config, packageFileInfo)]
+    .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
 export function handleRecursive(
-  content: string,
-  packageFile: string,
   config: RegexManagerConfig,
+  packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
+  const { content, packageFile } = packageFileInfo;
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g'),
   );
 
   return processRecursive({
     content,
-    packageFile,
+    packageFileInfo,
     config,
     index: 0,
     combinedGroups: {},
     regexes,
   })
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
     );
@@ -94,6 +98,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
     combinedGroups,
     regexes,
     config,
+    packageFileInfo,
   }: RecursionParameter = parameters;
   // abort if we have no matchString anymore
   if (regexes.length === index) {
@@ -103,6 +108,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
         replaceString: content,
       },
       config,
+      packageFileInfo,
     );
     return result ? [result] : /* istanbul ignore next: can this happen? */ [];
   }
@@ -111,7 +117,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       ...parameters,
       content: match[0],
       index: index + 1,
-      combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
+      combinedGroups: mergeGroups(combinedGroups, coerceObject(match.groups)),
     });
   });
 }

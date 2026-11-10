@@ -1,21 +1,26 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { UpdateType } from '../../../config/types';
-import * as terraformLockfile from '../terraform/lockfile';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+  UpdateType,
+} from '../../../config/types.ts';
+import * as terraformLockfile from '../terraform/lockfile/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('../terraform/lockfile');
+vi.mock('../terraform/lockfile/index.ts');
 
 const config = {
   constraints: {},
 };
 
-const adminConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 
 describe('modules/manager/terragrunt/artifacts', () => {
@@ -42,13 +47,16 @@ describe('modules/manager/terragrunt/artifacts', () => {
       ...config,
     };
 
-    await updateArtifacts({
+    const param = {
       packageFileName: '',
       updatedDeps: [],
       newPackageFileContent: '',
       config: localConfig,
-    });
-    expect(terraformLockfile.updateArtifacts).toHaveBeenCalledOnce();
+    };
+    await updateArtifacts(param);
+    expect(terraformLockfile.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+      param,
+    );
   });
 
   it.each(updateTypes)(

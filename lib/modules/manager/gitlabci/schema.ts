@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { toArray } from '../../../util/array';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils';
-import { trimLeadingSlash } from '../../../util/url';
+import { z } from 'zod/v4';
+import { toArray } from '../../../util/array.ts';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
+import { trimLeadingSlash } from '../../../util/url.ts';
 
 const LocalInclude = z
   .union([
@@ -58,7 +58,7 @@ const GitlabIncludes = z
   .catch([]);
 
 export const GitlabDocument = z
-  .record(z.unknown())
+  .record(z.string(), z.unknown())
   .transform((obj) => {
     const { include, ...rest } = obj;
     const children = Object.values(rest);

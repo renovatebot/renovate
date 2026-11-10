@@ -1,8 +1,8 @@
 import { Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import type { PackageFile } from '../types';
-import type { DependencyBetweenFiles, PipCompileArgs } from './types';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../types.ts';
+import type { DependencyBetweenFiles, PipCompileArgs } from './types.ts';
 
 export function sortPackageFiles(
   depsBetweenFiles: DependencyBetweenFiles[],
@@ -20,6 +20,7 @@ export function sortPackageFiles(
       const sortedLockFiles = [];
       // TODO(not7cd): this needs better test case
       for (const lockFile of packageFile.lockFiles!) {
+        // v8 ignore else -- every lock file of a package file is in the sorted list
         if (sorted.includes(lockFile)) {
           sortedLockFiles.push(lockFile);
         }
@@ -48,7 +49,7 @@ export function generateMermaidGraph(
     lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
   }
   const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
-    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
+    return `  ${sourceFile} -${type === 'requirement' ? '' : '.'}-> ${outputFile}`;
   });
   return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }

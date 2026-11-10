@@ -1,24 +1,27 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { NugetDatasource } from '../../datasource/nuget';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { regEx } from '../../../util/regex.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import * as semver from '../../versioning/semver/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { extractMsbuildGlobalManifest } from './extract/global-manifest';
-import type { DotnetToolsManifest, NugetPackageDependency } from './types';
+} from '../types.ts';
+import { extractMsbuildGlobalManifest } from './extract/global-manifest.ts';
+import { extractPackagesFromSingleCsharpFile } from './extract/single-csharp-file.ts';
+import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
 import {
   applyRegistries,
   findVersion,
   getConfiguredRegistries,
   isXmlElement,
-} from './util';
+} from './util.ts';
 
 /**
  * https://learn.microsoft.com/nuget/concepts/package-versioning
@@ -42,9 +45,10 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     const { name, attr } = child;
 
     if (name === 'ContainerBaseImage') {
-      const { depName, ...dep } = getDep(child.val, true);
+      const { depName, ...dep } = getDep(child.val);
 
-      if (is.nonEmptyStringAndNotWhitespace(depName)) {
+      // v8 ignore else -- needs a ContainerBaseImage element with a blank value
+      if (isNonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
     } else if (elemNames.has(name)) {
@@ -67,7 +71,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
 
-      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+      if (!isNonEmptyStringAndNotWhitespace(currentValue)) {
         dep.skipReason = 'invalid-version';
       }
 
@@ -75,7 +79,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       currentValue = currentValue
         ?.trim()
-        ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+        ?.replace(regEx(/^\$\((?<key>\w+)\)$/), (match, key) => {
           sharedVariableName = key;
           const val = vars.get(key);
           if (val) {
@@ -177,7 +181,7 @@ export async function extractPackageFile(
       return null;
     }
 
-    for (const depName of Object.keys(manifest.tools ?? {})) {
+    for (const depName of Object.keys(coerceObject(manifest.tools))) {
       const tool = manifest.tools[depName];
       const currentValue = tool.version;
       const dep: NugetPackageDependency = {
@@ -186,6 +190,11 @@ export async function extractPackageFile(
         currentValue,
         datasource: NugetDatasource.id,
       };
+      // v8 ignore else -- needs a package reference pinned to a non-semver value
+      if (isString(currentValue) && semver.isVersion(currentValue)) {
+        // This is to avoid nuget versioning pinning to [1.2.3]
+        dep.versioning = 'semver';
+      }
 
       applyRegistries(dep, registries);
 
@@ -197,6 +206,14 @@ export async function extractPackageFile(
 
   if (packageFile.endsWith('global.json')) {
     return extractMsbuildGlobalManifest(content, packageFile, registries);
+  }
+
+  if (packageFile.endsWith('.cs')) {
+    return extractPackagesFromSingleCsharpFile(
+      content,
+      packageFile,
+      registries,
+    );
   }
 
   // Simple xml validation.

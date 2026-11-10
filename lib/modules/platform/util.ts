@@ -1,4 +1,4 @@
-import { hash } from '../../util/hash';
+import { hash } from '../../util/hash.ts';
 
 export function repoFingerprint(
   repoId: number | string,

@@ -1,11 +1,13 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { isVersion, id as semverVersioningId } from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import {
+  isVersion,
+  id as semverVersioningId,
+} from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 
 const lineTerminationRegex = regEx(`\r?\n`);
 const releaseBeginningChar = '\t{';
@@ -25,11 +27,13 @@ export class GolangVersionDatasource extends Datasource {
     super(GolangVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://raw.githubusercontent.com/golang/website',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://raw.githubusercontent.com/golang/website'];
+  }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly defaultVersioning = semverVersioningId;
 
@@ -40,11 +44,10 @@ export class GolangVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/golang/go.';
 
-  @cache({ namespace: `datasource-${GolangVersionDatasource.id}`, key: 'all' })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -135,5 +138,15 @@ export class GolangVersionDatasource extends Datasource {
     }
 
     return res;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: config.registryUrl!,
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

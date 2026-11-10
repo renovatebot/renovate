@@ -1,12 +1,12 @@
-import { z } from 'zod';
-import { detectPlatform } from '../../../util/common';
-import { parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
-import { LooseRecord } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { z } from 'zod/v4';
+import { detectPlatform } from '../../../util/common.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { LooseRecord } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
-const HelmReleaseSchema = z.object({
+const HelmRelease = z.object({
   version: z.string(),
   created: MaybeTimestamp,
   digest: z.string().optional().catch(undefined),
@@ -14,7 +14,7 @@ const HelmReleaseSchema = z.object({
   sources: z.array(z.string()).catch([]),
   urls: z.array(z.string()).catch([]),
 });
-type HelmRelease = z.infer<typeof HelmReleaseSchema>;
+type HelmRelease = z.infer<typeof HelmRelease>;
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);
 
@@ -28,7 +28,7 @@ function isPossibleChartRepo(url: string): boolean {
 }
 
 const githubRelease = regEx(
-  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
+  /^(?<repoUrl>https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
 );
 
 function getSourceUrl(release: HelmRelease): string | undefined {
@@ -36,7 +36,7 @@ function getSourceUrl(release: HelmRelease): string | undefined {
   const [githubUrl] = release.urls;
   const releaseMatch = githubRelease.exec(githubUrl);
   if (releaseMatch) {
-    return releaseMatch[1];
+    return releaseMatch.groups!.repoUrl;
   }
 
   if (release.home && isPossibleChartRepo(release.home)) {
@@ -53,11 +53,11 @@ function getSourceUrl(release: HelmRelease): string | undefined {
   return release.sources[0];
 }
 
-export const HelmRepositorySchema = z
+export const HelmRepository = z
   .object({
     entries: LooseRecord(
       z.string(),
-      HelmReleaseSchema.array()
+      HelmRelease.array()
         .min(1)
         .transform((helmReleases) => {
           const latestRelease = helmReleases[0];
@@ -80,4 +80,4 @@ export const HelmRepositorySchema = z
   })
   .transform(({ entries }) => entries);
 
-export type HelmRepositoryData = z.infer<typeof HelmRepositorySchema>;
+export type HelmRepository = z.infer<typeof HelmRepository>;

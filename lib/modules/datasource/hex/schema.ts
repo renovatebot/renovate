@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
-import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release, ReleaseResult } from '../types';
+import { isPlainObject } from '@sindresorhus/is';
+import { z } from 'zod/v4';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release, ReleaseResult } from '../types.ts';
 
 export const HexRelease = z
   .object({
@@ -10,7 +10,7 @@ export const HexRelease = z
     meta: z
       .object({
         links: z
-          .record(z.string())
+          .record(z.string(), z.string())
           .transform((links) =>
             Object.fromEntries(
               Object.entries(links).map(([key, value]) => [
@@ -52,7 +52,7 @@ export const HexRelease = z
           release.releaseTimestamp = releaseTimestamp;
         }
 
-        if (is.plainObject(hexResponse.retirements?.[version])) {
+        if (isPlainObject(hexResponse.retirements?.[version])) {
           release.isDeprecated = true;
         }
 

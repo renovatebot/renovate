@@ -1,10 +1,15 @@
 // TODO #22198
 import type { Merge } from 'type-fest';
-import type { RenovateConfig, ValidationMessage } from '../../../config/types';
-import { addMeta, logger, removeMeta } from '../../../logger';
-import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { flattenUpdates } from './flatten';
-import { generateBranchConfig } from './generate';
+import type {
+  RenovateConfig,
+  ValidationMessage,
+} from '../../../config/types.ts';
+import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { collectSharedConstraints } from '../extract/shared-constraints.ts';
+import { flattenUpdates } from './flatten.ts';
+import { generateBranchConfig } from './generate.ts';
 
 export type BranchifiedConfig = Merge<
   RenovateConfig,
@@ -15,7 +20,7 @@ export type BranchifiedConfig = Merge<
 >;
 export async function branchifyUpgrades(
   config: RenovateConfig,
-  packageFiles: Record<string, any[]>,
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
   const updates = await flattenUpdates(config, packageFiles);
@@ -25,18 +30,27 @@ export async function branchifyUpgrades(
       .filter((txt) => txt?.trim().length)
       .join(', ')}`,
   );
+  const hasLookupFailure = Object.values(packageFiles)
+    .flat()
+    .flatMap((file) => file.deps)
+    .some((dep) => dep.lookupFailed);
+  // `generateBranchConfig()` removes `groupName` from single-update groups, so group branches are collected beforehand
+  const groupBranches = new Set(
+    updates.filter((u) => u.groupName).map((u) => u.branchName),
+  );
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
   const branches: BranchConfig[] = [];
   for (const u of updates) {
-    const update: BranchUpgradeConfig = { ...u } as any;
+    const update: BranchUpgradeConfig = { ...u };
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
       branchUpgrades[update.branchName],
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
+  const sharedConstraints = collectSharedConstraints(packageFiles);
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({
@@ -71,9 +85,15 @@ export async function branchifyUpgrades(
       })
       .reverse();
 
-    const branch = generateBranchConfig(branchUpgrades[branchName]);
+    const branch = generateBranchConfig(
+      branchUpgrades[branchName],
+      sharedConstraints,
+    );
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
+    if (hasLookupFailure && groupBranches.has(branchName)) {
+      branch.skippedForLookupFailure = true;
+    }
     branches.push(branch);
   }
   removeMeta(['branch']);

@@ -1,4 +1,4 @@
-import { EksAddonsFilter } from './schema';
+import { EksAddonsFilter } from './schema.ts';
 
 describe('modules/datasource/aws-eks-addon/schema', () => {
   describe('EksAddonsFilter', () => {

@@ -1,11 +1,11 @@
-import type { DependencyExtractor } from './base';
-import { ModuleExtractor } from './extractors/others/modules';
-import { ProvidersExtractor } from './extractors/others/providers';
-import { GenericDockerImageRefExtractor } from './extractors/resources/generic-docker-image-ref';
-import { HelmReleaseExtractor } from './extractors/resources/helm-release';
-import { TerraformWorkspaceExtractor } from './extractors/resources/terraform-workspace';
-import { RequiredProviderExtractor } from './extractors/terraform-block/required-provider';
-import { TerraformVersionExtractor } from './extractors/terraform-block/terraform-version';
+import type { DependencyExtractor } from './base.ts';
+import { ModuleExtractor } from './extractors/others/modules.ts';
+import { ProvidersExtractor } from './extractors/others/providers.ts';
+import { GenericDockerImageRefExtractor } from './extractors/resources/generic-docker-image-ref.ts';
+import { HelmReleaseExtractor } from './extractors/resources/helm-release.ts';
+import { TerraformWorkspaceExtractor } from './extractors/resources/terraform-workspace.ts';
+import { RequiredProviderExtractor } from './extractors/terraform-block/required-provider.ts';
+import { TerraformVersionExtractor } from './extractors/terraform-block/terraform-version.ts';
 
 export const resourceExtractors: DependencyExtractor[] = [
   new HelmReleaseExtractor(),

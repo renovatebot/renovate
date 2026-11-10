@@ -1,4 +1,4 @@
-import { HelmReleaseExtractor } from './helm-release';
+import { HelmReleaseExtractor } from './helm-release.ts';
 
 describe('modules/manager/terraform/extractors/resources/helm-release', () => {
   const extractor = new HelmReleaseExtractor();

@@ -1,7 +1,10 @@
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import { getExpression } from '../jsonata';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import { getExpression } from '../jsonata.ts';
+import { Matcher } from './base.ts';
 
 export class JsonataMatcher extends Matcher {
   override async matches(

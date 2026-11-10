@@ -1,10 +1,10 @@
 import { DateTime, Settings } from 'luxon';
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { registryUrl } from './common';
-import { EndoflifeDateDatasource } from './index';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { registryUrl } from './common.ts';
+import { EndoflifeDateDatasource } from './index.ts';
 
 const datasource = EndoflifeDateDatasource.id;
 
@@ -91,22 +91,22 @@ describe('modules/datasource/endoflife-date/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(200, []);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

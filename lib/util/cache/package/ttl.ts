@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { matchRegexOrGlob } from '../../string-match';
-import type { PackageCacheNamespace } from './types';
+import { isNumber } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
+import { matchRegexOrGlob } from '../../string-match.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 /**
  * This MUST NOT be used outside of cache implementation
@@ -11,15 +11,15 @@ import type { PackageCacheNamespace } from './types';
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
-  const overrides = GlobalConfig.get('cacheTtlOverride', {});
+  const overrides = GlobalConfig.get('cacheTtlOverride');
   let ttl: number | undefined = overrides[namespace];
-  if (is.number(ttl)) {
+  if (isNumber(ttl)) {
     return ttl;
   }
 
   let maxLen = 0;
   for (const [key, value] of Object.entries(overrides)) {
-    if (!is.number(value)) {
+    if (!isNumber(value)) {
       continue;
     }
 
@@ -30,7 +30,7 @@ export function getTtlOverride(
     }
   }
 
-  if (is.number(ttl)) {
+  if (isNumber(ttl)) {
     return ttl;
   }
 
@@ -58,10 +58,7 @@ export function resolveTtlValues(
 ): TTLValues {
   const softTtlMinutes = getTtlOverride(namespace) ?? ttlMinutes;
 
-  const cacheHardTtlMinutes = GlobalConfig.get(
-    'cacheHardTtlMinutes',
-    7 * 24 * 60,
-  );
+  const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
   const hardTtlMinutes = Math.max(softTtlMinutes, cacheHardTtlMinutes);
 
   return { softTtlMinutes, hardTtlMinutes };

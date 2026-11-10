@@ -1,4 +1,4 @@
-import { minimatch, minimatchFilter } from './minimatch';
+import { minimatch, minimatchFilter } from './minimatch.ts';
 
 describe('util/minimatch', () => {
   describe('minimatch', () => {
@@ -38,6 +38,18 @@ describe('util/minimatch', () => {
       const filterFunc = minimatchFilter('*.js');
       expect(filterFunc('test.js')).toBe(true);
       expect(filterFunc('test.txt')).toBe(false);
+    });
+
+    it('should correctly match filenames when uncached', () => {
+      const filterFunc = minimatchFilter('*.ts', undefined, false);
+      expect(filterFunc('test.ts')).toBe(true);
+      expect(filterFunc('test.txt')).toBe(false);
+    });
+
+    it('should respect options', () => {
+      const filterFunc = minimatchFilter('*.js', { dot: true });
+      expect(filterFunc('.test.js')).toBe(true);
+      expect(minimatchFilter('*.js')('.test.js')).toBe(false);
     });
   });
 });

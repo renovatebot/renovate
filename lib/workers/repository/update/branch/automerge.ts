@@ -1,13 +1,15 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { isScheduledNow } from './schedule';
-import { resolveBranchStatus } from './status-checks';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { isScheduledNow } from './schedule.ts';
+import { resolveBranchStatus } from './status-checks.ts';
 
 export type AutomergeResult =
   | 'automerged'
+  | 'automerge aborted - merge queue'
   | 'automerge aborted - PR exists'
   | 'branch status error'
   | 'failed'
@@ -18,6 +20,7 @@ export type AutomergeResult =
 
 export async function tryBranchAutomerge(
   config: RenovateConfig,
+  branchPr: Pr | null,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
@@ -26,11 +29,7 @@ export async function tryBranchAutomerge(
   if (!isScheduledNow(config, 'automergeSchedule')) {
     return 'off schedule';
   }
-  const existingPr = await platform.getBranchPr(
-    config.branchName!,
-    config.baseBranch,
-  );
-  if (existingPr) {
+  if (branchPr) {
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(
@@ -50,11 +49,13 @@ export async function tryBranchAutomerge(
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
+      /* v8 ignore if -- TODO: needs test */
       if (err.message === 'not ready') {
         logger.debug('Branch is not ready for automerge');
         return 'not ready';
       }
+      /* v8 ignore if -- TODO: needs test */
       if (
         err.message.includes('refusing to merge unrelated histories') ||
         err.message.includes('Not possible to fast-forward') ||
@@ -66,6 +67,18 @@ export async function tryBranchAutomerge(
         logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
+      // A merge queue (or merge train) rejects direct pushes unless Renovate
+      // is allowed to bypass it, so the push is attempted first and a PR is
+      // created only if it was refused. The rejection message is platform
+      // specific, so the platform is asked instead of parsing it.
+      if (await platform.isBranchMergeQueueEnabled?.(config.baseBranch!)) {
+        logger.warn(
+          { baseBranch: config.baseBranch, err },
+          'automergeType=branch is not possible because the base branch only accepts changes through its merge queue - falling back to creating a PR. Set automergeType=pr instead, or allow Renovate to bypass the merge queue.',
+        );
+        return 'automerge aborted - merge queue';
+      }
+      /* v8 ignore if -- TODO: needs test */
       if (err.message.includes('Protected branch')) {
         if (err.message.includes('status check')) {
           logger.debug(

@@ -1,10 +1,10 @@
-import { RegExpVersioningApi } from '../regex';
-import type { VersioningApi } from '../types';
+import { RegExpVersioningApi } from '../regex/index.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'kubernetes-api';
 export const displayName = 'Kubernetes API';
 export const urls = [
-  'https://kubernetes.io/docs/reference/using-api/#api-versioning',
+  '[Kubernetes API versioning](https://kubernetes.io/docs/reference/using-api/#api-versioning)',
 ];
 export const supportsRanges = false;
 

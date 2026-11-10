@@ -1,4 +1,4 @@
-import { range } from './range';
+import { range } from './range.ts';
 
 describe('util/range', () => {
   it.each`

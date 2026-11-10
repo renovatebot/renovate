@@ -1,14 +1,18 @@
-import { logger } from '../../../logger';
-import { massage as massageToml, parse as parseToml } from '../../../util/toml';
-import { PythonVersionDatasource } from '../../datasource/python-version';
-import * as pep440 from '../../versioning/pep440';
+import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
+import {
+  massage as massageToml,
+  parse as parseToml,
+} from '../../../util/toml.ts';
+import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
+import * as pep440 from '../../versioning/pep440/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { processors } from './processors';
-import { type PyProject, PyProjectSchema } from './schema';
+} from '../types.ts';
+import { processors } from './processors/index.ts';
+import { PyProject } from './schema.ts';
 
 export function parsePyProject(
   content: string,
@@ -16,7 +20,7 @@ export function parsePyProject(
 ): PyProject | null {
   try {
     const jsonMap = parseToml(massageToml(content));
-    return PyProjectSchema.parse(jsonMap);
+    return PyProject.parse(jsonMap);
   } catch (err) {
     logger.debug(
       { packageFile, err },
@@ -29,7 +33,7 @@ export function parsePyProject(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -41,7 +45,7 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   const pythonConstraint = def.project?.['requires-python'];
-  const extractedConstraints: Record<string, string> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   if (pythonConstraint) {
     extractedConstraints.python = pythonConstraint;
     deps.push({
@@ -59,10 +63,7 @@ export async function extractPackageFile(
     deps.push(...projectDependencies);
   }
 
-  const dependencyGroups = def['dependency-groups'];
-  if (dependencyGroups) {
-    deps.push(...dependencyGroups);
-  }
+  deps.push(...def['dependency-groups']);
 
   const projectOptionalDependencies = def.project?.['optional-dependencies'];
   if (projectOptionalDependencies) {
@@ -76,17 +77,27 @@ export async function extractPackageFile(
 
   // process specific tool sets
   let processedDeps = deps;
+  const lockFiles: string[] = [];
   for (const processor of processors) {
     processedDeps = processor.process(def, processedDeps);
     processedDeps = await processor.extractLockedVersions(
       def,
       processedDeps,
       packageFile,
+      config,
     );
+
+    const processedLockFiles = await processor.getLockfiles(def, packageFile);
+    lockFiles.push(...processedLockFiles);
   }
 
   const packageFileVersion = def.project?.version;
-  return processedDeps.length
-    ? { extractedConstraints, deps: processedDeps, packageFileVersion }
+  return processedDeps.length || lockFiles.length
+    ? {
+        extractedConstraints,
+        deps: processedDeps,
+        packageFileVersion,
+        lockFiles,
+      }
     : null;
 }

@@ -1,9 +1,11 @@
-import type { NewValueConfig, VersioningApi } from '../types';
-import { BzlmodVersion } from './bzlmod-version';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { BzlmodVersion } from './bzlmod-version.ts';
 
 export const id = 'bazel-module';
 export const displayName = 'Bazel Module';
-export const urls = ['https://bazel.build/external/module'];
+export const urls = ['[Bazel modules](https://bazel.build/external/module)'];
 export const supportsRanges = false;
 
 function getBzlmodVersion(version: string): BzlmodVersion {
@@ -90,7 +92,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (currentVersion === `v${currentValue}`) {
-    return newVersion.replace(/^v/, '');
+    return stripVersionPrefix(newVersion);
   }
   return newVersion;
 }
@@ -116,7 +118,7 @@ function matches(version: string, range: string): boolean {
  * Check whether the `version` is compatible with the `current` value
  * constraint.
  */
-function isCompatible(version: string, current?: string): boolean {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 
@@ -154,7 +156,7 @@ function isValid(input: string): boolean {
  * Check whether the `input` is a valid version string.
  */
 function isVersion(input: string | undefined | null): boolean {
-  if (input === undefined || input === null) {
+  if (isNullOrUndefined(input)) {
     return false;
   }
   return isValid(input);

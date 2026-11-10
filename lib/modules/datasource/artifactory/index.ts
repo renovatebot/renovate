@@ -1,13 +1,13 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { parse } from '../../../util/html';
-import { HttpError } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { datasource } from './common';
+import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { parse } from '../../../util/html.ts';
+import { isNotFound } from '../../../util/http/status.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { datasource } from './common.ts';
 
 export class ArtifactoryDatasource extends Datasource {
   static readonly id = datasource;
@@ -16,9 +16,9 @@ export class ArtifactoryDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
-
-  override readonly caching = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'merge';
 
@@ -26,13 +26,7 @@ export class ArtifactoryDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -97,18 +91,26 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode === 404) {
-          logger.warn(
-            { registryUrl, packageName },
-            'artifactory: `Not Found` error',
-          );
-          return null;
-        }
+      if (isNotFound(err)) {
+        logger.warn(
+          { registryUrl, packageName },
+          'artifactory: `Not Found` error',
+        );
+        return null;
       }
       this.handleGenericErrors(err);
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

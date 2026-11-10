@@ -1,9 +1,9 @@
-import fs from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import upath from 'upath';
-import type { RenovateConfig } from '../types';
-import { AbstractMigration } from './base/abstract-migration';
-import { MigrationsService } from './migrations-service';
-import type { Migration } from './types';
+import type { RenovateConfig } from '../types.ts';
+import { AbstractMigration } from './base/abstract-migration.ts';
+import { MigrationsService } from './migrations-service.ts';
+import type { Migration } from './types.ts';
 
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
@@ -40,7 +40,7 @@ describe('config/migrations/migrations-service', () => {
   });
 
   it('should save original order of properties', () => {
-    const originalConfig: RenovateConfig = {
+    const originalConfig = {
       exposeEnv: true,
       versionScheme: 'test',
       excludedPackageNames: ['test'],
@@ -60,6 +60,7 @@ describe('config/migrations/migrations-service', () => {
   it('should allow custom migrations by regexp', () => {
     let isMigrationDone = false;
     const originalConfig: RenovateConfig = {
+      // @ts-expect-error --  testing
       fooBar: 'one',
     };
     class CustomMigration extends AbstractMigration {
@@ -100,9 +101,12 @@ describe('config/migrations/migrations-service', () => {
     expect(duplicateProperties).toBeEmptyArray();
   });
 
-  it('includes all defined migration classes in MigrationsService.customMigrations', () => {
-    const allDefinedMigrationClasses: string[] = fs
-      .readdirSync(upath.join(__dirname, 'custom'), { withFileTypes: true })
+  it('includes all defined migration classes in MigrationsService.customMigrations', async () => {
+    const allDefinedMigrationClasses: string[] = (
+      await readdir(upath.join(import.meta.dirname, 'custom'), {
+        withFileTypes: true,
+      })
+    )
       .map((file) => file.name)
       .filter((name) => !name.includes('spec.ts'));
 

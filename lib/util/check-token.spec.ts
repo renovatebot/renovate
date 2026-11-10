@@ -1,9 +1,10 @@
-import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../config/global';
-import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
-import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFileContent } from '../modules/manager/types';
-import * as memCache from '../util/cache/memory';
+import { hostRules } from '~test/host-rules.ts';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../config/global.ts';
+import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
+import type { PackageFileContent } from '../modules/manager/types.ts';
+import * as memCache from '../util/cache/memory/index.ts';
 import {
   checkGithubToken,
   findGithubToken,
@@ -11,10 +12,7 @@ import {
   isGithubPersonalAccessToken,
   isGithubServerToServerToken,
   takePersonalAccessTokenIfPossible,
-} from './check-token';
-import { hostRules, logger } from '~test/util';
-
-vi.mock('./host-rules', () => mockDeep());
+} from './check-token.ts';
 
 describe('util/check-token', () => {
   describe('checkGithubToken', () => {
@@ -24,31 +22,25 @@ describe('util/check-token', () => {
     });
 
     it('does nothing if data is empty', () => {
-      hostRules.find.mockReturnValue({});
       checkGithubToken(undefined);
       expect(logger.logger.trace).not.toHaveBeenCalled();
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     it('returns early if GitHub token is found', () => {
-      hostRules.find.mockReturnValueOnce({ token: '123' });
-      checkGithubToken({});
-      expect(hostRules.find).toHaveBeenCalledWith({
+      hostRules.add({
         hostType: 'github',
-        url: 'https://api.github.com',
+        matchHost: 'api.github.com',
+        token: '123',
       });
+      checkGithubToken({});
       expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     it('returns early if token warnings are disabled', () => {
       GlobalConfig.set({ githubTokenWarn: false });
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({});
-      expect(hostRules.find).toHaveBeenCalledWith({
-        hostType: 'github',
-        url: 'https://api.github.com',
-      });
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'GitHub token warning is disabled',
       );
@@ -56,7 +48,6 @@ describe('util/check-token', () => {
     });
 
     it('does not warn if there is dependencies with GitHub sourceUrl', () => {
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({
         npm: [{ deps: [{ depName: 'renovatebot/renovate' }] }],
       });
@@ -64,7 +55,6 @@ describe('util/check-token', () => {
     });
 
     it('logs warning for github-tags datasource', () => {
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({
         npm: [
           {
@@ -81,7 +71,6 @@ describe('util/check-token', () => {
     });
 
     it('logs warning for github-releases datasource', () => {
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({
         npm: [
           {
@@ -98,7 +87,6 @@ describe('util/check-token', () => {
     });
 
     it('logs warning once', () => {
-      hostRules.find.mockReturnValueOnce({});
       const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
@@ -116,7 +104,13 @@ describe('util/check-token', () => {
         ],
       };
       checkGithubToken(packageFiles);
-      expect(logger.logger.warn).toHaveBeenCalledOnce();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          githubDeps: ['foo/foo', 'bar/bar'],
+        },
+        'GitHub token is required for some dependencies',
+      );
     });
   });
 
@@ -141,6 +135,13 @@ describe('util/check-token', () => {
   describe('isGithubServerToServerToken', () => {
     it('returns true when string is a github server to server token', () => {
       expect(isGithubServerToServerToken('ghs_XXXXXX')).toBeTrue();
+    });
+
+    // via https://github.blog/changelog/2026-04-24-notice-about-upcoming-new-format-for-github-app-installation-tokens/
+    it('returns true when string is a 2026-style GitHub Installation Access Token', () => {
+      expect(
+        isGithubServerToServerToken('ghs_0123456_eyJhbGciOiJSUzI1NiJ9'),
+      ).toBeTrue();
     });
 
     it('returns false when string is a github personal access token token', () => {

@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
-/* eslint-disable @typescript-eslint/only-throw-error */
+/* oxlint-disable typescript/prefer-promise-reject-errors */
+/* oxlint-disable typescript/only-throw-error */
 // TODO: fix, should only allow `Error` type
 
-import { z } from 'zod';
-import { AsyncResult, Result } from './result';
-import { logger } from '~test/util';
+import { z } from 'zod/v4';
+import { logger } from '~test/util.ts';
+import { AsyncResult, Result } from './result.ts';
 
 describe('util/result', () => {
   describe('Result', () => {
@@ -108,9 +108,7 @@ describe('util/result', () => {
         expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
         expect(Result.wrap(schema.safeParse(42))).toMatchObject(
           Result.err({
-            issues: [
-              { code: 'invalid_type', expected: 'string', received: 'number' },
-            ],
+            issues: [{ code: 'invalid_type', expected: 'string' }],
           }),
         );
       });
@@ -222,6 +220,7 @@ describe('util/result', () => {
           throw 'oops';
         });
         expect(res).toEqual(Result._uncaught('oops'));
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
           'Result: unhandled transform error',
@@ -274,7 +273,13 @@ describe('util/result', () => {
         expect(Result.parse('foo', schema)).toEqual(Result.ok('FOO'));
 
         expect(Result.parse(42, schema).unwrap()).toMatchObject({
-          err: { issues: [{ message: 'Expected string, received number' }] },
+          err: expect.objectContaining({
+            issues: expect.arrayContaining([
+              expect.objectContaining({
+                message: 'Invalid input: expected string, received number',
+              }),
+            ]),
+          }),
         });
 
         expect(Result.parse(undefined, schema).unwrap()).toMatchObject({
@@ -307,7 +312,13 @@ describe('util/result', () => {
         expect(Result.ok('foo').parse(schema)).toEqual(Result.ok('FOO'));
 
         expect(Result.ok(42).parse(schema).unwrap()).toMatchObject({
-          err: { issues: [{ message: 'Expected string, received number' }] },
+          err: expect.objectContaining({
+            issues: expect.arrayContaining([
+              expect.objectContaining({
+                message: 'Invalid input: expected string, received number',
+              }),
+            ]),
+          }),
         });
 
         expect(Result.err('oops').parse(schema)).toEqual(Result.err('oops'));
@@ -318,13 +329,13 @@ describe('util/result', () => {
       it('supports value handlers', () => {
         const cb = vi.fn();
         Result.ok(42).onValue(cb);
-        expect(cb).toHaveBeenCalledWith(42);
+        expect(cb).toHaveBeenCalledExactlyOnceWith(42);
       });
 
       it('supports error handlers', () => {
         const cb = vi.fn();
         Result.err('oops').onError(cb);
-        expect(cb).toHaveBeenCalledWith('oops');
+        expect(cb).toHaveBeenCalledExactlyOnceWith('oops');
       });
 
       it('handles error thrown in value handler', () => {
@@ -542,6 +553,7 @@ describe('util/result', () => {
         await expect(
           res.transform((_) => Promise.reject('oops')),
         ).resolves.toEqual(Result._uncaught('oops'));
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
           'Result: unhandled async transform error',
@@ -555,6 +567,7 @@ describe('util/result', () => {
             throw 'bar';
           }),
         ).resolves.toEqual(Result._uncaught('bar'));
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'bar' },
           'AsyncResult: unhandled transform error',
@@ -566,6 +579,7 @@ describe('util/result', () => {
         await expect(
           res.transform(() => Promise.reject('bar')),
         ).resolves.toEqual(Result._uncaught('bar'));
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'bar' },
           'AsyncResult: unhandled async transform error',
@@ -573,14 +587,17 @@ describe('util/result', () => {
       });
 
       it('accumulates error types into union type during chained transform', async () => {
-        const fn1 = (x: string): Result<string, string> =>
-          Result.ok(x.toUpperCase());
+        function fn1(x: string): Result<string, string> {
+          return Result.ok(x.toUpperCase());
+        }
 
-        const fn2 = (x: string): Result<string[], number> =>
-          Result.ok(x.split(''));
+        function fn2(x: string): Result<string[], number> {
+          return Result.ok(x.split(''));
+        }
 
-        const fn3 = (x: string[]): Result<string, boolean> =>
-          Result.ok(x.join('-'));
+        function fn3(x: string[]): Result<string, boolean> {
+          return Result.ok(x.join('-'));
+        }
 
         type Res = Result<string, string | number | boolean>;
         const res: Res = await AsyncResult.ok('foo')
@@ -644,12 +661,20 @@ describe('util/result', () => {
         .transform((x) => x.toUpperCase())
         .nullish();
 
-      expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
+      await expect(AsyncResult.ok('foo').parse(schema)).resolves.toEqual(
         Result.ok('FOO'),
       );
 
-      expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({
-        err: { issues: [{ message: 'Expected string, received number' }] },
+      await expect(
+        AsyncResult.ok(42).parse(schema).unwrap(),
+      ).resolves.toMatchObject({
+        err: expect.objectContaining({
+          issues: expect.arrayContaining([
+            expect.objectContaining({
+              message: 'Invalid input: expected string, received number',
+            }),
+          ]),
+        }),
       });
     });
 
@@ -668,13 +693,13 @@ describe('util/result', () => {
     it('supports value handlers', async () => {
       const cb = vi.fn();
       await AsyncResult.ok(42).onValue(cb);
-      expect(cb).toHaveBeenCalledWith(42);
+      expect(cb).toHaveBeenCalledExactlyOnceWith(42);
     });
 
     it('supports error handlers', async () => {
       const cb = vi.fn();
       await AsyncResult.err('oops').onError(cb);
-      expect(cb).toHaveBeenCalledWith('oops');
+      expect(cb).toHaveBeenCalledExactlyOnceWith('oops');
     });
 
     it('handles error thrown in value handler', async () => {

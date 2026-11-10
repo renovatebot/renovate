@@ -1,12 +1,12 @@
-import { regEx } from '../../../util/regex';
-import { CdnjsDatasource } from '../../datasource/cdnjs';
-import { cloudflareUrlRegex } from '../cdnurl/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { CdnjsDatasource } from '../../datasource/cdnjs/index.ts';
+import { cloudflareUrlRegex } from '../cdnurl/extract.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
-const regex = regEx(/<\s*(script|link)\s+[^>]*?\/?>/i);
+const regex = regEx(/<\s*(?:script|link)\s+[^>]*?\/?>/i);
 
 const integrityRegex = regEx(
-  /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/,
+  /\s+integrity\s*=\s*(?:"|')(?<currentDigest>[^"']+)/,
 );
 
 export function extractDep(tag: string): PackageDependency | null {

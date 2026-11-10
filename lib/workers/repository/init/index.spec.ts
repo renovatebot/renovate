@@ -1,24 +1,28 @@
-import { GlobalConfig } from '../../../config/global';
-import * as _secrets from '../../../config/secrets';
-import * as _onboarding from '../onboarding/branch';
-import * as _apis from './apis';
-import * as _config from './config';
-import * as _merge from './merge';
-import { initRepo } from '.';
-import { logger, partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _secrets from '../../../config/secrets.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import * as _onboarding from '../onboarding/branch/index.ts';
+import * as _apis from './apis.ts';
+import * as _config from './config.ts';
+import { initRepo } from './index.ts';
+import * as _merge from './merge.ts';
 
-vi.mock('../onboarding/branch');
-vi.mock('../configured');
-vi.mock('../init/apis');
-vi.mock('../init/config');
-vi.mock('../init/merge');
-vi.mock('../../../config/secrets');
-vi.mock('../../../config/variables');
-vi.mock('../../../modules/platform', () => ({
+vi.mock('../onboarding/branch/index.ts');
+vi.mock('../configured.ts');
+vi.mock('../init/apis.ts');
+vi.mock('../init/config.ts');
+vi.mock('../init/merge.ts');
+vi.mock('../../../config/secrets.ts');
+vi.mock('../../../config/variables.ts');
+vi.mock('../../../modules/platform/index.ts', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
 }));
+vi.unmock('../../../util/mutex.ts');
 
 const apis = vi.mocked(_apis);
 const config = vi.mocked(_config);
@@ -27,12 +31,16 @@ const onboarding = vi.mocked(_onboarding);
 const secrets = vi.mocked(_secrets);
 
 describe('workers/repository/init/index', () => {
-  beforeEach(() => {
-    GlobalConfig.set({ localDir: '', cacheDir: '' });
+  let tmpDir: DirectoryResult;
+
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ localDir: '', cacheDir: tmpDir.path });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     GlobalConfig.reset();
+    await tmpDir.cleanup();
   });
 
   describe('initRepo', () => {
@@ -48,6 +56,29 @@ describe('workers/repository/init/index', () => {
       expect(renovateConfig).toEqual({});
     });
 
+    it('applies the repo config to the platform after reading it', async () => {
+      const applyRepoConfig = vi.fn();
+      platform.applyRepoConfig = applyRepoConfig;
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({
+        azureWorkItemType: 'Task',
+      });
+      merge.mergeRenovateConfig.mockResolvedValueOnce({});
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>(),
+      );
+      await initRepo({});
+
+      expect(applyRepoConfig).toHaveBeenCalledExactlyOnceWith({
+        azureWorkItemType: 'Task',
+      });
+      expect(applyRepoConfig.mock.invocationCallOrder[0]).toBeGreaterThan(
+        config.getRepoConfig.mock.invocationCallOrder[0],
+      );
+      delete platform.applyRepoConfig;
+    });
+
     it('warns on unsupported options', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
@@ -60,12 +91,14 @@ describe('workers/repository/init/index', () => {
         partial<RenovateConfig>(),
       );
       await initRepo({});
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { platform: undefined },
+        { platform: 'github' },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { platform: undefined },
+        { platform: 'github' },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",
       );
     });

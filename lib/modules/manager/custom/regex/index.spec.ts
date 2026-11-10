@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../logger';
-import type { CustomExtractConfig } from '../types';
-import { defaultConfig, displayName, extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { CustomExtractConfig } from '../types.ts';
+import { defaultConfig, displayName, extractPackageFile } from './index.ts';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
 const ansibleYamlContent = Fixtures.get(`ansible.yml`);
@@ -36,15 +36,66 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(8);
-    expect(res?.deps.find((dep) => dep.depName === 'yarn')?.versioning).toBe(
-      'semver',
-    );
-    expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
-      'maven',
-    );
-    expect(res?.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'gradle',
+          currentValue: '6.2',
+          datasource: 'gradle-version',
+          versioning: 'maven',
+          depType: 'final',
+        },
+        {
+          depName: 'nodejs/node',
+          currentValue: '10.19.0',
+          datasource: 'github-tags',
+          versioning: 'node',
+          depType: 'final',
+        },
+        {
+          depName: 'composer/composer',
+          currentValue: '1.9.3',
+          datasource: 'github-releases',
+          versioning: 'semver',
+          depType: 'final',
+        },
+        {
+          depName: 'cocoapods',
+          currentValue: '1.9.0',
+          datasource: 'rubygems',
+          versioning: 'ruby',
+          depType: 'final',
+        },
+        {
+          depName: 'docker/docker-ce',
+          currentValue: '19.03.1',
+          datasource: 'github-releases',
+          versioning: 'docker',
+          depType: 'final',
+        },
+        {
+          depName: 'python-poetry/poetry',
+          currentValue: '1.0.0',
+          datasource: 'github-releases',
+          versioning: 'semver',
+          depType: 'final',
+        },
+        {
+          depName: 'npm',
+          currentValue: '6.10.2',
+          datasource: 'npm',
+          versioning: 'semver',
+          depType: 'final',
+        },
+        {
+          depName: 'yarn',
+          currentValue: '1.19.1',
+          datasource: 'npm',
+          versioning: 'semver',
+          depType: 'final',
+        },
+      ],
+    });
   });
 
   it('returns null if no dependencies found', async () => {
@@ -91,13 +142,17 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
-    expect(
-      res?.deps.find(
-        (dep) => dep.depName === 'openresty/headers-more-nginx-module',
-      )?.extractVersion,
-    ).toBe('^v(?<version>.*)$');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'openresty/headers-more-nginx-module',
+          currentValue: '0.30',
+          datasource: 'github-tags',
+          extractVersion: '^v(?<version>.*)$',
+          versioning: 'loose',
+        },
+      ],
+    });
   });
 
   it('extracts registryUrl', async () => {
@@ -126,12 +181,12 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot({
+    expect(res).toMatchObject({
       deps: [
         {
+          packageName: 'prometheus-operator',
           currentValue: '8.12.13',
           datasource: 'helm',
-          packageName: 'prometheus-operator',
           registryUrls: ['https://charts.helm.sh/stable'],
         },
       ],
@@ -152,8 +207,16 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'gradle',
+          currentValue: '6.2',
+          datasource: 'gradle-version',
+          registryUrls: ['http://registry.gradle.com/'],
+        },
+      ],
+    });
     expect(
       res?.deps.find((dep) => dep.depName === 'gradle')?.registryUrls,
     ).toEqual(['http://registry.gradle.com/']);
@@ -173,7 +236,8 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot({
+    expect(res).toEqual({
+      ...config,
       deps: [
         {
           currentValue: '6.2',
@@ -185,6 +249,7 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
+
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
       'Invalid regex manager registryUrl',
@@ -207,14 +272,22 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(2);
-    expect(
-      res?.deps.find((dep) => dep.depName === 'nodejs/node')?.versioning,
-    ).toBe('node');
-    expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
-      'maven',
-    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'gradle',
+          currentValue: '6.2',
+          datasource: 'gradle-version',
+          versioning: 'maven',
+        },
+        {
+          depName: 'nodejs/node',
+          currentValue: '10.19.0',
+          datasource: 'github-tags',
+          versioning: 'node',
+        },
+      ],
+    });
   });
 
   it('extracts dependency with autoReplaceStringTemplate', async () => {
@@ -233,8 +306,17 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'my.new.registry/aRepository/andImage',
+          currentValue: '1.18-alpine',
+          datasource: 'docker',
+          replaceString:
+            'image: my.old.registry/aRepository/andImage:1.18-alpine',
+        },
+      ],
+    });
   });
 
   it('extracts indentation: maintains indentation value if whitespace or empty', async () => {
@@ -311,8 +393,15 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'prom/prometheus',
+          currentValue: 'v2.21.0',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy and non standard capture groups', async () => {
@@ -334,9 +423,15 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res?.deps).toHaveLength(1);
-    expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'docker.io/prom/prometheus',
+          currentValue: 'v2.21.0',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy and multiple matches', async () => {
@@ -355,8 +450,15 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'prom/prometheus',
+          currentValue: '0.12.0',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy and registry url', async () => {
@@ -376,8 +478,16 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'descheduler',
+          currentValue: '0.19.2',
+          datasource: 'helm',
+          registryUrls: ['https://kubernetes-sigs.github.io/descheduler/'],
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy: sets replaceString when current version group present', async () => {
@@ -455,8 +565,16 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'helm_repo/descheduler',
+          currentValue: '0.19.2',
+          datasource: 'helm',
+          registryUrls: ['https://kubernetes-sigs.github.io/'],
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy and empty file', async () => {
@@ -490,8 +608,15 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'prom/prometheus',
+          currentValue: 'v2.19.0',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with recursive strategy and multiple matches', async () => {
@@ -509,8 +634,20 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(2);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'prom/prometheus',
+          currentValue: 'v2.19.0',
+          datasource: 'docker',
+        },
+        {
+          depName: 'grafana/grafana',
+          currentValue: '7.2.2',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with recursive strategy and multiple layers', async () => {
@@ -529,8 +666,15 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'grafana/loki',
+          currentValue: '1.6.1',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with recursive strategy and fail because of not sufficient regexes', async () => {
@@ -580,8 +724,30 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(4);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'group1/group1/prom/prometheus',
+          currentValue: 'v2.19.0',
+          datasource: 'docker',
+        },
+        {
+          depName: 'group2/group2/grafana/grafana',
+          currentValue: '7.2.2',
+          datasource: 'docker',
+        },
+        {
+          depName: 'backup/backup/grafana/loki',
+          currentValue: '1.6.1',
+          datasource: 'docker',
+        },
+        {
+          depName: 'setup/setup/python',
+          currentValue: '3.9.0',
+          datasource: 'docker',
+        },
+      ],
+    });
   });
 
   it('extracts with recursive strategy and without depName', async () => {
@@ -680,4 +846,48 @@ describe('modules/manager/custom/regex/index', () => {
       });
     },
   );
+
+  it('uses package file as dep name', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: ['\\s*(?<currentValue>.+)\\s*$'],
+      depNameTemplate: '{{packageFile}}',
+      datasourceTemplate: 'npm',
+    };
+
+    const res = await extractPackageFile('1.0.0', 'xmldoc', config);
+
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'xmldoc',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
+
+  it('uses package file dir as dep name', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: ['\\s*(?<currentValue>.+)\\s*$'],
+      depNameTemplate: '{{lookup (split packageFileDir "/") 1}}',
+      datasourceTemplate: 'npm',
+    };
+
+    const res = await extractPackageFile(
+      '1.0.0',
+      'packages/xmldoc/version.env',
+      config,
+    );
+
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'xmldoc',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
 });

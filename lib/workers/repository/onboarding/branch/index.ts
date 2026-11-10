@@ -1,35 +1,37 @@
-import is from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../../config';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { type Pr, platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { getBranchCommit, setGitAuthor } from '../../../../util/git';
-import { checkIfConfigured } from '../../configured';
-import { extractAllDependencies } from '../../extract';
-import { mergeRenovateConfig } from '../../init/merge';
-import { OnboardingState } from '../common';
-import { getOnboardingPr, isOnboarded } from './check';
-import { getOnboardingConfig } from './config';
-import { createOnboardingBranch } from './create';
+import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { type Pr, platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
+import { checkIfConfigured } from '../../configured.ts';
+import { extractAllDependencies } from '../../extract/index.ts';
+import { mergeRenovateConfig } from '../../init/merge.ts';
+import { OnboardingState } from '../common.ts';
+import { getOnboardingPr, isOnboarded } from './check.ts';
+import { getOnboardingConfig } from './config.ts';
+import { createOnboardingBranch } from './create.ts';
 import {
   deleteOnboardingCache,
   hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
   isOnboardingBranchModified,
   setOnboardingCache,
-} from './onboarding-branch-cache';
-import { rebaseOnboardingBranch } from './rebase';
+} from './onboarding-branch-cache.ts';
+import { rebaseOnboardingBranch } from './rebase.ts';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
-  let onboardingBranch = config.onboardingBranch;
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
   const defaultBranch = config.defaultBranch!;
   let isConflicted = false;
   let isModified = false;
@@ -53,7 +55,7 @@ export async function checkOnboardingBranch(
     logger.debug('Onboarding PR already exists');
 
     isModified = await isOnboardingBranchModified(
-      config.onboardingBranch!,
+      onboardingBranch!,
       defaultBranch,
     );
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
@@ -64,7 +66,7 @@ export async function checkOnboardingBranch(
       );
       if (commit) {
         logger.info(
-          { branch: config.onboardingBranch, commit, onboarding: true },
+          { branch: onboardingBranch, commit, onboarding: true },
           'Branch updated',
         );
       }
@@ -79,7 +81,7 @@ export async function checkOnboardingBranch(
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
-      isOnboardingCacheValid(defaultBranch, config.onboardingBranch!) &&
+      isOnboardingCacheValid(defaultBranch, onboardingBranch!) &&
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
       logger.debug(
@@ -90,12 +92,12 @@ export async function checkOnboardingBranch(
     }
     OnboardingState.onboardingCacheValid = false;
     if (isModified) {
-      if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
+      if (hasOnboardingBranchChanged(onboardingBranch!)) {
         invalidateExtractCache(config.baseBranch!);
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        config.onboardingBranch!,
+        onboardingBranch!,
       );
     }
   } else {
@@ -103,15 +105,13 @@ export async function checkOnboardingBranch(
     const onboardingConfig = await getOnboardingConfig(config);
     let mergedConfig = mergeChildConfig(config, onboardingConfig);
     mergedConfig = await mergeRenovateConfig(mergedConfig);
-    onboardingBranch = mergedConfig.onboardingBranch;
 
     if (
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
-        .length === 0
+        .length === 0 &&
+      getInheritedOrGlobal('onboardingNoDeps') !== 'enabled'
     ) {
-      if (config.onboardingNoDeps !== 'enabled') {
-        throw new Error(REPOSITORY_NO_PACKAGE_FILES);
-      }
+      throw new Error(REPOSITORY_NO_PACKAGE_FILES);
     }
     logger.debug('Need to create onboarding PR');
     if (config.onboardingRebaseCheckbox) {
@@ -126,12 +126,10 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!GlobalConfig.get('dryRun')) {
-    // TODO #22198
-    if (!isConflicted) {
-      logger.debug('Merge onboarding branch in default branch');
-      await scm.mergeToLocal(onboardingBranch!);
-    }
+  // TODO #22198
+  if (!GlobalConfig.get('dryRun') && !isConflicted) {
+    logger.debug('Merge onboarding branch in default branch');
+    await scm.mergeToLocal(onboardingBranch!);
   }
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,
@@ -144,12 +142,12 @@ export async function checkOnboardingBranch(
 }
 
 function handleOnboardingManualRebase(onboardingPr: Pr): void {
-  const pl = GlobalConfig.get('platform')!;
-  const { rebaseRequested } = onboardingPr.bodyStruct ?? {};
-  if (!['github', 'gitlab', 'gitea'].includes(pl)) {
+  const pl = GlobalConfig.get('platform');
+  const { rebaseRequested } = coerceObject(onboardingPr.bodyStruct);
+  if (!['github', 'gitlab', 'gitea', 'forgejo'].includes(pl)) {
     logger.trace(`Platform '${pl}' does not support extended markdown`);
     OnboardingState.prUpdateRequested = true;
-  } else if (is.nullOrUndefined(rebaseRequested)) {
+  } else if (isNullOrUndefined(rebaseRequested)) {
     logger.debug('No rebase checkbox was found in the onboarding PR');
     OnboardingState.prUpdateRequested = true;
   } else if (rebaseRequested) {
@@ -174,7 +172,7 @@ function isOnboardingCacheValid(
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
   return !!(
-    onboardingBranchCache &&
+    isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&
     onboardingBranchCache.onboardingBranchSha ===
       getBranchCommit(onboardingBranch) &&
@@ -184,9 +182,9 @@ function isOnboardingCacheValid(
 }
 
 function isConfigHashPresent(pr: Pr): boolean {
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   // if platform does not support html comments return true
-  if (!['github', 'gitlab', 'gitea'].includes(platform)) {
+  if (!['github', 'gitlab', 'gitea', 'forgejo'].includes(platform)) {
     return true;
   }
 

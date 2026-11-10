@@ -1,39 +1,43 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
-import type { Options, RetryObject } from 'got';
-import type { Merge, SetRequired } from 'type-fest';
-import type { infer as Infer } from 'zod';
-import { ZodType } from 'zod';
-import { GlobalConfig } from '../../config/global';
-import { HOST_DISABLED } from '../../constants/error-messages';
-import { pkg } from '../../expose.cjs';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../cache/memory';
-import { getEnv } from '../env';
-import { hash } from '../hash';
-import { type AsyncResult, Result } from '../result';
-import { Toml } from '../schema-utils';
-import { ObsoleteCacheHitLogger } from '../stats';
-import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
-import { parseSingleYaml } from '../yaml';
-import { applyAuthorization, removeAuthorization } from './auth';
-import { fetch, stream } from './got';
-import { applyHostRule, findMatchingRule } from './host-rules';
-
-import { getQueue } from './queue';
-import { getRetryAfter, wrapWithRetry } from './retry-after';
-import { getThrottle } from './throttle';
+import type { Options, OptionsInit, RetryObject } from 'got';
+import type { SetRequired } from 'type-fest';
+import type { z } from 'zod/v4';
+import { ZodType } from 'zod/v4';
+import { GlobalConfig } from '../../config/global.ts';
+import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { CombinedHostRule } from '../../types/index.ts';
+import { coerceArray } from '../array.ts';
+import * as memCache from '../cache/memory/index.ts';
+import { getEnv } from '../env.ts';
+import { hash } from '../hash.ts';
+import { coerceObject } from '../object.ts';
+import { type AsyncResult, Result } from '../result.ts';
+import { Toml } from '../schema-utils/index.ts';
+import { ObsoleteCacheHitLogger } from '../stats.ts';
+import { compile } from '../template/index.ts';
+import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
+import { parseSingleYaml } from '../yaml.ts';
+import { applyAuthorization } from './auth.ts';
+import type { HttpCacheProvider } from './cache/types.ts';
+import { fetch, normalize, stream } from './got.ts';
+import { applyHostGuard } from './host-guard.ts';
+import { applyHostRule, findMatchingRule } from './host-rules.ts';
+import { getQueue } from './queue.ts';
+import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
+import { isNotModified } from './status.ts';
+import { getThrottle } from './throttle.ts';
 import type {
   GotOptions,
-  GotStreamOptions,
   GotTask,
   HttpMethod,
   HttpOptions,
   HttpResponse,
   SafeJsonError,
-} from './types';
-import { copyResponse } from './util';
+} from './types.ts';
+import { copyResponse } from './util.ts';
 
 export interface InternalJsonUnsafeOptions<
   Opts extends HttpOptions = HttpOptions,
@@ -45,7 +49,7 @@ export interface InternalJsonUnsafeOptions<
 export interface InternalJsonOptions<
   Opts extends HttpOptions,
   ResT = unknown,
-  Schema extends ZodType<ResT> = ZodType<ResT>,
+  Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
 > extends InternalJsonUnsafeOptions<Opts> {
   schema?: Schema;
 }
@@ -60,13 +64,38 @@ export interface InternalHttpOptions extends HttpOptions {
   parseJson?: Options['parseJson'];
 }
 
-export function applyDefaultHeaders(options: Options): void {
-  const renovateVersion = pkg.version;
+const inFlightRequests = new WeakMap<
+  HttpCacheProvider,
+  Map<string, Promise<HttpResponse<unknown>>>
+>();
+
+function getInFlightRequest(
+  cacheProvider: HttpCacheProvider,
+  requestKey: string,
+): Promise<HttpResponse<unknown>> | null {
+  return inFlightRequests.get(cacheProvider)?.get(requestKey) ?? null;
+}
+
+/**
+ * Registers a cache provider request as in flight until it settles.
+ */
+function setInFlightRequest(
+  cacheProvider: HttpCacheProvider,
+  requestKey: string,
+  request: Promise<HttpResponse<unknown>>,
+): Promise<HttpResponse<unknown>> {
+  const requests = inFlightRequests.get(cacheProvider) ?? new Map();
+  inFlightRequests.set(cacheProvider, requests);
+  const pending = request.finally(() => requests.delete(requestKey));
+  requests.set(requestKey, pending);
+  return pending;
+}
+
+export function applyDefaultHeaders(options: OptionsInit): void {
+  const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent':
-      GlobalConfig.get('userAgent') ??
-      `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+    'user-agent': compile(userAgentTemplate, {}),
   };
 }
 
@@ -80,10 +109,10 @@ export abstract class HttpBase<
     return undefined;
   }
 
-  constructor(
-    protected hostType: string,
-    options: HttpOptions = {},
-  ) {
+  protected hostType: string;
+
+  constructor(hostType: string, options: HttpOptions = {}) {
+    this.hostType = hostType;
     const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,
@@ -95,23 +124,92 @@ export abstract class HttpBase<
             this.calculateRetryDelay(retryObject),
           limit: retryLimit,
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+          enforceRetryRules: false,
         },
       },
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
   }
+
+  /**
+   * Builds the final got options for a request to a given `url`
+   *
+   * This merges instance options, applies default headers, host rules and authorization, and rejects requests to disabled hosts.
+   *
+   * Both the `request()` and `stream()` paths must use this single entry point so that policy applied here covers every outbound request.
+   */
+  private prepareOptions(
+    resolvedUrl: URL,
+    httpOptions: InternalHttpOptions,
+  ): {
+    options: InternalGotOptions & InternalHttpOptions;
+    hostRule: CombinedHostRule;
+  } {
+    const url = resolvedUrl.toString();
+
+    let options = merge<InternalGotOptions, InternalHttpOptions>(
+      {
+        ...this.options,
+        hostType: this.hostType,
+      },
+      httpOptions,
+      { isMergeableObject: isPlainObject },
+    );
+
+    applyDefaultHeaders(options);
+
+    if (
+      isUndefined(options.readOnly) &&
+      ['head', 'get'].includes(options.method.toLowerCase())
+    ) {
+      options.readOnly = true;
+    }
+
+    const hostRule = findMatchingRule(url, options);
+    options = applyHostRule(url, options, hostRule);
+    if (options.enabled === false) {
+      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
+      throw new Error(HOST_DISABLED);
+    }
+    options = applyAuthorization(options);
+
+    // enforced here so it runs before anything else - including cache lookups - can act on the URL, and for the stream path too
+    const guard = applyHostGuard(
+      resolvedUrl,
+      options.hostType,
+      hostRule.internalHostGrant,
+      options.responseBecomesConfig,
+    );
+    options.dnsLookup = guard.dnsLookup;
+    options.hooks = {
+      ...options.hooks,
+      beforeRedirect: [
+        ...coerceArray(options.hooks?.beforeRedirect),
+        guard.beforeRedirect,
+      ],
+    };
+    if (guard.beforeRequest) {
+      options.hooks.beforeRequest = [
+        ...coerceArray(options.hooks.beforeRequest),
+        guard.beforeRequest,
+      ];
+    }
+
+    return { options, hostRule };
+  }
+
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
-  ): Promise<HttpResponse<Buffer>>;
+  ): Promise<HttpResponse<Uint8Array>>;
   private async request<T = unknown>(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'json' },
@@ -126,94 +224,106 @@ export abstract class HttpBase<
 
     this.processOptions(resolvedUrl, httpOptions);
 
-    let options = merge<InternalGotOptions, InternalHttpOptions>(
-      {
-        ...this.options,
-        hostType: this.hostType,
-      },
-      httpOptions,
-      { isMergeableObject: is.plainObject },
-    );
+    const { options, hostRule } = this.prepareOptions(resolvedUrl, httpOptions);
 
-    logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
+    const method = options.method.toLowerCase();
+    const isReadMethod = ['head', 'get'].includes(method);
 
-    options.hooks = {
-      beforeRedirect: [removeAuthorization],
-    };
+    logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
 
-    applyDefaultHeaders(options);
+    const timeout = options.timeout ?? 60000;
+    options.timeout = timeout;
 
-    if (
-      is.undefined(options.readOnly) &&
-      ['head', 'get'].includes(options.method)
-    ) {
-      options.readOnly = true;
+    let cacheProvider: HttpCacheProvider | undefined;
+    if (isReadMethod && options.cacheProvider) {
+      cacheProvider = options.cacheProvider;
     }
 
-    const hostRule = findMatchingRule(url, options);
-    options = applyHostRule(url, options, hostRule);
-    if (options.enabled === false) {
-      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
-      throw new Error(HOST_DISABLED);
-    }
-    options = applyAuthorization(options);
-    options.timeout ??= 60000;
-
-    const { cacheProvider } = options;
+    const requestKey = isReadMethod
+      ? hash(
+          `got-${JSON.stringify({
+            url,
+            headers: options.headers,
+            method,
+            responseType: options.responseType,
+            responseBecomesConfig: options.responseBecomesConfig,
+            throwHttpErrors: options.throwHttpErrors !== false,
+          })}`,
+        )
+      : '';
 
     const memCacheKey =
       !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
       !cacheProvider &&
       options.memCache !== false &&
-      (options.method === 'get' || options.method === 'head')
-        ? hash(
-            `got-${JSON.stringify({
-              url,
-              headers: options.headers,
-              method: options.method,
-            })}`,
-          )
+      isReadMethod
+        ? requestKey
         : null;
 
-    const cachedResponse = await cacheProvider?.bypassServer<unknown>(url);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
+    // each Http subclass runs its own handleResponse, so it doesn't join another's request
+    const inFlightKey = `${this.constructor.name}-${requestKey}`;
 
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
+    let sharedResponse = false;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
 
-      /* v8 ignore start: temporary code */
+      /* v8 ignore next: temporary code */
       if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
-      /* v8 ignore stop: temporary code */
+    } else if (cacheProvider) {
+      resPromise = getInFlightRequest(cacheProvider, inFlightKey);
+      sharedResponse = !!resPromise;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (!resPromise) {
-      if (cacheProvider) {
-        await cacheProvider.setCacheHeaders(url, options);
-      }
-
       const startTime = Date.now();
-      const httpTask: GotTask = () => {
+      const fetchTask: GotTask = () => {
         const queueMs = Date.now() - startTime;
-        return fetch(url, options, { queueMs });
+        return fetch(url, this._normalizeOptions(options), { queueMs });
       };
 
       const throttle = getThrottle(url);
-      const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
+      const throttledTask = throttle
+        ? () => throttle.add(fetchTask)
+        : fetchTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue
-        ? () => queue.add(throttledTask, { throwOnTimeout: true })
-        : throttledTask;
+      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
-      resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
+      function httpTask(): Promise<HttpResponse<unknown>> {
+        return wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
+      }
+
+      // cached responses don't hit the server, so they skip the throttle and queue
+      const cachedTask = async (
+        provider: HttpCacheProvider,
+      ): Promise<HttpResponse<unknown>> => {
+        let res = await provider.bypassServer<unknown>(options.method, url);
+        if (!res) {
+          await provider.setCacheHeaders(method, url, options);
+          res = await httpTask();
+        }
+        const resCopy = copyResponse(res, false);
+        resCopy.authorization = !!options?.headers?.authorization;
+        this.handleResponse(resolvedUrl, resCopy);
+        return await provider.wrapServerResponse(method, url, resCopy);
+      };
+
+      if (cacheProvider) {
+        resPromise = setInFlightRequest(
+          cacheProvider,
+          inFlightKey,
+          cachedTask(cacheProvider),
+        );
+      } else {
+        resPromise = httpTask();
+      }
 
       if (memCacheKey) {
         memCache.set(memCacheKey, resPromise);
@@ -222,13 +332,22 @@ export abstract class HttpBase<
 
     try {
       const res = await resPromise;
-      const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
+
+      if (cacheProvider) {
+        if (!sharedResponse) {
+          return res;
+        }
+        // identical requests share one response, so each caller gets its own copy
+        const resCopy = copyResponse(res, true);
+        resCopy.authorization = res.authorization;
+        return resCopy;
+      }
+
+      const deepCopyNeeded = !!memCacheKey && !isNotModified(res);
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
-      if (cacheProvider) {
-        return await cacheProvider.wrapServerResponse(url, resCopy);
-      }
+      this.handleResponse(resolvedUrl, resCopy);
 
       return resCopy;
     } catch (err) {
@@ -237,10 +356,9 @@ export abstract class HttpBase<
         throw new ExternalHostError(err);
       }
 
-      const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
-        url,
-        true,
-      );
+      const staleResponse = await cacheProvider?.bypassServer<
+        string | Uint8Array
+      >(method, url, true);
       if (staleResponse) {
         logger.debug(
           { err },
@@ -251,6 +369,23 @@ export abstract class HttpBase<
 
       this.handleError(requestUrl, httpOptions, err);
     }
+  }
+
+  private _normalizeOptions<T extends OptionsInit>(options: T): T {
+    return normalize(options, this.extraOptions());
+  }
+
+  /**
+   * Returns Renovate extra options which needs to be removed before passing to got.
+   * @returns extra Renovate options.
+   */
+  protected extraOptions(): readonly string[] {
+    return [
+      'baseUrl',
+      'cacheProvider',
+      'readOnly',
+      'responseBecomesConfig',
+    ] as (keyof HttpOptions)[];
   }
 
   protected processOptions(_url: URL, _options: InternalHttpOptions): void {
@@ -265,10 +400,11 @@ export abstract class HttpBase<
     throw err;
   }
 
-  protected resolveUrl(
-    requestUrl: string | URL,
-    options: HttpOptions | undefined,
-  ): URL {
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
+  }
+
+  resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
     if (url instanceof URL) {
@@ -299,7 +435,7 @@ export abstract class HttpBase<
   get(
     url: string,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<string | Buffer>> {
+  ): Promise<HttpResponse<string | Uint8Array>> {
     return this.request(url, options);
   }
 
@@ -312,17 +448,14 @@ export abstract class HttpBase<
     }) as Promise<HttpResponse<never>>;
   }
 
-  getText(
-    url: string | URL,
-    options: HttpOptions = {},
-  ): Promise<HttpResponse<string>> {
+  getText(url: string | URL, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, { ...options, responseType: 'text' });
   }
 
   getBuffer(
     url: string | URL,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<Buffer>> {
+  ): Promise<HttpResponse<Uint8Array>> {
     return this.request(url, { ...options, responseType: 'buffer' });
   }
 
@@ -346,7 +479,10 @@ export abstract class HttpBase<
     return this.request<ResT>(url, { ...opts, responseType: 'json' });
   }
 
-  private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  private async requestJson<
+    ResT,
+    Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
+  >(
     method: HttpMethod,
     options: InternalJsonOptions<JSONOpts, ResT, Schema>,
   ): Promise<HttpResponse<ResT>> {
@@ -380,7 +516,7 @@ export abstract class HttpBase<
   }
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
-    const opt = options ?? {};
+    const opt = coerceObject(options);
     return await this.getText(url, {
       headers: {
         Accept: 'text/plain',
@@ -404,17 +540,17 @@ export abstract class HttpBase<
   async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getYaml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>> {
+  ): Promise<HttpResponse<z.infer<Schema>>> {
     const url = arg1;
     let schema: Schema;
     let httpOptions: Opts | undefined;
@@ -438,7 +574,7 @@ export abstract class HttpBase<
   getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
+  >(url: string, schema: Schema): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
@@ -446,7 +582,7 @@ export abstract class HttpBase<
     url: string,
     options: Opts,
     schema: Schema,
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  ): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
@@ -502,19 +638,19 @@ export abstract class HttpBase<
   getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   getJson<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>> {
-    const args = this.resolveArgs<Infer<Schema>>(arg1, arg2, arg3);
-    return this.requestJson<Infer<Schema>>('get', args);
+  ): Promise<HttpResponse<z.infer<Schema>>> {
+    const args = this.resolveArgs<z.infer<Schema>>(arg1, arg2, arg3);
+    return this.requestJson<z.infer<Schema>>('get', args);
   }
 
   /**
@@ -527,12 +663,12 @@ export abstract class HttpBase<
   getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     url: string,
     schema: Schema,
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  ): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  ): AsyncResult<z.infer<Schema>, SafeJsonError>;
   getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -555,12 +691,12 @@ export abstract class HttpBase<
   postJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   postJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   postJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -574,18 +710,18 @@ export abstract class HttpBase<
   putJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   putJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   putJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
-    arg3?: ZodType,
+    arg3?: Schema,
   ): Promise<HttpResponse<T>> {
-    const args = this.resolveArgs(arg1, arg2, arg3);
+    const args = this.resolveArgs<T>(arg1, arg2, arg3);
     return this.requestJson<T>('put', args);
   }
 
@@ -593,12 +729,12 @@ export abstract class HttpBase<
   patchJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   patchJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   patchJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -612,12 +748,12 @@ export abstract class HttpBase<
   deleteJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   deleteJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   deleteJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
@@ -628,52 +764,34 @@ export abstract class HttpBase<
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    let combinedOptions: Merge<
-      GotStreamOptions,
-      SetRequired<InternalHttpOptions, 'method'>
-    > = {
-      ...this.options,
-      hostType: this.hostType,
+    const resolvedUrl = this.resolveUrl(url, options);
+
+    const { options: combinedOptions } = this.prepareOptions(resolvedUrl, {
       ...options,
       method: 'get',
-    };
+    });
 
-    const resolvedUrl = this.resolveUrl(url, options).toString();
-
-    applyDefaultHeaders(combinedOptions);
-
-    if (
-      is.undefined(combinedOptions.readOnly) &&
-      ['head', 'get'].includes(combinedOptions.method)
-    ) {
-      combinedOptions.readOnly = true;
-    }
-
-    const hostRule = findMatchingRule(url, combinedOptions);
-    combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
-    if (combinedOptions.enabled === false) {
-      throw new Error(HOST_DISABLED);
-    }
-    combinedOptions = applyAuthorization(combinedOptions);
-
-    return stream(resolvedUrl, combinedOptions);
+    return stream(
+      resolvedUrl.toString(),
+      this._normalizeOptions(combinedOptions),
+    );
   }
 
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: JSONOpts,
     schema: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>>;
+  ): Promise<HttpResponse<z.infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<Infer<Schema>>> {
-    const { url, schema, httpOptions } = this.resolveArgs<Infer<Schema>>(
+  ): Promise<HttpResponse<z.infer<Schema>>> {
+    const { url, schema, httpOptions } = this.resolveArgs<z.infer<Schema>>(
       arg1,
       arg2,
       arg3,
@@ -692,9 +810,9 @@ export abstract class HttpBase<
     if (schema) {
       res.body = await Toml.pipe(schema).parseAsync(res.body);
     } else {
-      res.body = (await Toml.parseAsync(res.body)) as Infer<Schema>;
+      res.body = (await Toml.parseAsync(res.body)) as z.infer<Schema>;
     }
 
-    return res;
+    return res as HttpResponse<z.infer<Schema>>;
   }
 }

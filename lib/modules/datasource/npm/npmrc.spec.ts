@@ -1,13 +1,15 @@
-import ini from 'ini';
-import { GlobalConfig } from '../../../config/global';
-import * as _sanitize from '../../../util/sanitize';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _sanitize from '../../../util/sanitize.ts';
+import { Ini } from '../../../util/schema-utils/index.ts';
+import { defaultRegistryUrl } from './common.ts';
 import {
   convertNpmrcToRules,
   getMatchHostFromNpmrcHost,
+  resolveRegistryUrl,
   setNpmrc,
-} from './npmrc';
+} from './npmrc.ts';
 
-vi.mock('../../../util/sanitize');
+vi.mock('../../../util/sanitize.ts');
 
 const sanitize = vi.mocked(_sanitize);
 
@@ -31,8 +33,8 @@ describe('modules/datasource/npm/npmrc', () => {
     });
 
     it('parses https://host', () => {
-      expect(getMatchHostFromNpmrcHost('https://registry.npmjs.org')).toBe(
-        'https://registry.npmjs.org',
+      expect(getMatchHostFromNpmrcHost(defaultRegistryUrl)).toBe(
+        defaultRegistryUrl,
       );
     });
   });
@@ -40,14 +42,14 @@ describe('modules/datasource/npm/npmrc', () => {
   describe('convertNpmrcToRules()', () => {
     it('rejects invalid registries', () => {
       const res = convertNpmrcToRules(
-        ini.parse('registry=1\n@scope:registry=2\n'),
+        Ini.parse('registry=1\n@scope:registry=2\n'),
       );
       expect(res.hostRules).toHaveLength(0);
       expect(res.packageRules).toHaveLength(0);
     });
 
     it('handles naked auth', () => {
-      expect(convertNpmrcToRules(ini.parse('_auth=abc123\n')))
+      expect(convertNpmrcToRules(Ini.parse('_auth=abc123\n')))
         .toMatchInlineSnapshot(`
         {
           "hostRules": [
@@ -64,7 +66,7 @@ describe('modules/datasource/npm/npmrc', () => {
 
     it('handles host, path and auth', () => {
       expect(
-        convertNpmrcToRules(ini.parse('//some.test/with/path:_auth=abc123')),
+        convertNpmrcToRules(Ini.parse('//some.test/with/path:_auth=abc123')),
       ).toMatchInlineSnapshot(`
         {
           "hostRules": [
@@ -83,7 +85,7 @@ describe('modules/datasource/npm/npmrc', () => {
     it('handles host, path, port and auth', () => {
       expect(
         convertNpmrcToRules(
-          ini.parse('//some.test:8080/with/path:_authToken=abc123'),
+          Ini.parse('//some.test:8080/with/path:_authToken=abc123'),
         ),
       ).toMatchInlineSnapshot(`
         {
@@ -100,7 +102,7 @@ describe('modules/datasource/npm/npmrc', () => {
     });
 
     it('handles naked authToken', () => {
-      expect(convertNpmrcToRules(ini.parse('_authToken=abc123\n')))
+      expect(convertNpmrcToRules(Ini.parse('_authToken=abc123\n')))
         .toMatchInlineSnapshot(`
         {
           "hostRules": [
@@ -117,7 +119,7 @@ describe('modules/datasource/npm/npmrc', () => {
     it('handles host authToken', () => {
       expect(
         convertNpmrcToRules(
-          ini.parse(
+          Ini.parse(
             '@fontawesome:registry=https://npm.fontawesome.com/\n//npm.fontawesome.com/:_authToken=abc123',
           ),
         ),
@@ -150,7 +152,7 @@ describe('modules/datasource/npm/npmrc', () => {
     it('handles username and _password', () => {
       expect(
         convertNpmrcToRules(
-          ini.parse(
+          Ini.parse(
             `//my-registry.example.com/npm-private/:_password=dGVzdA==\n//my-registry.example.com/npm-private/:username=bot\n//my-registry.example.com/npm-private/:always-auth=true`,
           ),
         ),
@@ -170,15 +172,25 @@ describe('modules/datasource/npm/npmrc', () => {
     });
   });
 
+  it('keeps the default registry for a package no rule matches', () => {
+    setNpmrc('@myco:registry=https://test.org');
+    expect(resolveRegistryUrl('@other/pkg')).toBe(defaultRegistryUrl);
+  });
+
   it('sanitize _auth', () => {
     setNpmrc('_auth=test');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(1);
+    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledExactlyOnceWith(
+      'test',
+    );
   });
 
   it('sanitize _authtoken', () => {
     setNpmrc('//registry.test.com:_authToken=test\n_authToken=${NPM_TOKEN}');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
+    expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(1, 'test');
+    expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(
+      2,
+      '${NPM_TOKEN}',
+    );
     expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(2);
   });
 
@@ -196,12 +208,13 @@ describe('modules/datasource/npm/npmrc', () => {
 
   it('sanitize _authtoken with high trust', () => {
     GlobalConfig.set({ exposeAllEnv: true });
-    process.env.TEST_TOKEN = 'test';
+    vi.stubEnv('TEST_TOKEN', 'test');
     setNpmrc(
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost',
     );
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(1);
+    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledExactlyOnceWith(
+      'test',
+    );
   });
 
   it('ignores localhost', () => {

@@ -1,5 +1,5 @@
-import * as massage from './massage';
-import type { RenovateConfig } from './types';
+import * as massage from './massage.ts';
+import type { RenovateConfig } from './types.ts';
 
 describe('config/massage', () => {
   describe('massageConfig', () => {
@@ -15,6 +15,44 @@ describe('config/massage', () => {
       };
       const res = massage.massageConfig(config);
       expect(Array.isArray(res.schedule)).toBeTrue();
+    });
+
+    it('normalizes zero minimumReleaseAge to null', () => {
+      const config: RenovateConfig = {
+        minimumReleaseAge: '0 days',
+      };
+
+      const res = massage.massageConfig(config);
+
+      expect(res.minimumReleaseAge).toBeNull();
+    });
+
+    it('normalizes zero minimumReleaseAge in packageRules', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            minimumReleaseAge: '0 days',
+            patch: {
+              minimumReleaseAge: '0 days',
+            },
+          },
+        ],
+      };
+
+      const res = massage.massageConfig(config);
+
+      expect(res.packageRules).toEqual([
+        {
+          matchPackageNames: ['foo'],
+          minimumReleaseAge: null,
+        },
+        {
+          matchPackageNames: ['foo'],
+          matchUpdateTypes: ['patch'],
+          minimumReleaseAge: null,
+        },
+      ]);
     });
 
     it('massages packageRules matchUpdateTypes', () => {

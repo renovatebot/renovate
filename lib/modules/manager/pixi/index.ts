@@ -1,11 +1,13 @@
-import type { Category } from '../../../constants';
-import { CondaDatasource } from '../../datasource/conda';
-import { PypiDatasource } from '../../datasource/pypi';
+import type { Category } from '../../../constants/index.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['pixi.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://github.com/prefix-dev/pixi/';
 export const categories: Category[] = ['python'];
@@ -18,3 +20,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id, CondaDatasource.id];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

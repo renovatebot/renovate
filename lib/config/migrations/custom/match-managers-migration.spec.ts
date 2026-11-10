@@ -1,10 +1,16 @@
-import { MatchManagersMigration } from './match-managers-migration';
+import { MatchManagersMigration } from './match-managers-migration.ts';
 
 describe('config/migrations/custom/match-managers-migration', () => {
-  it('migrates old custom manager syntax to new one', () => {
-    expect(MatchManagersMigration).toMigrate(
+  it('migrates old custom manager syntax to new one', async () => {
+    await expect(MatchManagersMigration).toMigrate(
       {
-        matchManagers: ['npm', 'regex', 'custom.regex', 'custom.someMgr'],
+        matchManagers: [
+          'npm',
+          'regex',
+          'custom.regex',
+          'custom.someMgr',
+          'renovate-config-presets',
+        ],
       },
       {
         matchManagers: [
@@ -12,14 +18,15 @@ describe('config/migrations/custom/match-managers-migration', () => {
           'custom.regex',
           'custom.regex',
           'custom.someMgr',
+          'renovate-config',
         ],
       },
     );
   });
 
   // coverage
-  it('only migrates when necessary', () => {
-    expect(MatchManagersMigration).not.toMigrate(
+  it('only migrates when necessary', async () => {
+    await expect(MatchManagersMigration).not.toMigrate(
       {
         matchManagers: undefined,
       },

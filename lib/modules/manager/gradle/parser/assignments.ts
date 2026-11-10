@@ -1,7 +1,7 @@
-import type { parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
+import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
 import {
   cleanupTempVars,
   coalesceVariable,
@@ -13,12 +13,12 @@ import {
   reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
-} from './common';
+} from './common.ts';
 import {
   qDependencyStrings,
   qGroovyMapNotationDependencies,
-} from './dependencies';
-import { handleAssignment } from './handlers';
+} from './dependencies.ts';
+import { handleAssignment } from './handlers.ts';
 
 // foo = "1.2.3"
 const qGroovySingleVarAssignment = qVariableAssignmentIdentifier
@@ -87,10 +87,10 @@ const qGroovySingleMapOfVarAssignment = q.alt(
   qDependencyStrings,
 );
 
-const qGroovyMapOfExpr = (
+function qGroovyMapOfExpr(
   search: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(
     q.alt(q.sym(storeVarToken), q.str(storeVarToken)).op(':').tree({
       type: 'wrapped-tree',
       maxDepth: 1,
@@ -102,6 +102,7 @@ const qGroovyMapOfExpr = (
     }),
     qGroovySingleMapOfVarAssignment,
   );
+}
 
 // versions = [ android: [ buildTools: '30.0.3' ], kotlin: '1.4.30' ]
 const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
@@ -127,10 +128,10 @@ const qKotlinSingleMapOfVarAssignment = qStringValue
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
   .handler(handleAssignment);
 
-const qKotlinMapOfExpr = (
+function qKotlinMapOfExpr(
   search: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(
     qStringValue.sym('to').sym('mapOf').tree({
       type: 'wrapped-tree',
       maxDepth: 1,
@@ -142,6 +143,7 @@ const qKotlinMapOfExpr = (
     }),
     qKotlinSingleMapOfVarAssignment,
   );
+}
 
 // val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
 export const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier

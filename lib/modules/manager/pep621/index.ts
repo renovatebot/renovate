@@ -1,17 +1,41 @@
-import type { Category } from '../../../constants';
-import { PypiDatasource } from '../../datasource/pypi';
-export { bumpPackageVersion } from './update';
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
+import type { VulnerabilityAlertSource } from '../../../config/types.ts';
+import type { Category } from '../../../constants/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
+
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
+export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['pdm.lock', 'uv.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  'Delegated to the underlying package manager CLI - `pdm` or `uv` - depending on which lockfile format the project uses.';
 
 export const displayName = 'PEP 621';
 export const url = 'https://peps.python.org/pep-0621';
 export const categories: Category[] = ['python'];
+
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  uv: {},
+  pdm: {},
+};
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pyproject\\.toml$/'],
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+// `uv` projects only: a `uv.lock` transitive dependency is extracted, and any
+// alert which matches it clears its `lockfile-only` skip, whichever source the
+// alert came from - they are all `packageRules` by the time it is looked up
+export const supportsTransitiveRemediation: Partial<
+  Record<VulnerabilityAlertSource, true>
+> = {
+  $platform: true,
+  OSV: true,
+  packageRules: true,
+};
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

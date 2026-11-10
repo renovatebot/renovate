@@ -1,38 +1,57 @@
-import type { Category } from '../../../constants';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { NpmDatasource } from '../../datasource/npm';
+import type { Category } from '../../../constants/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
 
-export { detectGlobalConfig } from './detect';
-export { extractAllPackageFiles } from './extract';
+export { updateArtifacts } from './artifacts.ts';
+export { detectGlobalConfig } from './detect.ts';
+export { extractAllPackageFiles } from './extract/index.ts';
+export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,
   updateDependency,
   updateLockedDependency,
-} from './update';
-export { getRangeStrategy } from './range';
-export { updateArtifacts } from './artifacts';
+} from './update/index.ts';
 
 export const supportsLockFileMaintenance = true;
+export const supportsNpmrc = true;
+export const lockFileNames = [
+  'package-lock.json',
+  'pnpm-lock.yaml',
+  'yarn.lock',
+];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  'Delegated to the underlying package manager CLI - `npm`, `pnpm`, or Yarn - depending on which lock file is present.';
 
 export const displayName = 'npm';
 export const url = 'https://docs.npmjs.com';
 export const categories: Category[] = ['js'];
 
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  npm: {
+    passesMinimumReleaseAge: true,
+    note: 'Passes `--before`. Uses the older date if the repository `.npmrc` has a `before` setting. Skipped if the `.npmrc` has `min-release-age`.',
+  },
+  pnpm: {},
+  yarn: {},
+};
+
 export const defaultConfig = {
   managerFilePatterns: [
     '/(^|/)package\\.json$/',
     '/(^|/)pnpm-workspace\\.yaml$/',
+    '/(^|/)\\.yarnrc\\.yml$/',
   ],
   digest: {
     prBodyDefinitions: {
       Change:
-        '{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}',
+        '{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}',
     },
   },
   prBodyDefinitions: {
     Change:
-      "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+      "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if packageName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
   },
 };
 
@@ -41,3 +60,5 @@ export const supportedDatasources = [
   NpmDatasource.id,
   NodeVersionDatasource.id,
 ];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

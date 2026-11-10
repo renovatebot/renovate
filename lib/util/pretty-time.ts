@@ -1,20 +1,20 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import ms from 'ms';
-import { logger } from '../logger';
-import { regEx } from './regex';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
 
-const splitRegex = regEx(/(.*?[a-z]+)/);
+const splitRegex = regEx(/(?<part>.*?[a-z]+)/);
 
 function split(time: string): string[] {
   return time
     .split(splitRegex)
     .map((x) => x.trim())
-    .filter(is.nonEmptyString);
+    .filter(isNonEmptyString);
 }
 
 function applyCustomFormat(spec: string): ms.StringValue {
-  const monthRegex = regEx(/^(\d+)\s*(?:months?|M)$/);
+  const monthRegex = regEx(/^(?<months>\d+)\s*(?:months?|M)$/);
   return spec.replace(
     monthRegex,
     (_, months) => `${months * 30} days`,
@@ -32,7 +32,7 @@ export function toMs(time: string): number | null {
     let totalMillis = 0;
     for (const spec of specs) {
       const millis = ms(spec);
-      if (!is.number(millis)) {
+      if (!isNumber(millis)) {
         logger.debug({ time }, `Invalid time specifier: '${spec}'`);
         return null;
       }
@@ -45,7 +45,7 @@ export function toMs(time: string): number | null {
   }
 }
 
-const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)$/);
+const rangeRegex = regEx(/^(?<operator>>=|<=|<|>)\s*(?<age>.*)$/);
 
 export function satisfiesDateRange(
   date: string,
@@ -65,7 +65,7 @@ export function satisfiesDateRange(
 
   const dateMs = luxonDate.toMillis();
   const ageMs = toMs(age);
-  if (!is.number(ageMs)) {
+  if (!isNumber(ageMs)) {
     return null;
   }
 
@@ -80,8 +80,7 @@ export function satisfiesDateRange(
       return dateMs > rangeMs;
     case '<=':
       return dateMs >= rangeMs;
-    // istanbul ignore next: can never happen
-    default:
-      return dateMs === rangeMs;
   }
+  // v8 ignore next: can never happen
+  return null;
 }

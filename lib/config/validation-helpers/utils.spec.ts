@@ -1,4 +1,4 @@
-import { getParentName } from './utils';
+import { getParentName } from './utils.ts';
 
 describe('config/validation-helpers/utils', () => {
   describe('getParentName()', () => {

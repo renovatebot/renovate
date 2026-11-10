@@ -23,17 +23,18 @@ The first two required fields are `managerFilePatterns` and `matchStrings`:
 
 Before Renovate can look up a dependency and decide about updates, it must have this info about each dependency:
 
-| Info type                                            | Required | Notes                                                     | Docs                                                                           |
-| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| Name of the dependency                               | Yes      |                                                           |                                                                                |
-| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)       |
-| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning) |
+| Info type                                            | Required | Notes                                                     | Docs                                                                                  |
+| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| Name of the dependency                               | Yes      |                                                           |                                                                                       |
+| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)              |
+| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning)        |
+| `fileFormat`                                         | Yes      | Must be either `json`, `yaml` or `toml`.                  | [`Configuration Options`](../../../configuration-options.md#custommanagersfileformat) |
 
 #### Required fields to be present in the resulting structure returned by the jsonata query
 
 You must:
 
-- Capture the `currentValue` of the dependency _or_ use the `currentValueTemplate` template field
+- Capture the `currentValue` or `currentDigest` of the dependency _or_ use the `currentValueTemplate` or `currentDigestTemplate` template field
 - Capture the `depName` or `packageName`. _Or_ use a template field: `depNameTemplate` and `packageNameTemplate`
 - Capture the `datasource`, _or_ use the `datasourceTemplate` template field
 
@@ -44,13 +45,14 @@ You may use any of these items:
 - `depType`, _or_ use the `depTypeTemplate` template field
 - `versioning`, _or_ the use `versioningTemplate` template field. If neither are present, Renovate defaults to `semver-coerced`
 - `extractVersion`, _or_ use the `extractVersionTemplate` template field
-- `currentDigest`
 - `registryUrl`, _or_ use the `registryUrlTemplate` template field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - `indentation`. Must be empty, _or_ whitespace. Else Renovate restes only `indentation` to an empty string
 
 ### Usage
 
 When you configure a JSONata manager, use the following syntax:
+
+<!-- doc-fence-check-disable-next-block -->
 
 ```javascript
 {
@@ -59,7 +61,7 @@ When you configure a JSONata manager, use the following syntax:
       "customType": "jsonata",
       "fileFormat": "json",
       "managerFilePatterns": ["<file match pattern>"],
-      "matchStrings": ['<query>'],
+      "matchStrings": ["<query>"],
       ...
     }
   ]
@@ -67,17 +69,19 @@ When you configure a JSONata manager, use the following syntax:
 ```
 
 Overwrite the `<query>` placeholder text with your [JSONata](https://docs.jsonata.org/overview.html) query.
-The JSONata query transforms the content to a JSON object, similar to the this:
+The JSONata query transforms the content to a JSON object, similar to this:
 
-```javascript title="dependencies information extracted usig jsonata query"
+<!-- schema-validation-disable-next-block -->
+
+```json title="dependencies information extracted using a JSONata query"
 [
   {
-    depName: 'some_dep',
-    currentValue: '1.0.0',
-    datasource: 'docker',
-    versioning: 'semver',
-  },
-];
+    "depName": "some_dep",
+    "currentValue": "1.0.0",
+    "datasource": "docker",
+    "versioning": "semver"
+  }
+]
 ```
 
 Creating your Renovate JSONata manager config is easier if you understand JSONata queries.
@@ -87,9 +91,9 @@ We recommend you follow these steps:
 2. Check our example queries below
 3. You're ready to make your own config
 
-Alternatively you can "try and error" to a working config, by adjusting our examples.
+Alternatively, you can use "trial and error" to a working config by adjusting our examples.
 
-YAML files are parsed as multi document files, even those that have only one document.
+YAML files are parsed as multi-document files, even those that have only one document.
 
 #### YAML parsing
 
@@ -112,6 +116,8 @@ development:
 ```
 
 JSON:
+
+<!-- schema-validation-disable-next-block -->
 
 ```json title="Example JSON parsing"
 [
@@ -144,6 +150,8 @@ JSON:
 Below are some example queries for the generic JSON manager.
 You can also use the [JSONata test website](https://try.jsonata.org) to experiment with queries.
 
+<!-- schema-validation-disable-next-block -->
+
 ```json title="Dependencies spread in different nodes, and we want to limit the extraction to a particular node"
 {
   "production": [
@@ -166,6 +174,8 @@ Query:
 ```
 production.{ "depName": package, "currentValue": version }
 ```
+
+<!-- schema-validation-disable-next-block -->
 
 ```json title="Dependencies spread in different nodes, and we want to extract all of them as if they were in the same node"
 {
@@ -190,6 +200,8 @@ Query:
 *.{ "depName": package, "currentValue": version }
 ```
 
+<!-- schema-validation-disable-next-block -->
+
 ```json title="The dependency name is in a JSON node name, and the version is in a child leaf to that node"
 {
   "foo": {
@@ -206,6 +218,8 @@ Query:
 ```
 $each(function($v, $n) { { "depName": $n, "currentValue": $v.version } })
 ```
+
+<!-- schema-validation-disable-next-block -->
 
 ```json title="The dependency name and its version are both value nodes of the same parent node"
 {
@@ -228,6 +242,8 @@ Query:
 packages.{ "depName": package, "currentValue": version }
 ```
 
+<!-- schema-validation-disable-next-block -->
+
 ```json title="The dependency name and version are part of the same string"
 {
   "packages": ["foo@1.2.3", "bar@4.5.6"]
@@ -242,15 +258,20 @@ $map($map(packages, function ($v) { $split($v, "@") }), function ($v) { { "depNa
 
 ```json title="JSONata manager config to extract deps from a package.json file in the Renovate repository"
 {
-  "customType": "jsonata",
-  "managerFilePatterns": ["/package.json/"],
-  "matchStrings": [
-    "$each(dependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"dependencies\"}})",
-    "$each(devDependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"devDependencies\"}})",
-    "$each(optionalDependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"optionalDependencies\"}})",
-    "{ \"depName\": \"pnpm\", \"currentValue\": $substring(packageManager, 5),  \"depType\": \"packageManager\"}"
-  ],
-  "datasourceTemplate": "npm"
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/package.json/"],
+      "matchStrings": [
+        "$each(dependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"dependencies\"}})",
+        "$each(devDependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"devDependencies\"}})",
+        "$each(optionalDependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"optionalDependencies\"}})",
+        "{ \"depName\": \"pnpm\", \"currentValue\": $substring(packageManager, 5),  \"depType\": \"packageManager\"}"
+      ],
+      "datasourceTemplate": "npm"
+    }
+  ]
 }
 ```
 

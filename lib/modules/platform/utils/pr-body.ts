@@ -1,4 +1,6 @@
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { emojify } from '../../../util/emoji.ts';
+import { regEx } from '../../../util/regex.ts';
 
 const re = regEx(
   `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
@@ -9,10 +11,27 @@ export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
   }
+  logger.debug(
+    `Truncating PR body due to platform limitation of ${len} characters`,
+  );
 
-  const reMatch = re.exec(input);
+  const note = emojify(
+    `> :information_source: **Note**\n> \n> This PR body was truncated due to platform limits.\n\n`,
+  );
+  const truncationNotice = emojify(
+    `\n\n> :exclamation: **Important**\n> \n> :scissors: PR body was truncated to here.\n`,
+  );
+  const truncatedInput = note + input;
+
+  const reMatch = re.exec(truncatedInput);
   if (!reMatch?.groups) {
-    return input.substring(0, len);
+    if (truncationNotice.length >= len) {
+      return truncatedInput.substring(0, len);
+    }
+    return (
+      truncatedInput.substring(0, len - truncationNotice.length) +
+      truncationNotice
+    );
   }
 
   const divider = `\n\n</details>\n\n---\n\n### Configuration`;
@@ -21,13 +40,26 @@ export function smartTruncate(input: string, len: number): string {
   const postNotes = reMatch.groups.postNotes;
 
   const availableLength =
-    len - (preNotes.length + postNotes.length + divider.length);
+    len -
+    (preNotes.length +
+      postNotes.length +
+      divider.length +
+      truncationNotice.length);
 
   if (availableLength <= 0) {
-    return input.substring(0, len);
-  } else {
+    if (truncationNotice.length >= len) {
+      return truncatedInput.substring(0, len);
+    }
     return (
-      preNotes + releaseNotes.slice(0, availableLength) + divider + postNotes
+      truncatedInput.substring(0, len - truncationNotice.length) +
+      truncationNotice
     );
   }
+  return (
+    preNotes +
+    releaseNotes.slice(0, availableLength) +
+    truncationNotice +
+    divider +
+    postNotes
+  );
 }

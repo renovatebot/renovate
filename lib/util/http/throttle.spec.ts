@@ -1,10 +1,9 @@
-import * as hostRules from '../host-rules';
-import { clear, getThrottle } from './throttle';
+import * as hostRules from '../host-rules.ts';
+import { clear, getThrottle } from './throttle.ts';
 
 describe('util/http/throttle', () => {
   beforeEach(() => {
     clear();
-    hostRules.clear();
     hostRules.add({
       matchHost: 'example.com',
       maxRequestsPerSecond: 143,

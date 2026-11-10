@@ -5,12 +5,13 @@ description: Configuring Renovate to use Semantic Commits
 
 # Semantic Commit messages
 
-Renovate looks at the last 10 commit messages in the base branch to decide if the repository uses semantic commits.
-If there are Semantic Commits, Renovate uses the [conventional-commits-detector](https://github.com/conventional-changelog/conventional-commits-detector) to decide what convention the commit messages follow.
+Renovate looks at the last 20 commit messages in the base branch to decide if the repository uses semantic commits.
+If there are Semantic Commits, Renovate uses an algorithm inspired by the [conventional-commits-detector](https://github.com/conventional-changelog/conventional-commits-detector) package to decide what convention the commit messages follow.
+Merge commits are ignored when looking for semantic commits, so they do not affect the result.
 
-Renovate can only find Angular-style conventional commits, it does not "understand" other commit conventions.
+Renovate can only find [conventional commits](https://www.conventionalcommits.org) style (including Angular-style conventional commits), it does not "understand" other commit conventions.
 
-When Renovate finds Angular-style commits, Renovate creates commit messages and PR titles like this:
+When Renovate finds conventional commits, Renovate creates commit messages and PR titles like this:
 
 - chore(deps): update eslint to v7.30.0
 

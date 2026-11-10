@@ -1,25 +1,59 @@
 // TODO #22198
-import is from '@sindresorhus/is';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultConfig } from '../../../modules/datasource';
-import { getDefaultVersioning } from '../../../modules/datasource/common';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import {
+  applyDatasourceDefaultConfig,
+  getManagerConfig,
+  mergeChildConfig,
+} from '../../../config/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
+import { logger } from '../../../logger/index.ts';
+import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../../modules/manager/types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { clone } from '../../../util/clone';
-import { applyPackageRules } from '../../../util/package-rules';
-import * as p from '../../../util/promises';
-import { Result } from '../../../util/result';
-import { LookupStats } from '../../../util/stats';
-import { PackageFiles } from '../package-files';
-import { lookupUpdates } from './lookup';
-import type { LookupUpdateConfig, UpdateResult } from './lookup/types';
+  PackageFileContent,
+} from '../../../modules/manager/types.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { clone } from '../../../util/clone.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import * as p from '../../../util/promises.ts';
+import { Result } from '../../../util/result.ts';
+import { LookupStats } from '../../../util/stats.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
+import { PackageFiles } from '../package-files.ts';
+import { lookupUpdates } from './lookup/index.ts';
+import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
 
-type LookupResult = Result<PackageDependency, Error>;
+type LookupResult = Result<PackageDependency>;
+
+/**
+ * Merge the constraints which a manager extracted into `target`, without ever letting them override a value which was configured.
+ *
+ * `overrides` holds the values which must win over the extracted ones: the repository config for a package file, the package file config for a dependency. They cannot be read from `target`, because `mergeChildConfig()` has already merged `constraintsVersioning` from `extracted` into it, the other way round.
+ */
+function mergeExtractedConstraints(
+  target: RenovateConfig,
+  extracted: Pick<
+    PackageFileContent,
+    'extractedConstraints' | 'constraintsVersioning'
+  >,
+  overrides: Pick<RenovateConfig, 'constraints' | 'constraintsVersioning'>,
+): void {
+  if (extracted.extractedConstraints) {
+    target.constraints = {
+      ...extracted.extractedConstraints,
+      ...overrides.constraints,
+    };
+  }
+  const constraintsVersioning = {
+    ...extracted.constraintsVersioning,
+    ...overrides.constraintsVersioning,
+  };
+  if (Object.keys(constraintsVersioning).length > 0) {
+    target.constraintsVersioning = constraintsVersioning;
+  }
+}
 
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
@@ -29,17 +63,26 @@ async function lookup(
 
   dep.updates = [];
 
-  if (is.string(dep.depName)) {
-    dep.depName = dep.depName.trim();
-  }
+  // `unknown-registry` says the manager could not work out where to look, which
+  // `applyPackageRules()` clears when config supplies a registry. Such a dep has
+  // to reach the rules to be given one, so it is dropped afterwards rather than
+  // here - unless its manager already gave it a registry it could not use.
+  const mayBeGivenARegistry =
+    dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
 
-  dep.packageName ??= dep.depName;
+  // A `lockfile-only` dependency is skipped for routine updates, because it is
+  // not declared anywhere for an update to change. A vulnerability fix still
+  // has to be able to reach it.
+  // Whether an alert matches is not known until the package rules have been
+  // applied, so the dependency passes through to them, and is skipped again
+  // below if none did.
+  const mayBeAVulnerabilityAlert = dep.skipReason === 'lockfile-only';
 
-  if (dep.skipReason) {
+  if (dep.skipReason && !mayBeGivenARegistry && !mayBeAVulnerabilityAlert) {
     return Result.ok(dep);
   }
 
-  if (!is.nonEmptyString(dep.packageName)) {
+  if (!isNonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
     return Result.ok(dep);
   }
@@ -52,17 +95,55 @@ async function lookup(
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
-  depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
+  mergeExtractedConstraints(depConfig, dep, packageFileConfig);
+  depConfig = await applyDatasourceDefaultConfig(depConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-  depConfig.packageName ??= depConfig.depName;
+
+  if (mayBeGivenARegistry) {
+    if (depConfig.skipReason === 'unknown-registry') {
+      logger.debug(
+        `Dependency: ${depName!}, has no registry to be looked up in - set registryUrls to say which one to use`,
+      );
+      return Result.ok(dep);
+    }
+
+    delete dep.skipReason;
+    delete dep.skipStage;
+  }
+
+  if (mayBeAVulnerabilityAlert) {
+    if (!depConfig.isVulnerabilityAlert) {
+      return Result.ok(dep);
+    }
+
+    logger.debug(
+      `Dependency: ${depName!}, is only in a lock file, but a vulnerability alert matches it - looking it up`,
+    );
+    delete dep.skipReason;
+    delete dep.skipStage;
+  }
 
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
     return Result.ok(dep);
+  }
+
+  // A manager may disable a dependency by default, but a vulnerability fix
+  // still goes through - unless a package rule disabled it as well
+  if (
+    depConfig.enabled === false &&
+    dep.enabled === false &&
+    depConfig.isVulnerabilityAlert &&
+    depConfig.skipReason !== 'package-rules'
+  ) {
+    logger.debug(
+      `Dependency: ${depName!}, is disabled by default, but has a vulnerability alert`,
+    );
+    depConfig.enabled = true;
+    dep.enabled = true;
   }
 
   if (depConfig.enabled === false) {
@@ -76,17 +157,27 @@ async function lookup(
   }
 
   return LookupStats.wrap(depConfig.datasource, async () => {
+    const { packageFile, manager } = packageFileConfig;
     return await Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig))
       .onValue((dep) => {
-        logger.trace({ dep }, 'Dependency lookup success');
+        logger.trace(
+          { dep, packageFile, manager },
+          'Dependency lookup success',
+        );
       })
       .onError((err) => {
-        logger.trace({ err, depName }, 'Dependency lookup error');
+        logger.trace(
+          { err, depName, packageFile, manager },
+          'Dependency lookup error',
+        );
       })
-      .catch((err): Result<UpdateResult, Error> => {
+      .catch((err): Result<UpdateResult> => {
+        if (!(err instanceof ExternalHostError)) {
+          return Result.err(err);
+        }
         if (
-          packageFileConfig.repoIsOnboarded === true ||
-          !(err instanceof ExternalHostError)
+          packageFileConfig.repoIsOnboarded === true &&
+          !err.onlyThisDependencyAffected
         ) {
           return Result.err(err);
         }
@@ -94,10 +185,11 @@ async function lookup(
         const cause = err.err;
         return Result.ok({
           updates: [],
+          ...(err.onlyThisDependencyAffected && { lookupFailed: true }),
           warnings: [
             {
               topic: 'Lookup Error',
-              message: `${depName}: ${cause.message}`,
+              message: withoutUrlCredentials(`${depName}: ${cause.message}`),
             },
           ],
         });
@@ -113,12 +205,7 @@ async function fetchManagerPackagerFileUpdates(
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
-  }
+  mergeExtractedConstraints(packageFileConfig, pFile, config);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => async (): Promise<PackageDependency> => {
@@ -132,7 +219,10 @@ async function fetchManagerPackagerFileUpdates(
   );
 
   pFile.deps = await p.all(queue);
-  logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
+  logger.trace(
+    { manager, packageFile },
+    'fetchManagerPackagerFileUpdates finished',
+  );
 }
 
 async function fetchManagerUpdates(
@@ -159,7 +249,9 @@ export async function fetchUpdates(
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager),
+    instrument(manager, () =>
+      fetchManagerUpdates(config, packageFiles, manager),
+    ),
   );
   await Promise.all(allManagerJobs);
   PackageFiles.add(config.baseBranch!, { ...packageFiles });

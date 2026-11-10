@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import { parseUrl } from '../../../util/url';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { isGithubUrl, parseGitOwnerRepo } from './common';
-import { parsePuppetfile } from './puppetfile-parser';
-import type { PuppetfileModule } from './types';
+import { logger } from '../../../logger/index.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { PuppetForgeDatasource } from '../../datasource/puppet-forge/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { isGithubUrl, parseGitOwnerRepo } from './common.ts';
+import { parsePuppetfile } from './puppetfile-parser.ts';
+import type { PuppetfileModule } from './types.ts';
 
 function parseForgeDependency(
   module: PuppetfileModule,

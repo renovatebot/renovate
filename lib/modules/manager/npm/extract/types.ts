@@ -25,14 +25,10 @@ export type NpmPackage = PackageJson & {
     overrides?: PackageJson.Dependency;
   };
   devEngines?: {
+    runtime?: DevEngineItem | DevEngineItem[];
     packageManager?: DevEngineItem | DevEngineItem[];
   };
 };
-
-export type LockFileEntry = Record<
-  string,
-  { version: string; integrity?: boolean }
->;
 
 export interface LockFile {
   lockedVersions?: Record<string, string>;
@@ -49,6 +45,8 @@ export interface PnpmWorkspaceFile {
   packages: string[];
   catalog?: Record<string, string>;
   catalogs?: Record<string, Record<string, string>>;
+  minimumReleaseAge?: number;
+  minimumReleaseAgeExclude?: string[];
 }
 
 /**

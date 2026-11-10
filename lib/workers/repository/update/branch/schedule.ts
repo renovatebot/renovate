@@ -1,11 +1,11 @@
 import later from '@breejs/later';
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { Cron, CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
-import { fixShortHours } from '../../../../config/migration';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
+import { fixShortHours } from '../../../../config/migration.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
@@ -96,7 +96,7 @@ export function cronMatches(
 ): boolean {
   const parsedCron: Cron = new Cron(cron, {
     ...(timezone && { timezone }),
-    legacyMode: false,
+    domAndDow: true,
   });
   // it will always parse because it is checked beforehand
   // istanbul ignore if
@@ -104,8 +104,11 @@ export function cronMatches(
     return false;
   }
 
-  // return the next date which matches the cron schedule
-  const nextRun = parsedCron.nextRun();
+  // check next viable cron run after right before the current minute
+  // if now is 09:59:xx, look for next run after 09:58:59, which is 09:59:00
+  const nowMinute = now.startOf('minute');
+  const probe = nowMinute.minus({ milliseconds: 1 });
+  const nextRun = parsedCron.nextRun(probe.toJSDate());
   // istanbul ignore if: should not happen
   if (!nextRun) {
     logger.warn(
@@ -115,16 +118,10 @@ export function cronMatches(
     return false;
   }
 
-  let nextDate = DateTime.fromJSDate(nextRun);
-  if (timezone) {
-    nextDate = nextDate.setZone(timezone);
-  }
-
-  return (
-    nextDate.hour === now.hour &&
-    nextDate.day === now.day &&
-    nextDate.month === now.month
-  );
+  // compare the next run minute to current minute
+  // if they match, then the current minute is within the cron schedule
+  const nextMinute = DateTime.fromJSDate(nextRun).startOf('minute');
+  return nextMinute.toMillis() === nowMinute.toMillis();
 }
 
 export function isScheduledNow(
@@ -134,7 +131,7 @@ export function isScheduledNow(
   let configSchedule = config[scheduleKey];
   logger.debug(
     // TODO: types (#22198)
-    `Checking schedule(schedule=${String(configSchedule)}, tz=${config.timezone!}, now=${new Date().toISOString()})`,
+    `Checking schedule(schedule=${String(configSchedule)}, tz=${config.timezone!}, now=${DateTime.utc().toISO()})`,
   );
   if (
     !configSchedule ||
@@ -145,7 +142,7 @@ export function isScheduledNow(
     logger.debug('No schedule defined');
     return true;
   }
-  if (!is.array(configSchedule)) {
+  if (!isArray(configSchedule)) {
     logger.warn(
       { schedule: configSchedule },
       'config schedule is not an array',

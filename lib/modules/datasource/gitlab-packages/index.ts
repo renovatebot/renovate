@@ -1,32 +1,31 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource } from './common';
-import type { GitlabPackage } from './types';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { defaultRegistryUrl, getApiBaseUrl } from '../../../util/gitlab/url.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource } from './common.ts';
+import { GitlabPackages } from './schema.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export class GitlabPackagesDatasource extends Datasource {
+export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   static readonly id = datasource;
 
-  protected override http: GitlabHttp;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override caching = true;
-
-  override customRegistrySupport = true;
-
-  override defaultRegistryUrls = ['https://gitlab.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `created_at` field in the results.';
 
   constructor() {
-    super(datasource);
-    this.http = new GitlabHttp(datasource);
+    super(datasource, new GitlabHttp(datasource));
   }
 
   static getGitlabPackageApiUrl(
@@ -38,24 +37,18 @@ export class GitlabPackagesDatasource extends Datasource {
     const packageNameEncoded = encodeURIComponent(packageName);
 
     return joinUrlParts(
-      registryUrl,
-      `api/v4/projects`,
+      getApiBaseUrl(registryUrl),
+      'projects',
       projectNameEncoded,
       `packages?package_name=${packageNameEncoded}&per_page=100`,
     );
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}-${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -68,30 +61,26 @@ export class GitlabPackagesDatasource extends Datasource {
       packagePart,
     );
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const response = await this.fetchJson(apiUrl, GitlabPackages, {
+      paginate: true,
+    });
 
-    let response: GitlabPackage[];
-    try {
-      response = (
-        await this.http.getJsonUnchecked<GitlabPackage[]>(apiUrl, {
-          paginate: true,
-        })
-      ).body;
+    const releases = response
+      // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
+      // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
+      .filter((pkg) => pkg.packageName === packagePart)
+      .map((pkg) => pkg.release);
 
-      result.releases = response
-        // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
-        // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-        .filter((r) => (r.conan_package_name ?? r.name) === packagePart)
-        .map(({ version, created_at }) => ({
-          version,
-          releaseTimestamp: asTimestamp(created_at),
-        }));
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    return releases.length ? { releases } : null;
+  }
 
-    return result.releases?.length ? result : null;
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

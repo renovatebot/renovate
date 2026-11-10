@@ -1,11 +1,11 @@
-import is from '@sindresorhus/is';
-import { minimatch } from './minimatch';
-import { regEx } from './regex';
+import { isString } from '@sindresorhus/is';
+import { minimatch } from './minimatch.ts';
+import { regEx } from './regex.ts';
 
 export type StringMatchPredicate = (s: string) => boolean;
 
 export function isDockerDigest(input: string): boolean {
-  return /^sha256:[a-f0-9]{64}$/i.test(input);
+  return regEx(/^sha256:[a-f0-9]{64}$/i).test(input);
 }
 
 export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
@@ -75,7 +75,7 @@ const configValEnd = regEx(/\/i?$/);
 
 export function isRegexMatch(input: unknown): input is string {
   return (
-    is.string(input) && configValStart.test(input) && configValEnd.test(input)
+    isString(input) && configValStart.test(input) && configValEnd.test(input)
   );
 }
 

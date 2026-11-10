@@ -1,11 +1,10 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { id as versioning } from '../../versioning/node';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
-import type { NodeRelease } from './types';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { id as versioning } from '../../versioning/node/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import { NodeReleases } from './schema.ts';
 
 export class NodeVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -14,11 +13,11 @@ export class NodeVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = versioning;
-
-  override readonly caching = true;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -27,15 +26,10 @@ export class NodeVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/nodejs/node';
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    // TODO: types (#22198)
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -45,23 +39,28 @@ export class NodeVersionDatasource extends Datasource {
       registryUrl,
       releases: [],
     };
-    try {
-      const resp = (
-        await this.http.getJsonUnchecked<NodeRelease[]>(
-          joinUrlParts(registryUrl, 'index.json'),
-        )
-      ).body;
-      result.releases.push(
-        ...resp.map(({ version, date, lts }) => ({
-          version,
-          releaseTimestamp: asTimestamp(date),
-          isStable: lts !== false,
-        })),
-      );
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(
+      joinUrlParts(registryUrl, 'index.json'),
+      NodeReleases,
+    );
+    result.releases.push(
+      ...body.map(({ version, date, lts }) => ({
+        version,
+        releaseTimestamp: asTimestamp(date),
+        isStable: lts !== false,
+      })),
+    );
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: config.registryUrl!,
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

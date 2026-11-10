@@ -1,12 +1,14 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { parseSingleYaml } from '../../../util/yaml';
-import { HelmDatasource } from '../../datasource/helm';
+import { isArray } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { isAlias, parseRepository, resolveAlias } from '../helmv3/utils.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -22,7 +24,7 @@ export function extractPackageFile(
     logger.debug({ packageFile }, `Failed to parse helm requirements.yaml`);
     return null;
   }
-  if (!(doc && is.array(doc.dependencies))) {
+  if (!(doc && isArray(doc.dependencies))) {
     logger.debug({ packageFile }, `requirements.yaml has no dependencies`);
     return null;
   }
@@ -57,32 +59,21 @@ export function extractPackageFile(
     }
 
     res.registryUrls = [dep.repository];
-    if (dep.repository.startsWith('@') || dep.repository.startsWith('alias:')) {
-      const repoWithPrefixRemoved = dep.repository.slice(
-        dep.repository[0] === '@' ? 1 : 6,
+    if (isAlias(dep.repository)) {
+      const repository = resolveAlias(
+        dep.repository,
+        coerceObject(config.registryAliases),
       );
-      const alias = config.registryAliases?.[repoWithPrefixRemoved];
-      if (alias) {
-        res.registryUrls = [alias];
+      if (!repository) {
+        res.skipReason = 'placeholder-url';
         return res;
       }
 
-      res.skipReason = 'placeholder-url';
-    } else {
-      try {
-        const url = new URL(dep.repository);
-        if (url.protocol === 'file:') {
-          res.skipReason = 'local-dependency';
-        }
-      } catch (err) {
-        logger.debug(
-          { err, packageFile, url: dep.repository },
-          'Error parsing url',
-        );
-        res.skipReason = 'invalid-url';
-      }
+      res.registryUrls = [repository];
+      return res;
     }
-    return res;
+
+    return { ...res, ...parseRepository(dep.name, dep.repository) };
   });
   const res = {
     deps,

@@ -1,34 +1,35 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import type { GithubRestRelease } from '../../../util/github/types';
-import { getApiBaseUrl } from '../../../util/github/url';
-import { GithubHttp } from '../../../util/http/github';
-import { regEx } from '../../../util/regex';
-import { streamToString } from '../../../util/streams';
-import { coerceString } from '../../../util/string';
-import { parseUrl } from '../../../util/url';
-import { id } from '../../versioning/hermit';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { HermitSearchResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import type { GithubRestRelease } from '../../../util/github/types.ts';
+import { getApiBaseUrl } from '../../../util/github/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { regEx } from '../../../util/regex.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { coerceString } from '../../../util/string.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { id } from '../../versioning/hermit/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { HermitSearchResult } from './types.ts';
 
 /**
  * Hermit Datasource searches a given package from the specified `hermit-packages`
  * repository. It expects the search manifest to come from an asset `index.json` from
  * a release named index.
  */
-export class HermitDatasource extends Datasource {
+export class HermitDatasource extends Datasource<GithubHttp> {
   static readonly id = 'hermit';
 
-  override readonly customRegistrySupport = true;
-
-  override readonly registryStrategy = 'first';
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly defaultVersioning = id;
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/cashapp/hermit-packages',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/cashapp/hermit-packages'];
+  }
 
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
@@ -37,17 +38,11 @@ export class HermitDatasource extends Datasource {
   pathRegex: RegExp;
 
   constructor() {
-    super(HermitDatasource.id);
-    this.http = new GithubHttp(id);
+    super(HermitDatasource.id, new GithubHttp(id));
     this.pathRegex = regEx('^/(?<owner>[^/]+)/(?<repo>[^/]+)$');
   }
 
-  @cache({
-    namespace: `datasource-${HermitDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `getReleases:${registryUrl ?? ''}-${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -101,15 +96,28 @@ export class HermitDatasource extends Datasource {
     };
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${HermitDatasource.id}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   /**
    * getHermitSearchManifest fetch the index.json from release
    * named index, parses it and returned the parsed JSON result
    */
-  @cache({
-    namespace: `datasource-${HermitDatasource.id}`,
-    key: (u) => `getHermitSearchManifest:${u.toString()}`,
-  })
-  async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
+  private async _getHermitSearchManifest(
+    u: URL,
+  ): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();
     const host = coerceString(u.host);
     const groups = this.pathRegex.exec(coerceString(u.pathname))?.groups;
@@ -163,5 +171,15 @@ export class HermitDatasource extends Datasource {
     }
 
     return null;
+  }
+
+  getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${HermitDatasource.id}`,
+        key: buildCacheKey('getHermitSearchManifest', u.toString()),
+      },
+      () => this._getHermitSearchManifest(u),
+    );
   }
 }

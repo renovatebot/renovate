@@ -1,9 +1,129 @@
-import { groups as presetGroups } from '../../lib/config/presets/internal';
-import { logger } from '../../lib/logger';
-import { updateFile } from '../utils';
+import { groups as presetGroups } from '../../lib/config/presets/internal/index.ts';
+import { logger } from '../../lib/logger/index.ts';
+import { updateFile } from '../utils/index.ts';
 
 function jsUcfirst(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function presetRefToLink(presetRef: string): string | null {
+  // Separate base name from arguments: ":followTag(typescript, next)" -> base=":followTag", argCount=2
+  let baseName = presetRef;
+  let argCount = 0;
+  const parenMatch = /^(?<base>[^(]+)\((?<args>.+)\)$/.exec(presetRef);
+  if (parenMatch) {
+    baseName = parenMatch.groups!.base;
+    argCount = parenMatch.groups!.args.split(/,\s*/).length;
+  }
+
+  let group: string;
+  const colonIdx = baseName.indexOf(':');
+  if (colonIdx === 0) {
+    group = 'default';
+  } else if (colonIdx > 0) {
+    group = baseName.slice(0, colonIdx);
+  } else {
+    return null;
+  }
+
+  // Reconstruct the heading text as it appears on the target page,
+  // where concrete args are replaced with <arg0>, <arg1>, etc.
+  let headingText = baseName;
+  if (argCount > 0) {
+    const argList = Array.from({ length: argCount }, (_, i) => `<arg${i}>`);
+    headingText += `(${argList.join(', ')})`;
+  }
+
+  // Slugify matching python-markdown's toc extension default behavior
+  const slug = headingText
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[-\s]+/g, '-');
+
+  return `./presets-${group}.md#${slug}`;
+}
+
+function getPresetDescription(
+  presetRef: string,
+  descriptions: Map<string, string>,
+): string | undefined {
+  // Try exact match first
+  let desc = descriptions.get(presetRef);
+  if (desc) {
+    return desc;
+  }
+
+  // Parameterized preset references like ":semanticCommitType(chore)" will be looked up as `:semanticCommitType` (which is the preset name)
+  const [prefix] = presetRef.split('(');
+  if (prefix) {
+    desc = descriptions.get(prefix);
+    if (desc) {
+      return desc;
+    }
+  }
+
+  return undefined;
+}
+
+function generateCodeBlock(
+  value: Record<string, unknown>,
+  descriptions: Map<string, string>,
+): string {
+  const json = JSON.stringify(value, null, 2);
+  const lines = json.split('\n');
+  let inExtends = false;
+  let counter = 0;
+  const annotations: {
+    num: number;
+    ref: string;
+    link: string;
+    description: string | undefined;
+  }[] = [];
+
+  const annotatedLines = lines.map((line) => {
+    if (/^\s+"extends":\s*\[/.test(line)) {
+      inExtends = true;
+      return line;
+    }
+    if (inExtends) {
+      if (/^\s+\]/.test(line)) {
+        inExtends = false;
+        return line;
+      }
+      const match = /^(?<quoted>\s+"(?<ref>[^"]+)")(?<comma>,?)$/.exec(line);
+      if (match) {
+        const presetRef = match.groups!.ref;
+        const link = presetRefToLink(presetRef);
+        if (link) {
+          counter++;
+          const description = getPresetDescription(presetRef, descriptions);
+          annotations.push({ num: counter, ref: presetRef, link, description });
+          // note that we use a trailing `!` to strip the comment from the resulting code block
+          return `${match.groups!.quoted}${match.groups!.comma} // (${counter})!`;
+        }
+      }
+    }
+    return line;
+  });
+
+  if (annotations.length === 0) {
+    return `\n\`\`\`json\n${json}\n\`\`\`\n`;
+  }
+
+  let result = '\n``` { .json .annotate }\n';
+  result += annotatedLines.join('\n');
+  result += '\n```\n\n';
+
+  for (const ann of annotations) {
+    if (ann.description) {
+      result += `${ann.num}. [\`${ann.ref}\`](${ann.link}): ${ann.description}\n`;
+    } else {
+      result += `${ann.num}. [\`${ann.ref}\`](${ann.link})\n`;
+    }
+  }
+
+  return result;
 }
 
 function getEditUrl(name: string): string {
@@ -47,6 +167,24 @@ edit_url: ${getEditUrl(presetName)}
 }
 
 export async function generatePresets(dist: string): Promise<void> {
+  // Calculate the descriptions for each preset ahead-of-time, as we remove them during generation
+  const descriptions = new Map<string, string>();
+  for (const [groupName, presetConfig] of Object.entries(presetGroups)) {
+    for (const [presetName, value] of Object.entries(presetConfig)) {
+      const ref =
+        groupName === 'default'
+          ? `:${presetName}`
+          : `${groupName}:${presetName}`;
+      const desc =
+        (value.description as string | undefined) ??
+        (value.overrideDescription as string | undefined) ??
+        (value.packageRules?.[0]?.description as string | undefined);
+      if (desc) {
+        descriptions.set(ref, desc);
+      }
+    }
+  }
+
   let index = 0;
   for (const [name, presetConfig] of Object.entries(presetGroups)) {
     index += 1;
@@ -57,14 +195,16 @@ export async function generatePresets(dist: string): Promise<void> {
     const frontMatter = generateFrontMatter(formattedName, index, name);
     let content = `\n`;
     for (const [preset, value] of Object.entries(presetConfig)) {
-      let header = `\n### ${name === 'default' ? '' : name}:${preset}`;
+      let header = `\n### \`${name === 'default' ? '' : name}:${preset}\``;
       let presetDescription = value.description as string;
       delete value.description;
-      if (!presetDescription) {
-        if (value.packageRules?.[0].description) {
-          presetDescription = value.packageRules[0].description as string;
-          delete value.packageRules[0].description;
-        }
+      if (!presetDescription && value.overrideDescription) {
+        presetDescription = value.overrideDescription as string;
+      }
+      delete value.overrideDescription;
+      if (!presetDescription && value.packageRules?.[0].description) {
+        presetDescription = value.packageRules[0].description as string;
+        delete value.packageRules[0].description;
       }
       let body = '';
       if (presetDescription) {
@@ -75,9 +215,7 @@ export async function generatePresets(dist: string): Promise<void> {
           'Preset has no description',
         );
       }
-      body += '\n```json\n';
-      body += JSON.stringify(value, null, 2);
-      body += '\n```\n';
+      body += generateCodeBlock(value, descriptions);
       body += '\n----\n';
       if (body.includes('{{arg0}}')) {
         header += '(`<arg0>`';
@@ -88,7 +226,7 @@ export async function generatePresets(dist: string): Promise<void> {
           }
         }
         header += ')';
-        body = body.replace(/{{(arg\d+)}}/g, '$1');
+        body = body.replace(/{{(?<arg>arg\d+)}}/g, '$<arg>');
       }
       content += header + body;
     }

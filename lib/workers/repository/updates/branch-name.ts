@@ -1,11 +1,14 @@
 // TODO #22198
 import cleanGitRef from 'clean-git-ref';
-import slugify from 'slugify';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { hash } from '../../../util/hash';
-import { regEx } from '../../../util/regex';
-import * as template from '../../../util/template';
+import _slugify from 'slugify';
+import { logger } from '../../../logger/index.ts';
+import { hash } from '../../../util/hash.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as template from '../../../util/template/index.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+
+const slugify = _slugify;
 
 const MIN_HASH_LENGTH = 6;
 
@@ -47,13 +50,13 @@ function cleanBranchName(
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
-    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~
-    .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
-    .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
+    .replace(regEx(/[[\]?:\\^~<>]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~ < >
+    .replace(regEx(/(?<pre>^|\/)-+/g), '$<pre>') // leading dashes
+    .replace(regEx(/-+(?<post>\/|$)/g), '$<post>') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
-export function generateBranchName(update: RenovateConfig): void {
+export function generateBranchName(update: BranchUpgradeConfig): void {
   // Check whether to use a group name
   const newMajor = String(update.newMajor);
   const newMinor = String(update.newMinor);
@@ -63,43 +66,55 @@ export function generateBranchName(update: RenovateConfig): void {
     );
     update.groupName = update.sharedVariableName;
   }
+
   if (update.groupName) {
-    update.groupName = template.compile(update.groupName, update);
-    logger.trace('Using group branchName template');
-    // TODO: types (#22198)
-    logger.trace(
-      `Dependency ${update.depName!} is part of group ${update.groupName}`,
-    );
-    if (update.groupSlug) {
-      update.groupSlug = template.compile(update.groupSlug, update);
+    if (update.updateType === 'replacement') {
+      logger.debug(
+        { depName: update.depName },
+        `Ignoring grouped branch name for ${update.updateType} update`,
+      );
     } else {
-      update.groupSlug = update.groupName;
-    }
-    update.groupSlug = slugify(update.groupSlug, {
-      lower: true,
-    });
-    if (update.updateType === 'major' && update.separateMajorMinor) {
-      if (update.separateMultipleMajor) {
-        update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
+      update.groupName = template.compile(update.groupName, update);
+      logger.trace('Using group branchName template');
+      // TODO: types (#22198)
+      logger.trace(
+        `Dependency ${update.depName!} is part of group ${update.groupName}`,
+      );
+      if (update.groupSlug) {
+        update.groupSlug = template.compile(update.groupSlug, update);
       } else {
-        update.groupSlug = `major-${update.groupSlug}`;
+        update.groupSlug = update.groupName;
       }
+      update.groupSlug = slugify(withoutUrlCredentials(update.groupSlug), {
+        lower: true,
+      });
+      if (update.updateType === 'major' && update.separateMajorMinor) {
+        if (update.separateMultipleMajor) {
+          update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
+        } else {
+          update.groupSlug = `major-${update.groupSlug}`;
+        }
+      }
+      if (update.updateType === 'minor' && update.separateMultipleMinor) {
+        update.groupSlug = `minor-${newMajor}.${newMinor}-${update.groupSlug}`;
+      }
+      if (update.updateType === 'patch' && update.separateMinorPatch) {
+        update.groupSlug = `patch-${update.groupSlug}`;
+      }
+      if (update.updateType === 'lockFileMaintenance') {
+        update.groupSlug = `lock-file-maintenance-${update.groupSlug}`;
+      }
+      update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
+      update.branchName = update.group!.branchName ?? update.branchName;
     }
-    if (update.updateType === 'minor' && update.separateMultipleMinor) {
-      update.groupSlug = `minor-${newMajor}.${newMinor}-${update.groupSlug}`;
-    }
-    if (update.updateType === 'patch' && update.separateMinorPatch) {
-      update.groupSlug = `patch-${update.groupSlug}`;
-    }
-    update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
-    update.branchName = update.group!.branchName ?? update.branchName;
   }
 
   if (update.hashedBranchLength) {
     let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
-        `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`,
+        { minHashLength: MIN_HASH_LENGTH },
+        '`hashedBranchLength` must allow for at least the minimum hash length in addition to `branchPrefix`. Using the minimum hash length instead.',
       );
       hashLength = MIN_HASH_LENGTH;
     }
@@ -118,7 +133,7 @@ export function generateBranchName(update: RenovateConfig): void {
 
     // Compile extra times in case of nested templates
     hashInput = template.compile(hashInput, update);
-    hashInput = template.compile(hashInput, update);
+    hashInput = withoutUrlCredentials(template.compile(hashInput, update));
 
     const hashedInput = hash(hashInput);
 
@@ -128,11 +143,13 @@ export function generateBranchName(update: RenovateConfig): void {
       hashLength,
     )}`;
   } else {
-    update.branchName = template.compile(update.branchName!, update);
+    update.branchName = template.compile(update.branchName, update);
 
     // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);
-    update.branchName = template.compile(update.branchName, update);
+    update.branchName = withoutUrlCredentials(
+      template.compile(update.branchName, update),
+    );
   }
   update.branchName = cleanBranchName(
     update.branchName,

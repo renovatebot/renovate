@@ -1,9 +1,10 @@
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'node:timers/promises';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
-import { logger } from '../../logger';
-import { parseUrl } from '../url';
-import type { Task } from './types';
+import { logger } from '../../logger/index.ts';
+import { parseUrl } from '../url.ts';
+import { isClientError } from './status.ts';
+import type { Task } from './types.ts';
 
 const hostDelays = new Map<string, Promise<unknown>>();
 
@@ -56,10 +57,9 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      const delay = Promise.all([
-        hostDelays.get(key),
-        setTimeout(1000 * delaySeconds),
-      ]);
+      let hostDelay = hostDelays.get(key);
+      hostDelay ??= Promise.resolve();
+      const delay = Promise.all([hostDelay, setTimeout(1000 * delaySeconds)]);
       hostDelays.set(key, delay);
       retries += 1;
     }
@@ -75,7 +75,7 @@ export function getRetryAfter(err: unknown): number | null {
     return null;
   }
 
-  if (err.response.statusCode < 400 || err.response.statusCode >= 500) {
+  if (!isClientError(err)) {
     logger.debug(
       { url: err.response.url },
       `Retry-After: unexpected status code ${err.response.statusCode}`,
@@ -102,7 +102,7 @@ export function getRetryAfter(err: unknown): number | null {
     return seconds;
   }
 
-  const seconds = parseInt(retryAfter);
+  const seconds = parseInt(retryAfter, 10);
   if (!Number.isNaN(seconds) && seconds >= 0) {
     return seconds;
   }

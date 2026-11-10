@@ -1,15 +1,15 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { FindPRConfig, Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { getMigrationBranchName } from '../common';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { createConfigMigrationBranch } from './create';
-import type { MigratedData } from './migrated-data';
-import { rebaseMigrationBranch } from './rebase';
+import { isUndefined } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { FindPRConfig, Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getMigrationBranchName } from '../common.ts';
+import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
+import { createConfigMigrationBranch } from './create.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { rebaseMigrationBranch } from './rebase.ts';
 
 export type CheckConfigMigrationBranchResult =
   | { result: 'no-migration-branch' }
@@ -26,17 +26,15 @@ export async function checkConfigMigrationBranch(
   const configMigrationCheckboxState =
     config.dependencyDashboardChecks?.configMigrationCheckboxState;
 
-  if (!config.configMigration) {
-    if (
-      is.undefined(configMigrationCheckboxState) ||
-      configMigrationCheckboxState === 'no-checkbox' ||
-      configMigrationCheckboxState === 'unchecked'
-    ) {
-      logger.debug(
-        'Config migration needed but config migration is disabled and checkbox not checked or not present.',
-      );
-      return { result: 'no-migration-branch' };
-    }
+  const isCheckboxNotChecked =
+    isUndefined(configMigrationCheckboxState) ||
+    configMigrationCheckboxState === 'no-checkbox' ||
+    configMigrationCheckboxState === 'unchecked';
+  if (!config.configMigration && isCheckboxNotChecked) {
+    logger.debug(
+      'Config migration needed but config migration is disabled and checkbox not checked or not present.',
+    );
+    return { result: 'no-migration-branch' };
   }
 
   const configMigrationBranch = getMigrationBranchName(config);
@@ -131,7 +129,7 @@ export async function migrationPrExists(
 async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
   if (await scm.branchExists(pr.sourceBranch)) {
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
+      logger.info(`DRY-RUN: Would delete branch ${pr.sourceBranch}`);
     } else {
       await scm.deleteBranch(pr.sourceBranch);
     }

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const validContents = Fixtures.get('valid-contents.yaml');
 const invalidContents = Fixtures.get('invalid-contents.yaml');
@@ -55,7 +55,6 @@ describe('modules/manager/vendir/extract', () => {
             registryUrls: ['https://charts.bitnami.com/bitnami'],
           },
           {
-            currentDigest: undefined,
             currentValue: '7.10.1',
             depName: 'oci-chart',
             datasource: 'docker',
@@ -64,7 +63,6 @@ describe('modules/manager/vendir/extract', () => {
             pinDigests: false,
           },
           {
-            currentDigest: undefined,
             currentValue: '7.10.1',
             depName: 'aliased-oci-chart',
             datasource: 'docker',
@@ -75,7 +73,7 @@ describe('modules/manager/vendir/extract', () => {
           {
             currentValue: '7.10.1',
             depName: 'https://github.com/test/test',
-            packageName: 'https://github.com/test/test',
+            depType: 'GitSource',
             datasource: 'git-refs',
           },
           {
@@ -84,8 +82,17 @@ describe('modules/manager/vendir/extract', () => {
             packageName: 'test/test',
             datasource: 'github-releases',
           },
+          {
+            currentValue: 'latest',
+            packageName:
+              'https://raw.githubusercontent.com/mend/renovate-ce-ee/refs/heads/main/docs/openapi-community.yaml',
+            depType: 'HttpSource',
+            skipReason: 'unsupported-datasource',
+          },
         ],
       });
+      // git-refs datasource does not support custom registries
+      expect(result?.deps[4].registryUrls).toBeUndefined();
     });
   });
 });

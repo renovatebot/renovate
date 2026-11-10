@@ -1,9 +1,10 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { parseSingleYaml } from '../../../util/yaml';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import type { WoodpeckerConfig } from './types';
+import { isObject, isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import type { WoodpeckerConfig } from './types.ts';
 
 function woodpeckerVersionDecider(
   woodpeckerConfig: WoodpeckerConfig,
@@ -31,7 +32,7 @@ export function extractPackageFile(
       );
       return null;
     }
-    if (typeof config !== 'object') {
+    if (!isObject(config)) {
       logger.debug(
         { packageFile, type: typeof config },
         'Unexpected type for Woodpecker Configuration content',
@@ -56,9 +57,11 @@ export function extractPackageFile(
   // Image name/tags for services are only eligible for update if they don't
   // use variables and if the image is not built locally
   const deps = pipelineKeys.flatMap((pipelineKey) =>
-    Object.values(config[pipelineKey] ?? {})
-      .filter((step) => is.string(step?.image))
-      .map((step) => getDep(step.image, true, extractConfig.registryAliases)),
+    Object.values(coerceObject(config[pipelineKey]))
+      .filter((step) => isString(step?.image))
+      .map((step) =>
+        getDep(step.image, { registryAliases: extractConfig.registryAliases }),
+      ),
   );
 
   logger.trace({ deps }, 'Woodpecker Configuration image');

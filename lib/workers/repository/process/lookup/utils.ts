@@ -1,10 +1,14 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isString,
+} from '@sindresorhus/is';
 
-import { getRangeStrategy } from '../../../../modules/manager';
-import type { LookupUpdate } from '../../../../modules/manager/types';
-import * as allVersioning from '../../../../modules/versioning';
-import * as template from '../../../../util/template';
-import type { LookupUpdateConfig } from './types';
+import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
+import * as allVersioning from '../../../../modules/versioning/index.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { LookupUpdateConfig } from './types.ts';
 
 export function addReplacementUpdateIfValid(
   updates: LookupUpdate[],
@@ -29,10 +33,10 @@ export function isReplacementRulesConfigured(
   config: LookupUpdateConfig,
 ): boolean {
   return (
-    is.nonEmptyString(config.replacementName) ||
-    is.nonEmptyString(config.replacementNameTemplate) ||
-    is.nonEmptyString(config.replacementVersion) ||
-    is.nonEmptyString(config.replacementVersionTemplate)
+    isNonEmptyString(config.replacementName) ||
+    isNonEmptyString(config.replacementNameTemplate) ||
+    isNonEmptyString(config.replacementVersion) ||
+    isNonEmptyString(config.replacementVersionTemplate)
   );
 }
 
@@ -69,11 +73,63 @@ export function determineNewReplacementValue(
 }
 
 function getNewVersion(config: LookupUpdateConfig): string | null {
-  if (!is.nullOrUndefined(config.replacementVersion)) {
+  if (!isNullOrUndefined(config.replacementVersion)) {
     return config.replacementVersion;
   }
-  if (!is.nullOrUndefined(config.replacementVersionTemplate)) {
+  if (!isNullOrUndefined(config.replacementVersionTemplate)) {
     return template.compile(config.replacementVersionTemplate, config, true);
   }
   return null;
+}
+
+function isRenamed(update: LookupUpdate, config: LookupUpdateConfig): boolean {
+  return isString(update.newName) && update.newName !== config.packageName;
+}
+
+function hasChangedDigest(
+  update: LookupUpdate,
+  config: LookupUpdateConfig,
+): boolean {
+  // TODO #22198
+  return (
+    !!update.newDigest && !update.newDigest.startsWith(config.currentDigest!)
+  );
+}
+
+/**
+ * Drop every update which would not actually change the package file, plus the
+ * updates excluded by `rangeStrategy=in-range-only` and by the `rollbackPrs` +
+ * `followTag` edge case.
+ */
+export function stripNoopUpdates(
+  config: LookupUpdateConfig,
+  updates: LookupUpdate[],
+): LookupUpdate[] {
+  let result = updates
+    .filter(
+      (update) => update.newValue !== null || config.currentValue === null,
+    )
+    .filter((update) => update.newDigest !== null)
+    .filter(
+      (update) =>
+        isRenamed(update, config) ||
+        update.isReplacement === true ||
+        update.newValue !== config.currentValue ||
+        update.isLockfileUpdate === true ||
+        hasChangedDigest(update, config),
+    );
+
+  // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
+  if (config.rangeStrategy === 'in-range-only') {
+    result = result.filter((update) => update.newValue === config.currentValue);
+  }
+
+  // Handle a weird edge case involving followTag and fallbacks
+  if (config.rollbackPrs && config.followTag) {
+    result = result.filter(
+      (update) => update.updateType !== 'rollback' || result.length === 1,
+    );
+  }
+
+  return result;
 }

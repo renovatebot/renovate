@@ -1,8 +1,14 @@
 import later from '@breejs/later';
-import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isArray, isString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
+const shortHoursRegex = regEx(/(?<hours> \d?\d)(?<meridiem>(?:a|p)m)/g);
+const afterBeforeRegex = regEx(
+  /^(?<pre>.*?)(?<afterBefore1>after|before) (?<mid1>.*?) and (?<afterBefore2>after|before) (?<mid2>.*?)(?: |$)(?<rest>.*)/,
+);
+const dayRegex1 = regEx(/every (?:mon|tues|wednes|thurs|fri|satur|sun)day$/);
+const dayRegex2 = regEx(/every (?<day>[a-z]*day)$/);
 export class ScheduleMigration extends AbstractMigration {
   override readonly propertyName = 'schedule';
 
@@ -10,10 +16,10 @@ export class ScheduleMigration extends AbstractMigration {
     if (value) {
       // massage to array first
       let schedules: string[] = [];
-      if (is.string(value)) {
+      if (isString(value)) {
         schedules = [value];
       }
-      if (is.array<string>(value)) {
+      if (isArray<string>(value)) {
         schedules = [...value];
       }
       // split 'and'
@@ -26,7 +32,7 @@ export class ScheduleMigration extends AbstractMigration {
         ) {
           const parsedSchedule = later.parse.text(
             // We need to massage short hours first before we can parse it
-            schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2'), // TODO #12071
+            schedules[i].replace(shortHoursRegex, '$<hours>:00$<meridiem>'),
           ).schedules[0];
           // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
           if (!parsedSchedule?.t_a || !parsedSchedule.t_b) {
@@ -37,19 +43,15 @@ export class ScheduleMigration extends AbstractMigration {
             const toSplit = schedules[i];
             schedules[i] = toSplit
               .replace(
-                regEx(
-                  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
-                ), // TODO #12071
-                '$1$2 $3 $7',
+                afterBeforeRegex,
+                '$<pre>$<afterBefore1> $<mid1> $<rest>',
               )
               .trim();
             schedules.push(
               toSplit
                 .replace(
-                  regEx(
-                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
-                  ), // TODO #12071
-                  '$1$4 $5 $7',
+                  afterBeforeRegex,
+                  '$<pre>$<afterBefore2> $<mid2> $<rest>',
                 )
                 .trim(),
             );
@@ -72,21 +74,14 @@ export class ScheduleMigration extends AbstractMigration {
         if (schedules[i].endsWith(' every day')) {
           schedules[i] = schedules[i].replace(' every day', '');
         }
-        if (
-          regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
-            schedules[i],
-          ) // TODO #12071
-        ) {
-          schedules[i] = schedules[i].replace(
-            regEx(/every ([a-z]*day)$/), // TODO #12071
-            'on $1',
-          );
+        if (dayRegex1.test(schedules[i])) {
+          schedules[i] = schedules[i].replace(dayRegex2, 'on $<day>');
         }
         if (schedules[i].endsWith('days')) {
           schedules[i] = schedules[i].replace('days', 'day');
         }
       }
-      if (is.string(value) && schedules.length === 1) {
+      if (isString(value) && schedules.length === 1) {
         this.rewrite(schedules[0]);
       } else {
         this.rewrite(schedules);

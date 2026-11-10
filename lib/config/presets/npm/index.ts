@@ -1,24 +1,24 @@
-import { logger } from '../../../logger';
+import { HOST_BLOCKED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   resolvePackageUrl,
   resolveRegistryUrl,
-} from '../../../modules/datasource/npm/npmrc';
-import type {
-  NpmResponse,
-  NpmResponseVersion,
-} from '../../../modules/datasource/npm/types';
-import { Http } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { Preset, PresetConfig } from '../types';
+} from '../../../modules/datasource/npm/npmrc.ts';
+import type { NpmResponseVersion } from '../../../modules/datasource/npm/schema.ts';
+import { NpmResponse } from '../../../modules/datasource/npm/schema.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { Preset, PresetConfig } from '../types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
-} from '../util';
+} from '../util.ts';
 
 const id = 'npm';
 
-const http = new Http(id);
+// the registry URL comes from `npmrc`, which a repository can set for itself, and the `renovate-config` fetched from it becomes Renovate configuration - so an internal host needs a deliberately-scoped `allowInternal` grant, as for any other preset source
+const http = new Http(id, { responseBecomesConfig: true });
 
 export async function getPreset({
   repo: pkg,
@@ -33,13 +33,20 @@ export async function getPreset({
     );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
     const body = (
-      await http.getJsonUnchecked<NpmResponse>(packageUrl, {
-        cacheProvider: memCacheProvider,
-      })
+      await http.getJson(
+        packageUrl,
+        { cacheProvider: memCacheProvider },
+        NpmResponse,
+      )
     ).body;
     // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
-  } catch {
+  } catch (err) {
+    // keep the block distinguishable from a missing package, so it surfaces as its own config validation error
+    if (err.message === HOST_BLOCKED) {
+      throw err;
+    }
+
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (!dep?.['renovate-config']) {

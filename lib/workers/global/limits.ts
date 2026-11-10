@@ -1,6 +1,6 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { isInteger, isNumber, isUndefined } from '@sindresorhus/is';
+import { logger } from '../../logger/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 
 export type Limit = 'Commits';
 interface LimitValue {
@@ -12,6 +12,7 @@ const limits = new Map<Limit, LimitValue>();
 
 export function resetAllLimits(): void {
   limits.clear();
+  counts.clear();
 }
 
 export function setMaxLimit(key: Limit, val: unknown): void {
@@ -31,19 +32,38 @@ export function incLimitedValue(key: Limit, incBy = 1): void {
 function handleCommitsLimit(): boolean {
   const limit = limits.get('Commits');
   // TODO: fix me?
-  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  // oxlint-disable-next-line typescript/prefer-optional-chain
   if (!limit || limit.max === null) {
     return false;
   }
   const { max, current } = limit;
-  return max - current <= 0;
+  const res = max - current <= 0;
+  if (res) {
+    logger.debug({ current, max }, 'Commits limit reached');
+  }
+  return res;
 }
 
-export type CountName = 'ConcurrentPRs' | 'HourlyPRs' | 'Branches';
+export type CountName =
+  | 'ConcurrentPRs'
+  | 'HourlyPRs'
+  | 'Branches'
+  | 'HourlyCommits'
+  | 'VulnerabilityConcurrentPRs'
+  | 'VulnerabilityBranches';
+
+/**
+ * The limits `isLimitReached()` evaluates against a single branch. `Commits` is
+ * excluded because it is global and takes no config, `HourlyPRs` because it is
+ * only ever read while checking one of these, and the `Vulnerability*` counts
+ * because they are picked internally rather than passed in.
+ */
+type BranchLimitCountName = 'ConcurrentPRs' | 'Branches' | 'HourlyCommits';
 
 type BranchLimitName =
   | 'branchConcurrentLimit'
   | 'prConcurrentLimit'
+  | 'commitHourlyLimit'
   | 'prHourlyLimit';
 
 export const counts = new Map<CountName, number>();
@@ -51,7 +71,7 @@ export const counts = new Map<CountName, number>();
 export function getCount(key: CountName): number {
   const count = counts.get(key);
   // istanbul ignore if: should not happen
-  if (!is.integer(count)) {
+  if (!isInteger(count)) {
     logger.debug(`Could not compute the count of ${key}, returning zero.`);
     return 0;
   }
@@ -68,26 +88,66 @@ export function incCountValue(key: CountName, incBy = 1): void {
   counts.set(key, count + incBy);
 }
 
+/**
+ * Vulnerability alerts are counted separately from other updates, so that a
+ * limit set under `vulnerabilityAlerts` is a budget of its own rather than a
+ * share of the repository-wide one.
+ */
+function vulnerabilityCountName(key: 'ConcurrentPRs' | 'Branches'): CountName {
+  return key === 'Branches'
+    ? 'VulnerabilityBranches'
+    : 'VulnerabilityConcurrentPRs';
+}
+
 function handleConcurrentLimits(
-  key: Exclude<CountName, 'HourlyPRs'>,
+  key: BranchLimitCountName,
   config: BranchConfig,
 ): boolean {
-  const limitKey =
-    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
+  // Only check hourly commit limit when specifically checking HourlyCommits
+  if (key === 'HourlyCommits') {
+    // calculate the remaining hourly commit limit
+    const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
+    const hourlyCommitCount = getCount('HourlyCommits');
 
-  // calculate the limits for this branch
-  const hourlyLimit = calcLimit(config.upgrades, 'prHourlyLimit');
-  const hourlyPrCount = getCount('HourlyPRs');
+    // if a limit is defined ( >0 ) and limit reached return true
+    if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
+      logger.debug(
+        { hourlyCommitCount, hourlyCommitLimit },
+        'Hourly commits limit reached',
+      );
+      return true;
+    }
 
-  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
-  if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
-    return true;
+    return false;
   }
 
+  // vulnerability alerts have no hourly limit of their own, so they keep skipping this one
+  if (!config.isVulnerabilityAlert) {
+    // calculate the remaining hourly PR limit
+    const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
+    const hourlyPrCount = getCount('HourlyPRs');
+
+    // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+    if (hourlyPrLimit && hourlyPrCount >= hourlyPrLimit) {
+      logger.debug(
+        { hourlyPrCount, hourlyPrLimit },
+        'Hourly PRs limit reached',
+      );
+      return true;
+    }
+  }
+
+  // calculate the branch or PR concurrent limit
+  const limitKey =
+    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
   const limitValue = calcLimit(config.upgrades, limitKey);
-  const currentCount = getCount(key);
+  const countName = config.isVulnerabilityAlert
+    ? vulnerabilityCountName(key)
+    : key;
+  const currentCount = getCount(countName);
 
   if (limitValue && currentCount >= limitValue) {
+    logger.debug({ limitKey, currentCount }, `${countName} limit reached`);
     return true;
   }
 
@@ -98,9 +158,10 @@ export function calcLimit(
   upgrades: BranchUpgradeConfig[],
   limitName: BranchLimitName,
 ): number {
+  const uniqueUpgrades = new Map(upgrades.map((u) => [u.depName, u]));
   logger.debug(
     {
-      limits: upgrades.map((upg) => {
+      limits: Array.from(uniqueUpgrades.values()).map((upg) => {
         return { depName: upg.depName, [limitName]: upg[limitName] };
       }),
     },
@@ -118,19 +179,19 @@ export function calcLimit(
     let limit = upgrade[limitName];
 
     // inherit prConcurrentLimit value incase branchConcurrentLimit is null
-    if (!is.number(limit) && limitName === 'branchConcurrentLimit') {
+    if (!isNumber(limit) && limitName === 'branchConcurrentLimit') {
       limit = upgrade.prConcurrentLimit;
     }
 
     // istanbul ignore if: should never happen as all limits get a default value
-    if (is.undefined(limit)) {
+    if (isUndefined(limit)) {
       limit = Number.MAX_SAFE_INTEGER;
     }
 
     // no limit
     if (limit === 0 || limit === null) {
       logger.debug(
-        `${limitName} of this branch is unlimited, because atleast one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
+        `${limitName} of this branch is unlimited, because at least one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
       );
       return 0;
     }
@@ -158,7 +219,7 @@ export function hasMultipleLimits(
     let limitValue = upgrade[limitName];
 
     // inherit prConcurrentLimit value incase branchConcurrentLimit is null
-    if (limitName === 'branchConcurrentLimit' && !is.number(limitValue)) {
+    if (limitName === 'branchConcurrentLimit' && !isNumber(limitValue)) {
       limitValue = upgrade.prConcurrentLimit;
     }
 
@@ -167,7 +228,7 @@ export function hasMultipleLimits(
       limitValue = 0;
     }
 
-    if (!is.undefined(limitValue) && !distinctLimits.has(limitValue)) {
+    if (!isUndefined(limitValue) && !distinctLimits.has(limitValue)) {
       distinctLimits.add(limitValue);
     }
   }
@@ -177,11 +238,11 @@ export function hasMultipleLimits(
 
 export function isLimitReached(limit: 'Commits'): boolean;
 export function isLimitReached(
-  limit: 'Branches' | 'ConcurrentPRs',
+  limit: BranchLimitCountName,
   config: BranchConfig,
 ): boolean;
 export function isLimitReached(
-  limit: 'Commits' | 'Branches' | 'ConcurrentPRs',
+  limit: 'Commits' | BranchLimitCountName,
   config?: BranchConfig,
 ): boolean {
   if (limit === 'Commits') {
@@ -192,7 +253,6 @@ export function isLimitReached(
     return handleConcurrentLimits(limit, config);
   }
 
-  // istanbul ignore next: should not happen
   throw new Error(
     'Config is required for computing limits for Branches and PullRequests',
   );

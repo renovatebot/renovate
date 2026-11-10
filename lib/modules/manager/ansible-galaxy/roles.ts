@@ -1,14 +1,14 @@
-import { regEx } from '../../../util/regex';
-import { GalaxyDatasource } from '../../datasource/galaxy';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency } from '../types';
-import type { AnsibleGalaxyPackageDependency } from './types';
+import { regEx } from '../../../util/regex.ts';
+import { GalaxyDatasource } from '../../datasource/galaxy/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { AnsibleGalaxyPackageDependency } from './types.ts';
 import {
   blockLineRegEx,
   galaxyDepRegex,
   nameMatchRegex,
   newBlockRegEx,
-} from './util';
+} from './util.ts';
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
@@ -16,8 +16,8 @@ function interpretLine(
   dependency: AnsibleGalaxyPackageDependency,
 ): AnsibleGalaxyPackageDependency | null {
   const localDependency = dependency;
-  const key = lineMatch[2];
-  const value = lineMatch[3].replace(regEx(/["']/g), '');
+  const key = lineMatch.groups!.key;
+  const value = lineMatch.groups!.value.replace(regEx(/["']/g), '');
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;
@@ -69,7 +69,7 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
     dep.skipReason = 'no-source-match';
     return false;
   }
-  if (dep.managerData.name !== null) {
+  if (dep.managerData.name !== undefined) {
     dep.depName = dep.managerData.name;
   }
 
@@ -85,7 +85,6 @@ export function extractRoles(lines: string[]): PackageDependency[] {
       const dep: AnsibleGalaxyPackageDependency = {
         depType: 'role',
         managerData: {
-          name: null,
           version: null,
           scm: null,
           src: null,

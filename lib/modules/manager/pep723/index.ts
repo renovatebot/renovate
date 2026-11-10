@@ -1,6 +1,7 @@
-import type { Category } from '../../../constants';
-import { PypiDatasource } from '../../datasource/pypi';
-export { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'PEP 723';
 export const url = 'https://peps.python.org/pep-0723';
@@ -12,3 +13,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

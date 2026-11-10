@@ -1,8 +1,8 @@
 import type { ReleaseType } from 'semver';
 import semver from 'semver';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import type { BumpPackageVersionResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { BumpPackageVersionResult } from '../types.ts';
 
 export function bumpPackageVersion(
   content: string,
@@ -20,8 +20,8 @@ export function bumpPackageVersion(
     return { bumpedContent };
   }
   bumpedContent = content.replace(
-    regEx(/^(version\s*:=\s*).*$/m),
-    `$1"${bumpedVersion}"`,
+    regEx(/^(?<prefix>version\s*:=\s*).*$/m),
+    `$<prefix>"${bumpedVersion}"`,
   );
 
   if (bumpedContent === content) {

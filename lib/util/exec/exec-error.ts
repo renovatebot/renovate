@@ -1,4 +1,4 @@
-import type { RawExecOptions } from './types';
+import type { RawExecOptions } from './types.ts';
 
 export interface ExecErrorData {
   cmd: string;

@@ -1,9 +1,9 @@
-import { assignKeys } from '../../../util/assign-keys';
-import type { Http, SafeJsonError } from '../../../util/http';
-import type { AsyncResult } from '../../../util/result';
-import { joinUrlParts as join } from '../../../util/url';
-import type { ReleaseResult } from '../types';
-import { GemMetadata, GemVersions } from './schema';
+import { assignKeys } from '../../../util/assign-keys.ts';
+import type { Http, SafeJsonError } from '../../../util/http/index.ts';
+import type { AsyncResult } from '../../../util/result.ts';
+import { joinUrlParts as join } from '../../../util/url.ts';
+import type { ReleaseResult } from '../types.ts';
+import { GemMetadata, GemVersions } from './schema.ts';
 
 export function assignMetadata(
   releases: ReleaseResult,

@@ -1,12 +1,14 @@
 import detectIndent from 'detect-indent';
 import upath from 'upath';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   deleteLocalFile,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import type { LockFile, ParseLockFileResult } from './types';
+} from '../../../util/fs/index.ts';
+
+import { PackageJson } from './schema.ts';
+import type { LockFile, ParseLockFileResult } from './types.ts';
 
 export function parseLockFile(lockFile: string): ParseLockFileResult {
   const detectedIndent = detectIndent(lockFile).indent || '  ';
@@ -22,7 +24,7 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
 }
 
 export function composeLockFile(lockFile: LockFile, indent: string): string {
-  return JSON.stringify(lockFile, null, indent) + '\n';
+  return `${JSON.stringify(lockFile, null, indent)}\n`;
 }
 
 export async function getNpmrcContent(dir: string): Promise<string | null> {
@@ -30,10 +32,10 @@ export async function getNpmrcContent(dir: string): Promise<string | null> {
   let originalNpmrcContent: string | null = null;
   try {
     originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
-    /* v8 ignore start -- needs test */
   } catch {
+    /* v8 ignore next -- needs test */
     originalNpmrcContent = null;
-  } /* v8 ignore stop -- needs test */
+  }
   if (originalNpmrcContent) {
     logger.debug(`npmrc file ${npmrcFilePath} found in repository`);
   }
@@ -55,10 +57,9 @@ export async function updateNpmrcContent(
       logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeLocalFile(npmrcFilePath, `${newContent}\n`);
     }
-    /* v8 ignore start -- needs test */
-  } catch {
+  } catch /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn('Unable to write custom npmrc file');
-  } /* v8 ignore stop -- needs test */
+  }
 }
 
 export async function resetNpmrcContent(
@@ -69,16 +70,45 @@ export async function resetNpmrcContent(
   if (originalContent) {
     try {
       await writeLocalFile(npmrcFilePath, originalContent);
-      /* v8 ignore start -- needs test */
-    } catch {
+    } catch /* v8 ignore next -- TODO: add test #40625 */ {
       logger.warn('Unable to reset npmrc to original contents');
-    } /* v8 ignore stop -- needs test */
+    }
   } else {
     try {
       await deleteLocalFile(npmrcFilePath);
-      /* v8 ignore start -- needs test */
-    } catch {
+    } catch /* v8 ignore next -- TODO: add test #40625 */ {
       logger.warn('Unable to delete custom npmrc');
-    } /* v8 ignore stop -- needs test */
+    }
   }
+}
+
+/**
+ * Add the host-rule lines to the `.npmrc` in `dir`, run `fn`, and restore the original `.npmrc` afterwards.
+ *
+ * The restore runs in a `finally`, so a package manager that throws cannot leave the injected credentials behind in the working tree.
+ */
+export async function withNpmrcHostRules<T>(
+  dir: string,
+  additionalLines: string[],
+  fn: (originalNpmrcContent: string | null) => Promise<T>,
+): Promise<T> {
+  const originalContent = await getNpmrcContent(dir);
+  await updateNpmrcContent(dir, originalContent, additionalLines);
+  try {
+    return await fn(originalContent);
+  } finally {
+    await resetNpmrcContent(dir, originalContent);
+  }
+}
+
+export async function loadPackageJson(parentDir: string): Promise<PackageJson> {
+  const json = await readLocalFile(
+    upath.join(parentDir, 'package.json'),
+    'utf8',
+  );
+  const res = PackageJson.safeParse(json);
+  if (res.success) {
+    return res.data;
+  }
+  return {};
 }

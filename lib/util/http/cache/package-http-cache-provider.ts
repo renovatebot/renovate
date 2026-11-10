@@ -1,27 +1,32 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import * as packageCache from '../../cache/package';
-import { resolveTtlValues } from '../../cache/package/ttl';
-import type { PackageCacheNamespace } from '../../cache/package/types';
-import { regEx } from '../../regex';
-import { HttpCacheStats } from '../../stats';
-import type { HttpResponse } from '../types';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './schema';
+import type { ZodType } from 'zod/v4';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import { buildCacheKey } from '../../cache/package/key.ts';
+import { resolveTtlValues } from '../../cache/package/ttl.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
+import { regEx } from '../../regex.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import { isOk } from '../status.ts';
+import type { HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
   softTtlMinutes?: number;
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
+  writeSchema?: ZodType;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
-
-  private softTtlMinutes: number;
-  private hardTtlMinutes: number;
+  private defaultTtlMinutes: number;
+  private writeSchema?: ZodType;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -29,36 +34,90 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor({
     namespace,
     softTtlMinutes = 15,
-    checkCacheControlHeader = false,
-    checkAuthorizationHeader = false,
+    checkCacheControlHeader,
+    checkAuthorizationHeader,
+    writeSchema,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttl.softTtlMinutes;
-    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    this.defaultTtlMinutes = softTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
+    this.writeSchema = writeSchema;
   }
 
-  async load(url: string): Promise<unknown> {
-    return await packageCache.get(this.namespace, url);
+  private get softTtlMinutes(): number {
+    const { softTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return softTtlMinutes;
   }
 
-  async persist(url: string, data: HttpCache): Promise<void> {
+  private get hardTtlMinutes(): number {
+    const { hardTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return hardTtlMinutes;
+  }
+
+  private cacheKey(method: string, url: string): string {
+    if (method !== 'get') {
+      return buildCacheKey(method, url);
+    }
+    return url;
+  }
+
+  async load(method: string, url: string): Promise<unknown> {
+    return await packageCache.get(this.namespace, this.cacheKey(method, url));
+  }
+
+  async persist(method: string, url: string, data: HttpCache): Promise<void> {
+    if (!data) {
+      return;
+    }
+
+    if (!this.writeSchema) {
+      await packageCache.setWithRawTtl(
+        this.namespace,
+        this.cacheKey(method, url),
+        data,
+        this.hardTtlMinutes,
+      );
+      return;
+    }
+
+    const httpResponse = copyResponse(data.httpResponse, false);
+
+    const { data: body, error: err } = this.writeSchema.safeParse(
+      httpResponse.body,
+    );
+
+    if (err) {
+      logger.once.debug(
+        { err, method, namespace: this.namespace, url },
+        'http cache: writeSchema validation failed for response body, skipping cache write',
+      );
+      return;
+    }
+
+    httpResponse.body = body;
+
     await packageCache.setWithRawTtl(
       this.namespace,
-      url,
-      data,
+      this.cacheKey(method, url),
+      { ...data, httpResponse },
       this.hardTtlMinutes,
     );
   }
 
   override async bypassServer<T>(
+    method: string,
     url: string,
     ignoreSoftTtl = false,
   ): Promise<HttpResponse<T> | null> {
-    const cached = await this.get(url);
+    const cached = await this.get(method, url);
     if (!cached) {
       return null;
     }
@@ -80,22 +139,19 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   cacheAllowed<T>(resp: HttpResponse<T>): boolean {
-    const allowedViaGlobalConfig = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
+    const allowedViaGlobalConfig = GlobalConfig.get('cachePrivatePackages');
     if (allowedViaGlobalConfig) {
       return true;
     }
 
-    if (
-      this.checkCacheControlHeader &&
-      is.string(resp.headers['cache-control'])
-    ) {
-      const isPublic = resp.headers['cache-control']
-        .toLocaleLowerCase()
-        .split(regEx(/\s*,\s*/))
-        .includes('public');
+    if (this.checkCacheControlHeader) {
+      const cacheControl = resp.headers['cache-control'];
+      const isPublic =
+        isString(cacheControl) &&
+        cacheControl
+          .toLocaleLowerCase()
+          .split(regEx(/\s*,\s*/))
+          .includes('public');
 
       if (!isPublic) {
         return false;
@@ -110,13 +166,14 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   override async wrapServerResponse<T>(
+    method: string,
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
+    if (isOk(resp) && !this.cacheAllowed(resp)) {
       return resp;
     }
 
-    return await super.wrapServerResponse(url, resp);
+    return await super.wrapServerResponse(method, url, resp);
   }
 }

@@ -1,27 +1,26 @@
-import { GlobalConfig } from '../../../config/global';
-import { type AllConfig } from '../../../config/types';
-import type { Pr } from '../../../modules/platform';
-import * as _cache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import type { BranchConfig } from '../../types';
-import * as _inherited from '../init/inherited';
-import * as _merge from '../init/merge';
-import * as _process from '../process';
-import * as _prComment from './comment';
-import * as _utils from './utils';
-import * as _validate from './validate';
-import { checkReconfigureBranch } from '.';
-import { git, logger, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { fakeSha, git, logger, partial, platform, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { type AllConfig } from '../../../config/types.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import * as _cache from '../../../util/cache/repository/index.ts';
+import type { BranchConfig } from '../../types.ts';
+import * as _inherited from '../init/inherited.ts';
+import * as _merge from '../init/merge.ts';
+import * as _process from '../process/index.ts';
+import * as _prComment from './comment.ts';
+import { checkReconfigureBranch } from './index.ts';
+import * as _utils from './utils.ts';
+import * as _validate from './validate.ts';
 
-vi.mock('./validate');
-vi.mock('./utils');
-vi.mock('../../../util/git');
-vi.mock('../process');
-vi.mock('./comment');
-vi.mock('../init/inherited');
-vi.mock('../init/merge');
-vi.mock('../../../util/cache/repository');
+vi.mock('./validate.ts');
+vi.mock('./utils.ts');
+vi.mock('../../../util/git/index.ts');
+vi.mock('../process/index.ts');
+vi.mock('./comment.ts');
+vi.mock('../init/inherited.ts');
+vi.mock('../init/merge.ts');
+vi.mock('../../../util/cache/repository/index.ts');
 
 const validate = vi.mocked(_validate);
 const utils = vi.mocked(_utils);
@@ -40,11 +39,12 @@ describe('workers/repository/reconfigure/index', () => {
     }),
   });
   const repoConfig: AllConfig = {};
+  const reconfigureBranchSha = fakeSha('sha1');
 
   beforeEach(() => {
     GlobalConfig.reset();
     scm.branchExists.mockResolvedValue(true);
-    git.getBranchCommit.mockReturnValue('sha1' as LongCommitSha);
+    git.getBranchCommit.mockReturnValue(reconfigureBranchSha);
     validate.validateReconfigureBranch.mockResolvedValue(true);
     platform.findPr.mockResolvedValue(partial<Pr>({ number: 1 }));
     utils.getReconfigureConfig.mockResolvedValue({
@@ -66,6 +66,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('no effect when running with platform=local', async () => {
     GlobalConfig.set({ platform: 'local' });
     await checkReconfigureBranch(config, repoConfig);
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'Not attempting to reconfigure when running with local platform',
     );
@@ -74,7 +75,9 @@ describe('workers/repository/reconfigure/index', () => {
   it('no effect on repo with no reconfigure branch', async () => {
     scm.branchExists.mockResolvedValueOnce(false);
     await checkReconfigureBranch(config, repoConfig);
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
+      { reconfigureBranch: 'prefix/reconfigure' },
       'No reconfigure branch found',
     );
   });
@@ -82,17 +85,35 @@ describe('workers/repository/reconfigure/index', () => {
   it('skips if reconfigure branch unchanged', async () => {
     cache.getCache.mockReturnValue({
       reconfigureBranchCache: {
-        reconfigureBranchSha: 'sha1',
+        reconfigureBranchSha,
         isConfigValid: true,
-        extractResult: {
-          branches: [partial<BranchConfig>()],
-          branchList: ['some-branch'],
-          packageFiles: {},
-        },
+        extractionSucceeded: true,
       },
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
-    expect(validate.validateReconfigureBranch).not.toHaveBeenCalledWith();
+    expect(
+      validate.validateReconfigureBranch,
+    ).not.toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('migrates the extract result persisted by earlier versions', async () => {
+    const repoCache = {
+      reconfigureBranchCache: {
+        reconfigureBranchSha,
+        isConfigValid: true,
+        extractResult: { packageFiles: {} },
+      },
+    };
+    cache.getCache.mockReturnValue(repoCache);
+
+    await checkReconfigureBranch(config, repoConfig);
+
+    expect(repoCache.reconfigureBranchCache).toEqual({
+      reconfigureBranchSha,
+      isConfigValid: true,
+      extractionSucceeded: true,
+    });
+    expect(validate.validateReconfigureBranch).not.toHaveBeenCalled();
   });
 
   it('skips if error while finding reconfigure config', async () => {
@@ -102,12 +123,15 @@ describe('workers/repository/reconfigure/index', () => {
       errMessage: 'error',
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
-    expect(validate.validateReconfigureBranch).not.toHaveBeenCalledWith();
+    expect(
+      validate.validateReconfigureBranch,
+    ).not.toHaveBeenCalledExactlyOnceWith();
   });
 
   it('skips if reconfigure config is invalid', async () => {
     validate.validateReconfigureBranch.mockResolvedValue(false);
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'Found errors in reconfigure config. Skipping dependencies extraction',
     );
@@ -116,6 +140,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('validates reconfigure branch and skips extraction if no reconfigure pr', async () => {
     platform.findPr.mockResolvedValue(null);
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'No reconfigure pr found. Skipping dependencies extraction',
     );
@@ -124,7 +149,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('extracts deps and adds comment when branch and reconfigure pr both exist', async () => {
     cache.getCache.mockReturnValue({
       reconfigureBranchCache: {
-        reconfigureBranchSha: 'sha1',
+        reconfigureBranchSha,
         isConfigValid: true,
       },
     });
@@ -132,9 +157,31 @@ describe('workers/repository/reconfigure/index', () => {
     expect(prComment.ensureReconfigurePrComment).toHaveBeenCalled();
   });
 
-  it('skips pr comment if error during deps extraction', async () => {
+  it('passes the default branch to the extraction config', async () => {
+    await checkReconfigureBranch(
+      { ...config, defaultBranch: 'main' },
+      repoConfig,
+    );
+    expect(inherited.mergeInheritedConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultBranch: 'main', baseBranch: 'main' }),
+    );
+  });
+
+  it('skips pr comment and fails the status check if error during deps extraction', async () => {
     process.extractDependencies.mockRejectedValue(new Error());
+
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+
     expect(prComment.ensureReconfigurePrComment).not.toHaveBeenCalled();
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err: expect.any(Error) },
+      'Error while extracting dependencies using the reconfigure config',
+    );
+    expect(utils.setBranchStatus).toHaveBeenCalledWith(
+      'prefix/reconfigure',
+      'Failed to extract dependencies using the new config',
+      'red',
+      'config-validation',
+    );
   });
 });

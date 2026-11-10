@@ -1,17 +1,17 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
-import type { MigratedData } from '../branch/migrated-data';
-import { ensureConfigMigrationPr } from '.';
-import { Fixtures } from '~test/fixtures';
-import { partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
+import type { MigratedData } from '../branch/migrated-data.ts';
+import { ensureConfigMigrationPr } from './index.ts';
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = platform.massageMarkdown;
@@ -30,9 +30,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    GlobalConfig.set({
-      dryRun: null,
-    });
+    GlobalConfig.reset();
 
     config = {
       ...getConfig(),
@@ -59,10 +57,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('creates PR with default PR title', async () => {
-      await ensureConfigMigrationPr(
-        { ...config, onboardingPrTitle: '' },
-        migratedData,
-      );
+      await ensureConfigMigrationPr(config, migratedData);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       createPrBody = platform.createPr.mock.calls[0][0].prBody;
@@ -108,6 +103,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
+
       expect(logger.debug).toHaveBeenCalledWith('Found open migration PR');
       expect(logger.debug).not.toHaveBeenLastCalledWith(
         `does not need updating`,
@@ -155,7 +151,26 @@ describe('workers/repository/config-migration/pr/index', () => {
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      // empty header: no separating newlines are added
+      expect(prBody).toStartWith(
+        'The Renovate config in this repository needs migrating.',
+      );
+      // empty footer: no separator is added
+      expect(prBody).toEndWith(
+        '[request help here](https://github.com/renovatebot/renovate/discussions).\n\n',
+      );
+    });
+
+    it('creates PR with no footer configured', async () => {
+      await ensureConfigMigrationPr(
+        { ...config, prFooter: undefined },
+        migratedData,
+      );
+
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      expect(prBody).not.toContain('\n---\n');
     });
 
     it('creates PR for JSON5 config file', async () => {
@@ -165,7 +180,13 @@ describe('workers/repository/config-migration/pr/index', () => {
         indent: partial<Indent>(),
       });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      expect(prBody).toContain(
+        '#### [PLEASE NOTE](https://docs.renovatebot.com/configuration-options#configmigration): JSON5 config file migrated! All comments & trailing commas were removed.',
+      );
+      expect(prBody).toStartWith(
+        'The Renovate config in this repository needs migrating.',
+      );
     });
 
     it('creates PR with footer and header with trailing and leading newlines', async () => {
@@ -179,7 +200,15 @@ describe('workers/repository/config-migration/pr/index', () => {
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      // leading newlines of the header are kept, as are the two separating ones
+      expect(prBody).toStartWith(
+        '\r\r\nThis should not be the first line of the PR\n\n',
+      );
+      // trailing newlines of the footer are kept
+      expect(prBody).toEndWith(
+        '---\n\nThere should be several empty lines at the end of the PR\r\n\n\n',
+      );
     });
 
     it('creates non-semantic PR title', async () => {
@@ -194,7 +223,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'Migrate renovate config',
+        'Migrate Renovate config',
       );
     });
 
@@ -212,7 +241,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'chore(config): migrate renovate config',
+        'chore(config): migrate Renovate config',
       );
     });
 
@@ -229,16 +258,11 @@ describe('workers/repository/config-migration/pr/index', () => {
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /platform:github/,
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      expect(prBody).toStartWith('This is a header for platform:github\n\n');
+      expect(prBody).toEndWith(
+        '---\n\nAnd this is a footer for repository:test baseBranch:some-branch',
       );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /repository:test/,
-      );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /baseBranch:some-branch/,
-      );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
   });
 
@@ -263,9 +287,10 @@ describe('workers/repository/config-migration/pr/index', () => {
       };
       platform.createPr.mockRejectedValue(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
+
       expect(logger.warn).toHaveBeenCalledWith(
-        { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.',
+        { err, branchName: 'renovate/migrate-config' },
+        'PR already exists but cannot find it. It was probably created by a different user.',
       );
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });

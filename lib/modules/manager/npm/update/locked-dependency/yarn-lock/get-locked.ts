@@ -1,5 +1,6 @@
-import { logger } from '../../../../../../logger';
-import type { YarnLock, YarnLockEntrySummary } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { regEx } from '../../../../../../util/regex.ts';
+import type { YarnLock, YarnLockEntrySummary } from './types.ts';
 
 export function parseEntry(depNameConstraint: string): {
   entryName: string;
@@ -11,7 +12,7 @@ export function parseEntry(depNameConstraint: string): {
   if (split.length === 2) {
     [entryName, constraint] = split;
   } else if (split.length === 3) {
-    entryName = '@' + split[1];
+    entryName = `@${split[1]}`;
     constraint = split[2];
   } else {
     logger.debug({ depNameConstraint }, 'Unexpected depNameConstraint');
@@ -29,7 +30,7 @@ export function getYarn1LockedDependencies(
   try {
     for (const [depNameConstraint, entry] of Object.entries(yarnLock)) {
       const parsed = parseEntry(depNameConstraint);
-      /* v8 ignore next 3 -- needs test */
+      /* v8 ignore next -- needs test */
       if (!parsed) {
         continue;
       }
@@ -37,10 +38,10 @@ export function getYarn1LockedDependencies(
       if (entryName === depName && entry?.version === currentVersion) {
         res.push({ entry, depNameConstraint, depName, constraint });
       }
-    } /* v8 ignore start -- needs test */
-  } catch (err) {
+    }
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'getLockedDependencies() error');
-  } /* v8 ignore stop -- needs test */
+  }
   return res;
 }
 
@@ -58,20 +59,20 @@ export function getYarn2LockedDependencies(
       for (const subConstraint of fullConstraint.split(', ')) {
         const depNameConstraint = subConstraint;
         const parsed = parseEntry(depNameConstraint);
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!parsed) {
           continue;
         }
         const { entryName } = parsed;
-        const constraint = parsed.constraint.replace(/^npm:/, '');
+        const constraint = parsed.constraint.replace(regEx(/^npm:/), '');
         if (entryName === depName && entry?.version === currentVersion) {
           res.push({ entry, depNameConstraint, depName, constraint });
         }
       }
-    } /* v8 ignore start -- needs test */
-  } catch (err) {
+    }
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'getLockedDependencies() error');
-  } /* v8 ignore stop -- needs test */
+  }
   return res;
 }
 

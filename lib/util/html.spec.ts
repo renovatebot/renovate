@@ -1,5 +1,5 @@
 import * as parser from 'node-html-parser';
-import { parse } from './html';
+import { parse } from './html.ts';
 
 describe('util/html', () => {
   it('parses HTML', () => {

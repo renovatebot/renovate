@@ -1,22 +1,15 @@
-import { mockDeep } from 'vitest-mock-extended';
-import { getDigest, getPkgReleases } from '..';
-import * as githubGraphql from '../../../util/github/graphql';
-import * as _hostRules from '../../../util/host-rules';
-import type { Timestamp } from '../../../util/timestamp';
-import { GitHubReleaseAttachmentMocker } from './test';
-import { GithubReleaseAttachmentsDatasource } from '.';
-
-vi.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = vi.mocked(_hostRules);
+import { hostRules } from '~test/host-rules.ts';
+import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { GithubReleaseAttachmentsDatasource } from './index.ts';
+import { GitHubReleaseAttachmentMocker } from './test/index.ts';
 
 const githubApiHost = 'https://api.github.com';
 
 describe('modules/datasource/github-release-attachments/index', () => {
   beforeEach(() => {
-    hostRules.hosts.mockReturnValue([]);
-    hostRules.find.mockReturnValue({
-      token: 'some-token',
-    });
+    hostRules.add({ token: 'some-token' });
   });
 
   describe('getReleases', () => {
@@ -100,6 +93,19 @@ describe('modules/datasource/github-release-attachments/index', () => {
       const digest = await getDigest(
         { datasource: GithubReleaseAttachmentsDatasource.id, packageName },
         currentValue,
+      );
+      expect(digest).toBeNull();
+    });
+
+    it('returns null when newValue is not provided', async () => {
+      const digest = await getDigest(
+        {
+          datasource: GithubReleaseAttachmentsDatasource.id,
+          packageName,
+          currentValue,
+          currentDigest,
+        },
+        undefined,
       );
       expect(digest).toBeNull();
     });

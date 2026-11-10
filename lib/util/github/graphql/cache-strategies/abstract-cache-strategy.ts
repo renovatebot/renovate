@@ -1,12 +1,12 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import type { PackageCacheNamespace } from '../../../cache/package/types';
+import type { PackageCacheNamespace } from '../../../cache/package/types.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheRecord,
   GithubGraphqlCacheStrategy,
-} from '../types';
-import { isDateExpired } from '../util';
+} from '../types.ts';
+import { isDateExpired } from '../util.ts';
 
 /**
  * Cache strategy handles the caching Github GraphQL items
@@ -14,8 +14,7 @@ import { isDateExpired } from '../util';
  */
 export abstract class AbstractGithubGraphqlCacheStrategy<
   GithubItem extends GithubDatasourceItem,
-> implements GithubGraphqlCacheStrategy<GithubItem>
-{
+> implements GithubGraphqlCacheStrategy<GithubItem> {
   /**
    * Time period after which a cache record is considered expired.
    */
@@ -51,10 +50,19 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
   ): Promise<void>;
 
+  protected readonly cacheNs: PackageCacheNamespace;
+  protected readonly cacheKey: string;
+  protected readonly skipStabilization: boolean;
+
   constructor(
-    protected readonly cacheNs: PackageCacheNamespace,
-    protected readonly cacheKey: string,
-  ) {}
+    cacheNs: PackageCacheNamespace,
+    cacheKey: string,
+    skipStabilization = false,
+  ) {
+    this.cacheNs = cacheNs;
+    this.cacheKey = cacheKey;
+    this.skipStabilization = skipStabilization;
+  }
 
   /**
    * Load data previously persisted by this strategy
@@ -116,7 +124,10 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       // the entire page of items. This protects us from unusual cases
       // when release authors intentionally break the timeline. Therefore,
       // while it feels appealing to break early, please don't do that.
-      if (oldItem && this.isStabilized(oldItem)) {
+      //
+      // Skip this optimization if skipStabilization is set (e.g. for branches
+      // where we can't rely on date-based ordering).
+      if (!this.skipStabilization && oldItem && this.isStabilized(oldItem)) {
         isPaginationDone = true;
       }
 

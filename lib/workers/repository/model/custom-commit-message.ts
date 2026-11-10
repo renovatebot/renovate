@@ -1,5 +1,5 @@
-import type { CommitMessageJSON } from '../../../types';
-import { CommitMessage } from './commit-message';
+import type { CommitMessageJSON } from '../../../types/index.ts';
+import { CommitMessage } from './commit-message.ts';
 
 export interface CustomCommitMessageJSON extends CommitMessageJSON {
   prefix?: string;

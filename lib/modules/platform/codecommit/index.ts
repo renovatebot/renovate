@@ -8,15 +8,14 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus, PrState } from '../../../types';
-import { coerceArray } from '../../../util/array';
-import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus, PrState } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { parseJson } from '../../../util/common.ts';
+import * as git from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -29,20 +28,14 @@ import type {
   MergePRConfig,
   PlatformParams,
   PlatformResult,
-  Pr,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import * as client from './codecommit-client';
-
-export interface CodeCommitPr extends Pr {
-  body: string;
-  destinationCommit: string;
-  sourceCommit: string;
-}
+} from '../types.ts';
+import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import * as client from './codecommit-client.ts';
+import type { CodeCommitPr } from './types.ts';
 
 interface Config {
   repository?: string;
@@ -52,8 +45,13 @@ interface Config {
 }
 
 export const id = 'codecommit';
+export const experimental = true;
 
-export const config: Config = {};
+const platformConfig = {
+  endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',
+};
+
+let config: Config = {};
 
 export async function initPlatform({
   endpoint,
@@ -63,7 +61,7 @@ export async function initPlatform({
 }: PlatformParams): Promise<PlatformResult> {
   const accessKeyId = username;
   const secretAccessKey = password;
-  const env = getEnv();
+  const env = process.env;
   let region: string | undefined;
 
   if (accessKeyId) {
@@ -92,21 +90,22 @@ export async function initPlatform({
   // To check if we have permission to codecommit, throws exception if failed.
   await client.listRepositories();
 
-  const platformConfig: PlatformResult = {
-    endpoint:
-      endpoint ??
-      `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`,
+  platformConfig.endpoint =
+    endpoint ??
+    `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`;
+
+  const platformResult: PlatformResult = {
+    endpoint: platformConfig.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformResult;
 }
 
 export async function initRepo({
   repository,
-  endpoint,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
-  config.repository = repository;
+  config = { repository };
 
   let repo;
   try {
@@ -143,7 +142,10 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
 
   return {
-    repoFingerprint: repoFingerprint(metadata.repositoryId, endpoint),
+    repoFingerprint: repoFingerprint(
+      metadata.repositoryId,
+      platformConfig.endpoint,
+    ),
     defaultBranch,
     isFork: false,
   };
@@ -181,9 +183,10 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
           ? 'open'
           : 'closed',
-      number: Number.parseInt(prId),
+      number: Number.parseInt(prId, 10),
       title: prInfo.title!,
       body: prInfo.description!,
+      createdAt: prInfo.creationDate?.toISOString(),
     };
     fetchedPrs.push(pr);
   }
@@ -283,8 +286,8 @@ export async function getRepos(): Promise<string[]> {
   try {
     reposRes = await client.listRepositories();
     //todo do we need pagination? maximum number of repos is 1000 without pagination, also the same for free account
-  } catch (error) {
-    logger.error({ error }, 'Could not retrieve repositories');
+  } catch (err) {
+    logger.error({ err }, 'Could not retrieve repositories');
     return [];
   }
 
@@ -293,6 +296,7 @@ export async function getRepos(): Promise<string[]> {
   const repoNames = coerceArray(reposRes?.repositories);
 
   for (const repo of repoNames) {
+    // v8 ignore else -- TODO: add test #40625
     if (repo.repositoryName) {
       res.push(repo.repositoryName);
     }
@@ -315,6 +319,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(
       regEx(/(?<hiddenComment><!--renovate-(?:debug|config-hash):.*?-->)/g),
@@ -383,7 +388,7 @@ export async function createPr({
   }
 
   return {
-    number: Number.parseInt(prCreateRes.pullRequest.pullRequestId),
+    number: Number.parseInt(prCreateRes.pullRequest.pullRequestId, 10),
     state: 'open',
     title: prCreateRes.pullRequest.title,
     sourceBranch,
@@ -405,13 +410,15 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   let cachedPr: CodeCommitPr | undefined = undefined;
-  const cachedPrs = config.prList ?? [];
+  const cachedPrs = coerceArray(config.prList);
   for (const p of cachedPrs) {
+    // v8 ignore else -- TODO: add test #40625
     if (p.number === prNo) {
       cachedPr = p;
     }
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (body && cachedPr?.body !== body) {
     await client.updatePrDescription(
       `${prNo}`,
@@ -419,6 +426,7 @@ export async function updatePr({
     );
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (title && cachedPr?.title !== title) {
     await client.updatePrTitle(`${prNo}`, title);
   }
@@ -427,6 +435,7 @@ export async function updatePr({
     state === 'closed'
       ? PullRequestStatusEnum.CLOSED
       : PullRequestStatusEnum.OPEN;
+  // v8 ignore else -- TODO: add test #40625
   if (cachedPr?.state !== prStatusInput) {
     try {
       await client.updatePrStatus(`${prNo}`, prStatusInput);
@@ -438,27 +447,24 @@ export async function updatePr({
 }
 
 // Auto-Merge not supported currently.
-/* v8 ignore start */
+/* v8 ignore next -- auto-merge is not supported on CodeCommit, so this stub is unexercised */
 export async function mergePr({
   branchName,
   id: prNo,
-  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName!})`);
   await client.getPr(`${prNo}`);
   return Promise.resolve(false);
   //
-  // /* v8 ignore start */
   // if (!prOut) {
   //   return false;
-  // } /* v8 ignore stop */
+  // }
   // const pReq = prOut.pullRequest;
   // const targets = pReq?.pullRequestTargets;
   //
-  // /* v8 ignore start */
   // if (!targets) {
   //   return false;
-  // } /* v8 ignore stop */
+  // }
   //
   // if (strategy === 'rebase') {
   //   logger.warn('CodeCommit does not support a "rebase" strategy.');
@@ -513,7 +519,7 @@ export async function mergePr({
   //   logger.debug({ err }, 'Failed to set the PR as Closed.');
   //   return false;
   // }
-} /* v8 ignore stop */
+}
 
 export async function addReviewers(
   prNo: number,
@@ -527,60 +533,64 @@ export async function addReviewers(
     `${prNo}`,
     approvalRuleContents,
   );
+  // v8 ignore else -- TODO: add test #40625
   if (res) {
     const approvalRule = res.approvalRule;
     logger.debug({ approvalRule }, `Approval Rule Added to PR #${prNo}:`);
   }
 }
 
-/* v8 ignore start */
-export function addAssignees(iid: number, assignees: string[]): Promise<void> {
+/* v8 ignore next -- no-op stub: CodeCommit does not support adding assignees */
+export function addAssignees(
+  _iid: number,
+  _assignees: string[],
+): Promise<void> {
   // CodeCommit does not support adding reviewers
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
-export function findIssue(title: string): Promise<Issue | null> {
+/* v8 ignore next -- no-op stub: CodeCommit has no issues */
+export function findIssue(_title: string): Promise<Issue | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
-export function ensureIssue({
-  title,
-}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
+/* v8 ignore next -- no-op stub: CodeCommit has no issues */
+export function ensureIssue(
+  _cfg: EnsureIssueConfig,
+): Promise<EnsureIssueResult | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next -- no-op stub: CodeCommit has no issues */
 export function getIssueList(): Promise<Issue[]> {
   // CodeCommit does not have issues
   return Promise.resolve([]);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
-export function ensureIssueClosing(title: string): Promise<void> {
+/* v8 ignore next -- no-op stub: CodeCommit has no issues */
+export function ensureIssueClosing(_title: string): Promise<void> {
   // CodeCommit does not have issues
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
-export function deleteLabel(prNumber: number, label: string): Promise<void> {
+/* v8 ignore next -- no-op stub: label deletion is not implemented for CodeCommit */
+export function deleteLabel(_prNumber: number, _label: string): Promise<void> {
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
 // Returns the combined status for a branch.
-/* v8 ignore start */
+/* v8 ignore next -- stub: branch statuses are not supported on CodeCommit yet, always yellow */
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   logger.debug(
     'returning branch status yellow, because getBranchStatus isnt supported on aws yet',
   );
   return Promise.resolve('yellow');
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next -- stub: branch status checks are not supported on CodeCommit yet, always null */
 export function getBranchStatusCheck(
   branchName: string,
   context: string,
@@ -590,18 +600,12 @@ export function getBranchStatusCheck(
     'returning null, because getBranchStatusCheck is not supported on aws yet',
   );
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
-export function setBranchStatus({
-  branchName,
-  context,
-  description,
-  state,
-  url: targetUrl,
-}: BranchStatusConfig): Promise<void> {
+/* v8 ignore next -- no-op stub: setting branch status is not supported on CodeCommit */
+export function setBranchStatus(_cfg: BranchStatusConfig): Promise<void> {
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
 export async function ensureComment({
   number,
@@ -631,10 +635,10 @@ export async function ensureComment({
       continue;
     }
     const firstCommentContent = commentObj.comments[0].content;
-    if (
-      (topic && firstCommentContent?.startsWith(header)) === true ||
-      (!topic && firstCommentContent === body)
-    ) {
+    const isMatchingComment = topic
+      ? firstCommentContent?.startsWith(header) === true
+      : firstCommentContent === body;
+    if (isMatchingComment) {
       commentId = commentObj.comments[0].commentId;
       commentNeedsUpdating = firstCommentContent !== body;
       break;
@@ -670,7 +674,7 @@ export async function ensureComment({
   } else {
     logger.debug(
       { repository: config.repository, prNo: number, topic },
-      'Comment is already update-to-date',
+      'Comment is already up-to-date',
     );
   }
 
@@ -710,17 +714,18 @@ export async function ensureCommentRemoval(
     }
 
     for (const comment of commentObj.comments) {
-      if (
-        (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
-          true ||
-        (removeConfig.type === 'by-content' &&
-          removeConfig.content === comment.content?.trim())
-      ) {
+      const isMatchingComment =
+        removeConfig.type === 'by-topic'
+          ? comment.content?.startsWith(`### ${removeConfig.topic}\n\n`) ===
+            true
+          : removeConfig.content === comment.content?.trim();
+      // v8 ignore else -- TODO: add test #40625
+      if (isMatchingComment) {
         commentIdToRemove = comment.commentId;
         break;
       }
     }
+    // v8 ignore else -- TODO: add test #40625
     if (commentIdToRemove) {
       await client.deleteComment(commentIdToRemove);
       logger.debug(`comment "${key}" in PR #${prNo} was removed`);

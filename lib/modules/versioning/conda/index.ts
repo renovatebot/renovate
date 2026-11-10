@@ -1,9 +1,10 @@
 import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
 
-import type { RangeStrategy } from '../../../types/versioning';
-import * as pep440 from '../pep440';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as pep440 from '../pep440/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 function parse(v: string): Version | null {
   try {
@@ -16,13 +17,12 @@ function parse(v: string): Version | null {
 export const id = 'conda';
 export const displayName = 'conda';
 export const urls = [
-  'https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications',
+  '[Conda package match specifications](https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
 ];
 
@@ -61,7 +61,11 @@ function isSingleVersion(input: string): boolean {
     return false;
   }
 
-  return isValidVersion(input.replace(/^==/, '').trimStart());
+  return isValidVersion(input.replace(regEx(/^==/), '').trimStart());
+}
+
+function getPinnedValue(newVersion: string): string {
+  return `==${newVersion}`;
 }
 
 function getNewValue({
@@ -71,13 +75,9 @@ function getNewValue({
   newVersion,
   isReplacement,
 }: NewValueConfig): string | null {
-  if (rangeStrategy === 'pin') {
-    return '==' + newVersion;
-  }
-
   if (currentValue === '*') {
     if (rangeStrategy === 'bump') {
-      return '>=' + newVersion;
+      return `>=${newVersion}`;
     }
 
     // don't think you can widen or replace `*`
@@ -87,16 +87,17 @@ function getNewValue({
   const normalizedCurrentValue = new VersionSpec(currentValue).toString();
 
   // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
-  if (/^(\d+\.)+\*$/.test(normalizedCurrentValue)) {
+  if (regEx(/^(?:\d+\.)+\*$/).test(normalizedCurrentValue)) {
     const newValue = pep440.api.getNewValue({
-      currentValue: '==' + normalizedCurrentValue,
+      currentValue: `==${normalizedCurrentValue}`,
       rangeStrategy,
       currentVersion,
       newVersion,
       isReplacement,
     });
 
-    return newValue?.replace(/^==/, '') ?? null;
+    // v8 ignore next -- pep440 always answers for a well-formed `==X.Y.*`
+    return newValue?.replace(regEx(/^==/), '') ?? null;
   }
 
   return pep440.api.getNewValue({
@@ -125,7 +126,7 @@ function isStable(version: string): boolean {
   return !(parse(version)?.isDev ?? true);
 }
 
-function isCompatible(version: string, current?: string): boolean {
+function isCompatible(_version: string, _current?: string): boolean {
   return true;
 }
 
@@ -157,7 +158,7 @@ function getSatisfyingVersion(
     .map((v) => {
       return [new Version(v), v] as const;
     })
-    .filter(([v, raw]) => spec.matches(v))
+    .filter(([v, _raw]) => spec.matches(v))
     .sort((a, b) => {
       return a[0].compare(b[0]);
     });
@@ -166,7 +167,7 @@ function getSatisfyingVersion(
     return null;
   }
 
-  return satisfiedVersions[satisfiedVersions.length - 1][1];
+  return satisfiedVersions.at(-1)![1];
 }
 
 function minSatisfyingVersion(
@@ -179,7 +180,7 @@ function minSatisfyingVersion(
     .map((v) => {
       return [new Version(v), v] as const;
     })
-    .filter(([v, raw]) => spec.matches(v))
+    .filter(([v, _raw]) => spec.matches(v))
     .sort((a, b) => {
       return a[0].compare(b[0]);
     });
@@ -215,7 +216,7 @@ export const api = {
 
   minSatisfyingVersion,
   getNewValue,
-
+  getPinnedValue,
   matches,
   sortVersions,
 } satisfies VersioningApi;

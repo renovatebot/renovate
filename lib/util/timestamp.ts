@@ -1,5 +1,6 @@
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export type Timestamp = string & { __timestamp: never };
 
@@ -41,7 +42,7 @@ export function asTimestamp(input: unknown): Timestamp | null {
     return null;
   }
 
-  if (typeof input === 'string') {
+  if (isString(input)) {
     const isoDate = DateTime.fromISO(input, { zone: 'UTC' });
     if (isValid(isoDate)) {
       return isoDate.toISO() as Timestamp;

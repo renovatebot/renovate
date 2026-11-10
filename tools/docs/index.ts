@@ -1,20 +1,28 @@
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import * as tar from 'tar';
-import { getProblems, logger } from '../../lib/logger';
-import { generateConfig } from './config';
-import { generateDatasources } from './datasources';
-import { getOpenGitHubItems } from './github-query-items';
-import { generateManagers } from './manager';
-import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins';
-import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins';
-import { generatePlatforms } from './platforms';
-import { generatePresets } from './presets';
-import { generateSchema } from './schema';
-import { generateTemplates } from './templates';
-import { generateVersioning } from './versioning';
+import { getProblems, logger } from '../../lib/logger/index.ts';
+import { generateConfig } from './config.ts';
+import { generateDatasources } from './datasources.ts';
+import { generateEnvOptions } from './env-options.ts';
+import { generateEnvVars } from './env-vars.ts';
+import { getOpenGitHubItems } from './github-query-items.ts';
+import { generateManagerKnownGithubActions } from './manager/github-actions/known-actions.ts';
+import { generateManagers } from './manager.ts';
+import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
+import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins.ts';
+import { generateMinimumReleaseAgePage } from './minimum-release-age.ts';
+import { generatePlatforms } from './platforms.ts';
+import { generatePresets } from './presets.ts';
+import { generateSchema } from './schema.ts';
+import { generateTemplates } from './templates.ts';
+import { generateVersioning } from './versioning.ts';
 
-export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
+export async function generateDocs(
+  root = 'tmp',
+  pack = true,
+  version?: string,
+): Promise<void> {
   try {
     const dist = `${root}/docs`;
     logger.info(`generating docs to '${dist}'`);
@@ -38,6 +46,10 @@ export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
     logger.info('* datasources');
     await generateDatasources(dist, openItems.datasources);
 
+    // minimum release age: datasource and manager support
+    logger.info('* key-concepts/minimum-release-age');
+    await generateMinimumReleaseAgePage(dist);
+
     // managers
     logger.info('* managers');
     await generateManagers(dist, openItems.managers);
@@ -45,6 +57,10 @@ export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
     // managers/asdf supported plugins
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
+
+    // managers/github-actions' known Actions that we extract `with`s from
+    logger.info('* managers/github-actions/known-actions');
+    await generateManagerKnownGithubActions(dist);
 
     // managers/mise supported plugins
     logger.info('* managers/mise/supported-plugins');
@@ -66,9 +82,27 @@ export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
     logger.info('* self-hosted-configuration');
     await generateConfig(dist, true);
 
+    // env-options
+    logger.info('* env-options');
+    await generateEnvOptions(dist);
+
+    // environment-variable-handling
+    logger.info('* environment-variable-handling');
+    await generateEnvVars(dist);
+
     // json-schema
     logger.info('* json-schema');
-    await generateSchema(dist);
+    await generateSchema(dist, { version });
+    await generateSchema(dist, {
+      filename: 'renovate-inherited-schema.json',
+      version,
+      isInherit: true,
+    });
+    await generateSchema(dist, {
+      filename: 'renovate-global-schema.json',
+      version,
+      isGlobal: true,
+    });
 
     if (pack) {
       await tar.create({ file: `${root}/docs.tgz`, cwd: dist, gzip: true }, [

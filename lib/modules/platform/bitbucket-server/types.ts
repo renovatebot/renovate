@@ -1,5 +1,5 @@
 import type { HTTPError, Response } from 'got';
-import type { Pr } from '../types';
+import type { Pr } from '../types.ts';
 
 export interface BbsConfig {
   bbUseDefaultReviewers: boolean;
@@ -77,4 +77,18 @@ export interface BbsPrCacheData {
   items: Record<number, BbsPr>;
   updatedDate: number | null;
   author: string | null;
+}
+
+export interface BitbucketCommitStatus {
+  failed: number;
+  inProgress: number;
+  successful: number;
+}
+
+export type BitbucketBranchState =
+  'SUCCESSFUL' | 'FAILED' | 'INPROGRESS' | 'STOPPED';
+
+export interface BitbucketStatus {
+  key: string;
+  state: BitbucketBranchState;
 }

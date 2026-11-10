@@ -1,21 +1,30 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isUndefined } from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
-import { logger } from './logger';
+import { logger } from './logger/index.ts';
+import { addSecretForSanitizing } from './util/sanitize.ts';
+import { parseUrl } from './util/url.ts';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
+const proxyEnvVarsWithCredentials = ['HTTP_PROXY', 'HTTPS_PROXY'];
 
 let agent = false;
 
+function sanitizeProxyCredentials(envVar: string): void {
+  const uri = parseUrl(process.env[envVar]);
+  if (uri?.password) {
+    addSecretForSanitizing(uri.password, 'global');
+  }
+}
+
 export function bootstrap(): void {
   envVars.forEach((envVar) => {
-    /* v8 ignore start -- env is case-insensitive on windows */
+    /* v8 ignore next -- env is case-insensitive on windows */
     if (
-      typeof process.env[envVar] === 'undefined' &&
-      typeof process.env[envVar.toLowerCase()] !== 'undefined'
+      isUndefined(process.env[envVar]) &&
+      !isUndefined(process.env[envVar.toLowerCase()])
     ) {
       process.env[envVar] = process.env[envVar.toLowerCase()];
     }
-    /* v8 ignore stop */
 
     if (process.env[envVar]) {
       logger.debug(`Detected ${envVar} value in env`);
@@ -23,9 +32,11 @@ export function bootstrap(): void {
     }
   });
 
+  proxyEnvVarsWithCredentials.forEach(sanitizeProxyCredentials);
+
   if (
-    is.nonEmptyString(process.env.HTTP_PROXY) ||
-    is.nonEmptyString(process.env.HTTPS_PROXY)
+    isNonEmptyString(process.env.HTTP_PROXY) ||
+    isNonEmptyString(process.env.HTTPS_PROXY)
   ) {
     createGlobalProxyAgent({
       environmentVariableNamespace: '',

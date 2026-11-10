@@ -1,5 +1,34 @@
 import type { SemVer } from 'semver';
-import type { RangeStrategy } from '../../types';
+import type { RangeStrategy } from '../../types/index.ts';
+
+export interface GenericVersion {
+  release: number[];
+  /** prereleases are treated in the standard semver manner, if present */
+  prerelease?: string;
+  suffix?: string;
+}
+export type VersionParser = (version: string) => GenericVersion;
+
+export type VersionComparator = (version: string, other: string) => number;
+
+export interface DistroSchedule {
+  codename: string;
+  series: string;
+  created: string;
+  release?: string;
+  eol?: string;
+  eol_server?: string;
+  eol_esm?: string;
+  eol_lts?: string;
+  eol_elts?: string;
+}
+
+export type DistroDataFile =
+  'data/ubuntu-distro-info.json' | 'data/debian-distro-info.json';
+
+export type DistroInfoRecord = Record<string, DistroSchedule>;
+
+export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
 
 export interface NewValueConfig {
   currentValue: string;
@@ -7,6 +36,12 @@ export interface NewValueConfig {
   currentVersion?: string;
   newVersion: string;
   isReplacement?: boolean;
+  /**
+   * All versions numbers that this given Release has.
+   *
+   * Allows Versioning modules to determine whether the version they're proposing matches a known version.
+   */
+  allVersions?: Set<string>;
 }
 export interface VersioningApi {
   // validation
@@ -106,6 +141,12 @@ export interface VersioningApi {
   getNewValue(newValueConfig: NewValueConfig): string | null;
 
   /**
+   * Convert the `newVersion` to a pinned value.
+   * @param newVersion
+   */
+  getPinnedValue?(newVersion: string): string;
+
+  /**
    * Compare two versions. Return `0` if `v1 == v2`, or `1` if `v1` is
    * greater, or `-1` if `v2` is greater.
    */
@@ -145,3 +186,12 @@ export interface VersioningApi {
 }
 
 export type VersioningApiConstructor = new (config?: string) => VersioningApi;
+
+/**
+ * One term of a comparator range, such as the `<=` and the `1.2.3` of `<=1.2.3`.
+ * The terms parsed from a single range are ANDed together.
+ */
+export interface RangeComparator {
+  operator: string;
+  version: string;
+}

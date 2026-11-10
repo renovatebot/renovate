@@ -1,28 +1,28 @@
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { parseYaml } from '../../../util/yaml';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { id as semverPartialId } from '../../versioning/semver-partial/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   GitlabDocument,
   Job,
   Jobs,
   MultiDocumentLocalIncludes,
-} from './schema';
-import { getGitlabDep } from './utils';
+} from './schema.ts';
+import { getGitlabDep } from './utils.ts';
 
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
   /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
 );
-const componentReferenceLatestVersion = '~latest';
 
 function extractDepFromIncludeComponent(
   component: string,
@@ -57,14 +57,8 @@ function extractDepFromIncludeComponent(
     depType: 'repository',
     currentValue: componentReference.specificVersion,
     registryUrls: [`https://${componentReference.fqdn}`],
+    versioning: semverPartialId,
   };
-  if (dep.currentValue === componentReferenceLatestVersion) {
-    logger.debug(
-      { componentVersion: dep.currentValue },
-      'Ignoring component version',
-    );
-    dep.skipReason = 'unsupported-version';
-  }
   return dep;
 }
 
@@ -167,6 +161,7 @@ export async function extractAllPackageFiles(
     }
 
     const result = extractPackageFile(content, file, config);
+    // v8 ignore else -- needs a listed file that yields no deps
     if (result !== null) {
       results.push({
         packageFile: file,

@@ -1,13 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
-import type { Pr } from '../../../../modules/platform';
-import * as bitbucketserver from '../../../../modules/platform/bitbucket-server';
-import * as gitlab from '../../../../modules/platform/gitlab';
-import type { LongCommitSha } from '../../../../util/git/types';
-import { codeOwnersForPr } from './code-owners';
-import { fs, git, platform } from '~test/util';
+import { fakeSha, fs, git, platform } from '~test/util.ts';
+import * as bitbucketserver from '../../../../modules/platform/bitbucket-server/index.ts';
+import * as gitlab from '../../../../modules/platform/gitlab/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { codeOwnersForPr } from './code-owners.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/pr/code-owners', () => {
   beforeAll(() => {
@@ -33,7 +32,7 @@ describe('workers/repository/update/pr/code-owners', () => {
     });
 
     it('returns global code owner for commit with sha set', async () => {
-      pr.sha = 'f7374c2de8a4c95a7fd7182ab24044e3896aac02' as LongCommitSha;
+      pr.sha = fakeSha('f7374c2de8a4c95a7fd7182ab24044e3896aac02');
       fs.readLocalFile.mockResolvedValueOnce('* @jimmy');
       git.getBranchFilesFromCommit.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);

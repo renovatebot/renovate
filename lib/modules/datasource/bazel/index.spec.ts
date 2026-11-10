@@ -1,12 +1,12 @@
-import { getPkgReleases } from '..';
-import { GlobalConfig } from '../../../config/global';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { BazelDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { BazelDatasource } from './index.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const datasource = BazelDatasource.id;
 const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
@@ -32,12 +32,16 @@ describe('modules/datasource/bazel/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).reply(404);
-      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).reply(200, {});
-      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -45,7 +49,9 @@ describe('modules/datasource/bazel/index', () => {
         .scope(defaultRegistryUrl)
         .get(path)
         .reply(200, '{ "versions": [], "yanked_versions": {} }');
-      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

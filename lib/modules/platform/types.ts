@@ -1,16 +1,13 @@
-import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-
-type VulnerabilityKey = string;
-type VulnerabilityRangeKey = string;
-type VulnerabilityPatch = string;
-export type AggregatedVulnerabilities = Record<
-  VulnerabilityKey,
-  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
->;
+import type { DateTime } from 'luxon';
+import type { MergeStrategy } from '../../config/types.ts';
+import type { BranchStatus, HostRule } from '../../types/index.ts';
+import type { CommitFilesConfig } from '../../util/git/types.ts';
+import type { LongCommitSha } from '../../util/schema-utils/git.ts';
+import type { GithubVulnerabilityAlert } from './github/schema.ts';
+export type VulnerabilityAlert = GithubVulnerabilityAlert;
 
 export interface PlatformParams {
+  dryRun?: string;
   endpoint?: string;
   token?: string;
   username?: string;
@@ -39,7 +36,6 @@ export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
   repository: string;
-  endpoint?: string;
   gitUrl?: GitUrlOption;
   forkCreation?: boolean;
   forkOrg?: string;
@@ -48,9 +44,13 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  ignorePrAuthor?: boolean;
-  bbUseDevelopmentBranch?: boolean;
-  includeMirrors?: boolean;
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
+}
+
+export interface RepoConfigParams {
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
 }
 
 export interface PrDebugData {
@@ -85,6 +85,8 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  /** Only set by Gerrit platform for now */
+  updatedAt?: string;
   isDraft?: boolean;
 }
 
@@ -96,9 +98,12 @@ export interface Issue {
   number?: number;
   state?: string;
   title?: string;
+  createdAt?: string;
+  lastModified?: string;
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
+  automergeCommitMessage?: string;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
@@ -161,12 +166,14 @@ export interface EnsureIssueConfig {
   shouldReOpen?: boolean;
   confidential?: boolean;
 }
-export interface BranchStatusConfig {
-  branchName: string;
+export interface StatusCheckConfig {
   context: string;
   description: string;
   state: BranchStatus;
   url?: string;
+}
+export interface BranchStatusConfig extends StatusCheckConfig {
+  branchName: string;
 }
 export interface FindPRConfig {
   branchName: string;
@@ -198,15 +205,16 @@ export interface EnsureCommentRemovalConfigByContent {
   content: string;
 }
 export type EnsureCommentRemovalConfig =
-  | EnsureCommentRemovalConfigByTopic
-  | EnsureCommentRemovalConfigByContent;
+  EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent;
 
 export type EnsureIssueResult = 'updated' | 'created';
 
 export type RepoSortMethod =
   | 'alpha'
   | 'created'
+  | 'created_at'
   | 'updated'
+  | 'updated_at'
   | 'size'
   | 'id'
   | null;
@@ -229,6 +237,14 @@ export interface FileOwnerRule {
 }
 
 export interface Platform {
+  /**
+   * Whether this is an experimental Platform.
+   *
+   * Experimental features might be changed or even removed at any time.
+   */
+  experimental?: true;
+  /** Applies options read from the repository config after `initRepo`. */
+  applyRepoConfig?(config: RepoConfigParams): void;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
@@ -264,21 +280,33 @@ export interface Platform {
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getBranchForceRebase?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the given branch is protected by a merge queue (GitHub)
+   * or a merge train (GitLab), so PRs targeting it must be merged through
+   * the queue. `mergePr` is then expected to add the PR to the queue instead
+   * of merging it directly.
+   *
+   * Platforms where the feature is configured per repository rather than
+   * per branch may ignore the branch name.
+   */
+  isBranchMergeQueueEnabled?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the PR is currently waiting in a merge queue, so it must
+   * not be enqueued or modified again.
+   */
+  isPrInMergeQueue?(number: number): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #22198
-    context: string | null | undefined,
+    context: string,
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
-      | EnsureCommentRemovalConfigByTopic
-      | EnsureCommentRemovalConfigByContent,
+      EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  getPr(number: number): Promise<Pr | null>;
+  getPr(number: number, refreshCache?: boolean): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
   reattemptPlatformAutomerge?(
@@ -288,11 +316,25 @@ export interface Platform {
     branchName: string,
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
+
+  /**
+   * Get the PR for a given branch.
+   *
+   * @param branchName The source branch name
+   * @param targetBranch Optional target branch to prioritize when multiple PRs exist for the
+   *   same source branch.
+   *
+   *   This does not restrict results to PRs targeting this branch. Instead, if
+   *   more than one PR matches the given source branch, the one whose target
+   *   branch matches `targetBranch` will be preferred.
+   *
+   *   Only used by Azure and Gerrit platforms currently.
+   * @returns The PR object if found, otherwise null.
+   */
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
-  tryReuseAutoclosedPr?(pr: Pr): Promise<Pr | null>;
+  tryReuseAutoclosedPr?(pr: Pr, newTitle: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
@@ -306,10 +348,12 @@ export interface PlatformScm {
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
+  getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
+  getAllBranchUpdateDates(): Promise<Record<string, DateTime>>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
-  checkoutBranch(branchName: string): Promise<LongCommitSha>;
+  checkoutBranch(branchName: string): Promise<LongCommitSha | null>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
   syncForkWithUpstream?(baseBranch: string): Promise<void>;

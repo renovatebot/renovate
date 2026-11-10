@@ -1,18 +1,24 @@
-import { z } from 'zod';
-import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils';
-import { CondaDatasource } from '../../datasource/conda/';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { PypiDatasource } from '../../datasource/pypi';
-import * as condaVersion from '../../versioning/conda/';
-import { id as gitRefVersionID } from '../../versioning/git';
-import { id as pep440VersionID } from '../../versioning/pep440/';
-import type { PackageDependency } from '../types';
+import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
+import { LooseRecord, Toml } from '../../../util/schema-utils/index.ts';
+import { CondaDatasource } from '../../datasource/conda//index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import * as condaVersion from '../../versioning/conda//index.ts';
+import { id as gitRefVersionID } from '../../versioning/git/index.ts';
+import { id as pep440VersionID } from '../../versioning/pep440//index.ts';
+import { PyProject } from '../pep621/schema.ts';
+import type { PackageDependency } from '../types.ts';
 
 export type Channels = z.infer<typeof Channel>[];
 
 const Channel = z.union([
   z.string(),
-  z.object({ channel: z.string(), priority: z.number() }),
+  z.object({
+    channel: z.string(),
+    priority: z.number().optional(),
+    'exclude-newer': z.string().optional(),
+  }),
 ]);
 
 export interface PixiPackageDependency extends PackageDependency {
@@ -37,11 +43,15 @@ const PypiDependency = z
     z.object({ version: z.string() }),
   ])
   .transform(({ version }) => {
-    return {
+    const dep: PixiPackageDependency = {
       currentValue: version,
       versioning: pep440VersionID,
       datasource: PypiDatasource.id,
-    } satisfies PixiPackageDependency;
+    };
+    if (version.startsWith('==')) {
+      dep.currentVersion = version.replace(regEx(/^==\s*/), '');
+    }
+    return dep;
   });
 
 const PypiGitDependency = z
@@ -93,8 +103,8 @@ const CondaDependencies = LooseRecord(z.string(), CondaDependency).transform(
 const Targets = LooseRecord(
   z.string(),
   z.object({
-    dependencies: z.optional(CondaDependencies).default({}),
-    'pypi-dependencies': z.optional(PypiDependencies).default({}),
+    dependencies: z.optional(CondaDependencies).default([]),
+    'pypi-dependencies': z.optional(PypiDependencies).default([]),
   }),
 ).transform((val) => {
   const conda: PixiPackageDependency[] = [];
@@ -118,9 +128,9 @@ const Project = z.object({
 
 const DependenciesMixin = z
   .object({
-    dependencies: z.optional(CondaDependencies).default({}),
-    'pypi-dependencies': z.optional(PypiDependencies).default({}),
-    target: z.optional(Targets).default({}),
+    dependencies: z.optional(CondaDependencies).default([]),
+    'pypi-dependencies': z.optional(PypiDependencies).default([]),
+    target: z.optional(Targets).default({ pypi: [], conda: [] }),
   })
   .transform(
     (
@@ -188,17 +198,20 @@ const PixiProject = z.object({
 /**
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
-export const PixiConfigSchema = z
+export const PixiConfig = z
   .union([PixiWorkspace, PixiProject])
-  .and(z.object({ feature: Features.default({}) }))
+  .and(z.object({ feature: Features.default({ pypi: [], conda: [] }) }))
   .and(DependenciesMixin);
 
-export type PixiConfig = z.infer<typeof PixiConfigSchema>;
+export type PixiConfig = z.infer<typeof PixiConfig>;
 
-export const PixiToml = Toml.pipe(PixiConfigSchema);
+export const PixiFile = Toml.pipe(PixiConfig);
 
-export const LockfileYaml = Yaml.pipe(
-  z.object({
-    version: z.number(),
+export const PixiPyProject = Toml.pipe(
+  PyProject.extend({
+    tool: z
+      .object({ pixi: PixiConfig.optional().catch(undefined) })
+      .optional()
+      .catch(undefined),
   }),
 );

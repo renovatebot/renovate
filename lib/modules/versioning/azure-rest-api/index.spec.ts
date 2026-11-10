@@ -1,4 +1,4 @@
-import { api as azureRestApi } from '.';
+import { api as azureRestApi } from './index.ts';
 
 describe('modules/versioning/azure-rest-api/index', () => {
   it.each`

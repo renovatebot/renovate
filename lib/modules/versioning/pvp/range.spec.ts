@@ -1,4 +1,4 @@
-import { parseRange } from './range';
+import { parseRange } from './range.ts';
 
 describe('modules/versioning/pvp/range', () => {
   describe('.parseRange(range)', () => {

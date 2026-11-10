@@ -1,19 +1,21 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../../config/global';
-import * as yaml from '../../../../util/yaml';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, getFixturePath, logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as yaml from '../../../../util/yaml.ts';
+import type { PackageFile } from '../../types.ts';
+import { PnpmWorkspaceFile } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
-} from './pnpm';
-import { Fixtures } from '~test/fixtures';
-import { fs, getFixturePath, logger, partial } from '~test/util';
+  resolveRegistryUrl,
+} from './pnpm.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {
@@ -34,6 +36,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
       expect(res).toBeUndefined();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
           fileName: expect.any(String),
@@ -49,6 +52,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
       expect(res).toBeUndefined();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           fileName: expect.any(String),
@@ -66,6 +70,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
       expect(res).toBeNull();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
         'Failed to locate pnpm-workspace.yaml in a parent directory.',
@@ -79,6 +84,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
       expect(res).toBeNull();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           workspaceYamlPath: 'pnpm-workspace.yaml',
@@ -91,7 +97,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.detectPnpmWorkspaces()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
 
       // The real implementations of these functions are used for this block;
       // they do static path manipulation.
@@ -110,86 +118,90 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = partial<PackageFile<NpmManagerData>>([
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/nested-group-a',
           },
         },
         {
           packageFile: 'nested-packages/group/b/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/nested-group-b',
           },
         },
         {
           packageFile: 'non-nested-packages/a/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/non-nested-a',
           },
         },
         {
           packageFile: 'non-nested-packages/b/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/non-nested-b',
           },
         },
         {
           packageFile: 'solo-package/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo',
           },
         },
         {
           packageFile: 'solo-package-leading-dot-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo-leading-dot-slash',
           },
         },
         {
           packageFile: 'solo-package-leading-double-dot-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo-leading-double-dot-slash',
           },
         },
         {
           packageFile: 'solo-package-trailing-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo-trailing-slash',
           },
         },
         {
           packageFile: 'test/test-package/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/test-package',
           },
         },
         {
           packageFile: 'tests/test-package2/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/test-package2',
           },
         },
       ]);
 
       await detectPnpmWorkspaces(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
+      // every workspace package file gets associated with the root lockfile
+      expect(packageFiles).toMatchObject(
+        packageFiles.map(() => ({
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+        })),
+      );
       expect(
         packageFiles.every(
-          (packageFile) =>
-            packageFile.managerData?.pnpmShrinkwrap !== undefined,
+          (packageFile) => packageFile.managerData?.pnpmLockFile !== undefined,
         ),
       ).toBeTrue();
     });
@@ -198,7 +210,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
       ];
 
@@ -206,9 +218,23 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toEqual([
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
       ]);
+    });
+
+    it('skips packages without a pnpm workspace', async () => {
+      fs.localPathExists.mockResolvedValue(false);
+      const packageFiles = [
+        {
+          packageFile: 'nested-packages/group/a/package.json',
+          packageJsonName: '@demo/nested-group-a',
+          managerData: { pnpmLockFile: undefined },
+        },
+      ];
+
+      await detectPnpmWorkspaces(packageFiles);
+      expect(packageFiles[0].managerData.pnpmLockFile).toBeUndefined();
     });
 
     it('filters none matching packages', async () => {
@@ -216,17 +242,17 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
       ];
 
@@ -234,24 +260,24 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toEqual([
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
       ]);
       expect(
         packageFiles.find(
           (packageFile) =>
             packageFile.packageFile === 'not-matching/b/package.json',
-        )?.managerData.pnpmShrinkwrap,
+        )?.managerData.pnpmLockFile,
       ).toBeUndefined();
     });
   });
@@ -337,23 +363,77 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const res = await getPnpmLock('package.json');
       expect(res.lockedVersionsWithPath).toBeUndefined();
     });
+
+    it('extracts version from multi-document lockfile (configDependencies)', async () => {
+      const lockfileContent = codeBlock`
+        ---
+        lockfileVersion: '9.0'
+
+        importers:
+
+          .:
+            configDependencies:
+              '@scope/pnpm-plugin-defaults':
+                specifier: 0.1.0
+                version: 0.1.0
+
+        packages:
+
+          '@scope/pnpm-plugin-defaults@0.1.0':
+            resolution: {integrity: sha512-aaa==}
+
+        snapshots:
+
+          '@scope/pnpm-plugin-defaults@0.1.0': {}
+
+        ---
+        lockfileVersion: '9.0'
+
+        settings:
+          autoInstallPeers: true
+          excludeLinksFromLockfile: false
+
+        importers:
+
+          .:
+            dependencies:
+              lodash:
+                specifier: ^4.17.20
+                version: 4.18.1
+
+        packages:
+
+          lodash@4.18.1:
+            resolution: {integrity: sha512-bbb==}
+
+        snapshots:
+
+          lodash@4.18.1: {}
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
+      expect(res.lockedVersionsWithPath!['.'].dependencies.lodash).toBe(
+        '4.18.1',
+      );
+    });
   });
 
   describe('.extractPnpmWorkspaceFile()', () => {
     it('handles empty catalog entries', async () => {
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           { catalog: {}, catalogs: {} },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [],
       });
     });
 
     it('parses valid pnpm-workspace.yaml file', async () => {
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           {
             catalog: {
               react: '18.3.0',
@@ -366,7 +446,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             currentValue: '18.3.0',
@@ -384,6 +464,235 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
         ],
       });
+    });
+
+    it('parses overrides in pnpm-workspace.yaml file', async () => {
+      await expect(
+        extractPnpmWorkspaceFile(
+          {
+            overrides: {
+              'foo>bar': '2.0.0',
+              'foo@1.0.0': '2.0.0',
+              'foo@>1.0.0': '2.0.0',
+              'foo@>=1.0.0': '2.0.0',
+              'foo@1.0.0>bar': '2.0.0',
+              'foo@>1.0.0>bar': '2.0.0',
+              'foo@>=1.0.0 <2.0.0': '>=2.0.0',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).resolves.toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+        ],
+      });
+    });
+
+    it('applies scoped registry from registries to catalog deps', async () => {
+      await expect(
+        extractPnpmWorkspaceFile(
+          {
+            catalog: {
+              '@my-org/pkg': '1.0.0',
+              react: '18.3.0',
+            },
+            registries: {
+              '@my-org': 'https://private.example.com/',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).resolves.toMatchObject({
+        deps: [
+          {
+            depName: '@my-org/pkg',
+            registryUrls: ['https://private.example.com/'],
+          },
+          {
+            depName: 'react',
+          },
+        ],
+      });
+    });
+
+    it('applies top-level registry to all npm catalog deps', async () => {
+      const res = await extractPnpmWorkspaceFile(
+        {
+          catalog: {
+            '@my-org/pkg': '1.0.0',
+            react: '18.3.0',
+          },
+          registry: 'https://private.example.com/',
+        },
+        'pnpm-workspace.yaml',
+      );
+      expect(res?.deps.flatMap((dep) => dep.registryUrls)).toEqual([
+        'https://private.example.com/',
+        'https://private.example.com/',
+      ]);
+    });
+
+    it('strips registries values containing env vars when parsing', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        registries:
+          "@my-org": https://\${TOKEN}.example.com/
+          "@other-org": https://private.example.com/
+      `);
+      expect(parsed.data?.registries).toEqual({
+        '@other-org': 'https://private.example.com/',
+      });
+    });
+
+    it('applies url-keyed registries to catalog deps', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        catalog:
+          "@my-org/pkg": 1.0.0
+          react: 18.3.0
+        registries:
+          https://private.example.com/:
+            serverType: artifactory
+            scopes: ["@my-org", "@my-other-org"]
+            prefix: work
+          https://default.example.com/:
+            scopes: ["@"]
+            supportsTimeField: true
+      `);
+
+      await expect(
+        extractPnpmWorkspaceFile(parsed.data!, 'pnpm-workspace.yaml'),
+      ).resolves.toMatchObject({
+        deps: [
+          {
+            depName: '@my-org/pkg',
+            registryUrls: ['https://private.example.com/'],
+          },
+          {
+            depName: 'react',
+            registryUrls: ['https://default.example.com/'],
+          },
+        ],
+      });
+    });
+
+    it('skips unusable url-keyed registries when parsing', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        registries:
+          https://\${TOKEN}.example.com/:
+            scopes: ["@env-var-org"]
+          https://user:pass@credentials.example.com/:
+            scopes: ["@credentials-org"]
+          not-a-url:
+            scopes: ["@invalid-url-org"]
+          https://unrouted.example.com/:
+          https://private.example.com/:
+            scopes: ["@my-org"]
+      `);
+
+      expect(parsed.data?.registries).toEqual({
+        '@my-org': 'https://private.example.com/',
+      });
+    });
+
+    it('ignores registries which mix both shapes', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        catalog:
+          react: 18.3.0
+        registries:
+          "@my-org": https://private.example.com/
+          https://default.example.com/:
+            scopes: ["@"]
+      `);
+
+      expect(parsed.data?.registries).toBeUndefined();
+      expect(parsed.data?.catalog).toEqual({ react: '18.3.0' });
+    });
+
+    it('does not apply registries to non-npm catalog deps', async () => {
+      const res = await extractPnpmWorkspaceFile(
+        {
+          catalog: {
+            a: 'github:owner/a#v1.1.0',
+          },
+          registry: 'https://private.example.com/',
+        },
+        'pnpm-workspace.yaml',
+      );
+      expect(res?.deps).toMatchObject([
+        { depName: 'a', datasource: 'github-tags' },
+      ]);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('resolves override registry using the package name, not the selector', async () => {
+      // depName starts with `@my-org/` but the real target package is `bar`,
+      // so the `@my-org` scoped registry must NOT apply.
+      const res = await extractPnpmWorkspaceFile(
+        {
+          overrides: {
+            '@my-org/foo>bar': '2.0.0',
+          },
+          registries: {
+            '@my-org': 'https://private.example.com/',
+          },
+        },
+        'pnpm-workspace.yaml',
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: '@my-org/foo>bar',
+          packageName: 'bar',
+        },
+      ]);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
     it('finds relevant lockfile', async () => {
@@ -431,8 +740,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
       `;
       fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-lock.yaml');
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           {
             catalog: {
               react: '18.3.1',
@@ -440,11 +749,53 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          pnpmLockFile: 'pnpm-lock.yaml',
         },
       });
+    });
+  });
+
+  describe('.resolveRegistryUrl()', () => {
+    it('returns the scoped registry for a matching scope', () => {
+      expect(
+        resolveRegistryUrl(
+          '@my-org/pkg',
+          { '@my-org': 'https://private.example.com/' },
+          undefined,
+        ),
+      ).toBe('https://private.example.com/');
+    });
+
+    it('falls back to registries.default for an unscoped package', () => {
+      expect(
+        resolveRegistryUrl(
+          'react',
+          { default: 'https://default.example.com/' },
+          undefined,
+        ),
+      ).toBe('https://default.example.com/');
+    });
+
+    it('falls back to the default registry for a non-matching scope', () => {
+      expect(
+        resolveRegistryUrl(
+          '@other/pkg',
+          { '@my-org': 'https://private.example.com/' },
+          'https://default.example.com/',
+        ),
+      ).toBe('https://default.example.com/');
+    });
+
+    it('falls back to the top-level registry when no registries are set', () => {
+      expect(
+        resolveRegistryUrl('react', undefined, 'https://default.example.com/'),
+      ).toBe('https://default.example.com/');
+    });
+
+    it('returns null when nothing matches', () => {
+      expect(resolveRegistryUrl('react', undefined, undefined)).toBeNull();
     });
   });
 });

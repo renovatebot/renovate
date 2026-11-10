@@ -1,9 +1,9 @@
 import { gt, gte, lt } from '@renovatebot/ruby-semver';
-import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
-import type { Range } from '../range';
-import { parseRanges, stringifyRanges } from '../range';
-import { adapt, trimZeroes } from '../version';
-import { replacePart } from './replace';
+import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator.ts';
+import { parseRanges, stringifyRanges } from '../range.ts';
+import type { Range } from '../types.ts';
+import { adapt, trimZeroes } from '../version.ts';
+import { replacePart } from './replace.ts';
 
 export default ({ range, to }: { range: string; to: string }): string => {
   const parts = parseRanges(range).map((part): Range => {
@@ -21,14 +21,13 @@ export default ({ range, to }: { range: string; to: string }): string => {
         if (trimZeroes(trimmed) === trimZeroes(to)) {
           // E.g. `'~> 5.2', '>= 5.2.0'`. In this case the latter is redundant.
           return { ...part, version: trimmed, companion: undefined };
-        } else {
-          // E.g. `'~> 5.2', '>= 5.2.1'`.
-          return {
-            ...part,
-            version: trimmed,
-            companion: { operator: GTE, delimiter: ' ', version: to },
-          };
         }
+        // E.g. `'~> 5.2', '>= 5.2.1'`.
+        return {
+          ...part,
+          version: trimmed,
+          companion: { operator: GTE, delimiter: ' ', version: to },
+        };
       }
       case NOT_EQUAL:
         if (lt(ver, to)) {

@@ -1,44 +1,51 @@
-import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../../util/host-rules';
-import { GoDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-
-vi.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = vi.mocked(_hostRules);
+import type { MockInstance } from 'vitest';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import type { ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
+import { GoDatasource } from './index.ts';
 
 const getReleasesDirectMock = vi.fn();
 
+const getDigestForgejoMock = vi.fn();
 const getDigestGiteaMock = vi.fn();
 const getDigestGithubMock = vi.fn();
 const getDigestGitlabMock = vi.fn();
 const getDigestGitMock = vi.fn();
 const getDigestBitbucketMock = vi.fn();
-vi.mock('./releases-direct', () => {
+vi.mock('./releases-direct.ts', () => {
   return {
-    GoDirectDatasource: vi.fn().mockImplementation(() => {
-      return {
-        git: { getDigest: (...args: any[]) => getDigestGitMock(...args) },
-        gitea: { getDigest: (...args: any[]) => getDigestGiteaMock(...args) },
-        github: { getDigest: (...args: any[]) => getDigestGithubMock(...args) },
-        gitlab: { getDigest: (...args: any[]) => getDigestGitlabMock(...args) },
-        bitbucket: {
+    GoDirectDatasource: vi.fn(
+      class {
+        forgejo = {
+          getDigest: (...args: any[]) => getDigestForgejoMock(...args),
+        };
+        git = { getDigest: (...args: any[]) => getDigestGitMock(...args) };
+        gitea = { getDigest: (...args: any[]) => getDigestGiteaMock(...args) };
+        github = {
+          getDigest: (...args: any[]) => getDigestGithubMock(...args),
+        };
+        gitlab = {
+          getDigest: (...args: any[]) => getDigestGitlabMock(...args),
+        };
+        bitbucket = {
           getDigest: (...args: any[]) => getDigestBitbucketMock(...args),
-        },
-        getReleases: (...args: any[]) => getReleasesDirectMock(...args),
-      };
-    }),
+        };
+        getReleases = (...args: any[]) => getReleasesDirectMock(...args);
+      },
+    ),
   };
 });
 
 const getReleasesProxyMock = vi.fn();
-vi.mock('./releases-goproxy', () => {
+vi.mock('./releases-goproxy.ts', () => {
   return {
-    GoProxyDatasource: vi.fn().mockImplementation(() => {
-      return {
-        getReleases: () => getReleasesProxyMock(),
-      };
-    }),
+    GoProxyDatasource: vi.fn(
+      class {
+        getReleases = () => getReleasesProxyMock();
+      },
+    ),
   };
 });
 
@@ -46,15 +53,6 @@ const datasource = new GoDatasource();
 
 describe('modules/datasource/go/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      delete process.env.GOPROXY;
-    });
-
     it('fetches releases', async () => {
       const expected = { releases: [{ version: '0.0.1' }] };
       getReleasesProxyMock.mockResolvedValue(expected);
@@ -71,11 +69,6 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('getDigest', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
     it('returns null for no go-source tag', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -151,7 +144,7 @@ describe('modules/datasource/go/index', () => {
         'v1.2.3',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -172,7 +165,7 @@ describe('modules/datasource/go/index', () => {
         'v0.0.0',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -193,6 +186,17 @@ describe('modules/datasource/go/index', () => {
       expect(res).toBe('123');
     });
 
+    it('support forgejo digest', async () => {
+      getDigestForgejoMock.mockResolvedValueOnce('123');
+      const res = await datasource.getDigest(
+        {
+          packageName: 'code.forgejo.org/go-chi/cache',
+        },
+        undefined,
+      );
+      expect(res).toBe('123');
+    });
+
     it('support gitea digest', async () => {
       getDigestGiteaMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
@@ -205,18 +209,166 @@ describe('modules/datasource/go/index', () => {
     });
 
     describe('GOPROXY', () => {
-      afterEach(() => {
-        delete process.env.GOPROXY;
-      });
-
       it('returns null when GOPROXY contains off', async () => {
-        process.env.GOPROXY = 'https://proxy.golang.org,off';
+        vi.stubEnv('GOPROXY', 'https://proxy.golang.org,off');
         const res = await datasource.getDigest(
           { packageName: 'golang.org/x/text' },
           'v1.2.3',
         );
         expect(res).toBeNull();
       });
+    });
+  });
+
+  describe('using getPkgReleases', () => {
+    describe('constraints', () => {
+      // TODO deprecated #42600
+      it('are respected based on an exact match on the `go` constraint', async () => {
+        const expected: ReleaseResult = {
+          releases: [
+            // Go 1.24
+            {
+              version: 'v0.32.0',
+              constraints: {
+                go: ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.33.0',
+              constraints: {
+                go: ['1.24.2'],
+              },
+            },
+            // Go 1.25
+            {
+              version: 'v0.34.0',
+              constraints: {
+                go: ['1.25.0'],
+              },
+            },
+          ],
+        };
+
+        getReleasesProxyMock.mockResolvedValue(expected);
+        getReleasesDirectMock.mockResolvedValue(null);
+
+        const res = await getPkgReleases({
+          datasource: GoDatasource.id,
+          packageName: 'golang.org/x/mod',
+
+          constraints: { go: '1.24.0' },
+          constraintsFiltering: 'strict',
+        });
+
+        expect(res).toBeDefined();
+        expect(res?.releases).toHaveLength(1);
+        expect(res?.releases[0].version).toEqual('v0.32.0');
+      });
+
+      it('are respected based on a SemVer-style range based on the `%goMod` constraint', async () => {
+        const expected: ReleaseResult = {
+          releases: [
+            // Go 1.23
+            {
+              version: 'v0.31.0',
+              constraints: {
+                '%goMod': ['1.23.0'],
+              },
+            },
+            // Go 1.24
+            {
+              version: 'v0.32.0',
+              constraints: {
+                '%goMod': ['1.24.0'],
+              },
+            },
+            {
+              version: 'v0.33.0',
+              constraints: {
+                '%goMod': ['1.24.1'],
+              },
+            },
+            // Go 1.25
+            {
+              version: 'v0.34.0',
+              constraints: {
+                '%goMod': ['1.25.0'],
+              },
+            },
+          ],
+        };
+
+        getReleasesProxyMock.mockResolvedValue(expected);
+        getReleasesDirectMock.mockResolvedValue(null);
+
+        const res = await getPkgReleases({
+          datasource: GoDatasource.id,
+          packageName: 'golang.org/x/mod',
+          constraints: { '%goMod': '<=1.24.x' },
+          constraintsFiltering: 'strict',
+          constraintsVersioning: {
+            '%goMod': 'semver-coerced',
+          },
+        });
+
+        expect(res?.releases.map((r) => r.version)).toEqual([
+          'v0.31.0',
+          'v0.32.0',
+          'v0.33.0',
+        ]);
+      });
+    });
+  });
+
+  describe('package cache', () => {
+    let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+    beforeEach(() => {
+      setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+    });
+
+    afterEach(() => {
+      setCache.mockRestore();
+    });
+
+    it('does not cache releases for modules matching GOPRIVATE', async () => {
+      vi.stubEnv('GOPRIVATE', 'golang.org/foo/*');
+      getReleasesProxyMock.mockResolvedValue({ releases: [] });
+
+      await datasource.getReleases({ packageName: 'golang.org/foo/bar' });
+
+      expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('does not cache digests for modules matching GOPRIVATE', async () => {
+      vi.stubEnv('GOPRIVATE', 'gitlab.com/group/*');
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup?go-get=1')
+        .reply(200, Fixtures.get('go-get-gitlab.html'));
+      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+
+      await datasource.getDigest(
+        { packageName: 'gitlab.com/group/subgroup' },
+        undefined,
+      );
+
+      expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('caches digests for public modules', async () => {
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup?go-get=1')
+        .reply(200, Fixtures.get('go-get-gitlab.html'));
+      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+
+      await datasource.getDigest(
+        { packageName: 'gitlab.com/group/subgroup' },
+        undefined,
+      );
+
+      expect(setCache).toHaveBeenCalledOnce();
     });
   });
 });

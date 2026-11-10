@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import { Http } from '../../../util/http';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 const http = new Http('batect-wrapper');
 
@@ -23,7 +23,7 @@ async function updateArtifact(
 
     return {
       artifactError: {
-        lockFile: path,
+        fileName: path,
         stderr: `HTTP GET ${url} failed: ${errorDescription}`,
       },
     };

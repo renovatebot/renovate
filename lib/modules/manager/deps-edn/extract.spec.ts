@@ -1,10 +1,36 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/deps-edn/extract', () => {
   describe('extractPackageFile', () => {
     it('returns null for invalid file', () => {
       expect(extractPackageFile('123')).toBeNull();
+    });
+
+    it('skips an aliases section that is not a map', () => {
+      const res = extractPackageFile('{:aliases "just a string"}');
+      expect(res?.deps).toBeEmpty();
+    });
+
+    it('skips an alias whose value is not a map', () => {
+      const res = extractPackageFile('{:aliases {:not-a-map "just a string"}}');
+      expect(res?.deps).toBeEmpty();
+    });
+
+    it('leaves the registries alone for a repo spec it cannot read', () => {
+      const res = extractPackageFile(
+        '{:deps {foo/bar {:mvn/version "1.0.0"}} :mvn/repos {"weird" "not-a-url"}}',
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'foo/bar',
+          currentValue: '1.0.0',
+          registryUrls: [
+            'https://clojars.org/repo',
+            'https://repo.maven.apache.org/maven2',
+          ],
+        },
+      ]);
     });
 
     it('extractPackageFile', () => {

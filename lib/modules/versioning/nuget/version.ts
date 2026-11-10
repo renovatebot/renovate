@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import type { NugetVersion } from './types';
+import { regEx } from '../../../util/regex.ts';
+import type { NugetVersion } from './types.ts';
 
 // We can't just use `Number.parseInt()` beacause it parses `123abc` as `123`,
 // which leads to incorrect version comparison.
@@ -8,7 +8,7 @@ function ensureNumber(input: string): number | null {
     return null;
   }
 
-  return Number.parseInt(input);
+  return Number.parseInt(input, 10);
 }
 
 function comparePrereleases(x: string, y: string): number {
@@ -50,17 +50,23 @@ export function compare(x: NugetVersion, y: NugetVersion): number {
 
   if (xMajor !== yMajor) {
     return Math.sign(xMajor - yMajor);
-  } else if (xMinor !== yMinor) {
+  }
+  if (xMinor !== yMinor) {
     return Math.sign(xMinor - yMinor);
-  } else if (xPatch !== yPatch) {
+  }
+  if (xPatch !== yPatch) {
     return Math.sign(xPatch - yPatch);
-  } else if (xRevision !== yRevision) {
+  }
+  if (xRevision !== yRevision) {
     return Math.sign(xRevision - yRevision);
-  } else if (x.prerelease && !y.prerelease) {
+  }
+  if (x.prerelease && !y.prerelease) {
     return -1;
-  } else if (!x.prerelease && y.prerelease) {
+  }
+  if (!x.prerelease && y.prerelease) {
     return 1;
-  } else if (x.prerelease && y.prerelease) {
+  }
+  if (x.prerelease && y.prerelease) {
     return comparePrereleases(x.prerelease, y.prerelease);
   }
 

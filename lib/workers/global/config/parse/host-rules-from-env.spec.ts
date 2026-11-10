@@ -1,5 +1,5 @@
-import { hostRulesFromEnv } from './host-rules-from-env';
-import { logger } from '~test/util';
+import { logger } from '~test/util.ts';
+import { hostRulesFromEnv } from './host-rules-from-env.ts';
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
   it('supports docker username/password', () => {
@@ -139,5 +139,19 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       npm_package_devDependencies__types_registry_auth_token: '4.2.0',
     };
     expect(hostRulesFromEnv(envParam)).toHaveLength(0);
+  });
+
+  it('ignores a datasource env var that names no auth field', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      RENOVATE_NPM_FOO: 'some-value',
+    };
+    expect(hostRulesFromEnv(envParam)).toHaveLength(0);
+  });
+
+  it('ignores a datasource env var with no value', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      RENOVATE_NPM_TOKEN: undefined,
+    };
+    expect(hostRulesFromEnv(envParam)).toEqual([{ hostType: 'npm' }]);
   });
 });

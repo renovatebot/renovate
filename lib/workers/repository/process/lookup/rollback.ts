@@ -1,15 +1,15 @@
-import { logger } from '../../../../logger';
-import type { Release } from '../../../../modules/datasource/types';
-import type { LookupUpdate } from '../../../../modules/manager/types';
-import type { VersioningApi } from '../../../../modules/versioning';
-import type { RollbackConfig } from './types';
+import { logger } from '../../../../logger/index.ts';
+import type { Release } from '../../../../modules/datasource/types.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../../modules/versioning/index.ts';
+import type { RollbackConfig } from './types.ts';
 
 export function getRollbackUpdate(
   config: RollbackConfig,
   versions: Release[],
   versioningApi: VersioningApi,
 ): LookupUpdate | null {
-  const { packageFile, versioning, depName, currentValue } = config;
+  const { packageFile, versioning, depName, currentValue, datasource } = config;
   // istanbul ignore if
   if (!('isLessThanRange' in versioningApi)) {
     logger.debug(
@@ -59,6 +59,9 @@ export function getRollbackUpdate(
     newVersion = newRelease?.version;
     registryUrl = newRelease?.registryUrl;
   }
+  // A real datasource always yields a release carrying a version here, so this
+  // only guards against malformed release data; `rollback.spec.ts` reaches it
+  // with a hand-built versioning api - see #40625
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
@@ -78,5 +81,8 @@ export function getRollbackUpdate(
     newVersion,
     registryUrl,
     updateType: 'rollback',
+    prBodyNotes: [
+      `The version of \`${depName}\` in use (\`${currentValue}\`) was not found once Renovate filtered the dependencies. The ${datasource} datasource returned ${versions.length} entries, but when Renovate applied its filtering, none were left, so Renovate will roll back to a supported version`,
+    ],
   };
 }

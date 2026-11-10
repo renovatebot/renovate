@@ -1,14 +1,16 @@
-import is from '@sindresorhus/is';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { isValidLocalPath, readLocalFile } from '../../../util/fs';
-import { HttpError } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
-import { id as bazelVersioningId } from '../../versioning/bazel-module';
-import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { BazelModuleMetadata } from './schema';
+import { isTruthy } from '@sindresorhus/is';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
+import { id as bazelVersioningId } from '../../versioning/bazel-module/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { BazelModuleMetadata } from './schema.ts';
 
 export class BazelDatasource extends Datasource {
   static readonly id = 'bazel';
@@ -16,10 +18,13 @@ export class BazelDatasource extends Datasource {
   static readonly bazelCentralRepoUrl =
     'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
 
-  override readonly defaultRegistryUrls = [BazelDatasource.bazelCentralRepoUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [BazelDatasource.bazelCentralRepoUrl];
+  }
   override readonly registryStrategy = 'hunt';
-  override readonly customRegistrySupport = true;
-  override readonly caching = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
   override readonly defaultVersioning = bazelVersioningId;
 
   static packageMetadataPath(packageName: string): string {
@@ -30,12 +35,7 @@ export class BazelDatasource extends Datasource {
     super(BazelDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${BazelDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl!}:${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -54,7 +54,7 @@ export class BazelDatasource extends Datasource {
         if (!fileContent) {
           return null;
         }
-        metadata = BazelModuleMetadata.parse(JSON.parse(fileContent));
+        metadata = Json.pipe(BazelModuleMetadata).parse(fileContent);
       } else {
         const response = await this.http.getJson(url, BazelModuleMetadata);
         metadata = response.body;
@@ -65,7 +65,7 @@ export class BazelDatasource extends Datasource {
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => {
           const release: Release = { version: bv.original };
-          if (is.truthy(metadata.yanked_versions?.[bv.original])) {
+          if (isTruthy(metadata.yanked_versions?.[bv.original])) {
             release.isDeprecated = true;
           }
           return release;
@@ -75,7 +75,7 @@ export class BazelDatasource extends Datasource {
       }
     } catch (err) {
       if (err instanceof HttpError) {
-        if (err.response?.statusCode === 404) {
+        if (isNotFound(err)) {
           return null;
         }
         throw new ExternalHostError(err);
@@ -84,5 +84,15 @@ export class BazelDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

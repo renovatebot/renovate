@@ -1,9 +1,9 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { asTimestamp } from '../../../util/timestamp';
-import * as Unity3dVersioning from '../../versioning/unity3d';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { UnityReleasesJSON } from './schema';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as Unity3dVersioning from '../../versioning/unity3d/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { UnityReleasesJSON } from './schema.ts';
 
 export class Unity3dDatasource extends Datasource {
   static readonly baseUrl =
@@ -24,7 +24,9 @@ export class Unity3dDatasource extends Datasource {
 
   static readonly id = 'unity3d';
 
-  override readonly defaultRegistryUrls = [Unity3dDatasource.streams.lts];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [Unity3dDatasource.streams.lts];
+  }
 
   override readonly defaultVersioning = Unity3dVersioning.id;
 
@@ -98,18 +100,23 @@ export class Unity3dDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${Unity3dDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     return await this.getByStream(
       registryUrl,
       packageName === 'm_EditorVersionWithRevision',
+    );
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
     );
   }
 }

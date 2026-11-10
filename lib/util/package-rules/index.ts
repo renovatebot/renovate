@@ -1,11 +1,29 @@
-import is from '@sindresorhus/is';
-import slugify from 'slugify';
-import { mergeChildConfig } from '../../config';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { StageName } from '../../types/skip-reason';
-import { compile } from '../template';
-import matchers from './matchers';
+import {
+  isNonEmptyArray,
+  isNullOrUndefined,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
+import _slugify from 'slugify';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { mergeChildConfig } from '../../config/utils.ts';
+import { logger } from '../../logger/index.ts';
+import type { StageName } from '../../types/skip-reason.ts';
+import { coerceArray } from '../array.ts';
+import { compile } from '../template/index.ts';
+import matchers from './matchers.ts';
+
+const slugify = _slugify;
+
+function hasRegistryUrls(config: PackageRuleInputConfig): boolean {
+  return (
+    isNonEmptyArray(config.registryUrls) ||
+    isNonEmptyArray(config.defaultRegistryUrls)
+  );
+}
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -15,11 +33,11 @@ async function matchesRule(
     const isMatch = await matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
-    if (is.nullOrUndefined(isMatch)) {
+    if (isNullOrUndefined(isMatch)) {
       continue;
     }
 
-    if (!is.truthy(isMatch)) {
+    if (!isTruthy(isMatch)) {
       return false;
     }
   }
@@ -32,7 +50,13 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
   stageName?: StageName,
 ): Promise<T> {
   let config = { ...inputConfig };
-  const packageRules = config.packageRules ?? [];
+  const packageRules = coerceArray(config.packageRules);
+  // The `packageRules` array is invariant while rules are being applied, and
+  // can be very large (e.g. vulnerability alerts append rules embedding full
+  // advisory texts). Remove it from the working config so mergeChildConfig()
+  // does not deep-clone the whole array once per matched rule, then restore
+  // it afterwards.
+  delete config.packageRules;
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`,
@@ -48,18 +72,37 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
           lower: true,
         });
       }
-      if (toApply.enabled === false && config.enabled !== false) {
+
+      // unless a force'd config option wins, record it even if the
+      // dependency is already disabled, so a user's rule can be told apart
+      // from a manager disabling it by default
+      const isDisabledWithoutForce =
+        toApply.enabled === false && config.force?.enabled !== true;
+      if (
+        // if it's got higher precedence, as it's a force'd config option
+        // multiple force'd config options are "last defined wins"
+        toApply.force?.enabled === false ||
+        isDisabledWithoutForce
+      ) {
         config.skipReason = 'package-rules';
         if (stageName) {
           config.skipStage = stageName;
         }
       }
-      if (toApply.enabled === true && config.enabled === false) {
+
+      const isEnabled = !!toApply.force?.enabled || !!toApply.enabled;
+      if (
+        isEnabled &&
+        // `unknown-registry` is not about whether the user wants the dependency
+        // updated, but about Renovate having nowhere to look it up, so a
+        // registry clears it rather than `enabled` - see below
+        config.skipReason !== 'unknown-registry'
+      ) {
         delete config.skipReason;
         delete config.skipStage;
       }
       if (
-        is.string(toApply.overrideDatasource) &&
+        isString(toApply.overrideDatasource) &&
         toApply.overrideDatasource !== config.datasource
       ) {
         logger.debug(
@@ -68,7 +111,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         config.datasource = toApply.overrideDatasource;
       }
       if (
-        is.string(toApply.overrideDepName) &&
+        isString(toApply.overrideDepName) &&
         toApply.overrideDepName !== config.depName
       ) {
         logger.debug(
@@ -77,7 +120,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         config.depName = compile(toApply.overrideDepName, config);
       }
       if (
-        is.string(toApply.overridePackageName) &&
+        isString(toApply.overridePackageName) &&
         toApply.overridePackageName !== config.packageName
       ) {
         logger.debug(
@@ -85,18 +128,40 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         );
         config.packageName = compile(toApply.overridePackageName, config);
       }
+      if (isString(toApply.sourceUrl)) {
+        toApply.sourceUrl = compile(toApply.sourceUrl, config);
+      }
       delete toApply.overrideDatasource;
       delete toApply.overrideDepName;
       delete toApply.overridePackageName;
       config = mergeChildConfig(config, toApply);
     }
   }
+  // A manager which could not work out where to look leaves `unknown-registry`
+  // behind. Config can still answer that, from a rule applied above or from the
+  // repository config the rules were applied to, so the dependency is no longer
+  // skipped once it has a registry to be looked up in.
+  if (config.skipReason === 'unknown-registry' && hasRegistryUrls(config)) {
+    delete config.skipReason;
+    delete config.skipStage;
+  }
+
+  // Restore the rules. If any applied rule carried nested `packageRules`
+  // (e.g. from a resolved preset), preserve the concat-merge semantics that
+  // mergeChildConfig() would previously have applied.
+  if (config.packageRules) {
+    config.packageRules = packageRules.concat(config.packageRules);
+  } else if ('packageRules' in inputConfig) {
+    config.packageRules = inputConfig.packageRules;
+  }
   return config;
 }
 
-function removeMatchers(
-  packageRule: PackageRule & PackageRuleInputConfig,
-): Record<string, unknown> {
+function removeMatchers<T extends Record<string, unknown>>(
+  packageRule: T,
+): Record<string, unknown> & {
+  force?: Record<string, unknown>;
+} {
   for (const key of Object.keys(packageRule)) {
     if (key.startsWith('match') || key.startsWith('exclude')) {
       delete packageRule[key];

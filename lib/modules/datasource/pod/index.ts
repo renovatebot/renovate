@@ -1,14 +1,24 @@
 import crypto from 'node:crypto';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import type { HttpError } from '../../../util/http';
-import { GithubHttp } from '../../../util/http/github';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
-import { massageGithubUrl } from '../metadata';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import {
+  isNotFound,
+  isRateLimitedOrServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Datasource } from '../datasource.ts';
+import { massageGithubUrl } from '../metadata.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 type URLFormatOptions =
   | 'withShardWithSpec'
@@ -57,18 +67,17 @@ function releasesGithubUrl(
 function handleError(packageName: string, err: HttpError): void {
   const errorData = { packageName, err };
 
-  const statusCode = err.response?.statusCode ?? 0;
-  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
+  if (isRateLimitedOrServerError(err)) {
     logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (statusCode === 401) {
+  if (isUnauthorized(err)) {
     logger.debug(errorData, 'Authorization error');
-  } else if (statusCode === 404) {
+  } else if (isNotFound(err)) {
     logger.debug(errorData, 'Package lookup error');
-  } else if (err.message === HOST_DISABLED) {
-    logger.trace(errorData, 'Host disabled');
+  } else if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+    logger.trace(errorData, refusedHostMessage(err));
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
   }
@@ -93,7 +102,9 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
 export class PodDatasource extends Datasource {
   static readonly id = 'pod';
 
-  override readonly defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://cdn.cocoapods.org'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -126,6 +137,7 @@ export class PodDatasource extends Datasource {
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJsonUnchecked<T>(url);
+      // v8 ignore else -- an empty json body throws before it gets here
       if (resp?.body) {
         return resp.body;
       }
@@ -201,18 +213,11 @@ export class PodDatasource extends Datasource {
     return null;
   }
 
-  @cache({
-    ttlMinutes: 30,
-    namespace: `datasource-${PodDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -221,7 +226,7 @@ export class PodDatasource extends Datasource {
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(baseUrl)) {
-      [baseUrl] = this.defaultRegistryUrls;
+      [baseUrl] = this.getDefaultRegistryUrls('');
     }
 
     let result: ReleaseResult | null = null;
@@ -238,5 +243,17 @@ export class PodDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        ttlMinutes: 30,
+        namespace: `datasource-${PodDatasource.id}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,9 +1,9 @@
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class SeparateMajorReleasesMigration extends AbstractMigration {
   override readonly propertyName = 'separateMajorReleases';
 
-  override run(value: unknown): void {
+  override run(value: boolean | undefined): void {
     this.setSafely('separateMajorMinor', value);
   }
 }

@@ -1,24 +1,217 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
-import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import type { StatusResult } from '../../../util/git/types';
-import { regEx } from '../../../util/regex';
-import mavenVersioning from '../../versioning/maven';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
+import {
+  chmodLocalFile,
+  deleteLocalFile,
+  readLocalFile,
+  statLocalFile,
+  writeLocalFile,
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { hashStream } from '../../../util/hash.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import mavenVersioning from '../../versioning/maven/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
+} from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
+const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
+
+function getChecksumFromUrl(url: string): Promise<string> {
+  return withCache(
+    {
+      namespace: 'url-sha256',
+      key: url,
+      ttlMinutes: 3 * 24 * 60, // 3 days
+    },
+    () => hashStream(http.stream(url), 'sha256'),
+  );
+}
+
+function getDistributionUrl(content: string): string | null {
+  const match = regEx(/^distributionUrl\s*=\s*(?<distributionUrl>.+)$/m).exec(
+    content,
+  );
+  return (
+    match?.groups?.distributionUrl?.replace(regEx(/\\:/g), ':').trim() ?? null
+  );
+}
+
+function getWrapperUrl(content: string): string | null {
+  const match = regEx(/^wrapperUrl\s*=\s*(?<wrapperUrl>.+)$/m).exec(content);
+  return match?.groups?.wrapperUrl?.replace(regEx(/\\:/g), ':').trim() ?? null;
+}
+
+function constructWrapperUrl(
+  version: string,
+  repoUrl: string = DEFAULT_MAVEN_REPO_URL,
+): string {
+  return `${repoUrl}/org/apache/maven/wrapper/maven-wrapper/${version}/maven-wrapper-${version}.jar`;
+}
+
+function getWrapperVersion(content: string): string | null {
+  const match = regEx(/^wrapperVersion\s*=\s*(?<wrapperVersion>.+)$/m).exec(
+    content,
+  );
+  return match?.groups?.wrapperVersion?.trim() ?? null;
+}
+
+function getDistributionType(content: string): string | null {
+  const match = regEx(/^distributionType\s*=\s*(?<distributionType>.+)$/m).exec(
+    content,
+  );
+  return match?.groups?.distributionType?.trim() ?? null;
+}
+
+function getChecksumValue(content: string, key: string): string | null {
+  const match = regEx(`^${key}\\s*=\\s*(?<value>.+)$`, 'm').exec(content);
+  return match?.groups?.value?.trim() ?? null;
+}
+
+function addChecksumAfterLine(
+  content: string,
+  lineRegex: RegExp,
+  key: string,
+  value: string,
+): string {
+  return content.replace(
+    regEx(lineRegex),
+    (lineMatch) => `${lineMatch}\n${key}=${value}`,
+  );
+}
+
+async function updateChecksums(
+  content: string,
+  updatedDeps: PackageDependency[],
+  addDistributionChecksum: boolean,
+  addWrapperChecksum: boolean,
+  originalContent: string,
+): Promise<string> {
+  let updatedContent = content;
+
+  // Update or add distribution checksum
+  if (addDistributionChecksum) {
+    const existingChecksum = getChecksumValue(
+      updatedContent,
+      'distributionSha256Sum',
+    );
+    const fallbackChecksum = getChecksumValue(
+      originalContent,
+      'distributionSha256Sum',
+    );
+    const distUrl = getDistributionUrl(updatedContent);
+    if (distUrl) {
+      try {
+        const checksum = await getChecksumFromUrl(distUrl);
+        if (existingChecksum) {
+          updatedContent = updatedContent.replace(
+            regEx(/distributionSha256Sum=.*/),
+            `distributionSha256Sum=${checksum}`,
+          );
+        } else {
+          // Add checksum after distributionUrl
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
+            'distributionSha256Sum',
+            checksum,
+          );
+        }
+      } catch (err) {
+        logger.warn(
+          { err, url: distUrl },
+          'Failed to fetch distribution checksum',
+        );
+        if (!existingChecksum && fallbackChecksum) {
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
+            'distributionSha256Sum',
+            fallbackChecksum,
+          );
+        }
+      }
+    }
+  }
+
+  // Update or add wrapper checksum
+  if (addWrapperChecksum) {
+    const existingChecksum = getChecksumValue(
+      updatedContent,
+      'wrapperSha256Sum',
+    );
+    const fallbackChecksum = getChecksumValue(
+      originalContent,
+      'wrapperSha256Sum',
+    );
+    let wrapperUrl = getWrapperUrl(updatedContent);
+
+    // If no wrapperUrl, try to construct from wrapperVersion
+    if (!wrapperUrl) {
+      const wrapperVersion = getWrapperVersion(updatedContent);
+      if (wrapperVersion) {
+        const customRepoUrl = getCustomMavenWrapperRepoUrl(updatedDeps);
+        wrapperUrl = constructWrapperUrl(
+          wrapperVersion,
+          customRepoUrl ?? DEFAULT_MAVEN_REPO_URL,
+        );
+      }
+    }
+
+    if (wrapperUrl) {
+      try {
+        const checksum = await getChecksumFromUrl(wrapperUrl);
+        if (existingChecksum) {
+          updatedContent = updatedContent.replace(
+            regEx(/wrapperSha256Sum=.*/),
+            `wrapperSha256Sum=${checksum}`,
+          );
+        } else {
+          // Add checksum after wrapperUrl or wrapperVersion
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
+            'wrapperSha256Sum',
+            checksum,
+          );
+        }
+      } catch (err) {
+        logger.warn(
+          { err, url: wrapperUrl },
+          'Failed to fetch wrapper checksum',
+        );
+        if (!existingChecksum && fallbackChecksum) {
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
+            'wrapperSha256Sum',
+            fallbackChecksum,
+          );
+        }
+      }
+    }
+  }
+
+  return updatedContent;
+}
+
 interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
   localProjectDir: string;
@@ -50,22 +243,91 @@ export async function updateArtifacts({
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
-    if (!updatedDeps.some((dep) => dep.depName === 'maven-wrapper')) {
-      logger.info(
-        'Maven wrapper version not updated - skipping Artifacts update',
+    const hasMavenUpdate = updatedDeps.some((dep) => dep.depName === 'maven');
+    const hasWrapperUpdate = updatedDeps.some(
+      (dep) => dep.depName === 'maven-wrapper',
+    );
+    // Remember original content properties - we'll restore them after wrapper:wrapper
+    const hadDistributionChecksum = newPackageFileContent.includes(
+      'distributionSha256Sum=',
+    );
+    const hadWrapperChecksum =
+      newPackageFileContent.includes('wrapperSha256Sum=');
+    const hadAnyChecksum = hadWrapperChecksum || hadDistributionChecksum;
+    const originalDistributionType = getDistributionType(newPackageFileContent);
+
+    // Skip if no relevant updates
+    if (!hasWrapperUpdate && !(hasMavenUpdate && hadDistributionChecksum)) {
+      logger.debug(
+        'No Maven wrapper or distribution checksum updates - skipping Artifacts update',
       );
       return null;
     }
 
-    const cmd = await createWrapperCommand(packageFileName);
+    // If wrapper is being updated, check if mvnw exists first
+    let cmd: string | null = null;
+    if (hasWrapperUpdate) {
+      cmd = await createWrapperCommand(
+        packageFileName,
+        originalDistributionType,
+      );
 
-    if (!cmd) {
-      logger.info('No mvnw found - skipping Artifacts update');
-      return null;
+      if (!cmd) {
+        logger.info('No mvnw found - skipping Artifacts update');
+        return null;
+      }
     }
 
-    const extraEnv = getExtraEnvOptions(updatedDeps);
-    await executeWrapperCommand(cmd, config, packageFileName, extraEnv);
+    // Delete old maven-wrapper.jar if checksums exist and wrapper:wrapper will run
+    // This prevents checksum validation failure when wrapper:wrapper runs
+    if (hasWrapperUpdate && hadAnyChecksum) {
+      const jarPath = packageFileName.replace(
+        'maven-wrapper.properties',
+        'maven-wrapper.jar',
+      );
+      if (jarPath.endsWith('maven-wrapper.jar')) {
+        try {
+          await deleteLocalFile(jarPath);
+          logger.debug({ jarPath }, 'Deleted old maven-wrapper.jar');
+        } catch {
+          // File may not exist, ignore
+        }
+      }
+    }
+
+    // Strip checksum lines before running wrapper:wrapper to avoid validation failure
+    // (mvnw would try to validate NEW jar against OLD checksum)
+    let contentToWrite = newPackageFileContent;
+    if (hasWrapperUpdate && hadAnyChecksum) {
+      contentToWrite = contentToWrite
+        .replace(regEx(/^distributionSha256Sum=.*\n?/m), '')
+        .replace(regEx(/^wrapperSha256Sum=.*\n?/m), '');
+    }
+
+    // Write the properties file
+    await writeLocalFile(packageFileName, contentToWrite);
+
+    // Run wrapper:wrapper if the wrapper itself is being updated
+    if (hasWrapperUpdate && cmd) {
+      const extraEnv = getExtraEnvOptions(updatedDeps);
+      await executeWrapperCommand(cmd, config, packageFileName, extraEnv);
+    }
+
+    // Now update checksums AFTER wrapper:wrapper has run (if it ran)
+    // This ensures we compute checksums for the actual generated content
+    if (hadDistributionChecksum || hadWrapperChecksum) {
+      const currentContent = await readLocalFile(packageFileName, 'utf8');
+      if (currentContent) {
+        const contentWithChecksums = await updateChecksums(
+          currentContent,
+          updatedDeps,
+          hadDistributionChecksum,
+          hadWrapperChecksum,
+          newPackageFileContent,
+        );
+        await writeLocalFile(packageFileName, contentWithChecksums);
+      }
+    }
 
     const status = await getRepoStatus();
     const artifactFileNames = [
@@ -81,7 +343,7 @@ export async function updateArtifacts({
     );
     const updateArtifactsResult = (
       await getUpdatedArtifacts(status, artifactFileNames)
-    ).filter(is.truthy);
+    ).filter(isTruthy);
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
@@ -93,7 +355,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: err.message,
         },
       },
@@ -151,8 +413,9 @@ async function executeWrapperCommand(
     toolConstraints: [
       {
         toolName: 'java',
-        constraint:
-          config.constraints?.java ?? getJavaConstraint(config.currentValue),
+        constraint: await resolveToolConstraint(config, 'java', () =>
+          getJavaConstraint(config.currentValue),
+        ),
       },
     ],
   };
@@ -166,11 +429,28 @@ async function executeWrapperCommand(
 }
 
 function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
+  const extraEnv: ExtraEnv = {};
+
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
-    return { MVNW_REPOURL: customMavenWrapperUrl };
+    extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
+
+    const { username, password } = hostRules.find({
+      hostType: MavenDatasource.id,
+      url: customMavenWrapperUrl,
+    });
+
+    if (username && password) {
+      extraEnv.MVNW_USERNAME = username;
+      extraEnv.MVNW_PASSWORD = password;
+      logger.trace(
+        { customMavenWrapperUrl },
+        'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
+      );
+    }
   }
-  return {};
+
+  return extraEnv;
 }
 
 function getCustomMavenWrapperRepoUrl(
@@ -184,7 +464,7 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+  const match = regEx(/^(?<repoUrl>.*?)\/org\/apache\/maven\/wrapper\//).exec(
     replaceString,
   );
 
@@ -192,11 +472,14 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
+  return match.groups!.repoUrl === DEFAULT_MAVEN_REPO_URL
+    ? null
+    : match.groups!.repoUrl;
 }
 
 async function createWrapperCommand(
   packageFileName: string,
+  distributionType: string | null,
 ): Promise<string | null> {
   const {
     wrapperExecutableFileName,
@@ -204,11 +487,16 @@ async function createWrapperCommand(
     wrapperFullyQualifiedPath,
   } = getMavenPaths(packageFileName);
 
+  // Use existing distributionType or default to 'script' to preserve JAR-based mode
+  // (prevents Maven 3.3.x from defaulting to only-script which doesn't support checksums)
+  const type = distributionType ?? 'script';
+  const args = `wrapper:wrapper -Dtype=${quote(type)}`;
+
   return await prepareCommand(
     wrapperExecutableFileName,
     localProjectDir,
     await statLocalFile(wrapperFullyQualifiedPath),
-    'wrapper:wrapper',
+    args,
   );
 }
 
@@ -224,7 +512,10 @@ function mavenWrapperFileName(): string {
 
 function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   const wrapperExecutableFileName = mavenWrapperFileName();
-  const localProjectDir = upath.join(upath.dirname(packageFileName), '../../');
+  const localProjectDir = upath.join(
+    upath.dirname(packageFileName),
+    packageFileName.includes('mvnw') ? '.' : '../../',
+  );
   const wrapperFullyQualifiedPath = upath.join(
     localProjectDir,
     wrapperExecutableFileName,
@@ -242,14 +533,15 @@ async function prepareCommand(
   pathFileStats: Stats | null,
   args: string | null,
 ): Promise<string | null> {
-  /* v8 ignore start -- hard to test */
+  /* v8 ignore next -- hard to test */
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
     if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
       logger.warn('Maven wrapper is missing the executable bit');
       await chmodLocalFile(
-        upath.join(cwd, fileName),
+        // TODO: types (#22198)
+        upath.join(cwd!, fileName),
         pathFileStats.mode | 0o111,
       );
     }
@@ -257,6 +549,6 @@ async function prepareCommand(
       return fileName;
     }
     return `${fileName} ${args}`;
-  } /* v8 ignore stop */
+  }
   return null;
 }

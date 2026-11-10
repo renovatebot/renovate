@@ -1,10 +1,10 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import * as gradleVersioning from '../../versioning/gradle';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GradleRelease } from './types';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as gradleVersioning from '../../versioning/gradle/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { GradleReleases } from './schema.ts';
 
 export class GradleVersionDatasource extends Datasource {
   static readonly id = 'gradle-version';
@@ -13,9 +13,9 @@ export class GradleVersionDatasource extends Datasource {
     super(GradleVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://services.gradle.org/versions/all',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://services.gradle.org/versions/all'];
+  }
 
   override readonly defaultVersioning = gradleVersioning.id;
 
@@ -28,43 +28,32 @@ export class GradleVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/gradle/gradle.';
 
-  @cache({
-    namespace: `datasource-${GradleVersionDatasource.id}`,
-    // TODO: types (#22198)
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
-    let releases: Release[];
-    try {
-      const response =
-        await this.http.getJsonUnchecked<GradleRelease[]>(registryUrl);
-      releases = response.body
-        .filter((release) => !release.snapshot && !release.nightly)
-        .map((release) => {
-          const { version, buildTime } = release;
+    const body = await this.fetchJson(registryUrl, GradleReleases);
+    const releases = body
+      .filter((release) => !release.snapshot && !release.nightly)
+      .map((release) => {
+        const { version, buildTime } = release;
 
-          const gitRef = GradleVersionDatasource.getGitRef(release.version);
+        const gitRef = GradleVersionDatasource.getGitRef(release.version);
 
-          const releaseTimestamp = asTimestamp(buildTime);
+        const releaseTimestamp = asTimestamp(buildTime);
 
-          const result: Release = { version, gitRef, releaseTimestamp };
+        const result: Release = { version, gitRef, releaseTimestamp };
 
-          if (release.broken) {
-            result.isDeprecated = true;
-          }
+        if (release.broken) {
+          result.isDeprecated = true;
+        }
 
-          return result;
-        });
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+        return result;
+      });
 
     const res: ReleaseResult = {
       releases,
@@ -77,6 +66,17 @@ export class GradleVersionDatasource extends Datasource {
     return null;
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GradleVersionDatasource.id}`,
+        key: config.registryUrl!,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   /**
    * Calculate `gitTag` based on `version`:
    *   - `8.1.2` -> `v8.1.2`
@@ -86,7 +86,7 @@ export class GradleVersionDatasource extends Datasource {
    */
   private static getGitRef(version: string): string {
     const [versionPart, typePart, unstablePart] = version.split(
-      regEx(/-([a-z]+)-/),
+      regEx(/-(?<type>[a-z]+)-/),
     );
 
     let suffix = '';

@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
-import { getPkgReleases } from '..';
-import { regEx } from '../../../util/regex';
-import * as mavenVersioning from '../../versioning/maven';
-import { MAVEN_REPO } from '../maven/common';
-import { extractPageLinks } from '../sbt-package/util';
-import { SbtPluginDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { MAVEN_REPO } from '../maven/common.ts';
+import { extractPageLinks } from '../sbt-package/util.ts';
+import { SbtPluginDatasource } from './index.ts';
 
 const mavenIndexHtml = Fixtures.get(`maven-index.html`);
 const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);
@@ -17,7 +17,18 @@ describe('modules/datasource/sbt-plugin/index', () => {
       extractPageLinks(mavenIndexHtml, (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'autofix-3.0.6_2.11',
+      'sbt-scalatest_2.12_1.0',
+      'scalatest',
+      'scalatest-app_native0.4_3',
+      'scalatest_2.12',
+      'scalatest_2.13',
+      'scalatest_2.13.0-RC1',
+      'scalatest_3',
+      'scalatest_sjs1.0.0-M7_2.13.0-RC2',
+      'test-interface',
+    ]);
   });
 
   it('parses sbt index directory', () => {
@@ -25,7 +36,15 @@ describe('modules/datasource/sbt-plugin/index', () => {
       extractPageLinks(sbtPluginIndex, (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'au.com.onegeek',
+      'ch',
+      'com.github.DavidPerezIngeniero',
+      'org.portable-scala',
+      'scalajs-react-interface',
+      'uk.co.josephearl',
+      'woshilaiceshide',
+    ]);
   });
 
   it('uses proper hostType', () => {
@@ -67,22 +86,22 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/org/scalatest/')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         }),
-      ).toBeNull();
-      expect(
-        await getPkgReleases({
+      ).resolves.toBeNull();
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.scalatest:scalaz',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('fetches sbt plugins', async () => {
@@ -139,14 +158,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/org/foundweekends/')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.foundweekends:sbt-bintray',
           registryUrls: [],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
         registryUrl: 'https://repo.maven.apache.org/maven2',
@@ -208,14 +227,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/org/foundweekends/')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
         registryUrl: 'https://repo.maven.apache.org/maven2',
@@ -287,14 +306,95 @@ describe('modules/datasource/sbt-plugin/index', () => {
         )
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
+        dependencyUrl:
+          'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
+        releases: [
+          { version: '2.0.0-RC2' },
+          { version: '2.0.0-RC6-1' },
+          { version: '2.0.0-RC6-2' },
+          { version: '2.0.0-RC6-6' },
+        ],
+        homepage: 'https://get-coursier.io/',
+        sourceUrl: 'https://github.com/coursier/sbt-coursier',
+      });
+    });
+
+    it('handles absolute and root relative paths', async () => {
+      httpMock
+        .scope('https://repo.maven.apache.org/maven2/')
+        .get('/io/get-coursier/')
+        .reply(
+          200,
+          codeBlock`
+            <a href="https://repo.maven.apache.org/maven2/io/">../</a>
+            <a href="https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>
+            <a href="https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>
+            <a href="https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>
+            <a href="https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>`,
+        )
+        .get('/io/get-coursier/sbt-coursier_2.12_1.0/')
+        .reply(
+          200,
+          codeBlock`
+            <a href="https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC2/">2.0.0-RC2/</a>
+            <a href="https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-1/">2.0.0-RC6-1/</a>
+            <a href="/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-2/">2.0.0-RC6-2/</a>
+            <a href="/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/">2.0.0-RC6-6/</a>
+          `,
+        )
+        .get(
+          '/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/sbt-coursier-2.0.0-RC6-6.pom',
+        )
+        .reply(
+          200,
+          codeBlock`
+            <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+              <url>https://get-coursier.io/</url>
+              <scm>
+                <url>https://github.com/coursier/sbt-coursier</url>
+              </scm>
+            </project>
+          `,
+        )
+
+        .get('/io/get-coursier/sbt-coursier/')
+        .reply(404)
+        .get('/io/get-coursier/sbt-coursier_2.10_0.13/')
+        .reply(404)
+        .get('/io/get-coursier/sbt-coursier_2.12_1.0.0-M5/')
+        .reply(404)
+        .get('/io/get-coursier/sbt-coursier_2.12_1.0.0-M6/')
+        .reply(404)
+        .get(
+          '/io/get-coursier/sbt-coursier_2.10_0.13/2.0.0-RC6-6/sbt-coursier_2.10_0.13-2.0.0-RC6-6.pom',
+        )
+        .reply(404)
+        .get(
+          '/io/get-coursier/sbt-coursier_2.10_0.13/2.0.0-RC6-6/sbt-coursier-2.0.0-RC6-6.pom',
+        )
+        .reply(404)
+        .get(
+          '/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/sbt-coursier_2.12_1.0-2.0.0-RC6-6.pom',
+        )
+        .reply(404);
+
+      await expect(
+        getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: SbtPluginDatasource.id,
+          packageName: 'io.get-coursier:sbt-coursier',
+          registryUrls: [MAVEN_REPO],
+        }),
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
         registryUrl: 'https://repo.maven.apache.org/maven2',

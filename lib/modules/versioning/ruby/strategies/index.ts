@@ -1,6 +1,5 @@
-import bump from './bump';
-import pin from './pin';
-import replace from './replace';
-import widen from './widen';
+import bump from './bump.ts';
+import replace from './replace.ts';
+import widen from './widen.ts';
 
-export { pin, bump, replace, widen };
+export { bump, replace, widen };

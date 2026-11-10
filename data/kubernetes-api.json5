@@ -144,11 +144,18 @@
     'source.toolkit.fluxcd.io/v1beta2',
     'source.toolkit.fluxcd.io/v1',
   ],
-  ImagePolicy: ['image.toolkit.fluxcd.io/v1beta2'],
-  ImageRepository: ['image.toolkit.fluxcd.io/v1beta2'],
+  ImagePolicy: [
+    'image.toolkit.fluxcd.io/v1beta2',
+    'image.toolkit.fluxcd.io/v1',
+  ],
+  ImageRepository: [
+    'image.toolkit.fluxcd.io/v1beta2',
+    'image.toolkit.fluxcd.io/v1',
+  ],
   ImageUpdateAutomation: [
     'image.toolkit.fluxcd.io/v1beta1',
     'image.toolkit.fluxcd.io/v1beta2',
+    'image.toolkit.fluxcd.io/v1',
   ],
   OCIRepository: [
     'source.toolkit.fluxcd.io/v1beta2',

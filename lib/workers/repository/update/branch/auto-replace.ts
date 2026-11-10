@@ -1,14 +1,15 @@
 // TODO #22198
-import is from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { extractPackageFile } from '../../../../modules/manager';
-import type { PackageDependency } from '../../../../modules/manager/types';
-import { writeLocalFile } from '../../../../util/fs';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { matchAt, replaceAt } from '../../../../util/string';
-import { compile } from '../../../../util/template';
-import type { BranchUpgradeConfig } from '../../../types';
+import { isNumber, isString, isUndefined } from '@sindresorhus/is';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { extractPackageFile } from '../../../../modules/manager/index.ts';
+import type { PackageDependency } from '../../../../modules/manager/types.ts';
+import { writeLocalFile } from '../../../../util/fs/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { matchAt, replaceAt } from '../../../../util/string.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -43,14 +44,15 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+    if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
@@ -89,22 +91,44 @@ export async function confirmIfDepUpdated(
   }
 
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
-    logger.debug(
-      {
-        depName: upgrade.depName,
-        manager,
-        packageFile,
-        expectedValue: upgrade.newValue,
-        foundValue: newUpgrade.currentValue,
-      },
-      'Value is not updated',
-    );
-    return false;
+    // accept reshaped values produced by autoReplaceStringTemplate
+    let templateMatchesExtractedValue = false;
+    if (upgrade.autoReplaceStringTemplate) {
+      try {
+        const compiledValue = compile(
+          upgrade.autoReplaceStringTemplate,
+          upgrade,
+          false,
+        );
+        templateMatchesExtractedValue =
+          compiledValue === newUpgrade.currentValue;
+      } catch (err) {
+        logger.debug(
+          { err, manager, packageFile },
+          'Failed to compile autoReplaceStringTemplate in confirmIfDepUpdated',
+        );
+      }
+    }
+    if (!templateMatchesExtractedValue) {
+      logger.debug(
+        {
+          depName: upgrade.depName,
+          manager,
+          packageFile,
+          expectedValue: upgrade.newValue,
+          foundValue: newUpgrade.currentValue,
+        },
+        'Value is not updated',
+      );
+      return false;
+    }
   }
 
+  const isPinOrDigestUpdate =
+    upgrade.isPinDigest === true || upgrade.currentDigest;
   if (
     upgrade.newDigest &&
-    (upgrade.isPinDigest === true || upgrade.currentDigest) &&
+    isPinOrDigestUpdate &&
     upgrade.newDigest !== newUpgrade.currentDigest
   ) {
     logger.debug(
@@ -125,13 +149,7 @@ export async function confirmIfDepUpdated(
 
 function getDepsSignature(deps: PackageDependency[]): string {
   // TODO: types (#22198)
-  return deps
-    .map(
-      (dep) =>
-        `${(dep.depName ?? dep.packageName)!}${(dep.packageName ??
-          dep.depName)!}`,
-    )
-    .join(',');
+  return deps.map((dep) => `${dep.depName!}${dep.packageName!}`).join(',');
 }
 
 function firstIndexOf(
@@ -162,6 +180,10 @@ export async function checkBranchDepsMatchBaseDeps(
       upgrade,
     )!;
     const branchDeps = res!.deps;
+    // `baseDeps` were normalized during extraction, so the freshly extracted `branchDeps` need the same treatment before their signatures can be compared
+    for (const dep of branchDeps) {
+      normalizeDepNames(dep);
+    }
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch /* istanbul ignore next */ {
     logger.info(
@@ -196,6 +218,13 @@ async function checkExistingBranch(
   return existingContent;
 }
 
+function isMissingDepName(
+  replaceString: string | undefined,
+  depName: string | undefined,
+): boolean {
+  return isUndefined(replaceString) || !replaceString.includes(depName!);
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -224,12 +253,30 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
-  const replaceWithoutReplaceString =
-    is.string(newName) &&
+  const valueChanging =
+    isString(currentValue) && isString(newValue) && currentValue !== newValue;
+  const digestChanging =
+    isString(currentDigest) &&
+    isString(newDigest) &&
+    currentDigest !== newDigest;
+  let replaceWithoutReplaceString =
+    isString(newName) &&
     newName !== depName &&
-    (is.undefined(upgrade.replaceString) ||
-      !upgrade.replaceString?.includes(depName!));
-  const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
+    isMissingDepName(upgrade.replaceString, depName);
+  // fallback must contain the field being updated, else the replacement is
+  // a no-op for managers where value and digest live in separate tokens
+  let replaceString = upgrade.replaceString;
+  if (isUndefined(replaceString)) {
+    if (valueChanging && digestChanging) {
+      // no single fallback covers both — use the per-field path
+      replaceWithoutReplaceString = true;
+      replaceString = currentValue;
+    } else if (digestChanging) {
+      replaceString = currentDigest;
+    } else {
+      replaceString = currentValue ?? currentDigest;
+    }
+  }
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {
@@ -260,7 +307,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentValue), autoReplaceRegExpFlag),
           newValue,
         );
       }
@@ -272,7 +319,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(depName), autoReplaceRegExpFlag),
           newName,
         );
       }
@@ -284,13 +331,17 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigest), autoReplaceRegExpFlag),
           newDigest,
         );
       } else if (
         currentDigestShort &&
         newDigest &&
-        currentDigestShort !== newDigest
+        currentDigestShort !== newDigest &&
+        // Only use short digest replacement when there's no full currentDigest
+        // that already matches newDigest (otherwise we'd incorrectly replace
+        // part of an already-correct digest)
+        !(currentDigest && currentDigest === newDigest)
       ) {
         if (!newString.includes(currentDigestShort)) {
           logger.debug(
@@ -299,7 +350,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigestShort), autoReplaceRegExpFlag),
           newDigest,
         );
       }
@@ -454,7 +505,8 @@ export async function doAutoReplace(
         newContent = existingContent;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next

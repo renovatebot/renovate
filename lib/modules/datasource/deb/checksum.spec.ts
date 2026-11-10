@@ -1,9 +1,12 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { GlobalConfig } from '../../../config/global';
-import { outputCacheFile } from '../../../util/fs';
-import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { outputCacheFile } from '../../../util/fs/index.ts';
+import {
+  computeFileChecksum,
+  parseChecksumsFromInRelease,
+} from './checksum.ts';
 
 const fixtureInRelease = Fixtures.getBinary(`InRelease`).toString();
 
@@ -47,11 +50,13 @@ describe('modules/datasource/deb/checksum', () => {
       const expectedHash =
         'fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9';
 
-      expect(await computeFileChecksum('file.txt')).toBe(expectedHash);
+      await expect(computeFileChecksum('file.txt')).resolves.toBe(expectedHash);
     });
 
     it('should fail if there is an error in the stream', async () => {
-      await expect(computeFileChecksum('file.txt')).rejects.toThrow();
+      await expect(computeFileChecksum('file.txt')).rejects.toThrow(
+        'ENOENT: no such file or directory',
+      );
     });
   });
 });

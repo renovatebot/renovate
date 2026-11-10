@@ -1,14 +1,15 @@
 import url from 'node:url';
-import is from '@sindresorhus/is';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import * as hostRules from '../../../util/host-rules';
-import type { HttpResponse } from '../../../util/http/types';
-import { parseUrl } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
-import type { GitUrlOption } from '../types';
-import type { GitLabMergeRequest, GitlabPr, RepoResponse } from './types';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { GitUrlOption } from '../types.ts';
+import type { GitLabMergeRequest } from './schema.ts';
+import type { GitlabPr, RepoResponse } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';
 export const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
@@ -22,6 +23,7 @@ export const defaults = {
 export function prInfo(mr: GitLabMergeRequest): GitlabPr {
   const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
+    targetBranch: mr.target_branch,
     state: mr.state === 'opened' ? 'open' : mr.state,
     number: mr.iid,
     title: mr.title,
@@ -35,8 +37,12 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
       headPipelineStatus: mr.head_pipeline?.status,
     }),
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
+    ...(mr.head_pipeline?.id && { headPipelineId: mr.head_pipeline?.id }),
+    ...(mr.head_pipeline?.source && {
+      headPipelineSource: mr.head_pipeline?.source,
+    }),
 
-    ...(is.nonEmptyArray(mr.reviewers) && {
+    ...(isNonEmptyArray(mr.reviewers) && {
       reviewers: mr.reviewers?.map(({ username }) => username),
     }),
 
@@ -76,7 +82,7 @@ export function getRepoUrl(
 
   if (
     gitUrl === 'endpoint' ||
-    is.nonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
+    isNonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
@@ -88,13 +94,16 @@ export function getRepoUrl(
       );
     }
 
-    // TODO: null check (#22198)
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
+    const parsedEndpoint = parseUrl(defaults.endpoint);
+    if (!parsedEndpoint) {
+      throw new Error(`Invalid GitLab endpoint: ${defaults.endpoint}`);
+    }
+    const { protocol, host, pathname } = parsedEndpoint;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const uri = url.format({
-      protocol:
-        /* v8 ignore next: should never happen */
-        protocol.slice(0, -1) || 'https',
+      /* v8 ignore start: should never happen (#40625) */
+      protocol: protocol.slice(0, -1) || 'https',
+      /* v8 ignore stop */
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,

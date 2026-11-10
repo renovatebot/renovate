@@ -1,40 +1,49 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { filterMap } from '../../../util/filter-map';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { filterMap } from '../../../util/filter-map.ts';
 import {
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { isValid } from '../../versioning/semver';
+} from '../../../util/fs/index.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import { getGoEnv } from '../../datasource/go/env.ts';
+import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { getExtraDepsNotice } from './artifacts-extra';
+} from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
+import { getExtraDepsNotice } from './artifacts-extra.ts';
+import { getGoModulesInTidyOrder } from './package-tree.ts';
 
 const { major, valid } = semver;
+const gitExec = withGitEnvironment(['go']);
 
-function getUpdateImportPathCmds(
+async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig,
-): string[] {
+  config: UpdateArtifactsConfig,
+): Promise<string[]> {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
     ({ newVersion }) => !valid(newVersion),
@@ -65,17 +74,20 @@ function getUpdateImportPathCmds(
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${depName} -t=${newMajor}`,
+        `mod upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
       'install github.com/marwan-at-work/mod/cmd/mod@latest';
-    const gomodModCompatibility = constraints?.gomodMod;
+    const gomodModCompatibility = await resolveToolConstraint(
+      config,
+      'gomodMod',
+    );
     if (gomodModCompatibility) {
       if (
         gomodModCompatibility.startsWith('v') &&
-        isValid(gomodModCompatibility.replace(regEx(/^v/), ''))
+        isValid(stripVersionPrefix(gomodModCompatibility))
       ) {
         installMarwanModArgs = installMarwanModArgs.replace(
           regEx(/@latest$/),
@@ -99,7 +111,7 @@ function getUpdateImportPathCmds(
 }
 
 function useModcacherw(goVersion: string | undefined): boolean {
-  if (!is.string(goVersion)) {
+  if (!isString(goVersion)) {
     return true;
   }
 
@@ -120,16 +132,29 @@ export async function updateArtifacts({
     logger.debug('No go.sum found');
     return null;
   }
-
   const goModDir = upath.dirname(goModFileName);
+  const goModFileBaseName = upath.basename(goModFileName);
+  const modFileFlag =
+    goModFileBaseName === 'go.mod'
+      ? ''
+      : ` -modfile=${quote(goModFileBaseName)}`;
 
-  const vendorDir = upath.join(goModDir, 'vendor/');
-  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
-  const useVendor =
-    !!config.postUpdateOptions?.includes('gomodVendor') ||
-    (!config.postUpdateOptions?.includes('gomodSkipVendor') &&
-      (await readLocalFile(vendorModulesFileName)) !== null);
+  // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
+  // the go workspaces are used.
+  const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
+  const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
+  let useVendor = !!config.postUpdateOptions?.includes('gomodVendor');
+  if (
+    !useVendor &&
+    !config.postUpdateOptions?.includes('gomodSkipVendor') &&
+    vendorDir
+  ) {
+    useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
+  }
   let massagedGoMod = newGoModContent;
+  const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
+  const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
+  const goGenerateAllowed = allowedUnsafeExecutions?.includes('goGenerate');
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
@@ -149,61 +174,68 @@ export async function updateArtifacts({
       .join('\n');
 
     const inlineReplaceRegEx = regEx(
-      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
+      /(?<newline>\r?\n)(?<directive>replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
     );
 
-    // $1 will be matched with the (\r?n) group
-    // $2 will be matched with the inline replace match, example
+    // $<newline> will be matched with the (\r?\n) group
+    // $<directive> will be matched with the inline replace match, example
     // "// renovate-replace replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5"
-    const inlineCommentOut = '$1// renovate-replace $2';
+    const inlineCommentOut = '$<newline>// renovate-replace $<directive>';
 
     // Regex match replace directive block, example:
     // replace (
     //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // )
-    const blockReplaceRegEx = regEx(/(\r?\n)replace\s*\([^)]+\s*\)/g);
+    const blockReplaceRegEx = regEx(/(?:\r?\n)replace\s*\([^)]+\s*\)/g);
 
     /**
      * replacerFunction for commenting out replace blocks
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match: string): string =>
-      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    function blockCommentOut(match: string): string {
+      return match.replace(
+        regEx(/(?<newline>\r?\n)/g),
+        '$<newline>// renovate-replace ',
+      );
+    }
 
     // Comment out golang replace directives
     massagedGoMod = massagedGoMod
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
+    // v8 ignore else -- needs a go.mod the replace massaging leaves unchanged
     if (massagedGoMod !== newGoModContent) {
       logger.debug(
         'Removed some relative replace statements and comments from go.mod',
       );
     }
   }
-  const goConstraints =
-    config.constraints?.go ?? getGoConstraints(newGoModContent);
+  const goConstraints = await deriveGoToolchainConstraints(
+    config,
+    newGoModContent,
+  );
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
 
     const cmd = 'go';
     const env = getEnv();
+    const goEnv = getGoEnv(true);
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
-        GOPROXY: env.GOPROXY,
-        GOPRIVATE: env.GOPRIVATE,
-        GONOPROXY: env.GONOPROXY,
-        GONOSUMDB: env.GONOSUMDB,
+        GOPROXY: goEnv.GOPROXY,
+        GOPRIVATE: goEnv.GOPRIVATE,
+        GONOPROXY: goEnv.GONOPROXY,
+        GONOSUMDB: goEnv.GONOSUMDB,
         GOSUMDB: env.GOSUMDB,
         GOINSECURE: env.GOINSECURE,
         /* v8 ignore next -- TODO: add test */
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
-        ...getGitEnvironmentVariables(['go']),
       },
       docker: {},
       toolConstraints: [
@@ -234,7 +266,7 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get `;
+    let args = `get${modFileFlag} `;
 
     if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
       // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
@@ -252,7 +284,10 @@ export async function updateArtifacts({
       config.updateType === 'major';
 
     if (isImportPathUpdateRequired) {
-      const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
+      const updateImportCmds = await getUpdateImportPathCmds(
+        updatedDeps,
+        config,
+      );
       if (updateImportCmds.length > 0) {
         logger.debug(updateImportCmds, 'update import path commands included');
         // The updates
@@ -275,19 +310,25 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
-    const isGoModTidyRequired =
-      !mustSkipGoModTidy &&
-      (config.postUpdateOptions?.includes('gomodTidy') === true ||
-        config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
-        config.postUpdateOptions?.includes('gomodTidyE') === true ||
-        (config.updateType === 'major' && isImportPathUpdateRequired));
+    // dependent modules can only be tidied once the updated module is settled
+    const isGoModTidyAllRequired =
+      config.postUpdateOptions?.includes('gomodTidyAll') === true;
+    const isMajorImportPathUpdate =
+      config.updateType === 'major' && isImportPathUpdateRequired;
+    const isTidyEnabled =
+      config.postUpdateOptions?.includes('gomodTidy') === true ||
+      config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
+      config.postUpdateOptions?.includes('gomodTidyE') === true ||
+      isGoModTidyAllRequired ||
+      isMajorImportPathUpdate;
+    const isGoModTidyRequired = !mustSkipGoModTidy && isTidyEnabled;
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
-    const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
+    let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
       // If we find a go.work, then use go workspace vendoring.
       const goWorkFile = await findLocalSiblingOrParent(
@@ -296,6 +337,11 @@ export async function updateArtifacts({
       );
 
       if (goWorkFile) {
+        goWorkSumFileName = upath.join(
+          upath.dirname(goWorkFile),
+          'go.work.sum',
+        );
+
         args = 'work vendor';
         logger.debug('using go work vendor');
         execCommands.push(`${cmd} ${args}`);
@@ -304,13 +350,13 @@ export async function updateArtifacts({
         logger.debug('using go work sync');
         execCommands.push(`${cmd} ${args}`);
       } else {
-        args = 'mod vendor';
+        args = `mod vendor${modFileFlag}`;
         logger.debug('using go mod vendor');
         execCommands.push(`${cmd} ${args}`);
       }
 
       if (isGoModTidyRequired) {
-        args = 'mod tidy' + tidyOpts;
+        args = `mod tidy${modFileFlag}${tidyOpts}`;
         logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -318,18 +364,49 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
-    await exec(execCommands, execOptions);
+    let dependentModules: string[] = [];
+    if (isGoModTidyAllRequired) {
+      try {
+        dependentModules = await getGoModulesInTidyOrder(goModFileName);
+        for (const dependent of dependentModules) {
+          const dir = upath.relative(goModDir, upath.dirname(dependent));
+          execCommands.push(`${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`);
+        }
+        logger.debug({ dependentModules }, 'go mod tidy commands included');
+      } catch (err) {
+        logger.warn({ err }, 'Failed to find dependent Go modules');
+      }
+    }
+
+    if (useGoGenerate) {
+      if (goGenerateAllowed) {
+        logger.debug('go generate command included');
+        execCommands.push(`${cmd} generate ./...`);
+      } else {
+        logger.once.warn(
+          `go generate command requested as a post update action, but goGenerate is not permitted in the allowedUnsafeExecutions`,
+        );
+      }
+    }
+
+    await gitExec(execCommands, execOptions);
 
     const status = await getRepoStatus();
+    const dependentFiles = dependentModules.flatMap((f) => [
+      f,
+      f.replace(regEx(/\.mod$/), '.sum'),
+    ]);
+
     if (
       !status.modified.includes(sumFileName) &&
       !status.modified.includes(goModFileName) &&
-      !status.modified.includes(goWorkSumFileName)
+      !status.modified.includes(goWorkSumFileName) &&
+      !dependentFiles.some((f) => status.modified.includes(f))
     ) {
       return null;
     }
@@ -337,24 +414,21 @@ export async function updateArtifacts({
     const res: UpdateArtifactsResult[] = [];
     if (status.modified.includes(sumFileName)) {
       logger.debug('Returning updated go.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: sumFileName,
-          contents: await readLocalFile(sumFileName),
-        },
-      });
+      res.push(fileAddition(sumFileName, await readLocalFile(sumFileName)));
     }
 
     if (status.modified.includes(goWorkSumFileName)) {
       logger.debug('Returning updated go.work.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: goWorkSumFileName,
-          contents: await readLocalFile(goWorkSumFileName),
-        },
-      });
+      res.push(
+        fileAddition(goWorkSumFileName, await readLocalFile(goWorkSumFileName)),
+      );
+    }
+
+    for (const f of dependentFiles) {
+      if (status.modified.includes(f)) {
+        logger.trace(`Returning updated ${f}`);
+        res.push(fileAddition(f, await readLocalFile(f)));
+      }
     }
 
     // Include all the .go file import changes
@@ -362,37 +436,25 @@ export async function updateArtifacts({
       logger.debug('Returning updated go source files for import path changes');
       for (const f of status.modified) {
         if (f.endsWith('.go')) {
-          res.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
+          res.push(fileAddition(f, await readLocalFile(f)));
         }
       }
     }
 
+    const alreadyAdded = new Set<string>();
+    const alreadyDeleted = new Set<string>();
     if (useVendor) {
-      for (const f of status.modified.concat(status.not_added)) {
-        if (f.startsWith(vendorDir)) {
-          res.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
+      const vendorChanges = await collectFileChanges(status, {
+        filter: (f) => !!vendorDir && f.startsWith(vendorDir),
+      });
+      for (const change of vendorChanges) {
+        if (change.type === 'addition') {
+          alreadyAdded.add(change.path);
+        } else {
+          alreadyDeleted.add(change.path);
         }
       }
-      for (const f of coerceArray(status.deleted)) {
-        res.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
-      }
+      res.push(...fileChangesToArtifactResults(vendorChanges));
     }
 
     // TODO: throws in tests (#22198)
@@ -413,6 +475,7 @@ export async function updateArtifacts({
         newGoModContent,
         finalGoModContent,
         updatedDepNames,
+        config,
       );
 
       if (extraDepsNotice) {
@@ -424,6 +487,29 @@ export async function updateArtifacts({
 
       logger.debug('Found updated go.mod after go.sum update');
       res.push(artifactResult);
+      alreadyAdded.add(goModFileName);
+    }
+
+    // add all files added when in `go generate` mode.
+    // unfortunately there is not a good way as there is with vendoring or go import path updates to detect this.
+    // Do this at the very very end to ensure we only capture files which would have been explicitly
+    // modified, added, or deleted from a `go generate` invocation
+    if (useGoGenerate && goGenerateAllowed) {
+      logger.debug(
+        'Updating all modified files since generated files were added',
+      );
+      res.push(
+        ...fileChangesToArtifactResults([
+          ...(await collectFileChanges(status, {
+            include: ['modified', 'created'],
+            filter: (f) => !alreadyAdded.has(f),
+          })),
+          ...(await collectFileChanges(status, {
+            include: ['deleted'],
+            filter: (f) => !alreadyDeleted.has(f),
+          })),
+        ]),
+      );
     }
     return res;
   } catch (err) {
@@ -431,14 +517,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update go.sum');
-    return [
-      {
-        artifactError: {
-          lockFile: sumFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(sumFileName, err);
   }
 }
 
@@ -475,4 +554,27 @@ function getGoConstraints(content: string): string | undefined {
     return undefined;
   }
   return `^${match.groups.gover}`;
+}
+
+/**
+ * Derive the version of the Go toolchain needed to run this project.
+ *
+ * This matches with the `golang` Containerbase tool.
+ *
+ * In precedence order:
+ *
+ * 1. config: \`constraints.go\`
+ * 1. \`go.mod\`: \`toolchain\` directive
+ * 1. \`go.mod\`: \`go\` directive
+ * 1. the \`go\` constraint collected during extraction
+ *
+ * NOTE that the \`constraints.golang\` is not used (TODO #42601)
+ */
+export async function deriveGoToolchainConstraints(
+  config: UpdateArtifactsConfig,
+  newGoModContent: string,
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'go', () =>
+    getGoConstraints(newGoModContent),
+  );
 }

@@ -1,8 +1,8 @@
 import type { PackageJson } from 'type-fest';
-import { logger } from '../../../../../../logger';
-import { regEx } from '../../../../../../util/regex';
-import { api as semver } from '../../../../../versioning/npm';
-import type { PackageLockOrEntry, ParentDependency } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { regEx } from '../../../../../../util/regex.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
+import type { PackageLockOrEntry, ParentDependency } from './types.ts';
 
 // Finds all parent dependencies for a given depName@currentVersion
 export function findDepConstraints(
@@ -38,7 +38,8 @@ export function findDepConstraints(
   if (parentDepName && requires) {
     let constraint = requires[depName];
     if (constraint) {
-      constraint = constraint.replace(regEx(/(\d)rc$/), '$1-rc');
+      constraint = constraint.replace(regEx(/(?<digit>\d)rc$/), '$<digit>-rc');
+      // v8 ignore else -- TODO: add test #40625
       if (semver.isValid(constraint)) {
         if (semver.matches(currentVersion, constraint)) {
           if (constraint === currentVersion) {
@@ -51,12 +52,12 @@ export function findDepConstraints(
             constraint,
           });
         }
-      } /* v8 ignore start -- needs test */ else {
+      } else {
         logger.warn(
           { parentDepName, depName, currentVersion, constraint },
           'Parent constraint is invalid',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
   }
   if (dependencies) {

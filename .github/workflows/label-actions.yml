@@ -1,5 +1,7 @@
 name: 'Label Actions'
 
+# NOTE that if adding any new events, these must be allowlisted via an Actions Policy due to its use of `pull_request_target`
+# https://github.com/renovatebot/renovate/settings/actions/rules/12707
 on:
   issues:
     types: [labeled]
@@ -16,8 +18,8 @@ permissions:
 
 jobs:
   reaction:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
-      - uses: dessant/label-actions@102faf474a544be75fbaf4df54e73d3c515a0e65 # v4.0.1
+      - uses: dessant/label-actions@65225c179d3b2502f6eda7b3d15101a3f412366b # v5.0.3
         with:
           github-token: ${{ github.token }}

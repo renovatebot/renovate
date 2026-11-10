@@ -1,15 +1,20 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { HttpError } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { id as semverId } from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
-import type { PackageType } from './types';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
+import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import {
+  api as semver,
+  id as semverId,
+} from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import type { PackageType } from './types.ts';
 
 export class HexpmBobDatasource extends Datasource {
   static readonly id = datasource;
@@ -18,11 +23,13 @@ export class HexpmBobDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
-
-  override readonly caching = true;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = semverId;
 
@@ -33,12 +40,7 @@ export class HexpmBobDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL https://github.com/elixir-lang/elixir.git for the `elixir` package and the https://github.com/erlang/otp.git URL for the `erlang` package.';
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -64,7 +66,7 @@ export class HexpmBobDatasource extends Datasource {
       result.releases = body
         .split('\n')
         .map((line) => line.trim())
-        .filter(is.nonEmptyString)
+        .filter(isNonEmptyString)
         .map((line) => {
           const [version, gitRef, buildDate] = line.split(' ');
 
@@ -76,7 +78,7 @@ export class HexpmBobDatasource extends Datasource {
           };
         });
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+      if (err instanceof HttpError && !isNotFound(err)) {
         throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
@@ -85,11 +87,21 @@ export class HexpmBobDatasource extends Datasource {
     return result.releases.length > 0 ? result : null;
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
+  }
+
   private static getPackageType(packageName: string): PackageType | null {
     if (packageName === 'elixir') {
       return 'elixir';
     }
-    if (/^otp\/\w+-\d+\.\d+$/.test(packageName)) {
+    if (regEx(/^otp\/\w+-\d+\.\d+$/).test(packageName)) {
       return 'erlang';
     }
     return null;
@@ -101,16 +113,23 @@ export class HexpmBobDatasource extends Datasource {
   ): string {
     switch (packageType) {
       case 'elixir':
-        return version.replace(/^v/, '');
+        return stripVersionPrefix(version);
       case 'erlang':
-        return version.replace(/^OTP-/, '');
+        return version.replace(regEx(/^OTP-/), '');
     }
   }
 
   private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
-      case 'elixir':
-        return regEx(/^v\d+\.\d+\.\d+($|-otp)/).test(version);
+      case 'elixir': {
+        // `-otp-<n>` builds of a stable release are stable too
+        const release = version.split('-otp')[0];
+        return (
+          release.startsWith('v') &&
+          semver.isVersion(release) &&
+          semver.isStable(release)
+        );
+      }
       case 'erlang':
         return version.startsWith('OTP-');
     }

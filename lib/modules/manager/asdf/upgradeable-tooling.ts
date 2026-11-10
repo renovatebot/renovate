@@ -1,30 +1,20 @@
-import { regEx } from '../../../util/regex';
-import { DartVersionDatasource } from '../../datasource/dart-version';
-import { DockerDatasource } from '../../datasource/docker';
-import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
-import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
-import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { NpmDatasource } from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as regexVersioning from '../../versioning/regex';
-import * as semverVersioning from '../../versioning/semver';
-import type { PackageDependency } from '../types';
-
-export type StaticTooling = Partial<PackageDependency> &
-  Required<Pick<PackageDependency, 'datasource'>>;
-
-export type DynamicTooling = (version: string) => StaticTooling | undefined;
-
-export type ToolingConfig = StaticTooling | DynamicTooling;
-export interface ToolingDefinition {
-  config: ToolingConfig;
-  asdfPluginUrl: string;
-}
+import { regEx } from '../../../util/regex.ts';
+import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
+import * as regexVersioning from '../../versioning/regex/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
+import type { ToolingDefinition } from './types.ts';
 
 const hugoDefinition: ToolingDefinition = {
   // This plugin supports the names `hugo` & `gohugo`
@@ -35,7 +25,7 @@ const hugoDefinition: ToolingDefinition = {
     extractVersion: '^v(?<version>\\S+)',
     // The asdf hugo plugin supports prefixing the version with
     // `extended_`. Extended versions feature Sass support.
-    currentValue: version.replace(/^extended_/, ''),
+    currentValue: version.replace(regEx(/^extended_/), ''),
   }),
 };
 
@@ -61,6 +51,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'npryce/adr-tools',
+    },
+  },
+  apm: {
+    asdfPluginUrl: 'https://github.com/edwinhern/asdf-apm',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'microsoft/apm',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   argocd: {
@@ -259,7 +257,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: (version) => ({
       datasource: FlutterVersionDatasource.id,
       // asdf-flutter plugin supports channel on version suffix.
-      currentValue: version.replace(regEx(/-(stable|beta|dev)$/), ''),
+      currentValue: version.replace(regEx(/-(?:stable|beta|dev)$/), ''),
     }),
   },
   flux2: {
@@ -402,7 +400,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   java: {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
-      const adoptOpenJdkMatches = /^adoptopenjdk-(?<version>\d\S+)/.exec(
+      const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
         version,
       )?.groups;
       if (adoptOpenJdkMatches) {
@@ -412,9 +410,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJdkMatches.version,
         };
       }
-      const adoptOpenJreMatches = /^adoptopenjdk-jre-(?<version>\d\S+)/.exec(
-        version,
-      )?.groups;
+      const adoptOpenJreMatches = regEx(
+        /^adoptopenjdk-jre-(?<version>\d\S+)/,
+      ).exec(version)?.groups;
       if (adoptOpenJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -422,7 +420,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJreMatches.version,
         };
       }
-      const temurinJdkMatches = /^temurin-(?<version>\d\S+)/.exec(
+      const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
         version,
       )?.groups;
       if (temurinJdkMatches) {
@@ -432,7 +430,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = /^temurin-jre-(?<version>\d\S+)/.exec(
+      const temurinJreMatches = regEx(/^temurin-jre-(?<version>\d\S+)/).exec(
         version,
       )?.groups;
       if (temurinJreMatches) {
@@ -707,8 +705,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   rust: {
     asdfPluginUrl: 'https://github.com/code-lever/asdf-rust',
     config: {
-      datasource: GithubTagsDatasource.id,
-      packageName: 'rust-lang/rust',
+      datasource: RustVersionDatasource.id,
+      packageName: 'rust',
     },
   },
   sbt: {

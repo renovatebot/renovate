@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 
 export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT = regEx(
   /^git@[^:]*:(?<repository>.+)$/,
@@ -13,23 +13,22 @@ export function parseGitOwnerRepo(
 
   if (genericGitSsh?.groups) {
     return genericGitSsh.groups.repository.replace(regEx(/\.git$/), '');
-  } else {
-    if (githubUrl) {
-      return git
-        .replace(regEx(/^github:/), '')
-        .replace(regEx(/^git\+/), '')
-        .replace(regEx(/^https:\/\/github\.com\//), '')
-        .replace(regEx(/\.git$/), '');
-    }
-
-    const url = parseUrl(git);
-
-    if (!url) {
-      return null;
-    }
-
-    return url.pathname.replace(regEx(/\.git$/), '').replace(regEx(/^\//), '');
   }
+  if (githubUrl) {
+    return git
+      .replace(regEx(/^github:/), '')
+      .replace(regEx(/^git\+/), '')
+      .replace(regEx(/^https:\/\/github\.com\//), '')
+      .replace(regEx(/\.git$/), '');
+  }
+
+  const url = parseUrl(git);
+
+  if (!url) {
+    return null;
+  }
+
+  return url.pathname.replace(regEx(/\.git$/), '').replace(regEx(/^\//), '');
 }
 
 export function isGithubUrl(gitUrl: string, parsedUrl: URL | null): boolean {

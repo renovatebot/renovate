@@ -1,4 +1,4 @@
-import { check } from './regex-glob-matchers';
+import { check } from './regex-glob-matchers.ts';
 
 describe('config/validation-helpers/regex-glob-matchers', () => {
   it('should error for multiple match alls', () => {

@@ -1,4 +1,4 @@
-import aws from '.';
+import aws from './index.ts';
 
 describe('modules/versioning/aws-machine-image/index', () => {
   describe('parse(version)', () => {
@@ -16,6 +16,10 @@ describe('modules/versioning/aws-machine-image/index', () => {
 
     it('should return false', () => {
       expect(aws.isValid('ami-1')).toBeFalsy();
+    });
+
+    it('should return false for an empty version', () => {
+      expect(aws.isValid('')).toBeFalsy();
     });
   });
 

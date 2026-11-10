@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import type { Range } from './types';
+import { regEx } from '../../../util/regex.ts';
+import type { Range } from './types.ts';
 
 // This range format was chosen because it is common in the ecosystem
 const gteAndLtRange = regEx(/>=(?<lower>[\d.]+)&&<(?<upper>[\d.]+)/);

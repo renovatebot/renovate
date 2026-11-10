@@ -1,5 +1,5 @@
-import { logger } from '../../../../../logger';
-import type { Upgrade } from '../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import type { Upgrade } from '../../../types.ts';
 
 export function getNewGitValue(upgrade: Upgrade): string | null {
   if (!upgrade.currentRawValue) {
@@ -12,13 +12,12 @@ export function getNewGitValue(upgrade: Upgrade): string | null {
       // TODO #22198
       upgrade.newDigest!.substring(0, upgrade.currentDigest.length),
     );
-  } else {
-    logger.debug('Updating git version tag');
-    return upgrade.currentRawValue.replace(
-      upgrade.currentValue,
-      upgrade.newValue,
-    );
   }
+  logger.debug('Updating git version tag');
+  return upgrade.currentRawValue.replace(
+    upgrade.currentValue,
+    upgrade.newValue,
+  );
 }
 
 export function getNewNpmAliasValue(

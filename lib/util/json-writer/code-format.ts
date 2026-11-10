@@ -1,4 +1,4 @@
-import type { IndentationType } from './indentation-type';
+import type { IndentationType } from './indentation-type.ts';
 
 export interface CodeFormat {
   indentationSize?: number;

@@ -1,16 +1,23 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import { asTimestamp } from '../../../util/timestamp';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GitlabRelease } from './types';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import {
+  defaultRegistryUrl,
+  getApiBaseUrl,
+  getSourceUrl,
+} from '../../../util/gitlab/url.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { GitlabReleases } from './schema.ts';
 
-export class GitlabReleasesDatasource extends Datasource {
+export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-releases';
 
-  override readonly defaultRegistryUrls = ['https://gitlab.com'];
-
-  static readonly registryStrategy = 'first';
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -20,47 +27,53 @@ export class GitlabReleasesDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GitlabReleasesDatasource.id);
-    this.http = new GitlabHttp(GitlabReleasesDatasource.id);
+    super(
+      GitlabReleasesDatasource.id,
+      new GitlabHttp(GitlabReleasesDatasource.id),
+    );
   }
 
-  @cache({
-    namespace: `datasource-${GitlabReleasesDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}/${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
     const urlEncodedRepo = encodeURIComponent(packageName);
-    const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
+    const apiUrl = joinUrlParts(
+      getApiBaseUrl(registryUrl),
+      'projects',
+      urlEncodedRepo,
+      'releases',
+    );
 
-    try {
-      const gitlabReleasesResponse = (
-        await this.http.getJsonUnchecked<GitlabRelease[]>(apiUrl)
-      ).body;
+    const gitlabReleasesResponse = await this.fetchJson(apiUrl, GitlabReleases);
 
-      return {
-        sourceUrl: `${registryUrl}/${packageName}`,
-        releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
-          const release: Release = {
-            registryUrl,
-            gitRef: tag_name,
-            version: tag_name,
-            releaseTimestamp: asTimestamp(released_at),
-          };
-          return release;
-        }),
-      };
-    } catch (e) {
-      this.handleGenericErrors(e);
-    }
+    return {
+      sourceUrl: getSourceUrl(packageName, registryUrl),
+      releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
+        const release: Release = {
+          registryUrl,
+          gitRef: tag_name,
+          version: tag_name,
+          releaseTimestamp: asTimestamp(released_at),
+        };
+        return release;
+      }),
+    };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GitlabReleasesDatasource.id}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

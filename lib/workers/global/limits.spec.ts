@@ -1,4 +1,5 @@
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { logger, partial } from '~test/util.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import {
   calcLimit,
   hasMultipleLimits,
@@ -8,8 +9,7 @@ import {
   resetAllLimits,
   setCount,
   setMaxLimit,
-} from './limits';
-import { partial } from '~test/util';
+} from './limits.ts';
 
 describe('workers/global/limits', () => {
   beforeEach(() => {
@@ -67,6 +67,12 @@ describe('workers/global/limits', () => {
     expect(isLimitReached('Commits')).toBeTrue();
   });
 
+  it('throws when a concurrent limit is asked for without a branch config', () => {
+    expect(() => isLimitReached('Branches', undefined!)).toThrow(
+      'Config is required for computing limits for Branches and PullRequests',
+    );
+  });
+
   describe('calcLimit', () => {
     it('handles single upgrade', () => {
       const upgrades = partial<BranchUpgradeConfig>([
@@ -96,7 +102,7 @@ describe('workers/global/limits', () => {
       expect(calcLimit(upgrades, 'prConcurrentLimit')).toBe(12);
     });
 
-    it('returns 0 if atleast one upgrade has no limit in the branch', () => {
+    it('returns 0 if at least one upgrade has no limit in the branch', () => {
       const upgrades = partial<BranchUpgradeConfig>([
         {
           prHourlyLimit: 10,
@@ -123,6 +129,7 @@ describe('workers/global/limits', () => {
     it('computes the lowest limit if multiple limits are present', () => {
       const upgrades = partial<BranchUpgradeConfig>([
         {
+          commitHourlyLimit: 5,
           prHourlyLimit: 10,
           branchConcurrentLimit: 11,
           prConcurrentLimit: 12,
@@ -133,6 +140,7 @@ describe('workers/global/limits', () => {
           prConcurrentLimit: 12,
         },
         {
+          commitHourlyLimit: 3,
           prHourlyLimit: 1,
           branchConcurrentLimit: 1,
           prConcurrentLimit: 1,
@@ -154,9 +162,38 @@ describe('workers/global/limits', () => {
         },
       ]);
 
+      expect(calcLimit(upgrades, 'commitHourlyLimit')).toBe(3);
       expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(1);
       expect(calcLimit(upgrades, 'branchConcurrentLimit')).toBe(1);
       expect(calcLimit(upgrades, 'prConcurrentLimit')).toBe(1);
+    });
+
+    it('de-duplicates upgrades by depName from debug log', () => {
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          depName: 'depA',
+          prHourlyLimit: 10,
+        },
+        {
+          depName: 'depA',
+          prHourlyLimit: 10,
+        },
+        {
+          depName: 'depB',
+          prHourlyLimit: 1,
+        },
+      ]);
+
+      expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(1);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          limits: [
+            { depName: 'depA', prHourlyLimit: 10 },
+            { depName: 'depB', prHourlyLimit: 1 },
+          ],
+        },
+        'prHourlyLimit of the upgrades present in this branch',
+      );
     });
   });
 
@@ -217,6 +254,97 @@ describe('workers/global/limits', () => {
   });
 
   describe('isLimitReached', () => {
+    it('counts vulnerability alerts against their own budget', () => {
+      setCount('ConcurrentPRs', 5);
+      setCount('Branches', 5);
+      setCount('VulnerabilityConcurrentPRs', 1);
+      setCount('VulnerabilityBranches', 1);
+      const upgrades = partial<BranchUpgradeConfig>([
+        { prConcurrentLimit: 5, branchConcurrentLimit: 5 },
+      ]);
+
+      // the repository-wide budget is spent, but the vulnerability one is not
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      expect(
+        isLimitReached(
+          'ConcurrentPRs',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(false);
+      expect(
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      expect(
+        isLimitReached(
+          'Branches',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(false);
+    });
+
+    it('applies vulnerabilityAlerts.branchConcurrentLimit to vulnerability branches', () => {
+      setCount('VulnerabilityBranches', 2);
+      setCount('VulnerabilityConcurrentPRs', 2);
+      // a lower branchConcurrentLimit blocks branches while PRs are still allowed
+      const upgrades = partial<BranchUpgradeConfig>([
+        { branchConcurrentLimit: 2, prConcurrentLimit: 10 },
+      ]);
+      const config = partial<BranchConfig>({
+        upgrades,
+        isVulnerabilityAlert: true,
+      });
+
+      expect(isLimitReached('Branches', config)).toBe(true);
+      expect(isLimitReached('ConcurrentPRs', config)).toBe(false);
+    });
+
+    it('inherits vulnerabilityAlerts.prConcurrentLimit when branchConcurrentLimit is null', () => {
+      const upgrades = partial<BranchUpgradeConfig>([
+        { branchConcurrentLimit: null, prConcurrentLimit: 3 },
+      ]);
+      const config = partial<BranchConfig>({
+        upgrades,
+        isVulnerabilityAlert: true,
+      });
+
+      setCount('VulnerabilityBranches', 2);
+      expect(isLimitReached('Branches', config)).toBe(false);
+
+      setCount('VulnerabilityBranches', 3);
+      expect(isLimitReached('Branches', config)).toBe(true);
+    });
+
+    it('applies the vulnerability budget once it is spent', () => {
+      setCount('VulnerabilityConcurrentPRs', 5);
+      const upgrades = partial<BranchUpgradeConfig>([{ prConcurrentLimit: 5 }]);
+
+      expect(
+        isLimitReached(
+          'ConcurrentPRs',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(true);
+    });
+
+    it('ignores the hourly PR limit for vulnerability alerts', () => {
+      setCount('HourlyPRs', 5);
+      const upgrades = partial<BranchUpgradeConfig>([
+        { prHourlyLimit: 2, prConcurrentLimit: 0 },
+      ]);
+
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      expect(
+        isLimitReached(
+          'ConcurrentPRs',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(false);
+    });
+
     it('returns false based on concurrent limits', () => {
       setCount('ConcurrentPRs', 1);
       setCount('HourlyPRs', 1);
@@ -246,7 +374,7 @@ describe('workers/global/limits', () => {
       ).toBe(false);
     });
 
-    it('returns true when hourly limit is reached', () => {
+    it('returns true when pr hourly limit is reached', () => {
       setCount('Branches', 2);
       setCount('ConcurrentPRs', 2);
       setCount('HourlyPRs', 2);
@@ -302,6 +430,52 @@ describe('workers/global/limits', () => {
       expect(
         isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
+    });
+
+    it('commit hourly limit only affects HourlyCommits check', () => {
+      setCount('HourlyCommits', 3);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          commitHourlyLimit: 3,
+        },
+      ]);
+      // Commit hourly limit should block HourlyCommits when reached
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      // Should NOT block when limit is not reached
+      setCount('HourlyCommits', 2);
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+      // Should be unlimited when set to 0
+      setCount('HourlyCommits', 100);
+      upgrades[0].commitHourlyLimit = 0;
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+    });
+
+    it('commit hourly limit does not block branch or PR checks', () => {
+      setCount('Branches', 0);
+      setCount('ConcurrentPRs', 1);
+      setCount('HourlyCommits', 10); // Commit limit reached
+      setCount('HourlyPRs', 0);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          commitHourlyLimit: 2, // Limit reached
+          prHourlyLimit: 10, // Limit not reached
+          branchConcurrentLimit: 10,
+          prConcurrentLimit: 0, // Unlimited
+        },
+      ]);
+      // Should NOT block branch or PR creation checks
+      expect(
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
     });
   });
 });

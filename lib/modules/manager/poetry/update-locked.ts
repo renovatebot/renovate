@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { Result } from '../../../util/result';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { Lockfile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { Result } from '../../../util/result.ts';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
+import { Lockfile } from './schema.ts';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,
@@ -12,13 +12,12 @@ export function updateLockedDependency(
     `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
 
-  const LockedVersionSchema = Lockfile.transform(({ lock }) => lock[depName]);
-  return Result.parse(lockFileContent, LockedVersionSchema)
-    .transform(
-      (lockedVersion): UpdateLockedResult =>
-        lockedVersion === newVersion
-          ? { status: 'already-updated' }
-          : { status: 'unsupported' },
+  const LockedVersion = Lockfile.transform(({ lock }) => lock[depName]);
+  return Result.parse(lockFileContent, LockedVersion)
+    .transform((lockedVersion): UpdateLockedResult =>
+      lockedVersion === newVersion
+        ? { status: 'already-updated' }
+        : { status: 'unsupported' },
     )
     .unwrapOr({ status: 'unsupported' });
 }

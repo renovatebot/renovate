@@ -1,7 +1,7 @@
-import { logger } from '../../../../logger';
-import { readLocalFile } from '../../../../util/fs';
-import { PackageLock } from '../schema';
-import type { LockFile } from './types';
+import { logger } from '../../../../logger/index.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { PackageLock } from '../schema.ts';
+import type { LockFile } from './types.ts';
 
 export async function getNpmLock(filePath: string): Promise<LockFile> {
   const lockfileContent = await readLocalFile(filePath, 'utf8');

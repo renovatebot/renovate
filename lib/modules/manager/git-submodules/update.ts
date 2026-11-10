@@ -1,27 +1,40 @@
-import Git from 'simple-git';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { getChildEnv } from '../../../util/exec/utils';
-import { readLocalFile } from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import type { UpdateDependencyConfig } from '../types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
+import type {
+  UpdateDependencyConfig,
+  UpdateDependencyResult,
+} from '../types.ts';
 
 export default async function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): Promise<string | null> {
+}: UpdateDependencyConfig): Promise<UpdateDependencyResult | null> {
+  // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir');
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
-    'git-tags',
-    'git-refs',
-  ]);
-  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-  const git = Git(localDir).env(gitEnv);
-  const submoduleGit = Git(upath.join(localDir, upgrade.depName)).env(gitEnv);
+  const authentication = {
+    hostTypes: ['git-tags', 'git-refs'],
+  };
+
+  const git = createSimpleGit({
+    config: { baseDir: localDir },
+    authentication,
+  });
+  const submoduleGit = createSimpleGit({
+    // TODO: types (#22198)
+    config: { baseDir: upath.join(localDir, upgrade.depName!) },
+    authentication,
+  });
 
   try {
-    await git.submoduleUpdate(['--checkout', '--init', upgrade.depName!]);
+    await git.submoduleUpdate([
+      '--checkout',
+      '--init',
+      '--recursive',
+      upgrade.depName!,
+    ]);
     await submoduleGit.checkout([upgrade.newDigest!]);
     if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
       await git.subModule([
@@ -34,9 +47,9 @@ export default async function updateDependency({
         upgrade.packageFile!,
         'utf8',
       );
-      return updatedPackageContent!;
+      return { content: updatedPackageContent!, updatedOutOfBand: true };
     }
-    return fileContent;
+    return { content: fileContent, updatedOutOfBand: true };
   } catch (err) {
     logger.debug({ err }, 'submodule checkout error');
     return null;

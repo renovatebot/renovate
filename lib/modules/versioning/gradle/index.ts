@@ -1,7 +1,8 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import mavenVersion from '../maven';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { isBigint } from '@sindresorhus/is';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import mavenVersion from '../maven/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   TokenType,
   compare,
@@ -11,69 +12,110 @@ import {
   parseMavenBasedRange,
   parsePrefixRange,
   parseSingleVersionRange,
-} from './compare';
+} from './compare.ts';
 
 export const id = 'gradle';
 export const displayName = 'Gradle';
 export const urls = [
-  'https://docs.gradle.org/current/userguide/single_versions.html#version_ordering',
+  '[Gradle version ordering](https://docs.gradle.org/current/userguide/single_versions.html#version_ordering)',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['pin', 'bump'];
+export const supportedRangeStrategies: RangeStrategy[] = ['bump'];
 
-const equals = (a: string, b: string): boolean => compare(a, b) === 0;
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
 
-const getMajor = (version: string): number | null => {
-  const tokens = parse(version?.replace(regEx(/^v/i), ''));
+function equals(a: string, b: string): boolean {
+  return compare(a, b) === 0;
+}
+
+function getMajor(version: string): number | null {
+  const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
     const majorToken = tokens?.[0];
-    if (majorToken && majorToken.type === TokenType.Number) {
-      return majorToken.val as number;
+    if (majorToken?.type === TokenType.Number) {
+      return parseInt(majorToken.val.toString(), 10);
     }
   }
   return null;
-};
+}
 
-const getMinor = (version: string): number | null => {
-  const tokens = parse(version?.replace(regEx(/^v/i), ''));
+function getMinor(version: string): number | null {
+  const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number
+      majorToken?.type === TokenType.Number &&
+      minorToken?.type === TokenType.Number
     ) {
-      return minorToken.val as number;
+      return parseInt(minorToken.val.toString(), 10);
     }
     return 0;
   }
   return null;
-};
+}
 
-const getPatch = (version: string): number | null => {
-  const tokens = parse(version?.replace(regEx(/^v/i), ''));
+function getPatch(version: string): number | null {
+  const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     const patchToken = tokens[2];
     if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number &&
-      patchToken &&
-      patchToken.type === TokenType.Number
+      majorToken?.type === TokenType.Number &&
+      minorToken?.type === TokenType.Number &&
+      patchToken?.type === TokenType.Number
     ) {
-      return patchToken.val as number;
+      return parseInt(patchToken.val.toString(), 10);
     }
     return 0;
   }
   return null;
-};
+}
 
-const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
+function isGreaterThan(a: string, b: string): boolean {
+  return compare(a, b) === 1;
+}
+
+function getExactSection(
+  version: string,
+  type: keyof typeof sectionIndexes,
+): bigint | null {
+  const tokens = parse(stripVersionPrefix(version));
+  if (!tokens) {
+    return null;
+  }
+  const sectionIndex = sectionIndexes[type];
+  if (sectionIndex === 0) {
+    const token = tokens[sectionIndex];
+    return token?.type === TokenType.Number && isBigint(token.val)
+      ? token.val
+      : null;
+  }
+
+  for (let index = 0; index <= sectionIndex; index += 1) {
+    if (tokens[index]?.type !== TokenType.Number) {
+      return 0n;
+    }
+  }
+
+  return BigInt(tokens[sectionIndex].val);
+}
+
+function isSame(
+  type: keyof typeof sectionIndexes,
+  a: string,
+  b: string,
+): boolean {
+  if (!(isVersion(a) && isVersion(b))) {
+    return false;
+  }
+  return getExactSection(a, type) === getExactSection(b, type);
+}
 
 const unstable = new Set([
   'dev',
@@ -90,7 +132,7 @@ const unstable = new Set([
   'snapshot',
 ]);
 
-const isStable = (version: string): boolean => {
+function isStable(version: string): boolean {
   const tokens = parse(version);
   if (tokens) {
     for (const token of tokens) {
@@ -104,9 +146,9 @@ const isStable = (version: string): boolean => {
     return true;
   }
   return false;
-};
+}
 
-const matches = (a: string, b: string): boolean => {
+function matches(a: string, b: string): boolean {
   const versionTokens = parse(a);
   if (!a || !versionTokens || !b) {
     return false;
@@ -159,7 +201,7 @@ const matches = (a: string, b: string): boolean => {
   }
 
   return leftResult && rightResult;
-};
+}
 
 function getSatisfyingVersion(
   versions: string[],
@@ -200,7 +242,7 @@ function getNewValue({
   rangeStrategy,
   newVersion,
 }: NewValueConfig): string | null {
-  if (isVersion(currentValue) || rangeStrategy === 'pin') {
+  if (isVersion(currentValue)) {
     return newVersion;
   }
 
@@ -215,14 +257,41 @@ function getNewValue({
           .join('.');
 
         return `${newPrefixed}.+`;
-      } else {
-        // our new version is shorter than our prefix range so drop our prefix range
-        return newVersion;
       }
-    } else {
-      // our version is already "+" which includes ever version
+      // our new version is shorter than our prefix range so drop our prefix range
+      return newVersion;
+    }
+    // our version is already "+" which includes ever version
+    return null;
+  }
+
+  const mavenRange = parseMavenBasedRange(currentValue);
+  if (mavenRange?.preferredVal) {
+    const { leftVal, rightVal, preferredVal } = mavenRange;
+    const baseRange = currentValue.slice(
+      0,
+      currentValue.lastIndexOf(`!!${preferredVal}`),
+    );
+    const newBaseRange = mavenVersion.getNewValue({
+      currentValue: baseRange,
+      rangeStrategy,
+      newVersion,
+    });
+    // v8 ignore if: the implementation has a non-null return type
+    if (newBaseRange === null) {
       return null;
     }
+
+    const preferredIsBoundary =
+      preferredVal === leftVal || preferredVal === rightVal;
+    const newParsed = parseMavenBasedRange(newBaseRange);
+    const preferredStillPresent =
+      newParsed?.leftVal === preferredVal ||
+      newParsed?.rightVal === preferredVal;
+    const newPreferredVal =
+      preferredIsBoundary && !preferredStillPresent ? newVersion : preferredVal;
+
+    return `${newBaseRange}!!${newPreferredVal}`;
   }
 
   return mavenVersion.getNewValue({ currentValue, rangeStrategy, newVersion });
@@ -236,6 +305,7 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isSingleVersion: isVersion,
+  isSame,
   isStable,
   isValid,
   isVersion,

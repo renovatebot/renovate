@@ -1,17 +1,21 @@
-import is from '@sindresorhus/is';
-import type { InterpolatorOptions } from '../util/interpolator';
+import { isPlainObject } from '@sindresorhus/is';
+import type { InterpolatorOptions } from '../util/interpolator.ts';
 import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
-} from '../util/interpolator';
-import { regEx } from '../util/regex';
-import { addSecretForSanitizing } from '../util/sanitize';
-import type { AllConfig, RenovateConfig } from './types';
+} from '../util/interpolator.ts';
+import { coerceObject } from '../util/object.ts';
+import { regEx } from '../util/regex.ts';
+import { addSecretForSanitizing } from '../util/sanitize.ts';
+import type { AllConfig, RenovateConfig } from './types.ts';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`);
-const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`);
+const secretTemplateRegex = regEx(`{{ *secrets\\.(${namePattern}) *}}`, 'g');
+const variableTemplateRegex = regEx(
+  `{{ *variables\\.(${namePattern}) *}}`,
+  'g',
+);
 
 export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
   secrets: {
@@ -33,7 +37,7 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
   validateInterpolatedValues(config[key], options[key]);
   if (config.repositories) {
     for (const repository of config.repositories) {
-      if (is.plainObject(repository)) {
+      if (isPlainObject(repository)) {
         validateInterpolatedValues(repository[key], options[key]);
       }
     }
@@ -66,7 +70,7 @@ export function applySecretsAndVariablesToConfig(
   const variables = applyConfig.variables ?? config.variables;
 
   // Add all secrets to be sanitized
-  if (is.plainObject(secrets)) {
+  if (isPlainObject(secrets)) {
     for (const secret of Object.values(secrets)) {
       addSecretForSanitizing(secret);
     }
@@ -74,14 +78,14 @@ export function applySecretsAndVariablesToConfig(
 
   const configWithVars = replaceInterpolatedValuesInObject(
     config,
-    variables ?? {},
+    coerceObject(variables),
     options.variables,
     deleteVariables,
   );
 
   return replaceInterpolatedValuesInObject(
     configWithVars,
-    secrets ?? {},
+    coerceObject(secrets),
     options.secrets,
     deleteSecrets,
   );

@@ -1,5 +1,5 @@
-import type { lexer as l, parser as p } from 'good-enough-parser';
-import { lang } from 'good-enough-parser';
+import type { lexer as l, parser as p } from '@renovatebot/good-enough-parser';
+import { lang } from '@renovatebot/good-enough-parser';
 
 /**
  * @see https://perldoc.perl.org/perldata#Scalar-value-constructors
@@ -23,6 +23,7 @@ const pointfloat = `(?:${digitpart}?${fraction}|${digitpart}\\.)`;
 const exponentfloat = `(?:(?:${digitpart}|${pointfloat})${exponent})`;
 const floatnumber = `(?:${pointfloat}|${exponentfloat})`;
 
+/* oxlint-disable renovate/require-regex-util -- good-enough-parser lexer patterns must be native RegExp: the lexer config is deep-cloned and compiled with moo, which rejects RE2 instances (TODO #12870) */
 const numbers = new RegExp(`(?:${floatnumber}|${integer})`);
 
 const lexer: l.LexerConfig = {
@@ -37,6 +38,7 @@ const lexer: l.LexerConfig = {
   ],
   strings: [{ startsWith: "'" }, { startsWith: '"' }],
 };
+/* oxlint-enable renovate/require-regex-util */
 
 const parser: p.ParserConfig = {
   useIndentBlocks: false,

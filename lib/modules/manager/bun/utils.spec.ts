@@ -1,4 +1,4 @@
-import { fileMatchesWorkspaces, filesMatchingWorkspaces } from './utils';
+import { fileMatchesWorkspaces, filesMatchingWorkspaces } from './utils.ts';
 
 describe('modules/manager/bun/utils', () => {
   const pwd = '/project';

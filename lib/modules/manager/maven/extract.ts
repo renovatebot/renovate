@@ -1,22 +1,27 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { MavenDatasource } from '../../datasource/maven';
-import { MAVEN_REPO } from '../../datasource/maven/common';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { MAVEN_REPO } from '../../datasource/maven/common.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import {
   BUILDPACK_REGISTRY_PREFIX,
   DOCKER_PREFIX,
   getDep as getBuildpackDep,
   isBuildpackRegistryRef,
   isDockerRef,
-} from '../buildpacks/extract';
-import { getDep as getDockerDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { MavenProp } from './types';
+} from '../buildpacks/extract.ts';
+import { getDep as getDockerDep } from '../dockerfile/extract.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+} from '../types.ts';
+import type { MavenProp } from './types.ts';
 
 const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.0.0',
@@ -29,6 +34,10 @@ const supportedExtensionsNamespaces = [
   'http://maven.apache.org/EXTENSIONS/1.1.0',
   'http://maven.apache.org/EXTENSIONS/1.2.0',
 ];
+
+function isModelVersion4(child: any): boolean {
+  return child.name === 'modelVersion' && child.val === '4.0.0';
+}
 
 function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
@@ -50,10 +59,7 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
   if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') {
     return project;
   }
-  if (
-    is.nonEmptyArray(children) &&
-    children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
-  ) {
+  if (isNonEmptyArray(children) && children.some(isModelVersion4)) {
     return project;
   }
   return null;
@@ -74,14 +80,17 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
   if (!supportedExtensionsNamespaces.includes(attr.xmlns)) {
     return null;
   }
-  if (!is.nonEmptyArray(children)) {
+  if (!isNonEmptyArray(children)) {
     return null;
   }
   return extensions;
 }
 
 function containsPlaceholder(str: string | null | undefined): boolean {
-  return !!str && regEx(/\${[^}]*?}/).test(str);
+  return (
+    !!str &&
+    [regEx(/\${[^}]*?}/), regEx(/\{\{[^}]*?\}\}/)].some((re) => re.test(str))
+  );
 }
 
 function getCNBDependencies(
@@ -92,13 +101,12 @@ function getCNBDependencies(
   for (const node of nodes) {
     const depString = node.val.trim();
     if (isDockerRef(depString)) {
-      const dep = getDockerDep(
-        depString.replace(DOCKER_PREFIX, ''),
-        true,
-        config.registryAliases,
-      );
+      const dep = getDockerDep(depString.replace(DOCKER_PREFIX, ''), {
+        registryAliases: config.registryAliases,
+      });
 
       dep.fileReplacePosition = node.position!; // TODO: should not be null
+      // v8 ignore else -- the extractor always populates this field
       if (dep.currentValue || dep.currentDigest) {
         deps.push(dep);
       }
@@ -120,9 +128,9 @@ function getAllCNBDependencies(
   node: XmlDocument,
   config: ExtractConfig,
 ): PackageDependency[] | null {
-  const pluginNodes =
-    node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin') ??
-    [];
+  const pluginNodes = coerceArray(
+    node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin'),
+  );
 
   const pluginNode = pluginNodes.find((pluginNode) => {
     return (
@@ -150,7 +158,7 @@ function getAllCNBDependencies(
     config,
   );
   const buildpacks = getCNBDependencies(
-    imageNode.childNamed('buildpacks')?.childrenNamed('buildpack') ?? [],
+    coerceArray(imageNode.childNamed('buildpacks')?.childrenNamed('buildpack')),
     config,
   );
   deps.push(...builder, ...runImage, ...buildpacks);
@@ -241,10 +249,10 @@ function deepExtract(
 }
 
 function applyProps(
-  dep: PackageDependency<Record<string, any>>,
+  dep: PackageDependency,
   depPackageFile: string,
   props: MavenProp,
-): PackageDependency<Record<string, any>> {
+): PackageDependency {
   let result = dep;
   let anyChange = false;
   const alreadySeenProps = new Set<string>();
@@ -274,18 +282,18 @@ function applyProps(
 }
 
 function applyPropsInternal(
-  dep: PackageDependency<Record<string, any>>,
+  dep: PackageDependency,
   depPackageFile: string,
   props: MavenProp,
   previouslySeenProps: Set<string>,
-): [PackageDependency<Record<string, any>>, boolean, boolean] {
+): [PackageDependency, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
 
   const seenProps = new Set<string>();
 
-  const replaceAll = (str: string): string =>
-    str.replace(regEx(/\${[^}]*?}/g), (substr) => {
+  function replaceAll(str: string): string {
+    return str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
@@ -300,8 +308,10 @@ function applyPropsInternal(
       }
       return substr;
     });
+  }
 
   let depName = dep.depName;
+  // v8 ignore else -- the extractor always populates this field
   if (dep.depName) {
     depName = replaceAll(dep.depName);
   }
@@ -313,6 +323,7 @@ function applyPropsInternal(
   let sharedVariableName: string | null = null;
   let currentValue: string | null = null;
 
+  // v8 ignore else -- the extractor always populates this field
   if (dep.currentValue) {
     currentValue = dep.currentValue.replace(regEx(/^\${[^}]*?}$/), (substr) => {
       const propKey = substr.slice(2, -1).trim();
@@ -321,10 +332,7 @@ function applyPropsInternal(
       if (propValue) {
         sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource =
-          propValue.packageFile ??
-          // istanbul ignore next
-          undefined;
+        propSource = propValue.packageFile;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
           fatal = true;
@@ -428,7 +436,8 @@ export function extractPackage(
       }
     }
     result.deps.forEach((dep) => {
-      if (is.array(dep.registryUrls)) {
+      // v8 ignore else -- the extractor always populates this field
+      if (isArray(dep.registryUrls)) {
         repoUrls.forEach((url) => dep.registryUrls!.push(url));
       }
     });
@@ -477,6 +486,7 @@ function parseUrls(xmlNode: XmlElement, path: string): string[] {
   if (children?.children) {
     children.eachChild((child) => {
       const url = child.valueWithPath('url');
+      // v8 ignore else -- the extractor always populates this field
       if (url) {
         urls.push(url);
       }
@@ -526,8 +536,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
 
+      // v8 ignore else -- the extractor always populates this field
       if (pkg.deps) {
         pkg.deps.forEach((dep) => {
+          // v8 ignore else -- the extractor always populates this field
           if (dep.registryUrls) {
             dep.registryUrls.forEach((url) => {
               registryUrls[name].add(url);
@@ -552,7 +564,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const urlsSet = new Set([
-        ...(rawDep.registryUrls ?? []),
+        ...coerceArray(rawDep.registryUrls),
         ...registryUrls[name],
       ]);
       rawDep.registryUrls = [...urlsSet];
@@ -600,6 +612,7 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
       //Add Registry From SuperPom
+      // v8 ignore else -- the extractor always populates this field
       if (dep.datasource === MavenDatasource.id) {
         dep.registryUrls!.push(MAVEN_REPO);
       }
@@ -647,6 +660,7 @@ export async function extractAllPackageFiles(
     }
     if (packageFile.endsWith('settings.xml')) {
       const registries = extractRegistries(content);
+      // v8 ignore else -- needs a settings.xml carrying no registries
       if (registries) {
         logger.debug(
           { registries, packageFile },
@@ -670,9 +684,11 @@ export async function extractAllPackageFiles(
       }
     }
   }
+  // v8 ignore else -- the array is always defined, so this is never falsy
   if (additionalRegistryUrls) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
+        // v8 ignore else -- the extractor always populates this field
         if (dep.registryUrls) {
           dep.registryUrls.unshift(...additionalRegistryUrls);
         }

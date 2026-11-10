@@ -1,25 +1,39 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { queryReleases, queryTags } from '../../../util/github/graphql';
-import type { GithubReleaseItem } from '../../../util/github/graphql/types';
-import { findCommitOfTag } from '../../../util/github/tags';
-import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import { GithubHttp } from '../../../util/http/github';
-import { Datasource } from '../datasource';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types';
+import { isBoolean, isNullOrUndefined } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import {
+  queryReleases,
+  queryTags,
+} from '../../../util/github/graphql/index.ts';
+import type { GithubReleaseItem } from '../../../util/github/graphql/types.ts';
+import { findCommitOfTag } from '../../../util/github/tags.ts';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { GetReleasesConfig, GitHostTag } from '../types.ts';
 
-export class GithubTagsDatasource extends Datasource {
+export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp> {
   static readonly id = 'github-tags';
 
-  override readonly defaultRegistryUrls = ['https://github.com'];
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
+    return getSourceUrl(packageName, registryUrl);
+  }
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
 
   override readonly registryStrategy = 'hunt';
+
+  // the GraphQL fetcher caches the tags and releases itself, and the latest
+  // commit lookup uses the HTTP memory cache
+  protected override cachedLookup<T>(
+    _registryUrl: string | undefined,
+    _key: string,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    return fn();
+  }
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
@@ -29,14 +43,19 @@ export class GithubTagsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  override http: GithubHttp;
-
   constructor() {
-    super(GithubTagsDatasource.id);
-    this.http = new GithubHttp(GithubTagsDatasource.id);
+    super(GithubTagsDatasource.id, new GithubHttp(GithubTagsDatasource.id));
   }
 
-  async getCommit(
+  protected fetchTagCommit(
+    registryUrl: string | undefined,
+    repo: string,
+    tag: string,
+  ): Promise<string | null> {
+    return findCommitOfTag(registryUrl, repo, tag, this.http);
+  }
+
+  protected async fetchLatestCommit(
     registryUrl: string | undefined,
     githubRepo: string,
   ): Promise<string | null> {
@@ -57,34 +76,13 @@ export class GithubTagsDatasource extends Datasource {
     return digest;
   }
 
-  /**
-   * github.getDigest
-   *
-   * The `newValue` supplied here should be a valid tag for the docker image.
-   *
-   * Returns the latest commit hash for the repository.
-   */
-  override getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
-    newValue?: string,
-  ): Promise<string | null> {
-    return newValue
-      ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
-      : this.getCommit(registryUrl, repo!);
-  }
-
-  override async getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult> {
-    const { registryUrl, packageName: repo } = config;
-    const sourceUrl = getSourceUrl(repo, registryUrl);
+  protected async fetchTags(config: GetReleasesConfig): Promise<GitHostTag[]> {
     const tagsResult = await queryTags(config, this.http);
-    const releases: Release[] = tagsResult.map(
-      ({ version, releaseTimestamp, gitRef, hash }) => ({
+    const releases: GitHostTag[] = tagsResult.map(
+      ({ version, releaseTimestamp, hash }) => ({
         newDigest: hash,
         version,
         releaseTimestamp,
-        gitRef,
       }),
     );
 
@@ -98,18 +96,28 @@ export class GithubTagsDatasource extends Datasource {
 
       for (const release of releases) {
         const isReleaseStable = releasesMap.get(release.version)?.isStable;
-        if (is.boolean(isReleaseStable)) {
+        if (isBoolean(isReleaseStable)) {
           release.isStable = isReleaseStable;
+        }
+
+        const releaseTimestamp = releasesMap.get(
+          release.version,
+        )?.releaseTimestamp;
+        if (!releaseTimestamp) {
+          continue;
+        }
+
+        if (
+          isNullOrUndefined(release.releaseTimestamp) ||
+          releaseTimestamp > release.releaseTimestamp
+        ) {
+          release.releaseTimestamp = releaseTimestamp;
         }
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, `Error fetching additional info for GitHub tags`);
     }
 
-    const dependency: ReleaseResult = {
-      sourceUrl,
-      releases,
-    };
-    return dependency;
+    return releases;
   }
 }

@@ -1,22 +1,35 @@
-<!-- prettier-ignore -->
 !!! warning
-    This datasource is experimental.
-    Its syntax and behavior may change at any time!
+  This datasource is experimental.
+  Its syntax and behavior may change at any time!
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
 
-Because the datasource uses the AWS-SDK for JavaScript, you can configure it like other AWS Tools.
-You can use common AWS configuration options, for example (partial list):
+See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
-- Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
-- Provide credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
-- Select the profile to use via `AWS_PROFILE` environment variable
+You can also provide credentials specifically for this datasource with a `hostRules` entry.
+Set `hostType` to `aws-machine-image`, `username` to the access key ID, `password` to the secret access key, and optionally `token` to the session token:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "aws-machine-image",
+      "username": "access-key-id",
+      "password": "secret-access-key",
+      "token": "session-token"
+    }
+  ]
+}
+```
+
+These credentials only apply to Amazon Machine Image lookups.
+When this host rule is absent or incomplete, Renovate uses the default AWS credential provider chain.
 
 Read the [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on configuration options.
 
 The least IAM privileges required for this datasource are:
 
-```json
+```json {configType=none}
 {
   "Sid": "AllowEc2ImageLookup",
   "Effect": "Allow",
@@ -93,46 +106,63 @@ Or as JSON:
 }
 ```
 
+**Note about `currentImageName`:**
+
+The optional `currentImageName` comment is automatically updated by Renovate to track the actual AMI name corresponding to the AMI ID.
+This provides human-readable context about which image version is being used.
+When Renovate finds a newer AMI, it will update both the AMI ID and the `currentImageName` comment.
+
 This would match every file, and would recognize the following lines:
 
 ```yaml
 # With AMI name mentioned in the comments
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.21-v20240703
 my_ami1: ami-02ce3d9008cab69cb
+
 # Only AMI, no name mentioned
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.20-v20240615
 my_ami2: ami-0083e9407e275acf2
 
 # Using custom aws profile and region
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]},{"profile":"test","region":"eu-central-1"}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.20-v20240615
 ami = "ami-0083e9407e275acf2"
+
+# Without currentImageName comment (also works!)
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+my_ami3: ami-0a1b2c3d4e5f6g7h8
 ```
 
 ```typescript
 const myConfigObject = {
   // With AMI name mentioned in the comments
   // amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
-  // currentImageName=unknown
+  // currentImageName=amazon-eks-node-1.21-v20240703
   my_ami1: 'ami-02ce3d9008cab69cb',
 };
 
 /**
- * Only AMI, no AMI name mentioned
+ * AMI with name tracked in comment
  * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
- * currentImageName=unknown
+ * currentImageName=amazon-eks-node-1.20-v20240615
  */
 const my_ami2 = 'ami-0083e9407e275acf2';
+
+/**
+ * Without currentImageName comment
+ * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+ */
+const my_ami3 = 'ami-0a1b2c3d4e5f6g7h8';
 ```
 
 ```hcl
 resource "aws_instance" "web" {
 
-    # Only AMI, no name mentioned
+    # AMI with name tracked in comment
     # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
-    # currentImageName=unknown
+    # currentImageName=amazon-eks-node-1.20-v20240615
     ami = "ami-0083e9407e275acf2"
 
     count = 2
@@ -141,5 +171,13 @@ resource "aws_instance" "web" {
     connection {
         user = "root"
     }
+}
+
+resource "aws_instance" "app" {
+    # Without currentImageName comment
+    # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+    ami = "ami-0a1b2c3d4e5f6g7h8"
+
+    count = 1
 }
 ```

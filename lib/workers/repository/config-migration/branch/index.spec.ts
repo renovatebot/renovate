@@ -1,20 +1,20 @@
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { createConfigMigrationBranch } from './create';
-import type { MigratedData } from './migrated-data';
-import { rebaseMigrationBranch } from './rebase';
-import { checkConfigMigrationBranch } from '.';
-import { Fixtures } from '~test/fixtures';
-import { git, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { createConfigMigrationBranch } from './create.ts';
+import { checkConfigMigrationBranch } from './index.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { rebaseMigrationBranch } from './rebase.ts';
 
-vi.mock('./migrated-data');
-vi.mock('./rebase');
-vi.mock('./create');
-vi.mock('../../update/branch/handle-existing');
+vi.mock('./migrated-data.ts');
+vi.mock('./rebase.ts');
+vi.mock('./create.ts');
+vi.mock('../../update/branch/handle-existing.ts');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
 
@@ -23,9 +23,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      GlobalConfig.set({
-        dryRun: null,
-      });
+      GlobalConfig.reset();
       config = getConfig();
       config.branchPrefix = 'some/';
     });
@@ -43,6 +41,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           migratedData,
         ),
       ).resolves.toMatchObject({ result: 'no-migration-branch' });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config migration needed but config migration is disabled and checkbox not checked or not present.',
       );
@@ -65,6 +64,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
+
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
 
@@ -93,6 +93,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(platform.refreshPr).toHaveBeenCalledTimes(0);
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration branch has been modified. Skipping branch rebase.',
       );
@@ -124,9 +125,41 @@ describe('workers/repository/config-migration/branch/index', () => {
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(platform.refreshPr).toHaveBeenCalledTimes(1);
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists',
       );
+    });
+
+    it('updates migration branch on a platform that cannot refresh prs', async () => {
+      const { refreshPr } = platform;
+      Object.defineProperty(platform, 'refreshPr', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
+      platform.getBranchPr.mockResolvedValue(mock<Pr>({ number: 1 }));
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+
+      try {
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'migration-pr-exists',
+            },
+          },
+          migratedData,
+        );
+
+        expect(res).toMatchObject({
+          result: 'migration-branch-exists',
+          migrationBranch: `${config.branchPrefix!}migrate-config`,
+        });
+      } finally {
+        platform.refreshPr = refreshPr;
+      }
     });
 
     it('creates migration branch when migration enabled but no pr exists', async () => {
@@ -148,6 +181,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
 
@@ -172,6 +206,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists',
       );
@@ -289,6 +324,32 @@ describe('workers/repository/config-migration/branch/index', () => {
         );
         expect(res).toMatchObject({
           result: 'no-migration-branch',
+        });
+      });
+
+      it('creates a new migration branch when the old branch is already gone', async () => {
+        platform.findPr.mockResolvedValueOnce(pr);
+        platform.getBranchPr.mockResolvedValue(null);
+        scm.branchExists.mockResolvedValueOnce(false);
+        vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce(
+          'committed',
+        );
+
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
+          },
+          migratedData,
+        );
+
+        expect(scm.deleteBranch).not.toHaveBeenCalled();
+        expect(res).toMatchObject({
+          result: 'migration-branch-exists',
+          migrationBranch: `${config.branchPrefix!}migrate-config`,
         });
       });
 

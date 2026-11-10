@@ -1,9 +1,22 @@
-import { GitRefsDatasource } from '../datasource/git-refs';
-import { GitTagsDatasource } from '../datasource/git-tags';
-import { GithubTagsDatasource } from '../datasource/github-tags';
-import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
-import { type PackageDependency } from './types';
-import { applyGitSource } from './util';
+import { fs } from '~test/util.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
+import { type PackageDependency } from './types.ts';
+import {
+  applyGitSource,
+  artifactError,
+  artifactErrorMessageFromExecError,
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+  updateLockFile,
+} from './util.ts';
+
+vi.mock('../../util/fs/index.ts');
 
 describe('modules/manager/util', () => {
   it('applies GitHub source for tag', () => {
@@ -53,6 +66,74 @@ describe('modules/manager/util', () => {
     });
   });
 
+  it('applies git source with subdomain', () => {
+    const dependency: PackageDependency = {};
+    const git = 'https://git.example.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'git.example.com',
+    });
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      packageName: 'foo/bar',
+      currentValue: tag,
+      registryUrls: ['https://git.example.com'],
+      skipReason: undefined,
+    });
+  });
+
+  it('applies GitHub source for tag with SSH URL', () => {
+    const dependency: PackageDependency = {};
+    const git = 'ssh://git@github.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      registryUrls: ['https://github.com'],
+      packageName: 'foo/bar',
+      currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
+  it('applies GitLab source for tag with SSH URL', () => {
+    const dependency: PackageDependency = {};
+    const git = 'ssh://git@gitlab.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GitlabTagsDatasource.id,
+      registryUrls: ['https://gitlab.com'],
+      packageName: 'foo/bar',
+      currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
+  it('applies GitHub source for tag with HTTPS URL', () => {
+    const dependency: PackageDependency = {};
+    const git = 'https://github.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      registryUrls: ['https://github.com'],
+      packageName: 'foo/bar',
+      currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
   it('applies git source for rev', () => {
     const dependency: PackageDependency = {};
     const git = 'https://github.com/foo/bar';
@@ -95,6 +176,319 @@ describe('modules/manager/util', () => {
       packageName: git,
       currentValue: undefined,
       skipReason: 'unspecified-version',
+    });
+  });
+});
+
+describe('modules/manager/util', () => {
+  it('returns stderr when present', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: 'some error', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some error');
+  });
+
+  it('returns stdout when stderr is empty', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns stdout when stderr is only whitespace', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '   ', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns stdout when stderr is undefined', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns fallback message when neither stderr nor stdout are present', () => {
+    const message = artifactErrorMessageFromExecError({}, 'fallback message');
+
+    expect(message).toBe('fallback message');
+  });
+
+  it('returns fallback message when stderr and stdout are only whitespace', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '  ', stdout: '  ' },
+      'fallback message',
+    );
+
+    expect(message).toBe('fallback message');
+  });
+
+  it('wraps file changes into artifact results', () => {
+    expect(
+      fileChangesToArtifactResults([
+        { type: 'addition', path: 'foo', contents: 'bar' },
+        { type: 'deletion', path: 'baz' },
+      ]),
+    ).toEqual([
+      { file: { type: 'addition', path: 'foo', contents: 'bar' } },
+      { file: { type: 'deletion', path: 'baz' } },
+    ]);
+  });
+
+  describe('resolveToolConstraint()', () => {
+    it('prefers the user configured constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '==3.12' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '==3.11',
+      );
+
+      expect(constraint).toBe('==3.12');
+    });
+
+    it('prefers the derived constraint over the extracted one', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => Promise.resolve('==3.11'),
+      );
+
+      expect(constraint).toBe('==3.11');
+    });
+
+    it('falls back to the extracted constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => null,
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns the extracted constraint when nothing can be derived', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns undefined when no constraint is known', async () => {
+      const constraint = await resolveToolConstraint({}, 'python', () => null);
+
+      expect(constraint).toBeUndefined();
+    });
+
+    it('treats an empty string as not set', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('accepts the null constraints of a post-update config', async () => {
+      const constraint = await resolveToolConstraint(
+        { constraints: null, extractedConstraints: null },
+        'node',
+      );
+
+      expect(constraint).toBeUndefined();
+    });
+
+    it.each`
+      toolName  | shared       | derived      | extracted    | expected
+      ${'rust'} | ${'1.80.0'}  | ${undefined} | ${undefined} | ${'1.80.0'}
+      ${'node'} | ${'20.11.0'} | ${'>=18'}    | ${undefined} | ${'20.11.0'}
+      ${'node'} | ${'20'}      | ${'>=18'}    | ${undefined} | ${'20'}
+      ${'node'} | ${'22.1.0'}  | ${'^20'}     | ${undefined} | ${'^20'}
+      ${'node'} | ${'20'}      | ${'20.11.0'} | ${undefined} | ${'20.11.0'}
+      ${'node'} | ${'foo'}     | ${'>=18'}    | ${undefined} | ${'>=18'}
+      ${'node'} | ${'20.11.0'} | ${'foo'}     | ${undefined} | ${'foo'}
+      ${'pnpm'} | ${'9.12.0'}  | ${undefined} | ${'>=9'}     | ${'9.12.0'}
+      ${'pnpm'} | ${'9.12.0'}  | ${'9.15.0'}  | ${'>=9'}     | ${'9.15.0'}
+      ${'uv'}   | ${'0.5.3'}   | ${'>=0.4'}   | ${undefined} | ${'0.5.3'}
+      ${'uv'}   | ${'==0.5.*'} | ${'>=0.4'}   | ${undefined} | ${'>=0.4'}
+      ${'go'}   | ${'1.22.0'}  | ${'1.21'}    | ${undefined} | ${'1.21'}
+      ${'node'} | ${''}        | ${undefined} | ${'>=18'}    | ${'>=18'}
+    `(
+      'returns $expected for the shared $toolName $shared and the required $derived or $extracted',
+      async ({ toolName, shared, derived, extracted, expected }) => {
+        const constraint = await resolveToolConstraint(
+          {
+            extractedConstraints: { [toolName]: extracted },
+            sharedConstraints: { [toolName]: shared },
+          },
+          toolName,
+          () => derived,
+        );
+
+        expect(constraint).toBe(expected);
+      },
+    );
+
+    it('prefers the user configured constraint over the shared one', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { node: '>=18' },
+          sharedConstraints: { node: '20.11.0' },
+        },
+        'node',
+      );
+
+      expect(constraint).toBe('>=18');
+    });
+  });
+
+  it('builds an addition result', () => {
+    expect(fileAddition('foo.lock', 'new')).toEqual({
+      file: { type: 'addition', path: 'foo.lock', contents: 'new' },
+    });
+  });
+
+  it('builds an artifact error result', () => {
+    expect(artifactError('foo.lock', 'boom')).toEqual({
+      artifactError: { fileName: 'foo.lock', stderr: 'boom' },
+    });
+  });
+
+  it('builds an artifact error result from an error', () => {
+    expect(
+      artifactErrorResult('foo.lock', Object.assign(new Error('msg'), {})),
+    ).toEqual([{ artifactError: { fileName: 'foo.lock', stderr: 'msg' } }]);
+
+    expect(
+      artifactErrorResult(
+        'foo.lock',
+        Object.assign(new Error('msg'), { stderr: 'from stderr' }),
+      ),
+    ).toEqual([
+      { artifactError: { fileName: 'foo.lock', stderr: 'from stderr' } },
+    ]);
+  });
+
+  describe('updateLockFile', () => {
+    it('writes the package file, deletes the lock file and returns the update', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('new content');
+      const run = vi.fn().mockResolvedValue(undefined);
+
+      const res = await updateLockFile({
+        lockFileName: 'foo.lock',
+        existingLockFileContent: 'old content',
+        packageFile: { path: 'foo.json', contents: 'new package file' },
+        deleteLockFile: true,
+        run,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'foo.lock',
+            contents: 'new content',
+          },
+        },
+      ]);
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'foo.json',
+        'new package file',
+      );
+      expect(fs.deleteLocalFile).toHaveBeenCalledWith('foo.lock');
+      expect(fs.readLocalFile).toHaveBeenCalledWith('foo.lock', 'utf8');
+      expect(run).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the package and lock file when not asked to touch them', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('new content');
+
+      await updateLockFile({
+        lockFileName: 'foo.lock',
+        existingLockFileContent: 'old content',
+        run: () => Promise.resolve(),
+      });
+
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('returns null when the lock file is gone', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      await expect(
+        updateLockFile({
+          lockFileName: 'foo.lock',
+          existingLockFileContent: 'old content',
+          run: () => Promise.resolve(),
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when the lock file is unchanged', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('old content');
+
+      await expect(
+        updateLockFile({
+          lockFileName: 'foo.lock',
+          existingLockFileContent: 'old content',
+          run: () => Promise.resolve(),
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('reads and returns the lock file as bytes when given a Buffer', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        Buffer.from('new content') as never,
+      );
+
+      const res = await updateLockFile({
+        lockFileName: 'foo.lockb',
+        existingLockFileContent: Buffer.from('old content'),
+        run: () => Promise.resolve(),
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'foo.lockb',
+            contents: Buffer.from('new content'),
+          },
+        },
+      ]);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('foo.lockb');
+    });
+
+    it('returns null when a binary lock file is unchanged', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        Buffer.from('old content') as never,
+      );
+
+      await expect(
+        updateLockFile({
+          lockFileName: 'foo.lockb',
+          existingLockFileContent: Buffer.from('old content'),
+          run: () => Promise.resolve(),
+        }),
+      ).resolves.toBeNull();
     });
   });
 });

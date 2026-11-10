@@ -2,15 +2,14 @@ import {
   DescribeDBEngineVersionsCommand,
   RDSClient,
 } from '@aws-sdk/client-rds';
-import { cache } from '../../../util/cache/package/decorator';
-import { Lazy } from '../../../util/lazy';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { Lazy } from '../../../util/lazy.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class AwsRdsDatasource extends Datasource {
   static readonly id = 'aws-rds';
-
-  override readonly caching = true;
 
   private readonly rds: Lazy<RDSClient>;
 
@@ -19,18 +18,14 @@ export class AwsRdsDatasource extends Datasource {
     this.rds = new Lazy(() => new RDSClient({}));
   }
 
-  @cache({
-    namespace: `datasource-${AwsRdsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const cmd = new DescribeDBEngineVersionsCommand({
       Filters: JSON.parse(serializedFilter),
     });
     const response = await this.rds.getValue().send(cmd);
-    const versions = response.DBEngineVersions ?? [];
+    const versions = coerceArray(response.DBEngineVersions);
     return {
       releases: versions
         .filter((version) => version.EngineVersion)
@@ -39,5 +34,15 @@ export class AwsRdsDatasource extends Datasource {
           isDeprecated: version.Status === 'deprecated',
         })),
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: buildCacheKey('getReleases', config.packageName),
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

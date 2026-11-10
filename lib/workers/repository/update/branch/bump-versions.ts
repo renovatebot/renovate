@@ -1,15 +1,17 @@
 import { type ReleaseType, inc } from 'semver';
-import type { BumpVersionConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import { coerceArray } from '../../../../util/array';
-import { readLocalFile } from '../../../../util/fs';
-import type { FileChange } from '../../../../util/git/types';
-import { regEx } from '../../../../util/regex';
-import { matchRegexOrGlobList } from '../../../../util/string-match';
-import { compile } from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
-import { getFilteredFileList } from '../../extract/file-match';
+import type { BumpVersionConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { parsePartialVersion } from '../../../../modules/versioning/semver-partial/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
+import { safeStringify } from '../../../../util/stringify.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { getFilteredFileList } from '../../extract/file-match.ts';
 
 type ParseFileChangesResult =
   | { state: 'modified'; content: string | null }
@@ -17,8 +19,8 @@ type ParseFileChangesResult =
   | { state: 'unmodified' };
 
 export async function bumpVersions(config: BranchConfig): Promise<void> {
-  const bumpVersions = config.bumpVersions;
-  if (!bumpVersions?.length) {
+  const bumpVersions = getBumpVersions(config);
+  if (!bumpVersions.length) {
     return;
   }
 
@@ -46,6 +48,33 @@ export async function bumpVersions(config: BranchConfig): Promise<void> {
   // update the config with the new files
   config.updatedPackageFiles = Object.values(packageFileChanges).flat();
   config.updatedArtifacts = Object.values(artifactFileChanges).flat();
+}
+
+/**
+ * `config.bumpVersions` is derived from `upgrades[0]` only (see `generateBranchConfig()`), so
+ * relying on it alone would silently drop `bumpVersions` config attached (e.g. via a `packageRule`)
+ * to any upgrade other than the first one in the branch. Collect `bumpVersions` from every
+ * upgrade instead, de-duplicating identical entries, and fall back to the top-level value for
+ * back-compat (e.g. when `config.upgrades` is empty).
+ */
+function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
+  const seen = new Set<string>();
+  const bumpVersions: BumpVersionConfig[] = [];
+  for (const upgrade of coerceArray(config.upgrades)) {
+    for (const bumpVersionConfig of coerceArray(upgrade.bumpVersions)) {
+      const key = safeStringify(bumpVersionConfig);
+      if (!seen.has(key)) {
+        seen.add(key);
+        bumpVersions.push(bumpVersionConfig);
+      }
+    }
+  }
+
+  if (!bumpVersions.length) {
+    bumpVersions.push(...coerceArray(config.bumpVersions));
+  }
+
+  return bumpVersions;
 }
 
 async function bumpVersion(
@@ -143,7 +172,45 @@ async function bumpVersion(
       let newVersion: string | null = null;
       try {
         const bumpType = compile(rawBumpType, branchConfig);
-        newVersion = inc(version, bumpType as ReleaseType);
+
+        // Handle 'sync' type - use version from branch upgrades
+        if (bumpType === 'sync') {
+          if (branchConfig.upgrades?.length) {
+            // Use the newVersion from the first upgrade
+            newVersion = branchConfig.upgrades[0].newVersion ?? null;
+            if (!newVersion) {
+              logger.debug(
+                { file: filePath },
+                `${bumpVersionsDescr}: No newVersion found in branch upgrades for sync type`,
+              );
+              continue;
+            }
+          } else {
+            logger.debug(
+              { file: filePath },
+              `${bumpVersionsDescr}: No upgrades found in branch config for sync type`,
+            );
+            continue;
+          }
+        } else {
+          // Existing logic for major/minor/patch
+          const partial = parsePartialVersion(version);
+          if (partial) {
+            const { major, minor } = partial;
+            const prefix = version.startsWith('v') ? 'v' : '';
+            if (bumpType === 'major') {
+              newVersion = `${prefix}${major + 1}${minor === undefined ? '' : '.0'}`;
+            } else if (bumpType === 'minor' && minor !== undefined) {
+              newVersion = `${prefix}${major}.${minor + 1}`;
+            } else {
+              throw new Error(
+                `Unsupported bump type for {major}.{minor} version: ${bumpType}`,
+              );
+            }
+          } else {
+            newVersion = inc(version, bumpType as ReleaseType);
+          }
+        }
       } catch (e) {
         addArtifactError(
           branchConfig,
@@ -284,8 +351,8 @@ async function getFileContent(
     return await readLocalFile(filePath, 'utf8');
   } catch (e) {
     logger.warn(
-      { file: filePath },
-      `${bumpVersionsDescr}: Could not read file: ${e.message}`,
+      { file: filePath, bumpVersionsDescr, err: e },
+      'bumpVersions: Could not read file',
     );
     return null;
   }
@@ -302,7 +369,7 @@ function parseFileChanges(
     return { state: 'unmodified' };
   }
 
-  const lastChange = changes[changes.length - 1];
+  const lastChange = changes.at(-1)!;
   if (lastChange.type === 'deletion') {
     return { state: 'deleted' };
   }

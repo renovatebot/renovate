@@ -1,4 +1,4 @@
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class DryRunMigration extends AbstractMigration {
   override readonly propertyName = 'dryRun';

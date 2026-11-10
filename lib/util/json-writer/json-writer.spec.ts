@@ -1,4 +1,4 @@
-import { JSONWriter } from './json-writer';
+import { JSONWriter } from './json-writer.ts';
 
 describe('util/json-writer/json-writer', () => {
   const DATA = {

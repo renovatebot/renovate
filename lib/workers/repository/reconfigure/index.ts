@@ -1,26 +1,26 @@
-import { GlobalConfig } from '../../../config/global';
-import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
-import type { AllConfig, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { getCache } from '../../../util/cache/repository';
-import { getBranchCommit } from '../../../util/git';
-import { mergeInheritedConfig } from '../init/inherited';
-import { mergeRenovateConfig } from '../init/merge';
-import { extractDependencies } from '../process';
-import type { ExtractResult } from '../process/extract-update';
-import { ensureReconfigurePrComment } from './comment';
+import { GlobalConfig } from '../../../config/global.ts';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
+import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { getBranchCommit } from '../../../util/git/index.ts';
+import { mergeInheritedConfig } from '../init/inherited.ts';
+import { mergeRenovateConfig } from '../init/merge.ts';
+import type { ExtractResult } from '../process/extract-update.ts';
+import { extractDependencies } from '../process/index.ts';
+import { ensureReconfigurePrComment } from './comment.ts';
 import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
-} from './reconfigure-cache';
+} from './reconfigure-cache.ts';
 import {
   getReconfigureBranchName,
   getReconfigureConfig,
   setBranchStatus,
-} from './utils';
-import { validateReconfigureBranch } from './validate';
+} from './utils.ts';
+import { validateReconfigureBranch } from './validate.ts';
 
 export async function checkReconfigureBranch(
   config: RenovateConfig,
@@ -40,7 +40,7 @@ export async function checkReconfigureBranch(
 
   // this is something the user initiates, skip if no branch exists
   if (!branchExists) {
-    logger.debug('No reconfigure branch found');
+    logger.debug({ reconfigureBranch }, 'No reconfigure branch found');
     deleteReconfigureBranchCache(); // in order to remove cache when the branch has been deleted
     return;
   }
@@ -54,13 +54,17 @@ export async function checkReconfigureBranch(
   const branchSha = getBranchCommit(reconfigureBranch)!;
   const cache = getCache();
   const reconfigureCache = cache.reconfigureBranchCache;
+  // migrate the extract result persisted by earlier versions
+  if (reconfigureCache?.extractResult) {
+    reconfigureCache.extractionSucceeded = true;
+    delete reconfigureCache.extractResult;
+  }
 
   // only use valid cached information
-  if (reconfigureCache?.reconfigureBranchSha === branchSha) {
-    if (!existingPr || reconfigureCache.extractResult) {
-      logger.debug('Skipping validation check as branch sha is unchanged');
-      return;
-    }
+  const isCacheUsable = !existingPr || reconfigureCache?.extractionSucceeded;
+  if (reconfigureCache?.reconfigureBranchSha === branchSha && isCacheUsable) {
+    logger.debug('Skipping validation check as branch sha is unchanged');
+    return;
   }
 
   const result = await getReconfigureConfig(reconfigureBranch);
@@ -93,7 +97,7 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  let extractResult: ExtractResult | undefined;
+  let extractResult: ExtractResult;
   // Recompute config similar to repo config processing
   // Get non-global config from file config
   // Merge it with inherited and static repo config
@@ -103,6 +107,7 @@ export async function checkReconfigureBranch(
       config: repoConfig,
     }),
   );
+  newConfig.defaultBranch = config.defaultBranch;
   newConfig.baseBranch = config.defaultBranch;
   newConfig.repoIsOnboarded = true;
   newConfig.errors = [];
@@ -114,38 +119,36 @@ export async function checkReconfigureBranch(
     await scm.checkoutBranch(config.defaultBranch!);
     extractResult = await extractDependencies(newConfig, false);
   } catch (err) {
-    logger.debug(
+    logger.warn(
       { err },
       'Error while extracting dependencies using the reconfigure config',
+    );
+    await setBranchStatus(
+      reconfigureBranch,
+      'Failed to extract dependencies using the new config',
+      'red',
+      context,
     );
     setReconfigureBranchCache(branchSha, true);
     await scm.checkoutBranch(config.defaultBranch!); // being cautious
     return;
   }
 
-  let commentEnsured = false;
-  if (extractResult) {
-    commentEnsured = await ensureReconfigurePrComment(
-      newConfig,
-      extractResult.packageFiles,
-      extractResult.branches,
-      reconfigureBranch,
-      existingPr,
-    );
-  }
+  const commentEnsured = await ensureReconfigurePrComment(
+    newConfig,
+    extractResult.packageFiles,
+    extractResult.branches,
+    reconfigureBranch,
+    existingPr,
+  );
 
-  // if comment is not added or updated
-  // do not store extractResult in cache so that we re-process the reconfigure branch on next run and do not skip
-  // istanbul ignore if: should rarely happen
-  if (!commentEnsured) {
-    extractResult = undefined;
-  }
   await setBranchStatus(
     reconfigureBranch,
     'Validation Successful',
     'green',
     context,
   );
-  setReconfigureBranchCache(branchSha, true, extractResult);
+  // if comment is not added or updated, re-process the reconfigure branch on next run and do not skip
+  setReconfigureBranchCache(branchSha, true, commentEnsured);
   await scm.checkoutBranch(config.defaultBranch!); //being cautious
 }

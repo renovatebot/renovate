@@ -1,9 +1,13 @@
-import { Repos, ReposArray, ReposRecord } from './schema';
+import { Repos, ReposArray, ReposRecord } from './schema.ts';
 
 describe('modules/manager/composer/schema', () => {
   describe('ReposRecord', () => {
     it('parses default values', () => {
       expect(ReposRecord.parse({})).toEqual([]);
+    });
+
+    it('ignores a disabled repository that is not packagist', () => {
+      expect(ReposRecord.parse({ 'some-other-repo': false })).toEqual([]);
     });
 
     it('parses repositories', () => {
@@ -86,6 +90,23 @@ describe('modules/manager/composer/schema', () => {
             url: 'https://some-vcs.com',
           },
         },
+      });
+    });
+
+    it('ignores an inline package repository', () => {
+      expect(
+        Repos.parse([
+          { type: 'package' },
+          {
+            name: 'wpackagist',
+            type: 'composer',
+            url: 'https://wpackagist.org',
+          },
+        ]),
+      ).toEqual({
+        pathRepos: {},
+        registryUrls: ['https://wpackagist.org', 'https://repo.packagist.org'],
+        gitRepos: {},
       });
     });
 

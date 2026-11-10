@@ -1,7 +1,7 @@
-import { initRepoCache } from '../cache/repository/init';
-import { detectSemanticCommits } from './semantic';
-import type { RenovateConfig } from '~test/util';
-import { git, partial } from '~test/util';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial } from '~test/util.ts';
+import { initRepoCache } from '../cache/repository/init.ts';
+import { detectSemanticCommits } from './semantic.ts';
 
 let config: RenovateConfig;
 
@@ -31,6 +31,31 @@ describe('util/git/semantic', () => {
     it('detects true if known', async () => {
       config.semanticCommits = undefined;
       git.getCommitMessages.mockResolvedValue(['fix: foo', 'refactor: bar']);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('enabled');
+    });
+
+    it('detects false on malformed commits', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue([
+        'fix(): foo',
+        'fix:',
+        'some:invalid',
+      ]);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('disabled');
+    });
+
+    it('detects true on breaking changes', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue(['fix!: foo']);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('enabled');
+    });
+
+    it('detects true on breaking changes with scope', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue(['fix(scope)!: foo']);
       const res = await detectSemanticCommits();
       expect(res).toBe('enabled');
     });

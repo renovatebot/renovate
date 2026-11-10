@@ -1,4 +1,4 @@
-import { AbstractMigration } from './abstract-migration';
+import { AbstractMigration } from './abstract-migration.ts';
 
 describe('config/migrations/base/abstract-migration', () => {
   it('should not allow to use method rewrite', () => {
@@ -11,12 +11,13 @@ describe('config/migrations/base/abstract-migration', () => {
     }
     const customMigration = new CustomMigration(
       {
+        // @ts-expect-error -- testing invalid usage
         fooBar: true,
       },
       {},
     );
 
-    expect(() => customMigration.run()).toThrow();
+    expect(() => customMigration.run()).toThrow(Error);
   });
 
   it('should not allow to use method delete', () => {
@@ -29,11 +30,12 @@ describe('config/migrations/base/abstract-migration', () => {
     }
     const customMigration = new CustomMigration(
       {
+        // @ts-expect-error -- testing invalid usage
         fooBar: true,
       },
       {},
     );
 
-    expect(() => customMigration.run()).toThrow();
+    expect(() => customMigration.run()).toThrow(Error);
   });
 });

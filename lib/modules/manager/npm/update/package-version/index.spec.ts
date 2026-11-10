@@ -1,4 +1,4 @@
-import * as npmUpdater from '../..';
+import * as npmUpdater from '../../index.ts';
 
 describe('modules/manager/npm/update/package-version/index', () => {
   describe('.bumpPackageVersion()', () => {
@@ -14,7 +14,9 @@ describe('modules/manager/npm/update/package-version/index', () => {
         '0.0.2',
         'mirror:chalk',
       );
-      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).toBe(
+        '{"name":"some-package","version":"2.4.2","dependencies":{"chalk":"2.4.2"}}',
+      );
       expect(bumpedContent).not.toEqual(content);
     });
 
@@ -33,7 +35,9 @@ describe('modules/manager/npm/update/package-version/index', () => {
         '0.0.2',
         'patch',
       );
-      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).toBe(
+        '{"name":"some-package","version":"0.0.3","dependencies":{"chalk":"2.4.2"}}',
+      );
       expect(bumpedContent).not.toEqual(content);
     });
 
@@ -52,7 +56,9 @@ describe('modules/manager/npm/update/package-version/index', () => {
         '0.0.1',
         'minor',
       );
-      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).toBe(
+        '{"name":"some-package","version":"0.1.0","dependencies":{"chalk":"2.4.2"}}',
+      );
       expect(bumpedContent).not.toEqual(content);
     });
 
@@ -62,7 +68,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
           throw new Error('semver inc');
         },
       }));
-      const npmUpdater1 = await import('./index.js');
+      const npmUpdater1 = await import('./index.ts');
       const { bumpedContent } = npmUpdater1.bumpPackageVersion(
         content,
         '0.0.2',

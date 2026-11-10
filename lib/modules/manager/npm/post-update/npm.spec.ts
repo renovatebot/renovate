@@ -1,21 +1,22 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { getNodeToolConstraint } from './node-version';
-import * as npmHelper from './npm';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs } from '~test/util';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { ExecError } from '../../../../util/exec/exec-error.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as npmHelper from './npm.ts';
 
-vi.mock('../../../../util/exec/env');
-vi.mock('../../../../util/fs');
-vi.mock('./node-version');
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./node-version.ts');
 
 process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -47,7 +48,45 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+  });
+
+  it('runs npm install twice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const packageLockContents = JSON.stringify({
+      packages: {},
+      lockfileVersion: 3,
+    });
+    fs.readLocalFile
+      .mockResolvedValueOnce(packageLockContents)
+      .mockResolvedValueOnce(packageLockContents);
+    const skipInstalls = true;
+    const postUpdateOptions = ['npmInstallTwice'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls, postUpdateOptions },
+      updates,
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
   });
 
   it('performs lock file updates', async () => {
@@ -67,7 +106,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs lock file updates retaining the package.json counterparts', async () => {
@@ -95,8 +139,22 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    // the lock file update is applied to the "dependencies" section while the
+    // package.json counterpart in the "packages" section is retained
+    const lockFile = JSON.parse(res.lockFile!);
+    expect(lockFile.packages['']).toEqual({
+      name: 'update-lockfile-massage-1',
+      version: '1.0.0',
+      dependencies: { postcss: '^8.0.0' },
+    });
+    expect(lockFile.dependencies.postcss.version).toBe('8.4.8');
+    expect(lockFile.packages['node_modules/postcss'].version).toBe('8.4.31');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -111,12 +169,12 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.renameLocalFile).toHaveBeenCalledWith(
+    expect(fs.renameLocalFile).toHaveBeenCalledExactlyOnceWith(
       upath.join('some-dir', 'package-lock.json'),
       upath.join('some-dir', 'npm-shrinkwrap.json'),
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -139,7 +197,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -256,6 +314,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
@@ -308,6 +367,9 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('finds npm globally', async () => {
     const execSnapshots = mockExecAll();
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
     // package.json
     fs.readLocalFile.mockResolvedValue('{}');
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -315,11 +377,17 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
+      {},
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('package-lock-contents');
-    // TODO: is that right?
-    expect(execSnapshots).toEqual([]);
+    // since there are no install npm commands, it means we are using the global npm
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
   });
 
   it('uses docker npm', async () => {
@@ -352,7 +420,39 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('does not run npm install four times for lock file maintenance with npmInstallTwice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions: ['npmInstallTwice'] },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('works for docker mode', async () => {
@@ -361,7 +461,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -375,24 +475,25 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'ghcr.io/containerbase/sidecar ' +
-          'bash -l -c "' +
+          'ghcr.io/renovatebot/base-image ' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
-          'hash -d npm 2>/dev/null || true ' +
+          'npm install --package-lock-only --no-audit ' +
           '&& ' +
           'npm install --package-lock-only --no-audit' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -417,11 +518,186 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
-      { cmd: 'hash -d npm 2>/dev/null || true' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
     ]);
+  });
+
+  it('does not install npm if no constraints specified', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { constraints: {} },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('falls back to the extracted npm constraint', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { extractedConstraints: { npm: '6.0.0' } },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool npm 6.0.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('prefers the derived npm constraint over the extracted one', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{"packageManager":"npm@8.0.0"}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { extractedConstraints: { npm: '6.0.0' } },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool npm 8.0.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  describe('passes NODE_OPTIONS', () => {
+    it('if nodeMaxMemory set on global config', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        toolSettings: {
+          nodeMaxMemory: 3456,
+        },
+        binarySource: 'global',
+      });
+
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ];
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        updates,
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=3456',
+      );
+    });
+
+    it('if nodeMaxMemory set on repo config', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ];
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {
+          skipInstalls,
+          toolSettings: {
+            nodeMaxMemory: 3456,
+          },
+        },
+        updates,
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=3456',
+      );
+    });
   });
 
   describe('installs workspace only packages separately', () => {
@@ -799,6 +1075,299 @@ describe('modules/manager/npm/post-update/npm', () => {
           cmd: "npm install --package-lock-only --no-audit --ignore-scripts '; date; echo @11.1.0'",
         },
       ]);
+    });
+  });
+
+  describe('--before with minimumReleaseAge', () => {
+    let execSnapshots: ReturnType<typeof mockExecAll>;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+      execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('sets --before from minimumReleaseAge', async () => {
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(res.error).toBeFalse();
+      expect(res.beforeFallback).toBeFalse();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('skips --before on unparseable minimumReleaseAge', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: 'invalid garbage' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
+      // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-01T00:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('uses minimumReleaseAge date when stricter than npmrc before date', async () => {
+      // minimumReleaseAge (3 days = June 12) is earlier than npmrc (June 14)
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'before=2026-06-14T00:00:00.000Z\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('skips --before when minimumReleaseAge is absent even if npmrc has before', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'before=2026-06-01T00:00:00.000Z\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('skips --before when .npmrc has min-release-age to avoid npm conflict', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+        'min-release-age=30\n',
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('retries without --before on ETARGET with "with a date before"', async () => {
+      const etargetError = new ExecError('npm error code ETARGET', {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        stdout: '',
+        stderr:
+          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
+        options: {},
+      });
+      const packageLockContents = JSON.stringify({
+        packages: {},
+        lockfileVersion: 3,
+      });
+      execSnapshots = mockExecSequence([
+        etargetError,
+        { stdout: '', stderr: '' },
+      ]);
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(res.error).toBeFalse();
+      expect(res.beforeFallback).toBeTrue();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('does not retry on non-before ETARGET errors', async () => {
+      const otherError = new ExecError('npm error code ETARGET', {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        stdout: '',
+        stderr:
+          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@999.999.999.',
+        options: {},
+      });
+      execSnapshots = mockExecSequence([otherError]);
+
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+          },
+        ],
+      );
+
+      expect(res.error).toBeTrue();
+      expect(res.beforeFallback).toBeUndefined();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+  });
+
+  describe('parseNpmrcCooldownDate', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe('returns null', () => {
+      it.each`
+        content
+        ${null}
+        ${''}
+        ${'registry=https://registry.npmjs.org\n'}
+        ${'before=not-a-date\n'}
+        ${'before=2026-13-99T00:00:00.000Z\n'}
+        ${'min-release-age=not-a-number\n'}
+      `('for: $content', ({ content }: { content: string | null }) => {
+        expect(npmHelper.parseNpmrcCooldownDate(content)).toBeNull();
+      });
+    });
+
+    describe('parses before= key', () => {
+      it.each`
+        input
+        ${'before=2026-06-01T00:00:00.000Z\n'}
+        ${'before="2026-06-01T00:00:00.000Z"\n'}
+        ${'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z # some comment\naudit=false\n'}
+      `('$input', ({ input }: { input: string }) => {
+        const result = npmHelper.parseNpmrcCooldownDate(input);
+        expect(result?.date.toISO()).toBe('2026-06-01T00:00:00.000Z');
+        expect(result?.source).toBe('before');
+      });
+    });
+
+    describe('parses min-release-age= key', () => {
+      it.each`
+        input
+        ${'min-release-age=30\n'}
+        ${'min-release-age="30"\n'}
+        ${'min-release-age=30 # 30 days\n'}
+        ${'registry=https://registry.npmjs.org\nmin-release-age=30 # 30 days\n'}
+      `('$input', ({ input }: { input: string }) => {
+        const result = npmHelper.parseNpmrcCooldownDate(input);
+        expect(result?.date.toISO()).toBe('2026-05-16T12:00:00.000Z');
+        expect(result?.source).toBe('min-release-age');
+      });
     });
   });
 });

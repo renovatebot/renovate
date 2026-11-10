@@ -1,5 +1,5 @@
 import { RequestError as HttpError } from 'got';
-import { parseUrl } from '../url';
+import { parseUrl } from '../url.ts';
 
 // TODO: remove when code is refactored (#9651)
 
@@ -26,6 +26,7 @@ Object.defineProperty(HttpError.prototype, 'headers', {
   get: function headers(this: HttpError) {
     return this.response?.headers;
   },
+  configurable: true,
 });
 
 Object.defineProperty(HttpError.prototype, 'url', {

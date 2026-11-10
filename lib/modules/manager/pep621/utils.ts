@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency } from '../types';
-import type { Pep508ParseResult } from './types';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { Pep508ParseResult, Pep621ManagerData } from './types.ts';
 
 const pep508Regex = regEx(
-  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
+  /^(?<packageName>[A-Z0-9._-]+)\s*(?:\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?<currentValue>[^;]+)?(?:;\s*(?<marker>.*))?/i,
 );
 
 export const depTypes = {
@@ -17,21 +17,19 @@ export const depTypes = {
   pdmDevDependencies: 'tool.pdm.dev-dependencies',
   uvDevDependencies: 'tool.uv.dev-dependencies',
   uvSources: 'tool.uv.sources',
+  uvTransitiveDependencies: 'uv.lock',
   buildSystemRequires: 'build-system.requires',
 };
 
 export function parsePEP508(
   value: string | null | undefined,
 ): Pep508ParseResult | null {
-  if (is.nullOrUndefined(value)) {
+  if (isNullOrUndefined(value)) {
     return null;
   }
 
   const regExpExec = pep508Regex.exec(value);
-  if (
-    is.nullOrUndefined(regExpExec) ||
-    is.nullOrUndefined(regExpExec?.groups)
-  ) {
+  if (isNullOrUndefined(regExpExec) || isNullOrUndefined(regExpExec?.groups)) {
     logger.trace(`Pep508 could not be extracted`);
     return null;
   }
@@ -39,7 +37,7 @@ export function parsePEP508(
   const result: Pep508ParseResult = {
     packageName: regExpExec.groups.packageName,
   };
-  if (is.nonEmptyString(regExpExec.groups.currentValue)) {
+  if (isNonEmptyString(regExpExec.groups.currentValue)) {
     if (
       regExpExec.groups.currentValue.startsWith('(') &&
       regExpExec.groups.currentValue.endsWith(')')
@@ -50,10 +48,10 @@ export function parsePEP508(
     }
   }
 
-  if (is.nonEmptyString(regExpExec.groups.marker)) {
+  if (isNonEmptyString(regExpExec.groups.marker)) {
     result.marker = regExpExec.groups.marker;
   }
-  if (is.nonEmptyString(regExpExec.groups.extras)) {
+  if (isNonEmptyString(regExpExec.groups.extras)) {
     // trim to remove allowed whitespace between brackets
     result.extras = regExpExec.groups.extras.split(',').map((e) => e.trim());
   }
@@ -64,20 +62,20 @@ export function parsePEP508(
 export function pep508ToPackageDependency(
   depType: string,
   value: string,
-): PackageDependency | null {
+): PackageDependency<Pep621ManagerData> | null {
   const parsed = parsePEP508(value);
-  if (is.nullOrUndefined(parsed)) {
+  if (isNullOrUndefined(parsed)) {
     return null;
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<Pep621ManagerData> = {
     packageName: normalizePythonDepName(parsed.packageName),
     depName: parsed.packageName,
     datasource: PypiDatasource.id,
     depType,
   };
 
-  if (is.nullOrUndefined(parsed.currentValue)) {
+  if (isNullOrUndefined(parsed.currentValue)) {
     dep.skipReason = 'unspecified-version';
   } else {
     dep.currentValue = parsed.currentValue;

@@ -1,8 +1,8 @@
-import { parseJson } from '../common';
-import { regEx } from '../regex';
-import { isHttpUrl } from '../url';
-import { HttpBase, type InternalHttpOptions } from './http';
-import type { HttpOptions } from './types';
+import { parseJson } from '../common.ts';
+import { regEx } from '../regex.ts';
+import { isHttpUrl } from '../url.ts';
+import { HttpBase, type InternalHttpOptions } from './http.ts';
+import type { HttpOptions } from './types.ts';
 
 let baseUrl: string;
 export function setBaseUrl(url: string): void {
@@ -24,10 +24,7 @@ export class GerritHttp extends HttpBase {
     super('gerrit', options);
   }
 
-  protected override resolveUrl(
-    requestUrl: string | URL,
-    options: HttpOptions | undefined,
-  ): URL {
+  override resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     // ensure trailing slash for gerrit
     return super.resolveUrl(
       isHttpUrl(requestUrl) ? requestUrl : `${baseUrl}${requestUrl}`,

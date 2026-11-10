@@ -1,14 +1,16 @@
-import is from '@sindresorhus/is';
+import { isArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
-import { logger } from '../../../logger';
-import { MavenDatasource } from '../../datasource/maven';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { Bundle, FeatureModel } from './types';
+} from '../types.ts';
+import type { Bundle, FeatureModel } from './types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -32,7 +34,7 @@ export function extractPackageFile(
 
   if (
     // for empty an empty result
-    is.nullOrUndefined(featureModel) ||
+    isNullOrUndefined(featureModel) ||
     // Compendium R8 159.9: resource versioning
     !isSupportedFeatureResourceVersion(featureModel, packageFile)
   ) {
@@ -40,12 +42,12 @@ export function extractPackageFile(
   }
 
   // OSGi Compendium R8 159.4: bundles entry
-  const allBundles = featureModel.bundles ?? [];
+  const allBundles = coerceArray(featureModel.bundles);
 
   // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
   const execEnvFramework =
     featureModel['execution-environment:JSON|false']?.framework;
-  if (!is.nullOrUndefined(execEnvFramework)) {
+  if (!isNullOrUndefined(execEnvFramework)) {
     allBundles.push(execEnvFramework);
   }
 
@@ -62,7 +64,7 @@ export function extractPackageFile(
 
   // convert bundles to dependencies
   for (const entry of allBundles) {
-    const rawGav = typeof entry === 'string' ? entry : entry.id;
+    const rawGav = isString(entry) ? entry : entry.id;
     // skip invalid definitions, such as objects without an id set
     if (!rawGav) {
       continue;
@@ -70,7 +72,7 @@ export function extractPackageFile(
 
     // both '/' and ':' are valid separators, but the Maven datasource
     // expects the separator to be ':'
-    const gav = rawGav.replace(/\//g, ':');
+    const gav = rawGav.replace(regEx(/\//g), ':');
 
     // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
     // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
@@ -83,7 +85,7 @@ export function extractPackageFile(
       continue;
     }
     // parsing should use the last entry for the version
-    const currentValue = parts[parts.length - 1];
+    const currentValue = parts.at(-1)!;
     const result: PackageDependency = {
       datasource: MavenDatasource.id,
       depName: `${parts[0]}:${parts[1]}`,
@@ -131,7 +133,7 @@ function extractArtifactList(
   sectionValue: unknown,
 ): Bundle[] {
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
-  if (sectionName.includes(':ARTIFACTS|') && is.array(sectionValue)) {
+  if (sectionName.includes(':ARTIFACTS|') && isArray(sectionValue)) {
     return sectionValue as Bundle[];
   }
 

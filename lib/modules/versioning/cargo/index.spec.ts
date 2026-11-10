@@ -1,4 +1,4 @@
-import { api as semver } from '.';
+import { api as semver } from './index.ts';
 
 describe('modules/versioning/cargo/index', () => {
   it.each`
@@ -98,19 +98,13 @@ describe('modules/versioning/cargo/index', () => {
     expect(!!semver.isSingleVersion(version)).toBe(expected);
   });
 
+  it('returns a pinned value', () => {
+    expect(semver.getPinnedValue?.('1.2.3')).toBe('=1.2.3');
+  });
+
   it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion      | expected
-    ${'*'}                   | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'1'}                   | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'1.0'}                 | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'1.0.0'}               | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'^1'}                  | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'^1.0'}                | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'^1.0.0'}              | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'~1'}                  | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
     ${'~0.7'}                | ${'replace'}  | ${'0.7.3'}     | ${'0.8.5'}      | ${'~0.8'}
-    ${'~1.0'}                | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
-    ${'~1.0.0'}              | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
     ${null}                  | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}      | ${null}
     ${'*'}                   | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}      | ${'*'}
     ${'=1.0.0'}              | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}      | ${'=1.1.0'}
@@ -152,6 +146,7 @@ describe('modules/versioning/cargo/index', () => {
     ${'>= 1.2.3, <= 1'}      | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'}      | ${'>= 1.2.4, <= 1'}
     ${'>= 1.2.3, <= 1.0'}    | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'}      | ${'>= 1.2.4, <= 1.2'}
     ${'>= 0.0.1, < 0.1'}     | ${'bump'}     | ${'0.1.0'}     | ${'0.2.1'}      | ${'>= 0.2.1, < 0.3'}
+    ${'>=1.0.0, <2.0.0'}     | ${'bump'}     | ${'1.0.0'}     | ${'1.0.1'}      | ${'>=1.0.1, <2.0.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -163,6 +158,37 @@ describe('modules/versioning/cargo/index', () => {
           newVersion,
         }),
       ).toBe(expected);
+    },
+  );
+
+  it.each`
+    subRange           | superRange       | expected
+    ${'1.70'}          | ${'1.63'}        | ${true}
+    ${'1.63'}          | ${'1.70'}        | ${false}
+    ${'1.2.3'}         | ${'1.2'}         | ${true}
+    ${'0.4'}           | ${'0.4.1'}       | ${false}
+    ${'^1.5'}          | ${'^1.0'}        | ${true}
+    ${'>=1.5'}         | ${'>=1.0'}       | ${true}
+    ${'>=1.0, <1.5'}   | ${'>=1.0, <2.0'} | ${true}
+    ${'>=1.0, <2.0'}   | ${'>=1.0, <1.5'} | ${false}
+    ${'not-a-version'} | ${'1.0'}         | ${false}
+  `(
+    'subset("$subRange", "$superRange") === $expected',
+    ({ subRange, superRange, expected }) => {
+      expect(semver.subset?.(subRange, superRange)).toBe(expected);
+    },
+  );
+
+  it.each`
+    subRange           | superRange | expected
+    ${'1.70'}          | ${'1.63'}  | ${true}
+    ${'1.63'}          | ${'1.70'}  | ${true}
+    ${'1.0'}           | ${'3.0'}   | ${false}
+    ${'not-a-version'} | ${'1.0'}   | ${false}
+  `(
+    'intersects("$subRange", "$superRange") === $expected',
+    ({ subRange, superRange, expected }) => {
+      expect(semver.intersects?.(subRange, superRange)).toBe(expected);
     },
   );
 

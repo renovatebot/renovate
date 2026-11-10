@@ -1,56 +1,39 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
-import upath from 'upath';
-import { logger } from '../../../../logger';
-import { readLocalFile } from '../../../../util/fs';
-import { Lazy } from '../../../../util/lazy';
-import type { PackageJsonSchema } from '../schema';
-import { PackageJson } from '../schema';
+import { logger } from '../../../../logger/index.ts';
+import { Lazy } from '../../../../util/lazy.ts';
+import type { PackageJson } from '../schema.ts';
+import { loadPackageJson } from '../utils.ts';
 
 export function lazyLoadPackageJson(
   lockFileDir: string,
-): Lazy<Promise<PackageJsonSchema>> {
+): Lazy<Promise<PackageJson>> {
   return new Lazy(() => loadPackageJson(lockFileDir));
-}
-
-export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;
-
-export async function loadPackageJson(
-  lockFileDir: string,
-): Promise<PackageJsonSchema> {
-  const json = await readLocalFile(
-    upath.join(lockFileDir, 'package.json'),
-    'utf8',
-  );
-  const res = PackageJson.safeParse(json);
-  if (res.success) {
-    return res.data;
-  }
-  return {};
 }
 
 export function getPackageManagerVersion(
   name: string,
-  pkg: PackageJsonSchema,
+  pkg: PackageJson,
 ): string | null {
-  if (pkg.volta?.[name]) {
-    const version = pkg.volta[name];
-    logger.debug(`Found ${name} constraint in package.json volta: ${version}`);
-
-    return version;
-  }
   if (pkg.devEngines?.packageManager) {
-    const packageManagers = is.array(pkg.devEngines.packageManager)
+    const packageManagers = isArray(pkg.devEngines.packageManager)
       ? pkg.devEngines.packageManager
       : [pkg.devEngines.packageManager];
     const packageMgr = packageManagers.find((pm) => pm.name === name);
     const version = packageMgr?.version;
+    // v8 ignore else -- TODO: add test #40625
     if (version) {
       logger.debug(
         `Found ${name} constraint in package.json devEngines: ${version}`,
       );
       return version;
     }
+  }
+  if (pkg.volta?.[name]) {
+    const version = pkg.volta[name];
+    logger.debug(`Found ${name} constraint in package.json volta: ${version}`);
+
+    return version;
   }
   if (pkg.packageManager?.name === name) {
     const version = pkg.packageManager.version;
@@ -70,4 +53,8 @@ export function getPackageManagerVersion(
     return version;
   }
   return null;
+}
+
+export function getNodeOptions(nodeMaxMemory: number): string {
+  return `--max-old-space-size=${nodeMaxMemory}`;
 }

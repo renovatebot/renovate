@@ -1,6 +1,6 @@
-import { newlineRegex } from '../../../util/regex';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { newlineRegex } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
@@ -34,11 +34,24 @@ function handleDepInMintfile(line: string): PackageDependency {
       skipReason: 'unspecified-version',
     };
   }
-  const [depName, currentVersion] = line.split('@').map((s) => s.trim());
+  const [depDefinition, currentVersion] = line.split('@').map((s) => s.trim());
+  let depName = depDefinition;
+  let packageName = `https://github.com/${depName}.git`;
+
+  if (
+    depDefinition.startsWith('http://') ||
+    depDefinition.startsWith('https://')
+  ) {
+    packageName = depDefinition.endsWith('.git')
+      ? depDefinition
+      : `${depDefinition}.git`;
+    depName = packageName.replace('.git', '').split('/').slice(-2).join('/');
+  }
+
   return {
     depName,
     currentValue: currentVersion,
     datasource: GitTagsDatasource.id,
-    packageName: `https://github.com/${depName}.git`,
+    packageName,
   };
 }

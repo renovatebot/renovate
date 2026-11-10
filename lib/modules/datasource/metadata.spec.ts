@@ -1,19 +1,19 @@
-import type { Timestamp } from '../../util/timestamp';
-import { GitTagsDatasource } from './git-tags';
-import { HelmDatasource } from './helm';
-import { MavenDatasource } from './maven';
+import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
+import type { Timestamp } from '../../util/timestamp.ts';
+import { GitTagsDatasource } from './git-tags/index.ts';
+import { HelmDatasource } from './helm/index.ts';
+import { MavenDatasource } from './maven/index.ts';
 import {
   addMetaData,
   massageGithubUrl,
   massageGitlabUrl,
   massageUrl,
   shouldDeleteHomepage,
-} from './metadata';
-import { NpmDatasource } from './npm';
-import { PypiDatasource } from './pypi';
-import type { ReleaseResult } from './types';
-import { hostRules } from '~test/host-rules';
-import { partial } from '~test/util';
+} from './metadata.ts';
+import { NpmDatasource } from './npm/index.ts';
+import { PypiDatasource } from './pypi/index.ts';
+import type { ReleaseResult } from './types.ts';
 
 describe('modules/datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {
@@ -42,9 +42,10 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'pycountry';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       changelogUrl:
         'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
+      sourceUrl: 'https://github.com/flyingcircusio/pycountry',
     });
   });
 
@@ -74,7 +75,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'mkdocs';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://github.com/mkdocs/mkdocs',
     });
   });
@@ -105,7 +106,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'django-filter';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://github.com/carltongibson/django-filter',
     });
   });
@@ -126,18 +127,21 @@ describe('modules/datasource/metadata', () => {
       addMetaData(dep, datasource, packageName);
       expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
+        sourceDirectory: expectedSourceDirectory,
       });
     },
   );
 
   it.each`
-    sourceUrl                                      | expectedSourceUrl
-    ${'git@gitlab.com:group/sub-group/repo'}       | ${'https://gitlab.com/group/sub-group/repo'}
-    ${'git@gitlab.com:group/sub-group/repo.git'}   | ${'https://gitlab.com/group/sub-group/repo'}
-    ${'git@somehost.com:group/sub-group/repo.git'} | ${'https://somehost.com/group/sub-group/repo'}
+    sourceUrl                                            | expectedSourceUrl
+    ${'git@gitlab.com:group/sub-group/repo'}             | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git@gitlab.com:group/sub-group/repo.git'}         | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git@somehost.com:group/sub-group/repo.git'}       | ${'https://somehost.com/group/sub-group/repo'}
+    ${'git+https://gitlab.com/group/sub-group/repo.git'} | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git+ssh://git@gitlab.com/group/sub/repo.git'}     | ${'https://gitlab.com/group/sub/repo'}
   `(
     'Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl',
-    ({ sourceUrl, expectedSourceUrl, expectedSourceDirectory }) => {
+    ({ sourceUrl, expectedSourceUrl }) => {
       const dep: ReleaseResult = { sourceUrl, releases: [] };
       const datasource = GitTagsDatasource.id;
       const packageName = 'some-dep';
@@ -219,7 +223,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'django-filter';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://github.com/some/repo',
     });
   });
@@ -242,7 +246,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/meno/dropzone',
     });
   });
@@ -265,7 +269,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab-nope',
     });
   });
@@ -288,7 +292,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://nope-nope-nope',
     });
   });
@@ -311,8 +315,18 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).not.toContainKey('sourceUrl');
-    expect(dep).toMatchSnapshot();
+    expect(dep).toEqual({
+      releases: [
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z',
+        },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+        },
+      ],
+    });
   });
 
   it('Should handle parsing/converting of GitHub sourceUrls with http and www correctly', () => {
@@ -393,6 +407,9 @@ describe('modules/datasource/metadata', () => {
       ${'https+git://github.com/user/repo'}
       ${'ssh://git@github.com/user/repo'}
       ${'git://github.com/user/repo'}
+      ${'git+https://github.com/user/repo'}
+      ${'git+ssh://git@github.com/user/repo'}
+      ${'git+git@github.com:user/repo'}
       ${'https://www.github.com/user/repo'}
       ${'https://user.github.com/repo'}
     `('Should massage GitHub url $sourceUrl', ({ sourceUrl }) => {
@@ -407,8 +424,17 @@ describe('modules/datasource/metadata', () => {
       ${'http://gitlab.com/user/repo/'}
       ${'http://gitlab.com/user/repo.git'}
       ${'git@gitlab.com:user/repo.git'}
+      ${'ssh://git@gitlab.com/user/repo'}
+      ${'git+https://gitlab.com/user/repo.git'}
+      ${'git+https://gitlab.com/user/repo'}
     `('Should massage GitLab url $sourceUrl', ({ sourceUrl }) => {
       expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
+    });
+
+    it('Should massage a GitLab subgroup git+https url', () => {
+      expect(massageUrl('git+https://gitlab.com/group/subgroup/repo.git')).toBe(
+        'https://gitlab.com/group/subgroup/repo',
+      );
     });
 
     it.each`
@@ -632,6 +658,36 @@ describe('modules/datasource/metadata', () => {
       expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
     },
   );
+
+  it.each`
+    urlKey             | rawUrl                                           | expectedUrl
+    ${'sourceUrl'}     | ${'https://user:token@example.com/foo/bar'}      | ${'https://example.com/foo/bar'}
+    ${'homepage'}      | ${'https://user:token@example.com/'}             | ${'https://example.com/'}
+    ${'changelogUrl'}  | ${'https://user:token@example.com/CHANGELOG.md'} | ${'https://example.com/CHANGELOG.md'}
+    ${'dependencyUrl'} | ${'https://user:token@example.com/maven2/foo'}   | ${'https://example.com/maven2/foo'}
+  `(
+    'removes userinfo credentials from $urlKey',
+    ({ urlKey, rawUrl, expectedUrl }) => {
+      const dep: ReleaseResult = { releases: [], [urlKey]: rawUrl };
+
+      addMetaData(dep, MavenDatasource.id, 'foobar');
+      expect(dep).toMatchObject({ [urlKey]: expectedUrl });
+    },
+  );
+
+  it('keeps an ssh git@ source URL working', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'git@gitlab.com:group/sub-group/repo.git',
+      releases: [],
+    };
+    const datasource = GitTagsDatasource.id;
+    const packageName = 'some-dep';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/group/sub-group/repo',
+    });
+  });
 
   // for coverage
   it('should handle dep with no releases', () => {

@@ -1,4 +1,4 @@
-import { Lazy } from './lazy';
+import { Lazy } from './lazy.ts';
 
 describe('util/lazy', () => {
   describe('.getValue()', () => {
@@ -23,7 +23,7 @@ describe('util/lazy', () => {
         throw new Error();
       });
       const lazy = new Lazy(() => spy());
-      expect(() => lazy.getValue()).toThrow();
+      expect(() => lazy.getValue()).toThrow(Error);
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
@@ -32,8 +32,8 @@ describe('util/lazy', () => {
         throw new Error();
       });
       const lazy = new Lazy(() => spy());
-      expect(() => lazy.getValue()).toThrow();
-      expect(() => lazy.getValue()).toThrow();
+      expect(() => lazy.getValue()).toThrow(Error);
+      expect(() => lazy.getValue()).toThrow(Error);
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });

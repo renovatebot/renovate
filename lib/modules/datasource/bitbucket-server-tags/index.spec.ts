@@ -1,7 +1,7 @@
-import { getDigest, getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { HttpError } from '../../../util/http';
-import { BitbucketServerTagsDatasource } from '.';
+import * as httpMock from '../../../../test/http-mock.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { BitbucketServerTagsDatasource } from './index.ts';
 
 const datasource = BitbucketServerTagsDatasource.id;
 const baseUrl = 'https://bitbucket.some.domain.org';

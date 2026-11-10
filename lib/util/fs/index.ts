@@ -1,12 +1,13 @@
 import stream from 'node:stream';
 import util from 'node:util';
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
 export const pipeline = util.promisify(stream.pipeline);
 
@@ -36,6 +37,9 @@ export async function readLocalFile(
     const fileContent = encoding
       ? await fs.readFile(localFileName, encoding)
       : await fs.readFile(localFileName);
+
+    logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
+
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
@@ -85,8 +89,18 @@ export async function renameLocalFile(
   await fs.move(fromPath, toPath);
 }
 
+export async function renameCacheFile(
+  fromFile: string,
+  toFile: string,
+): Promise<void> {
+  const fromPath = ensureCachePath(fromFile);
+  const toPath = ensureCachePath(toFile);
+  await fs.rename(fromPath, toPath);
+}
+
 export async function ensureDir(dirName: string): Promise<void> {
-  if (is.nonEmptyString(dirName)) {
+  // v8 ignore else -- TODO: add test #40625
+  if (isNonEmptyString(dirName)) {
     await fs.ensureDir(dirName);
   }
 }
@@ -109,6 +123,7 @@ export async function ensureCacheDir(name: string): Promise<string> {
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
+  // TODO: types (#22198)
   const cacheDir = GlobalConfig.get('cacheDir');
   return upath.join(cacheDir, '__renovate-private-cache');
 }
@@ -211,6 +226,7 @@ export async function findUpLocal(
   fileName: string | string[],
   cwd: string,
 ): Promise<string | null> {
+  // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir');
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
@@ -219,13 +235,14 @@ export async function findUpLocal(
     type: 'file',
   });
   // Return null if nothing found
-  if (!is.nonEmptyString(res) || !is.nonEmptyString(localDir)) {
+  if (!isNonEmptyString(res) || !isNonEmptyString(localDir)) {
     return null;
   }
   const safePath = upath.normalizeSafe(res);
   // Return relative path if file is inside of local dir
   if (safePath.startsWith(localDir)) {
     let relativePath = safePath.replace(localDir, '');
+    // v8 ignore else -- TODO: add test #40625
     if (relativePath.startsWith('/')) {
       relativePath = relativePath.substring(1);
     }
@@ -278,7 +295,8 @@ export function listCacheDir(
 
 export async function rmCache(path: string): Promise<void> {
   const fullPath = ensureCachePath(path);
-  await fs.rm(fullPath, { recursive: true });
+  // force: a missing path is a no-op, callers use this for cleanup
+  await fs.rm(fullPath, { recursive: true, force: true });
 }
 
 export async function cachePathExists(pathName: string): Promise<boolean> {

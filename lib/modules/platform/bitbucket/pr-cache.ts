@@ -1,30 +1,32 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
-import type { BitbucketHttp } from '../../../util/http/bitbucket';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import type { Pr } from '../types';
-import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
-import { prFieldsFilter, prInfo, prStates } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { clone } from '../../../util/clone.ts';
+import type { BitbucketHttp } from '../../../util/http/bitbucket.ts';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type { Pr } from '../types.ts';
+import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types.ts';
+import { prFieldsFilter, prInfo, prStates } from './utils.ts';
+
+const syncedCacheKey = 'bitbucket:pr-cache-synced';
 
 export class BitbucketPrCache {
   private items: Pr[] = [];
   private cache: BitbucketPrCacheData;
+  private repo: string;
+  private author: string | null;
 
-  private constructor(
-    private repo: string,
-    private author: string | null,
-  ) {
+  private constructor(repo: string, author: string | null) {
+    this.repo = repo;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.bitbucket ??= {};
 
     let pullRequestCache = repoCache.platform.bitbucket.pullRequestsCache as
-      | BitbucketPrCacheData
-      | undefined;
+      BitbucketPrCacheData | undefined;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {
@@ -51,13 +53,11 @@ export class BitbucketPrCache {
     author: string | null,
   ): Promise<BitbucketPrCache> {
     const res = new BitbucketPrCache(repo, author);
-    const isSynced = memCache.get<true | undefined>(
-      'bitbucket-pr-cache-synced',
-    );
+    const isSynced = memCache.get<true | undefined>(syncedCacheKey);
 
     if (!isSynced) {
       await res.sync(http);
-      memCache.set('bitbucket-pr-cache-synced', true);
+      memCache.set(syncedCacheKey, true);
     }
 
     return res;
@@ -109,6 +109,7 @@ export class BitbucketPrCache {
       }
 
       const cacheOldTime = updated_on ? DateTime.fromISO(updated_on) : null;
+      // v8 ignore else -- TODO: add test #40625
       if (!cacheOldTime || itemNewTime > cacheOldTime) {
         updated_on = rawItem.updated_on;
       }

@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { parseSingleYaml } from '../../../util/yaml';
-import { HelmDatasource } from '../../datasource/helm';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { parseRepository, resolveAlias } from './utils';
+} from '../types.ts';
+import { parseRepository, resolveAlias } from './utils.ts';
 
 export async function extractPackageFile(
   content: string,
@@ -44,14 +44,14 @@ export async function extractPackageFile(
   }
   const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
-  if (!is.nonEmptyArray(chart?.dependencies)) {
+  if (!isNonEmptyArray(chart?.dependencies)) {
     logger.debug(`Chart has no dependencies in ${packageFile}`);
     return null;
   }
   const validDependencies = chart.dependencies.filter(
-    (dep) => is.nonEmptyString(dep.name) && is.nonEmptyString(dep.version),
+    (dep) => isNonEmptyString(dep.name) && isNonEmptyString(dep.version),
   );
-  if (!is.nonEmptyArray(validDependencies)) {
+  if (!isNonEmptyArray(validDependencies)) {
     logger.debug('Name and/or version missing for all dependencies');
     return null;
   }
@@ -65,6 +65,15 @@ export async function extractPackageFile(
       return res;
     }
 
+    if (dep.repository.startsWith('git+')) {
+      logger.debug(
+        { repository: dep.repository, packageFile },
+        `Skipping unsupported helm-git repository.`,
+      );
+      res.skipReason = 'unknown-registry';
+      return res;
+    }
+
     const repository = resolveAlias(dep.repository, config.registryAliases!);
     if (!repository) {
       res.skipReason = 'placeholder-url';
@@ -73,7 +82,7 @@ export async function extractPackageFile(
 
     const result: PackageDependency = {
       ...res,
-      ...parseRepository(dep.name, repository),
+      ...parseRepository(dep.name, repository, config.registryAliases),
     };
     return result;
   });

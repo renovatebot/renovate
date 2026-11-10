@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import { toArray } from '../../../util/array';
-import { LooseArray } from '../../../util/schema-utils';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency } from '../types';
+import { z } from 'zod/v4';
+import { toArray } from '../../../util/array.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 const GitlabInclude = z
   .object({
@@ -29,7 +29,7 @@ const GitlabIncludes = z
   .union([GitlabInclude.transform(toArray), LooseArray(GitlabInclude)])
   .catch([]);
 
-const GitlabRecord = z.record(z.unknown()).transform((obj) => {
+const GitlabRecord = z.record(z.string(), z.unknown()).transform((obj) => {
   const { include, ...rest } = obj;
   const children = Object.values(rest);
   return { include, children };

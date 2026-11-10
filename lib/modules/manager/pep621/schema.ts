@@ -1,16 +1,21 @@
-import { z } from 'zod';
-import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import { PixiConfigSchema } from '../pixi/schema';
-import type { PackageDependency } from '../types';
-import { depTypes, pep508ToPackageDependency } from './utils';
+import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
+import {
+  LooseArray,
+  LooseRecord,
+  Toml,
+} from '../../../util/schema-utils/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { api as pep440 } from '../../versioning/pep440/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { Pep621ManagerData } from './types.ts';
+import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
-export type PyProject = z.infer<typeof PyProjectSchema>;
+type Pep508Dependency = z.ZodType<PackageDependency<Pep621ManagerData>>;
 
-type Pep508DependencySchema = z.ZodType<PackageDependency<Record<string, any>>>;
-
-function Pep508Dependency(depType: string): Pep508DependencySchema {
+function Pep508Dependency(depType: string): Pep508Dependency {
   return z.string().transform((x, ctx) => {
     const res = pep508ToPackageDependency(depType, x);
 
@@ -25,19 +30,18 @@ function Pep508Dependency(depType: string): Pep508DependencySchema {
     }
 
     return res;
-  }) as Pep508DependencySchema;
+  });
 }
 
-type DependencyGroupSchema = z.ZodType<
-  PackageDependency<Record<string, any>>[]
->;
+type DependencyGroup = z.ZodType<PackageDependency<Pep621ManagerData>[]>;
 
-function DependencyGroup(depType: string): DependencyGroupSchema {
+export function DependencyGroup(depType: string): DependencyGroup {
   return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
     (depGroups) => {
-      const deps: PackageDependency[] = [];
+      const deps: PackageDependency<Pep621ManagerData>[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
+          // v8 ignore else -- the parser always sets a package name on a group dep
           if (dep.packageName) {
             dep.depName = dep.packageName;
           }
@@ -47,10 +51,10 @@ function DependencyGroup(depType: string): DependencyGroupSchema {
       }
       return deps;
     },
-  ) as unknown as DependencyGroupSchema;
+  );
 }
 
-const PdmSchema = z
+const PdmConfig = z
   .object({
     'dev-dependencies': DependencyGroup(depTypes.pdmDevDependencies).catch([]),
     source: LooseArray(
@@ -89,13 +93,13 @@ const PdmSchema = z
     }),
   );
 
-const HatchSchema = z
+const HatchConfig = z
   .object({
     envs: LooseRecord(
       z.string(),
       z.object({
-        dependencies: z.unknown(),
-        'extra-dependencies': z.unknown(),
+        dependencies: z.unknown().optional(),
+        'extra-dependencies': z.unknown().optional(),
       }),
     ),
   })
@@ -148,8 +152,16 @@ const UvSource = z.union([
   UvPathSource,
   UvWorkspaceSource,
 ]);
+export type UvSource = z.infer<typeof UvSource>;
 
-const UvSchema = z.object({
+// A dependency can declare a single source or, when disambiguated by
+// environment markers, an array of sources. Normalize both to an array.
+// https://docs.astral.sh/uv/concepts/projects/dependencies/#multiple-sources
+const UvSources = z
+  .union([UvSource, z.array(UvSource).min(1)])
+  .transform((source) => (Array.isArray(source) ? source : [source]));
+
+const UvConfig = z.object({
   'dev-dependencies': LooseArray(
     Pep508Dependency(depTypes.uvDevDependencies),
   ).catch([]),
@@ -157,7 +169,7 @@ const UvSchema = z.object({
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
-    UvSource,
+    UvSources,
   ).optional(),
   index: z
     .array(
@@ -171,20 +183,37 @@ const UvSchema = z.object({
     .optional(),
 });
 
-export const PyProjectSchema = z.object({
-  project: z
-    .object({
-      version: z.string().optional().catch(undefined),
-      'requires-python': z.string().optional().catch(undefined),
-      dependencies: LooseArray(Pep508Dependency(depTypes.dependencies)).catch(
-        [],
-      ),
-      'optional-dependencies': DependencyGroup(
-        depTypes.optionalDependencies,
-      ).catch([]),
-    })
-    .optional()
-    .catch(undefined),
+export const ProjectSection = z.object({
+  version: z.string().optional().catch(undefined),
+  'requires-python': z.string().optional().catch(undefined),
+  dependencies: LooseArray(Pep508Dependency(depTypes.dependencies)).catch([]),
+  'optional-dependencies': DependencyGroup(depTypes.optionalDependencies).catch(
+    [],
+  ),
+});
+
+const PixiMinimalConfig = z
+  .object({
+    project: z
+      .object({ 'requires-pixi': z.string().optional() })
+      .optional()
+      .catch(undefined),
+    workspace: z
+      .object({ 'requires-pixi': z.string().optional() })
+      .optional()
+      .catch(undefined),
+  })
+  .transform((val) => ({
+    /* v8 ignore start: needs a pixi manifest declaring the requirement only under workspace */
+    'requires-pixi':
+      val.project?.['requires-pixi'] ?? val.workspace?.['requires-pixi'],
+    /* v8 ignore stop */
+  }))
+  .optional()
+  .catch(undefined);
+
+export const PyProject = z.object({
+  project: ProjectSection.optional().catch(undefined),
   'build-system': z
     .object({
       requires: LooseArray(
@@ -197,16 +226,17 @@ export const PyProjectSchema = z.object({
   'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
   tool: z
     .object({
-      pixi: PixiConfigSchema.optional().catch(undefined),
-      pdm: PdmSchema.optional().catch(undefined),
-      hatch: HatchSchema.optional().catch(undefined),
-      uv: UvSchema.optional().catch(undefined),
+      pdm: PdmConfig.optional().catch(undefined),
+      hatch: HatchConfig.optional().catch(undefined),
+      uv: UvConfig.optional().catch(undefined),
+      pixi: PixiMinimalConfig,
     })
     .optional()
     .catch(undefined),
 });
+export type PyProject = z.infer<typeof PyProject>;
 
-export const PdmLockfileSchema = Toml.pipe(
+export const PdmLockfile = Toml.pipe(
   z.object({
     package: LooseArray(
       z.object({
@@ -223,17 +253,119 @@ export const PdmLockfileSchema = Toml.pipe(
   )
   .transform((lock) => ({ lock }));
 
-export const UvLockfileSchema = Toml.pipe(
+export interface UvLockedPackage {
+  version: string;
+  /**
+   * Whether the lock file holds more than one entry for this package, as it
+   * does when resolution markers resolve to different versions. Such a package
+   * cannot be upgraded to a pinned version, because `uv` reads the pin as a
+   * constraint on every marker, and so may downgrade the other entries, or
+   * fail to resolve at all.
+   */
+  hasMultipleEntries?: boolean;
+  /**
+   * The index a package was resolved from, if any. Absent for the workspace
+   * root and for virtual/editable/path/git packages, which cannot be
+   * remediated by `uv lock --upgrade-package`.
+   */
+  registryUrl?: string;
+}
+
+export interface UvLockfileData {
+  packages: Record<string, UvLockedPackage>;
+  /**
+   * Every package name which a workspace member declares. A workspace shares
+   * one lock file between its members, so a package one member declares is not
+   * transitive just because another member doesn't declare it.
+   */
+  declaredNames: Set<string>;
+}
+
+const UvLockedDependencies = LooseArray(z.object({ name: z.string() }))
+  .optional()
+  .catch(undefined);
+const UvLockedDependencyGroups = z
+  .record(z.string(), LooseArray(z.object({ name: z.string() })))
+  .optional()
+  .catch(undefined);
+
+/**
+ * The source of a workspace member, as opposed to a package which was fetched:
+ * the workspace root is `virtual`, a member with a build backend `editable`.
+ */
+const UvWorkspaceMemberSource = z.object({
+  virtual: z.string().optional(),
+  editable: z.string().optional(),
+});
+
+export const UvLockfile = Toml.pipe(
   z.object({
+    manifest: z
+      .object({ members: LooseArray(z.string()) })
+      .partial()
+      .optional()
+      .catch(undefined),
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
+        source: z
+          .object({ registry: z.string() })
+          .partial()
+          .and(UvWorkspaceMemberSource)
+          .optional(),
+        dependencies: UvLockedDependencies,
+        'optional-dependencies': UvLockedDependencyGroups,
+        'dev-dependencies': UvLockedDependencyGroups,
       }),
     ),
   }),
-).transform(({ package: pkg }) =>
-  Object.fromEntries(
-    pkg.map(({ name, version }): [string, string] => [name, version]),
-  ),
-);
+).transform(({ manifest, package: pkgs }): UvLockfileData => {
+  const packages: Record<string, UvLockedPackage> = {};
+  const declaredNames = new Set<string>();
+  const members = new Set(coerceArray(manifest?.members));
+
+  for (const pkg of pkgs) {
+    const { name, version, source } = pkg;
+
+    // Only a workspace member declares its dependencies in a `pyproject.toml`
+    // of its own. A git, path or url package also has no registry, but what it
+    // depends on is as transitive as anything else in the lock file.
+    // A workspace names its members, and the root is the lock file's own
+    // directory. An editable path dependency outside the workspace carries a
+    // path of its own, and what it pulls in is as transitive as anything else.
+    const workspacePath = source?.virtual ?? source?.editable;
+    if (members.has(name) || workspacePath === '.') {
+      for (const group of [
+        pkg.dependencies,
+        ...Object.values(coerceObject(pkg['optional-dependencies'])),
+        ...Object.values(coerceObject(pkg['dev-dependencies'])),
+      ]) {
+        for (const dependency of coerceArray(group)) {
+          declaredNames.add(dependency.name);
+        }
+      }
+    }
+
+    const locked = packages[name];
+    // A package can be locked at several versions, e.g. for different Python
+    // versions or platforms. Use the lowest one, so updates are not missed.
+    if (!locked) {
+      packages[name] = { version, registryUrl: source?.registry };
+      continue;
+    }
+
+    locked.hasMultipleEntries = true;
+    // any entry of a package may be the one with a registry to look it up in
+    locked.registryUrl ??= source?.registry;
+    if (pep440.isGreaterThan(locked.version, version)) {
+      packages[name] = {
+        version,
+        registryUrl: source?.registry ?? locked.registryUrl,
+        hasMultipleEntries: true,
+      };
+    }
+  }
+
+  return { packages, declaredNames };
+});

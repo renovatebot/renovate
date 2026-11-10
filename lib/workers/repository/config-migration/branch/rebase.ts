@@ -1,14 +1,14 @@
 import JSON5 from 'json5';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import { getFile } from '../../../../util/git';
-import { quickStringify } from '../../../../util/stringify';
-import { getMigrationBranchName } from '../common';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { MigratedDataFactory } from './migrated-data';
-import type { MigratedData } from './migrated-data';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
+import { commitConfigFile } from '../../model/commit-config-file.ts';
+import { getMigrationBranchName } from '../common.ts';
+import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { MigratedDataFactory } from './migrated-data.ts';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
@@ -18,42 +18,40 @@ export async function rebaseMigrationBranch(
   const baseBranch = config.defaultBranch!;
   const branchName = getMigrationBranchName(config);
   const configFileName = migratedConfigData.filename;
-  let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
   if (
-    jsonStripWhitespaces(contents) === jsonStripWhitespaces(existingContents)
+    jsonStripWhitespaces(migratedConfigData.content) ===
+    jsonStripWhitespaces(existingContents)
   ) {
     logger.debug('Migration branch is up to date');
     return null;
   }
   logger.debug('Rebasing migration branch');
 
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would rebase files in migration branch');
-    return null;
-  }
-
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName,
   );
-  const commitMessage = commitMessageFactory.getCommitMessage();
 
-  await scm.checkoutBranch(baseBranch);
-  contents =
-    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
+  return await commitConfigFile({
+    config,
     branchName,
-    files: [
-      {
-        type: 'addition',
-        path: configFileName,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
+    getFiles: async () => {
+      await scm.checkoutBranch(baseBranch);
+      return [
+        {
+          type: 'addition',
+          path: configFileName,
+          contents:
+            await MigratedDataFactory.applyPrettierFormatting(
+              migratedConfigData,
+            ),
+        },
+      ];
+    },
+    message: commitMessageFactory.getCommitMessage(),
+    prTitle: commitMessageFactory.getPrTitle(),
+    dryRunMessage: 'DRY-RUN: Would rebase files in migration branch',
   });
 }
 
@@ -72,6 +70,7 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
+  // v8 ignore next -- JSON5 output is always serializable back to JSON
   return (
     quickStringify(JSON5.parse(json)) ??
     /* istanbul ignore next: should never happen */ null

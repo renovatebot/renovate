@@ -1,29 +1,29 @@
-import { TrustLevelMigration } from './trust-level-migration';
+import { TrustLevelMigration } from './trust-level-migration.ts';
 
 describe('config/migrations/custom/trust-level-migration', () => {
-  it('should handle hight level', () => {
-    expect(TrustLevelMigration).toMigrate(
+  it('should handle hight level', async () => {
+    await expect(TrustLevelMigration).toMigrate(
       {
         trustLevel: 'high',
       },
       {
-        allowCustomCrateRegistries: true,
+        allowCustomCrateGitRegistries: true,
         allowScripts: true,
         exposeAllEnv: true,
       },
     );
   });
 
-  it('should not rewrite provided properties', () => {
-    expect(TrustLevelMigration).toMigrate(
+  it('should not rewrite provided properties', async () => {
+    await expect(TrustLevelMigration).toMigrate(
       {
-        allowCustomCrateRegistries: false,
+        allowCustomCrateGitRegistries: false,
         allowScripts: false,
         exposeAllEnv: false,
         trustLevel: 'high',
       },
       {
-        allowCustomCrateRegistries: false,
+        allowCustomCrateGitRegistries: false,
         allowScripts: false,
         exposeAllEnv: false,
       },

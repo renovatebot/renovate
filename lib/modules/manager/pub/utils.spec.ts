@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { parsePubspec, parsePubspecLock } from './utils';
+import { parsePubspec, parsePubspecLock } from './utils.ts';
 
 describe('modules/manager/pub/utils', () => {
   const fileName = 'fileName';

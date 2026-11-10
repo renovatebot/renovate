@@ -1,12 +1,14 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { id as versioning } from '../../versioning/python';
-import { Datasource } from '../datasource';
-import { EndoflifeDateDatasource } from '../endoflife-date';
-import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
-import { GithubReleasesDatasource } from '../github-releases';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl, githubBaseUrl } from './common';
-import { PythonRelease } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { isRateLimited } from '../../../util/http/status.ts';
+import { id as versioning } from '../../versioning/python/index.ts';
+import { Datasource } from '../datasource.ts';
+import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
+import { EndoflifeDateDatasource } from '../endoflife-date/index.ts';
+import { GithubReleasesDatasource } from '../github-releases/index.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl, githubBaseUrl } from './common.ts';
+import { PythonRelease } from './schema.ts';
 
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -19,13 +21,15 @@ export class PythonVersionDatasource extends Datasource {
     this.pythonEolDatasource = new EndoflifeDateDatasource();
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = versioning;
-
-  override readonly caching = true;
 
   async getPrebuildReleases(): Promise<ReleaseResult | null> {
     return await this.pythonPrebuildDatasource.getReleases({
@@ -41,14 +45,10 @@ export class PythonVersionDatasource extends Datasource {
     });
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -79,7 +79,15 @@ export class PythonVersionDatasource extends Datasource {
           .filter((release) => pythonPrebuildVersions.has(release.version)),
       );
     } catch (err) {
-      this.handleGenericErrors(err);
+      if (isRateLimited(err)) {
+        logger.debug(
+          { err },
+          'Rate limited by python.org, using prebuild releases',
+        );
+        result.releases.push(...coerceArray(pythonPrebuildReleases?.releases));
+      } else {
+        this.handleGenericErrors(err);
+      }
     }
     for (const release of result.releases) {
       release.isDeprecated = pythonEolVersions.get(
@@ -88,5 +96,15 @@ export class PythonVersionDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: config.registryUrl!,
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 }

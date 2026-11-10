@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../config/global';
-import { getEnv } from '../../../util/env';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageFileContent } from '../types';
-import type { PipRequirementsManagerData } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { getEnv } from '../../../util/env.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { PackageFileContent } from '../types.ts';
+import type { PipRequirementsManagerData } from './types.ts';
 
 function cleanRegistryUrls(registryUrls: string[]): string[] {
   return registryUrls.map((url) => {
@@ -13,7 +13,7 @@ function cleanRegistryUrls(registryUrls: string[]): string[] {
     }
     // interpolate any environment variables
     return cleaned.replace(
-      regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
+      regEx(/(?:\$[A-Za-z\d_]+)|(?:\${[A-Za-z\d_]+})/g),
       (match) => {
         const envvar = match
           .substring(1)

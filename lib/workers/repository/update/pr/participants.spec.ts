@@ -1,18 +1,19 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import type { Pr } from '../../../../modules/platform/types';
-import * as _util from '../../../../util/sample';
-import * as _codeOwners from './code-owners';
-import { addParticipants } from './participants';
-import { partial, platform } from '~test/util';
+import { partial, platform } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
+import * as _util from '../../../../util/sample.ts';
+import * as _codeOwners from './code-owners.ts';
+import { addParticipants } from './participants.ts';
 
-vi.mock('../../../../util/sample');
+vi.mock('../../../../util/sample.ts');
 const util = vi.mocked(_util);
 
-vi.mock('./code-owners');
+vi.mock('./code-owners.ts');
 const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
+  // oxlint-disable-next-line renovate/prefer-partial-in-specs -- assigneesSampleSize/reviewersSampleSize intentionally set to null, which the type does not allow, to simulate an unset value
   const config: RenovateConfig = {
     assignees: ['a', 'b', '@c'],
     reviewers: ['x', 'y', '@z'],
@@ -35,7 +36,11 @@ describe('workers/repository/update/pr/participants', () => {
 
     it('adds assignees', async () => {
       await addParticipants(config, pr);
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b', 'c']);
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
+        'a',
+        'b',
+        'c',
+      ]);
     });
 
     it('filters assignees', async () => {
@@ -43,7 +48,18 @@ describe('workers/repository/update/pr/participants', () => {
         .fn()
         .mockResolvedValueOnce(['a', 'b']);
       await addParticipants({ ...config, filterUnavailableUsers: true }, pr);
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b']);
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
+        'a',
+        'b',
+      ]);
+    });
+
+    it('adds nothing when filtering leaves no assignee', async () => {
+      platform.filterUnavailableUsers = vi.fn().mockResolvedValueOnce([]);
+
+      await addParticipants({ ...config, filterUnavailableUsers: true }, pr);
+
+      expect(platform.addAssignees).not.toHaveBeenCalled();
     });
 
     it('expands group code owners assignees', async () => {
@@ -63,13 +79,15 @@ describe('workers/repository/update/pr/participants', () => {
         },
         pr,
       );
-      expect(platform.expandGroupMembers).toHaveBeenCalledWith([
+      expect(platform.expandGroupMembers).toHaveBeenCalledExactlyOnceWith([
         'user',
         '@group',
         'u@email.com',
       ]);
-      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledExactlyOnceWith({
+        number: 123,
+      });
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
         'a',
         'b',
         'c',
@@ -87,7 +105,11 @@ describe('workers/repository/update/pr/participants', () => {
       await addParticipants(config, pr);
       expect(codeOwners.codeOwnersForPr).not.toHaveBeenCalled();
       expect(platform.expandGroupMembers).not.toHaveBeenCalled();
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b', 'c']);
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
+        'a',
+        'b',
+        'c',
+      ]);
     });
 
     it('does not expand group code owners assignees when expandCodeOwnersGroups disabled', async () => {
@@ -96,9 +118,11 @@ describe('workers/repository/update/pr/participants', () => {
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants({ ...config, assigneesFromCodeOwners: true }, pr);
-      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
+      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledExactlyOnceWith({
+        number: 123,
+      });
       expect(platform.expandGroupMembers).not.toHaveBeenCalled();
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
         'a',
         'b',
         'c',
@@ -110,7 +134,10 @@ describe('workers/repository/update/pr/participants', () => {
     it('supports assigneesSampleSize', async () => {
       util.sampleSize.mockReturnValueOnce(['a', 'c']);
       await addParticipants({ ...config, assigneesSampleSize: 2 }, pr);
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'c']);
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
+        'a',
+        'c',
+      ]);
     });
 
     it('handles add assignee errors', async () => {
@@ -127,7 +154,7 @@ describe('workers/repository/update/pr/participants', () => {
     it('supports assigneesFromCodeOwners', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce(['foo', 'bar', 'baz']);
       await addParticipants({ ...config, assigneesFromCodeOwners: true }, pr);
-      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
         'a',
         'b',
         'c',
@@ -146,7 +173,11 @@ describe('workers/repository/update/pr/participants', () => {
 
     it('adds reviewers', async () => {
       await addParticipants(config, pr);
-      expect(platform.addReviewers).toHaveBeenCalledWith(123, ['x', 'y', 'z']);
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'x',
+        'y',
+        'z',
+      ]);
     });
 
     it('handles add assignee errors', async () => {
@@ -157,7 +188,10 @@ describe('workers/repository/update/pr/participants', () => {
     it('supports reviewersSampleSize', async () => {
       util.sampleSize.mockReturnValueOnce(['x', 'z']);
       await addParticipants({ ...config, reviewersSampleSize: 2 }, pr);
-      expect(platform.addReviewers).toHaveBeenCalledWith(123, ['x', 'z']);
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'x',
+        'z',
+      ]);
     });
 
     it('supports dry run assignee adding', async () => {
@@ -169,7 +203,7 @@ describe('workers/repository/update/pr/participants', () => {
     it('supports reviewersFromCodeOwners', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce(['foo', 'bar', 'baz']);
       await addParticipants({ ...config, reviewersFromCodeOwners: true }, pr);
-      expect(platform.addReviewers).toHaveBeenCalledWith(123, [
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
         'x',
         'y',
         'z',
@@ -179,12 +213,28 @@ describe('workers/repository/update/pr/participants', () => {
       ]);
     });
 
+    it('filters out bare @ from malformed CODEOWNERS entries', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce([
+        '@UserOne',
+        '@UserTwo',
+        '@',
+      ]);
+      await addParticipants(
+        { ...config, reviewers: [], reviewersFromCodeOwners: true },
+        pr,
+      );
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'UserOne',
+        'UserTwo',
+      ]);
+    });
+
     it('supports additionalReviewers', async () => {
       await addParticipants(
         { ...config, additionalReviewers: ['foo', 'bar', 'baz'] },
         pr,
       );
-      expect(platform.addReviewers).toHaveBeenCalledWith(123, [
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
         'x',
         'y',
         'z',

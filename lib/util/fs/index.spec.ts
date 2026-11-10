@@ -3,7 +3,8 @@ import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   cachePathExists,
   cachePathIsFile,
@@ -31,15 +32,16 @@ import {
   readLocalFile,
   readLocalSymlink,
   readSystemFile,
+  renameCacheFile,
   renameLocalFile,
   rmCache,
   statCacheFile,
   statLocalFile,
   writeLocalFile,
   writeSystemFile,
-} from '.';
+} from './index.ts';
 
-vi.mock('../exec/env');
+vi.mock('../exec/env.ts');
 vi.mock('find-up');
 const findUp = vi.mocked(_findUp);
 
@@ -121,7 +123,80 @@ describe('util/fs/index', () => {
     });
 
     it('returns null if file is not found', async () => {
-      expect(await readLocalFile('foobar')).toBeNull();
+      await expect(readLocalFile('foobar')).resolves.toBeNull();
+    });
+
+    it('logs a warning if hidden Unciode characters are found', async () => {
+      await fs.outputFile(`${localDir}/file.txt`, 'some\u00A0content\u200Bfoo');
+      await readLocalFile('file.txt', 'utf8');
+
+      // NOTE that we cannot test that this is called once across multiple `readLocalFile` as we're mocking the logger, so we're testing that it's called, not validating the nubmer of times
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200B' },
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
+    it('does not log the same hidden Unciode characters if found multiple times', async () => {
+      await fs.outputFile(
+        `${localDir}/file.txt`,
+        'some\u00A0content\u200Bfoo\u200Bbaz',
+      );
+      await readLocalFile('file.txt', 'utf8');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200B' },
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
+    it('logs a trace message (not warning) if hidden Unicode characters are found in a binary file', async () => {
+      // Create a binary file with null bytes (making it binary) and zero-width space (U+200B)
+      const binaryContent = Buffer.from([
+        0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x00,
+      ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)
+      await fs.outputFile(`${localDir}/binary.zip`, binaryContent);
+      await readLocalFile('binary.zip');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        {
+          file: 'binary.zip',
+          hiddenCharacters: expect.stringContaining('\\u200B'),
+        },
+        'Hidden Unicode characters discovered in file `binary.zip`, but not logging higher than TRACE as it appears to be a binary file',
+      );
+    });
+
+    // Via https://github.com/renovatebot/renovate/discussions/41381 and https://github.com/renovatebot/renovate/pull/41353, the Byte Order Mark (BOM) character is common on Windows-based platforms
+    describe('if hidden Byte Order Mark (BOM) Unciode characters are found', () => {
+      it('but no other hidden characters, it logs a trace message', async () => {
+        // via https://github.com/Particular/Particular.Packaging/blob/be9e3f4cb60bba9a4dd06dbc9f25fb7ff152e126/src/Particular.Packaging.Tasks/Particular.Packaging.Tasks.csproj
+        await fs.outputFile(
+          `${localDir}/example.csproj`,
+          '\uFEFF<Project Sdk="Microsoft.NET.Sdk">',
+        );
+        await readLocalFile('example.csproj', 'utf8');
+
+        expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+        expect(logger.logger.once.trace).toHaveBeenCalledWith(
+          { file: 'example.csproj', hiddenCharacters: '\\uFEFF' },
+          'Hidden Byte Order Mark (BOM) Unicode characters has been discovered in the file `example.csproj`. This is likely safe, if you are using Microsoft Windows, but please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        );
+      });
+
+      it('as well as other hidden characters, it logs a warning', async () => {
+        await fs.outputFile(
+          `${localDir}/example.csproj`,
+          '\uFEFF<Project Sdk="Microsoft.NET.Sdk">\u200B',
+        );
+        await readLocalFile('example.csproj', 'utf8');
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { file: 'example.csproj', hiddenCharacters: '\\uFEFF\\u200B' },
+          'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        );
+      });
     });
   });
 
@@ -130,24 +205,37 @@ describe('util/fs/index', () => {
       await writeLocalFile('foo/bar/file.txt', 'foobar');
 
       const path = `${localDir}/foo/bar/file.txt`;
-      expect(await fs.pathExists(path)).toBeTrue();
-      expect(await fs.readFile(path, 'utf8')).toBe('foobar');
+      await expect(fs.pathExists(path)).resolves.toBeTrue();
+      await expect(fs.readFile(path, 'utf8')).resolves.toBe('foobar');
     });
   });
 
   describe('deleteLocalFile', () => {
     it('throws if platform is local', async () => {
       GlobalConfig.set({ platform: 'local' });
-      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow(
+        'Cannot delete file when platform=local',
+      );
     });
 
     it('deletes file', async () => {
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');
 
-      expect(await fs.pathExists(filePath)).toBeTrue();
+      await expect(fs.pathExists(filePath)).resolves.toBeTrue();
       await deleteLocalFile('foo/bar/file.txt');
-      expect(await fs.pathExists(filePath)).toBeFalse();
+      await expect(fs.pathExists(filePath)).resolves.toBeFalse();
+    });
+
+    it('does nothing if no localDir is configured', async () => {
+      const filePath = `${localDir}/foo/bar/file.txt`;
+      await fs.outputFile(filePath, 'foobar');
+      GlobalConfig.set({});
+
+      await expect(
+        deleteLocalFile('foo/bar/file.txt'),
+      ).resolves.toBeUndefined();
+      await expect(fs.pathExists(filePath)).resolves.toBeTrue();
     });
   });
 
@@ -157,11 +245,26 @@ describe('util/fs/index', () => {
       const targetPath = `${localDir}/bar.txt`;
       await fs.outputFile(sourcePath, 'foobar');
 
-      expect(await fs.pathExists(sourcePath)).toBeTrue();
-      expect(await fs.pathExists(targetPath)).toBeFalse();
+      await expect(fs.pathExists(sourcePath)).resolves.toBeTrue();
+      await expect(fs.pathExists(targetPath)).resolves.toBeFalse();
       await renameLocalFile('foo.txt', 'bar.txt');
-      expect(await fs.pathExists(sourcePath)).toBeFalse();
-      expect(await fs.pathExists(targetPath)).toBeTrue();
+      await expect(fs.pathExists(sourcePath)).resolves.toBeFalse();
+      await expect(fs.pathExists(targetPath)).resolves.toBeTrue();
+    });
+  });
+
+  describe('renameCacheFile', () => {
+    it('renames file and replaces existing target', async () => {
+      const sourcePath = `${cacheDir}/foo.txt`;
+      const targetPath = `${cacheDir}/bar.txt`;
+      await fs.outputFile(sourcePath, 'source');
+      await fs.outputFile(targetPath, 'target');
+
+      await expect(fs.pathExists(sourcePath)).resolves.toBeTrue();
+      await expect(fs.readFile(targetPath, 'utf8')).resolves.toBe('target');
+      await renameCacheFile('foo.txt', 'bar.txt');
+      await expect(fs.pathExists(sourcePath)).resolves.toBeFalse();
+      await expect(fs.readFile(targetPath, 'utf8')).resolves.toBe('source');
     });
   });
 
@@ -190,7 +293,7 @@ describe('util/fs/index', () => {
       const res = await ensureCacheDir('bundler');
       const path = upath.join(cacheDir, 'others/bundler');
       expect(res).toEqual(path);
-      expect(await fs.pathExists(path)).toBeTrue();
+      await expect(fs.pathExists(path)).resolves.toBeTrue();
     });
   });
 
@@ -205,15 +308,15 @@ describe('util/fs/index', () => {
     it('returns true for file', async () => {
       const path = `${localDir}/file.txt`;
       await fs.outputFile(path, 'foobar');
-      expect(await localPathExists('file.txt')).toBeTrue();
+      await expect(localPathExists('file.txt')).resolves.toBeTrue();
     });
 
     it('returns true for directory', async () => {
-      expect(await localPathExists('.')).toBeTrue();
+      await expect(localPathExists('.')).resolves.toBeTrue();
     });
 
     it('returns false', async () => {
-      expect(await localPathExists('file.txt')).toBeFalse();
+      await expect(localPathExists('file.txt')).resolves.toBeFalse();
     });
   });
 
@@ -258,29 +361,33 @@ describe('util/fs/index', () => {
       await writeLocalFile('crates/one/Cargo.toml', 'foo');
       await writeLocalFile('Cargo.lock', 'bar');
 
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock'),
-      ).toBe('Cargo.lock');
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock'),
-      ).toBeNull();
+      await expect(
+        findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock'),
+      ).resolves.toBe('Cargo.lock');
+      await expect(
+        findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock'),
+      ).resolves.toBeNull();
 
       await writeLocalFile('crates/one/Cargo.lock', '');
 
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock'),
-      ).toBe('crates/one/Cargo.lock');
-      expect(await findLocalSiblingOrParent('crates/one', 'Cargo.lock')).toBe(
-        'Cargo.lock',
-      );
-      expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock'),
-      ).toBeNull();
+      await expect(
+        findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock'),
+      ).resolves.toBe('crates/one/Cargo.lock');
+      await expect(
+        findLocalSiblingOrParent('crates/one', 'Cargo.lock'),
+      ).resolves.toBe('Cargo.lock');
+      await expect(
+        findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock'),
+      ).resolves.toBeNull();
     });
 
     it('immediately returns null when either path is absolute', async () => {
-      expect(await findLocalSiblingOrParent('/etc/hosts', 'other')).toBeNull();
-      expect(await findLocalSiblingOrParent('other', '/etc/hosts')).toBeNull();
+      await expect(
+        findLocalSiblingOrParent('/etc/hosts', 'other'),
+      ).resolves.toBeNull();
+      await expect(
+        findLocalSiblingOrParent('other', '/etc/hosts'),
+      ).resolves.toBeNull();
     });
   });
 
@@ -290,21 +397,23 @@ describe('util/fs/index', () => {
       await writeLocalFile('test/Cargo.lock', '');
 
       const result = await readLocalDirectory('test');
-      expect(result).not.toBeNull();
-      expect(result).toBeArrayOfSize(2);
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual(['Cargo.lock', 'Cargo.toml']);
 
       await writeLocalFile('Cargo.lock', '');
       await writeLocalFile('test/subdir/Cargo.lock', '');
 
       const resultWithAdditionalFiles = await readLocalDirectory('test');
-      expect(resultWithAdditionalFiles).not.toBeNull();
-      expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
-      expect(resultWithAdditionalFiles).toMatchSnapshot();
+      expect(resultWithAdditionalFiles).toEqual([
+        'Cargo.lock',
+        'Cargo.toml',
+        'subdir',
+      ]);
     });
 
     it('return empty array for non existing directory', async () => {
-      await expect(readLocalDirectory('somedir')).rejects.toThrow();
+      await expect(readLocalDirectory('somedir')).rejects.toThrow(
+        'ENOENT: no such file or directory',
+      );
     });
 
     it('return empty array for a existing but empty directory', async () => {
@@ -328,7 +437,7 @@ describe('util/fs/index', () => {
         stream.close(resolve);
       });
       await write;
-      expect(await fs.readFile(path, 'utf8')).toBe('bar');
+      await expect(fs.readFile(path, 'utf8')).resolves.toBe('bar');
     });
   });
 
@@ -359,19 +468,19 @@ describe('util/fs/index', () => {
     it('returns true for file', async () => {
       const path = `${localDir}/file.txt`;
       await fs.outputFile(path, 'foo');
-      expect(await localPathIsFile('file.txt')).toBeTrue();
+      await expect(localPathIsFile('file.txt')).resolves.toBeTrue();
     });
 
     it('returns false for directory', async () => {
       const path = upath.resolve(`${localDir}/foobar`);
       await fs.mkdir(path);
-      expect(await localPathIsFile(path)).toBeFalse();
+      await expect(localPathIsFile(path)).resolves.toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {
-      expect(
-        await localPathIsFile(upath.resolve(`${localDir}/foobar`)),
-      ).toBeFalse();
+      await expect(
+        localPathIsFile(upath.resolve(`${localDir}/foobar`)),
+      ).resolves.toBeFalse();
     });
   });
 
@@ -379,18 +488,18 @@ describe('util/fs/index', () => {
     it('returns false for file', async () => {
       const path = `${localDir}/file.txt`;
       await fs.outputFile(path, 'foobar');
-      expect(await localPathIsSymbolicLink(path)).toBeFalse();
+      await expect(localPathIsSymbolicLink(path)).resolves.toBeFalse();
     });
 
     it('returns false for directory', async () => {
       const path = `${localDir}/foobar`;
       await fs.mkdir(path);
-      expect(await localPathIsSymbolicLink(path)).toBeFalse();
+      await expect(localPathIsSymbolicLink(path)).resolves.toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {
       const path = `${localDir}/file.txt`;
-      expect(await localPathIsSymbolicLink(path)).toBeFalse();
+      await expect(localPathIsSymbolicLink(path)).resolves.toBeFalse();
     });
 
     it('returns true for symlink', async () => {
@@ -447,7 +556,7 @@ describe('util/fs/index', () => {
 
   describe('statLocalFile', () => {
     it('returns stat object', async () => {
-      expect(await statLocalFile('foo')).toBeNull();
+      await expect(statLocalFile('foo')).resolves.toBeNull();
 
       await writeLocalFile('foo', 'bar');
       const stat = await statLocalFile('foo');
@@ -458,7 +567,7 @@ describe('util/fs/index', () => {
 
   describe('statCacheFile', () => {
     it('returns stat object', async () => {
-      expect(await statCacheFile('foo')).toBeNull();
+      await expect(statCacheFile('foo')).resolves.toBeNull();
 
       await fs.outputFile(`${cacheDir}/foo`, 'foobar');
       const stat = await statCacheFile('foo');
@@ -470,7 +579,7 @@ describe('util/fs/index', () => {
   describe('listCacheDir', () => {
     it('lists directory', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar.txt`, 'foobar');
-      expect(await listCacheDir('foo')).toEqual(['bar.txt']);
+      await expect(listCacheDir('foo')).resolves.toEqual(['bar.txt']);
     });
   });
 
@@ -478,20 +587,38 @@ describe('util/fs/index', () => {
     it('removes cache dir', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
       await rmCache(`foo/bar`);
-      expect(await fs.pathExists(`${cacheDir}/foo/bar/file.txt`)).toBeFalse();
-      expect(await fs.pathExists(`${cacheDir}/foo/bar`)).toBeFalse();
+      await expect(
+        fs.pathExists(`${cacheDir}/foo/bar/file.txt`),
+      ).resolves.toBeFalse();
+      await expect(fs.pathExists(`${cacheDir}/foo/bar`)).resolves.toBeFalse();
+    });
+
+    it('ignores missing path', async () => {
+      await expect(rmCache(`foo/missing`)).resolves.toBeUndefined();
     });
   });
 
   describe('cachePathExists', () => {
     it('reads file', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
-      expect(await cachePathExists(`foo/bar/file.txt1`)).toBeFalse();
-      expect(await cachePathExists(`foo/bar/file.txt`)).toBeTrue();
+      await expect(cachePathExists(`foo/bar/file.txt1`)).resolves.toBeFalse();
+      await expect(cachePathExists(`foo/bar/file.txt`)).resolves.toBeTrue();
     });
   });
 
   describe('cachePathIsFile', () => {
+    it('returns true for file', async () => {
+      await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
+
+      await expect(cachePathIsFile(`foo/bar/file.txt`)).resolves.toBeTrue();
+    });
+
+    it('returns false for directory', async () => {
+      await fs.ensureDir(`${cacheDir}/foo/bar`);
+
+      await expect(cachePathIsFile(`foo/bar`)).resolves.toBeFalse();
+    });
+
     it('returns false if does not exist', async () => {
       await expect(cachePathIsFile(`a/a/file.txt`)).resolves.toBe(false);
     });
@@ -500,8 +627,10 @@ describe('util/fs/index', () => {
   describe('readCacheFile', () => {
     it('reads file', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
-      expect(await readCacheFile(`foo/bar/file.txt`, 'utf8')).toBe('foobar');
-      expect(await readCacheFile(`foo/bar/file.txt`)).toEqual(
+      await expect(readCacheFile(`foo/bar/file.txt`, 'utf8')).resolves.toBe(
+        'foobar',
+      );
+      await expect(readCacheFile(`foo/bar/file.txt`)).resolves.toEqual(
         Buffer.from('foobar'),
       );
     });
@@ -519,8 +648,10 @@ describe('util/fs/index', () => {
     it('reads file', async () => {
       const path = `${tmpDir}/file.txt`;
       await fs.outputFile(path, 'foobar', { encoding: 'utf8' });
-      expect(await readSystemFile(path, 'utf8')).toBe('foobar');
-      expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
+      await expect(readSystemFile(path, 'utf8')).resolves.toBe('foobar');
+      await expect(readSystemFile(path)).resolves.toEqual(
+        Buffer.from('foobar'),
+      );
     });
   });
 
@@ -528,7 +659,9 @@ describe('util/fs/index', () => {
     it('writes file', async () => {
       const path = `${tmpDir}/file.txt`;
       await writeSystemFile(path, 'foobar');
-      expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
+      await expect(readSystemFile(path)).resolves.toEqual(
+        Buffer.from('foobar'),
+      );
     });
   });
 

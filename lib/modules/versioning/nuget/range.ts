@@ -1,5 +1,6 @@
-import type { NugetFloatingRange, NugetRange, NugetVersion } from './types';
-import { compare, versionToString } from './version';
+import { regEx } from '../../../util/regex.ts';
+import type { NugetFloatingRange, NugetRange, NugetVersion } from './types.ts';
+import { compare, versionToString } from './version.ts';
 
 export function getFloatingRangeLowerBound(
   range: NugetFloatingRange,
@@ -20,7 +21,7 @@ export function getFloatingRangeLowerBound(
     if (last === '*') {
       parts[lastIdx] = '0';
     } else {
-      parts[lastIdx] = last.replace(/\*$/, '');
+      parts[lastIdx] = last.replace(regEx(/\*$/), '');
     }
     res.prerelease = parts.join('.');
   }
@@ -110,11 +111,10 @@ export function rangeToString(range: NugetRange): string {
       res = `.${minorPart}${res}`;
     }
 
-    if (major !== undefined) {
-      const majorPart =
-        floating === 'major' ? floatingComponentToString(major) : `${major}`;
-      res = `${majorPart}${res}`;
-    }
+    // `major` is the one component a floating range always carries
+    const majorPart =
+      floating === 'major' ? floatingComponentToString(major) : `${major}`;
+    res = `${majorPart}${res}`;
 
     return res;
   }

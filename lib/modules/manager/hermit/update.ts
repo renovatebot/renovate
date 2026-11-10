@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import type { UpdateDependencyConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
 
 const updateLine = '#hermit updated';
 

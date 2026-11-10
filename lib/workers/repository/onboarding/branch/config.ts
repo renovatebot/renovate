@@ -1,18 +1,22 @@
-import { GlobalConfig } from '../../../../config/global';
-import { getPreset } from '../../../../config/presets/local';
-import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getPreset } from '../../../../config/presets/local/index.ts';
+import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util.ts';
 import type {
   RenovateConfig,
   RenovateSharedConfig,
-} from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { clone } from '../../../../util/clone';
-import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
+} from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { clone } from '../../../../util/clone.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import {
+  EditorConfig,
+  JSONWriter,
+} from '../../../../util/json-writer/index.ts';
 
 async function getOnboardingConfig(
   config: RenovateConfig,
 ): Promise<RenovateSharedConfig | undefined> {
-  let onboardingConfig = clone(config.onboardingConfig);
+  let onboardingConfig = clone(getInheritedOrGlobal('onboardingConfig'));
 
   // TODO #22198 fix types
   const foundPreset = await searchDefaultOnboardingPreset(config.repository!);
@@ -20,6 +24,7 @@ async function getOnboardingConfig(
   if (foundPreset) {
     logger.debug(`Found preset ${foundPreset} - using it in onboarding config`);
     onboardingConfig = {
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- JSON schema reference URL, not a documentation link
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [foundPreset],
     };
@@ -72,8 +77,7 @@ async function searchDefaultOnboardingPreset(
 
     const orgName = repoPathParts[0];
 
-    // TODO: types (#22198)
-    const platform = GlobalConfig.get('platform')!;
+    const platform = GlobalConfig.get('platform');
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';

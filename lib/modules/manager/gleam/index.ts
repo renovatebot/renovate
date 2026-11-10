@@ -1,9 +1,14 @@
-import { HexDatasource } from '../../datasource/hex';
-import * as hexVersioning from '../../versioning/hex';
+import type { Category } from '../../../constants/index.ts';
+import { HexDatasource } from '../../datasource/hex/index.ts';
 
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
-export { getRangeStrategy } from './range';
+export const categories: Category[] = ['elixir'];
+
+import * as hexVersioning from '../../versioning/hex/index.ts';
+
+export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes } from './dep-types.ts';
+export { extractPackageFile } from './extract.ts';
+export { getRangeStrategy } from './range.ts';
 
 export const url = 'https://gleam.run/documentation';
 
@@ -13,4 +18,6 @@ export const defaultConfig = {
 };
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['manifest.toml'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const supportedDatasources = [HexDatasource.id];

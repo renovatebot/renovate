@@ -1,4 +1,4 @@
-import semver from '.';
+import semver from './index.ts';
 
 describe('modules/versioning/semver/index', () => {
   it.each`

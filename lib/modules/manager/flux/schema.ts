@@ -1,16 +1,5 @@
-import { z } from 'zod';
-
-export const KubernetesResource = z.object({
-  apiVersion: z.string(),
-  kind: z.string(),
-  metadata: z.object({
-    name: z.string(),
-    // For Flux, the namespace property is optional, but matching HelmReleases to HelmRepositories would be
-    // much more difficult without it (we'd have to examine the parent Kustomizations to discover the value),
-    // so we require it for renovation.
-    namespace: z.string().optional(),
-  }),
-});
+import { z } from 'zod/v4';
+import { KubernetesResource } from '../kubernetes/schema.ts';
 
 export const HelmRelease = KubernetesResource.extend({
   apiVersion: z.string().startsWith('helm.toolkit.fluxcd.io/'),
@@ -38,7 +27,7 @@ export const HelmRelease = KubernetesResource.extend({
         namespace: z.string().optional(),
       })
       .optional(),
-    values: z.record(z.unknown()).optional(),
+    values: z.record(z.string(), z.unknown()).optional(),
   }),
 });
 export type HelmRelease = z.infer<typeof HelmRelease>;
@@ -76,6 +65,7 @@ export const GitRepository = KubernetesResource.extend({
       .object({
         tag: z.string().optional(),
         commit: z.string().optional(),
+        branch: z.string().optional(),
       })
       .optional(),
   }),
@@ -92,6 +82,12 @@ export const OCIRepository = KubernetesResource.extend({
         digest: z.string().optional(),
       })
       .optional(),
+    layerSelector: z
+      .object({
+        mediaType: z.string().optional(),
+      })
+      .optional()
+      .catch(undefined),
   }),
 });
 

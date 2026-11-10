@@ -1,15 +1,16 @@
 import { codeBlock } from 'common-tags';
-import * as templates from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
-import { bumpVersions } from './bump-versions';
-import { fs, logger, partial, scm } from '~test/util';
+import { fs, logger, partial, scm } from '~test/util.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import * as templates from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { bumpVersions } from './bump-versions.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
     it('should be noop if bumpVersions is undefined', async () => {
-      const config = {} as BranchConfig;
+      const config = partial<BranchConfig>();
       await bumpVersions(config);
 
       expect(config).toEqual({});
@@ -187,6 +188,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
         { files: ['.release-version'] },
         'bumpVersions(ipsum): Found 1 files to bump versions',
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: '.release-version' },
         'bumpVersions(ipsum): No match found for bumping version',
@@ -497,8 +499,12 @@ describe('workers/repository/update/branch/bump-versions', () => {
       await bumpVersions(config);
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { file: 'foo-bar' },
-        'bumpVersions(foo): Could not read file: an error',
+        {
+          file: 'foo-bar',
+          bumpVersionsDescr: 'bumpVersions(foo)',
+          err: new Error('an error'),
+        },
+        'bumpVersions: Could not read file',
       );
       expect(config).toMatchObject({
         updatedPackageFiles: [
@@ -560,6 +566,475 @@ describe('workers/repository/update/branch/bump-versions', () => {
               dependencies: {}
             `,
           },
+        ],
+      });
+    });
+
+    it('should bump major version', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'major',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: '.release-version',
+            contents: '2',
+          },
+        ],
+      });
+    });
+
+    it('should bump major/minor version', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'major',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.1');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: '.release-version',
+            contents: '2.0',
+          },
+        ],
+      });
+    });
+
+    it('should bump minor version', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: '.release-version',
+            contents: '1.1',
+          },
+        ],
+      });
+    });
+
+    it.each`
+      bumpType   | current   | expected
+      ${'major'} | ${'3'}    | ${'4'}
+      ${'major'} | ${'v1'}   | ${'v2'}
+      ${'minor'} | ${'v1.2'} | ${'v1.3'}
+    `(
+      'bumps $current with $bumpType to $expected',
+      async ({ bumpType, current, expected }) => {
+        const config = partial<BranchConfig>({
+          bumpVersions: [
+            {
+              filePatterns: ['\\.release-version'],
+              bumpType,
+              matchStrings: ['^(?<version>.+)$'],
+            },
+          ],
+          updatedPackageFiles: [
+            { type: 'addition', path: 'foo', contents: 'bar' },
+          ],
+        });
+        scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+        fs.readLocalFile.mockResolvedValueOnce(current);
+        await bumpVersions(config);
+
+        expect(config).toMatchObject({
+          updatedArtifacts: [
+            {
+              type: 'addition',
+              path: '.release-version',
+              contents: expected,
+            },
+          ],
+        });
+      },
+    );
+
+    it('throws for minor bump of a major only version', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          { type: 'addition', path: 'foo', contents: 'bar' },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        artifactErrors: [
+          {
+            fileName: '.release-version',
+            stderr:
+              'Failed to calculate new version for bumpVersions: Unsupported bump type for {major}.{minor} version: minor',
+          },
+        ],
+      });
+    });
+
+    it('throws for invalid bump type and short version', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'patch',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        artifactErrors: [
+          {
+            fileName: '.release-version',
+            stderr:
+              'Failed to calculate new version for bumpVersions: Unsupported bump type for {major}.{minor} version: patch',
+          },
+        ],
+      });
+    });
+
+    it('should use matched version when bumpType is sync', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'sync',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            newVersion: '2.5.3',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: '.release-version',
+            contents: '2.5.3',
+          },
+        ],
+      });
+    });
+
+    it('should log debug when no upgrades found for sync type', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: 'test',
+            filePatterns: ['\\.release-version'],
+            bumpType: 'sync',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { file: '.release-version' },
+        'bumpVersions(test): No upgrades found in branch config for sync type',
+      );
+    });
+
+    it('should log debug when newVersion is not found in upgrades for sync type', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: 'test',
+            filePatterns: ['\\.release-version'],
+            bumpType: 'sync',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { file: '.release-version' },
+        'bumpVersions(test): No newVersion found in branch upgrades for sync type',
+      );
+    });
+
+    it('reads from disk when the pending change carries no contents', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['first-file'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        // the target file is pending in both lists, but neither entry has
+        // contents, so the current version has to come off disk
+        updatedPackageFiles: [
+          partial<FileChange>({ type: 'addition', path: 'first-file' }),
+        ],
+        updatedArtifacts: [
+          partial<FileChange>({ type: 'addition', path: 'first-file' }),
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['first-file']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(config.updatedPackageFiles).toMatchObject([
+        { type: 'addition', path: 'first-file' },
+        { type: 'addition', path: 'first-file', contents: '1.1.0' },
+      ]);
+    });
+
+    it('should collect bumpVersions from all upgrades, not just the first', async () => {
+      const config = partial<BranchConfig>({
+        // top-level bumpVersions mirrors upgrades[0]'s value, as set by generateBranchConfig()
+        bumpVersions: [
+          {
+            name: 'first',
+            filePatterns: ['first-file'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            bumpVersions: [
+              {
+                name: 'first',
+                filePatterns: ['first-file'],
+                bumpType: 'minor',
+                matchStrings: ['^(?<version>.+)$'],
+              },
+            ],
+          },
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            bumpVersions: [
+              {
+                name: 'second',
+                filePatterns: ['second-file'],
+                bumpType: 'patch',
+                matchStrings: ['^(?<version>.+)$'],
+              },
+            ],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce([
+        'foo',
+        'first-file',
+        'second-file',
+      ]);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+      fs.readLocalFile.mockResolvedValueOnce('2.0.0');
+
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          { type: 'addition', path: 'first-file', contents: '1.1.0' },
+          { type: 'addition', path: 'second-file', contents: '2.0.1' },
+        ],
+      });
+    });
+
+    it('should deduplicate identical bumpVersions entries from multiple upgrades', async () => {
+      const sharedBumpVersionConfig = {
+        name: 'first',
+        filePatterns: ['first-file'],
+        bumpType: 'minor' as const,
+        matchStrings: ['^(?<version>.+)$'],
+      };
+      const config = partial<BranchConfig>({
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            bumpVersions: [sharedBumpVersionConfig],
+          },
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            // identical entry as the previous upgrade - should not be applied twice
+            bumpVersions: [sharedBumpVersionConfig],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', 'first-file']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      // if the duplicate entry wasn't deduplicated, the file would be bumped
+      // twice (to 1.2.0) instead of once (to 1.1.0)
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          { type: 'addition', path: 'first-file', contents: '1.1.0' },
+        ],
+      });
+      expect(config.updatedArtifacts).toHaveLength(1);
+    });
+
+    it('should fall back to top-level bumpVersions when no upgrade defines any', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: 'first',
+            filePatterns: ['first-file'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', 'first-file']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          { type: 'addition', path: 'first-file', contents: '1.1.0' },
         ],
       });
     });

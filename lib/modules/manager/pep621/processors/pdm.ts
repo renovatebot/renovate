@@ -1,30 +1,40 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { exec } from '../../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth';
-import { Result } from '../../../../util/result';
-import { PypiDatasource } from '../../../datasource/pypi';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type {
+  ExecOptions,
+  ToolConstraint,
+} from '../../../../util/exec/types.ts';
+import {
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
+import { Result } from '../../../../util/result.ts';
+import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../../types';
-import { PdmLockfileSchema, type PyProject } from '../schema';
-import type { Pep621ManagerData } from '../types';
-import { depTypes } from '../utils';
-import type { PyProjectProcessor } from './types';
+} from '../../types.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../../util.ts';
+import { PdmLockfile, type PyProject } from '../schema.ts';
+import type { Pep621ManagerData } from '../types.ts';
+import { depTypes } from '../utils.ts';
+import { BasePyProjectProcessor } from './abstract.ts';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
+const gitExec = withGitEnvironment(['pep621']);
 
-export class PdmProcessor implements PyProjectProcessor {
-  process(
-    project: PyProject,
-    deps: PackageDependency[],
-  ): PackageDependency<Pep621ManagerData>[] {
+export class PdmProcessor extends BasePyProjectProcessor {
+  override lockfileName = 'pdm.lock';
+
+  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const devDependencies = project.tool?.pdm?.devDependencies;
     if (devDependencies) {
       deps.push(...devDependencies);
@@ -59,7 +69,7 @@ export class PdmProcessor implements PyProjectProcessor {
     if (lockFileContent) {
       const lockFileMapping = Result.parse(
         lockFileContent,
-        PdmLockfileSchema.transform(({ lock }) => lock),
+        PdmLockfile.transform(({ lock }) => lock),
       ).unwrapOr({});
 
       for (const dep of deps) {
@@ -74,7 +84,7 @@ export class PdmProcessor implements PyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact,
+    updateArtifact: UpdateArtifact<Pep621ManagerData>,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
@@ -82,7 +92,7 @@ export class PdmProcessor implements PyProjectProcessor {
     const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
-    const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
+    const lockFileName = getSiblingFileName(packageFileName, this.lockfileName);
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (!existingLockFileContent) {
@@ -92,20 +102,19 @@ export class PdmProcessor implements PyProjectProcessor {
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint:
-          config.constraints?.python ?? project.project?.['requires-python'],
+        constraint: await resolveToolConstraint(
+          config,
+          'python',
+          () => project.project?.['requires-python'],
+        ),
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
-        constraint: config.constraints?.pdm,
+        constraint: await resolveToolConstraint(config, 'pdm'),
       };
 
-      const extraEnv = {
-        ...getGitEnvironmentVariables(['pep621']),
-      };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
-        extraEnv,
         docker: {},
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
@@ -118,39 +127,17 @@ export class PdmProcessor implements PyProjectProcessor {
       } else {
         cmds.push(...generateCMDs(updatedDeps));
       }
-      await exec(cmds, execOptions);
-
-      // check for changes
-      const fileChanges: UpdateArtifactsResult[] = [];
-      const newLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newLockContent;
-      if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockContent,
-          },
-        });
-      } else {
-        logger.debug('pdm.lock is unchanged');
-      }
-
-      return fileChanges.length ? fileChanges : null;
+      return await updateLockFile({
+        lockFileName,
+        existingLockFileContent,
+        run: () => gitExec(cmds, execOptions),
+      });
     } catch (err) {
-      // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
       logger.debug({ err }, 'Failed to update PDM lock file');
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: err.message,
-          },
-        },
-      ];
+      return artifactErrorResult(lockFileName, err);
     }
   }
 }

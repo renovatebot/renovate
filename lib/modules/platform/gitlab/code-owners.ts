@@ -1,6 +1,6 @@
 import ignore from 'ignore';
-import { regEx } from '../../../util/regex';
-import type { FileOwnerRule } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { FileOwnerRule } from '../types.ts';
 
 interface CodeOwnersSection {
   name: string;

@@ -28,21 +28,22 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
 
 env:
   # are we on a release branch?
-  DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
-  NODE_VERSION: 22
-  PDM_VERSION: 2.25.6 # renovate: datasource=pypi depName=pdm
+  DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
+  NODE_VERSION: 24
+  # an additional supported Node version, tested on Linux only
+  NODE_VERSION_ALTERNATE: 26
   DRY_RUN: true
-  TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
     .github/actions/
     data/
     patches/
     tools/
     package.json
+    pnpm-workspace.yaml
     pnpm-lock.yaml
 
 jobs:
@@ -98,14 +99,15 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
 
       - name: Calculate matrix for `node_modules` prefetch
-        uses: ./.github/actions/calculate-prefetch-matrix
+        uses: $/.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
         with:
           repo: ${{ github.event.repository.full_name }}
@@ -114,7 +116,7 @@ jobs:
 
       - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -127,7 +129,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          pnpm -s --config.verify-deps-before-run=false schedule-test-shards >> "$GITHUB_OUTPUT"
 
   setup-build:
     runs-on: ubuntu-latest
@@ -137,8 +139,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -149,7 +152,7 @@ jobs:
           echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -181,21 +184,22 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
-  lint-eslint:
+  lint-oxlint:
     needs:
       - setup-build
     runs-on: ubuntu-latest
@@ -203,33 +207,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Restore eslint cache
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: .cache/eslint
-          # we need to add the hash because eslint cache doesn't detect plugin changes
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
+      - name: Lint with oxlint
+        run: pnpm oxlint -f github
 
-      - name: Lint
-        run: pnpm eslint-ci
-
-      - name: Save eslint cache
-        if: github.event_name == 'push'
-        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: .cache/eslint
-          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Lint with biome
+        run: pnpm biome-ci
 
   lint-prettier:
     needs:
@@ -239,18 +232,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -259,7 +253,7 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm prettier --write --cache-location .cache/prettier
+          pnpm prettier-fix --cache-location .cache/prettier
           git diff --quiet || {
             echo "[ERROR] Please apply the changes prettier suggests:"
             git diff --color=always
@@ -268,7 +262,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -281,27 +275,28 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
+        run: pnpm markdown-lint
+
+      - name: Generate JSON schema
+        run: pnpm create-json-schema
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
 
       - name: Lint documentation
         run: pnpm lint-documentation
-
-      - name: Markdown lint
-        run: pnpm markdown-lint
 
   lint-other:
     needs:
@@ -311,21 +306,41 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Restore tsbuildinfo cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/tsbuildinfo
+          key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-
+            tsbuildinfo-
+
       - name: Type check
         run: pnpm type-check
 
+      - name: Save tsbuildinfo cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/tsbuildinfo
+          key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
+
       - name: Lint project file structure
         run: pnpm ls-lint
+
+      - name: Check unused dependencies
+        run: pnpm knip
 
       - name: Check git version
         run: pnpm git-check
@@ -335,6 +350,32 @@ jobs:
 
       - name: Lint other
         run: pnpm lint-other
+
+  lint-actions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+          # include local composite actions, so that actionlint validates
+          # their metadata, and zizmor audits them
+          sparse-checkout: .github/
+
+      - name: Check workflow files
+        uses: jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d # v2.5.0
+        with:
+          args: --color --profile correctness
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          version: 1.32.0
 
   test:
     needs: [setup, prefetch]
@@ -348,35 +389,60 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
+    permissions:
+      id-token: write # required for codecov OIDC
+
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache/vitest
+          # the shard cache key comes before the lockfile hash so that
+          # `restore-keys` can fall back to the same shard's cache after
+          # a lockfile change
           key: |
             vitest-cache-${{
               runner.os
             }}-${{
               env.NODE_VERSION
             }}-${{
+              matrix.cache-key
+            }}-${{
               hashFiles('pnpm-lock.yaml')
+            }}
+          restore-keys: |
+            vitest-cache-${{
+              runner.os
+            }}-${{
+              env.NODE_VERSION
             }}-${{
               matrix.cache-key
-            }}
+            }}-
+
+      # git-ignored canary, tests must not read a `config.js` from the working directory
+      - name: Create canary config.js
+        shell: bash
+        run: |
+          cat > config.js <<'EOF'
+          globalThis.__RENOVATE_CONFIG_JS_CANARY__ = true;
+          export default { token: 'canary-config-js-must-not-be-read-by-tests' };
+          EOF
 
       - name: Unit tests
         shell: bash
@@ -387,6 +453,17 @@ jobs:
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ matrix.coverage }}
           done
+
+      - name: Codecov Test
+        if: github.event_name != 'merge_group' && !cancelled()
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          report_type: test_results
+          directory: ./coverage/shard
+          # TODO: compute proper flags per job
+          # flags: ${{ matrix.name }}
+          verbose: true
 
       - name: Move coverage files
         if: success() && github.event.pull_request.draft != true && matrix.coverage
@@ -401,38 +478,75 @@ jobs:
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
             ./coverage/lcov
             ./coverage/json
 
+  test-node-alternate:
+    needs: [setup]
+
+    if: |
+      !(github.event.pull_request.draft == true &&
+        needs.setup.outputs.test-matrix-empty == 'true')
+
+    name: test-node-alternate (${{ matrix.shard }})
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/4, 2/4, 3/4, 4/4]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: $/.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION_ALTERNATE }}
+          os: ${{ runner.os }}
+
+      - name: Unit tests
+        run: pnpm vitest --shard ${{ matrix.shard }} --coverage.enabled=false
+
   codecov:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    permissions:
+      id-token: write # required for codecov OIDC
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
-      - name: Codecov
-        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
+      - name: Codecov Coverage
+        if: github.event_name != 'merge_group'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           directory: coverage/lcov
-          fail_ci_if_error: github.event_name != 'pull_request'
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' }}
           verbose: true
 
   coverage-threshold:
@@ -444,20 +558,21 @@ jobs:
     if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: coverage-*
           path: coverage
@@ -472,18 +587,26 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 98.16 \
-            --functions 99.51 \
-            --lines 98.22 \
-            --statements 98.22
+            --statements 100 \
+            --branches 100 \
+            --functions 100 \
+            --lines 100 \
 
   # Catch-all required check for test matrix and coverage
   test-success:
     needs:
       - setup
       - test
+      - test-node-alternate
       - codecov
       - coverage-threshold
+      - lint-actions
+      - lint-docs
+      - lint-other
+      - lint-oxlint
+      - lint-prettier
+      - build-docker
+      - build-docs
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -499,6 +622,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.test.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled tests on the alternate Node version
+        if: |
+          needs.test-node-alternate.result == 'failure' ||
+          needs.test-node-alternate.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped tests on the alternate Node version when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.test-node-alternate.result == 'skipped'
         run: exit 1
 
       - name: Fail for failed or cancelled codecov
@@ -527,6 +663,65 @@ jobs:
           needs.coverage-threshold.result == 'skipped'
         run: exit 1
 
+      - name: Fail for failed or cancelled Actions linting
+        if: |
+          needs.lint-actions.result == 'failure' ||
+          needs.lint-actions.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped Actions linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.lint-actions.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled linting
+        if: |
+          needs.lint-docs.result == 'failure' ||
+          needs.lint-docs.result == 'cancelled' ||
+          needs.lint-other.result == 'failure' ||
+          needs.lint-other.result == 'cancelled' ||
+          needs.lint-oxlint.result == 'failure' ||
+          needs.lint-oxlint.result == 'cancelled' ||
+          needs.lint-prettier.result == 'failure' ||
+          needs.lint-prettier.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          (
+            needs.lint-docs.result == 'skipped' ||
+            needs.lint-other.result == 'skipped' ||
+            needs.lint-oxlint.result == 'skipped' ||
+            needs.lint-prettier.result == 'skipped'
+          )
+        run: exit 1
+
+      - name: Fail for failed or cancelled docs build
+        if: |
+          needs.build-docs.result == 'failure' ||
+          needs.build-docs.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped docs build when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.build-docs.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for skipped or failed docker build when needed
+        if: |
+          (
+            github.event_name != 'pull_request' ||
+            (github.event.pull_request.draft != true && contains(github.event.pull_request.labels.*.name, 'ci:fulltest'))
+          ) &&
+          (needs.build-docker.result == 'skipped' || needs.build-docker.result == 'failure')
+        run: exit 1
+
   build:
     needs:
       - setup-build
@@ -535,12 +730,13 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -549,37 +745,42 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: renovate-dist
           path: dist/
 
   build-docker:
     needs:
+      - setup-build # we need the outputs
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
+    if: github.event_name != 'pull_request' || (github.event.pull_request.draft != true && contains(github.event.pull_request.labels.*.name, 'ci:fulltest'))
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
+      - name: Setup Docker
+        uses: $/.github/actions/setup-docker
+
       - name: Download dist
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: renovate-dist
           path: dist/
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3 --args '--load'
+        run: pnpm build:docker build --platform linux/amd64,linux/arm64 --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
 
@@ -587,60 +788,86 @@ jobs:
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: dry-run
-        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true')
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_RELEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
-          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RENOVATE_TOKEN: ${{ github.token }}
+
+      - run: df -h
+        if: ${{ !cancelled() }}
 
   build-docs:
     needs:
-      - lint-docs
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.13.7
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Build
         run: pnpm build:docs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 'true' || '' }}
+          GITHUB_TOKEN: ${{ github.token }}
+          SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event.repository.has_issues == false) && 'true' || '' }}
 
       - name: Test docs
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: docs
           path: tmp/docs/
 
+      - name: Get month
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      # The privacy plugin downloads external assets (fonts, mermaid, emojis) with a fixed 5s timeout.
+      # No restore keys: a new month starts empty, so floating versions like `mermaid@11` are refreshed.
+      # Saved on `main` pushes only, like the other caches.
+      - name: Restore mkdocs assets cache
+        id: mkdocs-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
+
       - name: Build mkdocs
         run: pnpm mkdocs build --no-build
 
+      - name: Save mkdocs assets cache
+        if: github.event_name == 'push' && steps.mkdocs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
+
   test-e2e:
-    needs: [build]
+    needs:
+      - setup-build
+      - build
     runs-on: 'ubuntu-latest'
     timeout-minutes: 7
 
@@ -648,24 +875,28 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: renovate-dist
           path: dist/
 
       - name: Pack
         run: pnpm test-e2e:pack
+
+      - name: Check npm install
+        run: pnpm test-e2e:npm
 
       - name: Install dependencies
         run: pnpm test-e2e:install
@@ -677,7 +908,7 @@ jobs:
     needs:
       - setup-build
       - build-docker
-      - lint-eslint
+      - lint-oxlint
       - lint-prettier
       - lint-docs
       - lint-other
@@ -690,50 +921,266 @@ jobs:
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    concurrency:
+      group: ${{ github.workflow }}-release-${{ github.ref }}
+      # never cancel a release that has already started, as it may have started pushing artifacts
+      cancel-in-progress: false
     permissions:
+      actions: write
       contents: write
       issues: write
       pull-requests: write
       id-token: write
       packages: write
+      # attest the released images
+      attestations: write
+      artifact-metadata: write
 
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      # right at the start of the job, make sure we're not seeing another commit that's landed
+      - name: Check for newer commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: renovatebot/renovate
+          REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          latest_sha=$(git ls-remote https://github.com/renovatebot/renovate "refs/heads/$REF_NAME" | cut -f1)
+          if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
+            gh run cancel "$RUN_ID"
+            sleep 5
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
-      - name: docker-config
-        uses: containerbase/internal-tools@7c3bf36c5b0f3ddd2c628e34417c085c16d1974d # v3.10.71
-        with:
-          command: docker-config
+      - name: Setup Docker
+        uses: $/.github/actions/setup-docker
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
+          # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
+          use-cache: false
 
-      - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+      - name: Install newer npm if needed
+        run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
+
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
 
       - name: Docker registry login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GITHUB_TOKEN: ${{ github.token }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$REPOSITORY_OWNER" --password-stdin
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: 0.13.7
+          # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
+          enable-cache: false
+          cache-python: true
+
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Check dry run
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dryRun }}
         run: |
-          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$INPUT_DRY_RUN" != "true"  ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
-          elif [[ "${{env.DO_REALEASE}}" == "true" ]]; then
+          elif [[ "$DO_RELEASE" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
-      - name: semantic-release
-        run: |
-          pnpm semantic-release --dry-run ${{env.DRY_RUN}}
+      # and one final check, in case preparing the environment has taken long enough for new commits
+      - name: Check for newer commits
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          latest_sha=$(git ls-remote https://github.com/renovatebot/renovate "refs/heads/$REF_NAME" | cut -f1)
+          if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
+            gh run cancel "$RUN_ID"
+            sleep 5
+          fi
+
+      - name: semantic-release
+        id: release
+        run: |
+          pnpm semantic-release --dry-run "$DRY_RUN"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
           LOG_LEVEL: debug
+
+      # a failed attestation shows as an error but doesn't fail the release
+      - name: Attest the slim GHCR image
+        if: steps.release.outputs.slim-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/renovatebot/renovate
+          subject-digest: ${{ steps.release.outputs.slim-digest }}
+          push-to-registry: true
+
+      - name: Attest the full GHCR image
+        if: steps.release.outputs.full-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/renovatebot/renovate
+          subject-digest: ${{ steps.release.outputs.full-digest }}
+          push-to-registry: true
+
+      - name: Attest the slim Docker Hub image
+        if: steps.release.outputs.slim-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: docker.io/renovate/renovate
+          subject-digest: ${{ steps.release.outputs.slim-digest }}
+          push-to-registry: true
+
+      - name: Attest the full Docker Hub image
+        if: steps.release.outputs.full-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: docker.io/renovate/renovate
+          subject-digest: ${{ steps.release.outputs.full-digest }}
+          push-to-registry: true
+
+      - name: Get month
+        if: github.ref_name == 'main'
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore mkdocs assets cache
+        if: github.ref_name == 'main'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
+
+      - name: Build mkdocs site for deployment
+        if: github.ref_name == 'main'
+        run: |
+          # Always rebuild the docs site with the announcement bar for deployment to GitHub Pages, including the announcement bar (which isn't included when preparing a release's docs)
+          latest_tag=$(gh release view --json tagName -q .tagName)
+          pnpm mkdocs build --version "$latest_tag"
+          mkdir -p tmp
+          tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
+
+      - name: Upload docs artifact for deployment
+        if: github.ref_name == 'main'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mkdocs-site
+          path: tmp/mkdocs-site.tgz
+          retention-days: 1
+
+      - run: df -h
+        if: ${{ !cancelled() }}
+
+  deploy-docs-site:
+    if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
+    needs:
+      - setup-build
+      - release
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download mkdocs site from release
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: mkdocs-site
+          path: tmp
+
+      - name: Extract docs site
+        run: |
+          mkdir -p tools/mkdocs/site
+          tar -xzf tmp/mkdocs-site.tgz -C tools/mkdocs/site
+
+      # Per https://github.com/renovatebot/helm-charts/issues/3752, when we migrated the docs site from renovatebot/renovatebot.github.io to renovatebot/renovate, the `/helm-charts/` repository would no longer work as a subdomain, due to a known GitHub Pages limitation
+      - name: Mirror helm-charts/index.yaml from helm-charts' GitHub Pages site
+        run: |
+          mkdir tools/mkdocs/site/helm-charts
+          curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: tools/mkdocs/site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  notify-release-failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.release.result == 'failure' || needs.release.result == 'timed_out') }}
+    needs:
+      - release
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+
+  notify-docs-failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.deploy-docs-site.result == 'failure' || needs.deploy-docs-site.result == 'timed_out') }}
+    needs:
+      - deploy-docs-site
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Docs build from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"

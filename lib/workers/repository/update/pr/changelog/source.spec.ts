@@ -1,10 +1,9 @@
-import type { BranchConfig } from '../../../../types';
-import { GitHubChangeLogSource } from './github/source';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
+import type { BranchConfig } from '../../../../types.ts';
+import { GitHubChangeLogSource } from './github/source.ts';
 
 const changelogSource = new GitHubChangeLogSource();
 const upgrade = partial<BranchConfig>({
-  endpoint: 'https://api.github.com/',
   packageName: 'renovate',
   sourceUrl: 'https://github.com/renovatebot/renovate',
 });

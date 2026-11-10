@@ -1,8 +1,8 @@
-import { getNpmLock } from './npm';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { getNpmLock } from './npm.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {
@@ -14,7 +14,7 @@ describe('modules/manager/npm/extract/npm', () => {
 
     it('extracts', async () => {
       const plocktest1Lock = Fixtures.get('plocktest1/package-lock.json', '..');
-      fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock as never);
+      fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getNpmLock('package.json');
       expect(res).toEqual({
         lockedVersions: {
@@ -32,7 +32,7 @@ describe('modules/manager/npm/extract/npm', () => {
 
     it('extracts npm 7 lockfile', async () => {
       const npm7Lock = Fixtures.get('npm7/package-lock.json', '..');
-      fs.readLocalFile.mockResolvedValueOnce(npm7Lock as never);
+      fs.readLocalFile.mockResolvedValueOnce(npm7Lock);
       const res = await getNpmLock('package.json');
       expect(res).toEqual({
         lockedVersions: {

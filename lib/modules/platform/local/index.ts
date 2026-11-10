@@ -1,17 +1,19 @@
-import type { BranchStatus } from '../../../types';
+import type { BranchStatus } from '../../../types/index.ts';
 import type {
   Issue,
   PlatformParams,
   PlatformResult,
   Pr,
   RepoResult,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'local';
+export const experimental = true;
 
 export function initPlatform(params: PlatformParams): Promise<PlatformResult> {
+  const dryRun = params.dryRun === 'extract' ? 'extract' : 'lookup';
   return Promise.resolve({
-    dryRun: 'lookup',
+    dryRun,
     endpoint: 'local',
     persistRepoData: true,
     requireConfig: 'optional',

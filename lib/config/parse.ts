@@ -2,8 +2,9 @@ import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import stripJsonComments from 'strip-json-comments';
 import upath from 'upath';
-import { logger } from '../logger';
-import { parseJson } from '../util/common';
+import { logger } from '../logger/index.ts';
+import { parseJson } from '../util/common.ts';
+import { regEx } from '../util/regex.ts';
 
 export function parseFileConfig(
   fileName: string,
@@ -30,7 +31,13 @@ export function parseFileConfig(
       };
     }
   } else {
-    const jsonString = stripJsonComments(fileContents);
+    // `json-dup-key-validator` is strict and rejects trailing commas, so we
+    // strip them before validation. The actual parsing is handled by a lenient
+    // JSONC parser which tolerates trailing commas.
+    const jsonString = stripJsonComments(fileContents).replace(
+      regEx(/,(?<trailing>\s*[}\]])/g),
+      '$<trailing>',
+    );
     let allowDuplicateKeys = true;
     let jsonValidationError = jsonValidator.validate(
       jsonString,

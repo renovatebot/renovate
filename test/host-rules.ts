@@ -1,7 +1,1 @@
-import { hostRules } from './util';
-
-export * as hostRules from '../lib/util/host-rules';
-
-beforeEach(() => {
-  hostRules.clear();
-});
+export * as hostRules from '../lib/util/host-rules.ts';

@@ -3,8 +3,8 @@ import {
   clearGlobalSanitizedSecretsList,
   clearRepoSanitizedSecretsList,
   sanitize,
-} from './sanitize';
-import { toBase64 } from './string';
+} from './sanitize.ts';
+import { toBase64 } from './string.ts';
 
 describe('util/sanitize', () => {
   beforeEach(() => {

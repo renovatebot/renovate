@@ -1,4 +1,4 @@
-import { CurrentValueMatcher } from './current-value';
+import { CurrentValueMatcher } from './current-value.ts';
 
 describe('util/package-rules/current-value', () => {
   const matcher = new CurrentValueMatcher();

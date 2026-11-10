@@ -1,11 +1,12 @@
 import fs from 'node:fs';
+import { codeBlock } from 'common-tags';
 import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './additional-config-file';
+import { logger } from '../../../../logger/index.ts';
+import customConfig from './__fixtures__/config.cjs';
+import * as file from './additional-config-file.ts';
 
 describe('workers/global/config/parse/additional-config-file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');
@@ -42,14 +43,21 @@ describe('workers/global/config/parse/additional-config-file', () => {
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s > %s', async (_fileType, filePath) => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
-      expect(
-        await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile }),
-      ).toEqual(customConfig);
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/',
+        filePath,
+      );
+      await expect(
+        file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile }),
+      ).resolves.toEqual(customConfig);
     });
 
     it('migrates', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/config2.js',
+      );
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({
@@ -60,33 +68,39 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
     it('warns if config is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config.js');
-      const fileContent = `module.exports = {
-        "enabled": "invalid-value",
-        "prTitle":"something",
-      };`;
-      fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+      const fileContent = codeBlock`
+        module.exports = {
+                "enabled": "invalid-value",
+                "prTitle":"something",
+              };
+      `;
+      await fs.promises.writeFile(configFile, fileContent, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
     });
 
     it('parse and returns empty config if there is no RENOVATE_ADDITIONAL_CONFIG_FILE in env', async () => {
-      expect(await file.getConfig({})).toBeDefined();
+      await expect(file.getConfig({})).resolves.toBeDefined();
     });
 
     it.each([
       [
         'config.invalid.js',
-        `module.exports = {
-        "platform": "github",
-        "token":"abcdef",
-        "onboarding": false,
-        "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
-        "onboardingConfig": {
-          "extends": ["config:recommended"],
-        },
-        "repositories": [ "test/test" ],
-      };`,
+        codeBlock`
+          module.exports = {
+                  "platform": "github",
+                  "token":"abcdef",
+                  "onboarding": false,
+                  "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
+                  "onboardingConfig": {
+                    "extends": ["config:recommended"],
+                  },
+                  "repositories": [ "test/test" ],
+                };
+        `,
       ],
       ['config.invalid.json5', `"invalid":`],
       ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
@@ -95,10 +109,12 @@ describe('workers/global/config/parse/additional-config-file', () => {
       async (fileName, fileContent) => {
         processExitSpy.mockImplementationOnce(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
-        fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+        await fs.promises.writeFile(configFile, fileContent, {
+          encoding: 'utf8',
+        });
         await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
-        expect(processExitSpy).toHaveBeenCalledWith(1);
-        fs.unlinkSync(configFile);
+        expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
+        await fs.promises.unlink(configFile);
       },
     );
 
@@ -110,6 +126,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
 
+      // TODO this should be called exactly once, but it is 2 times
+
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -117,7 +135,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
 
       const configFile = upath.resolve(
-        __dirname,
+        import.meta.dirname,
         './__fixtures__/config-ref-error.js-invalid',
       );
       const tmpDir = tmp.path;
@@ -129,9 +147,14 @@ describe('workers/global/config/parse/additional-config-file', () => {
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        'Error parsing additional config file due to unresolved variable(s): CI_API_V4_URL is not defined',
+        {
+          err: expect.objectContaining({
+            message: 'CI_API_V4_URL is not defined',
+          }),
+        },
+        'Error parsing additional config file due to unresolved variable(s)',
       );
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it.each([
@@ -140,22 +163,27 @@ describe('workers/global/config/parse/additional-config-file', () => {
     ])('fatal error and exit if %s', async (fileType, filePath) => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
-      fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
+      await fs.promises.writeFile(configFile, `{"token": "abc"}`, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
+
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
     });
 
     it('exports env variables to environment from processEnv object', async () => {
       const configFile = upath.resolve(tmp.path, 'config2.js');
-      const fileContent1 = `module.exports = {
-        "processEnv": {
-        "SOME_KEY": "SOME_VALUE"
-        },
-        "labels": ["renovate"]
-      }`;
-      fs.writeFileSync(configFile, fileContent1, {
+      const fileContent1 = codeBlock`
+        module.exports = {
+                "processEnv": {
+                "SOME_KEY": "SOME_VALUE"
+                },
+                "labels": ["renovate"]
+              }
+      `;
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -166,21 +194,23 @@ describe('workers/global/config/parse/additional-config-file', () => {
       });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
-      fs.unlinkSync(configFile);
-      delete process.env.SOME_KEY;
+      await fs.promises.unlink(configFile);
+      vi.stubEnv('SOME_KEY', undefined);
     });
 
     it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config3.js');
-      const fileContent1 = `module.exports = {
-        "processEnv": {
-        "SOME_KEY": "SOME_VALUE",
-        "SOME_OTHER_KEY": true,
-        "valid_Key": "true",
-        },
-        "labels": ["renovate"]
-      }`;
-      fs.writeFileSync(configFile, fileContent1, {
+      const fileContent1 = codeBlock`
+        module.exports = {
+                "processEnv": {
+                "SOME_KEY": "SOME_VALUE",
+                "SOME_OTHER_KEY": true,
+                "valid_Key": "true",
+                },
+                "labels": ["renovate"]
+              }
+      `;
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -193,9 +223,9 @@ describe('workers/global/config/parse/additional-config-file', () => {
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
-      fs.unlinkSync(configFile);
-      delete process.env.SOME_KEY;
-      delete process.env.valid_Key;
+      await fs.promises.unlink(configFile);
+      vi.stubEnv('SOME_KEY', undefined);
+      vi.stubEnv('valid_Key', undefined);
     });
   });
 
@@ -255,8 +285,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
         true,
       );
 
-      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
+
       expect(logger.trace).toHaveBeenCalledWith(
         expect.anything(),
         'Additional config file successfully deleted',
@@ -277,8 +307,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
         true,
       );
 
-      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
+
       expect(logger.warn).toHaveBeenCalledWith(
         expect.anything(),
         'Error deleting additional config file',

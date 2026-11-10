@@ -1,18 +1,20 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { extractPackageFile } from '../../../../modules/manager/html';
-import type { BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
+import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
   `../../../../modules/manager/html`,
 );
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -258,7 +260,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
 
-    it('fails with digest mismatch', async () => {
+    it('updates digest when only digest changes and no replaceString is set', async () => {
       const dockerfile = codeBlock`
         FROM java:11@sha256-1234 as build
       `;
@@ -272,8 +274,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newValue = '11';
       upgrade.newDigest = 'sha256-5678';
       upgrade.packageFile = 'Dockerfile';
-      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe('FROM java:11@sha256-5678 as build');
     });
 
     it('updates with docker replacement', async () => {
@@ -1347,6 +1349,259 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('jsonata: update currentValue', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.newValue = '1.2.4';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'github-releases';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.4", "digest": "abcdef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentDigest', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'github-releases';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentValue and currentDigest', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.newValue = '1.2.4';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'github-releases';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.4", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentDigest with currentValue captured', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'github-releases';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: reformats newValue via autoReplaceStringTemplate', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'nuget';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      upgrade.autoReplaceStringTemplate =
+        '{{replace "^(\\d+\\.\\d+\\.\\d+)$" "$1.0" newValue}}';
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe('[ { "version": "27.0.0.0", "package": "foo" } ]');
+    });
+
+    it.each([
+      {
+        description: 'git tag',
+        include:
+          'git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0',
+        newValue: 'v1.3.0',
+        newDigest: undefined,
+        expected:
+          'git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.3.0',
+      },
+      {
+        description: 'oci tag',
+        include: 'oci::ghcr.io/org/base:1.0',
+        newValue: '1.1',
+        newDigest: undefined,
+        expected: 'oci::ghcr.io/org/base:1.1',
+      },
+      {
+        description: 'oci tag and digest',
+        include: `oci::ghcr.io/org/base:1.0@sha256:${'a'.repeat(64)}`,
+        newValue: '1.1',
+        newDigest: `sha256:${'b'.repeat(64)}`,
+        expected: `oci::ghcr.io/org/base:1.1@sha256:${'b'.repeat(64)}`,
+      },
+    ])(
+      'mise include: updates $description',
+      async ({ include, newValue, newDigest, expected }) => {
+        const content = `include = ["${include}"]\n\n[tools]\nnode = "1.0"\n`;
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps.find((d) => d.depType === 'include')!;
+        Object.assign(upgrade, dep, {
+          newValue,
+          newDigest,
+          depIndex: extracted!.deps.indexOf(dep),
+        });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(content.replace(include, expected));
+      },
+    );
+
+    it.each([
+      {
+        description: 'tag bump with a sha and version comment',
+        comment: ' # v0.5.0',
+        newValue: 'v0.6.0',
+        expectedComment: ' # v0.6.0',
+      },
+      {
+        description: 'branch digest bump keeping the comment',
+        comment: ' # main',
+        newValue: 'main',
+        expectedComment: ' # main',
+      },
+    ])(
+      'mise include: updates $description',
+      async ({ comment, newValue, expectedComment }) => {
+        const oldSha = 'a'.repeat(40);
+        const newDigest = 'b'.repeat(40);
+        const entry = `git::https://gitlab.com/org/cfg.git//mise.toml?ref=`;
+        const prefix = `include = [\n  "${entry}`;
+        const suffix = `",${comment}\n  "oci::ghcr.io/org/base:1.0",\n]\n`;
+        const content = `${prefix}${oldSha}${suffix}`;
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps[0];
+        Object.assign(upgrade, dep, { newValue, newDigest, depIndex: 0 });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(
+          `${prefix}${newDigest}",${expectedComment}\n  "oci::ghcr.io/org/base:1.0",\n]\n`,
+        );
+      },
+    );
+
+    it.each([
+      {
+        description: 'a tag',
+        suffix: '',
+        ref: 'v1.0.0',
+        newValue: 'v1.1.0',
+        newDigest: undefined,
+        expectedRef: 'v1.1.0',
+        expectedSuffix: '',
+      },
+      {
+        description: 'a sha with a version comment',
+        suffix: ' # v1.0.0',
+        ref: 'a'.repeat(40),
+        newValue: 'v1.1.0',
+        newDigest: 'b'.repeat(40),
+        expectedRef: 'b'.repeat(40),
+        expectedSuffix: ' # v1.1.0',
+      },
+    ])(
+      'mise task file: updates $description',
+      async ({
+        suffix,
+        ref,
+        newValue,
+        newDigest,
+        expectedRef,
+        expectedSuffix,
+      }) => {
+        const entry =
+          'git::https://github.com/org/tasks.git//scripts/build.sh?ref=';
+        function build(r: string, s: string): string {
+          return `[tasks.build]\nfile = "${entry}${r}"${s}\n\n[tools]\nnode = "1.0"\n`;
+        }
+        const content = build(ref, suffix);
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps.find(
+          (d) => d.depType === 'task-build-file',
+        )!;
+        Object.assign(upgrade, dep, {
+          newValue,
+          newDigest,
+          depIndex: extracted!.deps.indexOf(dep),
+        });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(build(expectedRef, expectedSuffix));
+      },
+    );
+
+    it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.baseDeps = [{ depName: 'foo', packageName: 'foo' }];
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'nuget';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      // invalid handlebars template throws during confirmIfDepUpdated
+      upgrade.autoReplaceStringTemplate = '{{#if}}';
+      reuseExistingBranch = true;
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBeNull();
+    });
+
     it('github-actions: updates with newValue only', async () => {
       const githubAction = codeBlock`
         jobs:
@@ -1534,6 +1789,177 @@ describe('workers/repository/update/branch/auto-replace', () => {
                 - uses: some-other-action/checkout@2485f4 # tag=v2.0.0
         `,
       );
+    });
+
+    it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
+      // Regression test for https://github.com/renovatebot/renovate/discussions/38703
+      // When doing a replacement where currentDigest === newDigest, the currentDigestShort
+      // should not be used to incorrectly replace part of the correct digest
+      const dockerfile = codeBlock`
+        FROM redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'redis';
+      upgrade.currentValue = '8.2.1';
+      upgrade.currentDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.currentDigestShort = '5fa2edb';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.newName = 'docker.io/library/redis';
+      upgrade.newValue = '8.2.1';
+      // Same digest as currentDigest - this is the key scenario
+      upgrade.newDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM docker.io/library/redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
+        `,
+      );
+    });
+
+    it('updates only digest', async () => {
+      const githubAction = codeBlock`
+        """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "17eac47ea99057f7473a7d93292e76327c894ed9",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
+      `;
+      upgrade.manager = 'bazel-module';
+      upgrade.updateType = 'digest';
+      upgrade.pinDigests = false;
+      upgrade.autoReplaceStringTemplate = undefined;
+      upgrade.depName = 'rules_angular';
+      upgrade.currentValue = undefined;
+      upgrade.currentDigestShort = '17eac47';
+      upgrade.currentDigest = '17eac47ea99057f7473a7d93292e76327c894ed9';
+      upgrade.depIndex = 1;
+      upgrade.replaceString = undefined;
+      upgrade.newName = undefined;
+      upgrade.newValue = undefined;
+      upgrade.newDigest = '84f4bf185682d841c7e7b369f498e68c742229cc';
+      upgrade.packageFile = 'MODULE.bazel';
+      upgrade.autoReplaceGlobalMatch = true;
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "84f4bf185682d841c7e7b369f498e68c742229cc",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
+        `,
+      );
+    });
+
+    // `constraints` has `sharedScopes`, but the `renovate-config` manager only extracts the top-level and `packageRules` constraints
+    it('updates a tool constraint in the top-level, when the same value is set in both', async () => {
+      const content = codeBlock`
+        {
+          "constraints": {
+            "golang": "1.25"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.25"
+              }
+            }
+          ]
+        }
+      `;
+      upgrade.manager = 'renovate-config';
+      upgrade.packageFile = 'renovate.json';
+      const extracted = extractRenovateConfigPackageFile(
+        content,
+        'renovate.json',
+      );
+      Object.assign(upgrade, extracted!.deps[0], {
+        newValue: '1.27',
+        depIndex: 0,
+      });
+      const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+      expect(res).toBe(codeBlock`
+        {
+          "constraints": {
+            "golang": "1.27"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.25"
+              }
+            }
+          ]
+        }
+      `);
+    });
+
+    it('updates a tool constraint in a `packageRules` entry, when the same value is set in both', async () => {
+      const content = codeBlock`
+        {
+          "constraints": {
+            "golang": "1.25"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.25"
+              }
+            }
+          ]
+        }
+      `;
+      upgrade.manager = 'renovate-config';
+      upgrade.packageFile = 'renovate.json';
+      const extracted = extractRenovateConfigPackageFile(
+        content,
+        'renovate.json',
+      );
+      Object.assign(upgrade, extracted!.deps[1], {
+        newValue: '1.27',
+        depIndex: 1,
+      });
+      const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+      expect(res).toBe(codeBlock`
+        {
+          "constraints": {
+            "golang": "1.25"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.27"
+              }
+            }
+          ]
+        }
+      `);
     });
   });
 });

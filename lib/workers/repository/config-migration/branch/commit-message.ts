@@ -1,15 +1,18 @@
-import type { RenovateConfig } from '../../../../config/types';
-import * as template from '../../../../util/template';
-import type { CommitMessage } from '../../model/commit-message';
-import { CommitMessageFactory } from '../../model/commit-message-factory';
+import { isNonEmptyString } from '@sindresorhus/is';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import * as template from '../../../../util/template/index.ts';
+import { createConfigFileCommitMessage } from '../../model/commit-config-file.ts';
 
 export class ConfigMigrationCommitMessageFactory {
-  constructor(
-    private readonly config: RenovateConfig,
-    private readonly configFile: string,
-  ) {}
+  private readonly config: RenovateConfig;
+  private readonly configFile: string;
 
-  private create(commitMessageTopic: string): CommitMessage {
+  constructor(config: RenovateConfig, configFile: string) {
+    this.config = config;
+    this.configFile = configFile;
+  }
+
+  private create(commitMessageTopic: string): string {
     const { commitMessage } = this.config;
 
     const config = {
@@ -17,27 +20,23 @@ export class ConfigMigrationCommitMessageFactory {
       semanticCommitScope: 'config',
       commitMessageExtra: '',
       commitMessageAction: '',
+      commitMessageSuffix: '',
       commitMessageTopic,
     };
 
-    const commitMessageFactory = new CommitMessageFactory(config);
-    const commit = commitMessageFactory.create();
+    // a configured commitMessage replaces the prefix rather than following it
+    const subject = isNonEmptyString(commitMessage)
+      ? template.compile(commitMessage, { ...config, commitMessagePrefix: '' })
+      : commitMessageTopic;
 
-    if (commitMessage) {
-      config.commitMessagePrefix = '';
-      commit.subject = template.compile(commitMessage, config);
-    } else {
-      commit.subject = commitMessageTopic;
-    }
-
-    return commit;
+    return createConfigFileCommitMessage(config, subject);
   }
 
   getCommitMessage(): string {
-    return this.create(`Migrate config ${this.configFile}`).toString();
+    return this.create(`Migrate config ${this.configFile}`);
   }
 
   getPrTitle(): string {
-    return this.create(`Migrate renovate config`).toString();
+    return this.create(`Migrate Renovate config`);
   }
 }

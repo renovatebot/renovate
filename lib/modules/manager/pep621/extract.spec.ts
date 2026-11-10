@@ -1,11 +1,12 @@
 import { codeBlock } from 'common-tags';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { depTypes } from './utils';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { extractPackageFile } from './index.ts';
+import { depTypes } from './utils.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
@@ -347,6 +348,7 @@ describe('modules/manager/pep621/extract', () => {
           "dep4",
           "dep5",
           "dep6",
+          "dep7",
           "dep-with_NORMALIZATION",
         ]
 
@@ -355,6 +357,7 @@ describe('modules/manager/pep621/extract', () => {
         dep3 = { path = "/local-dep.whl" }
         dep4 = { url = "https://example.com" }
         dep5 = { workspace = true }
+        dep7 = { git = "ssh://git@github.com/foo/baz", tag = "1.0.1" }
         dep_WITH-normalization = { workspace = true }
         `,
         'pyproject.toml',
@@ -391,9 +394,78 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'dep6',
         },
         {
+          depName: 'dep7',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          packageName: 'foo/baz',
+          currentValue: '1.0.1',
+          registryUrls: ['https://github.com'],
+        },
+        {
           depName: 'dep-with_NORMALIZATION',
           depType: depTypes.uvSources,
           skipReason: 'inherited-dependency',
+        },
+      ]);
+    });
+
+    it('should apply the index registryUrl for array form uv sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = ["dep1==0.1.0"]
+
+        [[tool.uv.index]]
+        name = "custom"
+        url = "https://custom.example.com/simple"
+        explicit = true
+
+        [tool.uv.sources]
+        dep1 = [{ index = "custom" }]
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          currentValue: '==0.1.0',
+          registryUrls: ['https://custom.example.com/simple'],
+        },
+      ]);
+    });
+
+    it('should handle SSH git URLs correctly for GitHub sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = [
+          "dep1",
+          "dep2",
+        ]
+
+        [tool.uv.sources]
+        dep1 = { git = "ssh://git@github.com/foo/dep1", tag = "v1.2.3" }
+        dep2 = { git = "ssh://git@github.com/foo/dep2", rev = "abcd1234" }
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          packageName: 'foo/dep1',
+          currentValue: 'v1.2.3',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'ssh://git@github.com/foo/dep2',
         },
       ]);
     });
@@ -508,6 +580,10 @@ describe('modules/manager/pep621/extract', () => {
         Fixtures.get('pyproject_pdm_lockedversion.lock'),
       );
 
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('pdm.lock');
+
       const res = await extractPackageFile(
         Fixtures.get('pyproject_pdm_lockedversion.toml'),
         'pyproject.toml',
@@ -539,6 +615,7 @@ describe('modules/manager/pep621/extract', () => {
             skipReason: 'unspecified-version',
           },
         ],
+        lockFiles: ['pdm.lock'],
       });
     });
 
@@ -570,6 +647,10 @@ describe('modules/manager/pep621/extract', () => {
         `,
       );
 
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
       const res = await extractPackageFile(
         codeBlock`
           [project]
@@ -600,6 +681,392 @@ describe('modules/manager/pep621/extract', () => {
             lockedVersion: '24.2.0',
           },
         ],
+        lockFiles: ['uv.lock'],
+      });
+    });
+
+    it('should surface transitive deps from uv.lock when vulnerability alerts are enabled', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "idna"
+          version = "3.10"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "internal-lib"
+          version = "1.2.3"
+          source = { registry = "https://example.com/simple" }
+
+          [[package]]
+          name = "local-pkg"
+          version = "0.1.0"
+          source = { editable = "../local-pkg" }
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "attrs" },
+          ]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // attrs (direct) keeps its lockedVersion; idna and internal-lib are
+      // surfaced as skipped transitive deps; the editable local-pkg and the
+      // virtual workspace root are ignored.
+      expect(res).toMatchObject({
+        deps: [
+          { packageName: 'python', depType: 'requires-python' },
+          {
+            packageName: 'attrs',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
+            lockedVersion: '24.2.0',
+          },
+          {
+            packageName: 'idna',
+            depName: 'idna',
+            depType: 'uv.lock',
+            datasource: 'pypi',
+            lockedVersion: '3.10',
+            skipReason: 'lockfile-only',
+            skipStage: 'extract',
+          },
+          {
+            packageName: 'internal-lib',
+            depType: 'uv.lock',
+            lockedVersion: '1.2.3',
+            skipReason: 'lockfile-only',
+            registryUrls: ['https://example.com/simple'],
+          },
+        ],
+        lockFiles: ['uv.lock'],
+      });
+      // default-PyPI transitive deps don't carry registryUrls
+      expect(res?.deps[2].registryUrls).toBeUndefined();
+    });
+
+    it('should mark a transitive dep which uv.lock holds at several versions', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.8"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "urllib3"
+          version = "2.8.0"
+          source = { registry = "https://pypi.org/simple" }
+          resolution-markers = [
+              "python_full_version >= '3.10'",
+          ]
+
+          [[package]]
+          name = "urllib3"
+          version = "2.2.3"
+          source = { registry = "https://pypi.org/simple" }
+          resolution-markers = [
+              "python_full_version < '3.9'",
+          ]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.8"
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // the lowest version is the one to look up, so no fix is missed, but the
+      // upgrade cannot be pinned to it
+      expect(res?.deps).toMatchObject([
+        { packageName: 'python' },
+        { packageName: 'attrs' },
+        {
+          packageName: 'urllib3',
+          depType: 'uv.lock',
+          lockedVersion: '2.2.3',
+          skipReason: 'lockfile-only',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ]);
+    });
+
+    it('should surface transitive deps of a workspace only for the package file which owns uv.lock', async () => {
+      const workspaceLockfile = codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [manifest]
+        members = [
+            "pkg-a",
+            "workspace-root",
+        ]
+
+        [[package]]
+        name = "attrs"
+        version = "24.2.0"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "idna"
+        version = "3.10"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "urllib3"
+        version = "2.8.0"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "pkg-a"
+        version = "0.1.0"
+        source = { virtual = "packages/a" }
+        dependencies = [
+            { name = "attrs" },
+        ]
+
+        [package.dev-dependencies]
+        dev = [
+            { name = "idna" },
+        ]
+
+        [[package]]
+        name = "workspace-root"
+        version = "0.1.0"
+        source = { virtual = "." }
+      `;
+      const memberPyProject = codeBlock`
+        [project]
+        name = "pkg-a"
+        version = "0.1.0"
+        dependencies = ["attrs>=24.1.0"]
+        requires-python = ">=3.11"
+      `;
+
+      fs.readLocalFile.mockResolvedValue(workspaceLockfile);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      // a member does not own the lock file, which sits at the workspace root
+      const member = await extractPackageFile(
+        memberPyProject,
+        'packages/a/pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      expect(
+        member?.deps.filter((dep) => dep.depType === 'uv.lock'),
+      ).toBeEmpty();
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const root = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "workspace-root"
+          version = "0.1.0"
+          requires-python = ">=3.11"
+
+          [tool.uv.workspace]
+          members = ["packages/*"]
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // `attrs` and `idna` belong to a member, so only `urllib3` is transitive
+      expect(
+        root?.deps.filter((dep) => dep.depType === 'uv.lock'),
+      ).toMatchObject([{ packageName: 'urllib3', lockedVersion: '2.8.0' }]);
+    });
+
+    it('should surface what a git dependency pulls in, and keep a registry entry of a package with mixed sources', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [manifest]
+          members = ["pep621-uv"]
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "some-git-pkg" },
+          ]
+
+          [[package]]
+          name = "some-git-pkg"
+          version = "1.0.0"
+          source = { git = "https://example.com/some-git-pkg" }
+          dependencies = [
+              { name = "idna" },
+          ]
+
+          [[package]]
+          name = "idna"
+          version = "3.10"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { git = "https://example.com/attrs" }
+
+          [[package]]
+          name = "attrs"
+          version = "24.3.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "zope-interface"
+          version = "7.2"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "zope-interface"
+          version = "7.1"
+          source = { git = "https://example.com/zope-interface" }
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["some-git-pkg"]
+          requires-python = ">=3.11"
+
+          [tool.uv.sources]
+          some-git-pkg = { git = "https://example.com/some-git-pkg" }
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // `idna` is only a git package's dependency, which declares nothing of
+      // its own, and `attrs` keeps the registry of its other entry
+      expect(
+        res?.deps.filter((dep) => dep.depType === 'uv.lock'),
+      ).toMatchObject([
+        { packageName: 'idna', lockedVersion: '3.10' },
+        {
+          packageName: 'attrs',
+          lockedVersion: '24.2.0',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+        // the lower entry has no registry of its own, so the other one's is
+        // what it can be looked up in
+        {
+          packageName: 'zope-interface',
+          lockedVersion: '7.1',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ]);
+    });
+
+    it('should not surface transitive deps from uv.lock by default', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "idna"
+          version = "3.10"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "attrs" },
+          ]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          { packageName: 'python', depType: 'requires-python' },
+          {
+            packageName: 'attrs',
+            depType: 'project.dependencies',
+            lockedVersion: '24.2.0',
+          },
+        ],
+        lockFiles: ['uv.lock'],
       });
     });
 

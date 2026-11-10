@@ -1,84 +1,95 @@
 import { Readable } from 'node:stream';
-import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { MockedObject } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { partial } from '~test/util';
+import { partial } from '~test/util.ts';
 
-vi.mock('./azure-got-wrapper', () => mockDeep());
+vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 
 describe('modules/platform/azure/azure-helper', () => {
-  let azureHelper: typeof import('./azure-helper');
-  let azureApi: MockedObject<typeof import('./azure-got-wrapper')>;
+  let azureHelper: typeof import('./azure-helper.ts');
+  let azureApi: MockedObject<typeof import('./azure-got-wrapper.ts')>;
 
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    azureHelper = await vi.importActual('./azure-helper');
-    azureApi = await vi.importMock('./azure-got-wrapper');
+    azureHelper = await vi.importActual('./azure-helper.ts');
+    azureApi = await vi.importMock('./azure-got-wrapper.ts');
   });
 
   describe('getRef', () => {
     it('should get the ref with short ref name', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ objectId: 132 }]),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRefs: vi.fn().mockResolvedValue([{ objectId: 132 }]),
+        }),
       );
       const res = await azureHelper.getRefs('123', 'branch');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          objectId: 132,
+        },
+      ]);
     });
 
     it('should not get ref', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => []),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRefs: vi.fn().mockResolvedValue([]),
+        }),
       );
       const res = await azureHelper.getRefs('123');
       expect(res).toHaveLength(0);
     });
 
     it('should get the ref with full ref name', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ objectId: '132' }]),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRefs: vi.fn().mockResolvedValue([{ objectId: '132' }]),
+        }),
       );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          objectId: '132',
+        },
+      ]);
     });
   });
 
   describe('getAzureBranchObj', () => {
     it('should get the branch object', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ objectId: '132' }]),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRefs: vi.fn().mockResolvedValue([{ objectId: '132' }]),
+        }),
       );
       const res = await azureHelper.getAzureBranchObj(
         '123',
         'branchName',
         'base',
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        name: 'refs/heads/branchName',
+        oldObjectId: '132',
+      });
     });
 
     it('should get the branch object when ref missing', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => []),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRefs: vi.fn().mockResolvedValue([]),
+        }),
       );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        name: 'refs/heads/branchName',
+        oldObjectId: '0000000000000000000000000000000000000000',
+      });
     });
   });
 
@@ -97,11 +108,10 @@ describe('modules/platform/azure/azure-helper', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => mockEventStream),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemText: vi.fn().mockResolvedValue(mockEventStream),
+        }),
       );
 
       const res = await azureHelper.getFile(
@@ -126,11 +136,10 @@ describe('modules/platform/azure/azure-helper', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => mockEventStream),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemText: vi.fn().mockResolvedValue(mockEventStream),
+        }),
       );
 
       const res = await azureHelper.getFile(
@@ -155,11 +164,10 @@ describe('modules/platform/azure/azure-helper', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => mockEventStream),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemText: vi.fn().mockResolvedValue(mockEventStream),
+        }),
       );
 
       const res = await azureHelper.getFile(
@@ -167,17 +175,16 @@ describe('modules/platform/azure/azure-helper', () => {
         'repository',
         './myFilePath/test',
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toBe('{"hello"= "test"}');
     });
 
     it('should return null because the file is not readable', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => ({
-              readable: false,
-            })),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemText: vi.fn().mockResolvedValue({
+            readable: false,
+          }),
+        }),
       );
 
       const res = await azureHelper.getFile(
@@ -191,54 +198,103 @@ describe('modules/platform/azure/azure-helper', () => {
 
   describe('getCommitDetails', () => {
     it('should get commit details', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getCommit: vi.fn(() => ({
-              parents: ['123456'],
-            })),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getCommit: vi.fn().mockResolvedValue({
+            parents: ['123456'],
+          }),
+        }),
       );
       const res = await azureHelper.getCommitDetails('123', '123456');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        parents: ['123456'],
+      });
     });
   });
 
   describe('getMergeMethod', () => {
     it('should default to NoFastForward', async () => {
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: vi.fn(() => []),
-          }) as any,
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([]),
+        }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.NoFastForward,
       );
     });
 
-    it('should return Squash', async () => {
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: vi.fn(() => [
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+    it('should return NoFastForward when policy explicitly set', async () => {
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([
+            {
+              settings: {
+                allowNoFastForward: true,
+                scope: [
+                  {
+                    repositoryId: '',
+                  },
+                ],
               },
-            ]),
-          }) as any,
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+          ]),
+        }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
+        GitPullRequestMergeStrategy.NoFastForward,
+      );
+    });
+
+    it('should return RebaseMerge', async () => {
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([
+            {
+              settings: {
+                allowRebaseMerge: true,
+                scope: [
+                  {
+                    repositoryId: '',
+                  },
+                ],
+              },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+          ]),
+        }),
+      );
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
+        GitPullRequestMergeStrategy.RebaseMerge,
+      );
+    });
+
+    it('should return Squash', async () => {
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    repositoryId: '',
+                  },
+                ],
+              },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+          ]),
+        }),
+      );
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.Squash,
       );
     });
@@ -267,46 +323,45 @@ describe('modules/platform/azure/azure-helper', () => {
           ),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
-        GitPullRequestMergeStrategy.Squash,
-      );
+      await expect(
+        azureHelper.getMergeMethod('', '', refMock),
+      ).resolves.toEqual(GitPullRequestMergeStrategy.Squash);
     });
 
     it('should return default branch policy', async () => {
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: vi.fn(() => [
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: 'doo-dee-doo-repository-id',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    repositoryId: 'doo-dee-doo-repository-id',
+                  },
+                ],
               },
-              {
-                settings: {
-                  allowRebase: true,
-                  scope: [
-                    {
-                      matchKind: 'DefaultBranch',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
               },
-            ]),
-          }) as any,
+            },
+            {
+              settings: {
+                allowRebase: true,
+                scope: [
+                  {
+                    matchKind: 'DefaultBranch',
+                  },
+                ],
+              },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+          ]),
+        }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.Rebase,
       );
     });
@@ -314,126 +369,147 @@ describe('modules/platform/azure/azure-helper', () => {
     it('should return most specific exact branch policy', async () => {
       const refMock = 'refs/heads/ding';
       const defaultBranchMock = 'dong';
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: vi.fn(() => [
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: 'doo-dee-doo-repository-id',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    repositoryId: 'doo-dee-doo-repository-id',
+                  },
+                ],
               },
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
               },
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      matchKind: 'DefaultBranch',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+            },
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    repositoryId: '',
+                  },
+                ],
               },
-              {
-                settings: {
-                  allowRebase: true,
-                  scope: [
-                    {
-                      matchKind: 'Exact',
-                      refName: refMock,
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
               },
-            ]),
-          }) as any,
+            },
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    matchKind: 'DefaultBranch',
+                  },
+                ],
+              },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+            {
+              settings: {
+                allowRebase: true,
+                scope: [
+                  {
+                    matchKind: 'Exact',
+                    refName: refMock,
+                    repositoryId: '',
+                  },
+                ],
+              },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+          ]),
+        }),
       );
-      expect(
-        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
-      ).toEqual(GitPullRequestMergeStrategy.Rebase);
+      await expect(
+        azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
+      ).resolves.toEqual(GitPullRequestMergeStrategy.Rebase);
     });
 
     it('should return most specific prefix branch policy', async () => {
       const refMock = 'refs/heads/ding-wow';
       const defaultBranchMock = 'dong-wow';
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: vi.fn(() => [
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: vi.fn().mockResolvedValue([
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    repositoryId: '',
+                  },
+                ],
               },
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      matchKind: 'DefaultBranch',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
               },
-              {
-                settings: {
-                  allowRebase: true,
-                  scope: [
-                    {
-                      matchKind: 'Prefix',
-                      refName: 'refs/heads/ding',
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+            },
+            {
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    matchKind: 'DefaultBranch',
+                  },
+                ],
               },
-            ]),
-          }) as any,
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+            {
+              settings: {
+                allowRebase: true,
+                scope: [
+                  {
+                    matchKind: 'Prefix',
+                    refName: 'refs/heads/ding',
+                    repositoryId: '',
+                  },
+                ],
+              },
+              type: {
+                id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+              },
+            },
+          ]),
+        }),
       );
-      expect(
-        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
-      ).toEqual(GitPullRequestMergeStrategy.Rebase);
+      await expect(
+        azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
+      ).resolves.toEqual(GitPullRequestMergeStrategy.Rebase);
+    });
+  });
+
+  describe('getPolicyEvaluations', () => {
+    it('should get the policy evaluations for a pull request', async () => {
+      const policyEvaluations = [{ status: 2 }];
+      const getPolicyEvaluationsMock = vi
+        .fn()
+        .mockResolvedValue(policyEvaluations);
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: getPolicyEvaluationsMock,
+        }),
+      );
+      const res = await azureHelper.getPolicyEvaluations(
+        'projectId',
+        'artifactId',
+      );
+      expect(getPolicyEvaluationsMock).toHaveBeenCalledWith(
+        'projectId',
+        'artifactId',
+      );
+      expect(res).toEqual(policyEvaluations);
     });
   });
 
@@ -446,14 +522,13 @@ describe('modules/platform/azure/azure-helper', () => {
         description: `team2 ${index + 1}`,
       }));
       const allTeams = team1.concat(team2);
-      azureApi.coreApi.mockImplementationOnce(
-        () =>
-          ({
-            getTeams: vi
-              .fn()
-              .mockResolvedValueOnce(team1)
-              .mockResolvedValueOnce(team2),
-          }) as any,
+      azureApi.coreApi.mockResolvedValueOnce(
+        partial<ICoreApi>({
+          getTeams: vi
+            .fn()
+            .mockResolvedValueOnce(team1)
+            .mockResolvedValueOnce(team2),
+        }),
       );
       const res = await azureHelper.getAllProjectTeams('projectId');
       expect(res).toEqual(allTeams);

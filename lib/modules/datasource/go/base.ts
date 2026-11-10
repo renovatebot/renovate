@@ -1,21 +1,22 @@
 // TODO: types (#22198)
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
-import * as hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
-import { regEx } from '../../../util/regex';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   parseUrl,
   trimLeadingSlash,
   trimTrailingSlash,
-} from '../../../util/url';
-import { BitbucketTagsDatasource } from '../bitbucket-tags';
-import { GitTagsDatasource } from '../git-tags';
-import { GiteaTagsDatasource } from '../gitea-tags';
-import { GithubTagsDatasource } from '../github-tags';
-import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { DataSource } from './types';
+} from '../../../util/url.ts';
+import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
+import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { GitTagsDatasource } from '../git-tags/index.ts';
+import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../github-tags/index.ts';
+import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
+import type { DataSource } from './types.ts';
 
 // TODO: figure out class hierarchy (#10532)
 export class BaseGoDatasource {
@@ -27,6 +28,13 @@ export class BaseGoDatasource {
   );
   private static readonly gitVcsRegexp = regEx(
     /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
+  );
+  private static readonly goImportRegexp = regEx(
+    /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
+  );
+  private static readonly goImportAllRegexp = regEx(
+    BaseGoDatasource.goImportRegexp.source,
+    'g',
   );
 
   private static readonly id = 'go';
@@ -45,7 +53,7 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('github.com/')) {
       const split = goModule.split('/');
-      const packageName = split[1] + '/' + split[2];
+      const packageName = `${split[1]}/${split[2]}`;
       return {
         datasource: GithubTagsDatasource.id,
         packageName,
@@ -55,7 +63,7 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('bitbucket.org/')) {
       const split = goModule.split('/');
-      const packageName = split[1] + '/' + split[2];
+      const packageName = `${split[1]}/${split[2]}`;
       return {
         datasource: BitbucketTagsDatasource.id,
         packageName,
@@ -77,17 +85,8 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('dev.azure.com/')) {
       const split = goModule.split('/');
-      if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
-        const packageName =
-          'https://dev.azure.com/' +
-          split[1] +
-          '/' +
-          split[2] +
-          '/_git/' +
-          (split[3] === '_git' ? split[4] : split[3]).replace(
-            regEx(/\.git$/),
-            '',
-          );
+      if (split.length > 3) {
+        const packageName = `https://dev.azure.com/${split[1]}/${split[2]}/_git/${(split[3] === '_git' ? split[4] : split[3]).replace(regEx(/\.git$/), '')}`;
         return {
           datasource: GitTagsDatasource.id,
           packageName,
@@ -110,7 +109,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = `${split[1]}/${split[2]}`;
       return {
-        datasource: GiteaTagsDatasource.id,
+        datasource: ForgejoTagsDatasource.id,
         packageName,
         registryUrl: 'https://code.forgejo.org',
       };
@@ -120,7 +119,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = `${split[1]}/${split[2]}`;
       return {
-        datasource: GiteaTagsDatasource.id,
+        datasource: ForgejoTagsDatasource.id,
         packageName,
         registryUrl: 'https://codeberg.org',
       };
@@ -130,12 +129,72 @@ export class BaseGoDatasource {
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
+  /**
+   * Returns the module proxy URL that a `go-import` meta tag with the `mod` VCS advertises for the module.
+   *
+   * @see https://go.dev/ref/mod#serving-from-proxy
+   */
+  static async getModProxyUrl(goModule: string): Promise<string | null> {
+    const html = await BaseGoDatasource.goGet(goModule);
+    return BaseGoDatasource.findModProxyUrl(html, goModule);
+  }
+
+  /**
+   * Finds the first `go-import` meta tag with the `mod` VCS whose prefix is a path prefix of the module.
+   *
+   * The proxy URL is controlled by the host serving the page, so only a valid `https:` URL is accepted, as with `go` (unless `GOINSECURE` is set).
+   */
+  private static findModProxyUrl(
+    html: string,
+    goModule: string,
+  ): string | null {
+    for (const match of html.matchAll(BaseGoDatasource.goImportAllRegexp)) {
+      const { prefix, proto, goImportURL } = match.groups as Record<
+        string,
+        string
+      >;
+
+      if (
+        proto !== 'mod' ||
+        !(goModule === prefix || goModule.startsWith(`${prefix}/`))
+      ) {
+        continue;
+      }
+
+      if (parseUrl(goImportURL)?.protocol !== 'https:') {
+        logger.debug(
+          { goModule, goImportURL },
+          'Ignoring go-import mod proxy URL which is not a valid https URL',
+        );
+        continue;
+      }
+
+      return goImportURL;
+    }
+
+    return null;
+  }
+
+  private static async goGet(goModule: string): Promise<string> {
+    const goModuleUrl = goModule.replace(regEx(/\.git(?:\/[a-z0-9/]*)?$/), '');
+    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
+    const { body } = await BaseGoDatasource.http.getText(pkgUrl);
+    return body;
+  }
+
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(/\.git(\/[a-z0-9/]*)?$/, '');
-    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
-    const { body: html } = await BaseGoDatasource.http.getText(pkgUrl);
+    const html = await BaseGoDatasource.goGet(goModule);
+
+    // `go` prefers a `mod` proxy over a VCS for the same module, so leave it to the caller to look it up
+    if (BaseGoDatasource.findModProxyUrl(html, goModule)) {
+      logger.debug(
+        { goModule },
+        'Preferring go-import mod proxy over other go-import and go-source entries',
+      );
+      return null;
+    }
 
     const goSourceHeader = BaseGoDatasource.goSourceHeader(html, goModule);
     if (goSourceHeader) {
@@ -149,6 +208,7 @@ export class BaseGoDatasource {
     }
 
     logger.trace({ goModule }, 'No go-source or go-import header found');
+    /* istanbul ignore next */
     return null;
   }
 
@@ -204,7 +264,7 @@ export class BaseGoDatasource {
         const metadataPath = httpsRegExpName;
         const modulePath = gitlabModuleName;
 
-        if (modulePath.startsWith(metadataPath + '/')) {
+        if (modulePath.startsWith(`${metadataPath}/`)) {
           packageName = metadataPath;
         }
       }
@@ -226,7 +286,7 @@ export class BaseGoDatasource {
         return null;
       }
 
-      const endpoint = GlobalConfig.get('endpoint', '');
+      const endpoint = GlobalConfig.get('endpoint');
       const endpointPrefix = regEx(
         /https:\/\/[^/]+\/(?<prefix>.*?\/)(?:api\/v4\/?)?/,
       ).exec(endpoint)?.groups?.prefix;
@@ -248,7 +308,6 @@ export class BaseGoDatasource {
         packageName,
       };
     }
-    /* istanbul ignore next */
     return null;
   }
 
@@ -256,9 +315,8 @@ export class BaseGoDatasource {
     html: string,
     goModule: string,
   ): DataSource | null {
-    const importMatchGroups = regEx(
-      /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
-    ).exec(html)?.groups;
+    const importMatchGroups =
+      BaseGoDatasource.goImportRegexp.exec(html)?.groups;
     if (!importMatchGroups) {
       logger.trace({ goModule }, 'No go-source or go-import header found');
       return null;

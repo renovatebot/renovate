@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
 import {
   extractAllPackageFiles,
   extractExtensions,
   extractPackage,
   extractRegistries,
   resolveParents,
-} from './extract';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+} from './extract.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
@@ -240,6 +240,7 @@ describe('modules/manager/maven/extract', () => {
         'some-file',
         {},
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
       );
@@ -593,7 +594,7 @@ describe('modules/manager/maven/extract', () => {
       ]);
       for (const packageFile of res) {
         for (const dep of packageFile.deps) {
-          const depUrls = new Set([...dep.registryUrls!]);
+          const depUrls = new Set(dep.registryUrls);
           expect(depUrls).toStrictEqual(unorderedUrls);
         }
       }
@@ -913,16 +914,97 @@ describe('modules/manager/maven/extract', () => {
       ]);
     });
 
+    it('should extract from pom.template.xml file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>org.example</groupId>
+        <artifactId>template-project</artifactId>
+        <version>1.0.0</version>
+
+        <properties>
+          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+          <manifold.version>2021.1.12</manifold.version>
+          <scala.version>{{scala_version}}</scala.version>
+          <scala.binary.version>{{scala_binary_version}}</scala.binary.version>
+        </properties>
+
+        <dependencies>
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>3.2.0</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>templated-dep</artifactId>
+            <version>\${templateVersion}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>\${scala.version}</version>
+          </dependency>
+        </dependencies>
+      </project>
+    `);
+      const res = await extractAllPackageFiles({}, ['pom.template.xml']);
+      expect(res).toMatchObject([
+        {
+          packageFile: 'pom.template.xml',
+          deps: [
+            {
+              datasource: 'maven',
+              depName: 'org.springframework.boot:spring-boot-starter-web',
+              currentValue: '3.2.0',
+              depType: 'compile',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+            {
+              datasource: 'maven',
+              depName: 'org.junit.jupiter:junit-jupiter',
+              currentValue: '5.10.1',
+              depType: 'test',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+            {
+              datasource: 'maven',
+              depName: 'org.example:templated-dep',
+              currentValue: '${templateVersion}',
+              depType: 'compile',
+              skipReason: 'version-placeholder',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+            {
+              datasource: 'maven',
+              depName: 'org.scala-lang:scala-library',
+              currentValue: '{{scala_version}}',
+              depType: 'compile',
+              skipReason: 'version-placeholder',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should return empty array if extensions file is invalid or empty', async () => {
       fs.readLocalFile
         .mockResolvedValueOnce('')
         .mockResolvedValueOnce('invalid xml content');
-      expect(
-        await extractAllPackageFiles({}, [
+      await expect(
+        extractAllPackageFiles({}, [
           '.mvn/extensions.xml',
           'grp/.mvn/extensions.xml',
         ]),
-      ).toBeEmptyArray();
+      ).resolves.toBeEmptyArray();
     });
 
     describe('root pom handling', () => {

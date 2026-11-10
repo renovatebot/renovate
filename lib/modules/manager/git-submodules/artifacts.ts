@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export default function updateArtifacts({
   updatedDeps,

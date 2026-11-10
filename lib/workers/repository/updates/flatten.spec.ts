@@ -1,9 +1,11 @@
-import is from '@sindresorhus/is';
-import { getConfig } from '../../../config/defaults';
-import { flattenUpdates, sanitizeDepName } from './flatten';
-import type { RenovateConfig } from '~test/util';
+import { isNumber } from '@sindresorhus/is';
+import { type RenovateConfig, partial } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { SkipReason } from '../../../types/skip-reason.ts';
+import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
-vi.mock('../../../util/git/semantic');
+vi.mock('../../../util/git/semantic.ts');
 
 let config: RenovateConfig;
 
@@ -19,6 +21,28 @@ describe('workers/repository/updates/flatten', () => {
       expect(sanitizeDepName('https://some.host.name/a/path/to.git')).toBe(
         'https-some.host.name-a-path-to.git',
       );
+    });
+
+    it.each`
+      depName                                                      | expected
+      ${'https://user:token@git.example.com/org/repo'}             | ${'https-git.example.com-org-repo'}
+      ${'https://glpat-0123456789abcdef@git.example.com/org/repo'} | ${'https-git.example.com-org-repo'}
+      ${'https://token@git.example.com/org/repo'}                  | ${'https-tokengit.example.com-org-repo'}
+      ${'https://${USER}@git.example.com/org/repo'}                | ${'https-git.example.com-org-repo'}
+      ${'ssh://git@git.example.com/org/repo'}                      | ${'ssh-gitgit.example.com-org-repo'}
+    `(
+      'sanitizes url userinfo of $depName',
+      ({ depName, expected }: { depName: string; expected: string }) => {
+        expect(sanitizeDepName(depName)).toBe(expected);
+      },
+    );
+
+    it('strips shell-style variable placeholders', () => {
+      expect(sanitizeDepName('${DEPENDENCY_PROXY}python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY:-}python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY}/python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY:-}/python')).toBe('python');
+      expect(sanitizeDepName('$CI_REGISTRY/image')).toBe('ci_registry-image');
     });
   });
 
@@ -167,6 +191,7 @@ describe('workers/repository/updates/flatten', () => {
           },
         ],
       };
+      // @ts-expect-error -- TODO: fix types
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(15);
       expect(
@@ -174,7 +199,7 @@ describe('workers/repository/updates/flatten', () => {
           (upgrade) =>
             upgrade.isLockFileMaintenance ??
             upgrade.isRemediation ??
-            is.number(upgrade.depIndex),
+            isNumber(upgrade.depIndex),
         ),
       ).toBeTrue();
       expect(res.find((update) => update.sourceRepoSlug)!.sourceRepoSlug).toBe(
@@ -233,6 +258,348 @@ describe('workers/repository/updates/flatten', () => {
         ),
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
+    });
+
+    it('when a dependency is enabled=false, it is filtered', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                enabled: false,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(
+        res.find((update) => update.depName === '@org/a'),
+      ).not.toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).toBeDefined();
+    });
+
+    it('when a skipReason is found on a dependency, it is filtered', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                skipReason: 'disabled' as SkipReason,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(
+        res.find((update) => update.depName === '@org/a'),
+      ).not.toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).toBeDefined();
+    });
+
+    it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {
+      // TODO #22198
+      config.lockFileMaintenance!.enabled = true;
+      config.packageRules = [
+        {
+          matchUpdateTypes: ['major', 'lockFileMaintenance'],
+          groupName: 'group-lock-major',
+        },
+      ];
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                currentValue: '1.0.0',
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(2);
+      const lockFileUpdate = res.find(
+        (u) => u.updateType === 'lockFileMaintenance',
+      );
+      const regularUpdate = res.find(
+        (u) => u.updateType !== 'lockFileMaintenance',
+      );
+      expect(lockFileUpdate!.branchName).toContain('lock-file-maintenance');
+      expect(regularUpdate!.branchName).not.toContain('lock-file-maintenance');
+      expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
+    });
+
+    it('passes minimumReleaseAgeExtracted from the package file to all updates', async () => {
+      config.lockFileMaintenance!.enabled = true;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            minimumReleaseAgeExtracted: '3 days',
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        { depName: 'foo', minimumReleaseAgeExtracted: '3 days' },
+        {
+          updateType: 'lockFileMaintenance',
+          minimumReleaseAgeExtracted: '3 days',
+        },
+      ]);
+    });
+
+    describe('hasAttestation is taken from the current value', () => {
+      it.each([[true], [false], [undefined]])(
+        'current attestation %s, new attestation %s',
+        async (currentAttestation) => {
+          config = getConfig(); // HACK
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'foo',
+                    currentValue: '1.0.0',
+                    hasAttestation: currentAttestation,
+                    updates: [
+                      {
+                        newValue: '2.0.0',
+                        // but the new update may have a different value
+                        hasAttestation: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          const res = await flattenUpdates(config, packageFiles);
+          expect(res).toHaveLength(1);
+          expect(res[0].hasAttestation).toEqual(currentAttestation);
+        },
+      );
+    });
+
+    it('skips replacement update when replacement already exists as sibling dep', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: '@material-ui/core',
+                updates: [
+                  {
+                    newName: '@mui/material',
+                    newValue: '^5.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: '@mui/material',
+                updates: [
+                  {
+                    newValue: '^6.2.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === '@material-ui/core'),
+      ).toBeUndefined();
+      expect(
+        res.find((update) => update.depName === '@mui/material'),
+      ).toBeDefined();
+    });
+
+    it('skips replacement update when sibling packageName matches newName', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'old-pkg',
+                updates: [
+                  {
+                    newName: '@scope/new-pkg',
+                    newValue: '^2.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: 'alias',
+                packageName: '@scope/new-pkg',
+                updates: [
+                  {
+                    newValue: '^3.0.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === 'old-pkg'),
+      ).toBeUndefined();
+      expect(res.find((update) => update.depName === 'alias')).toBeDefined();
+    });
+
+    it('does not detect semantic commits when they are already decided', async () => {
+      config.semanticCommits = 'enabled';
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'some-dep',
+                updates: [{ newValue: '^2.0.0', updateType: 'minor' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toHaveLength(1);
+      expect(res[0].semanticCommits).toBe('enabled');
+    });
+
+    describe('vulnerabilityAlerts concurrent limits', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'some-dep',
+                packageName: 'some-dep',
+                updates: [{ newValue: '^2.0.0', updateType: 'minor' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        config.prConcurrentLimit = 10;
+        config.packageRules = [
+          { matchPackageNames: ['some-dep'], isVulnerabilityAlert: true },
+        ];
+      });
+
+      it('applies prConcurrentLimit to updates marked by a packageRule', async () => {
+        config.vulnerabilityAlerts = partial<RenovateConfig>({
+          prConcurrentLimit: 1,
+        });
+
+        const res = await flattenUpdates(config, packageFiles);
+
+        expect(res).toHaveLength(1);
+        expect(res[0].prConcurrentLimit).toBe(1);
+        expect(res[0].branchConcurrentLimit).toBe(config.branchConcurrentLimit);
+      });
+
+      it('applies branchConcurrentLimit to updates marked by a packageRule', async () => {
+        config.vulnerabilityAlerts = partial<RenovateConfig>({
+          branchConcurrentLimit: 2,
+        });
+
+        const res = await flattenUpdates(config, packageFiles);
+
+        expect(res).toHaveLength(1);
+        expect(res[0].branchConcurrentLimit).toBe(2);
+        expect(res[0].prConcurrentLimit).toBe(10);
+      });
+
+      it('keeps the repository-wide limit for regular updates', async () => {
+        config.packageRules = [];
+        config.vulnerabilityAlerts = partial<RenovateConfig>({
+          prConcurrentLimit: 1,
+          branchConcurrentLimit: 2,
+        });
+
+        const res = await flattenUpdates(config, packageFiles);
+
+        expect(res).toHaveLength(1);
+        expect(res[0].prConcurrentLimit).toBe(10);
+        expect(res[0].branchConcurrentLimit).toBe(config.branchConcurrentLimit);
+      });
     });
   });
 });

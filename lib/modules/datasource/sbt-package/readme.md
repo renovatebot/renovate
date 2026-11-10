@@ -6,10 +6,14 @@ For example:
 
 ```json
 {
-  "matchDatasources": ["sbt-package"],
-  "registryUrls": [
-    "https://repo.maven.apache.org/maven2",
-    "https://oss.sonatype.org/content/repositories/snapshots"
+  "packageRules": [
+    {
+      "matchDatasources": ["sbt-package"],
+      "registryUrls": [
+        "https://repo.maven.apache.org/maven2",
+        "https://oss.sonatype.org/content/repositories/snapshots"
+      ]
+    }
   ]
 }
 ```

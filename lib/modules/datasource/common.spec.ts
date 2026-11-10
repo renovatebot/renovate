@@ -1,18 +1,23 @@
-import { defaultVersioning } from '../versioning';
+import { logger } from '~test/util.ts';
+import { defaultVersioning } from '../versioning/index.ts';
+import ruby from '../versioning/ruby/index.ts';
+import semverCoerced from '../versioning/semver-coerced/index.ts';
+import datasources from './api.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
   applyVersionCompatibility,
+  extractVersionFromGroups,
   filterValidVersions,
   getDatasourceFor,
+  getDatasourceHostType,
   getDefaultVersioning,
   isGetPkgReleasesConfig,
   sortAndRemoveDuplicates,
-} from './common';
-import { CustomDatasource } from './custom';
-import { NpmDatasource } from './npm';
-import type { ReleaseResult } from './types';
-import { logger } from '~test/util';
+} from './common.ts';
+import { CustomDatasource } from './custom/index.ts';
+import { NpmDatasource } from './npm/index.ts';
+import type { GetPkgReleasesConfig, ReleaseResult } from './types.ts';
 
 describe('modules/datasource/common', () => {
   describe('getDatasourceFor', () => {
@@ -33,6 +38,30 @@ describe('modules/datasource/common', () => {
     });
   });
 
+  describe('getDatasourceHostType', () => {
+    it.each`
+      datasource         | expected
+      ${'npm'}           | ${'npm'}
+      ${'custom.foobar'} | ${'custom'}
+      ${'sbt-package'}   | ${'sbt'}
+      ${'sbt-plugin'}    | ${'sbt'}
+      ${'foobar'}        | ${null}
+    `('returns $expected for $datasource', ({ datasource, expected }) => {
+      expect(getDatasourceHostType(datasource)).toBe(expected);
+    });
+
+    it.each([...datasources.keys()])(
+      'returns the host type of the http client of %s',
+      (id) => {
+        const { http } = datasources.get(id) as unknown as {
+          http?: { hostType: string };
+        };
+
+        expect(getDatasourceHostType(id)).toBe(http?.hostType ?? id);
+      },
+    );
+  });
+
   describe('getDefaultVersioning', () => {
     it('returns default versioning for undefined datasource', () => {
       expect(getDefaultVersioning(undefined)).toBe(defaultVersioning.id);
@@ -40,6 +69,7 @@ describe('modules/datasource/common', () => {
 
     it('returns default versioning for unknown datasource', () => {
       expect(getDefaultVersioning('foobar')).toBe(defaultVersioning.id);
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
         'Missing datasource!',
@@ -119,6 +149,70 @@ describe('modules/datasource/common', () => {
         releases: [{ version: '1.0.0', versionOrig: 'v1.0.0' }],
       });
     });
+
+    it.each`
+      input                  | extractVersion                                                                                  | expected
+      ${'17.0.19_10-jdk'}    | ${'^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)-jdk$'}                      | ${'17.0.19+10'}
+      ${'v17'}               | ${'^v(?<major>\\d+)$'}                                                                          | ${'17.0.0'}
+      ${'v5.3'}              | ${'^v(?<major>\\d+)\\.(?<minor>\\d+)$'}                                                         | ${'5.3.0'}
+      ${'1.2.3-beta.1-sfx'}  | ${'^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<prerelease>[^-]+)'}                     | ${'1.2.3-beta.1'}
+      ${'pkg-2.5.0-rc.1_42'} | ${'^pkg-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<prerelease>[^_]+)_(?<build>\\d+)$'} | ${'2.5.0-rc.1+42'}
+      ${'v1.2.3'}            | ${'^v(?<version>\\d+\\.\\d+\\.\\d+)$'}                                                          | ${'1.2.3'}
+      ${'release-4.0.0'}     | ${'^release-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$'}                                 | ${'4.0.0'}
+      ${'21_35-jre'}         | ${'^(?<major>\\d+)_(?<build>\\d+)-jre$'}                                                        | ${'21.0.0+35'}
+    `(
+      'should extract "$expected" from "$input"',
+      ({ input, extractVersion, expected }) => {
+        const releaseResult: ReleaseResult = {
+          releases: [{ version: input }],
+        };
+        const result = applyExtractVersion(releaseResult, extractVersion);
+        expect(result).toEqual({
+          releases: [{ version: expected, versionOrig: input }],
+        });
+      },
+    );
+
+    it('should filter out non-matching releases when using named groups', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [
+          { version: '17.0.19_10-jdk' },
+          { version: 'latest' },
+          { version: '17-jdk' },
+        ],
+      };
+      const result = applyExtractVersion(
+        releaseResult,
+        '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)-jdk$',
+      );
+      expect(result).toEqual({
+        releases: [{ version: '17.0.19+10', versionOrig: '17.0.19_10-jdk' }],
+      });
+    });
+  });
+
+  describe('extractVersionFromGroups', () => {
+    it.each`
+      groups                                                                     | expected
+      ${undefined}                                                               | ${undefined}
+      ${{ minor: '2' }}                                                          | ${undefined}
+      ${{ patch: '3', build: '10' }}                                             | ${undefined}
+      ${{}}                                                                      | ${undefined}
+      ${{ version: '1.2.3' }}                                                    | ${'1.2.3'}
+      ${{ version: '0.0.1-alpha', major: '0' }}                                  | ${'0.0.1-alpha'}
+      ${{ major: '5' }}                                                          | ${'5.0.0'}
+      ${{ major: '1', minor: '2', patch: '3' }}                                  | ${'1.2.3'}
+      ${{ major: '0', minor: '0', patch: '0' }}                                  | ${'0.0.0'}
+      ${{ major: '17', minor: '0', patch: '19', build: '10' }}                   | ${'17.0.19+10'}
+      ${{ major: '1', minor: '0', patch: '0', prerelease: 'alpha.1' }}           | ${'1.0.0-alpha.1'}
+      ${{ major: '2', minor: '5', patch: '0', prerelease: 'rc.1', build: '42' }} | ${'2.5.0-rc.1+42'}
+      ${{ major: '3', build: '99' }}                                             | ${'3.0.0+99'}
+      ${{ major: '10', minor: '3' }}                                             | ${'10.3.0'}
+      ${{ major: '1', patch: '7' }}                                              | ${'1.0.7'}
+      ${{ major: '1', prerelease: 'beta' }}                                      | ${'1.0.0-beta'}
+    `('returns $expected for groups $groups', ({ groups, expected }) => {
+      expect(extractVersionFromGroups(groups)).toBe(expected);
+    });
   });
 
   describe('filterValidVersions', () => {
@@ -186,6 +280,7 @@ describe('modules/datasource/common', () => {
       expect(result).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
         'Missing datasource!',
@@ -202,8 +297,20 @@ describe('modules/datasource/common', () => {
       };
       const releaseResult: ReleaseResult = {
         releases: [
-          { version: '1.0.0', constraints: { foo: ['^1.0.0'] } },
-          { version: '2.0.0', constraints: { foo: ['^2.0.0'] } },
+          {
+            version: '1.0.0',
+            constraints: {
+              // @ts-expect-error -- intentionally using invalid constraint names
+              foo: ['^1.0.0'],
+            },
+          },
+          {
+            version: '2.0.0',
+            constraints: {
+              // @ts-expect-error -- intentionally using invalid constraint names
+              foo: ['^2.0.0'],
+            },
+          },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
@@ -216,13 +323,37 @@ describe('modules/datasource/common', () => {
         datasource: 'foo',
         packageName: 'bar',
         constraintsFiltering: 'strict' as const,
-        constraints: { baz: '^1.0.0', qux: 'invalid' },
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally using invalid constraint names
+        constraints: { baz: '^1.0.0', qux: 'invalid' } as never,
       };
       const releaseResult = {
         releases: [
           { version: '1.0.0' },
-          { version: '2.0.0', constraints: { baz: [undefined] } as never },
+          {
+            version: '2.0.0',
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally using invalid constraint value
+            constraints: { baz: [undefined] } as never,
+          },
           { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
+        ],
+      };
+      // @ts-expect-error -- intentionally using invalid constraint names
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
+    it('should return all releases when no configConstraints', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
+          { version: '2.0.0' },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
@@ -248,6 +379,108 @@ describe('modules/datasource/common', () => {
         releases: [{ version: '2.0.0' }],
       });
     });
+
+    it('should handle config with a range constraint, and a release with an exact version', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '>=3.8' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it('should handle config with an exact version, and a release with a range constraint', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '3.8.1' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['3.8.1'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
+      });
+    });
+
+    it(`should allow constraintsVersioning to override the datasource's default versioning`, () => {
+      const config: GetPkgReleasesConfig = {
+        datasource: 'rubygems',
+        packageName: 'rails',
+        versioning: 'ruby',
+        constraintsFiltering: 'strict' as const,
+        constraints: {
+          // anything between 1.3.0 and less than 2.0.0
+          rubygems: '^1.3',
+        },
+        constraintsVersioning: {
+          // instead of using ruby version, which doesn't support this syntax
+          rubygems: 'semver-coerced',
+        },
+      };
+
+      // make sure that it's currently an invalid constraint for ruby
+      expect(config.constraints?.rubygems).toBeDefined();
+      expect(ruby.isValid(config.constraints!.rubygems!)).toBeFalse();
+      // but that it works when using semver-coerced
+      expect(semverCoerced.isValid(config.constraints!.rubygems!)).toBeTrue();
+
+      const releaseResult = {
+        releases: [
+          // slightly modified from upstream
+          { version: '0.9.1', constraints: { rubygems: ['1.0.0'] } },
+          { version: '3.1.3', constraints: { rubygems: ['1.2.3'] } },
+
+          // using upstraem data
+          { version: '4.1.2', constraints: { rubygems: ['>= 1.8.11'] } },
+          { version: '8.1.3', constraints: { rubygems: ['>= 1.8.11'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '4.1.2' }, { version: '8.1.3' }],
+      });
+    });
+
+    it('should validate release constraints with the overridden constraint versioning', () => {
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { jenkins: ['>=15.0.0'] } },
+        ],
+      };
+      const config: GetPkgReleasesConfig = {
+        datasource: 'maven',
+        packageName: 'bar',
+        versioning: 'maven',
+        constraintsFiltering: 'strict',
+        constraints: { jenkins: '16.0.0' },
+        constraintsVersioning: { jenkins: 'npm' },
+      };
+
+      expect(
+        applyConstraintsFiltering(structuredClone(releaseResult), config),
+      ).toEqual({ releases: [{ version: '1.0.0' }] });
+      expect(
+        applyConstraintsFiltering(structuredClone(releaseResult), {
+          ...config,
+          constraints: { jenkins: '14.0.0' },
+        }),
+      ).toEqual({ releases: [] });
+    });
   });
 
   describe('applyVersionCompatibility', () => {
@@ -259,6 +492,7 @@ describe('modules/datasource/common', () => {
           { version: '1.0.0' },
           { version: '2.0.0' },
           { version: '2.0.0-alpine' },
+          { version: 'v3.0.0-alpine' },
         ],
       };
     });
@@ -273,7 +507,10 @@ describe('modules/datasource/common', () => {
       expect(
         applyVersionCompatibility(input, versionCompatibility, undefined),
       ).toMatchObject({
-        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+        releases: [
+          { version: '1.0.0', versionOrig: '1.0.0' },
+          { version: '2.0.0', versionOrig: '2.0.0' },
+        ],
       });
     });
 
@@ -282,7 +519,20 @@ describe('modules/datasource/common', () => {
       expect(
         applyVersionCompatibility(input, versionCompatibility, '-alpine'),
       ).toMatchObject({
-        releases: [{ version: '2.0.0' }],
+        releases: [
+          { version: '2.0.0', versionOrig: '2.0.0-alpine' },
+          { version: 'v3.0.0', versionOrig: 'v3.0.0-alpine' },
+        ],
+      });
+    });
+
+    it('does not override versionOrig from extractVersion', () => {
+      const versionCompatibility = '^(?<version>[^-]+)(?<compatibility>.*)?$';
+      const res = applyExtractVersion(input, '^v(?<version>.+)$');
+      expect(
+        applyVersionCompatibility(res, versionCompatibility, '-alpine'),
+      ).toMatchObject({
+        releases: [{ version: '3.0.0', versionOrig: 'v3.0.0-alpine' }],
       });
     });
   });

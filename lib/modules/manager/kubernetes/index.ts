@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { KubernetesApiDatasource } from '../../datasource/kubernetes-api';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { KubernetesApiDatasource } from '../../datasource/kubernetes-api/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://kubernetes.io/docs';
 export const categories: Category[] = ['kubernetes'];

@@ -1,4 +1,4 @@
-import { api } from '.';
+import { api } from './index.ts';
 
 describe('modules/versioning/conda/index', () => {
   it.each`
@@ -18,6 +18,7 @@ describe('modules/versioning/conda/index', () => {
     ${'renovatebot/renovate'}                        | ${false}
     ${'renovatebot/renovate#master'}                 | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
+    ${'latest'}                                      | ${true}
   `('isVersion("$input") === $expected', ({ input, expected }) => {
     const res = !!api.isVersion(input);
     expect(res).toBe(expected);
@@ -39,6 +40,7 @@ describe('modules/versioning/conda/index', () => {
     ${'renovatebot/renovate'}                        | ${false}
     ${'renovatebot/renovate#master'}                 | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
+    ${'latest'}                                      | ${true}
   `('isValid("$input") === $expected', ({ input, expected }) => {
     const res = !!api.isValid(input);
     expect(res).toBe(expected);
@@ -123,6 +125,7 @@ describe('modules/versioning/conda/index', () => {
     ${'==1.*'}      | ${false}
     ${'*'}          | ${false}
     ${'>=1.0'}      | ${false}
+    ${'latest'}     | ${false}
   `('isSingleVersion("$version") === $isSingle', ({ version, isSingle }) => {
     const res = !!api.isSingleVersion(version);
     expect(res).toBe(isSingle);
@@ -173,17 +176,19 @@ describe('modules/versioning/conda/index', () => {
     expect(api.isGreaterThan(a, b)).toBe(result);
   });
 
+  it('returns a pinned value', () => {
+    expect(api.getPinnedValue?.('1.2.3')).toBe('==1.2.3');
+  });
+
   it.each`
     currentValue | rangeStrategy | currentVersion | newVersion | expected
-    ${'*'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
     ${'*'}       | ${'bump'}     | ${'1.0.0'}     | ${'1.2.3'} | ${'>=1.2.3'}
     ${'*'}       | ${'widen'}    | ${'1.0.0'}     | ${'1.2.3'} | ${null}
     ${'*'}       | ${'widen'}    | ${'1.0.0'}     | ${'1.2.3'} | ${null}
-    ${'<2.0.0'}  | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
-    ${'1.0.*'}   | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
     ${'1.0.*'}   | ${'bump'}     | ${'1.0.0'}     | ${'1.2.3'} | ${'1.2.*'}
     ${'1.2.*'}   | ${'widen'}    | ${'1.0.0'}     | ${'1.2.3'} | ${'1.2.*'}
     ${'>=1.0.0'} | ${'bump'}     | ${'1.0.0'}     | ${'1.2.3'} | ${'>=1.2.3'}
+    ${'latest'}  | ${'replace'}  | ${'1.0.0'}     | ${'1.2.3'} | ${null}
   `(
     'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion) === $expected',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

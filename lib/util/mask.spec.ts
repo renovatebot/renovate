@@ -1,4 +1,4 @@
-import { maskToken } from './mask';
+import { maskToken } from './mask.ts';
 
 describe('util/mask', () => {
   describe('.maskToken', () => {

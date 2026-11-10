@@ -1,4 +1,4 @@
-import { JsonataMatcher } from './jsonata';
+import { JsonataMatcher } from './jsonata.ts';
 
 describe('util/package-rules/jsonata', () => {
   const matcher = new JsonataMatcher();
@@ -34,6 +34,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return true for a complex JSONata expression', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { depName: 'lodash', version: '4.17.21' },
       { matchJsonata: ['depName = "lodash" and version = "4.17.21"'] },
     );
@@ -42,6 +43,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return false for a complex JSONata expression with non-matching version', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { depName: 'lodash', version: '4.17.20' },
       { matchJsonata: ['depName = "lodash" and version = "4.17.21"'] },
     );
@@ -50,6 +52,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return true for a JSONata expression with nested properties', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { dep: { name: 'lodash', version: '4.17.21' } },
       { matchJsonata: ['dep.name = "lodash" and dep.version = "4.17.21"'] },
     );
@@ -58,6 +61,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return false for a JSONata expression with nested properties and non-matching version', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { dep: { name: 'lodash', version: '4.17.20' } },
       { matchJsonata: ['dep.name = "lodash" and dep.version = "4.17.21"'] },
     );
@@ -78,5 +82,45 @@ describe('util/package-rules/jsonata', () => {
       { matchJsonata: ['$notafunction()'] },
     );
     expect(result).toBeFalse();
+  });
+
+  describe('$detectPlatform', () => {
+    it('should return true when sourceUrl matches platform', async () => {
+      const result = await matcher.matches(
+        { sourceUrl: 'https://github.com/foo/bar' },
+        { matchJsonata: ['$detectPlatform(sourceUrl) = "github"'] },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false when sourceUrl does not match platform', async () => {
+      const result = await matcher.matches(
+        { sourceUrl: 'https://gitlab.com/foo/bar' },
+        { matchJsonata: ['$detectPlatform(sourceUrl) = "github"'] },
+      );
+      expect(result).toBeFalse();
+    });
+  });
+
+  describe('$matchRegexOrGlob', () => {
+    const matchJsonata = [
+      '$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://example.com/**"])',
+    ];
+
+    it.each`
+      packageName          | registryUrls                                    | expected
+      ${'@myorg/foo'}      | ${undefined}                                    | ${true}
+      ${'lodash'}          | ${['https://npm.org', 'https://example.com/x']} | ${true}
+      ${'@myorg-labs/foo'} | ${['https://registry.npmjs.org']}               | ${false}
+    `(
+      'returns $expected for $packageName with $registryUrls',
+      async ({ packageName, registryUrls, expected }) => {
+        const result = await matcher.matches(
+          { packageName, registryUrls },
+          { matchJsonata },
+        );
+        expect(result).toBe(expected);
+      },
+    );
   });
 });

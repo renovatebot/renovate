@@ -1,5 +1,7 @@
-import { getOptions } from './options';
-import type { AllConfig, RenovateOptions } from './types';
+import { clone } from '../util/clone.ts';
+import { getOptions } from './options/index.ts';
+import { getAllowedParents } from './options/scopes.ts';
+import type { AllConfig, RenovateOptions } from './types.ts';
 
 // Use functions instead of direct values to avoid introducing global references.
 // In particular, we want a new array instance every time we request a default array
@@ -16,15 +18,16 @@ const defaultValueFactories = {
 export function getDefault(option: RenovateOptions): any {
   return option.default === undefined
     ? defaultValueFactories[option.type]()
-    : option.default;
+    : clone(option.default);
 }
 
 export function getConfig(): AllConfig {
   const options = getOptions();
   const config: AllConfig = {};
   options.forEach((option) => {
-    if (!option.parents || option.parents.includes('.')) {
-      config[option.name] = getDefault(option);
+    const parents = getAllowedParents(option);
+    if (!parents || parents.includes('.')) {
+      config[option.name as keyof AllConfig] = getDefault(option);
     }
   });
   return config;

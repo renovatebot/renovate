@@ -1,18 +1,21 @@
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import type { ToolConstraint } from '../../../../util/exec/types';
-import { readLocalFile } from '../../../../util/fs';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import type { LazyPackageJson } from './utils';
+import { logger } from '../../../../logger/index.ts';
+import type { ToolConstraint } from '../../../../util/exec/types.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { newlineRegex } from '../../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../../util/string.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
+import type { LazyPackageJson } from './types.ts';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
     // TODO #22198
-    const constraint = (await readLocalFile(filename, 'utf8'))!
-      .split(newlineRegex)[0]
-      .replace(regEx(/^v/), '');
+    const constraint = stripVersionPrefix(
+      (await readLocalFile(filename, 'utf8'))!.split(newlineRegex)[0],
+    );
     if (semver.validRange(constraint)) {
       logger.debug(`Using node constraint "${constraint}" from ${filename}`);
       return constraint;
@@ -23,13 +26,44 @@ async function getNodeFile(filename: string): Promise<string | null> {
   return null;
 }
 
+async function getDevEnginesConstraint(
+  pkg: LazyPackageJson,
+): Promise<string | null> {
+  const runtime = (await pkg.getValue()).devEngines?.runtime;
+  const runtimes = isArray(runtime) ? runtime : [runtime];
+  const constraint = runtimes.find((r) => r?.name === 'node')?.version;
+  if (constraint && semver.validRange(constraint)) {
+    logger.debug(
+      `Using node constraint "${constraint}" from package.json devEngines`,
+    );
+    return constraint;
+  }
+  return null;
+}
+
 async function getPackageJsonConstraint(
   pkg: LazyPackageJson,
 ): Promise<string | null> {
-  const constraint = (await pkg.getValue()).engines?.node;
-  if (constraint && semver.validRange(constraint)) {
-    logger.debug(`Using node constraint "${constraint}" from package.json`);
-    return constraint;
+  const pkgJson = await pkg.getValue();
+  if (pkgJson.volta?.node) {
+    const constraint = pkgJson.volta.node;
+    // v8 ignore else -- TODO: add test #40625
+    if (semver.validRange(constraint)) {
+      logger.debug(
+        `Using node constraint "${constraint}" from package.json volta`,
+      );
+      return constraint;
+    }
+  }
+  if (pkgJson.engines?.node) {
+    const constraint = pkgJson.engines.node;
+    // v8 ignore else -- TODO: add test #40625
+    if (semver.validRange(constraint)) {
+      logger.debug(
+        `Using node constraint "${constraint}" from package.json engines`,
+      );
+      return constraint;
+    }
   }
   return null;
 }
@@ -43,10 +77,16 @@ export async function getNodeConstraint(
 ): Promise<string | null> {
   const constraint =
     getNodeUpdate(upgrades) ??
-    config.constraints?.node ??
-    (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
-    (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
-    (await getPackageJsonConstraint(pkg));
+    (await resolveToolConstraint(
+      config,
+      'node',
+      async () =>
+        (await getDevEnginesConstraint(pkg)) ??
+        (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
+        (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
+        (await getPackageJsonConstraint(pkg)),
+    )) ??
+    null;
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }

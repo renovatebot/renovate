@@ -1,7 +1,7 @@
-import * as _template from '../../../../../util/template';
-import { getPrExtraNotes, getPrNotes } from './notes';
+import * as _template from '../../../../../util/template/index.ts';
+import { getPrExtraNotes, getPrNotes } from './notes.ts';
 
-vi.mock('../../../../../util/template');
+vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/notes', () => {
@@ -61,5 +61,25 @@ describe('workers/repository/update/pr/body/notes', () => {
     expect(res).toContain(
       "Add the preset `:preserveSemverRanges` to your config if you don't want to pin your dependencies.",
     );
+  });
+
+  it('skips an upgrade with no notes', () => {
+    const res = getPrNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      baseBranch: 'base',
+      upgrades: [{ manager: 'some-manager', branchName: 'branch' }],
+    });
+    expect(res).toBe('\n\n');
+  });
+
+  it('renders no extra notes when nothing applies', () => {
+    const res = getPrExtraNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      baseBranch: 'base',
+      upgrades: [{ manager: 'some-manager', branchName: 'branch' }],
+    });
+    expect(res).toBe('');
   });
 });

@@ -1,5 +1,5 @@
-import * as memCache from '../../../util/cache/memory';
-import { parseGoproxy, parseNoproxy } from './goproxy-parser';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 
 describe('modules/datasource/go/goproxy-parser', () => {
   beforeEach(() => {
@@ -37,6 +37,19 @@ describe('modules/datasource/go/goproxy-parser', () => {
         { url: 'off', fallback: '|' },
         { url: 'direct', fallback: ',' },
         { url: 'qux', fallback: '|' },
+      ]);
+    });
+
+    it('skips empty segments', () => {
+      expect(parseGoproxy(',foo')).toMatchObject([{ url: 'foo' }]);
+      expect(parseGoproxy('|')).toBeEmpty();
+      expect(parseGoproxy('foo,,bar')).toMatchObject([
+        { url: 'foo', fallback: ',' },
+        { url: 'bar', fallback: '|' },
+      ]);
+      expect(parseGoproxy('foo|,bar')).toMatchObject([
+        { url: 'foo', fallback: '|' },
+        { url: 'bar', fallback: '|' },
       ]);
     });
 

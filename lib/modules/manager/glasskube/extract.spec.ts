@@ -1,14 +1,19 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
-import type { ExtractConfig } from '../types';
-import { extractAllPackageFiles, extractPackageFile } from './extract';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
+import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages/index.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 const config: ExtractConfig = {};
-const adminConfig: RepoGlobalConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+};
 
 const packageWithRepoName = codeBlock`
 apiVersion: packages.glasskube.dev/v1alpha1
@@ -32,7 +37,7 @@ spec:
   url: https://packages.dl.glasskube.dev/packages
 `;
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/glasskube/extract', () => {
   beforeEach(() => {

@@ -1,15 +1,17 @@
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import type { FindPRConfig } from '../types';
-import { client } from './client';
+import { DateTime } from 'luxon';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import type { FindPRConfig } from '../types.ts';
+import { client } from './client.ts';
 import type {
   GerritChange,
   GerritChangeMessageInfo,
-  GerritFindPRConfig,
   GerritMergeableInfo,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './schema.ts';
+import type { GerritFindPRConfig } from './types.ts';
+import { MIN_GERRIT_VERSION } from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
@@ -17,6 +19,21 @@ const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 describe('modules/platform/gerrit/client', () => {
   beforeAll(() => {
     setBaseUrl(gerritEndpointUrl);
+  });
+
+  describe('getGerritVersion()', () => {
+    it('returns version', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/config/server/version')
+        .reply(200, gerritRestResponse('3.9.1'), jsonResultHeader);
+      await expect(
+        client.getGerritVersion({
+          username: 'user',
+          password: 'pass',
+        }),
+      ).resolves.toBe('3.9.1');
+    });
   });
 
   describe('getRepos()', () => {
@@ -32,7 +49,7 @@ describe('modules/platform/gerrit/client', () => {
           }),
           jsonResultHeader,
         );
-      expect(await client.getRepos()).toEqual(['repo1', 'repo2']);
+      await expect(client.getRepos()).resolves.toEqual(['repo1', 'repo2']);
     });
   });
 
@@ -102,6 +119,8 @@ describe('modules/platform/gerrit/client', () => {
         'footer:Renovate-Branch=dependency-xyz',
         { branchName: 'dependency-xyz' },
       ],
+      ['message:"Renovate-Branch: "', { branchName: '' }],
+      ['hasfooter:Renovate-Branch', { branchName: '' }, '3.6.0'],
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
@@ -137,45 +156,247 @@ describe('modules/platform/gerrit/client', () => {
             'fix(deps): "update dependency react-router-dom to ~> "v6.21.2""',
         },
       ],
+      [
+        'subject:"fix(deps): update dependency react-router-dom to v6.21.2"',
+        {
+          branchName: 'dependency-xyz',
+          prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
+        },
+        '3.8.0',
+      ],
     ])(
       'query contains %p',
-      async (expectedQueryPart: string, config: GerritFindPRConfig) => {
+      async (
+        expectedQueryPart: string,
+        config: GerritFindPRConfig,
+        gerritVersion?: string,
+      ) => {
+        client.setGerritVersion(gerritVersion ?? MIN_GERRIT_VERSION);
+
         httpMock
           .scope(gerritEndpointUrl)
           .get('/a/changes/')
           .query((query) => query?.q?.includes(expectedQueryPart) ?? false)
           .reply(
             200,
-            gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
+            gerritRestResponse([
+              gerritChange({ _number: 1 }),
+              gerritChange({ _number: 2 }),
+            ]),
             jsonResultHeader,
           );
         await expect(client.findChanges('repo', config)).resolves.toEqual([
-          { _number: 1 },
-          { _number: 2 },
+          gerritChange({ _number: 1 }),
+          gerritChange({ _number: 2 }),
         ]);
       },
     );
 
-    it('sets query.n when limit is provided', async () => {
+    it('sets query.n as 1 if a single change is requested', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
-        .query((query) => query.n === '5' && !('no-limit' in query))
-        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+        .query((query) => query.n === '1')
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
       await expect(
-        client.findChanges('repo', { branchName: 'dependency-xyz', limit: 5 }),
-      ).resolves.toEqual([{ _number: 1 }]);
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          singleChange: true,
+          pageLimit: 5, // should be ignored
+        }),
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
-    it('sets query["no-limit"] when limit is not provided', async () => {
+    it('sets query.n as 50 if pageLimit is not provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
-        .query((query) => query['no-limit'] === 'true')
-        .reply(200, gerritRestResponse([{ _number: 2 }]), jsonResultHeader);
+        .query((query) => query.n === '50')
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
       await expect(
-        client.findChanges('repo', { branchName: 'dependency-xyz' }),
-      ).resolves.toEqual([{ _number: 2 }]);
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+        }),
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
+    });
+
+    it('sets query.n with pageLimit if provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '5')
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 5,
+        }),
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
+    });
+
+    it('sets query.S to 0 on the first page', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+        }),
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
+    });
+
+    it('handles pagination automatically', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '2')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 3 }),
+            gerritChange({ _number: 4, _more_changes: true }),
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '4')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 5 }),
+            gerritChange({ _number: 6 }),
+          ]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 2, // to keep the test short
+        }),
+      ).resolves.toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
+        gerritChange({ _number: 5 }),
+        gerritChange({ _number: 6 }),
+      ]);
+    });
+
+    it('calls shouldFetchNextPage callback after each page', async () => {
+      const calls: GerritChange[][] = [];
+      let callCount = 0;
+      function shouldFetchNextPage(changes: GerritChange[]): boolean {
+        calls.push(changes);
+        callCount++;
+        return callCount < 2; // Stop after second call
+      }
+
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '2')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 3 }),
+            gerritChange({ _number: 4, _more_changes: true }),
+          ]),
+          jsonResultHeader,
+        );
+
+      const result = await client.findChanges('repo', {
+        branchName: 'dependency-xyz',
+        pageLimit: 2,
+        shouldFetchNextPage,
+      });
+
+      expect(result).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
+      ]);
+      expect(calls).toHaveLength(2);
+      expect(calls[0]).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+      ]);
+      expect(calls[1]).toEqual([
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
+      ]);
+    });
+
+    it('stops pagination when shouldFetchNextPage returns false', async () => {
+      let callCount = 0;
+      function shouldFetchNextPage(): boolean {
+        callCount++;
+        return false;
+      }
+
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
+          ]),
+          jsonResultHeader,
+        );
+
+      const result = await client.findChanges('repo', {
+        branchName: 'dependency-xyz',
+        pageLimit: 2,
+        shouldFetchNextPage,
+      });
+
+      expect(result).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+      ]);
+      expect(callCount).toBe(1);
     });
 
     it('sets query.o when requestDetails is provided', async () => {
@@ -187,28 +408,29 @@ describe('modules/platform/gerrit/client', () => {
             Array.isArray(query.o) &&
             query.o.toString() === ['LABELS', 'MESSAGES'].toString(),
         )
-        .reply(200, gerritRestResponse([{ _number: 3 }]), jsonResultHeader);
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 3 })]),
+          jsonResultHeader,
+        );
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           requestDetails: ['LABELS', 'MESSAGES'],
         }),
-      ).resolves.toEqual([{ _number: 3 }]);
+      ).resolves.toEqual([gerritChange({ _number: 3 })]);
     });
   });
 
   describe('getChange()', () => {
     it('get', async () => {
-      const change = partial<GerritChange>({});
+      const change = gerritChange({ _number: 123456 });
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
-        client.getChange(123456, undefined, [
-          'CURRENT_REVISION',
-          'COMMIT_FOOTERS',
-        ]),
+        client.getChange(123456, ['CURRENT_REVISION', 'COMMIT_FOOTERS']),
       ).resolves.toEqual(change);
     });
   });
@@ -231,25 +453,27 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('abandonChange()', () => {
     it('abandon', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon', {
           notify: 'OWNER_REVIEWERS',
         })
-        .reply(200, gerritRestResponse({}), jsonResultHeader);
-      await expect(client.abandonChange(123456)).toResolve();
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.abandonChange(123456)).resolves.toEqual(change);
     });
     it('abandon with message', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon', {
           message: 'The abandon reason is important.',
           notify: 'OWNER_REVIEWERS',
         })
-        .reply(200, gerritRestResponse({}), jsonResultHeader);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
         client.abandonChange(123456, 'The abandon reason is important.'),
-      ).toResolve();
+      ).resolves.toEqual(change);
     });
   });
 
@@ -261,6 +485,123 @@ describe('modules/platform/gerrit/client', () => {
         .post('/a/changes/123456/submit')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.submitChange(123456)).resolves.toEqual(change);
+    });
+  });
+
+  describe('moveChange()', () => {
+    it('move change to different branch', async () => {
+      const change = partial<GerritChange>({ branch: 'new-main' });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/move', {
+          destination_branch: 'new-main',
+        })
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.moveChange(123456, 'new-main')).resolves.toEqual(
+        change,
+      );
+    });
+  });
+
+  describe('getBranchChange()', () => {
+    it('returns null when no changes found', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns single change when only one found', async () => {
+      const change = gerritChange({
+        _number: 123,
+        branch: 'main',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toEqual(change);
+    });
+
+    it('returns first change when multiple found without targetBranch', async () => {
+      const change1 = gerritChange({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = gerritChange({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toEqual(change1);
+    });
+
+    it('returns matching change when targetBranch specified and match found', async () => {
+      const change1 = gerritChange({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = gerritChange({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'develop',
+        }),
+      ).resolves.toEqual(change2);
+    });
+
+    it('returns first change when targetBranch specified but no match found', async () => {
+      const change1 = gerritChange({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = gerritChange({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'release',
+        }),
+      ).resolves.toEqual(change1);
     });
   });
 
@@ -280,20 +621,24 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            partial<GerritChangeMessageInfo>({ message: 'msg1' }),
-            partial<GerritChangeMessageInfo>({ message: 'msg2' }),
+            partial<GerritChangeMessageInfo>({ id: '1', message: 'msg1' }),
+            partial<GerritChangeMessageInfo>({ id: '2', message: 'msg2' }),
           ]),
           jsonResultHeader,
         );
       await expect(client.getMessages(123456)).resolves.toEqual([
-        { message: 'msg1' },
-        { message: 'msg2' },
+        { id: '1', message: 'msg1' },
+        { id: '2', message: 'msg2' },
       ]);
     });
   });
 
   describe('addMessage()', () => {
-    it('add with tag', async () => {
+    it('returns updated timestamp from change_info when Gerrit provides it (>= 3.10)', async () => {
+      const change = gerritChange({
+        _number: 123456,
+        updated: '2025-01-01 12:00:00.000000000',
+      });
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
@@ -301,31 +646,49 @@ describe('modules/platform/gerrit/client', () => {
           tag: 'tag',
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addMessage(123456, 'message', 'tag')).toResolve();
+        .reply(
+          200,
+          gerritRestResponse({ change_info: change }),
+          jsonResultHeader,
+        );
+      await expect(client.addMessage(123456, 'message', 'tag')).resolves.toBe(
+        '2025-01-01 12:00:00.000000000',
+      );
     });
 
-    it('add without tag', async () => {
+    it('synthesizes a Gerrit-formatted timestamp when change_info is absent (< 3.10)', async () => {
+      const t0 = DateTime.fromISO('2025-06-15T09:30:45.123Z', {
+        zone: 'utc',
+      });
+      vi.useFakeTimers();
+      vi.setSystemTime(t0.toMillis());
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addMessage(123456, 'message')).toResolve();
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
+      await expect(client.addMessage(123456, 'message')).resolves.toBe(
+        '2025-06-15 09:30:45.123000000',
+      );
+      vi.useRealTimers();
     });
 
     it('add too big message', async () => {
-      const okMessage = 'a'.repeat(0x4000);
-      const tooBigMessage = okMessage + 'b';
+      const okMessage = 'a'.repeat(16 * 1024); // 16KB
+      const tooBigMessage = `${okMessage}b`;
+      const truncationNotice = '\n\n[Truncated by Renovate]';
+      const truncatedMessage =
+        tooBigMessage.slice(0, 16 * 1024 - truncationNotice.length) +
+        truncationNotice;
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
-          message: okMessage,
+          message: truncatedMessage,
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
       await expect(client.addMessage(123456, tooBigMessage)).toResolve();
     });
   });
@@ -348,14 +711,37 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            partial<GerritChangeMessageInfo>({ message: 'msg1' }),
-            partial<GerritChangeMessageInfo>({ message: 'the message' }),
+            partial<GerritChangeMessageInfo>({ id: '1', message: 'msg1' }),
+            partial<GerritChangeMessageInfo>({
+              id: '2',
+              message: 'the message',
+            }),
           ]),
           jsonResultHeader,
         );
       await expect(
         client.checkForExistingMessage(123456, 'the message'),
       ).resolves.toBeTrue();
+    });
+
+    it('msg found but with another tag', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/123456/messages')
+        .reply(
+          200,
+          gerritRestResponse([
+            partial<GerritChangeMessageInfo>({
+              id: '1',
+              message: 'the message',
+              tag: 'other-tag',
+            }),
+          ]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.checkForExistingMessage(123456, 'the message', 'TAG'),
+      ).resolves.toBeFalse();
     });
   });
 
@@ -390,7 +776,11 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            partial<GerritChangeMessageInfo>({ message: 'msg1', tag: 'TAG' }),
+            partial<GerritChangeMessageInfo>({
+              id: '1',
+              message: 'msg1',
+              tag: 'TAG',
+            }),
           ]),
           jsonResultHeader,
         );
@@ -416,15 +806,54 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('deleteHashtag()', () => {
-    it('deleteHashtag', async () => {
+  describe('setHashtags()', () => {
+    it('add hashtags', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/hashtags', {
+          add: ['hashtag1', 'hashtag2'],
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.setHashtags(123456, { add: ['hashtag1', 'hashtag2'] }),
+      ).toResolve();
+    });
+
+    it('remove hashtags', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/hashtags', {
           remove: ['hashtag1'],
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.deleteHashtag(123456, 'hashtag1')).toResolve();
+      await expect(
+        client.setHashtags(123456, { remove: ['hashtag1'] }),
+      ).toResolve();
+    });
+
+    it('add and remove hashtags in single call', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/hashtags', {
+          add: ['hashtag2', 'hashtag3'],
+          remove: ['hashtag1'],
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.setHashtags(123456, {
+          add: ['hashtag2', 'hashtag3'],
+          remove: ['hashtag1'],
+        }),
+      ).toResolve();
+    });
+
+    it('does nothing when no hashtags provided', async () => {
+      await expect(client.setHashtags(123456, {})).toResolve();
+      await expect(client.setHashtags(123456, { add: [] })).toResolve();
+      await expect(client.setHashtags(123456, { remove: [] })).toResolve();
+      await expect(
+        client.setHashtags(123456, { add: [], remove: [] }),
+      ).toResolve();
     });
   });
 
@@ -467,6 +896,20 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 });
+
+function gerritChange(overrides: Partial<GerritChange> = {}): GerritChange {
+  return {
+    branch: 'main',
+    change_id: 'I0123456789abcdef',
+    subject: 'subject',
+    status: 'NEW',
+    created: '2024-01-01 00:00:00.000000000',
+    updated: '2024-01-01 00:00:00.000000000',
+    hashtags: [],
+    _number: 0,
+    ...overrides,
+  };
+}
 
 function gerritRestResponse(body: any): any {
   return `)]}'\n${JSON.stringify(body)}`;

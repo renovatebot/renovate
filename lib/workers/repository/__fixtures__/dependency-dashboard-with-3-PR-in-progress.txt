@@ -9,7 +9,7 @@ The following updates have all been created. To force a retry/rebase of any, cli
  - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
  - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 

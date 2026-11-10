@@ -1,9 +1,9 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import type { ExtractConfig, PackageFile } from '../types';
-import { BatectConfigSchema } from './schema';
-import type { ExtractionResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import type { ExtractConfig, PackageFile } from '../types.ts';
+import { BatectConfig } from './schema.ts';
+import type { ExtractionResult } from './types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -13,7 +13,7 @@ export function extractPackageFile(
 
   try {
     const { imageDependencies, bundleDependencies, fileIncludes } =
-      BatectConfigSchema.parse(content);
+      BatectConfig.parse(content);
     const deps = [...imageDependencies, ...bundleDependencies];
 
     const dirName = upath.dirname(packageFile);

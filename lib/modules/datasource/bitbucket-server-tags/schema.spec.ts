@@ -1,4 +1,4 @@
-import { BitbucketServerCommits, BitbucketServerTags } from './schema';
+import { BitbucketServerCommits, BitbucketServerTags } from './schema.ts';
 
 describe('modules/datasource/bitbucket-server-tags/schema', () => {
   it('parses BitbucketServerTags', () => {
@@ -19,13 +19,21 @@ describe('modules/datasource/bitbucket-server-tags/schema', () => {
         latestChangeset: '3566b84b24a7e8cf24badac73ea1d20a0851924e',
         hash: null,
       },
+      {
+        id: 'refs/tags/v17.7.1',
+        displayId: 'v17.7.1',
+        type: 'TAG',
+        latestCommit: '3566b84b24a7e8cf24badac73ea1d20a0851924e',
+        latestChangeset: '3566b84b24a7e8cf24badac73ea1d20a0851924e',
+      },
     ];
     expect(BitbucketServerTags.parse(response)).toMatchObject([
       {
         displayId: 'v17.7.2-deno',
         hash: '430f18aa2968b244fc91ecd9f374f62301af4b63',
       },
-      { displayId: 'v17.7.2', hash: null },
+      { displayId: 'v17.7.2', hash: undefined },
+      { displayId: 'v17.7.1' },
     ]);
   });
 

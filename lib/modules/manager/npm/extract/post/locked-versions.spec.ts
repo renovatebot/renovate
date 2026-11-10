@@ -1,21 +1,21 @@
-import type { PackageFile } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import * as _npm from '../npm';
-import * as _pnpm from '../pnpm';
-import * as _yarn from '../yarn';
-import { getLockedVersions } from './locked-versions';
-import { logger } from '~test/util';
+import { logger } from '~test/util.ts';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import * as _npm from '../npm.ts';
+import * as _pnpm from '../pnpm.ts';
+import * as _yarn from '../yarn.ts';
+import { getLockedVersions } from './locked-versions.ts';
 
 const npm = vi.mocked(_npm);
 const pnpm = vi.mocked(_pnpm);
 const yarn = vi.mocked(_yarn);
 
-vi.mock('../npm');
-vi.mock('../yarn', async () => ({
-  ...(await vi.importActual<typeof import('../yarn')>('../yarn')),
+vi.mock('../npm.ts');
+vi.mock('../yarn.ts', async () => ({
+  ...(await vi.importActual<typeof import('../yarn.ts')>('../yarn.ts')),
   getYarnLock: vi.fn(),
 }));
-vi.mock('../pnpm');
+vi.mock('../pnpm.ts');
 
 describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {
@@ -53,6 +53,75 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       'b@2.0.0': '2.0.0',
       'c@2.0.0': '3.0.0',
     };
+
+    it.each([true, false])(
+      'does not derive devEngines versions from yarn.lock (isYarn1: %s)',
+      async (isYarn1) => {
+        yarn.getYarnLock.mockResolvedValue({
+          isYarn1,
+          lockedVersions: {
+            'node@22.0.0': '22.0.0',
+            'yarn@4.6.0': '4.6.0',
+          },
+        });
+        const packageFiles: PackageFile<NpmManagerData>[] = [
+          {
+            packageFile: 'package.json',
+            managerData: { yarnLock: 'yarn.lock' },
+            deps: [
+              {
+                depName: 'node',
+                currentValue: '22.0.0',
+                depType: 'devEngines.runtime',
+              },
+              {
+                depName: 'yarn',
+                currentValue: '4.6.0',
+                depType: 'devEngines.packageManager',
+              },
+              {
+                depName: 'node',
+                currentValue: '22.0.0',
+                depType: 'dependencies',
+              },
+              {
+                depName: 'yarn',
+                currentValue: '4.6.0',
+                depType: 'dependencies',
+              },
+            ],
+          },
+        ];
+
+        await getLockedVersions(packageFiles);
+
+        expect(packageFiles[0].deps).toEqual([
+          {
+            depName: 'node',
+            currentValue: '22.0.0',
+            depType: 'devEngines.runtime',
+          },
+          {
+            depName: 'yarn',
+            currentValue: '4.6.0',
+            depType: 'devEngines.packageManager',
+            ...(isYarn1 ? {} : { packageName: '@yarnpkg/cli-dist' }),
+          },
+          {
+            depName: 'node',
+            currentValue: '22.0.0',
+            depType: 'dependencies',
+            lockedVersion: '22.0.0',
+          },
+          {
+            depName: 'yarn',
+            currentValue: '4.6.0',
+            depType: 'dependencies',
+            lockedVersion: '4.6.0',
+          },
+        ]);
+      },
+    );
 
     it('uses yarn.lock with yarn v1.22.0', async () => {
       const yarnVersion = '1.22.0';
@@ -121,14 +190,14 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depName: 'yarn',
               depType: 'engines',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
             {
               currentValue: '2.1.0',
               depName: 'yarn',
               depType: 'packageManager',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
           ],
           lockFiles: ['yarn.lock'],
@@ -168,14 +237,14 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depName: 'yarn',
               depType: 'engines',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
             {
               currentValue: '2.2.0',
               depName: 'yarn',
               depType: 'packageManager',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
           ],
           lockFiles: ['yarn.lock'],
@@ -207,14 +276,14 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depName: 'yarn',
               depType: 'engines',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
             {
               currentValue: '3.0.0',
               depName: 'yarn',
               depType: 'packageManager',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
           ],
           lockFiles: ['yarn.lock'],
@@ -247,14 +316,14 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depName: 'yarn',
               depType: 'engines',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
             {
               currentValue: '3.2.0',
               depName: 'yarn',
               depType: 'packageManager',
               lockedVersion: undefined,
-              packageName: '@yarnpkg/cli',
+              packageName: '@yarnpkg/cli-dist',
             },
           ],
           lockFiles: ['yarn.lock'],
@@ -341,6 +410,141 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           lockFiles: ['package-lock.json'],
           managerData: { npmLock: 'package-lock.json' },
           packageFile: 'workspace/some-file',
+        },
+      ]);
+    });
+
+    it('does not set locked versions for engines, packageManager, volta, and devEngines deps', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          npm: '1.2.3',
+          yarn: '2.3.4',
+          pnpm: '3.4.5',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [
+            {
+              depName: 'npm',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '^2.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '^3.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '2.0.0',
+              depType: 'engines',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '3.0.0',
+              depType: 'packageManager',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '4.0.0',
+              depType: 'volta',
+              datasource: 'npm',
+            },
+            {
+              depName: 'node',
+              currentValue: '22.0.0',
+              depType: 'devEngines.runtime',
+              datasource: 'node-version',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '9.0.0',
+              depType: 'devEngines.packageManager',
+              datasource: 'npm',
+            },
+          ],
+          packageFile: 'package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: { npm: '>=7' },
+          deps: [
+            {
+              depName: 'npm',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '1.2.3',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '^2.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '2.3.4',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '^3.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '3.4.5',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '2.0.0',
+              depType: 'engines',
+              datasource: 'npm',
+              // engines deps should NOT have lockedVersion
+            },
+            {
+              depName: 'yarn',
+              currentValue: '3.0.0',
+              depType: 'packageManager',
+              datasource: 'npm',
+              // packageManager deps should NOT have lockedVersion
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '4.0.0',
+              depType: 'volta',
+              datasource: 'npm',
+              // volta deps should NOT have lockedVersion
+            },
+            {
+              depName: 'node',
+              currentValue: '22.0.0',
+              depType: 'devEngines.runtime',
+              datasource: 'node-version',
+              // devEngines.runtime deps should NOT have lockedVersion
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '9.0.0',
+              depType: 'devEngines.packageManager',
+              datasource: 'npm',
+              // devEngines.packageManager deps should NOT have lockedVersion
+            },
+          ],
+          lockFiles: ['package-lock.json'],
+          managerData: { npmLock: 'package-lock.json' },
+          packageFile: 'package.json',
         },
       ]);
     });
@@ -591,7 +795,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          pnpmLockFile: 'pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -630,7 +834,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         packageFile: 'package.json',
       },
     ]);
@@ -651,7 +855,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          pnpmLockFile: 'pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '9.15.3',
@@ -690,7 +894,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         packageFile: 'pnpm-workspace.yaml',
       },
     ]);
@@ -712,7 +916,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
+          pnpmLockFile: 'subfolder/pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -751,7 +955,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['subfolder/pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'subfolder/pnpm-lock.yaml' },
         packageFile: 'subfolder/package.json',
       },
     ]);
@@ -773,7 +977,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
+          pnpmLockFile: 'subfolder/pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -783,7 +987,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       },
       {
         managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
+          pnpmLockFile: 'subfolder/pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -809,7 +1013,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
         extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [],
         lockFiles: ['subfolder/pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'subfolder/pnpm-lock.yaml' },
         packageFile: 'subfolder/package.json',
       },
       {
@@ -829,7 +1033,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['subfolder/pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'subfolder/pnpm-lock.yaml' },
         packageFile: 'subfolder/workspace-package/package.json',
       },
     ]);
@@ -855,6 +1059,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     ];
     await getLockedVersions(packageFiles);
     expect(packageFiles).toEqual(packageFiles);
+
     expect(logger.logger.warn).toHaveBeenCalledWith(
       {
         lockfileVersion: 99,

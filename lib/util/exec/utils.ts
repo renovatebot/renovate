@@ -1,18 +1,27 @@
-import is from '@sindresorhus/is';
-import { getCustomEnv, getUserEnv } from '../env';
-import { getChildProcessEnv } from './env';
-import type { ExecOptions } from './types';
+import {
+  isBoolean,
+  isNonEmptyStringAndNotWhitespace,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
+import { join } from 'shlex';
+import { getCustomEnv, getUserEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
+import { getChildProcessEnv } from './env.ts';
+import type { CommandWithOptions, ExecOptions } from './types.ts';
+
+export type ResolvedChildEnv = Record<string, string>;
 
 export function getChildEnv({
   extraEnv,
   env: forcedEnv = {},
-}: Pick<ExecOptions, 'env' | 'extraEnv'> = {}): Record<string, string> {
+}: Pick<ExecOptions, 'env' | 'extraEnv'> = {}): ResolvedChildEnv {
   const globalConfigEnv = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
 
   const inheritedKeys: string[] = [];
-  for (const [key, val] of Object.entries(extraEnv ?? {})) {
-    if (is.string(val)) {
+  for (const [key, val] of Object.entries(coerceObject(extraEnv))) {
+    if (isString(val)) {
       inheritedKeys.push(key);
     }
   }
@@ -28,10 +37,59 @@ export function getChildEnv({
 
   const result: Record<string, string> = {};
   for (const [key, val] of Object.entries(combinedEnv)) {
-    if (is.string(val)) {
+    if (isString(val)) {
       result[key] = `${val}`;
     }
   }
 
   return result;
+}
+
+function isValidShell(shell: unknown): boolean {
+  return isBoolean(shell) || isNonEmptyStringAndNotWhitespace(shell);
+}
+
+export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
+  if (!(isObject(cmd) && 'command' in cmd)) {
+    return false;
+  }
+
+  if (!Array.isArray(cmd.command)) {
+    return false;
+  }
+
+  if (!cmd.command.length) {
+    return false;
+  }
+
+  if (cmd.command.some((v) => !isString(v))) {
+    return false;
+  }
+
+  if ('ignoreFailure' in cmd && !isBoolean(cmd.ignoreFailure)) {
+    return false;
+  }
+
+  if ('shell' in cmd && !isValidShell(cmd.shell)) {
+    return false;
+  }
+
+  return true;
+}
+
+export function asRawCommand(cmd: string | CommandWithOptions): string {
+  if (isCommandWithOptions(cmd)) {
+    return join(cmd.command);
+  }
+
+  return cmd;
+}
+
+export function asRawCommands(
+  cmds: string | (string | CommandWithOptions)[],
+): string[] {
+  if (isString(cmds)) {
+    return [cmds];
+  }
+  return cmds.map((cmd) => asRawCommand(cmd));
 }

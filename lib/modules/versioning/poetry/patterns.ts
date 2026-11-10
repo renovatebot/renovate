@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 /**
  * regex used by poetry.core.version.Version to parse union of SemVer
@@ -43,5 +43,5 @@ export const VERSION_PATTERN = regEx(
   );
 
 export const RANGE_COMPARATOR_PATTERN = regEx(
-  /(\s*(?:\^|~|[><!]?=|[><]|\|\|)\s*)/,
+  /(?<comparator>\s*(?:\^|~|[><!]?=|[><]|\|\|)\s*)/,
 );

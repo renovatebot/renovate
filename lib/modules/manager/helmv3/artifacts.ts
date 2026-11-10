@@ -1,31 +1,39 @@
-import is from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import * as yaml from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { generateHelmEnvs, generateLoginCmd } from './common';
-import { isOCIRegistry, removeOCIPrefix } from './oci';
-import type { ChartDefinition, Repository, RepositoryRule } from './types';
+} from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as yaml from '../../../util/yaml.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
+import {
+  generateHelmEnvs,
+  generateRegistryLoginCmd,
+  helmRepositoryCredentialArgs,
+} from './common.ts';
+import { isOCIRegistry } from './oci.ts';
+import type { ChartDefinition, Repository } from './types.ts';
 import {
   aliasRecordToRepositories,
   getRepositories,
   isFileInDir,
-} from './utils';
+} from './utils.ts';
 
 async function helmCommands(
   execOptions: ExecOptions,
@@ -33,53 +41,27 @@ async function helmCommands(
   repositories: Repository[],
 ): Promise<void> {
   const cmd: string[] = [];
-  // get OCI registries and detect host rules
-  const registries: RepositoryRule[] = repositories
-    .filter(isOCIRegistry)
-    .map((value) => {
-      return {
-        ...value,
-        repository: removeOCIPrefix(value.repository),
-        hostRule: hostRules.find({
-          url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
-          hostType: DockerDatasource.id,
-        }),
-      };
-    });
-
-  // if credentials for the registry have been found, log into it
-  await pMap(registries, async (value) => {
-    const loginCmd = await generateLoginCmd(value);
+  // get OCI registries and log into them if credentials have been found
+  const ociRepositories = repositories.filter(isOCIRegistry);
+  await pMap(ociRepositories, async (value) => {
+    const loginCmd = await generateRegistryLoginCmd(
+      value.name,
+      value.repository,
+    );
     if (loginCmd) {
       cmd.push(loginCmd);
     }
   });
 
-  // find classic Chart repositories and fitting host rules
-  const classicRepositories: RepositoryRule[] = repositories
-    .filter((repository) => !isOCIRegistry(repository))
-    .map((value) => {
-      return {
-        ...value,
-        hostRule: hostRules.find({
-          url: value.repository,
-          hostType: HelmDatasource.id,
-        }),
-      };
-    });
-
-  // add helm repos if an alias or credentials for the url are defined
-  classicRepositories.forEach((value) => {
-    const { username, password } = value.hostRule;
-    const parameters = [`${quote(value.repository)}`, `--force-update`];
-    const isPrivateRepo = username && password;
-    if (isPrivateRepo) {
-      parameters.push(`--username ${quote(username)}`);
-      parameters.push(`--password ${quote(password)}`);
-    }
-
+  // add classic Chart repositories, with credentials from fitting host rules
+  for (const value of repositories.filter((repo) => !isOCIRegistry(repo))) {
+    const parameters = [
+      quote(value.repository),
+      '--force-update',
+      ...helmRepositoryCredentialArgs(value.repository),
+    ];
     cmd.push(`helm repo add ${quote(value.name)} ${parameters.join(' ')}`);
-  });
+  }
 
   cmd.push(`helm dependency update ${quote(getParentDir(manifestPath))}`);
 
@@ -99,10 +81,7 @@ export async function updateArtifacts({
     'helmUpdateSubChartArchives',
   );
 
-  if (
-    !isLockFileMaintenance &&
-    (updatedDeps === undefined || updatedDeps.length < 1)
-  ) {
+  if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No updated helmv3 deps - returning null');
     return null;
   }
@@ -136,14 +115,15 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Helm artifacts');
+    const helmConstraint = await resolveToolConstraint(config, 'helm');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
-      constraint: config.constraints?.helm,
+      constraint: helmConstraint,
     };
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: generateHelmEnvs(),
+      extraEnv: generateHelmEnvs(helmConstraint),
       toolConstraints: [helmToolConstraint],
     };
     await helmCommands(execOptions, packageFileName, repositories);
@@ -151,57 +131,31 @@ export async function updateArtifacts({
 
     const fileChanges: UpdateArtifactsResult[] = [];
 
-    if (is.truthy(existingLockFileContent)) {
+    if (isTruthy(existingLockFileContent)) {
       const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
       const isLockFileChanged =
-        !is.string(newHelmLockContent) ||
+        !isString(newHelmLockContent) ||
         isHelmLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newHelmLockContent,
-          },
-        });
+        fileChanges.push(fileAddition(lockFileName, newHelmLockContent));
       } else {
         logger.debug('Chart.lock is unchanged');
       }
     }
 
     // add modified helm chart archives to artifacts
-    if (is.truthy(isUpdateOptionAddChartArchives)) {
+    if (isTruthy(isUpdateOptionAddChartArchives)) {
       const chartsPath = getSiblingFileName(packageFileName, 'charts');
       const status = await getRepoStatus();
-      const chartsAddition = status.not_added ?? [];
-      const chartsDeletion = status.deleted ?? [];
-
-      for (const file of chartsAddition) {
-        // only add artifacts in the chart sub path
-        if (!isFileInDir(chartsPath, file)) {
-          continue;
-        }
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: file,
-            contents: await readLocalFile(file),
-          },
-        });
-      }
-
-      for (const file of chartsDeletion) {
-        // only add artifacts in the chart sub path
-        if (!isFileInDir(chartsPath, file)) {
-          continue;
-        }
-        fileChanges.push({
-          file: {
-            type: 'deletion',
-            path: file,
-          },
-        });
-      }
+      fileChanges.push(
+        ...fileChangesToArtifactResults(
+          await collectFileChanges(status, {
+            include: ['not_added', 'deleted'],
+            // only add artifacts in the chart sub path
+            filter: (file) => isFileInDir(chartsPath, file),
+          }),
+        ),
+      );
     }
 
     return fileChanges.length > 0 ? fileChanges : null;
@@ -211,14 +165,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Helm lock file');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
 

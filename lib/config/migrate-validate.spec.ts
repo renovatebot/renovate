@@ -1,6 +1,7 @@
-import { getConfig } from './defaults';
-import { migrateAndValidate } from './migrate-validate';
-import type { RenovateConfig } from '~test/util';
+import { type RenovateConfig, logger } from '~test/util.ts';
+import { getConfig } from './defaults.ts';
+import { migrateAndValidate } from './migrate-validate.ts';
+import * as configMigration from './migration.ts';
 
 let config: RenovateConfig;
 
@@ -29,10 +30,19 @@ describe('config/migrate-validate', () => {
     });
 
     it('handles invalid', async () => {
+      // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };
       const res = await migrateAndValidate(config, input);
-      expect(res).toMatchSnapshot();
-      expect(res.errors).toHaveLength(1);
+      expect(res).toEqual({
+        errors: [
+          {
+            message: 'Invalid configuration option: foo',
+            topic: 'Configuration Error',
+          },
+        ],
+        foo: 'none',
+        warnings: [],
+      });
     });
 
     it('isOnboarded', async () => {
@@ -41,8 +51,29 @@ describe('config/migrate-validate', () => {
         { ...config, repoIsOnboarded: true },
         input,
       );
-      expect(res.warnings).toBeUndefined();
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        errors: [],
+      });
+    });
+
+    it('logs errors', async () => {
+      vi.spyOn(configMigration, 'migrateConfig').mockImplementation(() => {
+        throw new Error('test error');
+      });
+      await expect(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid config for error path
+        migrateAndValidate(config, { invalid: 'config' } as any),
+      ).rejects.toThrow('test error');
+      expect(logger.logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.logger.debug).toHaveBeenNthCalledWith(
+        1,
+        'migrateAndValidate()',
+      );
+      expect(logger.logger.debug).toHaveBeenNthCalledWith(
+        2,
+        { config: { invalid: 'config' } },
+        'migrateAndValidate error',
+      );
     });
   });
 });

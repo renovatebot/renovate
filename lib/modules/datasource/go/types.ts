@@ -1,17 +1,23 @@
-import type { GoproxyFallback } from './common';
+export type GoproxyFallback =
+  | ',' // WhenNotFoundOrGone
+  | '|'; // Always
+
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 
 export interface DataSource {
-  datasource: string;
+  datasource: DatasourceName;
   registryUrl?: string;
   packageName: string;
-}
-
-export interface VersionInfo {
-  Version: string;
-  Time?: string;
 }
 
 export interface GoproxyItem {
   url: string;
   fallback: GoproxyFallback;
+}
+
+export interface GoEnv {
+  GOPROXY?: string;
+  GONOPROXY?: string;
+  GOPRIVATE?: string;
+  GONOSUMDB?: string;
 }

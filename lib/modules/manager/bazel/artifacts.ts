@@ -1,18 +1,27 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { hashStream } from '../../../util/hash';
-import { Http } from '../../../util/http';
-import { map as pMap } from '../../../util/promises';
-import { regEx } from '../../../util/regex';
+import { isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { Http } from '../../../util/http/index.ts';
+import { map as pMap } from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type {
   ArtifactError,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../types';
-import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
-import type { RecordFragment, StringFragment } from './types';
+} from '../types.ts';
+import {
+  findCodeFragment,
+  patchCodeAtFragments,
+  updateCode,
+} from './common.ts';
+import type {
+  BazelManagerData,
+  RecordFragment,
+  StringFragment,
+} from './types.ts';
 
 const http = new Http('bazel');
 
@@ -27,6 +36,7 @@ function getUrlFragments(rule: RecordFragment): StringFragment[] {
   const urlsRecord = rule.children.urls;
   if (urlsRecord?.type === 'array') {
     for (const urlRecord of urlsRecord.children) {
+      // v8 ignore else -- type narrowing only
       if (urlRecord.type === 'string') {
         urls.push(urlRecord);
       }
@@ -53,7 +63,7 @@ function massageUrl(url: string): string {
 }
 
 function migrateUrl(url: string, upgrade: Upgrade): string {
-  const newValue = upgrade.newValue?.replace(regEx(/^v/), '');
+  const newValue = upgrade.newValue && stripVersionPrefix(upgrade.newValue);
 
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.3.5
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.4.0
@@ -80,8 +90,8 @@ function replaceValues(
   if (!from || !to || from === to) {
     return content;
   }
-  const massagedFrom = from.replace(regEx(/^v/), '');
-  const massagedTo = to.replace(regEx(/^v/), '');
+  const massagedFrom = stripVersionPrefix(from);
+  const massagedTo = stripVersionPrefix(to);
   return replaceAll(content, massagedFrom, massagedTo);
 }
 
@@ -108,7 +118,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (
     await pMap(urls, (url) => getHashFromUrl(massageUrl(url)))
-  ).filter(is.truthy);
+  ).filter(isTruthy);
   if (!hashes.length) {
     logger.debug({ urls }, 'Could not calculate hash for URLs');
     return null;
@@ -124,22 +134,30 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<BazelManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   const oldContents = updateArtifact.newPackageFileContent;
   let newContents = oldContents;
   const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
-    const { managerData } = upgrade;
-    const idx = managerData?.idx as number;
+    /* v8 ignore next -- defensive handling of upgrades without Bazel manager data */
+    if (!upgrade.managerData) {
+      logger.debug(
+        `Skipping Bazel artifact update for ${upgrade.depName} in ${path}: missing manager data`,
+      );
+      continue;
+    }
 
+    const idx = upgrade.managerData.idx;
+
+    // v8 ignore else -- only http rules reach updateArtifacts
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
       const rule = findCodeFragment(newContents, [idx]);
-      /* v8 ignore start -- used only for type narrowing */
+      /* v8 ignore next -- used only for type narrowing */
       if (rule?.type !== 'record') {
         continue;
-      } /* v8 ignore stop */
+      }
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {
@@ -147,17 +165,18 @@ export async function updateArtifacts(
         continue;
       }
 
-      const updateValues = (oldUrl: string): string => {
+      function updateValues(oldUrl: string): string {
         let url = oldUrl;
         url = replaceValues(url, upgrade.currentValue, upgrade.newValue);
         url = replaceValues(url, upgrade.currentDigest, upgrade.newDigest);
         url = migrateUrl(url, upgrade);
         return url;
-      };
+      }
 
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
       if (!hash) {
+        // v8 ignore else -- the empty case already continued above
         if (urlFragments.length >= 1) {
           artifactErrors.push({
             fileName: path,

@@ -1,24 +1,33 @@
-import is from '@sindresorhus/is';
-import { setPrivateKeys } from '../../../../config/decrypt';
-import * as defaultsParser from '../../../../config/defaults';
-import { resolveConfigPresets } from '../../../../config/presets';
-import { applySecretsAndVariablesToConfig } from '../../../../config/secrets';
-import type { AllConfig } from '../../../../config/types';
-import { mergeChildConfig } from '../../../../config/utils';
-import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
-import { logger, setContext } from '../../../../logger';
-import { detectAllGlobalConfig } from '../../../../modules/manager';
-import { coerceArray } from '../../../../util/array';
-import { setCustomEnv } from '../../../../util/env';
-import { readSystemFile } from '../../../../util/fs';
-import { addSecretForSanitizing } from '../../../../util/sanitize';
-import { ensureTrailingSlash } from '../../../../util/url';
-import * as additionalConfigFileParser from './additional-config-file';
-import * as cliParser from './cli';
-import * as codespaces from './codespaces';
-import * as envParser from './env';
-import * as fileParser from './file';
-import { hostRulesFromEnv } from './host-rules-from-env';
+import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
+import { setPrivateKeys } from '../../../../config/decrypt.ts';
+import * as defaultsParser from '../../../../config/defaults.ts';
+import {
+  GlobalConfig,
+  setHttpGlobalConfig,
+} from '../../../../config/global.ts';
+import { resolveConfigPresets } from '../../../../config/presets/index.ts';
+import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
+import type { AllConfig } from '../../../../config/types.ts';
+import { mergeChildConfig } from '../../../../config/utils.ts';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
+import { logger, setContext } from '../../../../logger/index.ts';
+import type { HostRule } from '../../../../types/host-rules.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { clone } from '../../../../util/clone.ts';
+import { setCustomEnv } from '../../../../util/env.ts';
+import { readSystemFile } from '../../../../util/fs/index.ts';
+import {
+  add as addHostRule,
+  clear as clearHostRules,
+} from '../../../../util/host-rules.ts';
+import { addSecretForSanitizing } from '../../../../util/sanitize.ts';
+import { ensureTrailingSlash } from '../../../../util/url.ts';
+import * as additionalConfigFileParser from './additional-config-file.ts';
+import * as cliParser from './cli.ts';
+import * as codespaces from './codespaces.ts';
+import * as envParser from './env.ts';
+import * as fileParser from './file.ts';
 
 export async function resolveGlobalExtends(
   globalExtends: string[],
@@ -27,11 +36,65 @@ export async function resolveGlobalExtends(
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
     const config = { extends: globalExtends, ignorePresets };
-    const resolvedConfig = await resolveConfigPresets(config);
+    const { config: resolvedConfig } = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
     logger.error({ err }, 'Error resolving config preset');
     throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
+
+/**
+ * Returns the administrator's `hostRules` whose secrets and variables can be applied yet, or none if a rule which restricts access cannot.
+ */
+function getInterpolatedHostRules(config: AllConfig): HostRule[] {
+  const interpolated: HostRule[] = [];
+  for (const rule of coerceArray(config.hostRules)) {
+    try {
+      const { hostRules } = applySecretsAndVariablesToConfig({
+        config: { hostRules: [clone(rule)] },
+        secrets: config.secrets,
+        variables: config.variables,
+        deleteSecrets: true,
+        deleteVariables: true,
+      });
+      interpolated.push(...coerceArray(hostRules));
+    } catch (err) {
+      // skipping only this rule would let a broader rule apply where it was meant to restrict, so apply none of them, as before admin `hostRules` were applied here
+      if (rule.allowInternal === false || rule.enabled === false) {
+        logger.debug(
+          { err },
+          'Not applying hostRules to globalExtends, as a rule which restricts access cannot be resolved yet',
+        );
+        return [];
+      }
+      logger.debug(
+        { err },
+        'Not applying a hostRule to globalExtends, as its secrets or variables cannot be resolved yet',
+      );
+    }
+  }
+  return interpolated;
+}
+
+/**
+ * Resolves `globalExtends` presets with the administrator's own `hostRules` and `internalHostAccess` in effect.
+ */
+async function resolveGlobalExtendsAsAdmin(
+  globalExtends: string[],
+  config: AllConfig,
+): Promise<AllConfig> {
+  // `globalExtends` is fetched before `start()` sets `GlobalConfig` and `globalInitialize()` registers `hostRules`, so the administrator's own `internalHostAccess`, `endpoint` and `hostRules` are applied for the duration of that fetch only - `globalInitialize()` then registers the final, merged `hostRules`
+  try {
+    setHttpGlobalConfig(config);
+    for (const rule of getInterpolatedHostRules(config)) {
+      // the same `trusted` tier as `setGlobalHostRules()`, so that `allowInternal` is kept and can grant
+      addHostRule(rule, { trusted: true });
+    }
+    return await resolveGlobalExtends(globalExtends, config.ignorePresets);
+  } finally {
+    clearHostRules();
+    GlobalConfig.reset();
   }
 }
 
@@ -50,8 +113,11 @@ export async function parseConfigs(
 
   let config: AllConfig = mergeChildConfig(fileConfig, additionalFileConfig);
   // merge extends from file config and additional file config
-  if (is.nonEmptyArray(fileConfig.extends)) {
-    config.extends = [...fileConfig.extends, ...(config.extends ?? [])];
+  if (
+    isNonEmptyArray(fileConfig.extends) &&
+    isNonEmptyArray(additionalFileConfig.extends)
+  ) {
+    config.extends = [...fileConfig.extends, ...coerceArray(config.extends)];
   }
   config = mergeChildConfig(config, envConfig);
   config = mergeChildConfig(config, cliConfig);
@@ -60,11 +126,11 @@ export async function parseConfigs(
 
   let resolvedGlobalExtends: AllConfig | undefined;
 
-  if (is.nonEmptyArray(config?.globalExtends)) {
+  if (isNonEmptyArray(config?.globalExtends)) {
     // resolve global presets immediately
-    resolvedGlobalExtends = await resolveGlobalExtends(
+    resolvedGlobalExtends = await resolveGlobalExtendsAsAdmin(
       config.globalExtends,
-      config.ignorePresets,
+      config,
     );
     config = mergeChildConfig(resolvedGlobalExtends, config);
     delete config.globalExtends;
@@ -118,14 +184,49 @@ export async function parseConfigs(
   logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
   logger.debug({ config: combinedConfig }, 'Combined config');
 
+  // TODO #41551
+  if (isNonEmptyArray(cliConfig.repositories)) {
+    const existingRepos = [
+      ...coerceArray(fileConfig.repositories),
+      ...coerceArray(additionalFileConfig.repositories),
+      ...coerceArray(envConfig.repositories),
+    ];
+
+    if (isNonEmptyArray(existingRepos)) {
+      const allStrings = existingRepos.every((repo) => isString(repo));
+      let shouldWarn = true;
+
+      if (allStrings) {
+        const areEqual =
+          cliConfig.repositories.length === existingRepos.length &&
+          cliConfig.repositories.every(
+            (repo, idx) => repo === existingRepos[idx],
+          );
+
+        if (areEqual) {
+          shouldWarn = false;
+        }
+      }
+
+      if (shouldWarn) {
+        logger.warn(
+          'CLI config is overridding the `repositories` config previously set',
+        );
+      }
+    }
+  }
+
   if (config.detectGlobalManagerConfig) {
     logger.debug('Detecting global manager config');
+    const { detectAllGlobalConfig } =
+      await import('../../../../modules/manager/index.ts');
     const globalManagerConfig = await detectAllGlobalConfig();
     logger.debug({ config: globalManagerConfig }, 'Global manager config');
     config = mergeChildConfig(config, globalManagerConfig);
   }
 
   if (config.detectHostRulesFromEnv) {
+    const { hostRulesFromEnv } = await import('./host-rules-from-env.ts');
     const hostRules = hostRulesFromEnv(env);
     config.hostRules = [...coerceArray(config.hostRules), ...hostRules];
   }
@@ -161,10 +262,7 @@ export async function parseConfigs(
 
   // do not add these secrets to repoSecrets and,
   //  do not delete the secrets/variables object after applying on global config as it needs to be re-used for repo config
-  if (
-    is.nonEmptyObject(config.secrets) ||
-    is.nonEmptyObject(config.variables)
-  ) {
+  if (isNonEmptyObject(config.secrets) || isNonEmptyObject(config.variables)) {
     config = applySecretsAndVariablesToConfig({
       config,
       secrets: config.secrets,
@@ -178,8 +276,17 @@ export async function parseConfigs(
     }
   }
 
-  if (is.nonEmptyObject(config.customEnvVariables)) {
+  if (isNonEmptyObject(config.customEnvVariables)) {
     setCustomEnv(config.customEnvVariables);
+  }
+
+  if (isNonEmptyArray(config.configFileNames)) {
+    logger.debug(
+      { configFileNames: config.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(config.configFileNames);
+    delete config.configFileNames;
   }
 
   return config;

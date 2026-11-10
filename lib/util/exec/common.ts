@@ -1,11 +1,22 @@
 import type { ChildProcess } from 'node:child_process';
-import { spawn } from 'node:child_process';
 import type { Readable } from 'node:stream';
-import is from '@sindresorhus/is';
-import { getEnv } from '../env';
-import type { ExecErrorData } from './exec-error';
-import { ExecError } from './exec-error';
-import type { DataListener, ExecResult, RawExecOptions } from './types';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { execa } from 'execa';
+import { join, split } from 'shlex';
+import { instrument } from '../../instrumentation/index.ts';
+import { logger } from '../../logger/index.ts';
+import { getEnv } from '../env.ts';
+import { sanitize } from '../sanitize.ts';
+import type { ExecErrorData } from './exec-error.ts';
+import { ExecError } from './exec-error.ts';
+import type {
+  CommandWithOptions,
+  DataListener,
+  ExecResult,
+  OutputWriter,
+  RawExecOptions,
+} from './types.ts';
+import { asRawCommand, isCommandWithOptions } from './utils.ts';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
@@ -24,8 +35,8 @@ const NONTERM = [
 
 const encoding = 'utf8';
 
-function stringify(list: Buffer[]): string {
-  return Buffer.concat(list).toString(encoding);
+function stringify(list: Buffer[], writer: OutputWriter | undefined): string {
+  return writer?.toString() ?? Buffer.concat(list).toString(encoding);
 }
 
 function initStreamListeners(
@@ -42,6 +53,11 @@ function initStreamListeners(
 
   cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
+    if (opts.outputWriters?.stdout) {
+      opts.outputWriters.stdout.write(chunk);
+      return;
+    }
+
     const len = Buffer.byteLength(chunk, encoding);
     stdoutLen += len;
     if (stdoutLen > opts.maxBuffer) {
@@ -53,6 +69,11 @@ function initStreamListeners(
 
   cp.stderr?.on('data', (chunk: Buffer) => {
     // process.stderr.write(data.toString());
+    if (opts.outputWriters?.stderr) {
+      opts.outputWriters.stderr.write(chunk);
+      return;
+    }
+
     const len = Buffer.byteLength(chunk, encoding);
     stderrLen += len;
     if (stderrLen > opts.maxBuffer) {
@@ -68,7 +89,7 @@ function registerDataListeners(
   readable: Readable | null,
   dataListeners: DataListener[] | undefined,
 ): void {
-  if (is.nullOrUndefined(readable) || is.nullOrUndefined(dataListeners)) {
+  if (isNullOrUndefined(readable) || isNullOrUndefined(dataListeners)) {
     return;
   }
 
@@ -77,16 +98,57 @@ function registerDataListeners(
   }
 }
 
-export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
+export function exec(
+  commandArgument: string | CommandWithOptions,
+  opts: RawExecOptions,
+): Promise<ExecResult> {
+  let theCmd = commandArgument;
+  let ignoreFailure = false;
+  if (isCommandWithOptions(commandArgument)) {
+    theCmd = join(commandArgument.command);
+    if (commandArgument.ignoreFailure !== undefined) {
+      ignoreFailure = commandArgument.ignoreFailure;
+    }
+  }
+
   return new Promise((resolve, reject) => {
+    let cmd = asRawCommand(theCmd);
+    let args: string[] = [];
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
-    const cp = spawn(cmd, {
+
+    // don't use shell by default, as it leads to potential security issues
+    let shell = opts.shell ?? false;
+    if (
+      isCommandWithOptions(commandArgument) &&
+      commandArgument.shell !== undefined
+    ) {
+      shell = commandArgument.shell;
+    }
+
+    // if we're not in shell mode, we need to provide the command and arguments
+    if (shell === false) {
+      const parts = split(cmd);
+      // v8 ignore else -- TODO: add test #40625
+      if (parts) {
+        cmd = parts[0];
+        args = parts.slice(1);
+      }
+    }
+
+    const subprocess = execa(cmd, args, {
       ...opts,
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',
-      shell: typeof opts.shell === 'string' ? opts.shell : true, // force shell
+      shell,
+      extendEnv: false,
+      // Suppress execa's internal promise rejection (e.g., from timeout).
+      // We handle all exit scenarios via 'exit' and 'error' event listeners below,
+      // so the promise rejection would otherwise surface as an unhandledRejection.
+      // TODO: Refactor to await execa result (#45650)
+      reject: false,
     });
+    const cp = subprocess.nodeChildProcess;
 
     // handle streams
     const [stdout, stderr] = initStreamListeners(cp, {
@@ -95,38 +157,63 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     });
 
     // handle process events
-    cp.on('error', (error) => {
+    void cp.on('error', (error) => {
       kill(cp, 'SIGTERM');
       // rethrowing, use originally emitted error message
       reject(new ExecError(error.message, rejectInfo(), error));
     });
 
-    cp.on('exit', (code: number, signal: NodeJS.Signals) => {
+    void cp.on('exit', (code: number, signal: NodeJS.Signals) => {
       if (NONTERM.includes(signal)) {
         return;
       }
       if (signal) {
         kill(cp, signal);
         reject(
-          new ExecError(`Command failed: ${cmd}\nInterrupted by ${signal}`, {
-            ...rejectInfo(),
-            signal,
-          }),
+          new ExecError(
+            `Command failed: ${cp.spawnargs.join(' ')}\nInterrupted by ${signal}`,
+            {
+              ...rejectInfo(),
+              signal,
+            },
+          ),
         );
         return;
       }
       if (code !== 0) {
-        reject(
-          new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
-            ...rejectInfo(),
+        if (ignoreFailure === undefined || ignoreFailure === false) {
+          reject(
+            new ExecError(
+              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`,
+              {
+                ...rejectInfo(),
+                exitCode: code,
+              },
+            ),
+          );
+          return;
+        }
+
+        logger.once.debug(
+          {
+            command: cp.spawnargs.join(' '),
+            stdout: stringify(stdout, opts.outputWriters?.stdout),
+            stderr: stringify(stderr, opts.outputWriters?.stderr),
             exitCode: code,
-          }),
+          },
+          `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
+
+        resolve({
+          stderr: stringify(stderr, opts.outputWriters?.stderr),
+          stdout: stringify(stdout, opts.outputWriters?.stdout),
+          exitCode: code,
+        });
         return;
       }
       resolve({
-        stderr: stringify(stderr),
-        stdout: stringify(stdout),
+        stderr: stringify(stderr, opts.outputWriters?.stderr),
+        stdout: stringify(stdout, opts.outputWriters?.stdout),
       });
     });
 
@@ -134,8 +221,8 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       return {
         cmd: cp.spawnargs.join(' '),
         options: opts,
-        stdout: stringify(stdout),
-        stderr: stringify(stderr),
+        stdout: stringify(stdout, opts.outputWriters?.stdout),
+        stderr: stringify(stderr, opts.outputWriters?.stderr),
       };
     }
   });
@@ -151,22 +238,25 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
        * and for which the process has permission to send a signal.
        */
       return process.kill(-cp.pid, signal);
-    } else {
-      // destroying stdio is needed for unref to work
-      // https://nodejs.org/api/child_process.html#subprocessunref
-      // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-      cp.stderr?.destroy();
-      cp.stdout?.destroy();
-      cp.unref();
-      return cp.kill(signal);
     }
+    // destroying stdio is needed for unref to work
+    // https://nodejs.org/api/child_process.html#subprocessunref
+    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+    cp.stderr?.destroy();
+    cp.stdout?.destroy();
+    cp.unref();
+    return cp.kill(signal);
   } catch {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
     return false;
   }
 }
 
-export const rawExec: (
-  cmd: string,
+export function rawExec(
+  cmd: string | CommandWithOptions,
   opts: RawExecOptions,
-) => Promise<ExecResult> = exec;
+): Promise<ExecResult> {
+  return instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () =>
+    exec(cmd, opts),
+  );
+}

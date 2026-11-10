@@ -1,11 +1,12 @@
 // TODO #22198
-import type { RenovateConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { coerceArray } from '../../util/array';
-import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
-import type { DepWarnings } from '../types';
+import type { RenovateConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { PackageFile } from '../../modules/manager/types.ts';
+import { coerceArray } from '../../util/array.ts';
+import { emojify } from '../../util/emoji.ts';
+import { coerceObject } from '../../util/object.ts';
+import { regEx } from '../../util/regex.ts';
+import type { DepWarnings } from '../types.ts';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
@@ -38,8 +39,8 @@ function getDepWarnings(
 ): DepWarnings {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
-  for (const files of Object.values(packageFiles ?? {})) {
-    for (const file of files ?? []) {
+  for (const files of Object.values(coerceObject(packageFiles))) {
+    for (const file of coerceArray(files)) {
       // TODO: remove condition when type is fixed (#22198)
       if (file.packageFile) {
         for (const dep of coerceArray(file.deps)) {
@@ -79,10 +80,7 @@ export function getDepWarningsOnboardingPR(
   for (const w of warnings) {
     warningText += `> -   \`${w}\`\n`;
   }
-  warningText +=
-    '> \n> Files affected: ' +
-    warningFiles.map((f) => '`' + f + '`').join(', ') +
-    '\n\n';
+  warningText += `> \n> Files affected: ${warningFiles.map((f) => `\`${f}\``).join(', ')}\n\n`;
   return warningText;
 }
 
@@ -102,7 +100,10 @@ export function getDepWarningsPR(
   warningText = emojify(`\n---\n\n> :warning: **Warning**\n> \n`);
   warningText += '> Some dependencies could not be looked up. ';
   if (dependencyDashboard) {
-    warningText += `Check the Dependency Dashboard for more information.\n\n`;
+    const depDashboardMd = config.dependencyDashboardIssue
+      ? `[Dependency Dashboard](../issues/${config.dependencyDashboardIssue})`
+      : 'Dependency Dashboard';
+    warningText += `Check the ${depDashboardMd} for more information.\n\n`;
   } else {
     warningText += `Check the warning logs for more information.\n\n`;
   }
@@ -125,7 +126,7 @@ export function getDepWarningsDashboard(
     .map((w) =>
       w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), ''),
     )
-    .map((dep) => '`' + dep + '`')
+    .map((dep) => `\`${dep}\``)
     .join(', ');
 
   let warningText = emojify(
@@ -133,7 +134,7 @@ export function getDepWarningsDashboard(
   );
   warningText += depWarnings;
   warningText += '.\n> \n> Files affected: ';
-  warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
+  warningText += warningFiles.map((f) => `\`${f}\``).join(', ');
   warningText += '\n\n---\n\n';
   return warningText;
 }

@@ -4,15 +4,20 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { logger } from '../../../logger';
-import { streamToString } from '../../../util/streams';
-import { getNewBranchName } from '../util';
-import * as azureApi from './azure-got-wrapper';
-import { WrappedExceptionSchema } from './schema';
+import type {
+  PolicyConfiguration,
+  PolicyEvaluationRecord,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { logger } from '../../../logger/index.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { getNewBranchName } from '../util.ts';
+import * as azureApi from './azure-got-wrapper.ts';
+import { WrappedException } from './schema.ts';
+import type { AzureBranchObj } from './types.ts';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
-} from './util';
+} from './util.ts';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
@@ -28,11 +33,6 @@ export async function getRefs(
     getBranchNameWithoutRefsPrefix(branchName),
   );
   return refs;
-}
-
-export interface AzureBranchObj {
-  name: string;
-  oldObjectId: string;
 }
 
 export async function getAzureBranchObj(
@@ -84,20 +84,21 @@ export async function getFile(
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const result = WrappedExceptionSchema.safeParse(fileContent);
+      const result = WrappedException.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
           logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
+        // v8 ignore else -- TODO: add test #40625
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
           logger.warn({ branchName }, 'Unable to find branch');
           return null;
         }
       }
-    } catch /* v8 ignore start */ {
+    } catch /* v8 ignore next -- non-JSON error body falls through to raw file content, parse failure not simulated in specs */ {
       // it 's not a JSON, so I send the content directly with the line under
-    } /* v8 ignore stop */
+    }
 
     return fileContent;
   }
@@ -115,6 +116,23 @@ export async function getCommitDetails(
   return results;
 }
 
+interface MergeStrategyPolicyConfiguration {
+  allowNoFastForward?: boolean;
+  allowSquash?: boolean;
+  allowRebase?: boolean;
+  allowRebaseMerge?: boolean;
+}
+
+const policyKeyByStrategy: Record<
+  GitPullRequestMergeStrategy,
+  keyof MergeStrategyPolicyConfiguration
+> = {
+  [GitPullRequestMergeStrategy.NoFastForward]: 'allowNoFastForward',
+  [GitPullRequestMergeStrategy.Squash]: 'allowSquash',
+  [GitPullRequestMergeStrategy.Rebase]: 'allowRebase',
+  [GitPullRequestMergeStrategy.RebaseMerge]: 'allowRebaseMerge',
+};
+
 export async function getMergeMethod(
   repoId: string,
   project: string,
@@ -129,12 +147,11 @@ export async function getMergeMethod(
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }
-  const isRelevantScope = (scope: Scope): boolean => {
-    if (
-      scope.matchKind === 'DefaultBranch' &&
-      // TODO: types (#22198)
-      (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
-    ) {
+  function isRelevantScope(scope: Scope): boolean {
+    // TODO: types (#22198)
+    const isDefaultBranchRef =
+      !branchRef || branchRef === `refs/heads/${defaultBranch!}`;
+    if (scope.matchKind === 'DefaultBranch' && isDefaultBranchRef) {
       return true;
     }
     if (scope.repositoryId !== repoId && scope.repositoryId !== null) {
@@ -147,38 +164,51 @@ export async function getMergeMethod(
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
       : branchRef.startsWith(scope.refName!);
-  };
+  }
 
   const policyConfigurations = (
     await (
       await azureApi.policyApi()
     ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
   )
-    .filter((p) => p.settings.scope.some(isRelevantScope))
-    .map((p) => p.settings)[0];
+    .filter((p: PolicyConfiguration) => p.settings.scope.some(isRelevantScope))
+    .map((p: PolicyConfiguration) => p.settings)[0];
 
   logger.debug(
+    { policyConfigurations },
     // TODO: types (#22198)
-    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
-      policyConfigurations,
-      null,
-      4,
-    )}`,
+    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy`,
   );
 
-  try {
-    // TODO: fix me, wrong types
-    return Object.keys(policyConfigurations)
-      .map(
-        (p) =>
-          GitPullRequestMergeStrategy[
-            p.slice(5) as never
-          ] as never as GitPullRequestMergeStrategy,
-      )
-      .find((p) => p)!;
-  } catch {
-    return GitPullRequestMergeStrategy.NoFastForward;
+  // Note that this will iterate in the order of GitPullRequestMergeStrategy
+  for (const [key, policyKey] of Object.entries(policyKeyByStrategy)) {
+    if (policyConfigurations?.[policyKey] === true) {
+      const method = parseInt(key, 10) satisfies GitPullRequestMergeStrategy;
+      logger.debug(
+        { policyConfigurations },
+        `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
+      );
+      return method;
+    }
   }
+
+  logger.debug(
+    { policyConfigurations },
+    // TODO: types (#22198)
+    `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[GitPullRequestMergeStrategy.NoFastForward]}`,
+  );
+  return GitPullRequestMergeStrategy.NoFastForward;
+}
+
+export async function getPolicyEvaluations(
+  project: string,
+  artifactId: string,
+): Promise<PolicyEvaluationRecord[]> {
+  logger.debug(`getPolicyEvaluations(${project}, ${artifactId})`);
+  const policyEvaluations = await (
+    await azureApi.policyApi()
+  ).getPolicyEvaluations(project, artifactId);
+  return policyEvaluations;
 }
 
 export async function getAllProjectTeams(

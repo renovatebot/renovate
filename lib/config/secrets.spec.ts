@@ -2,12 +2,12 @@ import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
-} from '../constants/error-messages';
-import { getConfig } from './defaults';
+} from '../constants/error-messages.ts';
+import { getConfig } from './defaults.ts';
 import {
   applySecretsAndVariablesToConfig,
   validateConfigSecretsAndVariables,
-} from './secrets';
+} from './secrets.ts';
 
 describe('config/secrets', () => {
   describe('validateConfigSecretsAndVariables(config)', () => {
@@ -39,6 +39,7 @@ describe('config/secrets', () => {
 
     it('throws for secrets in repositories', () => {
       expect(() =>
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid secret value type
         validateConfigSecretsAndVariables({
           repositories: [{ repository: 'x/y', secrets: { abc: 123 } }],
         } as any),
@@ -47,6 +48,7 @@ describe('config/secrets', () => {
 
     it('throws for variables in repositories', () => {
       expect(() =>
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid variable value type
         validateConfigSecretsAndVariables({
           repositories: [{ repository: 'x/y', variables: { abc: 123 } }],
         } as any),
@@ -69,6 +71,59 @@ describe('config/secrets', () => {
       const result = applySecretsAndVariablesToConfig({ config });
       expect(result).toEqual({
         hostRules: [{ hostType: 'npm', token: 'secret123' }],
+      });
+    });
+
+    it('replaces all secrets and variables', () => {
+      const config = {
+        secrets: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        variables: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        customEnvVariables: {
+          SECRETS: '{{ secrets.FOO }} {{ secrets.BAR }} {{ secrets.BAZ }}',
+          VARIABLES:
+            '{{ variables.FOO }} {{ variables.BAR }} {{ variables.BAZ }}',
+        },
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        customEnvVariables: {
+          SECRETS: 'foo bar baz',
+          VARIABLES: 'foo bar baz',
+        },
+      });
+    });
+
+    it('handles a mix of space characters around the curly braces', () => {
+      const config = {
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [
+          {
+            hostType: '{{variables.MANAGER   }}',
+            token: '{{secrets.TOKEN}}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: 'secret123' }],
+      });
+    });
+
+    it('does not handle non-space characters around the curly braces', () => {
+      const config = {
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [
+          {
+            hostType: '{{variables.MANAGER   }}',
+            token: '{{\tsecrets.token\t}}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: '{{\tsecrets.token\t}}' }],
       });
     });
 

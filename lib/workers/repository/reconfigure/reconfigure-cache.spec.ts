@@ -1,13 +1,11 @@
-import * as _cache from '../../../util/cache/repository';
-import type { RepoCacheData } from '../../../util/cache/repository/types';
-import type { BranchConfig } from '../../types';
+import * as _cache from '../../../util/cache/repository/index.ts';
+import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
 import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
-} from './reconfigure-cache';
-import { partial } from '~test/util';
+} from './reconfigure-cache.ts';
 
-vi.mock('../../../util/cache/repository');
+vi.mock('../../../util/cache/repository/index.ts');
 
 const cache = vi.mocked(_cache);
 
@@ -21,6 +19,35 @@ describe('workers/repository/reconfigure/reconfigure-cache', () => {
         reconfigureBranchCache: {
           reconfigureBranchSha: 'reconfigure-sha',
           isConfigValid: false,
+        },
+      });
+    });
+
+    it('sets new cache with a successful extraction', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+
+      setReconfigureBranchCache('reconfigure-sha', true, true);
+
+      expect(dummyCache).toEqual({
+        reconfigureBranchCache: {
+          reconfigureBranchSha: 'reconfigure-sha',
+          isConfigValid: true,
+          extractionSucceeded: true,
+        },
+      });
+    });
+
+    it('omits a failed extraction', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+
+      setReconfigureBranchCache('reconfigure-sha', true, false);
+
+      expect(dummyCache).toEqual({
+        reconfigureBranchCache: {
+          reconfigureBranchSha: 'reconfigure-sha',
+          isConfigValid: true,
         },
       });
     });
@@ -42,16 +69,12 @@ describe('workers/repository/reconfigure/reconfigure-cache', () => {
       });
     });
 
-    it('updates extractResult old cache', () => {
+    it('updates old cache with a successful extraction', () => {
       const dummyCache = {
         reconfigureBranchCache: {
           reconfigureBranchSha: 'reconfigure-sha',
           isConfigValid: false,
-          extractResult: {
-            branches: [partial<BranchConfig>()],
-            branchList: ['some-branch'],
-            packageFiles: {},
-          },
+          extractionSucceeded: true,
         },
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValue(dummyCache);

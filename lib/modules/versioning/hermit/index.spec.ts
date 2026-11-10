@@ -1,4 +1,4 @@
-import { HermitVersioning } from './index';
+import { HermitVersioning } from './index.ts';
 
 describe('modules/versioning/hermit/index', () => {
   const versioning = new HermitVersioning();

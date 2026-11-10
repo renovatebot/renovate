@@ -1,22 +1,33 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { logger } from '../logger';
-import { clone } from '../util/clone';
-import { regEx } from '../util/regex';
-import { MigrationsService } from './migrations';
-import { getOptions } from './options';
+import { logger } from '../logger/index.ts';
+import { clone } from '../util/clone.ts';
+import { coerceObject } from '../util/object.ts';
+import { regEx } from '../util/regex.ts';
+import { MigrationsService } from './migrations/index.ts';
+import { getOptions } from './options/index.ts';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
   PackageRule,
   RenovateConfig,
   RenovateOptions,
-} from './types';
-import { mergeChildConfig } from './utils';
+} from './types.ts';
+import { mergeChildConfig } from './utils.ts';
 
 const options = getOptions();
 export function fixShortHours(input: string): string {
-  return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
+  return input.replace(
+    regEx(/(?<hours> \d?\d)(?<meridiem>(?:a|p)m)/g),
+    '$<hours>:00$<meridiem>',
+  );
 }
 
 let optionTypes: Record<string, RenovateOptions['type']>;
@@ -36,59 +47,73 @@ export function migrateConfig(
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
 
     for (const [key, val] of Object.entries(newConfig)) {
-      if (is.string(val) && val.includes('{{baseDir}}')) {
+      if (isString(val) && val.includes('{{baseDir}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}',
         );
-      } else if (is.string(val) && val.includes('{{lookupName}}')) {
+      } else if (isString(val) && val.includes('{{lookupName}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           regEx(/{{lookupName}}/g),
           '{{packageName}}',
         );
-      } else if (is.string(val) && val.includes('{{depNameShort}}')) {
+      } else if (isString(val) && val.includes('{{depNameShort}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           regEx(/{{depNameShort}}/g),
           '{{depName}}',
         );
-      } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
+      } else if (isString(val) && val.startsWith('{{semanticPrefix}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
           '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
         );
-      } else if (optionTypes[key] === 'object' && is.boolean(val)) {
+      } else if (optionTypes[key] === 'object' && isBoolean(val)) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = { enabled: val };
       } else if (optionTypes[key] === 'boolean') {
         if (val === 'true') {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = true;
         } else if (val === 'false') {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = false;
         }
       } else if (
         optionTypes[key] === 'string' &&
-        is.array(val) &&
+        isArray(val) &&
         val.length === 1
       ) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = String(val[0]);
-      } else if (is.array(val)) {
-        if (is.array(migratedConfig?.[key])) {
+      } else if (isArray(val)) {
+        // @ts-expect-error -- TODO: fix me
+        // v8 ignore else -- TODO: add test #40625
+        if (isArray(migratedConfig?.[key])) {
           const newArray = [];
+          // @ts-expect-error -- TODO: fix me
           for (const item of migratedConfig[key]) {
-            if (is.object(item) && !is.array(item)) {
-              const arrMigrate = migrateConfig(item as RenovateConfig);
+            if (isObject(item) && !isArray(item)) {
+              const arrMigrate = migrateConfig(item);
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);
             }
           }
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = newArray;
         }
-      } else if (is.object(val)) {
+      } else if (isObject(val)) {
         const subMigrate = migrateConfig(
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] as RenovateConfig,
           key,
         );
         if (subMigrate.isMigrated) {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = subMigrate.migratedConfig;
         }
       }
@@ -101,8 +126,10 @@ export function migrateConfig(
         newVersionMinor: 'newMinor',
         toVersion: 'newVersion',
       };
-      if (is.string(migratedConfig[key])) {
+      // @ts-expect-error -- TODO: fix me
+      if (isString(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = (migratedConfig[key] as string).replace(
             regEx(from, 'g'),
             to,
@@ -123,31 +150,37 @@ export function migrateConfig(
       'rust',
     ];
     for (const language of languages) {
-      if (is.nonEmptyObject(migratedConfig[language])) {
+      // @ts-expect-error -- TODO: fix me
+      if (isNonEmptyObject(migratedConfig[language])) {
         migratedConfig.packageRules ??= [];
+        // @ts-expect-error -- TODO: fix me
         const currentContent = migratedConfig[language] as any;
         const packageRule = {
           matchCategories: [language],
           ...currentContent,
         };
         migratedConfig.packageRules.unshift(packageRule);
+        // @ts-expect-error -- TODO: fix me
         delete migratedConfig[language];
       }
     }
     // Migrate nested packageRules
-    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+    if (isNonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;
       migratedConfig.packageRules = [];
       for (const packageRule of existingRules) {
-        if (is.array(packageRule.packageRules)) {
+        // @ts-expect-error -- TODO: fix me
+        if (isArray(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
+          // @ts-expect-error -- TODO: fix me
           for (const subrule of packageRule.packageRules) {
             // TODO: fix types #22198
             const combinedRule = mergeChildConfig(
               packageRule,
               subrule as PackageRule,
             );
+            // @ts-expect-error -- TODO: fix me
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }
@@ -157,38 +190,52 @@ export function migrateConfig(
       }
     }
     if (
-      is.nonEmptyObject(migratedConfig['pip-compile']) &&
-      is.nonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
+      // @ts-expect-error -- TODO: fix me
+      isNonEmptyObject(migratedConfig['pip-compile']) &&
+      // @ts-expect-error -- TODO: fix me
+      isNonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
     ) {
+      // @ts-expect-error -- TODO: fix me
       migratedConfig['pip-compile'].managerFilePatterns = migratedConfig[
         'pip-compile'
       ].managerFilePatterns.map((filePattern) => {
         const pattern = filePattern as string;
         if (pattern.endsWith('.in')) {
-          return pattern.replace(/\.in$/, '.txt');
+          return pattern.replace(regEx(/\.in$/), '.txt');
         }
         if (pattern.endsWith('.in/')) {
-          return pattern.replace(/\.in\/$/, '.txt/');
+          return pattern.replace(regEx(/\.in\/$/), '.txt/');
         }
-        return pattern.replace(/\.in\$\/$/, '.txt$/');
+        return pattern.replace(regEx(/\.in\$\/$/), '.txt$/');
       });
     }
-    if (is.nonEmptyArray(migratedConfig.matchManagers)) {
-      if (migratedConfig.matchManagers.includes('gradle-lite')) {
-        if (!migratedConfig.matchManagers.includes('gradle')) {
-          migratedConfig.matchManagers.push('gradle');
-        }
-        migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
-          (manager) => manager !== 'gradle-lite',
-        );
+    if (
+      // @ts-expect-error -- TODO: fix me
+      isNonEmptyArray(migratedConfig.matchManagers) &&
+      // @ts-expect-error -- TODO: fix me
+      migratedConfig.matchManagers.includes('gradle-lite')
+    ) {
+      // @ts-expect-error -- TODO: fix me
+      // v8 ignore else -- TODO: add test #40625
+      if (!migratedConfig.matchManagers.includes('gradle')) {
+        // @ts-expect-error -- TODO: fix me
+        migratedConfig.matchManagers.push('gradle');
       }
+      // @ts-expect-error -- TODO: fix me
+      migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
+        // @ts-expect-error -- TODO: fix me
+        (manager) => manager !== 'gradle-lite',
+      );
     }
-    if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
+    // @ts-expect-error -- TODO: fix me
+    if (isNonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle ?? {},
+        coerceObject(migratedConfig.gradle),
+        // @ts-expect-error -- TODO: fix me
         migratedConfig['gradle-lite'],
       );
     }
+    // @ts-expect-error -- TODO: fix me
     delete migratedConfig['gradle-lite'];
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
@@ -199,7 +246,6 @@ export function migrateConfig(
       };
     }
     return { isMigrated, migratedConfig };
-    /* v8 ignore next 4 -- TODO: add test */
   } catch (err) {
     logger.debug({ config, err }, 'migrateConfig() error');
     throw err;

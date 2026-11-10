@@ -1,7 +1,7 @@
 import addrs from 'email-addresses';
-import { logger } from '../../logger';
-import { regEx } from '../regex';
-import type { GitAuthor } from './types';
+import { logger } from '../../logger/index.ts';
+import { regEx } from '../regex.ts';
+import type { GitAuthor } from './types.ts';
 
 export function parseGitAuthor(input: string): GitAuthor | null {
   let result: GitAuthor | null = null;
@@ -17,7 +17,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     let massagedBotEmail = false;
     if (input.includes('<') && input.includes('>')) {
       // try wrapping the name part in quotations
-      massagedInput = '"' + input.replace(regEx(/(\s?<)/), '"$1');
+      massagedInput = `"${input.replace(regEx(/(?<sep>\s?<)/), '"$<sep>')}`;
     }
     if (input.includes('[bot]@')) {
       // invalid github app/bot addresses

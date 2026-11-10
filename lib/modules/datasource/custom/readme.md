@@ -13,9 +13,8 @@ Options:
 | format                     | `"json"` | format used by the API. Available values are: `html`, `json`, `plain`, `toml`, `yaml`                                                                                    |
 | transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
-<!-- prettier-ignore -->
 !!! tip
-    Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
+  Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
 
 Available template variables:
 
@@ -49,7 +48,7 @@ After all transformations, the resulting JSON must match one of these formats:
 
 Minimal-supported object:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -64,13 +63,14 @@ Minimal-supported object:
 
 All available options:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
       "version": "v1.0.0",
       "isDeprecated": true,
       "releaseTimestamp": "2022-12-24T18:21Z",
+      "changelogContent": "Release notes in Markdown.",
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
       "sourceDirectory": "monorepo/folder",
@@ -84,6 +84,14 @@ All available options:
   "homepage": "https://demo.org"
 }
 ```
+
+### Embedded release notes
+
+`changelogContent` is optional Markdown supplied for a release.
+Renovate can embed the selected release's content through its existing release-notes pipeline; it does not combine supplied notes from intermediate releases.
+Non-string content is discarded without removing the release from update consideration.
+Use `changelogUrl` to link to the full notes; providing a URL alone does not make Renovate fetch Markdown from that URL.
+Embedded notes respect [`fetchChangeLogs`](../../../configuration-options.md#fetchchangelogs) and use the existing Markdown sanitization and platform PR-body limits.
 
 ### Debugging
 
@@ -134,7 +142,7 @@ Suppose the body of the HTTP response is as follows:
 
 When Renovate receives this response with the `plain` format, it will convert it into the following:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -167,7 +175,7 @@ releases:
 
 When Renovate receives this response with the `yaml` format, it will convert it into the following:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -202,7 +210,7 @@ version = "3.0.0"
 
 Will convert applying any `jsonata` rules defined in the `transformTemplates` section will be applied.
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -236,7 +244,7 @@ For the following HTML document:
 
 The following JSON will be generated:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -359,6 +367,8 @@ Sometimes the "dependency version source" is _not_ available via an API.
 To work around a missing API, you can create dependency "files".
 These files are served via HTTP(S), so that Renovate can access them.
 For example, imagine the following file `versiontracker.json` for the software `something`:
+
+<!-- schema-validation-disable-next-block -->
 
 ```json
 [

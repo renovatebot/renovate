@@ -5,10 +5,11 @@ import {
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getPkgReleases } from '..';
-import { logger } from '../../../../test/util';
+import { logger } from '../../../../test/util.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
 
-import { AwsEKSAddonDataSource } from '.';
+import { AwsEKSAddonDataSource } from './index.ts';
 
 const datasource = AwsEKSAddonDataSource.id;
 const eksMock = mockClient(EKSClient);
@@ -116,7 +117,14 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         packageName: '{"kubernetesVersion":"1.30"}',
       });
       expect(res).toBeNull();
-      expect(logger.logger.warn).toHaveBeenCalledOnce();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          err: expect.anything(),
+          serializedFilter: '{"kubernetesVersion":"1.30"}',
+        },
+        'Error parsing eks-addons config.',
+      );
     });
 
     it('with addonName only', async () => {
@@ -157,6 +165,32 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         packageName: '{"addonName":"vpc-cni-not-exist", "profile":"paradox"}',
       });
       expect(eksMock.calls()).toHaveLength(1);
+    });
+
+    it('prefers host rule credentials over the configured profile', async () => {
+      hostRules.add({
+        hostType: datasource,
+        username: 'access-key-id',
+        password: 'secret-access-key',
+        token: 'session-token',
+      });
+      mockDescribeAddonVersionsCommand({ addons: [] });
+
+      const awsEksAddonDatasource = new AwsEKSAddonDataSource();
+      await awsEksAddonDatasource.getReleases({
+        packageName:
+          '{"addonName":"host-rule-credentials","profile":"ignored-profile"}',
+      });
+
+      const eks = eksMock.call(0).thisValue as EKSClient;
+      await expect(eks.config.credentials()).resolves.toEqual({
+        accessKeyId: 'access-key-id',
+        secretAccessKey: 'secret-access-key',
+        sessionToken: 'session-token',
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
+      });
     });
 
     it('with addon and region', async () => {

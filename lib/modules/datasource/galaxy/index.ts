@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import * as pep440Versioning from '../../versioning/pep440';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GalaxyV1 } from './schema';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as pep440Versioning from '../../versioning/pep440/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { GalaxyV1 } from './schema.ts';
 
 export class GalaxyDatasource extends Datasource {
   static readonly id = 'galaxy';
@@ -13,9 +13,13 @@ export class GalaxyDatasource extends Datasource {
     super(GalaxyDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://galaxy.ansible.com/'];
+  }
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -26,12 +30,7 @@ export class GalaxyDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `github_user` and `github_repo` fields in the results.';
 
-  @cache({
-    namespace: 'datasource-galaxy',
-    key: (getReleasesConfig: GetReleasesConfig) =>
-      getReleasesConfig.packageName,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -42,13 +41,7 @@ export class GalaxyDatasource extends Datasource {
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 
-    let body: GalaxyV1 | null = null;
-    try {
-      const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
-      body = raw.body;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(galaxyAPIUrl, GalaxyV1);
 
     if (body.results.length > 1) {
       body.results = body.results.filter(
@@ -78,7 +71,7 @@ export class GalaxyDatasource extends Datasource {
 
     result.dependencyUrl = galaxyProjectUrl;
     const { github_user: user, github_repo: repo } = resultObject;
-    if (is.nonEmptyString(user) && is.nonEmptyString(repo)) {
+    if (isNonEmptyString(user) && isNonEmptyString(repo)) {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
 
@@ -91,5 +84,17 @@ export class GalaxyDatasource extends Datasource {
     });
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: 'datasource-galaxy',
+        key: config.packageName,
+        public: true,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,35 +1,43 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getEnv } from '../../../../util/env';
-import { exec } from '../../../../util/exec';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { getEnv } from '../../../../util/env.ts';
+import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
+  CommandWithOptions,
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
-} from '../../../../util/exec/types';
+} from '../../../../util/exec/types.ts';
 import {
   localPathIsFile,
   readLocalFile,
   writeLocalFile,
-} from '../../../../util/fs';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import { uniqueStrings } from '../../../../util/string';
-import { NpmDatasource } from '../../../datasource/npm';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn';
-import type { NpmManagerData } from '../types';
-import { getNodeToolConstraint } from './node-version';
-import type { GenerateLockFileResult } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
+} from '../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { uniqueStrings } from '../../../../util/string.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
+import { hasPackageManager } from '../extract/common/package-file.ts';
+import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
+import type { NpmManagerData } from '../types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import type { GenerateLockFileResult } from './types.ts';
+import {
+  getNodeOptions,
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from './utils.ts';
 
 export async function checkYarnrc(
   lockFileDir: string,
@@ -41,7 +49,7 @@ export async function checkYarnrc(
       upath.join(lockFileDir, '.yarnrc'),
       'utf8',
     );
-    if (is.string(yarnrc)) {
+    if (isString(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
@@ -50,7 +58,10 @@ export async function checkYarnrc(
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+        yarnPath = pathLine.replace(
+          regEx(/^yarn-path\s+"?(?<path>.+?)"?$/),
+          '$<path>',
+        );
       }
       if (yarnPath) {
         // resolve binary relative to `yarnrc`
@@ -77,26 +88,29 @@ export async function checkYarnrc(
         );
       }
     }
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch {
     // not found
-  } /* v8 ignore stop -- needs test */
+  }
   return { offlineMirror, yarnPath };
 }
 
-export function getOptimizeCommand(fileName: string): string {
-  return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
+export function getOptimizeCommand(fileName: string): string[] {
+  return ['sed', '-i', 's/ steps,/ steps.slice(0,1),/', fileName];
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+  const isPackageManagerDepType =
+    upgrade.depType === 'packageManager' ||
+    upgrade.depType === 'devEngines.packageManager';
+  return isPackageManagerDepType && upgrade.depName === 'yarn';
 }
 
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: Partial<PostUpdateConfig<NpmManagerData>> = {},
-  upgrades: Upgrade[] = [],
+  upgrades: Upgrade<NpmManagerData>[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
@@ -108,12 +122,16 @@ export async function generateLockFile(
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility =
-      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
-      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-      getYarnVersionFromLock(await getYarnLock(lockFileName));
-    const minYarnVersion =
-      semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility);
+      yarnUpdate?.newValue ??
+      (await resolveToolConstraint(
+        config,
+        'yarn',
+        async () =>
+          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+          getYarnVersionFromLock(await getYarnLock(lockFileName)),
+      ));
+    const yarnRange = semver.validRange(yarnCompatibility);
+    const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
@@ -126,14 +144,18 @@ export async function generateLockFile(
     };
 
     // check first upgrade, see #17786
-    const hasPackageManager =
+    let packageManagerDeclared =
       !!config.managerData?.hasPackageManager ||
       !!upgrades[0]?.managerData?.hasPackageManager;
+    // dep-level managerData can shadow the flag (e.g. nested resolutions), see #25853
+    if (!isYarn1 && !packageManagerDeclared) {
+      packageManagerDeclared = await hasPackageManager(lockFileDir);
+    }
 
-    if (!isYarn1 && hasPackageManager) {
+    if (!isYarn1 && packageManagerDeclared) {
       toolConstraints.push({
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       });
     } else {
       toolConstraints.push(yarnTool);
@@ -145,20 +167,23 @@ export async function generateLockFile(
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      CI: 'true',
     };
 
-    const commands: string[] = [];
+    const commands: (string | CommandWithOptions)[] = [];
     let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {
         const { offlineMirror, yarnPath } = await checkYarnrc(lockFileDir);
+        // v8 ignore else -- TODO: add test #40625
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
           yarnTool.toolName = 'yarn-slim';
           if (yarnPath) {
-            commands.push(getOptimizeCommand(yarnPath) + ' || true');
+            commands.push({
+              command: getOptimizeCommand(yarnPath),
+              ignoreFailure: true,
+            });
           }
         }
       } else if (isYarnModeAvailable) {
@@ -175,7 +200,11 @@ export async function generateLockFile(
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
-      if (!config.managerData?.yarnZeroInstall) {
+      // check upgrades too, see #17786
+      const yarnZeroInstall =
+        !!config.managerData?.yarnZeroInstall ||
+        upgrades.some((upgrade) => !!upgrade.managerData?.yarnZeroInstall);
+      if (!yarnZeroInstall) {
         logger.debug('Enabling global cache as zero-install is not detected');
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }
@@ -193,13 +222,18 @@ export async function generateLockFile(
       }
     }
 
+    const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
+    if (nodeMaxMemory) {
+      extraEnv.NODE_OPTIONS = getNodeOptions(nodeMaxMemory);
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
       docker: {},
       toolConstraints,
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -213,12 +247,14 @@ export async function generateLockFile(
 
     const allEnv = getEnv();
     if (allEnv.RENOVATE_X_YARN_PROXY) {
+      // v8 ignore else -- TODO: add test #40625
       if (allEnv.HTTP_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpProxy');
         commands.push(
           `yarn config set --home httpProxy ${quote(allEnv.HTTP_PROXY)}`,
         );
       }
+      // v8 ignore else -- TODO: add test #40625
       if (allEnv.HTTPS_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpsProxy');
         commands.push(
@@ -240,7 +276,7 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .filter(is.string)
+            .filter(isString)
             .filter(uniqueStrings)
             .map(quote)
             .join(' ')}${cmdOptions}`,
@@ -291,13 +327,13 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-        /* v8 ignore start -- needs test */
       } catch (err) {
+        // v8 ignore next -- TODO: add test #40625
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     // Run the commands
@@ -305,8 +341,8 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore start -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -318,12 +354,14 @@ export async function generateLockFile(
       'lock file error',
     );
     const stdouterr = String(err.stdout) + String(err.stderr);
+    // v8 ignore if -- TODO: add test #40625
     if (
       stdouterr.includes('ENOSPC: no space left on device') ||
       stdouterr.includes('Out of diskspace')
     ) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
+    // v8 ignore if -- TODO: add test #40625
     if (
       stdouterr.includes('The registry may be down.') ||
       stdouterr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
@@ -332,7 +370,7 @@ export async function generateLockFile(
       throw new ExternalHostError(err, NpmDatasource.id);
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  } /* v8 ignore stop -- needs test */
+  }
   return { lockFile };
 }
 
@@ -340,17 +378,19 @@ export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
   const keys = new Map(
-    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
-      x.replace(/\/$/, '').replace(/^https?:/, ''),
+    Object.keys(coerceObject(existingYarnrRcYml.npmRegistries)).map((x) => [
+      x.replace(regEx(/\/$/), '').replace(regEx(/^https?:/), ''),
       x,
     ]),
   );
 
   return {
     ...additionalYarnRcYml,
-    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
+    npmRegistries: Object.entries(
+      coerceObject(additionalYarnRcYml.npmRegistries),
+    )
       .map(([k, v]) => {
-        const key = keys.get(k.replace(/\/$/, '')) ?? k;
+        const key = keys.get(k.replace(regEx(/\/$/), '')) ?? k;
         return { [key]: v };
       })
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}),

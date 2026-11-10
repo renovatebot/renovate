@@ -1,10 +1,10 @@
-import { logger } from '../../../../logger';
-import * as fs from '../../../../util/fs';
-import { newlineRegex, regEx } from '../../../../util/regex';
-import { coerceString } from '../../../../util/string';
-import type { PackageDependency } from '../../types';
-import type { GradleManagerData } from '../types';
-import { isDependencyString, versionLikeSubstring } from '../utils';
+import { logger } from '../../../../logger/index.ts';
+import * as fs from '../../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { coerceString } from '../../../../util/string.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { GradleManagerData } from '../types.ts';
+import { isDependencyString, versionLikeSubstring } from '../utils.ts';
 
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
@@ -71,6 +71,7 @@ export function parseGcv(
 
   // For each exact dep in props file
   for (const [propDep, versionAndPosition] of propsFileExactMap) {
+    // v8 ignore else -- needs a props entry missing from the lock file
     if (lockFileMap.has(propDep)) {
       const newDep: Record<string, any> = {
         managerData: {
@@ -118,9 +119,9 @@ export function parseGcv(
 function globToRegex(depName: string): RegExp {
   return regEx(
     depName
-      .replace(/\*/g, '_WC_CHAR_')
-      .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replace(/_WC_CHAR_/g, '.*?'),
+      .replace(regEx(/\*/g), '_WC_CHAR_')
+      .replace(regEx(/[/\-\\^$*+?.()|[\]{}]/g), '\\$&')
+      .replace(regEx(/_WC_CHAR_/g), '.*?'),
   );
 }
 
@@ -152,7 +153,7 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
         depVerMap.set(depName, {
           version: lockVersion,
           depType: isTestDepType ? 'test' : 'dependencies',
-        } as VersionWithDepType);
+        });
       }
     } else if (line === '[Test dependencies]') {
       isTestDepType = true; // We know that all lines below this header are test dependencies
@@ -180,7 +181,7 @@ export function parsePropsFile(
 
   let startOfLineIdx = 0;
   const isCrLf = input.indexOf('\r\n') > 0;
-  const validGlob = /^[a-zA-Z][-_a-zA-Z0-9.:*]+$/;
+  const validGlob = regEx(/^[a-zA-Z][-_a-zA-Z0-9.:*]+$/);
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propsLineRegex.exec(line);
     if (lineMatch?.groups) {
@@ -209,5 +210,10 @@ export function parsePropsFile(
   logger.trace(
     `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`,
   );
-  return [depVerExactMap, new Map([...depVerRegexMap].sort().reverse())];
+  return [
+    depVerExactMap,
+    new Map(
+      [...depVerRegexMap].sort(([ka], [kb]) => ka.localeCompare(kb)).reverse(),
+    ),
+  ];
 }

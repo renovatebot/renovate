@@ -1,9 +1,10 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import * as template from '../../../../util/template';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import * as template from '../../../../util/template/index.ts';
 
 /**
  * Filter labels that go over the maximum char limit, based on platform limits.
@@ -19,12 +20,12 @@ function trimLabel(label: string, limit: number): string {
 
 export function prepareLabels(config: RenovateConfig): string[] {
   const labelCharLimit = platform.labelCharLimit?.() ?? 50;
-  const labels = config.labels ?? [];
-  const addLabels = config.addLabels ?? [];
+  const labels = coerceArray(config.labels);
+  const addLabels = coerceArray(config.addLabels);
   return [...new Set([...labels, ...addLabels])]
-    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(isNonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
-    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(isNonEmptyStringAndNotWhitespace)
     .map((label) => trimLabel(label, labelCharLimit))
     .sort();
 }
@@ -78,17 +79,17 @@ export function shouldUpdateLabels(
   // If the 'labelsInDebugData' field is undefined
   // it means the PR was created before the update-labels logic was merged, and labels should not be updated.
   //  Reference: https://github.com/renovatebot/renovate/pull/25340
-  if (!is.array(prInitialLabels)) {
+  if (!isArray(prInitialLabels)) {
     return false;
   }
 
   // If the labels are unchanged, they should not be updated
-  if (dequal((configuredLabels ?? []).sort(), prInitialLabels.sort())) {
+  if (dequal(coerceArray(configuredLabels).sort(), prInitialLabels.sort())) {
     return false;
   }
 
   // If the labels in the PR have been modified by the user, they should not be updated
-  if (areLabelsModified(prInitialLabels, prCurrentLabels ?? [])) {
+  if (areLabelsModified(prInitialLabels, coerceArray(prCurrentLabels))) {
     logger.debug('Labels have been modified by user - skipping labels update.');
     return false;
   }

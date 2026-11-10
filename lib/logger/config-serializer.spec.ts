@@ -1,4 +1,4 @@
-import configSerializer from './config-serializer';
+import configSerializer from './config-serializer.ts';
 
 describe('logger/config-serializer', () => {
   it('squashes templates', () => {

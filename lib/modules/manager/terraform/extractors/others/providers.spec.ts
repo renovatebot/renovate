@@ -1,10 +1,10 @@
-import { ProvidersExtractor } from './providers';
+import { ProvidersExtractor } from './providers.ts';
 
 describe('modules/manager/terraform/extractors/others/providers', () => {
   const extractor = new ProvidersExtractor();
 
   it('return null if no provider returned', () => {
-    const result = extractor.extract({}, []);
+    const result = extractor.extract({}, [], {});
     expect(result).toBeArrayOfSize(0);
   });
 });

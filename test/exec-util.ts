@@ -1,9 +1,12 @@
 import is from '@sindresorhus/is';
-import traverse from 'neotraverse/legacy';
+import { map } from 'neotraverse';
 import upath from 'upath';
-import { rawExec as _exec } from '../lib/util/exec/common';
-import type { RawExecOptions } from '../lib/util/exec/types';
-import { regEx } from '../lib/util/regex';
+import { rawExec as _exec } from '../lib/util/exec/common.ts';
+import type {
+  CommandWithOptions,
+  RawExecOptions,
+} from '../lib/util/exec/types.ts';
+import { regEx } from '../lib/util/regex.ts';
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
@@ -16,7 +19,10 @@ export interface ExecSnapshot {
 
 export type ExecSnapshots = ExecSnapshot[];
 
-function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
+function execSnapshot(
+  cmd: string | CommandWithOptions,
+  options?: RawExecOptions,
+): ExecSnapshot {
   const snapshot = {
     cmd,
     options,
@@ -24,14 +30,14 @@ function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
 
   const cwd = upath.toUnix(process.cwd());
 
-  return traverse(snapshot).map(function fixup(v) {
-    if (is.string(v)) {
-      const val = v
-        .replace(regEx(/\\(\w)/g), '/$1')
+  return map(snapshot, (ctx, val) => {
+    if (is.string(val)) {
+      const newVal = val
+        .replace(regEx(/\\(?<char>\w)/g), '/$<char>')
         .replace(regEx(/^[A-Z]:\//), '/') // replace windows paths
         .replace(regEx(/"[A-Z]:\//g), '"/') // replace windows paths
         .replace(cwd, '/root/project');
-      this.update(val);
+      ctx.update(newVal);
     }
   });
 }
@@ -67,6 +73,7 @@ export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
 }
 
 const basicEnvMock = {
+  CI: 'true',
   HTTP_PROXY: 'http://example.com',
   HTTPS_PROXY: 'https://example.com',
   NO_PROXY: 'localhost',
@@ -92,9 +99,3 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
-
-// reset exec mock, otherwise there can be some left over from previous test
-beforeEach(() => {
-  // maybe not mocked
-  exec.mockReset?.();
-});

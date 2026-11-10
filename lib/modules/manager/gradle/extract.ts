@@ -1,25 +1,32 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getLocalFiles } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { MavenDatasource } from '../../datasource/maven';
-import gradleVersioning from '../../versioning/gradle';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { parseCatalog } from './extract/catalog';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getLocalFiles } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import gradleVersioning from '../../versioning/gradle/index.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+} from '../types.ts';
+import {
+  parseCatalog,
+  unifyCatalogSharedVariableNames,
+} from './extract/catalog.ts';
 import {
   isGcvPropsFile,
   parseGcv,
   usesGcv,
-} from './extract/consistent-versions-plugin';
-import { parseGradle, parseKotlinSource, parseProps } from './parser';
-import { REGISTRY_URLS } from './parser/common';
+} from './extract/consistent-versions-plugin.ts';
+import { REGISTRY_URLS } from './parser/common.ts';
+import { parseGradle, parseKotlinSource, parseProps } from './parser.ts';
 import type {
   ContentDescriptorSpec,
   GradleManagerData,
   PackageRegistry,
   VariableRegistry,
-} from './types';
+} from './types.ts';
 import {
   getVars,
   isGradleScriptFile,
@@ -29,7 +36,8 @@ import {
   reorderFiles,
   toAbsolutePath,
   updateVars,
-} from './utils';
+  updateVarsFromDefaultCatalog,
+} from './utils.ts';
 
 const mavenDatasource = MavenDatasource.id;
 
@@ -45,6 +53,7 @@ function updatePackageRegistries(
         item.registryType === url.registryType &&
         item.content === url.content,
     );
+    // v8 ignore else -- needs a registry that is already known
     if (!registryAlreadyKnown) {
       packageRegistries.push(url);
     }
@@ -52,7 +61,7 @@ function updatePackageRegistries(
 }
 
 export function matchesContentDescriptor(
-  dep: PackageDependency<GradleManagerData>,
+  dep: PackageDependency,
   contentDescriptors?: ContentDescriptorSpec[],
 ): boolean {
   const [groupId, artifactId] = (dep.packageName ?? dep.depName!).split(':');
@@ -111,7 +120,8 @@ export function matchesContentDescriptor(
       if (isMatch) {
         matchesInclude = true;
       }
-    } else if (mode === 'exclude') {
+    } else {
+      // the only other mode is `exclude`
       hasExcludes = true;
       if (isMatch) {
         matchesExclude = true;
@@ -122,10 +132,12 @@ export function matchesContentDescriptor(
   if (hasIncludes && hasExcludes) {
     // if both includes and excludes exist, dep must match include and not match exclude
     return matchesInclude && !matchesExclude;
-  } else if (hasIncludes) {
+  }
+  if (hasIncludes) {
     // if only includes exist, dep must match at least one include
     return matchesInclude;
-  } else if (hasExcludes) {
+  }
+  if (hasExcludes) {
     // if only excludes exist, dep must not match any exclude
     return !matchesExclude;
   }
@@ -164,7 +176,7 @@ async function parsePackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
   extractedDeps: PackageDependency<GradleManagerData>[],
-  packageFilesByName: Record<string, PackageFile>,
+  packageFilesByName: Record<string, PackageFile<GradleManagerData>>,
   packageRegistries: PackageRegistry[],
 ): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
@@ -187,7 +199,13 @@ async function parsePackageFiles(
         updateVars(varRegistry, packageFileDir, vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const deps = parseCatalog(packageFile, content);
+        const { vars, deps } = parseCatalog(packageFile, content);
+        updateVarsFromDefaultCatalog(
+          varRegistry,
+          packageFileDir,
+          packageFile,
+          vars,
+        );
         extractedDeps.push(...deps);
       } else if (
         isGcvPropsFile(packageFile) &&
@@ -230,7 +248,7 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
-  const packageFilesByName: Record<string, PackageFile> = {};
+  const packageFilesByName: Record<string, PackageFile<GradleManagerData>> = {};
   const packageRegistries: PackageRegistry[] = [];
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
@@ -250,13 +268,15 @@ export async function extractAllPackageFiles(
     return null;
   }
 
+  unifyCatalogSharedVariableNames(extractedDeps);
+
   for (const dep of extractedDeps) {
     dep.fileReplacePosition = dep?.managerData?.fileReplacePosition; // #8224
 
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      let pkgFile: PackageFile = packageFilesByName[key];
+      let pkgFile: PackageFile<GradleManagerData> = packageFilesByName[key];
       // istanbul ignore if: won't happen if "apply from" processes only initially known files
       if (!pkgFile) {
         pkgFile = {
@@ -268,6 +288,7 @@ export async function extractAllPackageFiles(
 
       dep.datasource ??= mavenDatasource;
 
+      // v8 ignore else -- every dep here defaults to the maven datasource above
       if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 

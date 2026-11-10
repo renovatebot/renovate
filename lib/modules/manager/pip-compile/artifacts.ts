@@ -1,55 +1,55 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import { exec } from '../../../util/exec/index.ts';
 import {
   deleteLocalFile,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common.ts';
 import type {
   PackageFileContent,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../types';
+} from '../types.ts';
 import {
   extractHeaderCommand,
   extractPythonVersion,
   getExecOptions,
   getRegistryCredVarsFromPackageFiles,
   matchManager,
-} from './common';
-import type { PipCompileArgs } from './types';
-import { inferCommandExecDir } from './utils';
+} from './common.ts';
+import type { PipCompileArgs } from './types.ts';
+import { inferCommandExecDir } from './utils.ts';
 
 function haveCredentialsInPipEnvironmentVariables(): boolean {
   const env = getEnv();
   if (env.PIP_INDEX_URL) {
-    try {
-      const indexUrl = new URL(env.PIP_INDEX_URL);
-      if (!!indexUrl.username || !!indexUrl.password) {
-        return true;
-      }
-    } catch {
+    const indexUrl = parseUrl(env.PIP_INDEX_URL);
+    if (!indexUrl) {
       // Assume that an invalid URL contains credentials, just in case
+      return true;
+    }
+    if (!!indexUrl.username || !!indexUrl.password) {
       return true;
     }
   }
 
-  try {
-    if (env.PIP_EXTRA_INDEX_URL) {
-      return env.PIP_EXTRA_INDEX_URL.split(' ')
-        .map((urlString) => new URL(urlString))
-        .some((url) => !!url.username || !!url.password);
-    }
-  } catch {
-    // Assume that an invalid URL contains credentials, just in case
-    return true;
+  if (env.PIP_EXTRA_INDEX_URL) {
+    return env.PIP_EXTRA_INDEX_URL.split(' ').some((urlString) => {
+      const url = parseUrl(urlString);
+      if (!url) {
+        // Assume that an invalid URL contains credentials, just in case
+        return true;
+      }
+      return !!url.username || !!url.password;
+    });
   }
 
   return false;
@@ -79,7 +79,7 @@ export function constructPipCompileCmd(
   }
   for (const dep of upgradePackages) {
     compileArgs.argv.push(
-      `--upgrade-package=${quote(dep.depName + '==' + dep.newVersion)}`,
+      `--upgrade-package=${quote(`${dep.depName}==${dep.newVersion}`)}`,
     );
   }
   return compileArgs.argv.map(quote).join(' ');
@@ -133,22 +133,25 @@ export async function updateArtifacts({
           const content = await readLocalFile(path, 'utf8');
           if (content) {
             const packageFile = extractRequirementsFileFlags(content);
-            if (packageFile) {
-              packageFiles.push(packageFile);
-            }
+            packageFiles.push(packageFile);
           }
         }
       }
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
+      const registryCredVars =
+        await getRegistryCredVarsFromPackageFiles(packageFiles);
       const execOptions = await getExecOptions(
         config,
         compileArgs.commandType,
         cwd,
-        getRegistryCredVarsFromPackageFiles(packageFiles),
+        registryCredVars,
         pythonVersion,
       );
-      logger.trace({ cwd, cmd }, 'pip-compile command');
-      logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
+      // only the variable names: the values are registry credentials
+      logger.trace(
+        { cwd, cmd, registryCredVars: Object.keys(registryCredVars) },
+        'pip-compile command',
+      );
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
       if (status?.modified.includes(outputFileName)) {
@@ -168,7 +171,7 @@ export async function updateArtifacts({
       logger.debug({ err }, 'pip-compile: Failed to run command');
       result.push({
         artifactError: {
-          lockFile: outputFileName,
+          fileName: outputFileName,
           stderr: err.message,
         },
       });

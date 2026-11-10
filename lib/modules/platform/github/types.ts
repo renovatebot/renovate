@@ -1,10 +1,19 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import type { Pr, PrBodyStruct } from '../types';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import type { Pr, PrBodyStruct } from '../types.ts';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
 export type CombinedBranchState = 'failure' | 'pending' | 'success';
 export type BranchState = 'failure' | 'pending' | 'success' | 'error';
+
+type VulnerabilityKey = string;
+type VulnerabilityRangeKey = string;
+type VulnerabilityPatch = string;
+export type AggregatedVulnerabilities = Record<
+  VulnerabilityKey,
+  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
+>;
 
 export interface GhBranchStatus {
   context: string;
@@ -24,6 +33,7 @@ export interface Comment {
 export interface GhRestRepo {
   full_name: string;
   default_branch: string;
+  ssh_url: string | null;
   owner: {
     login: string;
   };
@@ -74,17 +84,35 @@ export interface UserDetails {
   username: string;
   name: string;
   id: number;
+  email: EmailAddress | null;
 }
 
+interface GithubHostBase {
+  apiUrl: URL;
+}
+
+export interface GithubComHost extends GithubHostBase {
+  type: 'github';
+}
+
+export interface GithubEnterpriseCloudHost extends GithubHostBase {
+  type: 'ghec';
+}
+
+export interface GithubEnterpriseServerHost extends GithubHostBase {
+  type: 'ghes';
+  version: string | null;
+}
+
+export type GithubHost =
+  GithubComHost | GithubEnterpriseCloudHost | GithubEnterpriseServerHost;
+
 export interface PlatformConfig {
-  hostType: string;
-  endpoint: string;
-  isGhe?: boolean;
-  gheVersion?: string | null;
+  host: GithubHost;
   isGHApp?: boolean;
   existingRepos?: string[];
   userDetails?: UserDetails;
-  userEmail?: string | null;
+  userEmail?: EmailAddress | null;
 }
 
 export interface LocalRepoConfig {
@@ -108,12 +136,12 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueueEnabled: Record<string, boolean>;
 }
-
-export type BranchProtection = any;
 
 export interface GhRepo {
   id: string;
+  sshUrl: string | null;
   isFork: boolean;
   parent?: {
     nameWithOwner: string;
@@ -123,6 +151,7 @@ export interface GhRepo {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueue?: { id: string } | null;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;
@@ -138,6 +167,12 @@ export interface GhRepo {
 export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
     pullRequest: { number: number };
+  };
+}
+
+export interface GhEnqueuePullRequestResponse {
+  enqueuePullRequest: {
+    mergeQueueEntry: { id: string; position: number } | null;
   };
 }
 

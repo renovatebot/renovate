@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/pub/extract', () => {
   describe('extractPackageFile', () => {
@@ -27,6 +27,9 @@ describe('modules/manager/pub/extract', () => {
             datasource: 'dart-version',
           },
         ],
+        extractedConstraints: {
+          dart: '^3.0.0',
+        },
       });
     });
 
@@ -34,6 +37,7 @@ describe('modules/manager/pub/extract', () => {
       const dependenciesDepType = 'dependencies';
       const devDependenciesDepType = 'dev_dependencies';
       const dartDatasource = 'dart';
+      const gitRefDatasource = 'git-refs';
       const skipReason = undefined;
       const content = codeBlock`
         environment:
@@ -55,6 +59,20 @@ describe('modules/manager/pub/extract', () => {
           qux: false
           path_dep:
             path: path1
+          git_package:
+            git:
+              url: https://github.com/some-url/some-package
+          git_package_ref:
+            git:
+              url: https://github.com/some-url/some-package-ref
+              ref: v1.0.0
+          git_package_version:
+            git:
+              url: https://github.com/some-url/some-package-version
+            version: ^1.1.0
+          git_package_version_git_url:
+            git: https://github.com/some-url/some-package-version-url
+            version: ^1.1.0
         dev_dependencies:
           test: ^0.1.0
           build:
@@ -65,7 +83,17 @@ describe('modules/manager/pub/extract', () => {
             path: path2
       `;
       const actual = extractPackageFile(content, packageFile);
+      expect(actual).toMatchObject({
+        extractedConstraints: {
+          dart: '^3.0.0',
+          flutter: '2.0.0',
+        },
+      });
       expect(actual).toEqual({
+        extractedConstraints: {
+          dart: '^3.0.0',
+          flutter: '2.0.0',
+        },
         deps: [
           {
             currentValue: '1.0.0',
@@ -102,6 +130,38 @@ describe('modules/manager/pub/extract', () => {
             depType: dependenciesDepType,
             datasource: dartDatasource,
             skipReason: 'path-dependency',
+          },
+          {
+            currentValue: '',
+            depName: 'git_package',
+            packageName: 'https://github.com/some-url/some-package',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason: 'unspecified-version',
+          },
+          {
+            currentValue: 'v1.0.0',
+            depName: 'git_package_ref',
+            packageName: 'https://github.com/some-url/some-package-ref',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason,
+          },
+          {
+            currentValue: '^1.1.0',
+            depName: 'git_package_version',
+            packageName: 'https://github.com/some-url/some-package-version',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason,
+          },
+          {
+            currentValue: '^1.1.0',
+            depName: 'git_package_version_git_url',
+            packageName: 'https://github.com/some-url/some-package-version-url',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason,
           },
           {
             currentValue: '^0.1.0',

@@ -1,8 +1,8 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { DartVersionDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { DartVersionDatasource } from './index.ts';
 
 const baseUrl = 'https://storage.googleapis.com';
 const urlPath =
@@ -25,12 +25,12 @@ describe('modules/datasource/dart-version/index', () => {
 
     it('returns null for error', async () => {
       httpMock.scope(baseUrl).get(urlPath).replyWithError('error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -42,12 +42,12 @@ describe('modules/datasource/dart-version/index', () => {
           )
           .reply(200, { prefixes: [] });
       }
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

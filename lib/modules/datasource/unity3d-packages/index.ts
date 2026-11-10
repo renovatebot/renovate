@@ -1,18 +1,19 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { asTimestamp } from '../../../util/timestamp';
-import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { UnityPackageReleasesJSON } from './schema';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { UnityPackageReleasesJSON } from './schema.ts';
 
 export class Unity3dPackagesDatasource extends Datasource {
   static readonly id = 'unity3d-packages';
 
   static readonly defaultRegistryUrl = 'https://packages.unity.com';
 
-  override readonly defaultRegistryUrls = [
-    Unity3dPackagesDatasource.defaultRegistryUrl,
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [Unity3dPackagesDatasource.defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = Unity3dPackagesVersioning.id;
 
@@ -20,12 +21,7 @@ export class Unity3dPackagesDatasource extends Datasource {
     super(Unity3dPackagesDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${Unity3dPackagesDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -62,5 +58,16 @@ export class Unity3dPackagesDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${Unity3dPackagesDatasource.id}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

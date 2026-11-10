@@ -1,6 +1,9 @@
-import { logger } from '../logger';
-import * as memCache from './cache/memory';
-import { parseUrl } from './url';
+import { logger } from '../logger/index.ts';
+import { coerceArray } from './array.ts';
+import * as memCache from './cache/memory/index.ts';
+import type { GitOperationType } from './git/types.ts';
+import { coerceObject } from './object.ts';
+import { parseUrl } from './url.ts';
 
 type LookupStatsData = Record<string, number[]>;
 
@@ -16,7 +19,10 @@ export function makeTimingReport(data: number[]): TimingStatsReport {
   const count = data.length;
   const totalMs = data.reduce((a, c) => a + c, 0);
   const avgMs = count ? Math.round(totalMs / count) : 0;
-  const maxMs = Math.max(0, ...data);
+  let maxMs = 0;
+  for (const duration of data) {
+    maxMs = Math.max(maxMs, duration);
+  }
   const sorted = data.sort((a, b) => a - b);
   const medianMs = count ? sorted[Math.floor(count / 2)] : 0;
   return { count, avgMs, medianMs, maxMs, totalMs };
@@ -24,7 +30,7 @@ export function makeTimingReport(data: number[]): TimingStatsReport {
 
 export class LookupStats {
   static write(datasource: string, duration: number): void {
-    const data = memCache.get<LookupStatsData>('lookup-stats') ?? {};
+    const data = coerceObject(memCache.get<LookupStatsData>('lookup-stats'));
     data[datasource] ??= [];
     data[datasource].push(duration);
     memCache.set('lookup-stats', data);
@@ -43,7 +49,7 @@ export class LookupStats {
 
   static getReport(): Record<string, TimingStatsReport> {
     const report: Record<string, TimingStatsReport> = {};
-    const data = memCache.get<LookupStatsData>('lookup-stats') ?? {};
+    const data = coerceObject(memCache.get<LookupStatsData>('lookup-stats'));
     for (const [datasource, durations] of Object.entries(data)) {
       report[datasource] = makeTimingReport(durations);
     }
@@ -56,11 +62,177 @@ export class LookupStats {
   }
 }
 
+interface GetReleasesDataPoint {
+  datasource: string;
+  registryUrl: string;
+  packageName: string;
+  duration: number;
+}
+
+interface getReleaseStatsInternalPackages<T> {
+  stats: T;
+  packages: Record<string, T>;
+}
+
+/**
+ * Internal structure that represents the hierarchical structure of the data. We use this
+ * to handle the duration datapoints, and then convert to the final report structure.
+ */
+interface getReleaseStatsInternal<T, P = T> {
+  // Overall stats
+  stats: T;
+  datasources: Record<
+    string,
+    {
+      // Datasource stats.
+      stats: T;
+      registryUrls: Record<
+        string,
+        [P] extends [never]
+          ? Omit<getReleaseStatsInternalPackages<T>, 'packages'>
+          : getReleaseStatsInternalPackages<T>
+      >;
+    }
+  >;
+}
+
+export type GetReleaseStatsReport = getReleaseStatsInternal<TimingStatsReport>;
+
+// Short report does not include package stats.
+export type GetReleaseStatsReportShort = getReleaseStatsInternal<
+  TimingStatsReport,
+  never
+>;
+
+export class GetDatasourceReleasesStats {
+  static write(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+    duration: number,
+  ): void {
+    const data = coerceArray(
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats'),
+    );
+    data.push({ datasource, registryUrl, packageName, duration });
+    memCache.set('get-releases-stats', data);
+  }
+
+  static async wrap<T>(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+    callback: () => Promise<T>,
+  ): Promise<T> {
+    const start = Date.now();
+    const result = await callback();
+    const duration = Date.now() - start;
+    this.write(datasource, registryUrl, packageName, duration);
+    return result;
+  }
+
+  static getReport(): GetReleaseStatsReport {
+    const data = coerceArray(
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats'),
+    );
+
+    // Process all datapoints into a hierarchical structure of datasource, registry url, and package name.
+    const durationData: getReleaseStatsInternal<number[]> = {
+      stats: [],
+      datasources: {},
+    };
+    for (const { datasource, registryUrl, packageName, duration } of data) {
+      durationData.stats.push(duration);
+
+      durationData.datasources[datasource] ??= { stats: [], registryUrls: {} };
+      durationData.datasources[datasource].stats.push(duration);
+
+      durationData.datasources[datasource].registryUrls[registryUrl] ??= {
+        stats: [],
+        packages: {},
+      };
+      durationData.datasources[datasource].registryUrls[registryUrl].stats.push(
+        duration,
+      );
+
+      durationData.datasources[datasource].registryUrls[registryUrl].packages[
+        packageName
+      ] ??= [];
+      durationData.datasources[datasource].registryUrls[registryUrl].packages[
+        packageName
+      ].push(duration);
+    }
+
+    const report: GetReleaseStatsReport = {
+      stats: makeTimingReport(durationData.stats),
+      datasources: {},
+    };
+
+    for (const [datasource, datasourceData] of Object.entries(
+      durationData.datasources,
+    )) {
+      report.datasources[datasource] = {
+        stats: makeTimingReport(datasourceData.stats),
+        registryUrls: {},
+      };
+
+      for (const [registryUrl, registryUrlData] of Object.entries(
+        datasourceData.registryUrls,
+      )) {
+        report.datasources[datasource].registryUrls[registryUrl] = {
+          stats: makeTimingReport(registryUrlData.stats),
+          packages: {},
+        };
+
+        for (const [packageName, packageNameData] of Object.entries(
+          registryUrlData.packages,
+        )) {
+          report.datasources[datasource].registryUrls[registryUrl].packages[
+            packageName
+          ] = makeTimingReport(packageNameData);
+        }
+      }
+    }
+
+    return report;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+
+    const shortReport: GetReleaseStatsReportShort = {
+      stats: report.stats,
+      datasources: {},
+    };
+
+    for (const [datasource, datasourceData] of Object.entries(
+      report.datasources,
+    )) {
+      shortReport.datasources[datasource] = {
+        stats: datasourceData.stats,
+        registryUrls: {},
+      };
+      for (const [registryUrl, registryUrlData] of Object.entries(
+        datasourceData.registryUrls,
+      )) {
+        shortReport.datasources[datasource].registryUrls[registryUrl] = {
+          stats: registryUrlData.stats,
+        };
+      }
+    }
+
+    logger.trace(report, 'getReleases statistics with packages');
+    logger.debug(shortReport, 'getReleases statistics summary');
+  }
+}
+
 type PackageCacheData = number[];
 
 export class PackageCacheStats {
   static writeSet(duration: number): void {
-    const data = memCache.get<PackageCacheData>('package-cache-sets') ?? [];
+    const data = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-sets'),
+    );
     data.push(duration);
     memCache.set('package-cache-sets', data);
   }
@@ -74,7 +246,9 @@ export class PackageCacheStats {
   }
 
   static writeGet(duration: number): void {
-    const data = memCache.get<PackageCacheData>('package-cache-gets') ?? [];
+    const data = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-gets'),
+    );
     data.push(duration);
     memCache.set('package-cache-gets', data);
   }
@@ -88,12 +262,14 @@ export class PackageCacheStats {
   }
 
   static getReport(): { get: TimingStatsReport; set: TimingStatsReport } {
-    const packageCacheGets =
-      memCache.get<PackageCacheData>('package-cache-gets') ?? [];
+    const packageCacheGets = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-gets'),
+    );
     const get = makeTimingReport(packageCacheGets);
 
-    const packageCacheSets =
-      memCache.get<PackageCacheData>('package-cache-sets') ?? [];
+    const packageCacheSets = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-sets'),
+    );
     const set = makeTimingReport(packageCacheSets);
 
     return { get, set };
@@ -112,35 +288,37 @@ interface DatasourceCacheDataPoint {
   action: 'hit' | 'miss' | 'set' | 'skip';
 }
 
-/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
-export interface DatasourceCacheReport {
-  long: {
-    [datasource in string]: {
-      [registryUrl in string]: {
-        [packageName in string]: {
-          read?: 'hit' | 'miss';
-          write?: 'set' | 'skip';
-        };
-      };
-    };
-  };
-  short: {
-    [datasource in string]: {
-      [registryUrl in string]: {
-        hit: number;
-        miss: number;
-        set: number;
-        skip: number;
-      };
-    };
-  };
+interface DatasourceCacheLongEntry {
+  read?: 'hit' | 'miss';
+  write?: 'set' | 'skip';
 }
-/* eslint-enable @typescript-eslint/consistent-indexed-object-style */
+
+interface DatasourceCacheShortEntry {
+  hit: number;
+  miss: number;
+  set: number;
+  skip: number;
+}
+
+type DatasourceCacheLong = Record<
+  string,
+  Record<string, Record<string, DatasourceCacheLongEntry>>
+>;
+
+type DatasourceCacheShort = Record<
+  string,
+  Record<string, DatasourceCacheShortEntry>
+>;
+
+export interface DatasourceCacheReport {
+  long: DatasourceCacheLong;
+  short: DatasourceCacheShort;
+}
 
 export class DatasourceCacheStats {
   private static getData(): DatasourceCacheDataPoint[] {
-    return (
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? []
+    return coerceArray(
+      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats'),
     );
   }
 
@@ -223,6 +401,7 @@ export class DatasourceCacheStats {
         continue;
       }
 
+      /* v8 ignore else -- TODO: add tests #40625 */
       if (action === 'skip') {
         result.long[datasource][registryUrl][packageName].write = 'skip';
         result.short[datasource][registryUrl].skip += 1;
@@ -280,15 +459,17 @@ interface HttpStatsCollection {
 
 export class HttpStats {
   static write(data: HttpRequestStatsDataPoint): void {
-    const httpRequests =
-      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+    const httpRequests = coerceArray(
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests'),
+    );
     httpRequests.push(data);
     memCache.set('http-requests', httpRequests);
   }
 
   static getDataPoints(): HttpRequestStatsDataPoint[] {
-    const httpRequests =
-      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+    const httpRequests = coerceArray(
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests'),
+    );
 
     // istanbul ignore next: sorting is hard and not worth testing
     httpRequests.sort((a, b) => {
@@ -397,7 +578,7 @@ function sortObject<T>(obj: Record<string, T>): Record<string, T> {
 
 export class HttpCacheStats {
   static getData(): HttpCacheStatsData {
-    return memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+    return coerceObject(memCache.get<HttpCacheStatsData>('http-cache-stats'));
   }
 
   static read(key: string): HttpCacheHostStatsData {
@@ -410,7 +591,9 @@ export class HttpCacheStats {
   }
 
   static write(key: string, data: HttpCacheHostStatsData): void {
-    const stats = memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+    const stats = coerceObject(
+      memCache.get<HttpCacheStatsData>('http-cache-stats'),
+    );
     stats[key] = data;
     memCache.set('http-cache-stats', stats);
   }
@@ -428,6 +611,7 @@ export class HttpCacheStats {
 
   static incLocalHits(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -439,6 +623,7 @@ export class HttpCacheStats {
 
   static incLocalMisses(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -450,6 +635,7 @@ export class HttpCacheStats {
 
   static incRemoteHits(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -460,6 +646,7 @@ export class HttpCacheStats {
 
   static incRemoteMisses(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -473,6 +660,7 @@ export class HttpCacheStats {
     let report: Record<string, Record<string, HttpCacheHostStatsData>> = {};
     for (const [url, stats] of Object.entries(data)) {
       const parsedUrl = parseUrl(url);
+      /* v8 ignore else -- TODO: add tests #40625 */
       if (parsedUrl) {
         const { origin, pathname } = parsedUrl;
         report[origin] ??= {};
@@ -496,10 +684,12 @@ type ObsoleteCacheStats = Record<
   }
 >;
 
-/* v8 ignore start: temporary code */
+/* v8 ignore next: temporary code */
 export class ObsoleteCacheHitLogger {
   static getData(): ObsoleteCacheStats {
-    return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
+    return coerceObject(
+      memCache.get<ObsoleteCacheStats>('obsolete-cache-stats'),
+    );
   }
 
   static write(url: string): void {
@@ -531,7 +721,7 @@ type AbandonedPackageReport = Record<string, Record<string, string>>;
 
 export class AbandonedPackageStats {
   static getData(): AbandonedPackage[] {
-    return memCache.get<AbandonedPackage[]>('abandonment-stats') ?? [];
+    return coerceArray(memCache.get<AbandonedPackage[]>('abandonment-stats'));
   }
 
   private static setData(data: AbandonedPackage[]): void {
@@ -573,5 +763,36 @@ export class AbandonedPackageStats {
     if (Object.keys(report).length > 0) {
       logger.debug(report, 'Abandoned package statistics');
     }
+  }
+}
+
+type GitOperationStatsData = Record<GitOperationType, number[]>;
+
+export class GitOperationStats {
+  static write(operationType: GitOperationType, duration: number): void {
+    const data = coerceObject(
+      memCache.get<GitOperationStatsData>('git-operations-stats'),
+    );
+    data[operationType] ??= [];
+    data[operationType].push(duration);
+    memCache.set('git-operations-stats', data);
+  }
+
+  static getReport(): Record<string, TimingStatsReport> {
+    const report: Record<string, TimingStatsReport> = {};
+    const data = coerceObject(
+      memCache.get<LookupStatsData>('git-operations-stats'),
+    );
+    for (const [operationType, durations] of Object.entries(data)) {
+      report[operationType] = makeTimingReport(durations);
+      report[operationType].totalMs = Math.ceil(report[operationType].totalMs);
+    }
+
+    return report;
+  }
+
+  static report(): void {
+    const report = GitOperationStats.getReport();
+    logger.debug(report, 'Git operations statistics');
   }
 }

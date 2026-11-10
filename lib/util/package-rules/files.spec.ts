@@ -1,4 +1,4 @@
-import { FileNamesMatcher } from './files';
+import { FileNamesMatcher } from './files.ts';
 
 describe('util/package-rules/files', () => {
   const fileMatcher = new FileNamesMatcher();

@@ -1,7 +1,9 @@
-import is from '@sindresorhus/is';
-import { clone } from '../util/clone';
-import { getOptions } from './options';
-import type { PackageRule, RenovateConfig, UpdateType } from './types';
+import { isArray, isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
+import { coerceArray } from '../util/array.ts';
+import { clone } from '../util/clone.ts';
+import { toMs } from '../util/pretty-time.ts';
+import { getOptions } from './options/index.ts';
+import type { PackageRule, RenovateConfig, UpdateType } from './types.ts';
 
 const options = getOptions();
 
@@ -19,24 +21,29 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   }
   const massagedConfig = clone(config);
   for (const [key, val] of Object.entries(config)) {
-    if (allowedStrings.includes(key) && is.string(val)) {
+    if (key === 'minimumReleaseAge' && isString(val) && toMs(val) === 0) {
+      massagedConfig.minimumReleaseAge = null;
+    } else if (allowedStrings.includes(key) && isString(val)) {
+      // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = [val];
-    } else if (is.array(val)) {
+    } else if (isArray(val)) {
+      // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = [];
       val.forEach((item) => {
-        if (is.object(item)) {
-          (massagedConfig[key] as RenovateConfig[]).push(
-            massageConfig(item as RenovateConfig),
-          );
+        if (isObject(item)) {
+          // @ts-expect-error -- TODO: fix me
+          (massagedConfig[key] as RenovateConfig[]).push(massageConfig(item));
         } else {
+          // @ts-expect-error -- TODO: fix me
           (massagedConfig[key] as unknown[]).push(item);
         }
       });
-    } else if (is.object(val) && key !== 'encrypted') {
-      massagedConfig[key] = massageConfig(val as RenovateConfig);
+    } else if (isObject(val) && key !== 'encrypted') {
+      // @ts-expect-error -- TODO: fix me
+      massagedConfig[key] = massageConfig(val);
     }
   }
-  if (is.nonEmptyArray(massagedConfig.packageRules)) {
+  if (isNonEmptyArray(massagedConfig.packageRules)) {
     let newRules: PackageRule[] = [];
     const updateTypes: UpdateType[] = [
       'major',
@@ -56,10 +63,11 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
           let newRule = clone(rule);
           Object.keys(newRule).forEach((newKey) => {
             if (!(newKey.startsWith(`match`) || newKey.startsWith('exclude'))) {
+              // @ts-expect-error -- TODO: fix me
               delete newRule[newKey];
             }
           });
-          newRule.matchUpdateTypes = rule.matchUpdateTypes ?? [];
+          newRule.matchUpdateTypes = coerceArray(rule.matchUpdateTypes);
           newRule.matchUpdateTypes.push(key);
           newRule = { ...newRule, ...val };
           newRules.push(newRule);

@@ -1,17 +1,17 @@
-import type { PlatformId } from '../../constants';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { loadModules } from '../../util/modules';
-import api from './api';
-import type { Platform } from './types';
-import * as platform from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import { PLATFORM_HOST_TYPES, type PlatformId } from '../../constants/index.ts';
+import { loadModules } from '../../util/modules.ts';
+import api from './api.ts';
+import * as platform from './index.ts';
+import type { Platform } from './types.ts';
 
-vi.unmock('.');
-vi.unmock('./scm');
+vi.unmock('./index.ts');
+vi.unmock('./scm.ts');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
-    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
+    vi.stubEnv('RENOVATE_X_GITHUB_HOST_RULES', 'true');
   });
 
   it('validates', async () => {
@@ -25,7 +25,7 @@ describe('modules/platform/index', () => {
     const platforms = api;
 
     const loadedMgr = await loadModules(
-      __dirname,
+      import.meta.dirname,
       undefined,
       (m) => !['utils', 'git'].includes(m),
     );
@@ -49,7 +49,9 @@ describe('modules/platform/index', () => {
       username: 'abc',
       password: '123',
     };
-    await expect(platform.initPlatform(config)).rejects.toThrow();
+    await expect(platform.initPlatform(config)).rejects.toThrow(
+      'Init: Platform "wrong" not found. Must be one of: azure, bitbucket,',
+    );
   });
 
   it('initializes', async () => {
@@ -64,7 +66,7 @@ describe('modules/platform/index', () => {
       username: 'abc',
       password: '123',
     };
-    expect(await platform.initPlatform(config)).toEqual({
+    await expect(platform.initPlatform(config)).resolves.toEqual({
       endpoint: 'https://api.bitbucket.org/',
       gitAuthor: 'user@domain.com',
       hostRules: [
@@ -80,13 +82,18 @@ describe('modules/platform/index', () => {
   });
 
   it('merges config hostRules with platform hostRules', async () => {
-    httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
+    httpMock
+      .scope('https://ghe.renovatebot.com')
+      .head('/')
+      .reply(200)
+      .get('/user')
+      .reply(200, { login: 'abc', name: 'some', id: 123 })
+      .get('/user/emails')
+      .reply(200, [{ email: 'user@domain.com' }]);
 
     const config = {
       platform: 'github' as PlatformId,
       endpoint: 'https://ghe.renovatebot.com',
-      gitAuthor: 'user@domain.com',
-      username: 'abc',
       token: '123',
       hostRules: [
         {
@@ -98,9 +105,9 @@ describe('modules/platform/index', () => {
       ],
     };
 
-    expect(await platform.initPlatform(config)).toEqual({
+    await expect(platform.initPlatform(config)).resolves.toEqual({
       endpoint: 'https://ghe.renovatebot.com/',
-      gitAuthor: 'user@domain.com',
+      gitAuthor: 'some <user@domain.com>',
       hostRules: [
         {
           hostType: 'github',
@@ -112,7 +119,6 @@ describe('modules/platform/index', () => {
           hostType: 'github',
           matchHost: 'ghe.renovatebot.com',
           token: '123',
-          username: 'abc',
         },
       ],
       platform: 'github',
@@ -138,7 +144,7 @@ describe('modules/platform/index', () => {
         ],
       };
 
-      expect(await platform.initPlatform(config)).toEqual({
+      await expect(platform.initPlatform(config)).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
         hostRules: [
@@ -198,7 +204,7 @@ describe('modules/platform/index', () => {
         token: '123',
       };
 
-      expect(await platform.initPlatform(config)).toEqual({
+      await expect(platform.initPlatform(config)).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
         hostRules: [
@@ -241,6 +247,14 @@ describe('modules/platform/index', () => {
         platform: 'github',
         renovateUsername: 'abc',
       });
+    });
+  });
+
+  describe('getPlatformList', () => {
+    it('has the same values as PLATFORM_HOST_TYPES', () => {
+      expect(new Set(platform.getPlatformList())).toEqual(
+        new Set(PLATFORM_HOST_TYPES),
+      );
     });
   });
 });

@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 
 export function extractPackageFile(
   content: string,
@@ -33,25 +33,26 @@ export function extractPackageFile(
           ).exec(internalLine);
           if (middleLineMatch?.groups) {
             currentFrom += middleLineMatch.groups.currentFrom;
-            replaceString += '\n' + middleLineMatch.groups.replaceString;
+            replaceString += `\n${middleLineMatch.groups.replaceString}`;
           } else {
             const finalLineMatch = regEx(
               /^(?<replaceString>\s*(?<currentFrom>[^\s'"]+)['"])$/,
             ).exec(internalLine);
             if (finalLineMatch?.groups) {
               currentFrom += finalLineMatch.groups.currentFrom;
-              replaceString += '\n' + finalLineMatch.groups.replaceString;
+              replaceString += `\n${finalLineMatch.groups.replaceString}`;
 
-              const dep = getDep(currentFrom, true, config.registryAliases);
-              dep.depType = 'docker';
+              const dep = getDep(currentFrom, {
+                registryAliases: config.registryAliases,
+                depType: 'docker',
+              });
               dep.replaceString = replaceString;
-              if (dep.autoReplaceStringTemplate) {
-                const d = '@{{newDigest}}';
-                const c = firstLineMatch.groups.leading.length + 1;
-                const nd = `\\\n${' '.repeat(c)}${d}`;
-                const replaced = dep.autoReplaceStringTemplate.replace(d, nd);
-                dep.autoReplaceStringTemplate = `"${replaced}"`;
-              }
+              const d = '@{{newDigest}}';
+              const c = firstLineMatch.groups.leading.length + 1;
+              const nd = `\\\n${' '.repeat(c)}${d}`;
+              // getDep always set it, see second parameter
+              const replaced = dep.autoReplaceStringTemplate!.replace(d, nd);
+              dep.autoReplaceStringTemplate = `"${replaced}"`;
               deps.push(dep);
             }
             break;
@@ -62,12 +63,10 @@ export function extractPackageFile(
           /^\s* image:\s*'?"?(?<currentFrom>[^\s'"]+)'?"?\s*$/,
         ).exec(line);
         if (match?.groups) {
-          const dep = getDep(
-            match.groups.currentFrom,
-            true,
-            config.registryAliases,
-          );
-          dep.depType = 'docker';
+          const dep = getDep(match.groups.currentFrom, {
+            registryAliases: config.registryAliases,
+            depType: 'docker',
+          });
           deps.push(dep);
         }
       }

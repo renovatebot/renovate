@@ -1,30 +1,56 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { filterMap } from '../../../util/filter-map';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
+import { filterMap } from '../../../util/filter-map.ts';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../util/fs';
-import { Result } from '../../../util/result';
-import { massage as massageToml } from '../../../util/toml';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import type { PackageFileContent } from '../types';
-import { Lockfile, PoetrySchemaToml } from './schema';
+} from '../../../util/fs/index.ts';
+import { Result } from '../../../util/result.ts';
+import { massage as massageToml } from '../../../util/toml.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
+import type { PackageFileContent } from '../types.ts';
+import {
+  Lockfile,
+  PoetryPyProject,
+  getRegistryUrls,
+  withImplicitPypi,
+} from './schema.ts';
+import { getLockfilePoetryVersion } from './utils.ts';
+
+/**
+ * Before Poetry 1.8, PyPI was implicitly added as a secondary source
+ * even when a primary source was configured.
+ */
+function isLegacyPoetry(lockContents: string | undefined): boolean {
+  const version = lockContents && getLockfilePoetryVersion(lockContents);
+  if (!version) {
+    return false;
+  }
+
+  // a non-exact value is a constraint inferred from lock-version, i.e. < 1.4
+  return (
+    !poetryVersioning.api.isVersion(version) ||
+    poetryVersioning.api.isGreaterThan('1.8.0', version)
+  );
+}
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  const { val: res, err } = Result.parse(
+  const { val: parsed, err } = Result.parse(
     massageToml(content),
-    PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
+    PoetryPyProject,
   ).unwrap();
   if (err) {
     logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
     return null;
   }
+  const { packageFileContent: res, poetrySources } = parsed;
 
   const lockfileName = getSiblingFileName(packageFile, 'poetry.lock');
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
@@ -33,9 +59,14 @@ export async function extractPackageFile(
     Lockfile.transform(({ lock }) => lock),
   ).unwrapOr({});
 
+  if (poetrySources?.length && isLegacyPoetry(lockContents)) {
+    res.registryUrls = getRegistryUrls(withImplicitPypi(poetrySources, true));
+  }
+
   let pythonVersion: string | undefined;
   filterMap(res.deps, (dep) => {
     if (dep.depName === 'python') {
+      // v8 ignore else -- a python dep always carries a current value
       if (dep.currentValue) {
         pythonVersion = dep.currentValue;
       }
@@ -62,9 +93,9 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Record<string, any> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
 
-  if (is.nonEmptyString(pythonVersion)) {
+  if (isNonEmptyString(pythonVersion)) {
     extractedConstraints.python = pythonVersion;
   }
   res.extractedConstraints = extractedConstraints;

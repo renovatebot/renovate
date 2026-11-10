@@ -1,7 +1,11 @@
-import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import * as semverVersioning from '../../versioning/semver';
+import type { Category } from '../../../constants/index.ts';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
 
-export { extractPackageFile } from './extract';
+export const categories: Category[] = ['dart'];
+
+import * as semverVersioning from '../../versioning/semver/index.ts';
+
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'FVM';
 export const url = 'https://fvm.app';

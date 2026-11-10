@@ -1,25 +1,22 @@
 {
-  "$schema": "https://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "$schema": { "type": "string" },
     "all": {
       "type": "object",
       "properties": {
-        "description": { "type": "string" },
         "extends": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "ignoreDeps": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
+        "overrideDescription": { "type": "string" }
       },
-      "required": ["description", "extends"]
+      "required": ["extends", "overrideDescription"]
     }
   },
   "patternProperties": {
-    "^[a-zA-Z0-9-]+$": {
+    "^(?!all$)[a-zA-Z0-9-]+$": {
       "type": "object",
       "properties": {
         "description": { "type": "string" },

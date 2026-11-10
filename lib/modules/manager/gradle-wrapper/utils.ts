@@ -1,17 +1,17 @@
 import os from 'node:os';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   chmodLocalFile,
   localPathExists,
   readLocalFile,
   statLocalFile,
-} from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import gradleVersioning from '../../versioning/gradle';
-import { parseJavaToolchainVersion } from '../gradle/parser';
-import type { GradleVersionExtract } from './types';
+} from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import gradleVersioning from '../../versioning/gradle/index.ts';
+import { parseJavaToolchainVersion } from '../gradle/parser.ts';
+import type { GradleVersionExtract } from './types.ts';
 
 export const extraEnv = {
   GRADLE_OPTS:
@@ -44,6 +44,18 @@ export async function prepareGradleCommand(
   return null;
 }
 
+function isGradleAtLeast(
+  major: number,
+  minor: number | null,
+  wantMajor: number,
+  wantMinor: number,
+): boolean {
+  if (major !== wantMajor) {
+    return major > wantMajor;
+  }
+  return !!minor && minor >= wantMinor;
+}
+
 /**
  * Find compatible java version for gradle.
  * see https://docs.gradle.org/current/userguide/compatibility.html
@@ -60,23 +72,26 @@ export async function getJavaConstraint(
 
   if (major) {
     // https://docs.gradle.org/8.8/release-notes.html#daemon-toolchains
-    if (major > 8 || (major === 8 && minor && minor >= 8)) {
+    if (isGradleAtLeast(major, minor, 8, 8)) {
       const toolChainVersion = await getJvmConfiguration(gradlewFile);
       if (toolChainVersion) {
         return `^${toolChainVersion}.0.0`;
       }
     }
     // https://docs.gradle.org/6.7/release-notes.html#new-jvm-ecosystem-features
-    if (major > 6 || (major === 6 && minor && minor >= 7)) {
+    if (isGradleAtLeast(major, minor, 6, 7)) {
       const languageVersion = await getJavaLanguageVersion(gradlewFile);
       if (languageVersion) {
         return `^${languageVersion}.0.0`;
       }
     }
-    if (major > 8 || (major === 8 && minor && minor >= 5)) {
+    if (isGradleAtLeast(major, minor, 9, 1)) {
+      return '^25.0.0';
+    }
+    if (isGradleAtLeast(major, minor, 8, 5)) {
       return '^21.0.0';
     }
-    if (major > 7 || (major === 7 && minor && minor >= 3)) {
+    if (isGradleAtLeast(major, minor, 7, 3)) {
       return '^17.0.0';
     }
     if (major === 7) {
@@ -108,6 +123,7 @@ export async function getJvmConfiguration(
       'm',
     );
     const toolChainMatch = TOOLCHAIN_VERSION_REGEX.exec(daemonJvm);
+    // v8 ignore else -- needs a daemon-jvm file without a toolchain version
     if (toolChainMatch?.groups) {
       return toolChainMatch.groups.version;
     }

@@ -1,6 +1,6 @@
-import { getPkgReleases } from '..';
-import { BuildpacksRegistryDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { BuildpacksRegistryDatasource } from './index.ts';
 
 const baseUrl = 'https://registry.buildpacks.io/api/v1/buildpacks/';
 
@@ -42,6 +42,28 @@ describe('modules/datasource/buildpacks-registry/index', () => {
         registryUrl: 'https://registry.buildpacks.io',
         releases: [{ version: '0.17.0' }, { version: '0.17.1' }],
         sourceUrl: 'https://github.com/heroku/buildpacks-python',
+      });
+    });
+
+    it('processes data without a homepage', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/heroku/nohomepage')
+        .reply(200, {
+          latest: {
+            version: '1.1.0',
+            namespace: 'heroku',
+            name: 'nohomepage',
+          },
+          versions: [{ version: '1.0.0' }, { version: '1.1.0' }],
+        });
+      const res = await getPkgReleases({
+        datasource: BuildpacksRegistryDatasource.id,
+        packageName: 'heroku/nohomepage',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://registry.buildpacks.io',
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
       });
     });
 

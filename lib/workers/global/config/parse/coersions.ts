@@ -1,5 +1,6 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { regEx } from '../../../../util/regex.ts';
 
 export const coersions: Record<string, (arg: string) => unknown> = {
   boolean: (val: string): boolean => {
@@ -10,9 +11,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return false;
     }
     throw new Error(
-      "Invalid boolean value: expected 'true' or 'false', but got '" +
-        val +
-        "'",
+      `Invalid boolean value: expected 'true' or 'false', but got '${val}'`,
     );
   },
   array: (val: string): string[] => {
@@ -25,7 +24,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return val
         .split(',')
         .map((el) => el.trim())
-        .filter(is.nonEmptyString);
+        .filter(isNonEmptyString);
     }
   },
   object: (val: string): any => {
@@ -35,9 +34,9 @@ export const coersions: Record<string, (arg: string) => unknown> = {
     try {
       return JSON5.parse(val);
     } catch {
-      throw new Error("Invalid JSON value: '" + val + "'");
+      throw new Error(`Invalid JSON value: '${val}'`);
     }
   },
-  string: (val: string): string => val.replace(/\\n/g, '\n'),
+  string: (val: string): string => val.replace(regEx(/\\n/g), '\n'),
   integer: parseInt,
 };

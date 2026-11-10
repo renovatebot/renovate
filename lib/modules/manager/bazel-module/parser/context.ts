@@ -1,18 +1,15 @@
+import * as fragments from './fragments.ts';
 import type {
   AllFragments,
   ArrayFragment,
+  CtxCompatible,
   ExtensionTagFragment,
   PreparedExtensionTagFragment,
+  RepoRuleCallFragment,
   ResultFragment,
   RuleFragment,
-} from './fragments';
-import * as fragments from './fragments';
-
-// Represents the fields that the context must have.
-export interface CtxCompatible {
-  results: ResultFragment[];
-  stack: AllFragments[];
-}
+  UseRepoRuleFragment,
+} from './types.ts';
 
 export class CtxProcessingError extends Error {
   readonly current: AllFragments;
@@ -32,6 +29,10 @@ export class Ctx implements CtxCompatible {
   readonly source: string;
   results: ResultFragment[];
   stack: AllFragments[];
+
+  // Temporary state for use_repo_rule parsing
+  _tempVariableName?: string;
+  _tempStrings?: string[];
 
   constructor(source: string) {
     this.source = source;
@@ -65,6 +66,22 @@ export class Ctx implements CtxCompatible {
       return current;
     }
     throw new Error('Requested current extension tag, but does not exist.');
+  }
+
+  private get currentUseRepoRule(): UseRepoRuleFragment {
+    const current = this.current;
+    if (current.type === 'useRepoRule') {
+      return current;
+    }
+    throw new Error('Requested current use repo rule, but does not exist.');
+  }
+
+  private get currentRepoRuleCall(): RepoRuleCallFragment {
+    const current = this.current;
+    if (current.type === 'repoRuleCall') {
+      return current;
+    }
+    throw new Error('Requested current repo rule call, but does not exist.');
   }
 
   private get currentArray(): ArrayFragment {
@@ -109,15 +126,25 @@ export class Ctx implements CtxCompatible {
         parent.items.push(current);
         return true;
       }
+      // v8 ignore else -- TODO: add test #40625
+      const parentHasAttributes =
+        parent.type === 'rule' ||
+        parent.type === 'extensionTag' ||
+        parent.type === 'repoRuleCall';
       if (
-        (parent.type === 'rule' || parent.type === 'extensionTag') &&
+        parentHasAttributes &&
         current.type === 'attribute' &&
         current.value !== undefined
       ) {
         parent.children[current.name] = current.value;
         return true;
       }
-    } else if (current.type === 'rule' || current.type === 'extensionTag') {
+    } else if (
+      current.type === 'rule' ||
+      current.type === 'extensionTag' ||
+      current.type === 'useRepoRule' ||
+      current.type === 'repoRuleCall'
+    ) {
       this.results.push(current);
       return true;
     }
@@ -185,6 +212,35 @@ export class Ctx implements CtxCompatible {
     const tag = this.currentExtensionTag;
     tag.isComplete = true;
     tag.rawString = this.source.slice(tag.offset, offset);
+    return this.processStack();
+  }
+
+  startUseRepoRule(
+    variableName: string,
+    bzlFile: string,
+    ruleName: string,
+  ): Ctx {
+    const useRepoRule = fragments.useRepoRule(variableName, bzlFile, ruleName);
+    this.stack.push(useRepoRule);
+    return this;
+  }
+
+  endUseRepoRule(): Ctx {
+    const useRepoRule = this.currentUseRepoRule;
+    useRepoRule.isComplete = true;
+    return this.processStack();
+  }
+
+  startRepoRuleCall(functionName: string, offset: number): Ctx {
+    const repoRuleCall = fragments.repoRuleCall(functionName, offset);
+    this.stack.push(repoRuleCall);
+    return this;
+  }
+
+  endRepoRuleCall(offset: number): Ctx {
+    const repoRuleCall = this.currentRepoRuleCall;
+    repoRuleCall.isComplete = true;
+    repoRuleCall.rawString = this.source.slice(repoRuleCall.offset, offset);
     return this.processStack();
   }
 

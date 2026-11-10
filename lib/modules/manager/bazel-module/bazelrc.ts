@@ -1,8 +1,8 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
-import * as fs from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { isNotNullOrUndefined } from '../../../util/array.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
 
 const importRegex = regEx(`^(?<type>(?:try-)?import)\\s+(?<path>\\S+)$`);
 const optionRegex = regEx(
@@ -12,17 +12,23 @@ const spaceRegex = regEx(`\\s+`);
 
 export class ImportEntry {
   readonly entryType = 'import';
-  constructor(
-    readonly path: string,
-    readonly isTry: boolean,
-  ) {}
+  readonly path: string;
+  readonly isTry: boolean;
+
+  constructor(path: string, isTry: boolean) {
+    this.path = path;
+    this.isTry = isTry;
+  }
 }
 
 export class BazelOption {
-  constructor(
-    readonly name: string,
-    readonly value?: string,
-  ) {}
+  readonly name: string;
+  readonly value?: string;
+
+  constructor(name: string, value?: string) {
+    this.name = name;
+    this.value = value;
+  }
 
   static parse(input: string): BazelOption[] {
     const options: BazelOption[] = [];
@@ -58,11 +64,15 @@ export class BazelOption {
 
 export class CommandEntry {
   readonly entryType = 'command';
-  constructor(
-    readonly command: string,
-    readonly options: BazelOption[],
-    readonly config?: string,
-  ) {}
+  readonly command: string;
+  readonly options: BazelOption[];
+  readonly config?: string;
+
+  constructor(command: string, options: BazelOption[], config?: string) {
+    this.command = command;
+    this.options = options;
+    this.config = config;
+  }
 
   getOption(name: string): BazelOption | undefined {
     return this.options.find((bo) => bo.name === name);

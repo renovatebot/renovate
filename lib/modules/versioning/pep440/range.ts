@@ -1,10 +1,11 @@
 import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
 import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
 import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig } from '../types';
+import { isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig } from '../types.ts';
 
 const UserPolicyPrecisionMap = {
   Major: 0,
@@ -98,6 +99,10 @@ interface Range {
   version: string;
 }
 
+export function getPinnedValue(newVersion: string): string {
+  return `==${newVersion}`;
+}
+
 export function getNewValue({
   currentValue,
   rangeStrategy,
@@ -107,12 +112,20 @@ export function getNewValue({
 }: NewValueConfig): string | null {
   let ranges: Range[];
   let updatedRange: (string | null)[];
-  if (rangeStrategy === 'pin' && !isReplacement) {
-    return '==' + newVersion;
-  }
 
   // no symbol: accept only that specific version specified
   if (currentValue === currentVersion || isReplacement) {
+    return newVersion;
+  }
+
+  // Handle bare versions (e.g., "v0.7.15") that don't strictly equal
+  // currentVersion due to normalization, treating them as pinned while
+  // preserving the v-prefix.
+  if (parseVersion(currentValue)) {
+    const vPrefix = regEx(/^(?<prefix>[vV])/).exec(currentValue);
+    if (vPrefix) {
+      return `${vPrefix.groups!.prefix}${newVersion}`;
+    }
     return newVersion;
   }
 
@@ -181,9 +194,7 @@ export function getNewValue({
       // Valid rangeStrategy values are: bump, extend, pin, replace.
       // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
       logger.debug(
-        'Unsupported rangeStrategy: ' +
-          rangeStrategy +
-          '. Using "replace" instead.',
+        `Unsupported rangeStrategy: ${rangeStrategy}. Using "replace" instead.`,
       );
       return getNewValue({
         currentValue,
@@ -193,7 +204,7 @@ export function getNewValue({
       });
   }
 
-  let result = updatedRange.filter(Boolean).join(', ');
+  let result = updatedRange.filter(isTruthy).join(', ');
 
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
@@ -224,7 +235,7 @@ export function isLessThanRange(input: string, range: string): boolean {
       .map((x) =>
         x
           .replace(regEx(/\s*/g), '')
-          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
+          .split(regEx(/(?<op>~=|==|!=|<=|>=|<|>|===)/))
           .slice(1),
       )
       .map(([op, version]) => {
@@ -235,11 +246,9 @@ export function isLessThanRange(input: string, range: string): boolean {
         if (['~=', '==', '>=', '==='].includes(op)) {
           return lt(input, version);
         }
-        if (op === '>') {
-          return lte(input, version);
-        }
-        // istanbul ignore next
-        return false;
+        // the split regex only yields pep440 operators, and `>` is the one
+        // left unhandled above
+        return lte(input, version);
       });
 
     const result = results.every((res) => res === true);
@@ -262,19 +271,15 @@ function parseCurrentRange(currentValue: string): Range[] {
   return ranges;
 }
 
-function handleLowerBound(range: Range, newVersion: string): string | null {
+function handleLowerBound(range: Range, newVersion: string): string {
   // used to mark minimum supported version
   // lower the bound if the new version is lower than current range
-  if (['>', '>='].includes(range.operator)) {
-    if (lte(newVersion, range.version)) {
-      // this looks like a rollback
-      return '>=' + newVersion;
-    }
-    // otherwise, treat it same as exclude
-    return range.operator + range.version;
+  if (lte(newVersion, range.version)) {
+    // this looks like a rollback
+    return `>=${newVersion}`;
   }
-  // istanbul ignore next
-  return null;
+  // otherwise, treat it same as exclude
+  return `${range.operator}${range.version}`;
 }
 
 function handleUpperBound(range: Range, newVersion: string): string | null {
@@ -300,7 +305,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
 }
 
 function updateRangeValue(
-  { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
+  { currentValue, newVersion }: NewValueConfig,
   range: Range,
 ): string | null {
   // used to exclude versions,
@@ -316,7 +321,7 @@ function updateRangeValue(
       newVersion,
       range.version,
     ).join('.');
-    return range.operator + futureVersion + '.*';
+    return `${range.operator}${futureVersion}.*`;
   }
   if (range.operator === '~=') {
     const baseVersion = coerceArray(parseVersion(range.version)?.release);
@@ -345,25 +350,16 @@ function updateRangeValue(
     return range.operator + newVersion;
   }
 
-  let output = handleUpperBound(range, newVersion);
+  const output = handleUpperBound(range, newVersion);
   if (output) {
     // manged to update upperbound
     // no need to try anything else
     return output;
   }
-  output = handleLowerBound(range, newVersion);
-  if (output) {
-    return output;
-  }
 
-  // unless PEP440 changes, this won't happen
-  // istanbul ignore next
-  logger.error(
-    { newVersion, currentValue, range },
-    'pep440: failed to process range',
-  );
-  // istanbul ignore next
-  return null;
+  // `!=`, a `.*` prefix, `~=`, `==`, `<=` and `<` are all handled above, and
+  // `===` is rejected when the range is parsed, so only `>` and `>=` are left
+  return handleLowerBound(range, newVersion);
 }
 
 /**
@@ -391,10 +387,10 @@ function trimTrailingZeros(numbers: number[]): number[] {
 function divideCompatibleReleaseRange(currentRange: Range): Range[] {
   const currentVersionUpperBound = currentRange.version
     .split('.')
-    .map((num) => parseInt(num));
-  if (currentVersionUpperBound.length > 1) {
-    currentVersionUpperBound.splice(-1);
-  }
+    .map((num) => parseInt(num, 10));
+  // pep440 requires at least two release components after `~=`, so there is
+  // always one to drop here
+  currentVersionUpperBound.splice(-1);
   currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
   return [
     { operator: '>=', version: currentRange.version },
@@ -487,7 +483,7 @@ function handleReplaceStrategy(
     if (['>', '>='].includes(range.operator)) {
       if (lte(newVersion, range.version)) {
         // this looks like a rollback
-        return '>=' + newVersion;
+        return `>=${newVersion}`;
       }
       // update the lower bound to reflect the accepted new version
       const lowerBound = coerceArray(parseVersion(range.version)?.release);
@@ -499,10 +495,12 @@ function handleReplaceStrategy(
       // trim last element of the newBase when new accepted version is out of range.
       // example: let new bound be >8.2.5 & newVersion be 8.2.5
       // return value will be: >8.2
-      if (range.operator === '>') {
-        if (newVersion === newBase.join('.') && newBase.length > 1) {
-          newBase.pop();
-        }
+      if (
+        range.operator === '>' &&
+        newVersion === newBase.join('.') &&
+        newBase.length > 1
+      ) {
+        newBase.pop();
       }
       return range.operator + newBase.join('.');
     }
@@ -550,11 +548,10 @@ export function checkRangeAndRemoveUnnecessaryRangeLimit(
     if (
       newRes[0].includes('.*') &&
       newRes[0].includes('==') &&
-      newRes[1].includes('>=')
+      newRes[1].includes('>=') &&
+      satisfies(newVersion, newRes[0])
     ) {
-      if (satisfies(newVersion, newRes[0])) {
-        newRange = newRes[0];
-      }
+      newRange = newRes[0];
     }
   } else {
     return rangeInput;

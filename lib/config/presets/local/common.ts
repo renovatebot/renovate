@@ -1,9 +1,8 @@
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import type { Nullish } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { Preset } from '../types';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { Nullish } from '../../../types/index.ts';
+import type { Preset } from '../types.ts';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
 
 export async function fetchJSONFile(
   repo: string,
@@ -11,6 +10,7 @@ export async function fetchJSONFile(
   _endpoint?: string,
   tag?: string,
 ): Promise<Nullish<Preset>> {
+  const { platform } = await import('../../../modules/platform/index.ts');
   let raw: string | null;
   try {
     raw = await platform.getRawFile(fileName, repo, tag ?? undefined);

@@ -1,21 +1,36 @@
 import os from 'node:os';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { exec } from '../exec';
-import { newlineRegex, regEx } from '../regex';
-import { addSecretForSanitizing } from '../sanitize';
+import { GlobalConfig } from '../../config/global.ts';
+import { PLATFORM_GPG_FAILED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { exec } from '../exec/index.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import { addSecretForSanitizing } from '../sanitize.ts';
+import { fromBase64, toBase64 } from '../string.ts';
 
 type PrivateKeyFormat = 'gpg' | 'ssh';
 
 const sshKeyRegex = regEx(
-  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----.*?-----END (?:[A-Z]+ )?PRIVATE KEY-----/,
   's',
 );
 
 let gitPrivateKey: PrivateKey | undefined;
+
+/**
+ * Decodes Base64 string if roundtrip encoding matches
+ */
+function tryBase64(value: string): string | null {
+  const decodedValue = fromBase64(value);
+  const encodedValue = toBase64(decodedValue);
+  if (value !== encodedValue) {
+    return null;
+  }
+
+  return decodedValue;
+}
 
 abstract class PrivateKey {
   protected readonly key: string;
@@ -24,9 +39,18 @@ abstract class PrivateKey {
   protected abstract readonly gpgFormat: string;
 
   constructor(key: string, passphrase: string | undefined) {
-    this.key = key;
-    this.passphrase = passphrase;
+    const decodedKey = tryBase64(key);
+
+    if (decodedKey) {
+      this.key = decodedKey;
+      addSecretForSanitizing(key, 'global');
+      logger.debug('gitPrivateKey: decoded key from Base64');
+    } else {
+      this.key = key;
+    }
     addSecretForSanitizing(this.key, 'global');
+
+    this.passphrase = passphrase;
     if (this.passphrase) {
       addSecretForSanitizing(this.passphrase, 'global');
     }
@@ -68,8 +92,15 @@ class GPGKey extends PrivateKey {
     }
   }
 
+  override async configSigningKey(cwd: string): Promise<void> {
+    await super.configSigningKey(cwd);
+    if (GlobalConfig.get('platform') === 'gerrit') {
+      await exec(`git config push.gpgSign if-asked`, { cwd });
+    }
+  }
+
   protected async importKey(): Promise<string | undefined> {
-    const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');
+    const keyFileName = upath.join(`${os.tmpdir()}/git-private-gpg.key`);
     await fs.outputFile(keyFileName, this.key);
     const { stdout, stderr } = await exec(
       // --batch --no-tty flags allow Renovate to skip warnings about unsupported algorithms in the key
@@ -90,9 +121,10 @@ class SSHKey extends PrivateKey {
   protected readonly gpgFormat = 'ssh';
 
   protected async importKey(): Promise<string | undefined> {
-    const keyFileName = upath.join(os.tmpdir() + '/git-private-ssh.key');
-    await fs.outputFile(keyFileName, this.key.replace(/\n?$/, '\n'));
-    process.on('exit', () => fs.removeSync(keyFileName));
+    const keyFileName = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
+    await fs.outputFile(keyFileName, this.key.replace(regEx(/\n?$/), '\n'));
+    /* v8 ignore next -- not easily testable */
+    process.on('exit', () => fs.rmSync(keyFileName, { force: true }));
     await fs.chmod(keyFileName, 0o600);
 
     // If there's a passphrase, decrypt the private key and save without passphrase
@@ -116,7 +148,8 @@ class SSHKey extends PrivateKey {
     const { stdout } = await exec(`ssh-keygen -y -f ${keyFileName}`);
     const pubFileName = `${keyFileName}.pub`;
     await fs.outputFile(pubFileName, stdout);
-    process.on('exit', () => fs.removeSync(pubFileName));
+    /* v8 ignore next -- not easily testable */
+    process.on('exit', () => fs.rmSync(pubFileName, { force: true }));
     return keyFileName;
   }
 }
@@ -143,7 +176,7 @@ export function setPrivateKey(
   key: string | undefined,
   passphrase: string | undefined,
 ): void {
-  if (!is.nonEmptyStringAndNotWhitespace(key)) {
+  if (!isNonEmptyStringAndNotWhitespace(key)) {
     return;
   }
   gitPrivateKey = createPrivateKey(key, passphrase);

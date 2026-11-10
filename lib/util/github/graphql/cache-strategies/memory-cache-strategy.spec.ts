@@ -1,9 +1,12 @@
 import { DateTime, Settings } from 'luxon';
-import * as memCache from '../../../cache/memory';
-import { clone } from '../../../clone';
-import type { Timestamp } from '../../../timestamp';
-import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
+import * as memCache from '../../../cache/memory/index.ts';
+import { clone } from '../../../clone.ts';
+import type { Timestamp } from '../../../timestamp.ts';
+import type {
+  GithubDatasourceItem,
+  GithubGraphqlCacheRecord,
+} from '../types.ts';
+import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy.ts';
 
 // const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO()!;
 
@@ -11,24 +14,24 @@ const hourMinRe = /T\d{2}:\d{2}$/;
 const hourMinSecRe = /T\d{2}:\d{2}:\d{2}$/;
 const hourMinSecMillisRe = /T\d{2}:\d{2}:\d{2}\.\d\d\d$/;
 
-const isoTs = (t: string) => {
+function isoTs(t: string) {
   let iso = t.replace(' ', 'T');
   if (hourMinSecMillisRe.test(iso)) {
-    iso = iso + 'Z';
+    iso = `${iso}Z`;
   } else if (hourMinSecRe.test(iso)) {
-    iso = iso + '.000Z';
+    iso = `${iso}.000Z`;
   } else if (hourMinRe.test(iso)) {
-    iso = iso + ':00.000Z';
+    iso = `${iso}:00.000Z`;
   } else {
-    throw new Error('Unrecognized date-time string. ' + t);
+    throw new Error(`Unrecognized date-time string. ${t}`);
   }
   return iso as Timestamp;
-};
+}
 
-const mockTime = (input: string): void => {
+function mockTime(input: string): void {
   const now = DateTime.fromISO(isoTs(input)).valueOf();
   Settings.now = () => now;
-};
+}
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 

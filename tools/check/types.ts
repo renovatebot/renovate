@@ -1,0 +1,49 @@
+import type { ResultPromise } from 'execa';
+
+export interface CliArgs {
+  all: boolean;
+  fix: boolean;
+  noTest: boolean;
+  coverageDir: string;
+  targets: string[];
+}
+
+export interface ParallelCheck {
+  name: string;
+  cmd: string;
+  args: string[];
+  env?: Record<string, string>;
+}
+
+export interface CheckResult {
+  name: string;
+  success: boolean;
+  duration: number;
+  output: string;
+}
+
+export interface CoverageInfo {
+  file: string;
+  percentage: number;
+  uncoveredLines: string[];
+}
+
+export interface CheckResultWithCoverage {
+  result: CheckResult;
+  coverage?: CoverageInfo[];
+}
+
+export interface ProcessManager {
+  subprocesses: Set<ResultPromise>;
+  abortController: AbortController;
+  renderInterval: ReturnType<typeof setInterval> | null;
+}
+
+export interface ExecutionProgress {
+  startTime: number;
+  checks: readonly ParallelCheck[];
+  results: (CheckResultWithCoverage | null)[];
+  startedIndices: Set<number>;
+  spinnerFrame: number;
+  displayLines: number;
+}

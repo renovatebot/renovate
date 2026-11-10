@@ -1,8 +1,13 @@
-import is from '@sindresorhus/is';
+import {
+  isEmptyStringOrWhitespace,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isUndefined,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
-import type { AllConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { getParsedContent, migrateAndValidateConfig } from './util';
+import type { AllConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { getParsedContent, migrateAndValidateConfig } from './util.ts';
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
@@ -23,16 +28,17 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     return config;
   }
 
-  logger.debug('Checking for config file in ' + configFile);
+  logger.debug(`Checking for config file in ${configFile}`);
   try {
     config = await getParsedContent(configFile);
   } catch (err) {
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal({ error: err.stack }, 'Could not parse config file');
+      logger.fatal({ err }, 'Could not parse config file');
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(
-        `Error parsing config file due to unresolved variable(s): ${err.message}`,
+        { err },
+        'Error parsing config file due to unresolved variable(s)',
       );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {
@@ -46,10 +52,10 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     logger.debug('Error reading or parsing file - skipping');
   }
 
-  if (is.nonEmptyObject(config.processEnv)) {
+  if (isNonEmptyObject(config.processEnv)) {
     const exportedKeys = [];
     for (const [key, value] of Object.entries(config.processEnv)) {
-      if (!is.nonEmptyString(value)) {
+      if (!isNonEmptyString(value)) {
         logger.error({ key }, 'processEnv value is not a string.');
         continue;
       }
@@ -73,7 +79,7 @@ export async function deleteNonDefaultConfig(
 ): Promise<void> {
   const configFile = env.RENOVATE_CONFIG_FILE;
 
-  if (is.undefined(configFile) || is.emptyStringOrWhitespace(configFile)) {
+  if (isUndefined(configFile) || isEmptyStringOrWhitespace(configFile)) {
     return;
   }
 

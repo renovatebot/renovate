@@ -1,28 +1,26 @@
-import is from '@sindresorhus/is';
-import { z } from 'zod';
+import { isString } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { Result } from '../../../util/result';
-import { Toml } from '../../../util/schema-utils';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { coerceNumber } from '../../../util/number.ts';
+import { Result } from '../../../util/result.ts';
 import {
   ensureTrailingSlash,
   isHttpUrl,
   joinUrlParts,
-} from '../../../util/url';
-import type { RegistryStrategy } from '../../datasource';
-import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common';
-import { PyProjectSchema } from '../pep621/schema';
-import type { PackageFileContent } from '../types';
+} from '../../../util/url.ts';
+import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common.ts';
+import type { RegistryStrategy } from '../../datasource/index.ts';
+import type { PackageFileContent } from '../types.ts';
 import {
   type Channels,
   type PixiConfig,
+  PixiFile,
   type PixiPackageDependency,
-  PixiToml,
-} from './schema';
-
-const PyProjectToml = Toml.pipe(PyProjectSchema);
+  PixiPyProject,
+} from './schema.ts';
 
 export function getUserPixiConfig(
   content: string,
@@ -32,7 +30,7 @@ export function getUserPixiConfig(
     packageFile === 'pyproject.toml' ||
     packageFile.endsWith('/pyproject.toml')
   ) {
-    const { val, err } = Result.parse(content, PyProjectToml).unwrap();
+    const { val, err } = Result.parse(content, PixiPyProject).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
@@ -42,7 +40,7 @@ export function getUserPixiConfig(
   }
 
   if (packageFile === 'pixi.toml' || packageFile.endsWith('/pixi.toml')) {
-    const { val, err } = Result.parse(content, PixiToml).unwrap();
+    const { val, err } = Result.parse(content, PixiFile).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
@@ -53,13 +51,14 @@ export function getUserPixiConfig(
 
   const { val, err } = Result.parse(
     content,
-    z.union([PixiToml, PyProjectToml.transform((p) => p.tool?.pixi)]),
+    z.union([PixiFile, PixiPyProject.transform((p) => p.tool?.pixi)]),
   ).unwrap();
 
   if (err) {
     logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
     return null;
   }
+  /* v8 ignore next -- a successful parse always yields a value */
   return val ?? null;
 }
 
@@ -162,11 +161,11 @@ function channelToRegistryUrl(channel: string): string {
 function orderChannels(channels: Channels = []): string[] {
   return channels
     .map((channel, index) => {
-      if (is.string(channel)) {
+      if (isString(channel)) {
         return { channel, priority: 0, index };
       }
 
-      return { ...channel, index: 0 };
+      return { ...channel, priority: coerceNumber(channel.priority), index };
     })
     .toSorted((a, b) => {
       // first based on priority then based on index

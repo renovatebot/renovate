@@ -1,4 +1,4 @@
-import { presets } from './group';
+import { presets } from './group.preset.ts';
 
 const exceptions = new Set(['monorepos', 'recommended']);
 
@@ -9,5 +9,18 @@ describe('config/presets/internal/group', () => {
 
   it.each(presetNames)('group:%s contains packageRules', (name: string) => {
     expect(presets[name]).toHaveProperty('packageRules');
+  });
+
+  it('groups @primer packages', () => {
+    expect(presets.primer).toEqual({
+      description: 'Group all `@primer` packages together.',
+      packageRules: [
+        {
+          groupName: 'Primer packages',
+          groupSlug: 'primer',
+          matchPackageNames: ['@primer/**'],
+        },
+      ],
+    });
   });
 });

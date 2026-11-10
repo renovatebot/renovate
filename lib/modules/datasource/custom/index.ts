@@ -1,16 +1,23 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { getExpression } from '../../../util/jsonata';
-import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { fetchers } from './formats';
-import { ReleaseResultZodSchema } from './schema';
-import { getCustomConfig } from './utils';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { getExpression } from '../../../util/jsonata.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { fetchers } from './formats/index.ts';
+import { ReleaseResultZod } from './schema.ts';
+import { getCustomConfig } from './utils.ts';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
 
-  override customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   constructor() {
     super(CustomDatasource.id);
@@ -20,7 +27,7 @@ export class CustomDatasource extends Datasource {
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const config = getCustomConfig(getReleasesConfig);
-    if (is.nullOrUndefined(config)) {
+    if (isNullOrUndefined(config)) {
       return null;
     }
 
@@ -53,8 +60,8 @@ export class CustomDatasource extends Datasource {
 
       if (expression instanceof Error) {
         logger.once.warn(
-          { errorMessage: expression.message },
-          `Invalid JSONata expression: ${transformTemplate}`,
+          { errorMessage: expression.message, transformTemplate },
+          'Invalid JSONata expression',
         );
         return null;
       }
@@ -70,16 +77,23 @@ export class CustomDatasource extends Datasource {
         data = modifiedData;
       } catch (err) {
         logger.once.warn(
-          { err },
-          `Error while evaluating JSONata expression: ${transformTemplate}`,
+          { err, transformTemplate },
+          'Error while evaluating JSONata expression',
         );
         return null;
       }
     }
 
     try {
-      const parsed = ReleaseResultZodSchema.parse(data);
-      return structuredClone(parsed);
+      const parsed = ReleaseResultZod.parse(data);
+      const result: ReleaseResult = structuredClone(parsed);
+      const { registryUrl } = getReleasesConfig;
+      // a URL template keeps its credentials until it is compiled
+      // set only with releases, as `getRegistryReleases()` does, so that an empty result stays recognisable as one
+      if (registryUrl && result.releases.length) {
+        result.registryUrl = withoutUrlCredentials(registryUrl);
+      }
+      return result;
     } catch (err) {
       logger.debug({ err }, `Response has failed validation`);
       logger.trace({ data }, 'Response that has failed validation');
@@ -88,8 +102,8 @@ export class CustomDatasource extends Datasource {
   }
 
   override getDigest(
-    { packageName }: DigestConfig,
-    newValue?: string,
+    _cfg: DigestConfig,
+    _newValue?: string,
   ): Promise<string | null> {
     // Return null here to support setting a digest: value can be provided digest in getReleases
     return Promise.resolve(null);

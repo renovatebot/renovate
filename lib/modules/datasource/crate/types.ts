@@ -17,10 +17,7 @@ export interface RegistryInfo {
   /** parsed URL of the registry */
   url: URL;
 
-  /** whether the registry uses sparse indexing (rfc-2789) */
-  isSparse: boolean;
-
-  /** path where the registry is cloned */
+  /** path where the registry is cloned, otherwise a sparse registry */
   clonePath?: string;
 }
 
@@ -28,11 +25,5 @@ export interface CrateRecord {
   vers: string;
   yanked: boolean;
   rust_version?: string;
-}
-
-export interface CrateMetadata {
-  description: string | null;
-  documentation: string | null;
-  homepage: string | null;
-  repository: string | null;
+  pubtime?: string;
 }

@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import type { JsonataExtractConfig } from './types';
-import { defaultConfig, extractPackageFile } from '.';
-import { logger } from '~test/util';
+import { logger, partial } from '~test/util.ts';
+import { defaultConfig, extractPackageFile } from './index.ts';
+import type { JsonataExtractConfig } from './types.ts';
 
 describe('modules/manager/custom/jsonata/index', () => {
   it('has default config', () => {
@@ -11,10 +11,15 @@ describe('modules/manager/custom/jsonata/index', () => {
   });
 
   it('returns null when content does not match specified file format', async () => {
-    const res = await extractPackageFile('not-json', 'foo-file', {
-      fileFormat: 'json',
-    } as JsonataExtractConfig);
+    const res = await extractPackageFile(
+      'not-json',
+      'foo-file',
+      partial<JsonataExtractConfig>({
+        fileFormat: 'json',
+      }),
+    );
     expect(res).toBeNull();
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.anything(),
       'Error while parsing file',
@@ -27,7 +32,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
-    } as JsonataExtractConfig);
+    });
     expect(res).toBeNull();
   });
 
@@ -51,17 +56,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
@@ -104,17 +111,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'yaml',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
@@ -158,17 +167,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
       depNameTemplate:
         '{{#if depName}}{{depName}}{{else}}default-dep-name{{/if}}',
@@ -240,16 +251,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "currentValue": current_value,
-            "datasource": data_source
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "currentValue": current_value,
+                      "datasource": data_source
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toBeNull();
+
     expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
       'Query results failed schema validation',
@@ -264,6 +278,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     };
     const res = await extractPackageFile('{}', 'unused', config);
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       {
         packageFile: 'unused',
@@ -285,6 +300,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toBeNull();
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.anything(),
       'Error compiling template for JSONata manager',
@@ -301,6 +317,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).not.toBeNull();
+
     expect(logger.logger.debug).toHaveBeenCalledWith(
       { url: 'this-is-not-a-valid-url-foo' },
       'Invalid JSONata manager registryUrl',
@@ -332,14 +349,40 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
+  it('extracts other matchStrings if one finds no match', async () => {
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [`packages.{ "depName": package }`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        packageFile: 'unused',
+        jsonataQuery: 'packages.{ "depName": package }',
+      },
+      'The jsonata query returned no matches. Possible error, please check your query. Skipping',
+    );
+    expect(res).toMatchObject({
+      ...config,
+      deps: [
+        {
+          depName: 'bar',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
+
   it('populates manager config and jsonata manager template fields in extract result', async () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
-      // should be included present extract result as it is not valid jsonata manager template
-      // adding here for testing
       autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -360,6 +403,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
+      autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
     });
   });
 
@@ -381,17 +425,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'toml',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
@@ -412,5 +458,49 @@ describe('modules/manager/custom/jsonata/index', () => {
         },
       ],
     });
+  });
+
+  it('catches jsonata evaluation errors', async () => {
+    const yaml = codeBlock`
+      public.ecr.aws:
+        images-by-semver:
+          bitnamicharts/cert-manager: '>=1.5.14'
+      `;
+    const config = {
+      fileFormat: 'yaml',
+      matchStrings: [
+        '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
+        '$reduce($each(*, function($images, $host){ $each($images.`images-by-semver`, function($v, $n){ { "packageName": $host & "/" & $n, "depName": $n, "currentValue": $replace($v, ">=", "") } })}), $append)',
+      ],
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(yaml, 'some.yaml', config);
+
+    expect(res).toEqual({
+      datasourceTemplate: 'docker',
+      deps: [
+        {
+          currentValue: '1.5.14',
+          datasource: 'docker',
+          depName: 'bitnamicharts/cert-manager',
+          packageName: 'public.ecr.aws/bitnamicharts/cert-manager',
+        },
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
+        '$reduce($each(*, function($images, $host){ $each($images.`images-by-semver`, function($v, $n){ { "packageName": $host & "/" & $n, "depName": $n, "currentValue": $replace($v, ">=", "") } })}), $append)',
+      ],
+    });
+
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      {
+        err: expect.any(TypeError),
+        packageFile: 'some.yaml',
+        jsonataQuery:
+          '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
+      },
+      'Error executing jsonata query. Please check your query.',
+    );
   });
 });

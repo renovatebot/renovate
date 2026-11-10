@@ -1,24 +1,26 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { NpmDatasource } from '../../datasource/npm';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(
   content: string,
   packageFile?: string,
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
-  const npmDepends = regEx(/\nNpm\.depends\({([\s\S]*?)}\);/).exec(content);
+  const npmDepends = regEx(/\nNpm\.depends\({(?<body>[\s\S]*?)}\);/).exec(
+    content,
+  );
   if (!npmDepends) {
     return null;
   }
   try {
-    deps = npmDepends[1]
-      .replace(regEx(/(\s|\\n|\\t|'|")/g), '')
+    deps = npmDepends
+      .groups!.body.replace(regEx(/(?:\s|\\n|\\t|'|")/g), '')
       .split(',')
       .map((dep) => dep.trim())
       .filter((dep) => dep.length)
-      .map((dep) => dep.split(regEx(/:(.*)/)))
+      .map((dep) => dep.split(regEx(/:(?<value>.*)/)))
       .map((arr) => {
         const [depName, currentValue] = arr;
         // istanbul ignore if

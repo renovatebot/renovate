@@ -1,8 +1,7 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { LongCommitSha } from '../../../../util/git/types';
-import type { BranchConfig } from '../../../types';
-import { commitFilesToBranch } from './commit';
-import { scm } from '~test/util';
+import { fakeSha, logger, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { commitFilesToBranch } from './commit.ts';
 
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {
@@ -22,7 +21,7 @@ describe('workers/repository/update/branch/commit', () => {
         upgrades: [],
         platformCommit: 'auto',
       } satisfies BranchConfig;
-      scm.commitAndPush.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.commitAndPush.mockResolvedValueOnce(fakeSha('123test'));
       GlobalConfig.reset();
     });
 
@@ -59,6 +58,25 @@ describe('workers/repository/update/branch/commit', () => {
       ]);
     });
 
+    it('passes commit trailers', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.commitTrailers = [
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      ];
+
+      await commitFilesToBranch(config);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
     it('dry runs', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.updatedPackageFiles?.push({
@@ -68,6 +86,9 @@ describe('workers/repository/update/branch/commit', () => {
       });
       await commitFilesToBranch(config);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(logger.logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would commit files to branch renovate/some-branch. See debug logs for raw commit information',
+      );
     });
   });
 });

@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
-import { toBase64 } from './string';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { toBase64 } from './string.ts';
 
 const globalSecrets = new Set<string>();
 const repoSecrets = new Set<string>();
@@ -15,8 +15,10 @@ export const redactedFields = [
   'gitPrivateKey',
   'forkToken',
   'password',
+  /* not actually sensitive, but redacted nonetheless */
   'httpsCertificate',
   'httpsPrivateKey',
+  /* not actually sensitive, but redacted nonetheless */
   'httpsCertificateAuthority',
 ];
 
@@ -48,7 +50,7 @@ export function addSecretForSanitizing(
   secret: string | undefined,
   type = 'repo',
 ): void {
-  if (!is.nonEmptyString(secret)) {
+  if (!isNonEmptyString(secret)) {
     return;
   }
   const secrets = type === 'repo' ? repoSecrets : globalSecrets;

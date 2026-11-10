@@ -1,25 +1,24 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { queryReleases } from '../../../util/github/graphql';
-import { findCommitOfTag } from '../../../util/github/tags';
-import { getSourceUrl } from '../../../util/github/url';
-import { GithubHttp } from '../../../util/http/github';
-import { Datasource } from '../datasource';
+import { isBoolean } from '@sindresorhus/is';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
+import { logger } from '../../../logger/index.ts';
+import { queryReleases } from '../../../util/github/graphql/index.ts';
+import { findCommitOfTag } from '../../../util/github/tags.ts';
+import { getSourceUrl } from '../../../util/github/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from '../types';
+} from '../types.ts';
 
-export const cacheNamespace = 'datasource-github-releases';
+export class GithubReleasesDatasource extends Datasource<GithubHttp> {
+  static readonly id: DatasourceName = 'github-releases';
 
-export class GithubReleasesDatasource extends Datasource {
-  static readonly id = 'github-releases';
-
-  override readonly defaultRegistryUrls = ['https://github.com'];
-
-  override http: GithubHttp;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
@@ -29,9 +28,13 @@ export class GithubReleasesDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  constructor() {
-    super(GithubReleasesDatasource.id);
-    this.http = new GithubHttp(GithubReleasesDatasource.id);
+  /**
+   * A subclass with a different `id` (currently only
+   * `GithubReleaseAttachmentsDatasource`) passes it through here so the base
+   * constructor builds its own `GithubHttp` client keyed to that `id`.
+   */
+  constructor(id: string = GithubReleasesDatasource.id) {
+    super(id, new GithubHttp(id));
   }
 
   /**
@@ -44,19 +47,22 @@ export class GithubReleasesDatasource extends Datasource {
    * the artifact checksum computation separately. This data-source does not know about
    * specific artifacts being used, as that could vary per manager
    */
-  override getDigest(
+  override async getDigest(
     {
       packageName: repo,
       currentValue,
       currentDigest,
       registryUrl,
     }: DigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
       'getDigest',
     );
+    if (!newValue) {
+      return null;
+    }
 
     return findCommitOfTag(registryUrl, repo, newValue, this.http);
   }
@@ -79,7 +85,7 @@ export class GithubReleasesDatasource extends Datasource {
         gitRef: version,
         releaseTimestamp,
       };
-      if (is.boolean(isStable)) {
+      if (isBoolean(isStable)) {
         result.isStable = isStable;
       }
       return result;

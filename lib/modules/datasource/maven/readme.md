@@ -1,3 +1,28 @@
+#### Maven Central rate limiting and caching
+
+Maven Central, hosted by Sonatype, receives a very large number of requests and has implemented rate limiting measures to manage organizational overconsumption.
+If you're experiencing 429 (rate limited) responses from Maven Central, you may need to optimize your caching strategy.
+
+Renovate includes Maven caching optimizations, but they rely on having a _persistent_ datasource cache.
+By default, Renovate uses a file-based cache, which means:
+
+- **Persistent environments** (like self-hosted runners with persistent storage) will benefit from cross-run caching
+- **Ephemeral environments** (like GitHub Actions or other CI/CD with fresh containers each run) won't benefit from caching across runs
+
+To maximize caching effectiveness and reduce Maven Central requests:
+
+1. **Use Redis for persistent caching**: Configure a Redis instance for your Renovate datasource cache
+2. **Ensure cache persistence**: If using file-based caching, ensure the cache directory persists between Renovate runs
+3. **Monitor rate limit warnings**: Renovate will log warnings when receiving 429 responses from Maven Central
+
+If you continue to experience rate limiting issues after implementing persistent caching, you may need to:
+
+- Reduce the frequency of Renovate runs
+- Consider using a Maven repository proxy with its own caching layer
+
+!!! note
+  Dependencies that appear to be Gradle plugins (where the groupId or artifactId ends with `.gradle.plugin`) will **not** be looked up in Maven Central.
+
 #### Making your changelogs fetchable
 
 In case you are publishing artifacts and you want to ensure that your changelogs are fetchable by `Renovate`, you need to configure the [scm section](https://maven.apache.org/scm/git.html) on their `pom.xml` file.
@@ -12,10 +37,9 @@ For example:
 
 This is what allows `Renovate` to determine the `sourceUrl`, that it then uses to fetch the changelogs.
 
-<!-- prettier-ignore -->
 !!! note
-    This also works for private repositories.
-    It can leverage the same `token` that you had to configure in order to be able to reach the private Artifactory.
+  This also works for private repositories.
+  It can leverage the same `token` that you had to configure in order to be able to reach the private Artifactory.
 
 #### Specifying your project homepage
 
@@ -30,9 +54,8 @@ For example:
 
 #### latest and release tags
 
-Although a package's `maven-metadata.xml` may contain `latest` and `release` tags, we do not map them to `tags.latest` or `tags.release` in Renovate internal data.
-The reason for not doing this is that Maven registries don't use these tags as an indicator of stability - `latest` essentially means "the most recent version which was published".
+When `latest` or `release` values are present in a package's `maven-metadata.xml`, Renovate will map these to its `tags` concept.
+This enables the use of Renovate's `followTag` feature.
 
-For more information on this, see the analysis done in [Discussion #36927](https://github.com/renovatebot/renovate/discussions/36927).
-
-As a result, neither `followTag` nor `respectLatest` concepts apply to Maven dependencies.
+However, Renovate will set `respectLatest=false` whenever the `latest` tag is found, because many Maven registries have been found to populate the tag unreliably.
+You should use `packageRules` to set `respectLatest=true` if you wish to use this feature.

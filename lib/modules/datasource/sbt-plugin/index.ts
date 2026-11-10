@@ -1,19 +1,19 @@
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { Http } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as ivyVersioning from '../../versioning/ivy';
-import { compare } from '../../versioning/maven/compare';
-import { Datasource } from '../datasource';
-import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpContent } from '../maven/util';
-import { extractPageLinks, getLatestVersion } from '../sbt-package/util';
+import { logger } from '../../../logger/index.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as ivyVersioning from '../../versioning/ivy/index.ts';
+import { compare } from '../../versioning/maven/compare.ts';
+import { Datasource } from '../datasource.ts';
+import { MAVEN_REPO } from '../maven/common.ts';
+import { downloadHttpContent } from '../maven/util.ts';
+import { extractPageLinks, getLatestVersion } from '../sbt-package/util.ts';
 import type {
   GetReleasesConfig,
   RegistryStrategy,
   ReleaseResult,
-} from '../types';
+} from '../types.ts';
 
 export const SBT_PLUGINS_REPO =
   'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
@@ -21,7 +21,9 @@ export const SBT_PLUGINS_REPO =
 export class SbtPluginDatasource extends Datasource {
   static readonly id = 'sbt-plugin';
 
-  override readonly defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [SBT_PLUGINS_REPO, MAVEN_REPO];
+  }
 
   override readonly defaultVersioning = ivyVersioning.id;
 
@@ -32,8 +34,7 @@ export class SbtPluginDatasource extends Datasource {
     'The source URL is determined from the `scm` tags in the results.';
 
   constructor() {
-    super(SbtPluginDatasource.id);
-    this.http = new Http('sbt');
+    super(SbtPluginDatasource.id, new Http('sbt'));
   }
 
   // istanbul ignore next: to be rewritten
@@ -45,9 +46,8 @@ export class SbtPluginDatasource extends Datasource {
     const pkgUrl = ensureTrailingSlash(searchRoot);
     const indexContent = await downloadHttpContent(this.http, pkgUrl);
     if (indexContent) {
-      const rootPath = new URL(pkgUrl).pathname;
       let artifactSubdirs = extractPageLinks(indexContent, (href) => {
-        const path = href.replace(rootPath, '');
+        const path = href.split('/').at(-1)!;
         if (
           path.startsWith(`${artifact}_native`) ||
           path.startsWith(`${artifact}_sjs`)
@@ -85,9 +85,8 @@ export class SbtPluginDatasource extends Datasource {
         const pkgUrl = ensureTrailingSlash(`${searchRoot}/${searchSubdir}`);
         const content = await downloadHttpContent(this.http, pkgUrl);
         if (content) {
-          const rootPath = new URL(pkgUrl).pathname;
           const subdirReleases = extractPageLinks(content, (href) => {
-            const path = href.replace(rootPath, '');
+            const path = href.split('/').at(-1)!;
             if (path.startsWith('.')) {
               return null;
             }
@@ -163,13 +162,13 @@ export class SbtPluginDatasource extends Datasource {
     scalaVersion: string,
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
-    const hrefFilterMap = (href: string): string | null => {
+    function hrefFilterMap(href: string): string | null {
       if (href.startsWith('.')) {
         return null;
       }
 
       return href;
-    };
+    }
     const searchRootContent = await downloadHttpContent(
       this.http,
       ensureTrailingSlash(searchRoot),
@@ -192,6 +191,7 @@ export class SbtPluginDatasource extends Datasource {
           this.http,
           ensureTrailingSlash(searchSubRoot),
         );
+        // v8 ignore else -- needs a nested directory listing fixture
         if (subRootContent) {
           const sbtVersionItems = extractPageLinks(
             subRootContent,
@@ -203,6 +203,7 @@ export class SbtPluginDatasource extends Datasource {
               this.http,
               ensureTrailingSlash(releasesRoot),
             );
+            // v8 ignore else -- needs a nested directory listing fixture
             if (releasesIndexContent) {
               const releasesParsed = extractPageLinks(
                 releasesIndexContent,
@@ -213,6 +214,7 @@ export class SbtPluginDatasource extends Datasource {
           }
         }
       }
+      // v8 ignore else -- needs a nested directory listing fixture
       if (releases.length) {
         return [...new Set(releases)].sort(compare);
       }
@@ -224,7 +226,7 @@ export class SbtPluginDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

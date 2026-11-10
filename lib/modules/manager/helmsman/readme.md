@@ -19,3 +19,8 @@ To enable the `helmsman` manager, provide a valid `managerFilePatterns` yourself
 
 Currently, state files must be in the `.yaml` format.
 The `.toml` format is not supported.
+
+### OCI Helm charts
+
+Renovate looks up Helm charts stored in OCI registries with the `docker` datasource.
+Use [`registryAliases`](../../../configuration-options.md#registryaliases) to map a registry host, for example a pull-through cache, to the registry Renovate should query instead.

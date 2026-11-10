@@ -1,22 +1,19 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { processHostRules } from '../npm/post-update/rules.ts';
+import { withNpmrcHostRules } from '../npm/utils.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
-  deleteLocalFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
-import { processHostRules } from '../npm/post-update/rules';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from '../npm/utils';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -26,17 +23,19 @@ export async function updateArtifacts(
   logger.debug(`bun.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated bun deps - returning null');
     return null;
   }
 
-  // Find the first bun dependency in order to handle mixed manager updates
-  const lockFileName = updatedDeps.find((dep) => dep.manager === 'bun')
-    ?.lockFiles?.[0];
+  // Find the first bun dependency in order to handle mixed manager updates,
+  // eventually falling back to the first lock file from config.
+  const lockFileName =
+    updatedDeps.find((dep) => dep.manager === 'bun')?.lockFiles?.[0] ??
+    config.lockFiles?.[0];
 
   if (!lockFileName) {
-    logger.debug(`No ${lockFileName} found`);
+    logger.debug(`bun: No lock file found`);
     return null;
   }
 
@@ -47,64 +46,47 @@ export async function updateArtifacts(
   }
 
   const pkgFileDir = upath.dirname(packageFileName);
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
+    return await withNpmrcHostRules(
+      pkgFileDir,
+      additionalNpmrcContent,
+      async () => {
+        let cmd = 'bun install';
 
-    let cmd = 'bun install';
+        if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+          cmd += ' --ignore-scripts';
+        }
 
-    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
-      cmd += ' --ignore-scripts';
-    }
+        const execOptions: ExecOptions = {
+          cwdFile: lockFileName,
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+              constraint: await resolveToolConstraint(config, 'bun'),
+            },
+          ],
+        };
 
-    const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'bun',
-          constraint: updateArtifact?.config?.constraints?.bun,
-        },
-      ],
-    };
-
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
+        return await updateLockFile({
+          lockFileName,
+          existingLockFileContent: oldLockFileContent,
+          packageFile: {
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+          deleteLockFile: isLockFileMaintenance,
+          run: () => exec(cmd, execOptions),
+        });
       },
-    ];
+    );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

@@ -1,20 +1,10 @@
-import is from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from './types';
-
-export interface GenericVersion {
-  release: number[];
-  /** prereleases are treated in the standard semver manner, if present */
-  prerelease?: string;
-  suffix?: string;
-}
-export type VersionParser = (version: string) => GenericVersion;
-
-export type VersionComparator = (version: string, other: string) => number;
+import { isNonEmptyString } from '@sindresorhus/is';
+import { stripVersionPrefix } from '../../util/string.ts';
+import type { GenericVersion, NewValueConfig, VersioningApi } from './types.ts';
 
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion,
-> implements VersioningApi
-{
+> implements VersioningApi {
   private _getSection(version: string, index: number): number | null {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index
@@ -43,8 +33,8 @@ export abstract class GenericVersioningApi<
     }
 
     if (
-      is.nonEmptyString(left.prerelease) &&
-      is.nonEmptyString(right.prerelease)
+      isNonEmptyString(left.prerelease) &&
+      isNonEmptyString(right.prerelease)
     ) {
       const pre = left.prerelease.localeCompare(right.prerelease, undefined, {
         numeric: true,
@@ -53,9 +43,9 @@ export abstract class GenericVersioningApi<
       if (pre !== 0) {
         return pre;
       }
-    } else if (is.nonEmptyString(left.prerelease)) {
+    } else if (isNonEmptyString(left.prerelease)) {
       return -1;
-    } else if (is.nonEmptyString(right.prerelease)) {
+    } else if (isNonEmptyString(right.prerelease)) {
       return 1;
     }
 
@@ -133,7 +123,7 @@ export abstract class GenericVersioningApi<
     newVersion,
   }: NewValueConfig): string | null {
     if (currentVersion === `v${currentValue}`) {
-      return newVersion.replace(/^v/, '');
+      return stripVersionPrefix(newVersion);
     }
     return newVersion ?? null;
   }

@@ -1,24 +1,24 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
-import { isVersion } from '../../versioning/semver';
-import { getDep as getDockerDep } from '../dockerfile/extract';
+import { isArray } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry/index.ts';
+import { isVersion } from '../../versioning/semver/index.ts';
+import { getDep as getDockerDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   type ProjectDescriptor,
   ProjectDescriptorToml,
   isBuildpackByName,
   isBuildpackByURI,
-} from './schema';
+} from './schema.ts';
 
 export const DOCKER_PREFIX = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
-  /^((?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)(?::\d{2,5}\/)?)?[a-z\d]+((\.|_|__|-+)[a-z\d]+)*(\/[a-z\d]+((\.|_|__|-+)[a-z\d]+)*)*(?::(\w[\w.-]{0,127})(?:@sha256:[A-Fa-f\d]{32,})?|@sha256:[A-Fa-f\d]{32,})$/,
+  /^(?:(?:(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)(?::\d{2,5}\/)?)?[a-z\d]+(?:(?:\.|_|__|-+)[a-z\d]+)*(?:\/[a-z\d]+(?:(?:\.|_|__|-+)[a-z\d]+)*)*(?::(?:\w[\w.-]{0,127})(?:@sha256:[A-Fa-f\d]{32,})?|@sha256:[A-Fa-f\d]{32,}))$/,
 );
 
 export function isDockerRef(ref: string): boolean {
@@ -36,7 +36,8 @@ function isBuildpackRegistryId(ref: string): boolean {
   const bpRegistryMatch = buildpackRegistryId.exec(ref);
   if (!bpRegistryMatch) {
     return false;
-  } else if (!bpRegistryMatch.groups?.version) {
+  }
+  if (!bpRegistryMatch.groups?.version) {
     return true;
   }
   return isVersion(bpRegistryMatch.groups.version);
@@ -83,8 +84,7 @@ export function extractPackageFile(
   ) {
     const dep = getDockerDep(
       descriptor.io.buildpacks.builder.replace(DOCKER_PREFIX, ''),
-      true,
-      config.registryAliases,
+      { registryAliases: config.registryAliases },
     );
     logger.trace(
       {
@@ -100,15 +100,13 @@ export function extractPackageFile(
 
   if (
     descriptor.io?.buildpacks?.group &&
-    is.array(descriptor.io.buildpacks.group)
+    isArray(descriptor.io.buildpacks.group)
   ) {
     for (const group of descriptor.io.buildpacks.group) {
       if (isBuildpackByURI(group) && isDockerRef(group.uri)) {
-        const dep = getDockerDep(
-          group.uri.replace(DOCKER_PREFIX, ''),
-          true,
-          config.registryAliases,
-        );
+        const dep = getDockerDep(group.uri.replace(DOCKER_PREFIX, ''), {
+          registryAliases: config.registryAliases,
+        });
         logger.trace(
           {
             depName: dep.depName,

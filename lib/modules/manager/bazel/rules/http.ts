@@ -1,12 +1,12 @@
-import is from '@sindresorhus/is';
-import { z } from 'zod';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { parseUrl } from '../../../../util/url';
-import { GithubReleasesDatasource } from '../../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases';
-import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
-import type { PackageDependency } from '../../types';
+import { isString, isTruthy } from '@sindresorhus/is';
+import { z } from 'zod/v4';
+import { regEx } from '../../../../util/regex.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases/index.ts';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 // Source: https://bazel.build/rules/lib/repo/http
 const archives = [
@@ -36,7 +36,7 @@ const archives = [
 ];
 
 const archiveSuffixRegex = regEx(
-  `(?:${archives.map(escapeRegExp).join('|')})$`,
+  `(?:${archives.map((archive) => RegExp.escape(archive)).join('|')})$`,
 );
 
 function stripArchiveSuffix(value: string): string {
@@ -44,18 +44,17 @@ function stripArchiveSuffix(value: string): string {
 }
 
 function isHash(value: unknown): value is string {
-  return is.string(value) && regEx(/[0-9a-z]{40}/i).test(value);
+  return isString(value) && regEx(/[0-9a-z]{40}/i).test(value);
 }
 
 export function parseGithubPath(
   pathname: string,
 ): Partial<PackageDependency> | null {
   const [p0, p1, p2, p3, p4, p5] = pathname.split('/').slice(1);
-  const packageName = p0 + '/' + p1;
+  const packageName = `${p0}/${p1}`;
   let datasource = '';
   let value: string | null = null;
   if (p2 === 'releases' && p3 === 'download') {
-    // https://github.com/foo/bar/releases/download/1.2.3/bar-1.2.3.tar.gz
     datasource = GithubReleasesDatasource.id;
     value = p4;
   } else if (p2 === 'archive' && p3 === 'refs' && p4 === 'tags') {
@@ -82,7 +81,7 @@ function parseGitlabPath(pathname: string): Partial<PackageDependency> | null {
   // https://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.zip
   // https://gitlab.com/libeigen/eigen/-/archive/90ee821c563fa20db4d64d6991ddca256d5c52f2/eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2.tar.gz
   const [p0, p1, p2, p3, p4] = pathname.split('/').slice(1);
-  const packageName = p0 + '/' + p1;
+  const packageName = `${p0}/${p1}`;
   if (p2 === '-' && p3 === 'archive' && p4) {
     return isHash(p4)
       ? {
@@ -136,7 +135,7 @@ export const HttpTarget = z
   })
   .refine(({ url, urls }) => !!url || !!urls)
   .transform(({ rule, name, url, urls = [] }): PackageDependency[] => {
-    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(is.truthy);
+    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(isTruthy);
     if (!parsedUrl) {
       return [];
     }

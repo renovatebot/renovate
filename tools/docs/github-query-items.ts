@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod';
-import { logger } from '../../lib/logger';
-import { exec } from '../../lib/util/exec';
+import { z } from 'zod/v4';
+import { logger } from '../../lib/logger/index.ts';
+import { Json } from '../../lib/util/schema-utils/index.ts';
+import { exec } from '../utils/exec.ts';
 
 export interface ItemsEntity {
   url: string;
@@ -29,30 +30,45 @@ export interface Items {
   features: ItemsEntity[];
 }
 
-const GhOutputSchema = z.array(
-  z.object({
-    url: z.string(),
-    title: z.string(),
-    labels: z.array(
-      z.object({
-        name: z.string(),
-      }),
-    ),
-    number: z.number(),
-  }),
+const GhOutput = Json.pipe(
+  z.array(
+    z.object({
+      url: z.string(),
+      title: z.string(),
+      labels: z.array(
+        z.object({
+          name: z.string(),
+        }),
+      ),
+      number: z.number(),
+    }),
+  ),
 );
 
 async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
-  const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
-  const execRes = await exec(command);
-  const res = GhOutputSchema.safeParse(JSON.parse(execRes.stdout));
-  if (res.error) {
-    throw res.error;
-  }
+  const execRes = await exec(
+    'gh',
+    [
+      'issue',
+      'list',
+      '--json',
+      'title,number,url,labels',
+      '--search',
+      `type:${issueType}`,
+      '--limit',
+      '1000',
+    ],
+    {
+      env: {
+        GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+      },
+    },
+  );
+  const res = GhOutput.parse(execRes.stdout);
 
-  return res.data.map((issue) => {
+  return res.map((issue) => {
     return { ...issue, issueType };
   });
 }
@@ -77,7 +93,19 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     return result;
   }
 
-  if (process.env.CI) {
+  if (
+    process.env.CI &&
+    process.env.GITHUB_REF === 'main' &&
+    process.env.GITHUB_REPOSITORY !== 'renovatebot/renovatebot.github.io' &&
+    process.env.GITHUB_REPOSITORY !== 'renovatebot/renovate'
+  ) {
+    logger.warn(
+      {
+        repository: process.env.GITHUB_REPOSITORY,
+        ref: process.env.GITHUB_REF,
+      },
+      "Skipping collection of open GitHub Issues, as we're running CI on a non-HEAD branch of Renovate or its docs site",
+    );
     return result;
   }
 

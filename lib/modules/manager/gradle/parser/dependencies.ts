@@ -1,6 +1,7 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
+import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
@@ -13,13 +14,14 @@ import {
   qVersion,
   storeInTokenMap,
   storeVarToken,
-} from './common';
+} from './common.ts';
 import {
   handleDepString,
   handleImplicitDep,
   handleKotlinShortNotationDep,
   handleLongFormDep,
-} from './handlers';
+  handleRichVersionDep,
+} from './handlers.ts';
 
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"
@@ -153,6 +155,86 @@ export const qLongFormDep = q
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
 
+// strictly '1.2.3'
+// strictly("1.2.3")
+function qRichVersionValue(
+  tokenMapKey: string,
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q
+    .alt<Ctx>(
+      q.tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        maxMatches: 1,
+        startsWith: '(',
+        endsWith: ')',
+        search: q.begin<Ctx>().join(qValueMatcher).end(),
+      }),
+      qValueMatcher,
+    )
+    .handler((ctx) => storeInTokenMap(ctx, tokenMapKey));
+}
+
+// version { strictly '[1.7, 1.8['; prefer '1.7.25' }
+// version { strictly("[1.7, 1.8["); prefer("1.7.25") }
+const qRichVersion = q.sym<Ctx>('version').tree({
+  type: 'wrapped-tree',
+  maxDepth: 1,
+  startsWith: '{',
+  endsWith: '}',
+  search: q.alt<Ctx>(
+    q.sym<Ctx>('strictly').join(qRichVersionValue('strictly')),
+    q.sym<Ctx>('require').join(qRichVersionValue('require')),
+    q.sym<Ctx>('prefer').join(qRichVersionValue('prefer')),
+    // the rejected versions themselves are irrelevant: their mere presence
+    // means Renovate cannot reason about the constraint
+    q
+      .sym<Ctx>(regEx(/^reject(?:All)?$/), storeVarToken)
+      .handler((ctx) => storeInTokenMap(ctx, 'reject')),
+  ),
+});
+
+// implementation('foo:bar') { version { strictly '1.2.3' } }
+// implementation("foo:bar") { version { strictly("1.2.3") } }
+// implementation(group: 'foo', name: 'bar') { version { strictly '1.2.3' } }
+const qRichVersionDep = q
+  .opt<Ctx>(
+    q.sym(storeVarToken).handler((ctx) => storeInTokenMap(ctx, 'methodName')),
+  )
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(
+        qTemplateString.handler((ctx) =>
+          storeInTokenMap(ctx, 'templateStringTokens'),
+        ),
+        q
+          .sym<Ctx>('group')
+          .alt(q.op(':'), q.op('='))
+          .join(qGroupId)
+          .op(',')
+          .sym('name')
+          .alt(q.op(':'), q.op('='))
+          .join(qArtifactId),
+      )
+      .end(),
+  })
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: qRichVersion,
+  })
+  .handler(handleRichVersionDep)
+  .handler(cleanupTempVars);
+
 // pmd { toolVersion = "1.2.3" }
 const qImplicitGradlePlugin = q
   .alt(
@@ -190,26 +272,48 @@ const qImplicitGradlePlugin = q
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
+// Match the use* method call with version parameter
+const qTestSuiteMethod = q
+  .sym(
+    regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
+    storeVarToken,
+  )
+  .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().join(qVersion).end(),
+  });
+
 // testing { suites { test { useSpock("1.2.3") } } }
+// testing.suites.test { useJunit("1.2.3") }
+// testing { suites.withType(JvmTestSuite).configureEach { useJUnitJupiter("5.13.4") } }
+// testing { suites.withType(JvmTestSuite::class).configureEach { useSpock("2.3") } }
 const qImplicitTestSuites = qDotOrBraceExpr(
   'testing',
   qDotOrBraceExpr(
     'suites',
-    qDotOrBraceExpr(
-      'test',
+    q.alt(
+      qDotOrBraceExpr('test', qTestSuiteMethod),
       q
-        .sym(
-          regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
-          storeVarToken,
-        )
-        .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+        .sym<Ctx>('withType')
         .tree({
           type: 'wrapped-tree',
           maxDepth: 1,
-          maxMatches: 1,
           startsWith: '(',
           endsWith: ')',
-          search: q.begin<Ctx>().join(qVersion).end(),
+        })
+        .op('.')
+        .sym('configureEach')
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '{',
+          endsWith: '}',
+          search: qTestSuiteMethod,
         }),
     ),
   ),
@@ -217,9 +321,30 @@ const qImplicitTestSuites = qDotOrBraceExpr(
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
+// substitute module("foo:bar:1.2.3") using "baz:qux:4.5.6"
+// substitute(module("foo:bar:1.2.3")).using("baz:qux:4.5.6")
+const qIgnoreSubstitutedDependencies = q.sym<Ctx>('substitute').alt(
+  q.sym<Ctx>('module').tree(),
+  q.tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.sym<Ctx>('module').tree(),
+  }),
+);
+
+// buildConfigField("type", "name", "value")
+// resValue("type", "name", "value")
+const qIgnoreAndroidBuildValues = q.alt(
+  q.sym<Ctx>('buildConfigField').tree(),
+  q.sym<Ctx>('resValue').tree(),
+);
+
 export const qDependencies = q.alt(
   qDependencyStrings,
   qDependencySet,
+  qRichVersionDep,
   qGroovyMapNotationDependencies,
   qKotlinShortNotationDependencies,
   qKotlinMapNotationDependencies,
@@ -227,4 +352,8 @@ export const qDependencies = q.alt(
   qImplicitTestSuites,
   // avoid heuristic matching of gradle feature variant capabilities
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
+  // avoid matching substituted dependency modules
+  qIgnoreSubstitutedDependencies,
+  // avoid heuristic matching of Android build values
+  qIgnoreAndroidBuildValues,
 );

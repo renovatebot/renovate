@@ -1,15 +1,18 @@
+import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-import { getPkgReleases } from '..';
-import * as _packageCache from '../../../util/cache/package';
-import { regEx } from '../../../util/regex';
-import * as mavenVersioning from '../../versioning/maven';
-import { MAVEN_REPO } from '../maven/common';
-import { extractPageLinks } from './util';
-import { SbtPackageDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as urlUtil from '../../../util/url.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { MAVEN_REPO } from '../maven/common.ts';
+import * as mavenUtil from '../maven/util.ts';
+import { SbtPackageDatasource } from './index.ts';
+import { extractPageLinks } from './util.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {
@@ -18,7 +21,18 @@ describe('modules/datasource/sbt-package/index', () => {
       extractPageLinks(Fixtures.get(`maven-index.html`), (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'autofix-3.0.6_2.11',
+      'sbt-scalatest_2.12_1.0',
+      'scalatest',
+      'scalatest-app_native0.4_3',
+      'scalatest_2.12',
+      'scalatest_2.13',
+      'scalatest_2.13.0-RC1',
+      'scalatest_3',
+      'scalatest_sjs1.0.0-M7_2.13.0-RC2',
+      'test-interface',
+    ]);
   });
 
   it('parses sbt index directory', () => {
@@ -26,7 +40,15 @@ describe('modules/datasource/sbt-package/index', () => {
       extractPageLinks(Fixtures.get(`sbt-plugins-index.html`), (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'au.com.onegeek',
+      'ch',
+      'com.github.DavidPerezIngeniero',
+      'org.portable-scala',
+      'scalajs-react-interface',
+      'uk.co.josephearl',
+      'woshilaiceshide',
+    ]);
   });
 
   it('uses proper hostType', () => {
@@ -279,6 +301,83 @@ describe('modules/datasource/sbt-package/index', () => {
 
       expect(res).toMatchObject({});
     });
+
+    it('continues when parseUrl returns null for packageRootUrl', async () => {
+      httpMock
+        .scope('https://repo.maven.apache.org/maven2/')
+        .get('/org/example/example/maven-metadata.xml')
+        .reply(404);
+
+      const downloadSpy = vi
+        .spyOn(mavenUtil, 'downloadHttpContent')
+        .mockResolvedValueOnce(
+          `<a href="example/" title='example/'>example/</a>`,
+        )
+        .mockResolvedValueOnce(null); // dot-separated group URL returns nothing
+
+      const realParseUrl = urlUtil.parseUrl;
+      const parseUrlSpy = vi
+        .spyOn(urlUtil, 'parseUrl')
+        .mockImplementation((url) => {
+          if (
+            isString(url) &&
+            url === 'https://repo.maven.apache.org/maven2/org/example/'
+          ) {
+            return null;
+          }
+          return realParseUrl(url);
+        });
+
+      const res = await getPkgReleases({
+        versioning: mavenVersioning.id,
+        datasource: SbtPackageDatasource.id,
+        packageName: 'org.example:example',
+        registryUrls: [MAVEN_REPO],
+      });
+
+      parseUrlSpy.mockRestore();
+      downloadSpy.mockRestore();
+      expect(res).toBeNull();
+    });
+
+    it('skips pkgUrl when parseUrl returns null for it', async () => {
+      httpMock
+        .scope('https://repo.maven.apache.org/maven2/')
+        .get('/org/example/example/maven-metadata.xml')
+        .reply(404);
+
+      const downloadSpy = vi
+        .spyOn(mavenUtil, 'downloadHttpContent')
+        .mockResolvedValueOnce(
+          `<a href="example/" title='example/'>example/</a>`,
+        )
+        .mockResolvedValueOnce(null) // dot-separated group URL returns nothing
+        .mockResolvedValueOnce(`<a href='1.2.3/'>1.2.3/</a>`); // artifact subdir
+
+      const realParseUrl = urlUtil.parseUrl;
+      const parseUrlSpy = vi
+        .spyOn(urlUtil, 'parseUrl')
+        .mockImplementation((url) => {
+          if (
+            isString(url) &&
+            url === 'https://repo.maven.apache.org/maven2/org/example/example/'
+          ) {
+            return null;
+          }
+          return realParseUrl(url);
+        });
+
+      const res = await getPkgReleases({
+        versioning: mavenVersioning.id,
+        datasource: SbtPackageDatasource.id,
+        packageName: 'org.example:example',
+        registryUrls: [MAVEN_REPO],
+      });
+
+      parseUrlSpy.mockRestore();
+      downloadSpy.mockRestore();
+      expect(res).toBeNull();
+    });
   });
 
   describe('postprocessRelease', () => {
@@ -287,11 +386,12 @@ describe('modules/datasource/sbt-package/index', () => {
     it('extracts URL from Maven POM file', async () => {
       const registryUrl = 'https://repo.maven.apache.org/maven2/';
       const packageName = 'org.example:example';
-      packageCache.get.mockImplementation(((ns: string, k: string) =>
+      packageCache.get.mockImplementation((ns: string, k: string) =>
         ns === 'datasource-sbt-package' &&
         k === `package-urls:${registryUrl}:${packageName}`
           ? Promise.resolve([`${registryUrl}org/example/`])
-          : Promise.resolve(undefined)) as never);
+          : Promise.resolve(undefined),
+      );
 
       httpMock
         .scope(registryUrl)

@@ -1,14 +1,18 @@
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createCondaToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
+  createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
+  createPypiToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
-} from './backends';
+} from './backends.ts';
 
 describe('modules/manager/mise/backends', () => {
   describe('createAquaToolConfig()', () => {
@@ -40,6 +44,7 @@ describe('modules/manager/mise/backends', () => {
       expect(createCargoToolConfig('eza', '')).toStrictEqual({
         packageName: 'eza',
         datasource: 'crate',
+        versioning: 'semver',
       });
     });
 
@@ -86,6 +91,15 @@ describe('modules/manager/mise/backends', () => {
     });
   });
 
+  describe('createCondaToolConfig()', () => {
+    it('should create a tooling config', () => {
+      expect(createCondaToolConfig('ripgrep')).toStrictEqual({
+        packageName: 'ripgrep',
+        datasource: 'conda',
+      });
+    });
+  });
+
   describe('createDotnetToolConfig()', () => {
     it('should create a tooling config', () => {
       expect(createDotnetToolConfig('GitVersion.Tool')).toStrictEqual({
@@ -100,6 +114,146 @@ describe('modules/manager/mise/backends', () => {
       expect(createGemToolConfig('rubocop')).toStrictEqual({
         packageName: 'rubocop',
         datasource: 'rubygems',
+      });
+    });
+  });
+
+  describe('createGithubToolConfig()', () => {
+    it('should create a tooling config with empty options', () => {
+      expect(
+        createGithubToolConfig('BurntSushi/ripgrep', '14.1.1', {}),
+      ).toStrictEqual({
+        packageName: 'BurntSushi/ripgrep',
+        datasource: 'github-releases',
+        currentValue: '14.1.1',
+      });
+    });
+
+    it('should preserve a leading v in the version', () => {
+      expect(createGithubToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
+        packageName: 'cli/cli',
+        datasource: 'github-releases',
+        currentValue: 'v2.64.0',
+      });
+    });
+
+    it('should set extractVersion with custom version_prefix', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'release-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+      });
+    });
+
+    it('should set extractVersion with version_prefix even if version has leading v', () => {
+      expect(
+        createGithubToolConfig('some/repo', 'v1.0.0', {
+          version_prefix: 'version-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: 'v1.0.0',
+        extractVersion: '^\\x76ersion\\x2d(?<version>.+)',
+      });
+    });
+
+    it('should handle empty version_prefix with version not having v', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', { version_prefix: '' }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('should handle empty version_prefix with version having v', () => {
+      expect(
+        createGithubToolConfig('some/repo', 'v1.0.0', { version_prefix: '' }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: 'v1.0.0',
+      });
+    });
+
+    it('should escape special regex characters in version_prefix', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'v1.0+',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x761\\.0\\+(?<version>.+)',
+      });
+    });
+
+    it('should escape brackets and parentheses in version_prefix', () => {
+      expect(
+        createGithubToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'prefix[test](v)',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'github-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x70refix\\[test\\]\\(v\\)(?<version>.+)',
+      });
+    });
+  });
+
+  describe('createGitlabToolConfig()', () => {
+    it('should create a tooling config with empty options', () => {
+      expect(
+        createGitlabToolConfig('gitlab-org/cli', '1.54.0', {}),
+      ).toStrictEqual({
+        packageName: 'gitlab-org/cli',
+        datasource: 'gitlab-releases',
+        currentValue: '1.54.0',
+      });
+    });
+
+    it('should not set extractVersion if the version has leading v', () => {
+      expect(
+        createGitlabToolConfig('gitlab-org/cli', 'v1.54.0', {}),
+      ).toStrictEqual({
+        packageName: 'gitlab-org/cli',
+        datasource: 'gitlab-releases',
+        currentValue: 'v1.54.0',
+      });
+    });
+
+    it('should set extractVersion with custom version_prefix', () => {
+      expect(
+        createGitlabToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'release-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'gitlab-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+      });
+    });
+
+    it('should escape special regex characters in version_prefix', () => {
+      expect(
+        createGitlabToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'v1.0+',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'gitlab-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x761\\.0\\+(?<version>.+)',
       });
     });
   });
@@ -165,6 +319,49 @@ describe('modules/manager/mise/backends', () => {
     });
   });
 
+  describe('createPypiToolConfig()', () => {
+    it('should create a tooling config for pypi package', () => {
+      expect(createPypiToolConfig('yamllint')).toStrictEqual({
+        packageName: 'yamllint',
+        datasource: 'pypi',
+      });
+    });
+
+    it('should create a tooling config for github shorthand', () => {
+      expect(createPypiToolConfig('psf/black')).toStrictEqual({
+        packageName: 'psf/black',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('should create a tooling config for github url', () => {
+      expect(
+        createPypiToolConfig('git+https://github.com/psf/black.git'),
+      ).toStrictEqual({
+        packageName: 'psf/black',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('should create a tooling config for git url', () => {
+      expect(
+        createPypiToolConfig('git+https://gitlab.com/user/repo.git'),
+      ).toStrictEqual({
+        packageName: 'https://gitlab.com/user/repo',
+        datasource: 'git-refs',
+      });
+    });
+
+    it('provides skipReason for zip file url', () => {
+      expect(
+        createPypiToolConfig('https://github.com/psf/black/archive/18.9b0.zip'),
+      ).toStrictEqual({
+        packageName: 'https://github.com/psf/black/archive/18.9b0.zip',
+        skipReason: 'unsupported-url',
+      });
+    });
+  });
+
   describe('createSpmToolConfig()', () => {
     it('should create a tooling config for github shorthand', () => {
       expect(createSpmToolConfig('tuist/tuist')).toStrictEqual({
@@ -221,6 +418,7 @@ describe('modules/manager/mise/backends', () => {
 
     it('should ignore options unless tag_regex is provided', () => {
       expect(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- deliberately passes an unrecognized option to verify it is ignored
         createUbiToolConfig('cli/cli', '2.64.0', { exe: 'gh' } as any),
       ).toStrictEqual({
         packageName: 'cli/cli',

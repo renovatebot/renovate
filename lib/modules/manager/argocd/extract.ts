@@ -1,33 +1,36 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import { withDebugMessage } from '../../../util/schema-utils';
-import { trimTrailingSlash } from '../../../util/url';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { isNonEmptyObject, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { withDebugMessage } from '../../../util/schema-utils/index.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import {
+  getOciChartDep,
+  isOCIRegistry,
+  removeOCIPrefix,
+} from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   type ApplicationDefinition,
-  ApplicationDefinitionSchema,
+  ApplicationDefinitions,
   type ApplicationSource,
   type ApplicationSpec,
-} from './schema';
-import { fileTestRegex } from './util';
+} from './schema.ts';
+import { fileTestRegex } from './util.ts';
 
 const kustomizeImageRe = regEx(/=(?<image>.+)$/);
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
@@ -37,16 +40,21 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions = ApplicationDefinitionSchema.catch(
+  const definitions = ApplicationDefinitions.catch(
     withDebugMessage([], `${packageFile} does not match schema`),
   ).parse(content);
 
-  const deps = definitions.flatMap(processAppSpec);
+  const deps = definitions.flatMap((definition) =>
+    processAppSpec(definition, config?.registryAliases),
+  );
 
   return deps.length ? { deps } : null;
 }
 
-function processSource(source: ApplicationSource): PackageDependency[] {
+function processSource(
+  source: ApplicationSource,
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency[] {
   // a chart variable is defined this is helm declaration
   if (source.chart) {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
@@ -55,9 +63,9 @@ function processSource(source: ApplicationSource): PackageDependency[] {
 
       return [
         {
+          ...getOciChartDep(source.repoURL, source.chart, registryAliases),
           depName: `${registryURL}/${source.chart}`,
           currentValue: source.targetRevision,
-          datasource: DockerDatasource.id,
         },
       ];
     }
@@ -68,6 +76,17 @@ function processSource(source: ApplicationSource): PackageDependency[] {
         registryUrls: [source.repoURL],
         currentValue: source.targetRevision,
         datasource: HelmDatasource.id,
+      },
+    ];
+  }
+
+  // Handle OCI Helm chart without explicit chart field
+  if (isOCIRegistry(source.repoURL)) {
+    return [
+      {
+        ...getOciChartDep(source.repoURL, undefined, registryAliases),
+        depName: trimTrailingSlash(removeOCIPrefix(source.repoURL)),
+        currentValue: source.targetRevision,
       },
     ];
   }
@@ -83,7 +102,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
   // Git repo is pointing to a Kustomize resources
   if (source.kustomize?.images) {
     dependencies.push(
-      ...source.kustomize.images.map(processKustomizeImage).filter(is.truthy),
+      ...source.kustomize.images.map(processKustomizeImage).filter(isTruthy),
     );
   }
 
@@ -92,6 +111,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
 
 function processAppSpec(
   definition: ApplicationDefinition,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const spec: ApplicationSpec =
     definition.kind === 'Application'
@@ -100,12 +120,12 @@ function processAppSpec(
 
   const deps: PackageDependency[] = [];
 
-  if (is.nonEmptyObject(spec.source)) {
-    deps.push(...processSource(spec.source));
+  if (isNonEmptyObject(spec.source)) {
+    deps.push(...processSource(spec.source, registryAliases));
   }
 
   for (const source of coerceArray(spec.sources)) {
-    deps.push(...processSource(source));
+    deps.push(...processSource(source, registryAliases));
   }
 
   return deps;

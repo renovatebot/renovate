@@ -1,30 +1,54 @@
-import { z } from 'zod';
-import { logger } from '../../../logger';
-import { LooseArray } from '../../../util/schema-utils';
+import { z } from 'zod/v4';
+import { logger } from '../../../logger/index.ts';
+import {
+  DeepNullish,
+  LooseArray,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
-const PackageSchema = z.object({
-  ecosystem: z.union([
-    z.literal('maven'),
-    z.literal('npm'),
-    z.literal('nuget'),
-    z.literal('pip'),
-    z.literal('rubygems'),
-    z.literal('rust'),
-    z.literal('composer'),
-    z.literal('go'),
-  ]),
+const Ecosystem = z.enum([
+  'actions',
+  'composer',
+  'go',
+  'maven',
+  'npm',
+  'nuget',
+  'pip',
+  'rubygems',
+  'rust',
+]);
+export type Ecosystem = z.infer<typeof Ecosystem>;
+
+const Package = z.object({
+  ecosystem: Ecosystem.catch((ctx) => {
+    logger.debug(
+      { ecosystem: ctx.input },
+      'Skipping vulnerability alert with unsupported ecosystem',
+    );
+    return undefined as any;
+  }),
   name: z.string(),
 });
 
-const SecurityVulnerabilitySchema = z
+const Severity = z.enum(['low', 'medium', 'high', 'critical']);
+
+const SecurityVulnerability = z
   .object({
-    first_patched_version: z.object({ identifier: z.string() }).nullish(),
-    package: PackageSchema,
+    first_patched_version: Nullish(z.object({ identifier: z.string() })),
+    package: Package,
+    severity: Severity,
     vulnerable_version_range: z.string(),
   })
   .nullable();
 
-const SecurityAdvisorySchema = z.object({
+const CvssSeverity = z.object({
+  vector_string: z.string().nullable(),
+  score: z.number().nullable(),
+});
+
+const SecurityAdvisory = z.object({
+  ghsa_id: z.string(),
+  summary: z.string(),
   description: z.string(),
   identifiers: z.array(
     z.object({
@@ -33,28 +57,42 @@ const SecurityAdvisorySchema = z.object({
     }),
   ),
   references: z.array(z.object({ url: z.string() })).optional(),
+  severity: Severity,
+  cvss_severities: Nullish(
+    DeepNullish(
+      z.object({
+        cvss_v3: CvssSeverity.optional(),
+        cvss_v4: CvssSeverity.optional(),
+      }),
+    ),
+  ),
 });
+export type SecurityAdvisory = z.infer<typeof SecurityAdvisory>;
 
-export const VulnerabilityAlertSchema = LooseArray(
+export const GithubVulnerabilityAlerts = LooseArray(
   z.object({
-    dismissed_reason: z.string().nullish(),
-    security_advisory: SecurityAdvisorySchema,
-    security_vulnerability: SecurityVulnerabilitySchema,
+    dismissed_reason: Nullish(z.string()),
+    security_advisory: SecurityAdvisory,
+    security_vulnerability: SecurityVulnerability,
     dependency: z.object({
       manifest_path: z.string(),
     }),
   }),
   {
-    /* v8 ignore start */
     onError: ({ error }) => {
       logger.debug(
-        { error },
+        { err: error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },
-    /* v8 ignore stop */
   },
+).transform((alerts) =>
+  alerts.filter((alert) => alert.security_vulnerability?.package?.ecosystem),
 );
+export type GithubVulnerabilityAlerts = z.infer<
+  typeof GithubVulnerabilityAlerts
+>;
+export type GithubVulnerabilityAlert = GithubVulnerabilityAlerts[number];
 
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
 const GithubResponseMetadata = z.object({
@@ -91,3 +129,57 @@ export const GithubElement = GithubFile.or(GithubFileMeta)
 export type GithubElement = z.infer<typeof GithubElement>;
 
 export const GithubContentResponse = z.array(GithubElement).or(GithubElement);
+
+export const GithubBranchProtection = z.object({
+  required_status_checks: Nullish(
+    z.object({
+      strict: z.boolean(),
+    }),
+  ),
+});
+export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;
+
+const GithubRulesetRule = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('non_fast_forward'),
+  }),
+  z.object({
+    type: z.literal('required_status_checks'),
+    parameters: z.object({
+      strict_required_status_checks_policy: z.boolean().optional(),
+    }),
+  }),
+  // prevents deletion
+  z.object({
+    type: z.literal('deletion'),
+  }),
+]);
+
+export const GithubBranchRulesets = LooseArray(GithubRulesetRule);
+export type GithubBranchRulesets = z.infer<typeof GithubBranchRulesets>;
+
+const GithubIssueBase = z.object({
+  number: z.number(),
+  state: z.string().transform((val) => val.toLowerCase()),
+  title: z.string(),
+  body: z.string(),
+});
+
+const GithubGraphqlIssue = GithubIssueBase.extend({
+  updatedAt: z.string(),
+}).transform((issue) => {
+  const lastModified = issue.updatedAt;
+  const { number, state, title, body } = issue;
+  return { number, state, title, body, lastModified };
+});
+
+const GithubRestIssue = GithubIssueBase.extend({
+  updated_at: z.string(),
+}).transform((issue) => {
+  const lastModified = issue.updated_at;
+  const { number, state, title, body } = issue;
+  return { number, state, title, body, lastModified };
+});
+
+export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
+export type GithubIssue = z.infer<typeof GithubIssue>;

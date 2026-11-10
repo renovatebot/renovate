@@ -1,5 +1,5 @@
-import { dump } from '../../../util/yaml';
-import * as helmv3Updater from '.';
+import { dump } from '../../../util/yaml.ts';
+import * as helmv3Updater from './index.ts';
 
 describe('modules/manager/helmv3/update', () => {
   describe('.bumpPackageVersion()', () => {

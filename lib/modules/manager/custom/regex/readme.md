@@ -36,7 +36,7 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 
 You must:
 
-- Capture the `currentValue` of the dependency in a named capture group
+- Capture the `currentValue` or `currentDigest` of the dependency in a named capture group
 - Set a `depName` or `packageName` capture group. Or use a template field: `depNameTemplate` and `packageNameTemplate`
 - Set a `datasource` capture group, or a `datasourceTemplate` config field
 
@@ -47,7 +47,6 @@ You may use any of these items:
 - A `depType` capture group, or a `depTypeTemplate` config field
 - A `versioning` capture group, or a `versioningTemplate` config field. If neither are present, Renovate defaults to `semver-coerced`
 - An `extractVersion` capture group, or an `extractVersionTemplate` config field
-- A `currentDigest` capture group
 - A `registryUrl` capture group, or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - An `indentation` capture group. It must be either empty, or whitespace only (otherwise `indentation` will be reset to an empty string)
 
@@ -93,7 +92,7 @@ something:4.7.2    something-else:4.7.2
 
 If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 You must select the `ECMAScript (JavaScript)` flavor of regex.
-Backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
+Backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` → `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
 ##### Renovate's regex differs from the online tools
@@ -249,4 +248,58 @@ To this:
 - project: 'pipeline-solutions/gitlab/fragments/docker-lint'
   ref: 2-4-1
   file: 'ci-include-docker-lint-base.yml'
+```
+
+#### Handling scenarios where dependency name must be extracted from the file path
+
+Some repositories structure dependencies so that the dependency name is embedded in the file path itself.
+Two common patterns are:
+
+```bash
+packages/
+  <package-name>/
+
+# or
+
+packages/
+  <package-name-1>/
+    version.txt
+  <package-name-2>/
+    version.txt
+```
+
+In these situations, the regex manager may need to derive the dependency name from either the filename or the directory containing that file.
+
+Renovate exposes two template fields that help with this:
+
+1. `packageFile`: Filename of the matched file
+1. `packageFileDir`: Directory path where the file exists (relative to repo root)
+
+For example, if you package file exists at `home/packages/package.json`, then:
+
+`packageFile` will be `package.json`
+`packageFileDir` will be `home/packages`
+
+These values can be referenced inside `depNameTemplate` or `packageNameTemplate`
+
+If your dependency folder looks like:
+
+```bash
+packages/my-lib/version.txt
+```
+
+You can configure the regex manager like:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["packages/.*/version\\.txt$"],
+      "matchStrings": ["(?<currentValue>.+)"],
+      "depNameTemplate": "{{lookup (split packageFileDir '/') 1 }}",
+      "datasourceTemplate": "github-tags"
+    }
+  ]
+}
 ```

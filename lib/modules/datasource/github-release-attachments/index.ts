@@ -1,25 +1,17 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { queryReleases } from '../../../util/github/graphql';
+import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type {
   GithubDigestFile,
   GithubRestAsset,
   GithubRestRelease,
-} from '../../../util/github/types';
-import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
-import { hashStream } from '../../../util/hash';
-import { GithubHttp } from '../../../util/http/github';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types';
-
-export const cacheNamespace = 'datasource-github-releases';
+} from '../../../util/github/types.ts';
+import { getApiBaseUrl } from '../../../util/github/url.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import { GithubReleasesDatasource } from '../github-releases/index.ts';
+import type { DigestConfig } from '../types.ts';
 
 function inferHashAlg(digest: string): string {
   switch (digest.length) {
@@ -31,33 +23,14 @@ function inferHashAlg(digest: string): string {
   }
 }
 
-export class GithubReleaseAttachmentsDatasource extends Datasource {
-  static readonly id = 'github-release-attachments';
-
-  override readonly defaultRegistryUrls = ['https://github.com'];
-
-  override http: GithubHttp;
-
-  override readonly releaseTimestampSupport = true;
-  // Note: not sure
-  override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `releaseTimestamp` field in the results.';
-  override readonly sourceUrlSupport = 'package';
-  override readonly sourceUrlNote =
-    'The source URL is determined by using the `packageName` and `registryUrl`.';
+export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
+  static override readonly id = 'github-release-attachments';
 
   constructor() {
     super(GithubReleaseAttachmentsDatasource.id);
-    this.http = new GithubHttp(GithubReleaseAttachmentsDatasource.id);
   }
 
-  @cache({
-    ttlMinutes: 1440,
-    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-    key: (release: GithubRestRelease, digest: string) =>
-      `findDigestFile:${release.html_url}:${digest}`,
-  })
-  async findDigestFile(
+  private async _findDigestFile(
     release: GithubRestRelease,
     digest: string,
   ): Promise<GithubDigestFile | null> {
@@ -81,19 +54,45 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     return null;
   }
 
-  @cache({
-    ttlMinutes: 1440,
-    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-    key: (asset: GithubRestAsset, algorithm: string) =>
-      `downloadAndDigest:${asset.browser_download_url}:${algorithm}`,
-  })
-  async downloadAndDigest(
+  findDigestFile(
+    release: GithubRestRelease,
+    digest: string,
+  ): Promise<GithubDigestFile | null> {
+    return withCache(
+      {
+        ttlMinutes: 1440,
+        namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
+        key: buildCacheKey('findDigestFile', release.html_url, digest),
+      },
+      () => this._findDigestFile(release, digest),
+    );
+  }
+
+  private async _downloadAndDigest(
     asset: GithubRestAsset,
     algorithm: string,
   ): Promise<string> {
     const res = this.http.stream(asset.browser_download_url);
     const digest = await hashStream(res, algorithm);
     return digest;
+  }
+
+  downloadAndDigest(
+    asset: GithubRestAsset,
+    algorithm: string,
+  ): Promise<string> {
+    return withCache(
+      {
+        ttlMinutes: 1440,
+        namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
+        key: buildCacheKey(
+          'downloadAndDigest',
+          asset.browser_download_url,
+          algorithm,
+        ),
+      },
+      () => this._downloadAndDigest(asset, algorithm),
+    );
   }
 
   async findAssetWithDigest(
@@ -145,8 +144,8 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     digestAsset: GithubDigestFile,
     release: GithubRestRelease,
   ): Promise<string | null> {
-    const current = digestAsset.currentVersion.replace(regEx(/^v/), '');
-    const next = release.tag_name.replace(regEx(/^v/), '');
+    const current = stripVersionPrefix(digestAsset.currentVersion);
+    const next = stripVersionPrefix(release.tag_name);
 
     if (digestAsset.digestedFileName) {
       const checksumAssetName = digestAsset.assetName.replace(current, next);
@@ -206,7 +205,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
       currentDigest,
       registryUrl,
     }: DigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
@@ -217,6 +216,9 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     }
     if (!currentValue) {
       return currentDigest;
+    }
+    if (!newValue) {
+      return null;
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
@@ -239,32 +241,5 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
       newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
     }
     return newDigest;
-  }
-
-  /**
-   * This function can be used to fetch releases with a customizable versioning
-   * (e.g. semver) and with releases.
-   *
-   * This function will:
-   *  - Fetch all releases
-   *  - Sanitize the versions if desired (e.g. strip out leading 'v')
-   *  - Return a dependency object containing sourceUrl string and releases array
-   */
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
-    const releasesResult = await queryReleases(config, this.http);
-    const releases = releasesResult.map((item) => {
-      const { version, releaseTimestamp, isStable } = item;
-      const result: Release = {
-        version,
-        gitRef: version,
-        releaseTimestamp,
-      };
-      if (is.boolean(isStable)) {
-        result.isStable = isStable;
-      }
-      return result;
-    });
-    const sourceUrl = getSourceUrl(config.packageName, config.registryUrl);
-    return { sourceUrl, releases };
   }
 }

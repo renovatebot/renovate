@@ -1,5 +1,5 @@
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(content: string): PackageFileContent {
   const dep: PackageDependency = {

@@ -1,8 +1,8 @@
-import type { RepositoryCacheType } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { RepoCache } from '../types';
-import { RepoCacheLocal } from './local';
-import { RepoCacheS3 } from './s3';
+import type { RepositoryCacheType } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { RepoCache } from '../types.ts';
+import { RepoCacheLocal } from './local.ts';
+import { RepoCacheS3 } from './s3.ts';
 
 export class CacheFactory {
   static get(

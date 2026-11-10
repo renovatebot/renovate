@@ -1,13 +1,17 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import { logger } from '../../../../logger';
+import { logger } from '../../../../logger/index.ts';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import type { LockFile } from './types';
+} from '../../../../util/fs/index.ts';
+import type { PackageFileContent } from '../../types.ts';
+import type { YarnCatalogs } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import type { Catalog, LockFile } from './types.ts';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -20,7 +24,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
-        lockfileVersion = parseInt(val.cacheKey);
+        lockfileVersion = parseInt(val.cacheKey, 10);
         logger.once.debug(
           `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
         );
@@ -32,7 +36,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
             const { selector } = structUtils.parseRange(range);
 
             logger.trace({ entry, version: val.version });
-            lockedVersions[packageName + '@' + selector] = parsed[key].version;
+            lockedVersions[`${packageName}@${selector}`] = parsed[key].version;
           } catch (err) {
             logger.debug(
               { entry, err },
@@ -64,12 +68,13 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
+  // TODO: fix type #22198
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml); /* v8 ignore start -- needs test */
-  } catch (err) {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
-  } /* v8 ignore stop -- needs test */
+  }
   const paths = [
     conf?.cacheFolder ?? './.yarn/cache',
     '.pnp.cjs',
@@ -87,7 +92,8 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
-  if (is.string(yarnrcYml)) {
+  // v8 ignore else -- TODO: add test #40625
+  if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {
       if (await localPathExists(getSiblingFileName(yarnrcYmlPath, p))) {
@@ -114,10 +120,62 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   if (lockfileVersion && lockfileVersion >= 8) {
     // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
     return '^3.0.0';
-  } else if (lockfileVersion && lockfileVersion >= 6) {
+  }
+  if (lockfileVersion && lockfileVersion >= 6) {
     // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
     return '^2.2.0';
   }
 
   return '^2.0.0';
+}
+
+export async function extractYarnCatalogs(
+  catalogs: YarnCatalogs,
+  packageFile: string,
+  hasPackageManager: boolean,
+): Promise<PackageFileContent<NpmManagerData>> {
+  logger.trace(`yarn.extractYarnCatalogs(${packageFile})`);
+
+  const yarnCatalogs = yarnCatalogsToArray(catalogs);
+
+  const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
+
+  let yarnLock: string | undefined;
+  const filePath = getSiblingFileName(packageFile, 'yarn.lock');
+
+  if (await localPathExists(filePath)) {
+    yarnLock = filePath;
+  }
+
+  return {
+    deps,
+    managerData: {
+      yarnLock,
+      hasPackageManager,
+    },
+  };
+}
+
+function yarnCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: YarnCatalogs): Catalog[] {
+  const result: Catalog[] = [];
+
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({
+      name,
+      dependencies,
+    });
+  }
+
+  return result;
 }

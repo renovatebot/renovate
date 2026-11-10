@@ -1,8 +1,8 @@
-import { logger } from '../logger';
-import { clone } from '../util/clone';
-import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
-import * as options from './options';
-import type { RenovateConfig } from './types';
+import { logger } from '../logger/index.ts';
+import { clone } from '../util/clone.ts';
+import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils.ts';
+import * as options from './options/index.ts';
+import type { RenovateConfig } from './types.ts';
 
 export function mergeChildConfig<
   T extends Record<string, any>,
@@ -17,7 +17,10 @@ export function mergeChildConfig<
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
 
   // Ensure highest severity survives parent / child merge
-  if (config?.isVulnerabilityAlert) {
+  const hasSeverity =
+    parent.vulnerabilitySeverity !== undefined ||
+    child.vulnerabilitySeverity !== undefined;
+  if (config.isVulnerabilityAlert && hasSeverity) {
     config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
       parent,
       child,

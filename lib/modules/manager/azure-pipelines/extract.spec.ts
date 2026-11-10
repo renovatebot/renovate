@@ -1,21 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
+import { Fixtures } from '~test/fixtures.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks/index.ts';
 import {
   extractAzurePipelinesTasks,
   extractContainer,
   extractRepository,
   parseAzurePipelines,
-} from './extract';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+} from './extract.ts';
+import { extractPackageFile } from './index.ts';
 
 const azurePipelinesFilename = 'azure-pipelines.yaml';
 
 const azurePipelines = Fixtures.get('azure-pipelines.yaml');
-const azurePipelinesNoDependency = Fixtures.get(
-  'azure-pipelines-no-dependency.yaml',
-);
 
 describe('modules/manager/azure-pipelines/extract', () => {
   afterEach(() => {
@@ -186,13 +183,36 @@ describe('modules/manager/azure-pipelines/extract', () => {
   describe('extractContainer()', () => {
     it('should extract container information', () => {
       expect(
-        extractContainer({
-          image: 'ubuntu:16.04',
-        }),
+        extractContainer(
+          {
+            image: 'ubuntu:16.04',
+          },
+          {},
+        ),
       ).toMatchObject({
         depName: 'ubuntu',
         currentValue: '16.04',
         datasource: 'docker',
+        depType: 'docker',
+      });
+    });
+
+    it('should resolve registry aliases', () => {
+      expect(
+        extractContainer(
+          {
+            image: 'quay.io/ubuntu:16.04',
+          },
+          {
+            registryAliases: { 'quay.io': 'my-quay-mirror.registry.com' },
+          },
+        ),
+      ).toMatchObject({
+        depName: 'quay.io/ubuntu',
+        packageName: 'my-quay-mirror.registry.com/ubuntu',
+        currentValue: '16.04',
+        datasource: 'docker',
+        depType: 'docker',
       });
     });
   });
@@ -243,8 +263,32 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should return null when there is no dependency found', () => {
+      const azurePipelinesNoDependency = codeBlock`
+        resources:
+          pipelines:
+            - pipeline: MyAppA
+              source: MyCIPipelineA
+            - pipeline: MyAppB
+              source: MyCIPipelineB
+              trigger: true
+      `;
       expect(
         extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename, {
+          repository: 'repo',
+        }),
+      ).toBeNull();
+    });
+
+    it('should skip steps and containers that yield no dependency', () => {
+      const packageFile = codeBlock`
+        resources:
+          containers:
+          - container: linux
+        steps:
+        - task: NotAVersionedTask
+      `;
+      expect(
+        extractPackageFile(packageFile, azurePipelinesFilename, {
           repository: 'repo',
         }),
       ).toBeNull();

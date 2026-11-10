@@ -1,12 +1,15 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { parse } from '../../../util/html';
-import type { HttpError } from '../../../util/http';
-import { asTimestamp } from '../../../util/timestamp';
-import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { parse } from '../../../util/html.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import {
+  isVersion,
+  id as rubyVersioningId,
+} from '../../versioning/ruby/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class RubyVersionDatasource extends Datasource {
   static readonly id = 'ruby-version';
@@ -15,9 +18,13 @@ export class RubyVersionDatasource extends Datasource {
     super(RubyVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://www.ruby-lang.org/'];
+  }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly defaultVersioning = rubyVersioningId;
 
@@ -28,8 +35,7 @@ export class RubyVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/ruby/ruby.';
 
-  @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
-  async getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
@@ -43,8 +49,9 @@ export class RubyVersionDatasource extends Datasource {
       const response = await this.http.getText(rubyVersionsUrl);
 
       const root = parse(response.body);
-      const rows =
-        root.querySelector('.release-list')?.querySelectorAll('tr') ?? [];
+      const rows = coerceArray(
+        root.querySelector('.release-list')?.querySelectorAll('tr'),
+      );
       rows.forEach((row) => {
         const tds = row.querySelectorAll('td');
         const columns: string[] = [];
@@ -69,6 +76,17 @@ export class RubyVersionDatasource extends Datasource {
     }
 
     return res;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return this.cached(
+      {
+        key: 'all',
+        public: true,
+        fallback: true,
+      },
+      () => this.fetchReleases(config),
+    );
   }
 
   override handleHttpErrors(err: HttpError): never | void {

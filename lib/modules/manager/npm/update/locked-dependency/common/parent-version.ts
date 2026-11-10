@@ -1,10 +1,10 @@
-import { logger } from '../../../../../../logger';
+import { logger } from '../../../../../../logger/index.ts';
 import type {
   GetPkgReleasesConfig,
   ReleaseResult,
-} from '../../../../../datasource';
-import { getPkgReleases } from '../../../../../datasource';
-import { api as semver } from '../../../../../versioning/npm';
+} from '../../../../../datasource/index.ts';
+import { getPkgReleases } from '../../../../../datasource/index.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
 
 const pkgCache = new Map<string, Promise<ReleaseResult | null>>();
 
@@ -23,6 +23,13 @@ function getPkgReleasesCached(
   return cachedResult;
 }
 
+function isStableVersionAtLeast(version: string, minVersion: string): boolean {
+  if (!semver.isVersion(version) || !semver.isStable(version)) {
+    return false;
+  }
+  return version === minVersion || semver.isGreaterThan(version, minVersion);
+}
+
 /**
  * Finds the first stable version of parentName after parentStartingVersion which either:
  * - depends on targetDepName@targetVersion or a range which it satisfies, OR
@@ -35,50 +42,40 @@ export async function findFirstParentVersion(
   targetDepName: string,
   targetVersion: string,
 ): Promise<string | null> {
-  /* v8 ignore start -- needs test */
+  /* v8 ignore next -- needs test */
   if (!semver.isVersion(parentStartingVersion)) {
     logger.debug('parentStartingVersion is not a version - cannot remediate');
     return null;
-  } /* v8 ignore stop -- needs test */
+  }
   logger.debug(
     `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`,
   );
   try {
     const targetDep = await getPkgReleasesCached(targetDepName);
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
     if (!targetDep) {
       logger.info(
         { targetDepName },
         'Could not look up target dependency for remediation',
       );
       return null;
-    } /* v8 ignore stop -- needs test */
+    }
     const targetVersions = targetDep.releases
       .map((release) => release.version)
-      .filter(
-        (version) =>
-          semver.isVersion(version) &&
-          semver.isStable(version) &&
-          (version === targetVersion ||
-            semver.isGreaterThan(version, targetVersion)),
-      );
+      .filter((version) => isStableVersionAtLeast(version, targetVersion));
     const parentDep = await getPkgReleasesCached(parentName);
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
     if (!parentDep) {
       logger.info(
         { parentName },
         'Could not look up parent dependency for remediation',
       );
       return null;
-    } /* v8 ignore stop -- needs test */
+    }
     const parentVersions = parentDep.releases
       .map((release) => release.version)
-      .filter(
-        (version) =>
-          semver.isVersion(version) &&
-          semver.isStable(version) &&
-          (version === parentStartingVersion ||
-            semver.isGreaterThan(version, parentStartingVersion)),
+      .filter((version) =>
+        isStableVersionAtLeast(version, parentStartingVersion),
       )
       .sort((v1, v2) => semver.sortVersions(v1, v2));
     // iterate through parentVersions in sorted order
@@ -118,14 +115,13 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-    /* v8 ignore start -- needs test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn(
       { parentName, parentStartingVersion, targetDepName, targetVersion, err },
       'findFirstParentVersion error',
     );
     return null;
-  } /* v8 ignore stop -- needs test */
+  }
   logger.debug(`Could not find a matching version`);
   return null;
 }

@@ -1,9 +1,9 @@
-import type { lexer, parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
-import { qApplyFrom } from './apply-from';
-import { qAssignments } from './assignments';
+import type { lexer, parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
+import { qApplyFrom } from './apply-from.ts';
+import { qAssignments } from './assignments.ts';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
@@ -13,19 +13,19 @@ import {
   qVersion,
   storeInTokenMap,
   storeVarToken,
-} from './common';
-import { handleRegistryContent, handleRegistryUrl } from './handlers';
-import { qPlugins } from './plugins';
+} from './common.ts';
+import { handleRegistryContent, handleRegistryUrl } from './handlers.ts';
+import { qPlugins } from './plugins.ts';
 
-const cleanupTmpContentSpec = (ctx: Ctx): Ctx => {
+function cleanupTmpContentSpec(ctx: Ctx): Ctx {
   ctx.tmpRegistryContent = [];
   return ctx;
-};
+}
 
-const qContentDescriptorSpec = (
+function qContentDescriptorSpec(
   methodName: RegExp,
   matcher: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> => {
+): q.QueryBuilder<Ctx, parser.Node> {
   return q
     .sym<Ctx>(methodName, storeVarToken)
     .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
@@ -41,13 +41,13 @@ const qContentDescriptorSpec = (
         search: q.begin<Ctx>().join(matcher).end(),
       }),
     );
-};
+}
 
 // includeModule('foo')
 // excludeModuleByRegex('bar')
-const qContentDescriptor = (
+function qContentDescriptor(
   mode: 'include' | 'exclude',
-): q.QueryBuilder<Ctx, parser.Node> => {
+): q.QueryBuilder<Ctx, parser.Node> {
   return q
     .alt<Ctx>(
       qContentDescriptorSpec(
@@ -66,7 +66,7 @@ const qContentDescriptor = (
       ),
     )
     .handler(handleRegistryContent);
-};
+}
 
 // content { includeModule('foo'); excludeModule('bar') }
 const qRegistryContent = q.sym<Ctx>('content').tree({
@@ -213,6 +213,7 @@ const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
   },
   search: q
     .handler<Ctx>((ctx) => {
+      // v8 ignore else -- the handler only runs once a registry scope was stored
       if (ctx.tmpTokenStore.registryScope) {
         ctx.tokenMap.registryScope = ctx.tmpTokenStore.registryScope;
       }

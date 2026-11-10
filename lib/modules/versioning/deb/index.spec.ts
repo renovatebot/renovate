@@ -1,4 +1,4 @@
-import deb from '.';
+import deb from './index.ts';
 
 describe('modules/versioning/deb/index', () => {
   it.each`

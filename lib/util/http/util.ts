@@ -1,22 +1,39 @@
-import { clone } from '../clone';
-import type { HttpResponse } from './types';
+import { HOST_BLOCKED } from '../../constants/error-messages.ts';
+import { clone } from '../clone.ts';
+import type { HttpResponse } from './types.ts';
 
 // Copying will help to avoid circular structure
 // and mutation of the cached response.
 export function copyResponse<T>(
-  response: HttpResponse<T>,
+  { statusCode, headers, body, cached }: HttpResponse<T>,
   deep: boolean,
 ): HttpResponse<T> {
-  const { body, statusCode, headers } = response;
-  return deep
-    ? {
-        statusCode,
-        body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
-        headers: clone(headers),
-      }
-    : {
-        statusCode,
-        body,
-        headers,
-      };
+  const res: HttpResponse<T> = { statusCode, headers, body };
+
+  if (deep) {
+    res.headers = clone(headers);
+    if (Buffer.isBuffer(body)) {
+      // Buffer#slice returns a view, so copy it explicitly
+      res.body = Buffer.from(body) as T;
+    } else if (body instanceof Uint8Array) {
+      res.body = body.slice() as T;
+    } else {
+      res.body = clone<T>(body);
+    }
+  }
+
+  if (cached) {
+    res.cached = true;
+  }
+
+  return res;
+}
+
+/**
+ * The log message for a request the HTTP layer refused, distinguishing a host blocked by the internal-host policy from one an administrator disabled.
+ *
+ * Both are reported the same way by their callers - traced and swallowed - so only the wording tells them apart in the logs.
+ */
+export function refusedHostMessage(err: Error): string {
+  return err.message === HOST_BLOCKED ? 'Host blocked' : 'Host disabled';
 }

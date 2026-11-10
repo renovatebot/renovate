@@ -1,8 +1,8 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../types';
-import { cleanupTempVars, qValueMatcher, storeInTokenMap } from './common';
-import { handleApplyFrom } from './handlers';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from '../types.ts';
+import { cleanupTempVars, qValueMatcher, storeInTokenMap } from './common.ts';
+import { handleApplyFrom } from './handlers.ts';
 
 // apply from: 'foo.gradle'
 // apply(from = property("foo"))

@@ -1,14 +1,17 @@
-import is from '@sindresorhus/is';
-import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import { detectPlatform } from '../common';
-import { getEnv } from '../env';
-import { find, getAll } from '../host-rules';
-import { regEx } from '../regex';
-import { createURLFromHostOrURL, isHttpUrl } from '../url';
-import type { AuthenticationRule } from './types';
-import { parseGitUrl } from './url';
+import { isEmptyString } from '@sindresorhus/is';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import { detectPlatform } from '../common.ts';
+import type { ResolvedChildEnv } from '../exec/utils.ts';
+import { find, findDetachedCredentials, getAll } from '../host-rules.ts';
+import { regEx } from '../regex.ts';
+import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
+import { addGitConfigEnvironmentVariables } from './config.ts';
+import type { AuthenticationRule } from './types.ts';
+import { getTokenCredentials, parseGitUrl } from './url.ts';
+
+const platformHostTypes = new Set<string>(PLATFORM_HOST_TYPES);
 
 const githubApiUrls = new Set([
   'github.com',
@@ -18,14 +21,14 @@ const githubApiUrls = new Set([
 ]);
 
 /**
- * Add authorization to a Git Url and returns a new environment variables object
- * @returns a new NodeJS.ProcessEnv object without modifying any input parameters
+ * Append Git authentication configuration to a resolved child environment.
+ * @returns a new environment without modifying the input
  */
 export function getGitAuthenticatedEnvironmentVariables(
+  environmentVariables: Readonly<ResolvedChildEnv>,
   originalGitUrl: string,
   { token, username, password, hostType, matchHost }: HostRule,
-  environmentVariables?: NodeJS.ProcessEnv,
-): NodeJS.ProcessEnv {
+): ResolvedChildEnv {
   if (!token && !(username && password)) {
     logger.warn(
       { host: matchHost },
@@ -34,24 +37,6 @@ export function getGitAuthenticatedEnvironmentVariables(
     return { ...environmentVariables };
   }
 
-  const env = getEnv();
-  // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
-  const gitConfigCountEnvVariable =
-    environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
-  let gitConfigCount = 0;
-  if (gitConfigCountEnvVariable) {
-    // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
-    gitConfigCount = parseInt(gitConfigCountEnvVariable);
-    if (Number.isNaN(gitConfigCount)) {
-      logger.warn(
-        {
-          GIT_CONFIG_COUNT: env.GIT_CONFIG_COUNT,
-        },
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
-      );
-      gitConfigCount = 0;
-    }
-  }
   let authenticationRules: AuthenticationRule[];
   if (token) {
     authenticationRules = getAuthenticationRulesWithToken(
@@ -70,22 +55,13 @@ export function getGitAuthenticatedEnvironmentVariables(
     );
   }
 
-  // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
-  // add the two new config key and value to the returnEnvironmentVariables object
-  // increase the CONFIG_COUNT by one for each rule and add it to the object
-  const newEnvironmentVariables = {
-    ...environmentVariables,
-  };
-  for (const rule of authenticationRules) {
-    newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
-      `url.${rule.url}.insteadOf`;
-    newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] =
-      rule.insteadOf;
-    gitConfigCount++;
-  }
-  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
-
-  return newEnvironmentVariables;
+  return addGitConfigEnvironmentVariables(
+    environmentVariables,
+    authenticationRules.map((rule) => ({
+      key: `url.${rule.url}.insteadOf`,
+      value: rule.insteadOf,
+    })),
+  );
 }
 
 function getAuthenticationRulesWithToken(
@@ -93,13 +69,16 @@ function getAuthenticationRulesWithToken(
   hostType: string | undefined | null,
   authToken: string,
 ): AuthenticationRule[] {
-  let token = authToken;
-  let type = hostType;
-  type ??= detectPlatform(url);
-  if (type === 'gitlab') {
-    token = `gitlab-ci-token:${authToken}`;
-  }
-  return getAuthenticationRules(url, type, token);
+  const type = hostType ?? detectPlatform(url);
+  const platform =
+    hostType && platformHostTypes.has(hostType)
+      ? hostType
+      : detectPlatform(url);
+  return getAuthenticationRules(
+    url,
+    type,
+    getTokenCredentials(platform, authToken),
+  );
 }
 
 /**
@@ -128,7 +107,8 @@ export function getAuthenticationRules(
     // sshPort is string, wrong type!
     // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
     // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
-    if (!sshPort || is.emptyString(sshPort)) {
+    // v8 ignore next -- TODO: add test #40625
+    if (!sshPort || isEmptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
       sshPort = '7999';
@@ -136,6 +116,10 @@ export function getAuthenticationRules(
   }
 
   const url = { ...insteadUrl };
+  // git-url-parse would prefix `x-token-auth:` again on bitbucket.org
+  if (hasUser && url.source === 'bitbucket.org') {
+    url.source = 'bitbucket';
+  }
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol
     : 'https';
@@ -168,10 +152,43 @@ export function getAuthenticationRules(
   return authenticationRules;
 }
 
+function hasCredentials(rule: HostRule): boolean {
+  const basicAuth = rule.username && rule.password;
+  return !!(rule.token ?? basicAuth);
+}
+
+/**
+ * Appends Git authentication for the repository `url` from the credentials registered from URL credentials for it with `hostType`, a username without a password as a percent-encoded token; configured host rules come through `getAll()` instead.
+ * @returns a new environment without modifying the input
+ */
+function getGitUrlEnvironmentVariables(
+  environmentVariables: Readonly<ResolvedChildEnv>,
+  url: string,
+  hostType: string,
+): ResolvedChildEnv {
+  const credentials = findDetachedCredentials({ hostType, url });
+  if (!credentials?.username) {
+    return { ...environmentVariables };
+  }
+  const auth: HostRule = credentials.password
+    ? credentials
+    : { token: encodeURIComponent(credentials.username) };
+  return getGitAuthenticatedEnvironmentVariables(environmentVariables, url, {
+    ...auth,
+    hostType,
+  });
+}
+
+/**
+ * Appends Git authentication from the host rules with a `matchHost` for the platform host types and `hostTypes`, and, when `url` is given, for that single repository from the credentials registered from URL credentials for it with each of `hostTypes`.
+ * @returns a new environment without modifying the input
+ */
 export function getGitEnvironmentVariables(
-  additionalHostTypes: string[] = [],
-): NodeJS.ProcessEnv {
-  let environmentVariables: NodeJS.ProcessEnv = {};
+  environmentVariables: Readonly<ResolvedChildEnv>,
+  hostTypes: readonly string[] = [],
+  url?: string,
+): ResolvedChildEnv {
+  let gitEnvironmentVariables: ResolvedChildEnv = { ...environmentVariables };
 
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
   const gitHubHostRule = find({
@@ -180,54 +197,64 @@ export function getGitEnvironmentVariables(
   });
 
   if (gitHubHostRule?.token) {
-    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+    gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(
+      gitEnvironmentVariables,
       'https://github.com/',
       gitHubHostRule,
     );
   }
 
-  // construct the Set of allowed hostTypes consisting of the standard Git provides
-  // plus additionalHostTypes, which are provided as parameter
+  // Manager-scoped rules are opt-in so unrelated credentials are not exposed to Git.
   const gitAllowedHostTypes = new Set<string>([
     ...PLATFORM_HOST_TYPES,
-    ...additionalHostTypes,
+    ...hostTypes,
   ]);
 
   // filter rules without `matchHost` and `token` or username and password and github api github rules
   const hostRules = getAll()
-    .filter((r) => r.matchHost && (r.token ?? (r.username && r.password)))
+    .filter((r) => r.matchHost && hasCredentials(r))
     .filter((r) => !gitHubHostRule || !githubApiUrls.has(r.matchHost!));
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   // for each hostRule with hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
     if (!hostRule.hostType || gitAllowedHostTypes.has(hostRule.hostType)) {
-      environmentVariables = addAuthFromHostRule(
+      gitEnvironmentVariables = addAuthFromHostRule(
         hostRule,
-        environmentVariables,
+        gitEnvironmentVariables,
       );
     }
   }
-  return environmentVariables;
+
+  // `getAll()` leaves out the rules registered from URL credentials, which only apply to the repository they came from
+  if (url) {
+    for (const hostType of hostTypes) {
+      gitEnvironmentVariables = getGitUrlEnvironmentVariables(
+        gitEnvironmentVariables,
+        url,
+        hostType,
+      );
+    }
+  }
+  return gitEnvironmentVariables;
 }
 
 function addAuthFromHostRule(
   hostRule: HostRule,
-  env: NodeJS.ProcessEnv,
-): NodeJS.ProcessEnv {
-  let environmentVariables = env;
+  environmentVariables: Readonly<ResolvedChildEnv>,
+): ResolvedChildEnv {
   const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
   if (isHttpUrl(httpUrl)) {
     logger.trace(`Adding Git authentication for ${httpUrl} using token auth.`);
-    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+    return getGitAuthenticatedEnvironmentVariables(
+      environmentVariables,
       httpUrl!,
       hostRule,
-      environmentVariables,
-    );
-  } else {
-    logger.debug(
-      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`,
     );
   }
-  return environmentVariables;
+
+  logger.debug(
+    `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`,
+  );
+  return { ...environmentVariables };
 }

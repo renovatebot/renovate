@@ -1,14 +1,19 @@
 import upath from 'upath';
 import type { DeepMockProxy } from 'vitest-mock-extended';
-import type { RenovateConfig } from '../lib/config/types';
-import * as _logger from '../lib/logger';
-import type { Platform } from '../lib/modules/platform';
-import { platform as _platform } from '../lib/modules/platform';
-import { scm as _scm } from '../lib/modules/platform/scm';
-import * as _env from '../lib/util/exec/env';
-import * as _fs from '../lib/util/fs';
-import * as _git from '../lib/util/git';
-import * as _hostRules from '../lib/util/host-rules';
+import type { RenovateConfig } from '../lib/config/types.ts';
+import * as _logger from '../lib/logger/index.ts';
+import type { Platform } from '../lib/modules/platform/index.ts';
+import { platform as _platform } from '../lib/modules/platform/index.ts';
+import { scm as _scm } from '../lib/modules/platform/scm.ts';
+import * as _env from '../lib/util/exec/env.ts';
+import * as _fs from '../lib/util/fs/index.ts';
+import * as _git from '../lib/util/git/index.ts';
+import { hash } from '../lib/util/hash.ts';
+import * as _hostRules from '../lib/util/host-rules.ts';
+import {
+  type LongCommitSha,
+  toLongCommitSha,
+} from '../lib/util/schema-utils/git.ts';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -36,7 +41,8 @@ export const platform = vi.mocked(partial<Required<Platform>>(_platform));
 export const scm = vi.mocked(_scm);
 export const env = vi.mocked(_env);
 export const hostRules = vi.mocked(_hostRules);
-export const logger = vi.mocked(_logger, true);
+export const logger: ReturnType<typeof vi.mockObject<typeof _logger>> =
+  vi.mocked(_logger, true);
 
 export type { RenovateConfig };
 
@@ -77,4 +83,39 @@ function getCallerFileName(): string | null {
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
+}
+
+/**
+ * Deterministically derive a valid {@link LongCommitSha} from a seed, for tests.
+ * Same seed always yields the same SHA, keeping snapshots stable.
+ * Defaults to a 40-char (sha1) hash; pass 'sha256' for a 64-char hash.
+ */
+export function fakeSha(
+  seed: string,
+  algorithm: 'sha1' | 'sha256' = 'sha1',
+): LongCommitSha {
+  return toLongCommitSha(hash(seed, algorithm));
+}
+
+/**
+ * Variables that `vi.stubEnv()` treats as booleans: it maps them onto '1' / ''
+ * rather than deleting them, so they cannot be cleared through a stub.
+ * Vitest sets them itself, and nothing under test reads them.
+ */
+const unstubbableEnvVars = new Set(['PROD', 'DEV', 'SSR']);
+
+/**
+ * Clear every environment variable for the duration of the current test.
+ *
+ * Replacing `process.env` wholesale would break `vi.stubEnv()`, which captures
+ * the original object when the worker starts and would keep deleting from it.
+ * Stubbing each key instead keeps that intact, and `unstubEnvs` restores them
+ * all before the next test.
+ */
+export function clearEnv(): void {
+  for (const key of Object.keys(process.env)) {
+    if (!unstubbableEnvVars.has(key)) {
+      vi.stubEnv(key, undefined);
+    }
+  }
 }

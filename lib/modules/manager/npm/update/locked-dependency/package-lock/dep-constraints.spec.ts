@@ -1,7 +1,7 @@
-import { findDepConstraints } from './dep-constraints';
-import { Fixtures } from '~test/fixtures';
+import { Fixtures } from '~test/fixtures.ts';
+import { findDepConstraints } from './dep-constraints.ts';
 
-vi.mock('../../../../../../util/fs');
+vi.mock('../../../../../../util/fs/index.ts');
 
 const packageJson = Fixtures.getJson('package.json');
 const packageLockJson = Fixtures.getJson('package-lock-v1.json');

@@ -1,13 +1,19 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as p from '../../../util/promises';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { ReadContentResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import {
+  localPathIsSymbolicLink,
+  readLocalSymlink,
+} from '../../../util/fs/index.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import * as p from '../../../util/promises.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type { ReadContentResult } from './types.ts';
+
+const gitExec = withGitEnvironment(['hermit']);
 
 /**
  * updateArtifacts runs hermit install for each updated dependencies
@@ -19,13 +25,21 @@ export async function updateArtifacts(
   try {
     await updateHermitPackage(update);
   } catch (err) {
-    const execErr: UpdateHermitError = err;
     logger.debug({ err }, `error updating hermit packages.`);
+    if (err instanceof UpdateHermitError) {
+      return [
+        {
+          artifactError: {
+            fileName: `from: ${err.from}, to: ${err.to}`,
+            stderr: err.stderr,
+          },
+        },
+      ];
+    }
     return [
       {
         artifactError: {
-          lockFile: `from: ${execErr.from}, to: ${execErr.to}`,
-          stderr: execErr.stderr,
+          stderr: err instanceof Error ? err.message : String(err),
         },
       },
     ];
@@ -59,6 +73,7 @@ async function getContent(file: string): Promise<ReadContentResult> {
   let contents: string | null = '';
   const isSymlink = await localPathIsSymbolicLink(file);
 
+  // v8 ignore else -- hermit always tracks its packages as symlinks
   if (isSymlink) {
     contents = await readLocalSymlink(file);
   }
@@ -226,13 +241,16 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
     const uninstallCommands = `./hermit uninstall ${packagesToUninstall}`;
 
     try {
-      const result = await exec(uninstallCommands, execOptions);
+      const result = await gitExec(uninstallCommands, execOptions);
       logger.trace(
         { stdout: result.stdout },
         `hermit uninstall command stdout`,
       );
     } catch (e) {
       logger.warn({ err: e }, `error uninstall hermit package for replacement`);
+      if (!(e instanceof ExecError)) {
+        throw e;
+      }
       throw new UpdateHermitError(
         fromPackages,
         packagesToUninstall,
@@ -254,10 +272,13 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   );
 
   try {
-    const result = await exec(execCommands, execOptions);
+    const result = await gitExec(execCommands, execOptions);
     logger.trace({ stdout: result.stdout }, `hermit command stdout`);
   } catch (e) {
     logger.warn({ err: e }, `error updating hermit package`);
+    if (!(e instanceof ExecError)) {
+      throw e;
+    }
     throw new UpdateHermitError(
       fromPackages,
       packagesToInstall,

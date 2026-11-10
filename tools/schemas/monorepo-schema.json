@@ -1,7 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "$schema": { "type": "string" },
     "repoGroups": {
       "type": "object",
       "patternProperties": {
@@ -37,10 +38,10 @@
       "patternProperties": {
         "^[a-zA-Z0-9. -]+$": {
           "oneOf": [
-            { "type": "string", "pattern": "^/.+/$" },
+            { "type": "string" },
             {
               "type": "array",
-              "items": { "type": "string", "pattern": "^/.+/$" }
+              "items": { "type": "string" }
             }
           ]
         }

@@ -1,9 +1,9 @@
-import * as hostRules from '../util/host-rules';
-import { Http } from '../util/http';
-import errSerializer from './err-serializer';
-import { sanitizeValue } from './utils';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
+import * as hostRules from '../util/host-rules.ts';
+import { Http } from '../util/http/index.ts';
+import errSerializer from './err-serializer.ts';
+import { sanitizeValue } from './utils.ts';
 
 describe('logger/err-serializer', () => {
   it('expands errors', () => {
@@ -54,8 +54,6 @@ describe('logger/err-serializer', () => {
     const baseUrl = 'https://github.com';
 
     beforeEach(() => {
-      // clean up hostRules
-      hostRules.clear();
       hostRules.add({
         hostType: 'any',
         matchHost: baseUrl,
@@ -99,9 +97,14 @@ describe('logger/err-serializer', () => {
       delete err.stack;
 
       // sanitize like Bunyan
-      expect(sanitizeValue(err)).toMatchSnapshot({
+      expect(sanitizeValue(err)).toMatchObject({
+        message:
+          'Request failed with status code 412 (Precondition Failed): POST https://github.com/api',
         name: 'HTTPError',
         options: {
+          headers: {
+            authorization: '***********',
+          },
           method: 'POST',
           password: '***********',
           url: 'https://**redacted**@github.com/api',

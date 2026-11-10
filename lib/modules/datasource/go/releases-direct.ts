@@ -1,15 +1,16 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { BitbucketTagsDatasource } from '../bitbucket-tags';
-import { Datasource } from '../datasource';
-import { GitTagsDatasource } from '../git-tags';
-import { GiteaTagsDatasource } from '../gitea-tags';
-import { GithubTagsDatasource } from '../github-tags';
-import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { BaseGoDatasource } from './base';
-import { getSourceUrl } from './common';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
+import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
+import { Datasource } from '../datasource.ts';
+import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { GitTagsDatasource } from '../git-tags/index.ts';
+import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../github-tags/index.ts';
+import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { BaseGoDatasource } from './base.ts';
+import { getSourceUrl, isPublicGoPackage } from './common.ts';
 
 /**
  * This function tries to select tags with longest prefix could be constructed from `packageName`.
@@ -60,6 +61,7 @@ function filterByPrefix(packageName: string, releases: Release[]): Release[] {
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
+  readonly forgejo = new ForgejoTagsDatasource();
   git: GitTagsDatasource;
   readonly gitea = new GiteaTagsDatasource();
   github: GithubTagsDatasource;
@@ -85,11 +87,9 @@ export class GoDirectDatasource extends Datasource {
    *  - Call the respective getReleases in github/gitlab to retrieve the tags
    *  - Filter module tags according to the module path
    */
-  @cache({
-    namespace: `datasource-${GoDirectDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { packageName } = config;
 
     let res: ReleaseResult | null = null;
@@ -106,6 +106,10 @@ export class GoDirectDatasource extends Datasource {
     }
 
     switch (source.datasource) {
+      case ForgejoTagsDatasource.id: {
+        res = await this.forgejo.getReleases(source);
+        break;
+      }
       case GitTagsDatasource.id: {
         res = await this.git.getReleases(source);
         break;
@@ -126,23 +130,36 @@ export class GoDirectDatasource extends Datasource {
         res = await this.bitbucket.getReleases(source);
         break;
       }
-      /* v8 ignore next 3 -- should never happen */
+      /* v8 ignore next -- should never happen */
       default: {
         return null;
       }
     }
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!res) {
       return null;
     }
 
-    const sourceUrl = getSourceUrl(source) ?? null;
+    const sourceUrl = res.sourceUrl ?? getSourceUrl(source) ?? null;
 
     return {
       ...res,
       releases: filterByPrefix(packageName, res.releases),
       sourceUrl,
+      effectiveDatasource: source.datasource,
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GoDirectDatasource.id}`,
+        key: config.packageName,
+        public: isPublicGoPackage(config.packageName),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

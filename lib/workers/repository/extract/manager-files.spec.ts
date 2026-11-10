@@ -1,12 +1,13 @@
-import type { RenovateConfig } from '../../../config/types';
-import * as _html from '../../../modules/manager/html';
-import * as _fileMatch from './file-match';
-import { getManagerPackageFiles } from './manager-files';
-import { fs, partial } from '~test/util';
+import { fs, partial } from '~test/util.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import * as _html from '../../../modules/manager/html/index.ts';
+import * as managerApi from '../../../modules/manager/index.ts';
+import * as _fileMatch from './file-match.ts';
+import { getManagerPackageFiles } from './manager-files.ts';
 
-vi.mock('./file-match');
-vi.mock('../../../modules/manager/html');
-vi.mock('../../../util/fs');
+vi.mock('./file-match.ts');
+vi.mock('../../../modules/manager/html/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 const fileMatch = vi.mocked(_fileMatch);
 const html = vi.mocked(_html);
@@ -53,12 +54,73 @@ describe('workers/repository/extract/manager-files', () => {
       fs.readLocalFile.mockResolvedValueOnce('some content');
       html.extractPackageFile = vi.fn(() => ({
         deps: [{}, { replaceString: 'abc', packageName: 'p' }],
-      })) as never;
+      }));
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toEqual([
         {
           packageFile: 'Dockerfile',
           deps: [{}, { replaceString: 'abc', packageName: 'p', depName: 'p' }],
+        },
+      ]);
+    });
+
+    it('handles an extractAllPackageFiles that finds nothing', async () => {
+      const managerConfig = {
+        manager: 'npm',
+        enabled: true,
+        fileList: ['package.json'],
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
+      vi.spyOn(managerApi, 'extractAllPackageFiles').mockResolvedValueOnce(
+        null,
+      );
+
+      const res = await getManagerPackageFiles(managerConfig);
+
+      expect(res).toBeNull();
+    });
+
+    it('skips a file whose extract returns nothing', async () => {
+      const managerConfig = {
+        manager: 'html',
+        enabled: true,
+        fileList: ['Dockerfile'],
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
+      fs.readLocalFile.mockResolvedValueOnce('some content');
+      html.extractPackageFile = vi.fn(() => null);
+
+      const res = await getManagerPackageFiles(managerConfig);
+
+      expect(res).toHaveLength(0);
+    });
+
+    it('normalizes dep names in both directions', async () => {
+      const managerConfig = {
+        manager: 'html',
+        enabled: true,
+        fileList: ['Dockerfile'],
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
+      fs.readLocalFile.mockResolvedValueOnce('some content');
+      html.extractPackageFile = vi.fn(() => ({
+        deps: [
+          { packageName: 'only-package-name' },
+          { depName: ' only-dep-name ' },
+          { depName: 'dep', packageName: 'package' },
+          { skipReason: 'invalid-name' },
+        ],
+      })) as never;
+      const res = await getManagerPackageFiles(managerConfig);
+      expect(res).toEqual([
+        {
+          packageFile: 'Dockerfile',
+          deps: [
+            { depName: 'only-package-name', packageName: 'only-package-name' },
+            { depName: 'only-dep-name', packageName: 'only-dep-name' },
+            { depName: 'dep', packageName: 'package' },
+            { skipReason: 'invalid-name' },
+          ],
         },
       ]);
     });

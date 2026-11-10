@@ -1,16 +1,22 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
-import { getParentDir, localPathExists } from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
-import { regEx } from '../../../util/regex';
-import { parse as parseToml } from '../../../util/toml';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { PipFile, PipRequirement, PipSource } from './types';
+import { isArray, isObject, isString, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import type { SkipReason } from '../../../types/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
+import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
+import { ensureLocalPath } from '../../../util/fs/util.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parse as parseToml } from '../../../util/toml.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  PipFile,
+  PipRequirement,
+  PipSource,
+  PipenvManagerData,
+} from './types.ts';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';
@@ -38,7 +44,7 @@ function extractFromSection(
       let currentValue: string | undefined;
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
-      if (is.object(requirements)) {
+      if (isObject(requirements)) {
         if (requirements.git) {
           skipReason = 'git-dependency';
         } else if (requirements.file) {
@@ -76,7 +82,7 @@ function extractFromSection(
           skipReason = 'invalid-version';
         }
       }
-      const dep: PackageDependency = {
+      const dep: PackageDependency<PipenvManagerData> = {
         depType: sectionName,
         depName,
         packageName: normalizePythonDepName(depName),
@@ -97,28 +103,31 @@ function extractFromSection(
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
-      if (sources && is.object(requirements) && requirements.index) {
+      if (sources && isObject(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
+        // v8 ignore else -- needs a requirement naming an index that is not declared
         if (source) {
           dep.registryUrls = [source.url];
         }
       }
       return dep;
     })
-    .filter(Boolean);
+    .filter(isTruthy);
   return deps;
+}
+
+function isInvalidRequirementEntry(dep: unknown): boolean {
+  return !isObject(dep) && !isString(dep);
 }
 
 function isPipRequirements(
   section?:
-    | Record<string, PipRequirement>
-    | Record<string, string>
-    | PipSource[],
+    Record<string, PipRequirement> | Record<string, string> | PipSource[],
 ): section is Record<string, PipRequirement> {
   return (
-    !is.array(section) &&
-    is.object(section) &&
-    !Object.values(section).some((dep) => !is.object(dep) && !is.string(dep))
+    !isArray(section) &&
+    isObject(section) &&
+    !Object.values(section).some(isInvalidRequirementEntry)
   );
 }
 
@@ -162,7 +171,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Record<string, any> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
 
   const pipfileDir = getParentDir(ensureLocalPath(packageFile));
 

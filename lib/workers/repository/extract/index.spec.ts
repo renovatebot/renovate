@@ -1,12 +1,12 @@
-import { getConfig } from '../../../config/defaults';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
-import * as _managerFiles from './manager-files';
-import { extractAllDependencies } from '.';
-import { partial, scm } from '~test/util';
+import { partial, scm } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { extractAllDependencies } from './index.ts';
+import * as _managerFiles from './manager-files.ts';
 
-vi.mock('./manager-files');
+vi.mock('./manager-files.ts');
 
 const managerFiles = vi.mocked(_managerFiles);
 
@@ -22,7 +22,7 @@ describe('workers/repository/extract/index', () => {
 
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
-        partial<PackageFile<Record<string, any>>>({}),
+        partial<PackageFile>({}),
       ]);
       delete config.customManagers; // for coverage
       const res = await extractAllDependencies(config);
@@ -32,7 +32,7 @@ describe('workers/repository/extract/index', () => {
     it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([
-        partial<PackageFile<Record<string, any>>>({}),
+        partial<PackageFile>({}),
       ]);
       const res = await extractAllDependencies(config);
       expect(res).toMatchObject({
@@ -44,6 +44,7 @@ describe('workers/repository/extract/index', () => {
       config.enabledManagers = ['npm', 'custom.regex'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
+
       expect(logger.debug).toHaveBeenCalledWith(
         { manager: 'custom.regex' },
         `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
@@ -58,7 +59,7 @@ describe('workers/repository/extract/index', () => {
 
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
-        partial<PackageFile<Record<string, any>>>({}),
+        partial<PackageFile>({}),
       ]);
       config.customManagers = [
         {

@@ -1,4 +1,4 @@
-import { BzlmodVersion, Identifier, VersionPart } from './bzlmod-version';
+import { BzlmodVersion, Identifier, VersionPart } from './bzlmod-version.ts';
 
 describe('modules/versioning/bazel-module/bzlmod-version', () => {
   describe('Identifier', () => {
@@ -162,7 +162,7 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
     `('bad versions $a', ({ a }) => {
       expect(() => {
         new BzlmodVersion(a);
-      }).toThrow();
+      }).toThrow(Error);
     });
 
     it.each`

@@ -1,21 +1,16 @@
-import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { emojify } from '../../../../util/emoji';
-import { coerceString } from '../../../../util/string';
-import * as template from '../../../../util/template';
-import { joinUrlParts } from '../../../../util/url';
-import { getPlatformPrOptions } from '../../update/pr';
-import { prepareLabels } from '../../update/pr/labels';
-import { addParticipants } from '../../update/pr/participants';
-import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
-import type { MigratedData } from '../branch/migrated-data';
-import { getMigrationBranchName } from '../common';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { joinUrlParts } from '../../../../util/url.ts';
+import { getPrFooter } from '../../update/pr/body/footer.ts';
+import { getPrHeader } from '../../update/pr/body/header.ts';
+import { ensureConfigPr } from '../../update/pr/ensure-config-pr.ts';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
+import type { MigratedData } from '../branch/migrated-data.ts';
+import { getMigrationBranchName } from '../common.ts';
 
 export async function ensureConfigMigrationPr(
   config: RenovateConfig,
@@ -23,7 +18,7 @@ export async function ensureConfigMigrationPr(
 ): Promise<Pr | null> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    GlobalConfig.get('productLinks').documentation,
     'configuration-options/#configmigration',
   );
   const branchName = getMigrationBranchName(config);
@@ -52,85 +47,20 @@ ${
 :no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
-      config.productLinks?.help
+      GlobalConfig.get('productLinks').help
     }).\n\n`,
   );
 
-  if (is.string(config.prHeader)) {
-    prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
-  }
-  if (is.string(config.prFooter)) {
-    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
-  }
-  logger.trace({ prBody }, 'prBody');
+  prBody = `${getPrHeader(config)}${prBody}${getPrFooter(config)}`;
 
-  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
-
-  if (existingPr) {
-    logger.debug('Found open migration PR');
-    // Check if existing PR needs updating
-    const prBodyHash = hashBody(prBody);
-    if (
-      existingPr.bodyStruct?.hash === prBodyHash &&
-      existingPr.title === prTitle
-    ) {
-      logger.debug(`Pr does not need updating, PrNo: ${existingPr.number}`);
-      return existingPr;
-    }
-    // PR must need updating
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would update migration PR');
-    } else {
-      await platform.updatePr({
-        number: existingPr.number,
-        prTitle,
-        prBody,
-      });
-      logger.info({ pr: existingPr.number }, 'Migration PR updated');
-    }
-    return existingPr;
-  }
-  logger.debug('Creating migration PR');
-  const labels = prepareLabels(config);
-  try {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create migration PR');
-    } else {
-      const pr = await platform.createPr({
-        sourceBranch: branchName,
-        // TODO #22198
-        targetBranch: config.defaultBranch!,
-        prTitle,
-        prBody,
-        labels,
-        platformPrOptions: getPlatformPrOptions({
-          ...config,
-          automerge: false,
-        }),
-      });
-      logger.info({ pr: pr?.number }, 'Migration PR created');
-      if (pr) {
-        await addParticipants(config, pr);
-      }
-
-      return pr;
-    }
-  } catch (err) {
-    if (
-      err.response?.statusCode === 422 &&
-      err.response?.body?.errors?.[0]?.message?.startsWith(
-        'A pull request already exists',
-      )
-    ) {
-      logger.warn(
-        { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.',
-      );
-      await scm.deleteBranch(branchName);
-      return null;
-    }
-    throw err;
-  }
-
-  return null;
+  return await ensureConfigPr({
+    branchName,
+    // TODO #22198
+    targetBranch: config.defaultBranch!,
+    prTitle,
+    prBody,
+    config,
+    existingPr,
+    type: 'migration',
+  });
 }

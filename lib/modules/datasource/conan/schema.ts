@@ -1,17 +1,15 @@
-import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import type { ReleaseResult } from '../types';
-import { conanDatasourceRegex } from './common';
+import { z } from 'zod/v4';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import type { ReleaseResult } from '../types.ts';
+import { conanDatasourceRegex } from './common.ts';
 
 export const ConanCenterReleases = z
   .object({
     versions: z.record(z.string(), z.unknown()),
   })
-  .transform(
-    ({ versions }): ReleaseResult => ({
-      releases: Object.keys(versions).map((version) => ({ version })),
-    }),
-  )
+  .transform(({ versions }): ReleaseResult => ({
+    releases: Object.keys(versions).map((version) => ({ version })),
+  }))
   .nullable()
   .catch(null);
 

@@ -1,0 +1,129 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import {
+  queryBranches,
+  queryTags,
+} from '../../../util/github/graphql/index.ts';
+import { getSourceUrl } from '../../../util/github/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import * as exactVersioning from '../../versioning/exact/index.ts';
+import { Datasource } from '../datasource.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
+
+export class GithubDigestDatasource extends Datasource<GithubHttp> {
+  static readonly id = 'github-digest';
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
+
+  override readonly registryStrategy = 'hunt';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the commit date.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
+  override readonly defaultVersioning = exactVersioning.id;
+
+  constructor() {
+    super(GithubDigestDatasource.id, new GithubHttp(GithubDigestDatasource.id));
+  }
+
+  override getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
+    const { registryUrl, packageName: repo } = config;
+    const sourceUrl = getSourceUrl(repo, registryUrl);
+
+    return this.cached(
+      {
+        key: buildCacheKey(registryUrl, repo, 'releases'),
+      },
+      async () => {
+        const [tagsSettled, branchesSettled] = await Promise.allSettled([
+          queryTags(config, this.http),
+          queryBranches(config, this.http),
+        ]);
+
+        if (tagsSettled.status === 'rejected') {
+          throw tagsSettled.reason;
+        }
+        if (branchesSettled.status === 'rejected') {
+          throw branchesSettled.reason;
+        }
+
+        const tagsResult = tagsSettled.value;
+        const branchesResult = branchesSettled.value;
+
+        // Tags take priority over branches when names conflict
+        const releases: Release[] = tagsResult.map(
+          ({ version, releaseTimestamp, gitRef, hash }) => ({
+            version,
+            releaseTimestamp,
+            gitRef,
+            newDigest: hash,
+          }),
+        );
+        const tagVersions = new Set(tagsResult.map((t) => t.version));
+        for (const {
+          version,
+          releaseTimestamp,
+          gitRef,
+          hash,
+        } of branchesResult) {
+          if (!tagVersions.has(version)) {
+            releases.push({
+              version,
+              releaseTimestamp,
+              gitRef,
+              newDigest: hash,
+            });
+          }
+        }
+
+        return {
+          sourceUrl,
+          releases,
+        };
+      },
+    );
+  }
+
+  override async getDigest(
+    { packageName: repo, registryUrl }: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    if (!newValue) {
+      return null;
+    }
+
+    return await this.cached(
+      {
+        key: buildCacheKey(registryUrl, repo, 'digest', newValue),
+      },
+      async () => {
+        const config = { packageName: repo, registryUrl };
+
+        // Tags take priority over branches
+        const tags = await queryTags(config, this.http);
+        const tagItem = tags.find(({ version }) => version === newValue);
+        if (tagItem?.hash) {
+          return tagItem.hash;
+        }
+
+        const branches = await queryBranches(config, this.http);
+        const branchItem = branches.find(({ version }) => version === newValue);
+        if (branchItem?.hash) {
+          return branchItem.hash;
+        }
+
+        return null;
+      },
+    );
+  }
+}
