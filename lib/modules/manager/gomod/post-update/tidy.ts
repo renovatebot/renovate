@@ -55,12 +55,6 @@ function getTidyOptions(config: BranchConfig): string {
   return tidyOpts;
 }
 
-/**
- * Determines whether Go module tidy should run for the given upgrades.
- *
- * Major Go updates continue to skip tidy unless gomodUpdateImportPaths
- * is enabled, matching the existing gomod artifact behavior.
- */
 function shouldRunTidy(
   config: BranchConfig,
   upgrades: BranchUpgradeConfig[],
@@ -93,12 +87,6 @@ function shouldRunTidy(
   );
 }
 
-/**
- * Finds the Go module associated with an upgraded package file.
- *
- * A .mod file is used directly. For other package files, the nearest
- * go.mod file in the same directory or a parent directory is used.
- */
 async function findGoModFile(
   upgrade: BranchUpgradeConfig,
 ): Promise<string | null> {
@@ -115,9 +103,6 @@ async function findGoModFile(
   return findLocalSiblingOrParent(packageFile, 'go.mod');
 }
 
-/**
- * Collects the Go module files associated with the branch upgrades.
- */
 async function getGoModules(
   config: BranchConfig,
 ): Promise<Map<string, BranchUpgradeConfig[]>> {
@@ -138,10 +123,6 @@ async function getGoModules(
   return modules;
 }
 
-/**
- * Adds the Go module, its checksum file, and its workspace checksum file
- * to the list of files which must be collected after tidy.
- */
 async function addModuleFiles(
   goModFile: string,
   files: Set<string>,
@@ -156,9 +137,6 @@ async function addModuleFiles(
   }
 }
 
-/**
- * Executes go mod tidy for one Go module.
- */
 async function runTidy(
   goModFile: string,
   config: BranchConfig,
@@ -203,10 +181,6 @@ async function runTidy(
   await gitExec(commands, execOptions);
 }
 
-/**
- * Executes post-update Go module tidy operations independently of
- * the manager which originally performed the dependency update.
- */
 export async function executeGoModTidy(
   config: BranchConfig,
 ): Promise<GoModTidyExecutionResult> {
@@ -237,8 +211,6 @@ export async function executeGoModTidy(
     const sumFile = goModFile.replace(regEx(/\.mod$/), '.sum');
     const existingGoSum = await readLocalFile(sumFile);
 
-    // Preserve the existing behavior: don't run tidy if the module
-    // does not already have a go.sum file.
     if (!existingGoSum) {
       logger.debug({ sumFile }, 'No go.sum found, skipping go mod tidy');
       continue;
@@ -263,8 +235,6 @@ export async function executeGoModTidy(
 
       const tidyCommand = `go mod tidy${modFileFlag}${tidyOpts}`;
 
-      // Run tidy twice as before, preserving the behavior introduced
-      // for https://github.com/renovatebot/renovate/issues/6795.
       const commands = [tidyCommand, tidyCommand];
 
       if (isTidyAllRequired) {
@@ -279,8 +249,6 @@ export async function executeGoModTidy(
         for (const dependent of dependentModules) {
           await addModuleFiles(dependent, filesToCollect);
 
-          // If the dependent is also an upgraded module, it will
-          // receive its own primary tidy execution.
           if (
             primaryModules.has(dependent) ||
             alreadyTidyDependentModules.has(dependent)
