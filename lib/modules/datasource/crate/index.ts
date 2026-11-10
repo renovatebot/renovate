@@ -4,12 +4,14 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -150,13 +152,22 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}/${config.packageName}`,
-        cacheable: CrateDatasource.isCratesIo(config.registryUrl),
+        key: buildCacheKey(config.registryUrl, config.packageName),
+        public: CrateDatasource.isCratesIo(config.registryUrl),
         fallback: true,
       },
       () => this._getReleases(config),
     );
+  }
+
+  /** Returns the memory cache key of the registry's config.json. */
+  private static registryConfigCacheKey(rawUrl: string): string {
+    return buildCacheKey('crate-datasource', 'registry-config', rawUrl);
+  }
+
+  /** Returns the memory cache key of the unsupported read API marker. */
+  private static apiUnsupportedCacheKey(api: string): string {
+    return buildCacheKey('crate-datasource', 'registry-api-unsupported', api);
   }
 
   /**
@@ -167,7 +178,7 @@ export class CrateDatasource extends Datasource {
   private async fetchRegistryConfig(
     info: RegistryInfo,
   ): Promise<RegistryConfig | null> {
-    const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
+    const cacheKey = CrateDatasource.registryConfigCacheKey(info.rawUrl);
     const cached = memCache.get<RegistryConfig>(cacheKey);
     if (cached) {
       return cached;
@@ -219,7 +230,7 @@ export class CrateDatasource extends Datasource {
   }
 
   private static isNotFound(err: unknown): boolean {
-    return err instanceof HttpError && err.response?.statusCode === 404;
+    return err instanceof HttpError && isNotFound(err);
   }
 
   /**
@@ -231,7 +242,7 @@ export class CrateDatasource extends Datasource {
       return false;
     }
 
-    const memKey = `crate-datasource/registry-api-unsupported/${api}`;
+    const memKey = CrateDatasource.apiUnsupportedCacheKey(api);
     const cached = memCache.get<boolean>(memKey);
     if (isBoolean(cached)) {
       return cached;
@@ -254,7 +265,7 @@ export class CrateDatasource extends Datasource {
       { registryUrl, api },
       'Registry does not implement the crates.io read API, skipping crate metadata and release timestamp lookups',
     );
-    memCache.set(`crate-datasource/registry-api-unsupported/${api}`, true);
+    memCache.set(CrateDatasource.apiUnsupportedCacheKey(api), true);
     await packageCache.set('datasource-crate-registry-api', api, true, 24 * 60);
   }
 
@@ -313,8 +324,8 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}-metadata`,
-        key: `${info.rawUrl}/${packageName}`,
-        cacheable: info.flavor === 'crates.io',
+        key: buildCacheKey(info.rawUrl, packageName),
+        public: info.flavor === 'crates.io',
         ttlMinutes: 24 * 60, // 24 hours
       },
       () => this._getCrateMetadata(info, packageName),
@@ -443,7 +454,11 @@ export class CrateDatasource extends Datasource {
         );
         return null;
       }
-      const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
+      const cacheKey = buildCacheKey(
+        'crate-datasource',
+        'registry-clone-path',
+        registryFetchUrl,
+      );
       const lockKey = registryFetchUrl;
 
       const executionTimeout = GlobalConfig.get('executionTimeout') * 60 * 1000;
@@ -512,7 +527,11 @@ export class CrateDatasource extends Datasource {
     const git = createSimpleGit({
       config: { maxConcurrentProcesses: 1 },
       ...(isHttpUrl(registryFetchUrl) && {
-        authentication: { hostTypes: [CrateDatasource.id] },
+        // the URL as well, for the credentials registered from it, which only apply to this registry
+        authentication: {
+          hostTypes: [CrateDatasource.id],
+          url: registryFetchUrl,
+        },
       }),
     });
 
@@ -589,8 +608,9 @@ export class CrateDatasource extends Datasource {
     if (!rawUrl) {
       return release;
     }
-    const cacheKey = `crate-datasource/registry-config/${rawUrl}`;
-    const config = memCache.get<RegistryConfig>(cacheKey);
+    const config = memCache.get<RegistryConfig>(
+      CrateDatasource.registryConfigCacheKey(rawUrl),
+    );
     if (!config?.api) {
       return release;
     }
@@ -634,9 +654,14 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-crate`,
-        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        key: buildCacheKey(
+          'postprocessRelease',
+          config.registryUrl,
+          config.packageName,
+          release.version,
+        ),
         ttlMinutes: 7 * 24 * 60,
-        cacheable: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
+        public: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
       },
       () => this._postprocessRelease(config, release),
     );

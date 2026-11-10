@@ -1,0 +1,47 @@
+extends: substitution
+message: "Avoid contractions, use '%s' instead of '%s'."
+link: https://docs.renovatebot.com/development/style-guide/#avoid-contractionspossessives
+level: error
+ignorecase: true
+action:
+  name: replace
+# Both the straight and the curly apostrophe are matched.
+swap:
+  "don['’]t": do not
+  "doesn['’]t": does not
+  "didn['’]t": did not
+  "isn['’]t": is not
+  "aren['’]t": are not
+  "wasn['’]t": was not
+  "weren['’]t": were not
+  "shouldn['’]t": should not
+  "wouldn['’]t": would not
+  "couldn['’]t": could not
+  "hasn['’]t": has not
+  "haven['’]t": have not
+  "hadn['’]t": had not
+  "mustn['’]t": must not
+  "needn['’]t": need not
+  "won['’]t": will not
+  "can['’]t": cannot
+  "you['’]re": you are
+  "we['’]re": we are
+  "they['’]re": they are
+  "you['’]ll": you will
+  "we['’]ll": we will
+  "they['’]ll": they will
+  "it['’]ll": it will
+  "that['’]ll": that will
+  "I['’]ll": I will
+  "you['’]ve": you have
+  "we['’]ve": we have
+  "they['’]ve": they have
+  "I['’]ve": I have
+  "I['’]m": I am
+  "it['’]s": it is
+  "that['’]s": that is
+  "there['’]s": there is
+  "here['’]s": here is
+  "what['’]s": what is
+  "who['’]s": who is
+  "let['’]s": let us

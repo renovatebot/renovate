@@ -12,6 +12,8 @@ import {
   MultidocYaml,
   NotCircular,
   Nullish,
+  StringOrStringArray,
+  StringOrStringArrayOption,
   Toml,
   UtcDate,
   Yaml,
@@ -922,6 +924,36 @@ describe('util/schema-utils/index', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('StringOrStringArray', () => {
+    it.each`
+      value         | expected
+      ${'a'}        | ${true}
+      ${['a', 'b']} | ${true}
+      ${[]}         | ${true}
+      ${['a', 1]}   | ${false}
+      ${1}          | ${false}
+      ${undefined}  | ${false}
+    `('returns $expected for $value', ({ value, expected }) => {
+      expect(StringOrStringArray.safeParse(value).success).toBe(expected);
+    });
+  });
+
+  describe('StringOrStringArrayOption', () => {
+    it.each`
+      option                                   | expected
+      ${{ type: 'string' }}                    | ${true}
+      ${{ type: 'array', subType: 'string' }}  | ${true}
+      ${{ type: 'array', subType: 'object' }}  | ${false}
+      ${{ type: 'array' }}                     | ${false}
+      ${{ type: 'object', subType: 'string' }} | ${false}
+      ${undefined}                             | ${false}
+    `('returns $expected for $option', ({ option, expected }) => {
+      expect(StringOrStringArrayOption.safeParse(option).success).toBe(
+        expected,
+      );
     });
   });
 });

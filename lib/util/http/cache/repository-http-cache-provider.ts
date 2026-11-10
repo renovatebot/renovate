@@ -1,5 +1,6 @@
 import { get as memGet, set as memSet } from '../../cache/memory/index.ts';
 import { getCache } from '../../cache/repository/index.ts';
+import { hashUserinfoAndQuery } from '../../cache/sanitize-key.ts';
 import type { HttpResponse } from '../types.ts';
 import { copyResponse } from '../util.ts';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
@@ -15,14 +16,15 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
 
   override load(method: string, url: string): Promise<unknown> {
     const cache = getCache();
+    const key = hashUserinfoAndQuery(url);
 
     if (method === 'head') {
       cache.httpCacheHead ??= {};
-      return Promise.resolve(cache.httpCacheHead[url]);
+      return Promise.resolve(cache.httpCacheHead[key]);
     }
 
     cache.httpCache ??= {};
-    return Promise.resolve(cache.httpCache[url]);
+    return Promise.resolve(cache.httpCache[key]);
   }
 
   override persist(
@@ -31,15 +33,16 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
     data: HttpCache,
   ): Promise<void> {
     const cache = getCache();
+    const key = hashUserinfoAndQuery(url);
 
     if (method === 'head') {
       cache.httpCacheHead ??= {};
-      cache.httpCacheHead[url] = data;
+      cache.httpCacheHead[key] = data;
       return Promise.resolve();
     }
 
     cache.httpCache ??= {};
-    cache.httpCache[url] = data;
+    cache.httpCache[key] = data;
     return Promise.resolve();
   }
 

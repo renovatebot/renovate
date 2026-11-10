@@ -211,7 +211,7 @@ Packages installed by a system package manager use the `install` `depType`, so y
 
 ### Versioning
 
-Renovate's managers does not understand versioning, that's up to Renovate's versioning modules.
+Renovate's managers does not understand versioning, that is up to Renovate's versioning modules.
 The default `docker` versioning for container image datasources treats suffixes as "compatibility", for example: `-alpine`.
 Many container images are _not_ SemVer compliant because they use such suffixes in their tags.
 

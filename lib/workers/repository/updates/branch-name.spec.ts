@@ -1,6 +1,7 @@
 import { logger, partial } from '~test/util.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchName } from './branch-name.ts';
+import { sanitizeDepName } from './flatten.ts';
 
 describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
@@ -400,6 +401,103 @@ describe('workers/repository/updates/branch-name', () => {
       });
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('dep-2e27927800');
+    });
+
+    describe('url userinfo in dependency names', () => {
+      const defaultBranchName =
+        '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}';
+      const defaultBranchTopic =
+        '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}';
+
+      function getBranchName(
+        config: Partial<BranchUpgradeConfig>,
+      ): string | undefined {
+        const upgrade = partial<BranchUpgradeConfig>({
+          branchPrefix: 'renovate/',
+          newMajor: 1,
+          group: {},
+          ...config,
+          depNameSanitized: sanitizeDepName(config.depName!),
+        });
+        generateBranchName(upgrade);
+        return upgrade.branchName;
+      }
+
+      it.each`
+        branchTopic                         | expected
+        ${defaultBranchTopic}               | ${'renovate/https-git.example.com-org-repo-1.x'}
+        ${'{{{depName}}}-{{{newMajor}}}.x'} | ${'renovate/https//git.example.com/org/repo-1.x'}
+      `(
+        'removes credentials from branch topic $branchTopic',
+        ({
+          branchTopic,
+          expected,
+        }: {
+          branchTopic: string;
+          expected: string;
+        }) => {
+          const res = getBranchName({
+            depName: 'https://user:token@git.example.com/org/repo',
+            branchName: defaultBranchName,
+            branchTopic,
+          });
+
+          expect(res).toBe(expected);
+        },
+      );
+
+      it.each`
+        branchTopic
+        ${defaultBranchTopic}
+        ${'{{{depName}}}-{{{newMajor}}}.x'}
+      `(
+        'hashes branch topic $branchTopic without credentials',
+        ({ branchTopic }: { branchTopic: string }) => {
+          const config = {
+            branchName: defaultBranchName,
+            branchTopic,
+            hashedBranchLength: 20,
+          };
+
+          const res = getBranchName({
+            ...config,
+            depName: 'https://user:token@git.example.com/org/repo',
+          });
+
+          expect(res).toBe(
+            getBranchName({
+              ...config,
+              depName: 'https://git.example.com/org/repo',
+            }),
+          );
+        },
+      );
+
+      it('keeps a placeholder userinfo', () => {
+        const res = getBranchName({
+          depName: 'https://${USER}@git.example.com/org/repo',
+          branchName: defaultBranchName,
+          branchTopic: '{{{depName}}}-{{{newMajor}}}.x',
+        });
+
+        expect(res).toBe(
+          'renovate/https//${USER}@git.example.com/org/repo-1.x',
+        );
+      });
+
+      it('removes credentials from the group slug', () => {
+        const upgrade = partial<BranchUpgradeConfig>({
+          groupName: 'https://user:token@git.example.com/org/repo',
+          group: { branchName: 'renovate/{{groupSlug}}' },
+        });
+
+        generateBranchName(upgrade);
+
+        expect(upgrade.groupSlug).toBe('https:git.example.comorgrepo');
+        expect(upgrade.branchName).toBe(
+          'renovate/https-git.example.comorgrepo',
+        );
+      });
     });
 
     it('enforces valid git branch name', () => {

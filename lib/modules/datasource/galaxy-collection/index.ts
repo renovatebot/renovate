@@ -1,4 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -97,7 +98,11 @@ export class GalaxyCollectionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this.fetchReleases(config),
@@ -150,7 +155,11 @@ export class GalaxyCollectionDatasource extends Datasource {
   ): Promise<Release> {
     return this.cached(
       {
-        key: `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
+        key: buildCacheKey(
+          'getVersionDetails',
+          versionsUrl,
+          basicRelease.version,
+        ),
         ttlMinutes: 10080, // 1 week
       },
       () => this.fetchVersionDetails(versionsUrl, basicRelease),

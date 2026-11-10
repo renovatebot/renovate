@@ -9,7 +9,7 @@ As part of this build process, there are two key variants of this:
 
 Renovate's "slim" image is recommended as the minimal set of installed tools on a given container to be able to run Renovate.
 
-It uses [`binarySource=install`](./self-hosted-configuration.md#binarysource) to dynamically install tools as they're needed.
+It uses [`binarySource=install`](./self-hosted-configuration.md#binarysource) to dynamically install tools as they are needed.
 This keeps the base container quite lightweight (hence "slim") but requires outbound network access at runtime.
 
 It is possible to make the "slim" container even more lightweight by removing some of the tools and packages - for instance to reduce the attack surface, or reduce the size of the resulting image - but that is left as an exercise to the reader.
@@ -35,15 +35,13 @@ The full flow can be seen below:
 flowchart TD
     Ubuntu               --> ContainerbaseUbuntu
     ContainerbaseUbuntu  --> ContainerbaseBase
-    ContainerbaseBase    --> ContainerbaseSidecar
-    ContainerbaseSidecar --> RenovatebotBaseImage
+    ContainerbaseBase    --> RenovatebotBaseImage
     RenovatebotBaseImage --> RenovateSlim
     RenovatebotBaseImage --> RenovateFull
 
     Ubuntu[<code>docker.io/library/ubuntu</code>]
     ContainerbaseUbuntu[<a href="https://github.com/containerbase/ubuntu"><code>ghcr.io/containerbase/ubuntu</code></a>]
     ContainerbaseBase[<a href="https://github.com/containerbase/base"><code>ghcr.io/containerbase/base</code></a>]
-    ContainerbaseSidecar[<a href="https://github.com/containerbase/sidecar"><code>ghcr.io/containerbase/sidecar</code></a>]
     RenovatebotBaseImage[<a href="https://github.com/renovatebot/base-image"><code>ghcr.io/renovatebot/base-image</code></a>]
     RenovateSlim[<code>ghcr.io/renovatebot/renovate</code><br><code>docker.io/renovate/renovate</code>]
     RenovateFull[<code>ghcr.io/renovatebot/renovate:full</code><br><code>docker.io/renovate/renovate:full</code>]

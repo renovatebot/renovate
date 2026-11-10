@@ -1,4 +1,5 @@
 import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
+import { addRepositoryMetadata } from '../../../instrumentation/reporting.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import * as repositoryCache from '../../../util/cache/repository/index.ts';
@@ -39,6 +40,11 @@ export async function finalizeRepo(
   }
   runBranchSummary(config);
   runRenovateRepoStats(config, prList);
+  addRepositoryMetadata(
+    config,
+    repositoryCache.getCache().configFileName,
+    prList,
+  );
 }
 
 // istanbul ignore next

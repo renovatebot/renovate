@@ -156,7 +156,7 @@ export function bumpPackageVersion(
       );
     } else if (currentPrereleaseValue) {
       // Some qualifier which is not a SNAPSHOT is present.
-      // The expected behaviour in this case is unclear and the standard increase will be used.
+      // The expected behavior in this case is unclear and the standard increase will be used.
       newPomVersion = semver.inc(currentValue, bumpVersion);
     } else {
       // A release version without any qualifier is present.

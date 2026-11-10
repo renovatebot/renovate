@@ -115,10 +115,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       const configFileContent = await platform.getJsonFile(
         cache.configFileName,
       );
-      if (
-        configFileContent &&
-        (cache.configFileName !== 'package.json' || configFileContent.renovate)
-      ) {
+      const hasRenovateConfig =
+        cache.configFileName !== 'package.json' || configFileContent?.renovate;
+      if (configFileContent && hasRenovateConfig) {
         logger.debug('Existing config file confirmed');
         logger.debug(
           { fileName: cache.configFileName, config: configFileContent },

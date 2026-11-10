@@ -316,9 +316,8 @@ describe('modules/datasource/forgejo-tags/index', () => {
         .get('/api/v1/repos/forgejo-helm/forgejo-helm/tags/v9.0.1')
         .reply(200, body);
 
-      const res = await new ForgejoTagsDatasource().getTagCommit(
-        undefined,
-        'forgejo-helm/forgejo-helm',
+      const res = await new ForgejoTagsDatasource().getDigest(
+        { packageName: 'forgejo-helm/forgejo-helm' },
         'v9.0.1',
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');

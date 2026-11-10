@@ -9,12 +9,14 @@ import {
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
-import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
-  toolDefinitions,
-  toolNames,
+  toolDefinitionDocumentation,
 } from '../../lib/util/exec/types.ts';
 import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
@@ -137,7 +139,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'advancedUse',
     'deprecationMsg',
     'patternMatch',
+    'properties',
     'requiresCheckAtTrustBoundary',
+    'suggestedValues',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -147,26 +151,26 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     if (key === 'env' && !val) {
       ignoredKeys.push('env');
     }
-    if (
-      !ignoredKeys.includes(el[0]) ||
-      (el[0] === 'default' &&
-        (typeof el[1] !== 'object' || ['array', 'object'].includes(type)) &&
-        name !== 'prBody')
-    ) {
+    const isScalarOrCollection =
+      typeof el[1] !== 'object' || ['array', 'object'].includes(type);
+    const isShownDefault =
+      el[0] === 'default' && isScalarOrCollection && name !== 'prBody';
+    if (!ignoredKeys.includes(el[0]) || isShownDefault) {
       if (type === 'string' && el[0] === 'default') {
         el[1] = `<code>"${el[1]}"</code>`;
       }
-      if (
-        (type === 'boolean' && el[0] === 'default') ||
-        el[0] === 'cli' ||
-        el[0] === 'env'
-      ) {
+      const isBooleanDefault = type === 'boolean' && el[0] === 'default';
+      if (isBooleanDefault || el[0] === 'cli' || el[0] === 'env') {
         el[1] = `<code>${el[1]}</code>`;
       }
+      // objects and arrays should be printed in JSON notation
+      const isDefaultOrAdditionalProperties =
+        el[0] === 'default' || el[0] === 'additionalProperties';
+      const isCollectionType = type === 'object' || type === 'array';
+      const isObjectOrArrayValue =
+        isCollectionType && isDefaultOrAdditionalProperties;
       if (
-        // objects and arrays should be printed in JSON notation
-        ((type === 'object' || type === 'array') &&
-          (el[0] === 'default' || el[0] === 'additionalProperties')) ||
+        isObjectOrArrayValue ||
         // enum values for `allowedValues` should be printed in JSON notation
         el[0] === 'allowedValues' ||
         // previous names should be printed in JSON notation
@@ -353,15 +357,15 @@ function generateConfigFileNames(): string {
 function generateToolsForConstraints(): string {
   let output = '| Tool | Additional Information | Versioning | Datasource |\n';
   output += '| --- | --- | --- | --- |\n';
-  for (const toolDef of toolDefinitions) {
-    const toolConfig = getToolConfig(toolDef.name);
+  for (const toolName of getSupportedToolNames()) {
+    const toolConfig = getToolConfig(toolName);
     if (!toolConfig) {
       continue;
     }
-    const def: ConstraintDefinition = toolDef;
+    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     // Newlines in the Markdown-rendered table will break table rendering
-    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
-    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+    const desc = def?.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolName}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
   }
 
   return output;
@@ -384,7 +388,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of toolNames) {
+  for (const tool of getSupportedToolNames()) {
     output += `- \`${tool}\`\n`;
   }
 

@@ -311,7 +311,34 @@ function headersByIdentity(
  */
 function isWithinHost(matchHost: string, adminMatchHost: string): boolean {
   const url = parseUrl(matchHost) ? matchHost : `https://${matchHost}`;
-  return hostRules.matchesHost(url, adminMatchHost);
+  // by prefix only: a `matchHost` such as `https://host/path` reaches `https://host/path-other/` as well, which the admin's `https://host/path/` does not
+  return hostRules.matchesHost(url, adminMatchHost, { prefixOnly: true });
+}
+
+function isWithinAdminHost(
+  matchHost: string,
+  adminHost: string | null,
+): boolean {
+  return adminHost !== null && isWithinHost(matchHost, adminHost);
+}
+
+/**
+ * Whether the admin granted `allowInternal` for every host `matchHost` can reach. A `null` entry is a grant without host restriction.
+ */
+function isCoveredByAdminHosts(
+  adminHosts: Set<string | null> | undefined,
+  matchHost: string | undefined,
+): boolean {
+  if (!adminHosts) {
+    return false;
+  }
+  if (adminHosts.has(null)) {
+    return true;
+  }
+  return (
+    !!matchHost &&
+    [...adminHosts].some((adminHost) => isWithinAdminHost(matchHost, adminHost))
+  );
 }
 
 /**
@@ -433,10 +460,8 @@ function withoutAdminSuppliedValues(
             // a host-less rule reaches every host, so only a host-less admin header (above) can exempt it
             return !(
               rule.matchHost &&
-              [...adminHosts].some(
-                (adminHost) =>
-                  adminHost !== null &&
-                  isWithinHost(rule.matchHost!, adminHost),
+              [...adminHosts].some((adminHost) =>
+                isWithinAdminHost(rule.matchHost!, adminHost),
               )
             );
           }),
@@ -448,16 +473,7 @@ function withoutAdminSuppliedValues(
         const adminHosts = admin.internalGrants.get(
           filtered.allowInternal.toString(),
         );
-        const covered =
-          adminHosts &&
-          (adminHosts.has(null) ||
-            (!!filtered.matchHost &&
-              [...adminHosts].some(
-                (adminHost) =>
-                  adminHost !== null &&
-                  isWithinHost(filtered.matchHost!, adminHost),
-              )));
-        if (covered) {
+        if (isCoveredByAdminHosts(adminHosts, filtered.matchHost)) {
           delete filtered.allowInternal;
         }
       }
@@ -649,7 +665,7 @@ export async function mergeRenovateConfig(
   applyNpmrc(decryptedConfig, 'decrypted');
 
   // NOTE that this should not be used with any other configuration (`resolvedConfig`, etc) below, as they will include addditionally merged configuration
-  // Decrypted secrets are sanitised, so should be safe to log
+  // Decrypted secrets are sanitized, so should be safe to log
   await logShallowConfig(decryptedConfig, config);
 
   // Decrypt after resolving in case the preset contains npm authentication instead
@@ -667,7 +683,7 @@ export async function mergeRenovateConfig(
     resolvedConfig = migrationResult.migratedConfig;
   }
 
-  // Validate the fully-resolved repository config, enforcing validation is applied against all stages of the preset, and providing defence-in-depth for any sensitive config options
+  // Validate the fully-resolved repository config, enforcing validation is applied against all stages of the preset, and providing defense-in-depth for any sensitive config options
   // note that we do not need to re-run `migrateAndValidate` if we're already at the same configuration that we've previously resolved, decrypted and migrated, so we can avoid a costly re-validation
   if (!dequal(resolvedConfig, migratedConfig)) {
     await validateResolvedConfig(
@@ -834,7 +850,8 @@ export async function tryReadStaticRepoFileConfig(
   // validate and log issues here to preserve context, caller handles migration and full validation.
   const { errors, warnings } = await configValidation.validateConfig(
     'repo',
-    staticRepoConfig,
+    // `validateConfig` expects massaged input
+    massageConfig(staticRepoConfig),
   );
 
   if (isNonEmptyArray(errors) || isNonEmptyArray(warnings)) {
@@ -890,7 +907,7 @@ async function logShallowConfig(
     await presets.resolveConfigPresets(
       clone(decryptedConfig),
       clone(config),
-      [],
+      config.ignorePresets,
       [],
       false,
     );
