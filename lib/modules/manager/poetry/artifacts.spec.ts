@@ -1018,6 +1018,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps: [
             {
               depName: 'dep1',
+              datasource: 'pypi',
               manager: 'poetry',
               minimumReleaseAgePackageManagerSync: true,
               minimumReleaseAge: '7 days',
@@ -1052,6 +1053,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps: [
             {
               depName: 'dep1',
+              datasource: 'pypi',
               manager: 'poetry',
               minimumReleaseAgePackageManagerSync: true,
               minimumReleaseAge: '14 days',
@@ -1086,6 +1088,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps: [
             {
               depName: 'dep1',
+              datasource: 'pypi',
               manager: 'poetry',
               minimumReleaseAgePackageManagerSync: true,
               minimumReleaseAge: '12 hours',
@@ -1130,6 +1133,7 @@ describe('modules/manager/poetry/artifacts', () => {
         const env = await runYoung([
           {
             depName: 'mycorp-lib',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1148,6 +1152,7 @@ describe('modules/manager/poetry/artifacts', () => {
         const env = await runYoung([
           {
             depName: 'dep1',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1157,6 +1162,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'Dep_2',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1165,6 +1171,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'dep3',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1183,6 +1190,7 @@ describe('modules/manager/poetry/artifacts', () => {
         const env = await runYoung([
           {
             depName: 'pinned',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.35.50',
             minimumReleaseAgePackageManagerSync: true,
@@ -1191,6 +1199,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'equals',
+            datasource: 'pypi',
             manager: 'poetry',
             versioning: 'pep440',
             newValue: '==1.35.50',
@@ -1200,6 +1209,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'pep440-range',
+            datasource: 'pypi',
             manager: 'poetry',
             versioning: 'pep440',
             newValue: '>=1.35.50',
@@ -1209,6 +1219,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'poetry-equals',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '==1.35.50',
             minimumReleaseAgePackageManagerSync: true,
@@ -1217,6 +1228,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'caret',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '^1.35.50',
             minimumReleaseAgePackageManagerSync: true,
@@ -1225,6 +1237,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'no-value',
+            datasource: 'pypi',
             manager: 'poetry',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: '1 day',
@@ -1243,6 +1256,7 @@ describe('modules/manager/poetry/artifacts', () => {
             depName: 'old-pkg',
             newName: 'New_Pkg',
             updateType: 'replacement',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1260,6 +1274,7 @@ describe('modules/manager/poetry/artifacts', () => {
         const env = await runYoung([
           {
             depName: 'dep1',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '^1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1268,6 +1283,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
           {
             depName: 'dep1',
+            datasource: 'pypi',
             manager: 'pep621',
             versioning: 'pep440',
             newValue: '==1.2.3',
@@ -1280,10 +1296,27 @@ describe('modules/manager/poetry/artifacts', () => {
         expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE');
       });
 
+      it('ignores updates of other datasources', async () => {
+        const env = await runYoung([
+          {
+            datasource: 'github-tags',
+            depName: 'tag-dep',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: null,
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ]);
+        expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+        expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE');
+      });
+
       it('sets no exclude if the constraint of an exempted update is a range', async () => {
         const env = await runYoung([
           {
             depName: 'boto3',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '^1.35.50',
             minimumReleaseAgePackageManagerSync: true,
@@ -1299,6 +1332,7 @@ describe('modules/manager/poetry/artifacts', () => {
         const env = await runYoung([
           {
             depName: 'dep1',
+            datasource: 'pypi',
             manager: 'poetry',
             newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
@@ -1344,6 +1378,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1364,6 +1399,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1384,6 +1420,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1404,6 +1441,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1428,6 +1466,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep2',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1437,6 +1476,7 @@ describe('modules/manager/poetry/artifacts', () => {
               },
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1460,6 +1500,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1484,6 +1525,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1507,6 +1549,7 @@ describe('modules/manager/poetry/artifacts', () => {
             [
               {
                 depName: 'dep1',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1532,6 +1575,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'My.Package',
                 packageName: 'my-package',
+                datasource: 'pypi',
                 manager: 'poetry',
                 newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
@@ -1593,11 +1637,13 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps: [
             {
               depName: 'dep1',
+              datasource: 'pypi',
               manager: 'pep621',
               minimumReleaseAgeRepository: '3 days',
             },
             {
               depName: 'dep2',
+              datasource: 'pypi',
               manager: 'poetry',
               minimumReleaseAgePackageManagerSync: true,
               minimumReleaseAge: '5 days',
@@ -1644,6 +1690,7 @@ describe('modules/manager/poetry/artifacts', () => {
               },
               {
                 isLockFileMaintenance: true,
+                datasource: 'pypi',
                 manager: 'poetry',
                 minimumReleaseAgePackageManagerSync: true,
                 packageFile: 'pyproject.toml',

@@ -1,12 +1,11 @@
 import { isNumber } from '@sindresorhus/is';
 import { Duration } from 'luxon';
 import { logger } from '../../../logger/index.ts';
-import { getElapsedMs } from '../../../util/date.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import {
   calculatePackageManagerMinimumReleaseAgeMs,
   getMinimumReleaseAgeExemption,
-  isPackageManagerSyncEnabled,
+  isReleaseOldEnough,
 } from '../../../util/minimum-release-age.ts';
 import { toMs } from '../../../util/pretty-time.ts';
 import { Result } from '../../../util/result.ts';
@@ -98,25 +97,22 @@ function getConfigMinReleaseAgeEnv(
 }
 
 /**
- * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` which raises `solver.min-release-age` of the `poetry.toml` to the minimum release age of Renovate, and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE` for updated packages with a smaller `minimumReleaseAge` than the age which Poetry checks.
- *
- * Without `minimumReleaseAgePackageManagerSync`, it returns `POETRY_SOLVER_MIN_RELEASE_AGE` for the `minimumReleaseAge` of `config`.
+ * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` which raises `solver.min-release-age` of the `poetry.toml` to the minimum release age of Renovate, and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE` for updated packages with a smaller `minimumReleaseAge` than the age which Poetry checks, or without `minimumReleaseAgePackageManagerSync` the `POETRY_SOLVER_MIN_RELEASE_AGE` for the `minimumReleaseAge` of `config`.
  */
 export async function getMinReleaseAgeEnv(
   config: UpdateArtifactsConfig,
   packageFileName: string,
   updatedDeps: Upgrade[],
 ): Promise<NodeJS.ProcessEnv> {
-  const options = {
+  const ageMs = calculatePackageManagerMinimumReleaseAgeMs({
     config,
     manager: 'poetry',
     packageFile: packageFileName,
     upgrades: updatedDeps,
-  };
-  if (!isPackageManagerSyncEnabled(options)) {
+  });
+  if (ageMs === null) {
     return getConfigMinReleaseAgeEnv(config);
   }
-  const ageMs = calculatePackageManagerMinimumReleaseAgeMs(options);
   // without an age, e.g. for security updates, Poetry applies its own config
   if (!ageMs) {
     return {};
@@ -134,6 +130,7 @@ export async function getMinReleaseAgeEnv(
       (dep) => !poetryConfig.exclude.includes(getNormalizedName(dep)),
     ),
     'poetry',
+    PypiDatasource.id,
     // the age which Poetry checks
     Duration.fromObject({ days }).as('milliseconds'),
   );
@@ -166,19 +163,15 @@ export async function getMinReleaseAgeEnv(
 }
 
 /**
- * Whether Poetry may skip the minimum release age for `dep`: Poetry excludes all versions of a package, so the constraint must pin the single version which Renovate checked, and the release must be at least as old as `solver.min-release-age` of `configDays`, as the exclusion also skips that age. A release without a timestamp only passes `0`.
+ * Whether the constraint of `dep` pins a single version and its release is at least as old as the `solver.min-release-age` of `configDays`.
  */
 function isExcludable(dep: Upgrade, configDays: number): boolean {
-  if (!isPinned(dep)) {
-    return false;
-  }
-  if (!configDays) {
-    return true;
-  }
   return (
-    !!dep.releaseTimestamp &&
-    getElapsedMs(dep.releaseTimestamp) >=
-      Duration.fromObject({ days: configDays }).as('milliseconds')
+    isPinned(dep) &&
+    isReleaseOldEnough(
+      dep,
+      Duration.fromObject({ days: configDays }).as('milliseconds'),
+    )
   );
 }
 
