@@ -17,11 +17,11 @@ Stressed maintainers quit, or reduce their time spent on the project.
 Often a few users behave badly, where most users are nice.
 
 We want to avoid maintainers getting stressed out by bad behavior from contributors.
-That is why we have these rules.
+That's why we have these rules.
 
 ## Politeness
 
-Sadly, it is common in Open Source projects for a few users to behave in an aggressive and rude way.
+Sadly, it's common in Open Source projects for a few users to behave in an aggressive and rude way.
 A user might say something like: "You should have fixed this bug already!", or "Why am I still waiting for this feature?".
 We do not allow this kind of behavior.
 
@@ -31,7 +31,7 @@ We expect basic politeness, do not act rude.
 For example: it is okay if you ask a question and do not thank us afterwards.
 But avoid writing mean comments like:
 
-- "Pity the documentation did not say that."
+- "Pity the documentation didn’t say that."
 - "Thanks for nothing."
 
 ### No thumbs-down emojis (except on polls)
@@ -60,14 +60,14 @@ When you ask for help, please remember that the maintainer's time is the limited
 We get many questions each week and do our best to answer each one.
 
 To get the help you need, please be prepared to give detailed logs or descriptions of your issues.
-If you do not want to spend the effort giving us enough information, it is likely you will not get the help you need.
+If you do not want to spend the effort giving us enough information, it's likely you will not get the help you need.
 
 ### Why we sometimes give short answers
 
 We have limited time, which means we may:
 
 - only give you a short answer
-- forget to soften the blow of a negative answer with "I am really sorry but.."
+- forget to soften the blow of a negative answer with "I'm really sorry but.."
 
 We know that getting a short answer feels bad.
 Please remember that we are doing the best we can to improve Renovate.
@@ -79,7 +79,7 @@ Do not post comments in Discussions or Issues to demand a response, like: "Any u
 These comments force a maintainer to either repond, or hide your comment.
 
 Our development is mostly done in the open on GitHub.
-It is rare that updates are hidden from you.
+It's rare that updates are hidden from you.
 Please do not comment on GitHub "just in case there are updates".
 
 When you comment on a stalled topic, please add new information, or valuable insight.
@@ -118,7 +118,7 @@ You may be disappointed when we focus on other work ahead of your feature or bug
 
 We use GitHub Discussions to start and sort issues.
 Only maintainers are allowed to create new issues.
-If we confirm a bug or agree with a feature idea, and if it is well-documented, we will turn it into an official issue.
+If we confirm a bug or agree with a feature idea, and if it's well-documented, we will turn it into an official issue.
 This way most issues are ready to work on, either by us or the community.
 
 We may reject ideas that are too specialized, or that would make the project too hard to maintain.
@@ -133,7 +133,7 @@ We only do this to keep the project sustainable.
 ## If you have urgent work
 
 People working for big companies might push too hard in Open Source projects.
-It is often hard for them to understand that our maintainers cannot spend much time to solve their issues quickly.
+It’s often hard for them to understand that our maintainers cannot spend much time to solve their issues quickly.
 Frequent requests for updates like "@maintainers how can we move this forward?" are _not_ helpful.
 
 Please remember, unless you are a Mend.io customer, this project does not owe you the level of response or support you might expect.
