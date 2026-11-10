@@ -1,4 +1,4 @@
-import { git, platform } from '~test/util.ts';
+import { git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { tryBranchAutomerge } from '../../../workers/repository/update/branch/automerge.ts';
 import { scm, setPlatformScmApi } from '../scm.ts';
@@ -20,15 +20,16 @@ describe('modules/platform/oci/scm', () => {
   });
 
   it('prevents the branch automerge worker from merging when tests are ignored', async () => {
-    platform.getBranchPr.mockResolvedValueOnce(null);
-
-    const result = await tryBranchAutomerge({
-      automerge: true,
-      automergeType: 'branch',
-      ignoreTests: true,
-      branchName: 'renovate/dep',
-      baseBranch: 'main',
-    });
+    const result = await tryBranchAutomerge(
+      {
+        automerge: true,
+        automergeType: 'branch',
+        ignoreTests: true,
+        branchName: 'renovate/dep',
+        baseBranch: 'main',
+      },
+      null,
+    );
 
     expect(result).toBe('failed');
     expect(git.mergeBranch).not.toHaveBeenCalled();
