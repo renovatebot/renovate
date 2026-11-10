@@ -35,9 +35,7 @@ export const pnpmDefaultMinimumReleaseAgeRange = '>=11.0.0';
 export const pnpmDefaultMinimumReleaseAgeMinutes = 1440;
 
 /**
- * Reads the minimum release age settings of the `pnpm-workspace.yaml` next to a pnpm lock file.
- *
- * pnpm sets `minimumReleaseAge` in minutes.
+ * Reads the minimum release age settings of the `pnpm-workspace.yaml` next to a pnpm lock file, with `minimumReleaseAge` in minutes.
  */
 export async function readPnpmWorkspaceMinimumReleaseAge(
   pnpmLockFile: string,
@@ -73,11 +71,7 @@ export function getPnpmWorkspaceMinimumReleaseAge(
 }
 
 /**
- * The `minimumReleaseAge` in minutes which pnpm configures itself.
- *
- * The `pnpm-workspace.yaml` wins over the `minimum-release-age` of the `.npmrc` in `npmrcMinutes`, which pnpm reads only before v11.
- * With `includeDefault`, the pnpm default applies if neither sets it and the pnpm version may be v11 or later.
- * An unknown pnpm version counts as the latest pnpm.
+ * Returns the `minimumReleaseAge` in minutes which pnpm configures itself: the `pnpm-workspace.yaml` value, else before pnpm v11 `npmrcMinutes`, else with `includeDefault` the pnpm default if the pnpm version may be v11 or later or is unknown.
  */
 export function getPnpmMinimumReleaseAgeMinutes(
   workspace: Pick<PnpmWorkspaceMinimumReleaseAge, 'minimumReleaseAge'>,
@@ -113,9 +107,7 @@ const plainPackageNameRegex = regEx(/^[\w./@~-]+$/);
 const regexSpecialCharacterRegex = regEx(/[.*+?^${}()|[\]\\]/g);
 
 /**
- * Translates a pnpm package name pattern to a `matchPackageNames` pattern, or returns `null` for a pattern which matches no package.
- *
- * In pnpm, `*` matches any characters including `/`, `?` matches one character, and a leading `!` matches every package which the rest of the pattern does not match. As Renovate globs do not cross `/`, a pattern with wildcards becomes a regex.
+ * Translates a pnpm package name pattern, where `*` also matches `/`, `?` matches one character and a leading `!` negates the pattern, to a `matchPackageNames` name or regex, or returns `null` for a pattern which matches no package.
  */
 export function toMatchPackageNamesPattern(pattern: string): string | null {
   const negated = pattern.startsWith('!');
@@ -196,9 +188,7 @@ export function isPnpmMinimumReleaseAgeExcluded(
 }
 
 /**
- * The `packageRules` for a pnpm minimum release age, which pnpm applies to npm packages only, and which `minimumReleaseAgeExclude` lifts for every version of the packages it names.
- *
- * Entries with exact versions get no rule, as Renovate does not look up other versions with a different age.
+ * Returns the `packageRules` for a pnpm minimum release age of npm packages, with `minimumReleaseAgeExclude` entries without exact versions lifting it for the packages they name.
  */
 export function getPnpmMinimumReleaseAgeRules(
   minutes: number,
@@ -219,8 +209,6 @@ export function getPnpmMinimumReleaseAgeRules(
 
 /**
  * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the `minimum-release-age` of the merged `.npmrc` (the `npmrc` option and the repository `.npmrc`), or the pnpm v11 default, and keeps the settings of the lock file in the `managerData` of each of its package files.
- *
- * The pnpm version comes from the configured `constraints`, the root `package.json` or the lock file, like for the lock file update.
  */
 export async function setPnpmMinimumReleaseAge(
   packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[],
