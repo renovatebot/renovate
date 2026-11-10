@@ -228,12 +228,12 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
     it.each`
       pnpm          | expected
       ${'^11.0.0'}  | ${[rule('1440 minutes')]}
-      ${'>=9'}      | ${[rule('1440 minutes')]}
-      ${undefined}  | ${[rule('1440 minutes')]}
-      ${'latest'}   | ${[rule('1440 minutes')]}
+      ${'>=9'}      | ${undefined}
+      ${undefined}  | ${undefined}
+      ${'latest'}   | ${undefined}
       ${'^10.20.0'} | ${undefined}
     `(
-      'adds the pnpm v11 default without a setting for pnpm $pnpm',
+      'adds the pnpm v11 default without a setting only for pnpm v11 or later: $pnpm',
       async ({ pnpm, expected }) => {
         mockWorkspace('packages:\n  - pkgs/*\n');
         const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
@@ -256,7 +256,8 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       ${'^10.20.0'} | ${null}                      | ${'2880 minutes'}
       ${'^10.20.0'} | ${'minimumReleaseAge: 60\n'} | ${'60 minutes'}
       ${'^11.0.0'}  | ${null}                      | ${'1440 minutes'}
-      ${undefined}  | ${null}                      | ${'1440 minutes'}
+      ${'>=9'}      | ${null}                      | ${'2880 minutes'}
+      ${undefined}  | ${null}                      | ${'2880 minutes'}
     `(
       'reads the .npmrc for pnpm $pnpm and workspace=$workspace',
       async ({ pnpm, workspace, expected }) => {
@@ -357,8 +358,8 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       ${{}}                  | ${undefined}  | ${"'6.0'"}      | ${'2880 minutes'}
       ${{}}                  | ${undefined}  | ${5.4}          | ${'2880 minutes'}
       ${{}}                  | ${'^11.0.0'}  | ${"'6.0'"}      | ${'1440 minutes'}
-      ${{}}                  | ${undefined}  | ${"'9.0'"}      | ${'1440 minutes'}
-      ${{}}                  | ${undefined}  | ${undefined}    | ${'1440 minutes'}
+      ${{}}                  | ${undefined}  | ${"'9.0'"}      | ${'2880 minutes'}
+      ${{}}                  | ${undefined}  | ${undefined}    | ${'2880 minutes'}
     `(
       'resolves pnpm for constraints=$constraints, extracted=$extracted and lockfileVersion=$lockfileVersion like the lock file update',
       async ({ constraints, extracted, lockfileVersion, expected }) => {
@@ -511,34 +512,46 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
     const npmrcMinutes = 2880;
 
     it.each`
-      workspace                   | pnpm          | includeDefault | expected
-      ${{}}                       | ${'^10.20.0'} | ${true}        | ${2880}
-      ${{}}                       | ${'^10.20.0'} | ${false}       | ${2880}
-      ${{ minimumReleaseAge: 0 }} | ${'^10.20.0'} | ${true}        | ${0}
-      ${{ minimumReleaseAge: 0 }} | ${'^11.0.0'}  | ${true}        | ${0}
-      ${{}}                       | ${'^11.0.0'}  | ${true}        | ${1440}
-      ${{}}                       | ${'^11.0.0'}  | ${false}       | ${undefined}
-      ${{}}                       | ${'>=10'}     | ${true}        | ${1440}
-      ${{}}                       | ${'bananas'}  | ${true}        | ${1440}
-      ${{}}                       | ${null}       | ${true}        | ${1440}
+      workspace                   | pnpm          | lenient  | expected
+      ${{}}                       | ${'^10.20.0'} | ${true}  | ${2880}
+      ${{}}                       | ${'^10.20.0'} | ${false} | ${2880}
+      ${{ minimumReleaseAge: 0 }} | ${'^10.20.0'} | ${true}  | ${0}
+      ${{ minimumReleaseAge: 0 }} | ${'^11.0.0'}  | ${true}  | ${0}
+      ${{}}                       | ${'^11.0.0'}  | ${true}  | ${1440}
+      ${{}}                       | ${'^11.0.0'}  | ${false} | ${undefined}
+      ${{}}                       | ${'>=10'}     | ${true}  | ${2880}
+      ${{}}                       | ${'>=10'}     | ${false} | ${undefined}
+      ${{}}                       | ${'bananas'}  | ${true}  | ${2880}
+      ${{}}                       | ${null}       | ${true}  | ${2880}
+      ${{}}                       | ${null}       | ${false} | ${undefined}
     `(
-      'returns $expected for workspace=$workspace, pnpm $pnpm and includeDefault=$includeDefault',
-      ({ workspace, pnpm, includeDefault, expected }) => {
+      'returns $expected for workspace=$workspace, pnpm $pnpm and lenient=$lenient with an .npmrc age',
+      ({ workspace, pnpm, lenient, expected }) => {
         expect(
           getPnpmMinimumReleaseAgeMinutes(
             workspace,
             npmrcMinutes,
             pnpm,
-            includeDefault,
+            lenient,
           ),
         ).toBe(expected);
       },
     );
 
-    it('returns undefined for pnpm v10 without a setting', () => {
-      expect(
-        getPnpmMinimumReleaseAgeMinutes({}, null, '^10.20.0', true),
-      ).toBeUndefined();
-    });
+    it.each`
+      pnpm          | expected
+      ${'^10.20.0'} | ${undefined}
+      ${'^11.0.0'}  | ${1440}
+      ${'>=10'}     | ${undefined}
+      ${'bananas'}  | ${undefined}
+      ${null}       | ${undefined}
+    `(
+      'returns $expected for pnpm $pnpm without a setting',
+      ({ pnpm, expected }) => {
+        expect(getPnpmMinimumReleaseAgeMinutes({}, null, pnpm, true)).toBe(
+          expected,
+        );
+      },
+    );
   });
 });

@@ -71,36 +71,53 @@ export function getPnpmWorkspaceMinimumReleaseAge(
 }
 
 /**
- * Returns the `minimumReleaseAge` in minutes which pnpm configures itself: the `pnpm-workspace.yaml` value, else before pnpm v11 `npmrcMinutes`, else with `includeDefault` the pnpm default if the pnpm version may be v11 or later or is unknown.
+ * Returns the `minimumReleaseAge` in minutes which pnpm configures itself: the `pnpm-workspace.yaml` value, else `npmrcMinutes` if every allowed pnpm version is older than v11. With `lenient`, `npmrcMinutes` also counts if the pnpm version may be older than v11 or is unknown, and else the pnpm default if every allowed pnpm version is v11 or later.
  */
 export function getPnpmMinimumReleaseAgeMinutes(
   workspace: Pick<PnpmWorkspaceMinimumReleaseAge, 'minimumReleaseAge'>,
   npmrcMinutes: number | null | undefined,
   pnpmConstraint: string | null | undefined,
-  includeDefault = false,
+  lenient = false,
 ): number | undefined {
   if (workspace.minimumReleaseAge !== undefined) {
     return workspace.minimumReleaseAge;
   }
-  if (
-    isNumber(npmrcMinutes) &&
-    isSubsetOf(npmVersioning, pnpmConstraint, pnpmNpmrcMinimumReleaseAgeRange)
-  ) {
+  if (isNumber(npmrcMinutes) && readsNpmrc(pnpmConstraint, lenient)) {
     return npmrcMinutes;
+  }
+  if (
+    lenient &&
+    isSubsetOf(npmVersioning, pnpmConstraint, pnpmDefaultMinimumReleaseAgeRange)
+  ) {
+    return pnpmDefaultMinimumReleaseAgeMinutes;
+  }
+  return undefined;
+}
+
+/**
+ * Whether every pnpm version of `pnpmConstraint` reads `minimum-release-age` from the `.npmrc`, or with `lenient` whether one may or the version is unknown.
+ */
+function readsNpmrc(
+  pnpmConstraint: string | null | undefined,
+  lenient: boolean,
+): boolean {
+  if (!lenient) {
+    return isSubsetOf(
+      npmVersioning,
+      pnpmConstraint,
+      pnpmNpmrcMinimumReleaseAgeRange,
+    );
   }
   const isKnownVersion =
     isNonEmptyString(pnpmConstraint) && npmVersioning.isValid(pnpmConstraint);
-  const mayHaveDefault =
+  return (
     !isKnownVersion ||
     intersectsWith(
       npmVersioning,
       pnpmConstraint,
-      pnpmDefaultMinimumReleaseAgeRange,
-    );
-  if (includeDefault && mayHaveDefault) {
-    return pnpmDefaultMinimumReleaseAgeMinutes;
-  }
-  return undefined;
+      pnpmNpmrcMinimumReleaseAgeRange,
+    )
+  );
 }
 
 const plainPackageNameRegex = regEx(/^[\w./@~-]+$/);

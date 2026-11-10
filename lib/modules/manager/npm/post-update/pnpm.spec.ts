@@ -864,8 +864,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       ${'^11.0.0'}  | ${'7 days'}       | ${undefined}                 | ${null}                            | ${10080}
       ${'^11.0.0'}  | ${'1 hour'}       | ${'minimumReleaseAge: 0\n'}  | ${null}                            | ${60}
       ${'^11.0.0'}  | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${1440}
-      ${'>=9'}      | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${1440}
-      ${undefined}  | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${1440}
+      ${'>=9'}      | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${2880}
+      ${'>=9'}      | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${60}
+      ${undefined}  | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${2880}
+      ${undefined}  | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${60}
       ${'^10.20.0'} | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${60}
       ${'^10.20.0'} | ${'1 day'}        | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${2880}
       ${'^10.20.0'} | ${'1 day'}        | ${'minimumReleaseAge: 60\n'} | ${'minimum-release-age=2880\n'}    | ${1440}
@@ -1347,7 +1349,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       },
     );
 
-    it('does not lower the minimum release age below the pnpm v11 default', async () => {
+    it('lowers the minimum release age below the pnpm v11 default if pnpm may be older than v11', async () => {
       mockExecAll();
       mockPnpmFiles();
 
@@ -1367,7 +1369,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         ],
       );
 
-      expect(res.minimumReleaseAgeNotice).toBeUndefined();
+      expect(res.minimumReleaseAgeNotice).toBeString();
     });
 
     it('lowers the minimum release age no further than the pnpm-workspace.yaml value', async () => {
