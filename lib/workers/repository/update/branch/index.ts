@@ -38,6 +38,7 @@ import {
 } from './check-existing.ts';
 import { commitFilesToBranch } from './commit.ts';
 import { handleBranchError } from './errors.ts';
+import executePostUpdateOptions from './execute-post-update-options.ts';
 import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
 import { handleClosedPr, handleModifiedPr } from './handle-existing.ts';
@@ -462,6 +463,15 @@ export async function processBranch(
         upgrades: config.upgrades,
         stage: 'branch',
       });
+
+      const postUpdateOptionsResults = await executePostUpdateOptions(config);
+
+      if (postUpdateOptionsResults !== null) {
+        const { updatedArtifacts, artifactErrors } = postUpdateOptionsResults;
+
+        config.updatedArtifacts = updatedArtifacts;
+        config.artifactErrors = artifactErrors;
+      }
 
       const postUpgradeCommandResults =
         await executePostUpgradeCommands(config);
