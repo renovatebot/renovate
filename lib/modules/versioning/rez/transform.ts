@@ -15,7 +15,7 @@ function getVersionParts(input: string): [string, string] {
     return [input, ''];
   }
 
-  return [versionParts[0], '-' + versionParts[1]];
+  return [versionParts[0], `-${versionParts[1]}`];
 }
 
 export function padZeroes(input: string): string {
@@ -30,12 +30,12 @@ export function padZeroes(input: string): string {
   while (sections.length < 3) {
     sections.push('0');
   }
-  return sections.join('.') + stability;
+  return `${sections.join('.')}${stability}`;
 }
 
 function plus2npm(input: string): string {
   if (input.includes('+')) {
-    return '>=' + input.replace('+', ' ');
+    return `>=${input.replace('+', ' ')}`;
   }
   return input;
 }
@@ -48,7 +48,7 @@ export function rez2npm(input: string): string {
     return input.replace('==', '=');
   }
   if (inclusiveBound.test(input)) {
-    return '>=' + input.replace(regEx(/\.\./g), ' <');
+    return `>=${input.replace(regEx(/\.\./g), ' <')}`;
   }
   if (lowerBound.test(input)) {
     return plus2npm(input);
@@ -60,13 +60,13 @@ export function rez2npm(input: string): string {
   if (matchAscRange?.groups) {
     const lowerBoundAsc = matchAscRange.groups.range_lower_asc;
     const upperBoundAsc = matchAscRange.groups.range_upper_asc;
-    return plus2npm(lowerBoundAsc) + ' ' + plus2npm(upperBoundAsc);
+    return `${plus2npm(lowerBoundAsc)} ${plus2npm(upperBoundAsc)}`;
   }
   const matchDscRange = descendingRange.exec(input);
   if (matchDscRange?.groups) {
     const upperBoundDesc = matchDscRange.groups.range_upper_desc;
     const lowerBoundDesc = matchDscRange.groups.range_lower_desc;
-    return plus2npm(lowerBoundDesc) + ' ' + plus2npm(upperBoundDesc);
+    return `${plus2npm(lowerBoundDesc)} ${plus2npm(upperBoundDesc)}`;
   }
   return input;
 }
@@ -79,7 +79,7 @@ export function rez2pep440(input: string): string {
     return input;
   }
   if (inclusiveBound.test(input)) {
-    return '>=' + input.replace(regEx(/\.\./g), ', <');
+    return `>=${input.replace(regEx(/\.\./g), ', <')}`;
   }
   if (lowerBound.test(input)) {
     return plus2npm(input);
@@ -91,13 +91,13 @@ export function rez2pep440(input: string): string {
   if (matchAscRange?.groups) {
     const lowerBoundAsc = matchAscRange.groups.range_lower_asc;
     const upperBoundAsc = matchAscRange.groups.range_upper_asc;
-    return plus2npm(lowerBoundAsc) + ', ' + plus2npm(upperBoundAsc);
+    return `${plus2npm(lowerBoundAsc)}, ${plus2npm(upperBoundAsc)}`;
   }
   const matchDscRange = descendingRange.exec(input);
   if (matchDscRange?.groups) {
     const upperBoundDesc = matchDscRange.groups.range_upper_desc;
     const lowerBoundDesc = matchDscRange.groups.range_lower_desc;
-    return plus2npm(lowerBoundDesc) + ', ' + plus2npm(upperBoundDesc);
+    return `${plus2npm(lowerBoundDesc)}, ${plus2npm(upperBoundDesc)}`;
   }
   return input;
 }
@@ -110,5 +110,5 @@ export function pep4402rezInclusiveBound(input: string): string {
 }
 
 export function npm2rezplus(input: string): string {
-  return input.trim().replace('>=', '') + '+';
+  return `${input.trim().replace('>=', '')}+`;
 }

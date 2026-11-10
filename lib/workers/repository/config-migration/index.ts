@@ -20,37 +20,36 @@ export async function configMigration(
     return { result: 'no-migration' };
   }
 
-  const migratedConfigData = await MigratedDataFactory.getAsync();
-  if (!migratedConfigData) {
-    logger.debug('Config does not need migration');
+  try {
+    const migratedConfigData = await MigratedDataFactory.getAsync();
+    if (!migratedConfigData) {
+      logger.debug('Config does not need migration');
+      return { result: 'no-migration' };
+    }
+
+    const res = await checkConfigMigrationBranch(config, migratedConfigData);
+
+    // migration needed but not demanded by user
+    if (res.result === 'no-migration-branch') {
+      return { result: 'add-checkbox' };
+    }
+
+    branchList.push(res.migrationBranch);
+
+    const pr = await ensureConfigMigrationPr(config, migratedConfigData);
+
+    // only happens incase a migration pr was created by another user
+    // for other cases in which a PR could not be found or created: we log warning and throw error from within the ensureConfigMigrationPr fn
+    if (!pr) {
+      return { result: 'add-checkbox' };
+    }
+
+    return {
+      result:
+        res.result === 'migration-branch-exists' ? 'pr-exists' : 'pr-modified',
+      prNumber: pr.number,
+    };
+  } finally {
     MigratedDataFactory.reset();
-    return { result: 'no-migration' };
   }
-
-  const res = await checkConfigMigrationBranch(config, migratedConfigData);
-
-  // migration needed but not demanded by user
-  if (res.result === 'no-migration-branch') {
-    MigratedDataFactory.reset();
-    return { result: 'add-checkbox' };
-  }
-
-  branchList.push(res.migrationBranch);
-
-  const pr = await ensureConfigMigrationPr(config, migratedConfigData);
-
-  // only happens incase a migration pr was created by another user
-  // for other cases in which a PR could not be found or created: we log warning and throw error from within the ensureConfigMigrationPr fn
-  if (!pr) {
-    MigratedDataFactory.reset();
-    return { result: 'add-checkbox' };
-  }
-
-  MigratedDataFactory.reset();
-
-  return {
-    result:
-      res.result === 'migration-branch-exists' ? 'pr-exists' : 'pr-modified',
-    prNumber: pr.number,
-  };
 }

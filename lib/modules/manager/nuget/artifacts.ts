@@ -1,7 +1,9 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
@@ -18,14 +20,22 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  resolveToolConstraint,
+} from '../util.ts';
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
+  DIRECTORY_BUILD_PROPS,
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
 } from './package-tree.ts';
+import type { Registry } from './types.ts';
 import {
   findGlobalJson,
   getConfiguredRegistries,
@@ -35,11 +45,23 @@ import {
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
+  updatedDeps: Upgrade[],
 ): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  const contents = createNuGetConfigXml(registries);
+  const updatedDepsRegistries: Registry[] = Array.from(
+    new Set(
+      updatedDeps
+        .flatMap((dep) => coerceArray(dep.registryUrls))
+        .filter(isNonEmptyString),
+    ),
+    (url) => ({ url }),
+  );
+
+  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+
+  const contents = createNuGetConfigXml(combinedRegistries);
 
   const cachedNugetConfigFile = upath.join(nugetCacheDir, `nuget.config`);
   await ensureDir(nugetCacheDir);
@@ -52,17 +74,21 @@ async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig,
+  updatedDeps: Upgrade[],
 ): Promise<void> {
   const nugetCacheDir = upath.join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
     packageFileName,
+    updatedDeps,
   );
 
-  const dotnetVersion =
-    config.constraints?.dotnet ??
-    (await findGlobalJson(packageFileName))?.sdk?.version;
+  const dotnetVersion = await resolveToolConstraint(
+    config,
+    'dotnet',
+    async () => (await findGlobalJson(packageFileName))?.sdk?.version,
+  );
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
@@ -72,14 +98,12 @@ async function runDotnetRestore(
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
-  const cmds = [
-    ...dependentPackageFileNames.map(
-      (fileName) =>
-        `dotnet restore ${quote(
-          fileName,
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
-    ),
-  ];
+  const cmds = dependentPackageFileNames.map(
+    (fileName) =>
+      `dotnet restore ${quote(
+        fileName,
+      )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
+  );
 
   if (config.postUpdateOptions?.includes('dotnetWorkloadRestore')) {
     cmds.unshift(
@@ -108,9 +132,14 @@ export async function updateArtifacts({
 
   const isGlobalJson = packageFileName === GLOBAL_JSON;
 
+  const isDirectoryBuildProps =
+    packageFileName === DIRECTORY_BUILD_PROPS ||
+    packageFileName.endsWith(`/${DIRECTORY_BUILD_PROPS}`);
+
   if (
     !isCentralManagement &&
     !isGlobalJson &&
+    !isDirectoryBuildProps &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -126,7 +155,7 @@ export async function updateArtifacts({
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManagement,
+    isCentralManagement || isDirectoryBuildProps,
     isGlobalJson,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
@@ -163,7 +192,7 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, packageFiles, config);
+    await runDotnetRestore(packageFileName, packageFiles, config, updatedDeps);
 
     const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
@@ -175,13 +204,9 @@ export async function updateArtifacts({
       ) {
         logger.trace(`Lock file ${lockFileName} is unchanged`);
       } else if (newLockFileContentMap[lockFileName]) {
-        retArray.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockFileContentMap[lockFileName],
-          },
-        });
+        retArray.push(
+          fileAddition(lockFileName, newLockFileContentMap[lockFileName]),
+        );
       }
       // TODO: else should we return an artifact error if new content is missing?
     }
@@ -192,14 +217,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to generate lock file');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileNames.join(', '),
-          // error is written to stdout
-          stderr: err.stdout ?? err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileNames.join(', '), err);
   }
 }

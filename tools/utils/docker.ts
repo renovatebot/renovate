@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
-import os from 'os';
+import { setTimeout } from 'node:timers/promises';
 import type { SemVer } from 'semver';
-import { setTimeout } from 'timers/promises';
 import { logger } from '../../lib/logger/index.ts';
 import { toMs } from '../../lib/util/pretty-time.ts';
-import { exec } from './exec.ts';
+import { commandError, exec } from './exec.ts';
 
 const file = 'tools/docker/bake.hcl';
 const tmp = fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
@@ -25,11 +25,10 @@ export async function bake(
     version?: SemVer;
     args?: string[];
     delay?: string;
-    exitOnError?: boolean;
     tries?: number;
-    channel?: string;
+    channel?: string | false;
   },
-): Promise<MetaData | null> {
+): Promise<MetaData> {
   if (opts.version) {
     console.log(`Using version: ${opts.version.version}`);
     process.env.RENOVATE_VERSION = opts.version.version;
@@ -65,29 +64,24 @@ export async function bake(
 
   args.push(target);
 
-  for (let tries = opts.tries ?? 0; tries >= 0; tries--) {
-    const result = exec(`docker`, args);
-    if (result.signal) {
-      logger.error(`Signal received: ${result.signal}`);
-      process.exit(-1);
-    } else if (result.exitCode) {
-      if (tries > 0) {
-        logger.debug(`Error occured:\n ${result.stderr}`);
-        const delay = opts.delay ? toMs(opts.delay) : null;
-        if (delay) {
-          logger.info(`Retrying in ${opts.delay} ...`);
-          await setTimeout(delay);
-        }
-      } else {
-        logger.error(`Error occured:\n${result.stderr}`);
-        if (opts.exitOnError !== false) {
-          process.exit(result.exitCode);
-        }
-        return null;
-      }
-    } else {
-      logger.debug(`${target} succeeded:\n${result.stdout || result.stderr}`);
+  for (let tries = opts.tries ?? 0; ; tries--) {
+    // the output goes straight to the log, so it is only shown once
+    const result = await exec('docker', args, {
+      reject: false,
+      stdio: 'inherit',
+    });
+    if (!result.failed) {
       break;
+    }
+    const message = result.shortMessage ?? `docker bake ${target} failed`;
+    if (result.signal || tries <= 0) {
+      throw commandError(message);
+    }
+    logger.warn(message);
+    const delay = opts.delay ? toMs(opts.delay) : null;
+    if (delay) {
+      logger.info(`Retrying in ${opts.delay} ...`);
+      await setTimeout(delay);
     }
   }
 
@@ -97,24 +91,28 @@ export async function bake(
   return meta;
 }
 
-export function sign(
-  image: string,
-  opts: {
-    args?: string[];
-    exitOnError?: boolean;
-  },
-): void {
-  logger.info(`Signing ${image} ...`);
-  const result = exec('cosign', ['sign', '--yes', image]);
-  if (result.signal) {
-    logger.error(`Signal received: ${result.signal}`);
-    process.exit(-1);
-  } else if (result.exitCode) {
-    logger.error(`Error occured:\n${result.stderr}`);
-    if (opts.exitOnError !== false) {
-      process.exit(result.exitCode);
+const signAttempts = 3;
+const signDelay = 10_000;
+
+/**
+ * Signs an image with cosign, retrying a failed signing a few times.
+ */
+export async function sign(image: string): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    logger.info(`Signing ${image} ...`);
+    const result = await exec('cosign', ['sign', '--yes', image], {
+      reject: false,
+      stdio: 'inherit',
+    });
+    if (!result.failed) {
+      return;
     }
-  } else {
-    logger.debug(`Succeeded:\n${result.stdout || result.stderr}`);
+    const message = result.shortMessage ?? `Signing ${image} failed`;
+    if (attempt >= signAttempts) {
+      throw commandError(message);
+    }
+    logger.warn(message);
+    logger.info(`Retrying in ${signDelay / 1000}s ...`);
+    await setTimeout(signDelay);
   }
 }

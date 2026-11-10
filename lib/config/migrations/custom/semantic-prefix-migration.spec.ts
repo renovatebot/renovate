@@ -5,7 +5,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'fix(deps): ',
-      } as any,
+      },
       { semanticCommitType: 'fix', semanticCommitScope: 'deps' },
     );
   });
@@ -14,7 +14,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: true,
-      } as any,
+      },
       {},
     );
   });
@@ -23,7 +23,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'fix: ',
-      } as any,
+      },
       { semanticCommitType: 'fix', semanticCommitScope: null },
     );
   });
@@ -32,7 +32,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'test',
-      } as any,
+      },
       { semanticCommitType: 'test', semanticCommitScope: null },
     );
   });

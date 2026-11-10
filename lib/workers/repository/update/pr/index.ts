@@ -1,4 +1,10 @@
-import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyArray,
+  isNumber,
+  isUndefined,
+} from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
@@ -23,9 +29,11 @@ import {
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getElapsedHours } from '../../../../util/date.ts';
-import { stripEmojis } from '../../../../util/emoji.ts';
+import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
+import { isPrAlreadyExistsError } from '../../../../util/http/github.ts';
+import { isBadGateway } from '../../../../util/http/status.ts';
 import { memoize } from '../../../../util/memoize.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -52,14 +60,15 @@ import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
 ): PlatformPrOptions {
+  const isPrOrBranchAutomerge =
+    config.automergeType === 'pr' || config.automergeType === 'branch';
   const usePlatformAutomerge = Boolean(
-    config.automerge &&
-    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-    config.platformAutomerge,
+    config.automerge && isPrOrBranchAutomerge && config.platformAutomerge,
   );
 
   return {
     autoApprove: !!config.autoApprove,
+    automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
@@ -123,32 +132,29 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 
 function addPullRequestNoteIfAttestationHasBeenLost(
   upgrade: BranchUpgradeConfig,
+  currentReleaseHasAttestation: boolean | undefined,
 ): void {
-  const { packageName, depName, currentVersion, newVersion } = upgrade;
-  const name = packageName ?? depName;
+  const { packageName, currentVersion, newVersion } = upgrade;
 
-  const currentRelease = upgrade.releases?.find(
-    (release) => release.version === currentVersion,
-  );
   const newRelease = upgrade.releases?.find(
     (release) => release.version === newVersion,
   );
 
   if (
-    currentRelease &&
     newRelease &&
-    currentRelease.attestation === true &&
+    currentReleaseHasAttestation === true &&
     newRelease.attestation !== true
   ) {
     upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
-      [
-        '> :stop_sign: **Caution**',
-        '>',
-        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
-        `> Verify that release ${newVersion} was published by the expected author.`,
-        '\n',
-      ].join('\n'),
+      emojify(
+        codeBlock`
+          > :stop_sign: **Caution**
+          >
+          > ${packageName} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
+          > Verify that release ${newVersion} was published by the expected author.
+        `,
+      ),
     );
   }
 }
@@ -168,12 +174,16 @@ export async function ensurePr(
     internalChecksAsSuccess,
     prTitle = '',
     upgrades,
+    hasAttestation: currentReleaseHasAttestation,
   } = config;
   const getBranchStatus = memoize(() =>
     resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests),
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
+  const dependencyDashboardApproved =
+    dependencyDashboardCheck === 'approvePr' ||
+    dependencyDashboardCheck === 'unpend';
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
@@ -186,7 +196,9 @@ export async function ensurePr(
     } else if (prCache) {
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
-      if (validatePrCache(prCache, prBodyFingerprint)) {
+      // skip cache when autoApprove is set, since new commits may have
+      // reset platform approvals (e.g. GitLab's "Remove all approvals" setting)
+      if (validatePrCache(prCache, prBodyFingerprint) && !config.autoApprove) {
         return { type: 'with-pr', pr: existingPr };
       }
     } else if (config.repositoryCache === 'enabled') {
@@ -200,7 +212,7 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
-  if (dependencyDashboardCheck === 'approvePr') {
+  if (dependencyDashboardApproved) {
     logger.debug('Forcing PR because of dependency dashboard approval');
     config.forcePr = true;
   }
@@ -243,7 +255,7 @@ export async function ensurePr(
       logger.debug('Branch status success');
     } else if (
       config.prCreation === 'approval' &&
-      dependencyDashboardCheck !== 'approvePr'
+      !dependencyDashboardApproved
     ) {
       return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
     } else if (config.prCreation === 'not-pending' && !config.forcePr) {
@@ -252,12 +264,13 @@ export async function ensurePr(
         logger.debug(`Branch status is yellow - checking timeout`);
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         const elapsedHours = getElapsedHours(lastCommitTime);
-        if (
-          !dependencyDashboardCheck &&
-          ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-            (isNumber(config.prNotPendingHours) &&
-              elapsedHours < config.prNotPendingHours))
-        ) {
+        const isStabilityPending =
+          !!config.stabilityStatus && config.stabilityStatus !== 'yellow';
+        const isWithinNotPendingHours =
+          isNumber(config.prNotPendingHours) &&
+          elapsedHours < config.prNotPendingHours;
+        const isAwaitingTests = isStabilityPending || isWithinNotPendingHours;
+        if (!dependencyDashboardCheck && isAwaitingTests) {
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
@@ -287,10 +300,11 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchChangeLogs === 'pr') {
-    // fetch changelogs when not already done;
-    await embedChangelogs(upgrades);
-  }
+  // fetch changelogs for matching upgrades.
+  await embedChangelogs({
+    upgrades: upgrades,
+    stage: 'pr',
+  });
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
@@ -304,18 +318,24 @@ export async function ensurePr(
     const logJSON = upgrade.logJSON;
 
     if (logJSON) {
-      if (typeof logJSON.error === 'undefined') {
+      if (isUndefined(logJSON.error)) {
         if (logJSON.project) {
           upgrade.repoName = logJSON.project.repository;
         }
         upgrade.hasReleaseNotes = false;
         upgrade.releases = [];
+        const shared = !logJSON.perDependencyNotes;
         if (
           logJSON.hasReleaseNotes &&
           upgrade.repoName &&
-          !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
+          !(
+            shared &&
+            commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
+          )
         ) {
-          commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          if (shared) {
+            commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          }
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             for (const version of logJSON.versions) {
@@ -327,18 +347,22 @@ export async function ensurePr(
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes.push(
-          [
-            '> :exclamation: **Important**',
-            '> ',
-            '> Release Notes retrieval for this PR were skipped because no github.com credentials were available. ',
-            '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
-            '\n',
-          ].join('\n'),
+          emojify(
+            codeBlock`
+              > :exclamation: **Important**
+              >
+              > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md#githubcom-token-for-changelogs-and-tools).
+            `,
+          ),
         );
       }
     }
 
-    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
+    addPullRequestNoteIfAttestationHasBeenLost(
+      upgrade,
+      currentReleaseHasAttestation,
+    );
 
     config.upgrades.push(upgrade);
   }
@@ -347,6 +371,10 @@ export async function ensurePr(
 
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
+    if (upgrade.logJSON?.perDependencyNotes) {
+      continue;
+    }
+
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
     // TODO: types (#22198)
     notesSourceUrl ??= `${upgrade.sourceUrl!}${
@@ -366,12 +394,14 @@ export async function ensurePr(
     }
   }
 
+  const configuredLabels = prepareLabels(config);
+
   const prBody = getPrBody(
     config,
     {
       debugData: updatePrDebugData(
         config.baseBranch,
-        prepareLabels(config), // include labels in debug data
+        configuredLabels, // include labels in debug data
         existingPr?.bodyStruct?.debugData,
       ),
     },
@@ -400,7 +430,6 @@ export async function ensurePr(
 
       const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
       const prCurrentLabels = existingPr.labels;
-      const configuredLabels = prepareLabels(config);
 
       const labelsNeedUpdate = shouldUpdateLabels(
         prInitialLabels,
@@ -412,7 +441,8 @@ export async function ensurePr(
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash &&
-        !labelsNeedUpdate
+        !labelsNeedUpdate &&
+        !config.autoApprove
       ) {
         // adds or-cache for existing PRs
         setPrCache(branchName, prBodyFingerprint, false);
@@ -479,6 +509,8 @@ export async function ensurePr(
           },
           'PR title changed',
         );
+      } else if (config.autoApprove) {
+        logger.debug({ prTitle }, 'PR approval required');
       } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
@@ -491,11 +523,11 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
         return { type: 'with-pr', pr: existingPr };
-      } else {
-        await platform.updatePr(updatePrConfig);
-        logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
-        setPrCache(branchName, prBodyFingerprint, true);
       }
+      await platform.updatePr(updatePrConfig);
+      logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+      setPrCache(branchName, prBodyFingerprint, true);
+
       return {
         type: 'with-pr',
         pr: {
@@ -512,14 +544,17 @@ export async function ensurePr(
     }
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      logger.info(
+        { labels: configuredLabels },
+        `DRY-RUN: Would create PR: ${prTitle}`,
+      );
       pr = { number: 0 } as never;
     } else {
       try {
+        // for a vulnerability alert this checks the VulnerabilityConcurrentPRs count
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('ConcurrentPRs', prConfig) &&
-          !config.isVulnerabilityAlert
+          isLimitReached('ConcurrentPRs', prConfig)
         ) {
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
@@ -529,28 +564,29 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: prepareLabels(config),
+          labels: configuredLabels,
           platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
           milestone: config.milestone,
         });
 
-        incCountValue('ConcurrentPRs');
+        incCountValue(
+          config.isVulnerabilityAlert
+            ? 'VulnerabilityConcurrentPRs'
+            : 'ConcurrentPRs',
+        );
         incCountValue('HourlyPRs');
-        logger.info({ pr: pr?.number, prTitle }, 'PR created');
+        logger.info(
+          { pr: pr?.number, prTitle, labels: pr?.labels },
+          'PR created',
+        );
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
-        if (
-          err.body?.message === 'Validation failed' &&
-          err.body.errors?.length &&
-          err.body.errors.some((error: { message?: string }) =>
-            error.message?.startsWith('A pull request already exists'),
-          )
-        ) {
+        if (isPrAlreadyExistsError(err)) {
           logger.warn('A pull requests already exists');
           return { type: 'without-pr', prBlockedBy: 'Error' };
         }
-        if (err.statusCode === 502) {
+        if (isBadGateway(err)) {
           logger.warn(
             { branch: branchName },
             'Deleting branch due to server error',
@@ -570,6 +606,13 @@ export async function ensurePr(
         'This PR was configured for branch automerge. However, this is not possible, so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
+      }
+      if (
+        config.branchAutomergeFailureMessage ===
+        'automerge aborted - merge queue'
+      ) {
+        content +=
+          '\n___\n * The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.';
       }
       content = platform.massageMarkdown(content, config.rebaseLabel);
       logger.debug('Adding branch automerge failure message to PR');
@@ -602,6 +645,7 @@ export async function ensurePr(
     }
   } catch (err) {
     if (
+      // oxlint-disable-next-line typescript/prefer-optional-chain -- instanceof is not a null guard
       err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||

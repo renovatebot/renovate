@@ -11,6 +11,7 @@ import type {
   TokenTypes,
 } from './types.ts';
 
+/* oxlint-disable renovate/require-regex-util -- moo lexer patterns must be native RegExp: moo recompiles their source with the native engine and rejects RE2 instances (TODO #12870) */
 const lexerStates = {
   main: {
     comma: { match: ',' },
@@ -56,6 +57,7 @@ const lexerStates = {
     stringContent: moo.fallback,
   },
 };
+/* oxlint-enable renovate/require-regex-util */
 
 type TokenType = TokenTypes<typeof lexerStates>;
 
@@ -74,7 +76,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
     EdnMetadata
   >();
 
-  const popState = (): boolean => {
+  function popState(): boolean {
     const savedState = stack.pop();
     if (!savedState) {
       return false;
@@ -104,7 +106,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
 
     state = savedState;
     return true;
-  };
+  }
 
   for (const token of tokens) {
     const tokenType = token.type as TokenType;

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export PRETTIER_EXPERIMENTAL_CLI=1
+
 ls-lint
 lint-staged
 

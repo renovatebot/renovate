@@ -24,7 +24,7 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
 }
 
 export function composeLockFile(lockFile: LockFile, indent: string): string {
-  return JSON.stringify(lockFile, null, indent) + '\n';
+  return `${JSON.stringify(lockFile, null, indent)}\n`;
 }
 
 export async function getNpmrcContent(dir: string): Promise<string | null> {
@@ -57,8 +57,7 @@ export async function updateNpmrcContent(
       logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeLocalFile(npmrcFilePath, `${newContent}\n`);
     }
-  } catch {
-    /* v8 ignore next -- needs test */
+  } catch /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn('Unable to write custom npmrc file');
   }
 }
@@ -71,17 +70,34 @@ export async function resetNpmrcContent(
   if (originalContent) {
     try {
       await writeLocalFile(npmrcFilePath, originalContent);
-      /* v8 ignore next -- needs test */
-    } catch {
+    } catch /* v8 ignore next -- TODO: add test #40625 */ {
       logger.warn('Unable to reset npmrc to original contents');
     }
   } else {
     try {
       await deleteLocalFile(npmrcFilePath);
-    } catch {
-      /* v8 ignore next -- needs test */
+    } catch /* v8 ignore next -- TODO: add test #40625 */ {
       logger.warn('Unable to delete custom npmrc');
     }
+  }
+}
+
+/**
+ * Add the host-rule lines to the `.npmrc` in `dir`, run `fn`, and restore the original `.npmrc` afterwards.
+ *
+ * The restore runs in a `finally`, so a package manager that throws cannot leave the injected credentials behind in the working tree.
+ */
+export async function withNpmrcHostRules<T>(
+  dir: string,
+  additionalLines: string[],
+  fn: (originalNpmrcContent: string | null) => Promise<T>,
+): Promise<T> {
+  const originalContent = await getNpmrcContent(dir);
+  await updateNpmrcContent(dir, originalContent, additionalLines);
+  try {
+    return await fn(originalContent);
+  } finally {
+    await resetNpmrcContent(dir, originalContent);
   }
 }
 

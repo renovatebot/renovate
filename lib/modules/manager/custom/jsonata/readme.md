@@ -23,18 +23,18 @@ The first two required fields are `managerFilePatterns` and `matchStrings`:
 
 Before Renovate can look up a dependency and decide about updates, it must have this info about each dependency:
 
-| Info type                                            | Required | Notes                                                     | Docs                                                                           |
-| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| Name of the dependency                               | Yes      |                                                           |                                                                                |
-| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)       |
-| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning) |
-| `fileFormat`                                         | Yes      | Must be either `json`, `yaml` or `toml`.                  | [`Configuration Options`](../../../configuration-options.md#fileformat)        |
+| Info type                                            | Required | Notes                                                     | Docs                                                                                  |
+| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| Name of the dependency                               | Yes      |                                                           |                                                                                       |
+| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)              |
+| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning)        |
+| `fileFormat`                                         | Yes      | Must be either `json`, `yaml` or `toml`.                  | [`Configuration Options`](../../../configuration-options.md#custommanagersfileformat) |
 
 #### Required fields to be present in the resulting structure returned by the jsonata query
 
 You must:
 
-- Capture the `currentValue` of the dependency _or_ use the `currentValueTemplate` template field
+- Capture the `currentValue` or `currentDigest` of the dependency _or_ use the `currentValueTemplate` or `currentDigestTemplate` template field
 - Capture the `depName` or `packageName`. _Or_ use a template field: `depNameTemplate` and `packageNameTemplate`
 - Capture the `datasource`, _or_ use the `datasourceTemplate` template field
 
@@ -45,13 +45,14 @@ You may use any of these items:
 - `depType`, _or_ use the `depTypeTemplate` template field
 - `versioning`, _or_ the use `versioningTemplate` template field. If neither are present, Renovate defaults to `semver-coerced`
 - `extractVersion`, _or_ use the `extractVersionTemplate` template field
-- `currentDigest`
 - `registryUrl`, _or_ use the `registryUrlTemplate` template field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - `indentation`. Must be empty, _or_ whitespace. Else Renovate restes only `indentation` to an empty string
 
 ### Usage
 
 When you configure a JSONata manager, use the following syntax:
+
+<!-- doc-fence-check-disable-next-block -->
 
 ```javascript
 {

@@ -1,9 +1,10 @@
-import { isArray, isNumber } from '@sindresorhus/is';
+import { isArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { noLeadingAtSymbol } from '../../../../util/common.ts';
 import { sampleSize } from '../../../../util/sample.ts';
 import { codeOwnersForPr } from './code-owners.ts';
@@ -36,7 +37,9 @@ function prepareParticipants(
   config: RenovateConfig,
   usernames: string[],
 ): Promise<string[]> {
-  const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
+  const normalizedUsernames = [
+    ...new Set(usernames.map(noLeadingAtSymbol).filter(isNonEmptyString)),
+  ];
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 
@@ -44,7 +47,7 @@ export async function addParticipants(
   config: RenovateConfig,
   pr: Pr,
 ): Promise<void> {
-  let assignees = config.assignees ?? [];
+  let assignees = coerceArray(config.assignees);
   logger.debug(`addParticipants(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(config, assignees, pr);
@@ -71,7 +74,7 @@ export async function addParticipants(
     }
   }
 
-  let reviewers = config.reviewers ?? [];
+  let reviewers = coerceArray(config.reviewers);
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(config, reviewers, pr);
     logger.debug(

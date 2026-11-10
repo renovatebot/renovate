@@ -1,6 +1,7 @@
 import * as p from '../../../util/promises.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
+import type { EmbedChangelogsOptions } from './types.ts';
 
 export async function embedChangelog(
   upgrade: BranchUpgradeConfig,
@@ -15,6 +16,7 @@ export async function embedChangelog(
   } else {
     upgrade.logJSON = {
       hasReleaseNotes: true,
+      perDependencyNotes: true,
       project: {
         packageName: upgrade.packageName,
         depName: upgrade.depName,
@@ -43,8 +45,13 @@ export async function embedChangelog(
   }
 }
 
-export async function embedChangelogs(
-  branches: BranchUpgradeConfig[],
-): Promise<void> {
-  await p.map(branches, embedChangelog, { concurrency: 10 });
+export async function embedChangelogs({
+  upgrades,
+  stage,
+}: EmbedChangelogsOptions): Promise<void> {
+  // Only process upgrades whose fetchChangeLogs value match the stage.
+  const filteredUpgrades = upgrades.filter(
+    (upgrade) => upgrade.fetchChangeLogs === stage,
+  );
+  await p.map(filteredUpgrades, embedChangelog, { concurrency: 10 });
 }

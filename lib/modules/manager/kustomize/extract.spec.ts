@@ -230,6 +230,29 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toEqual(sample);
     });
 
+    it('should skip a chart without repo and version', () => {
+      const pkg = extractHelmChart({ name: 'renovate' });
+      expect(pkg).toEqual({
+        depName: 'renovate',
+        datasource: HelmDatasource.id,
+        skipReason: 'local-chart',
+      });
+    });
+
+    it('should skip a chart with an empty repo', () => {
+      const pkg = extractHelmChart({
+        name: 'renovate',
+        version: '1.0.0',
+        repo: '',
+      });
+      expect(pkg).toEqual({
+        depName: 'renovate',
+        currentValue: '1.0.0',
+        datasource: HelmDatasource.id,
+        skipReason: 'local-chart',
+      });
+    });
+
     it('should correctly extract an OCI chart', () => {
       const sample = {
         depName: 'redis',
@@ -267,6 +290,11 @@ describe('modules/manager/kustomize/extract', () => {
   });
 
   describe('image extraction', () => {
+    it('should return null for image with name only (no newTag/newName/digest)', () => {
+      const pkg = extractImage({ name: 'foo' });
+      expect(pkg).toBeNull();
+    });
+
     it('should return null on a null input', () => {
       const pkg = extractImage({
         name: '',
@@ -595,6 +623,20 @@ describe('modules/manager/kustomize/extract', () => {
       expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
     });
 
+    it('skips components, images and helm charts that yield nothing', () => {
+      const content = codeBlock`
+        apiVersion: kustomize.config.k8s.io/v1beta1
+        kind: Kustomization
+        components:
+          - ./local-component
+        images:
+          - name: ''
+        helmCharts:
+          - name: ''
+      `;
+      expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
+    });
+
     it('should extract bases resources and components from their respective blocks', () => {
       const content = codeBlock`
       apiVersion: kustomize.config.k8s.io/v1beta1
@@ -834,6 +876,33 @@ describe('modules/manager/kustomize/extract', () => {
             datasource: DockerDatasource.id,
             packageName: 'registry-1.docker.io/bitnamicharts/redis',
             pinDigests: false,
+          },
+        ],
+      });
+    });
+
+    it('parses helmChart field without repo', () => {
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      helmGlobals:
+        chartHome: charts
+      helmCharts:
+      - name: local-chart
+        releaseName: local
+        version: 1.0.0
+      `;
+
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depType: 'HelmChart',
+            depName: 'local-chart',
+            currentValue: '1.0.0',
+            datasource: HelmDatasource.id,
+            skipReason: 'local-chart',
           },
         ],
       });
@@ -1108,7 +1177,7 @@ describe('modules/manager/kustomize/extract', () => {
         const sample: any = {
           currentValue: version,
         };
-        if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
+        if (regEx(/(?:github\.com)(?::|\/)/).test(url)) {
           sample.depName = project;
           sample.datasource = GithubTagsDatasource.id;
         } else {

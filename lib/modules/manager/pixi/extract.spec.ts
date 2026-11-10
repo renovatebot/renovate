@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
 import { fs } from '~test/util.ts';
+import { getUserPixiConfig } from './extract.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -95,6 +96,7 @@ numpy = { version = "*", build = "py312*" }
 [pypi-dependencies]
 requests = '*'
 requests2 = {version = '*'}
+mako = "==1.3.9"
 
 [target.win-64.pypi-dependencies]
 urllib3 = {version = '*'}
@@ -142,23 +144,27 @@ python = "3.12.*"
 describe('modules/manager/pixi/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty pyproject.toml', async () => {
-      expect(
-        await extractPackageFile('nothing here', 'pyproject.toml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'pyproject.toml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty pixi.toml', async () => {
-      expect(await extractPackageFile('nothing here', 'pixi.toml')).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'pixi.toml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for parsed file without pixi section', async () => {
-      expect(
-        await extractPackageFile(pyprojectWithoutPixi, 'pyproject.toml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(pyprojectWithoutPixi, 'pyproject.toml'),
+      ).resolves.toBeNull();
     });
 
     it('returns parse pixi.toml', async () => {
-      expect(await extractPackageFile(pixiToml, 'pixi.toml')).toMatchObject({
+      await expect(
+        extractPackageFile(pixiToml, 'pixi.toml'),
+      ).resolves.toMatchObject({
         deps: [
           {
             channels: ['conda-forge'],
@@ -297,9 +303,9 @@ describe('modules/manager/pixi/extract', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.localPathExists.mockResolvedValueOnce(true);
 
-      expect(
-        await extractPackageFile(pyprojectToml, 'pyproject.toml'),
-      ).toMatchObject({
+      await expect(
+        extractPackageFile(pyprojectToml, 'pyproject.toml'),
+      ).resolves.toMatchObject({
         deps: [
           {
             currentValue: '*',
@@ -316,9 +322,9 @@ describe('modules/manager/pixi/extract', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.localPathExists.mockReturnValueOnce(Promise.resolve(false));
 
-      expect(
-        await extractPackageFile(pyprojectToml, 'pyproject.toml'),
-      ).toMatchObject({
+      await expect(
+        extractPackageFile(pyprojectToml, 'pyproject.toml'),
+      ).resolves.toMatchObject({
         deps: [
           {
             currentValue: '*',
@@ -335,9 +341,9 @@ describe('modules/manager/pixi/extract', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.localPathExists.mockReturnValueOnce(Promise.resolve(false));
 
-      expect(
-        await extractPackageFile(fullPixiConfig, 'pixi.toml'),
-      ).toMatchObject({
+      await expect(
+        extractPackageFile(fullPixiConfig, 'pixi.toml'),
+      ).resolves.toMatchObject({
         deps: [
           {
             channels: ['conda-forge', 'conda-not-forge'],
@@ -412,6 +418,13 @@ describe('modules/manager/pixi/extract', () => {
             versioning: 'pep440',
           },
           {
+            currentValue: '==1.3.9',
+            currentVersion: '1.3.9',
+            datasource: 'pypi',
+            depName: 'mako',
+            versioning: 'pep440',
+          },
+          {
             currentValue: '*',
             datasource: 'pypi',
             depName: 'urllib3',
@@ -471,8 +484,8 @@ describe('modules/manager/pixi/extract', () => {
     });
 
     it('returns parse non-known config file as pyproject.toml', async () => {
-      expect(
-        await extractPackageFile(
+      await expect(
+        extractPackageFile(
           codeBlock`
           [tool.pixi.project]
           channels = ['conda-forge']
@@ -483,7 +496,7 @@ describe('modules/manager/pixi/extract', () => {
           `,
           'not-sure-what-file-this-is.toml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             channels: ['conda-forge'],
@@ -499,8 +512,8 @@ describe('modules/manager/pixi/extract', () => {
     });
 
     it('returns parse non-known config file as pixi.toml', async () => {
-      expect(
-        await extractPackageFile(
+      await expect(
+        extractPackageFile(
           codeBlock`
         [project]
         channels = ['conda-forge']
@@ -511,7 +524,7 @@ describe('modules/manager/pixi/extract', () => {
         `,
           'not-sure-what-file-this-is.toml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             channels: ['conda-forge'],
@@ -619,7 +632,7 @@ describe('modules/manager/pixi/extract', () => {
     });
   });
 
-  it(`extract package with channel priority`, async () => {
+  it(`extract package with channel options`, async () => {
     const result = await extractPackageFile(
       codeBlock`
         [project]
@@ -630,7 +643,12 @@ describe('modules/manager/pixi/extract', () => {
         version = "0.1.0"
 
         [feature.scipy]
-        channels = ["anaconda", {channel = 'cuda', priority = 1},  {channel = 'cuda2', priority = 1}]
+        channels = [
+          "anaconda",
+          { channel = "community", exclude-newer = "7d" },
+          { channel = "cuda", priority = 1 },
+          { channel = "cuda2", priority = 1 },
+        ]
         dependencies = { scipy = "==1.15.1" }
 
         [feature.numpy]
@@ -649,6 +667,7 @@ describe('modules/manager/pixi/extract', () => {
             'https://api.anaconda.org/package/cuda/',
             'https://api.anaconda.org/package/cuda2/',
             'https://api.anaconda.org/package/anaconda/',
+            'https://api.anaconda.org/package/community/',
             'https://api.anaconda.org/package/conda-forge/',
             'https://api.anaconda.org/package/conda-not-forge/',
           ],
@@ -670,14 +689,34 @@ describe('modules/manager/pixi/extract', () => {
     });
   });
 
+  it('parses optional channel configuration', () => {
+    expect(
+      getUserPixiConfig(
+        codeBlock`
+          [project]
+          channels = [
+            { channel = "conda-forge", exclude-newer = "7d" },
+            { channel = "cuda", priority = 1 },
+          ]
+        `,
+        'pixi.toml',
+      )?.project.channels,
+    ).toEqual([
+      { channel: 'conda-forge', 'exclude-newer': '7d' },
+      { channel: 'cuda', priority: 1 },
+    ]);
+  });
+
   it('returns null for non-known config file', async () => {
-    expect(await extractPackageFile(`{}`, 'unexpected.json')).toBe(null);
+    await expect(extractPackageFile(`{}`, 'unexpected.json')).resolves.toBe(
+      null,
+    );
   });
 
   it(`set registryStrategy='merge' for channel-priority='disabled'"`, async () => {
-    expect(
-      await extractPackageFile(pixiChannelPriorityDisabled, 'pixi.toml'),
-    ).toMatchObject({
+    await expect(
+      extractPackageFile(pixiChannelPriorityDisabled, 'pixi.toml'),
+    ).resolves.toMatchObject({
       deps: [
         {
           channels: ['anaconda', 'conda-forge'],
@@ -696,8 +735,8 @@ describe('modules/manager/pixi/extract', () => {
     });
   });
   it(`use default registryStrategy for channel-priority='strict'"`, async () => {
-    expect(
-      await extractPackageFile(
+    await expect(
+      extractPackageFile(
         codeBlock`
         [project]
         channels = ["anaconda", "conda-forge"]
@@ -708,7 +747,7 @@ describe('modules/manager/pixi/extract', () => {
         `,
         'pixi.toml',
       ),
-    ).toMatchObject({
+    ).resolves.toMatchObject({
       deps: [
         {
           channels: ['anaconda', 'conda-forge'],

@@ -34,5 +34,30 @@ describe('util/git/semantic', () => {
       const res = await detectSemanticCommits();
       expect(res).toBe('enabled');
     });
+
+    it('detects false on malformed commits', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue([
+        'fix(): foo',
+        'fix:',
+        'some:invalid',
+      ]);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('disabled');
+    });
+
+    it('detects true on breaking changes', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue(['fix!: foo']);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('enabled');
+    });
+
+    it('detects true on breaking changes with scope', async () => {
+      config.semanticCommits = undefined;
+      git.getCommitMessages.mockResolvedValue(['fix(scope)!: foo']);
+      const res = await detectSemanticCommits();
+      expect(res).toBe('enabled');
+    });
   });
 });

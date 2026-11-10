@@ -1,5 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { dir as tmpDir } from 'tmp-promise';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { AzureBicepResourceDatasource } from './index.ts';
 
@@ -146,5 +150,48 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         },
       ],
     });
+  });
+
+  it('persists public releases and index when private package caching is disabled', async () => {
+    const cacheDir = await tmpDir({ unsafeCleanup: true });
+    GlobalConfig.set({ cachePrivatePackages: false });
+    await packageCache.init({ cacheDir: cacheDir.path });
+    httpMock
+      .scope(gitHubHost)
+      .get(indexPath)
+      .reply(200, {
+        resources: { 'Microsoft.Storage/storageAccounts@2018-02-01': {} },
+      });
+    const config = {
+      datasource: AzureBicepResourceDatasource.id,
+      packageName: 'Microsoft.Storage/storageAccounts',
+    };
+    const expected = {
+      releases: [
+        {
+          version: '2018-02-01',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2018-02-01',
+        },
+      ],
+    };
+
+    try {
+      await expect(getPkgReleases(config)).resolves.toEqual(expected);
+      memCache.init();
+
+      const datasource = new AzureBicepResourceDatasource();
+      const getIndex = vi.spyOn(datasource, 'getResourceVersionIndex');
+      await expect(datasource.getReleases(config)).resolves.toEqual(expected);
+      expect(getIndex).not.toHaveBeenCalled();
+      memCache.init();
+
+      await expect(datasource.getResourceVersionIndex()).resolves.toEqual({
+        'microsoft.storage/storageaccounts': ['2018-02-01'],
+      });
+    } finally {
+      await packageCache.cleanup({});
+      await cacheDir.cleanup();
+    }
   });
 });

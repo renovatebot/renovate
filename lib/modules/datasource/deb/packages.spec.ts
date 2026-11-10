@@ -1,6 +1,6 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import * as upath from 'upath';
+import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';

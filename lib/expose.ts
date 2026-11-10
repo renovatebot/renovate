@@ -27,8 +27,9 @@ export async function openpgp(): Promise<typeof import('openpgp')> {
 }
 
 /**
- * return's sqlite
+ * return's bunyan
  */
-export async function sqlite(): Promise<typeof import('better-sqlite3')> {
-  return (await import('better-sqlite3')).default;
+export function bunyan(): typeof import('bunyan') {
+  // use `require` to allow opentelemetry instrumentation
+  return require('bunyan');
 }

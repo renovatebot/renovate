@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import upath from 'upath';
 import type { RenovateConfig } from '../types.ts';
 import { AbstractMigration } from './base/abstract-migration.ts';
@@ -101,11 +101,12 @@ describe('config/migrations/migrations-service', () => {
     expect(duplicateProperties).toBeEmptyArray();
   });
 
-  it('includes all defined migration classes in MigrationsService.customMigrations', () => {
-    const allDefinedMigrationClasses: string[] = fs
-      .readdirSync(upath.join(import.meta.dirname, 'custom'), {
+  it('includes all defined migration classes in MigrationsService.customMigrations', async () => {
+    const allDefinedMigrationClasses: string[] = (
+      await readdir(upath.join(import.meta.dirname, 'custom'), {
         withFileTypes: true,
       })
+    )
       .map((file) => file.name)
       .filter((name) => !name.includes('spec.ts'));
 

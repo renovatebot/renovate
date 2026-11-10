@@ -11,7 +11,7 @@ This is implemented with two-level cache:
 
   Either full or delta sync is performed, depending on the cache state.
 
-  All the data of this layer is stored in-memory as the mapping `packageName -> version[]`.
+  All the data of this layer is stored in-memory as the mapping `packageName → version[]`.
 
   ```mermaid
   stateDiagram-v2

@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as devboxVersioning from '../../versioning/devbox/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -15,14 +16,16 @@ export class DevboxDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
   override readonly releaseTimestampSupport = true;
-
-  override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = devboxVersioning.id;
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   async getReleases({
     registryUrl,
@@ -44,10 +47,8 @@ export class DevboxDatasource extends Datasource {
       res.releases = response.body.releases;
       res.homepage = response.body.homepage;
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && !isNotFound(err)) {
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }

@@ -293,11 +293,13 @@ describe('config/presets/internal/custom-managers', () => {
       it.each`
         path                                  | expected
         ${'bitbucket-pipelines.yml'}          | ${true}
-        ${'bitbucket-pipelines.yaml'}         | ${true}
+        ${'bitbucket-pipelines.yaml'}         | ${false}
         ${'foo/bitbucket-pipelines.yml'}      | ${true}
-        ${'foo/bitbucket-pipelines.yaml'}     | ${true}
+        ${'foo/bitbucket-pipelines.yaml'}     | ${false}
         ${'foo/bar/bitbucket-pipelines.yml'}  | ${true}
-        ${'foo/bar/bitbucket-pipelines.yaml'} | ${true}
+        ${'foo/bar/bitbucket-pipelines.yaml'} | ${false}
+        ${'.bitbucket/shared-pipelines.yml'}  | ${true}
+        ${'.bitbucket/shared-pipeline.yaml'}  | ${false}
         ${'bitbucket-pipelines'}              | ${false}
       `('$path', ({ path, expected }) => {
         expect(
@@ -606,13 +608,19 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                        | expected
-        ${'.gitlab-ci.yaml'}        | ${true}
-        ${'.gitlab-ci.yml'}         | ${true}
-        ${'foo.yaml'}               | ${false}
-        ${'foo.yml'}                | ${false}
-        ${'.gitlab/ci.yml'}         | ${false}
-        ${'includes/gitlab-ci.yml'} | ${false}
+        path                             | expected
+        ${'.gitlab-ci.yaml'}             | ${true}
+        ${'.gitlab-ci.yml'}              | ${true}
+        ${'foo.gitlab-ci.yaml'}          | ${true}
+        ${'foo.gitlab-ci.yml'}           | ${true}
+        ${'includes/.gitlab-ci.yaml'}    | ${true}
+        ${'includes/.gitlab-ci.yml'}     | ${true}
+        ${'includes/foo.gitlab-ci.yaml'} | ${true}
+        ${'includes/foo.gitlab-ci.yml'}  | ${true}
+        ${'foo.yaml'}                    | ${false}
+        ${'foo.yml'}                     | ${false}
+        ${'.gitlab/ci.yml'}              | ${false}
+        ${'includes/gitlab-ci.yml'}      | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),
@@ -760,6 +768,71 @@ describe('config/presets/internal/custom-managers', () => {
     });
   });
 
+  describe('Update Vale package versions in .vale.ini', () => {
+    const customManager = presets.valeVersions.customManagers?.[0];
+
+    it('finds dependencies in file', async () => {
+      const fileContent = codeBlock`
+        StylesPath = styles
+
+        MinAlertLevel = suggestion
+
+        [*.{md,txt}]
+        BasedOnStyles = Vale
+
+        Packages = https://github.com/vale-cli/Google/releases/download/v1.0.0/Google.zip
+        Packages = https://github.com/vale-cli/Microsoft/releases/download/v0.1.0/Microsoft.zip, https://github.com/vale-cli/write-good/releases/download/v0.4.0/write-good.zip
+        Packages = proselint
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        '.vale.ini',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-releases',
+          packageName: 'vale-cli/Google',
+          replaceString:
+            'https://github.com/vale-cli/Google/releases/download/v1.0.0/',
+        },
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          packageName: 'vale-cli/Microsoft',
+          replaceString:
+            'https://github.com/vale-cli/Microsoft/releases/download/v0.1.0/',
+        },
+        {
+          currentValue: 'v0.4.0',
+          datasource: 'github-releases',
+          packageName: 'vale-cli/write-good',
+          replaceString:
+            'https://github.com/vale-cli/write-good/releases/download/v0.4.0/',
+        },
+      ]);
+    });
+
+    describe('matches regex patterns', () => {
+      it.each`
+        path                   | expected
+        ${'.vale.ini'}         | ${true}
+        ${'foo/.vale.ini'}     | ${true}
+        ${'foo/bar/.vale.ini'} | ${true}
+        ${'vale.ini'}          | ${false}
+        ${'.vale.ini.bak'}     | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
+    });
+  });
+
   describe('finds dependencies in pom.xml properties', () => {
     const customManager = presets.mavenPropertyVersions.customManagers?.[0];
 
@@ -844,7 +917,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `tsconfig/node` version in tsconfig.json', () => {
-    const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
+    const customManager = presets.tsconfigNodeVersions.customManagers![0];
 
     it(`find in tsconfig.json extends string`, async () => {
       const fileContent = codeBlock`
@@ -858,7 +931,31 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        customManager,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    it(`find in tsconfig.json extends string with short reference`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": "@tsconfig/node20",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        presets.tsconfigNodeVersions.customManagers![1],
       );
 
       expect(res?.deps).toMatchObject([
@@ -885,7 +982,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager!,
+        customManager,
       );
 
       expect(res?.deps).toMatchObject([
@@ -907,7 +1004,7 @@ describe('config/presets/internal/custom-managers', () => {
         ${'tsconfig.yml'}           | ${false}
       `('$path', ({ path, expected }) => {
         expect(
-          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+          matchRegexOrGlobList(path, customManager.managerFilePatterns),
         ).toBe(expected);
       });
     });

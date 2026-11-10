@@ -1,9 +1,10 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import { isServiceUnavailable } from '../../../util/http/status.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { ServiceDiscoveryResult } from './types.ts';
+import { ServiceDiscoveryResponse } from './schema.ts';
 
 const terraformId = 'terraform';
 
@@ -11,19 +12,24 @@ const terraformId = 'terraform';
 export abstract class TerraformDatasource extends Datasource {
   static id = terraformId;
 
+  static readonly terraformRegistryUrl = 'https://registry.terraform.io';
+  static readonly openTofuApiUrl = 'https://api.opentofu.org';
+  static readonly openTofuRegistryUrl = 'https://registry.opentofu.org';
+
   private async _getTerraformServiceDiscoveryResult(
     registryUrl: string,
-  ): Promise<ServiceDiscoveryResult> {
+  ): Promise<ServiceDiscoveryResponse> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
-    const serviceDiscovery = (
-      await this.http.getJsonUnchecked<ServiceDiscoveryResult>(discoveryURL)
-    ).body;
-    return serviceDiscovery;
+    const { body: res } = await this.http.getJson(
+      discoveryURL,
+      ServiceDiscoveryResponse,
+    );
+    return res;
   }
 
   getTerraformServiceDiscoveryResult(
     registryUrl: string,
-  ): Promise<ServiceDiscoveryResult> {
+  ): Promise<ServiceDiscoveryResponse> {
     return withCache(
       {
         namespace: `datasource-${terraformId}`,
@@ -40,12 +46,10 @@ export abstract class TerraformDatasource extends Datasource {
 
   override handleHttpErrors(err: HttpError): void {
     const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
-    // istanbul ignore if
-    if (err.response?.statusCode === 503) {
+    if (isServiceUnavailable(err)) {
       throw new ExternalHostError(err);
     }
   }

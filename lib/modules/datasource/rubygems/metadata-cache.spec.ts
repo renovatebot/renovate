@@ -12,15 +12,70 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
   beforeEach(() => {
     packageCacheMock.clear();
 
-    packageCache.get.mockImplementation(
-      (ns, key) =>
-        Promise.resolve(packageCacheMock.get(`${ns}::${key}`)) as never,
+    packageCache.get.mockImplementation((ns, key) =>
+      Promise.resolve(packageCacheMock.get(`${ns}::${key}`)),
     );
 
     packageCache.set.mockImplementation((ns, key, value) => {
       packageCacheMock.set(`${ns}::${key}`, value);
-      return Promise.resolve() as never;
+      return Promise.resolve();
     });
+  });
+
+  it.each`
+    platform          | indexVersion
+    ${undefined}      | ${'1.0.0'}
+    ${'ruby'}         | ${'1.0.0'}
+    ${'arm64-darwin'} | ${'1.0.0-arm64-darwin'}
+  `(
+    'preserves release metadata for platform $platform',
+    async ({ platform, indexVersion }) => {
+      const cache = new MetadataCache(new Http('test'));
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [{ number: '1.0.0', platform, created_at: '2023-01-01' }])
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {});
+
+      const result = await cache.getRelease('https://rubygems.org', 'foobar', [
+        indexVersion,
+      ]);
+      const cachedResult = await cache.getRelease(
+        'https://rubygems.org',
+        'foobar',
+        [indexVersion],
+      );
+
+      expect(result.releases).toEqual([
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2023-01-01T00:00:00.000Z',
+          ...(platform ? { constraints: { platform: [platform] } } : {}),
+        },
+      ]);
+      expect(cachedResult).toEqual(result);
+      expect(packageCache.set).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('rejects metadata when the platform differs from the index', async () => {
+    const cache = new MetadataCache(new Http('test'));
+    httpMock
+      .scope('https://rubygems.org')
+      .get('/api/v1/versions/foobar.json')
+      .reply(200, [
+        { number: '1.0.0', platform: 'arm64-darwin', created_at: '2023-01-01' },
+      ])
+      .get('/api/v1/gems/foobar.json')
+      .reply(200, {});
+
+    const result = await cache.getRelease('https://rubygems.org', 'foobar', [
+      '1.0.0-x86_64-linux',
+    ]);
+
+    expect(result).toEqual({ releases: [{ version: '1.0.0-x86_64-linux' }] });
+    expect(packageCache.set).not.toHaveBeenCalled();
   });
 
   it('fetches data', async () => {

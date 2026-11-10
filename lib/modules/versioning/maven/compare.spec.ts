@@ -191,6 +191,7 @@ describe('modules/versioning/maven/compare', () => {
         ${'1_5ea'}                                      | ${'1_c3b'}
         ${'1_c3b'}                                      | ${'2'}
         ${'17.0.5'}                                     | ${'17.0.5+8'}
+        ${'2026051723231779060202'}                     | ${'2026051723231779060208'}
       `('$x < $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(-1);
         expect(compare(y, x)).toBe(1);
@@ -246,9 +247,9 @@ describe('modules/versioning/maven/compare', () => {
 
   describe('tokenize', () => {
     const zeroToken = {
-      prefix: 'PREFIX_HYPHEN',
+      prefix: '',
       type: 'TYPE_NUMBER',
-      val: 0,
+      val: 0n,
       isTransition: false,
     };
     const testObj = [
@@ -257,21 +258,67 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
+            prefix: '',
+            type: 'TYPE_NUMBER',
+            val: 1n,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2n,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3n,
+          },
+        ],
+      },
+      {
+        input: 'v1.2.3',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'v',
+            type: 'TYPE_NUMBER',
+            val: 1n,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2n,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3n,
+          },
+        ],
+      },
+      {
+        input: 'version2.3',
+        expected: [
+          {
+            isTransition: true,
+            prefix: '',
+            type: 'TYPE_QUALIFIER',
+            val: 'version',
+          },
+          {
+            isTransition: false,
             prefix: 'PREFIX_HYPHEN',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
-          },
-          {
-            isTransition: false,
-            prefix: 'PREFIX_DOT',
-            type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -280,7 +327,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_QUALIFIER',
             val: 'alpha',
           },
@@ -303,21 +350,21 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 1n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
           {
             isTransition: false,
@@ -338,15 +385,15 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 1n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
@@ -358,7 +405,7 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: 'PREFIX_HYPHEN',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -367,21 +414,21 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
-            val: 0,
+            val: 0n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -390,7 +437,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_QUALIFIER',
             val: 'invalid',
           },
@@ -512,47 +559,56 @@ describe('modules/versioning/maven/compare', () => {
     );
 
     it.each`
-      range                      | version      | expected
-      ${'[1.2.3]'}               | ${'1.2.3'}   | ${'[1.2.3]'}
-      ${'[1.2.3]'}               | ${'1.2.4'}   | ${'[1.2.4]'}
-      ${'[1.0.0,1.2.3]'}         | ${'0.0.1'}   | ${'[1.0.0,1.2.3]'}
-      ${'[1.0.0,1.2.3]'}         | ${'1.2.4'}   | ${'[1.0.0,1.2.4]'}
-      ${'[1.0.0,1.2.23]'}        | ${'1.1.0'}   | ${'[1.0.0,1.2.23]'}
-      ${'(,1.0]'}                | ${'2.0'}     | ${'(,2.0]'}
-      ${'],1.0]'}                | ${'2.0'}     | ${'],2.0]'}
-      ${'(,1.0)'}                | ${'2.0'}     | ${'(,3.0)'}
-      ${'],1.0['}                | ${'2.0'}     | ${'],3.0['}
-      ${'[1.0,1.2.3],[1.3,1.5)'} | ${'1.2.4'}   | ${'[1.0,1.2.4],[1.3,1.5)'}
-      ${'[1.0,1.2.3],[1.3,1.5['} | ${'1.2.4'}   | ${'[1.0,1.2.4],[1.3,1.5['}
-      ${'[1.2.3,)'}              | ${'1.2.4'}   | ${'[1.2.4,)'}
-      ${'[1.2.3,['}              | ${'1.2.4'}   | ${'[1.2.4,['}
-      ${'[1.2.3,]'}              | ${'1.2.4'}   | ${'[1.2.3,]'}
-      ${'[0.21,0.22)'}           | ${'0.20.21'} | ${'[0.21,0.22)'}
-      ${'[0.21,0.22)'}           | ${'0.21.1'}  | ${'[0.21,0.22)'}
-      ${'[0.21,0.22.0)'}         | ${'0.22.1'}  | ${'[0.21,0.22.2)'}
-      ${'[0.21,0.22)'}           | ${'0.23'}    | ${'[0.23,0.24)'}
-      ${'[1.8,1.9)'}             | ${'1.9.0.1'} | ${'[1.9,1.10)'}
-      ${'[1.8a,1.9)'}            | ${'1.9.0.1'} | ${'[1.8a,1.10)'}
-      ${'[1.8,1.9.0)'}           | ${'1.9.0.1'} | ${'[1.8,1.10.0)'}
-      ${'[1.8,1.9.0.0)'}         | ${'1.9.0.1'} | ${'[1.8,1.9.0.2)'}
-      ${'[1.8,1.9.0.0)'}         | ${'1.10.1'}  | ${'[1.8,1.10.2.0)'}
-      ${'[1.8,1.9)'}             | ${'1.9.1'}   | ${'[1.9,1.10)'}
-      ${'[1.8,1.9)'}             | ${'1.10.0'}  | ${'[1.10,1.11)'}
-      ${'[1.8,1.9)'}             | ${'1.10.1'}  | ${'[1.10,1.11)'}
-      ${'(,1.0.0]'}              | ${'2.0.0'}   | ${'(,2.0.0]'}
-      ${'(,1.0]'}                | ${'2.0.0'}   | ${'(,2.0]'}
-      ${'(,1]'}                  | ${'2.0.0'}   | ${'(,2]'}
-      ${'(,1.0.0-foobar]'}       | ${'2.0.0'}   | ${'(,2.0.0]'}
-      ${'[1,2]'}                 | ${'2'}       | ${'[1,2]'}
-      ${'[1,2)'}                 | ${'2'}       | ${'[2,3)'}
-      ${'[0,2)'}                 | ${'2'}       | ${'[0,3)'}
-      ${'[1.2,1.3]'}             | ${'1.3'}     | ${'[1.2,1.3]'}
-      ${'[1.2,1.3)'}             | ${'1.3'}     | ${'[1.3,1.4)'}
-      ${'[1.1,1.3)'}             | ${'1.3'}     | ${'[1.1,1.4)'}
-      ${'[1.2.3,1.2.4]'}         | ${'1.2.4'}   | ${'[1.2.3,1.2.4]'}
-      ${'[1.2.3,1.2.4)'}         | ${'1.2.4'}   | ${'[1.2.4,1.2.5)'}
-      ${'[1.2.1,1.2.4)'}         | ${'1.2.4'}   | ${'[1.2.1,1.2.5)'}
-      ${'[1,1.2.3)'}             | ${'1.2.3'}   | ${'[1,1.2.4)'}
+      range                                                        | version                      | expected
+      ${'[1.2.3]'}                                                 | ${'1.2.3'}                   | ${'[1.2.3]'}
+      ${'[1.2.3]'}                                                 | ${'1.2.4'}                   | ${'[1.2.4]'}
+      ${'[1.0.0,1.2.3]'}                                           | ${'0.0.1'}                   | ${'[1.0.0,1.2.3]'}
+      ${'[1.0.0,1.2.3]'}                                           | ${'1.2.4'}                   | ${'[1.0.0,1.2.4]'}
+      ${'[1.0.0,1.2.23]'}                                          | ${'1.1.0'}                   | ${'[1.0.0,1.2.23]'}
+      ${'(,1.0]'}                                                  | ${'2.0'}                     | ${'(,2.0]'}
+      ${'],1.0]'}                                                  | ${'2.0'}                     | ${'],2.0]'}
+      ${'(,1.0)'}                                                  | ${'2.0'}                     | ${'(,3.0)'}
+      ${'],1.0['}                                                  | ${'2.0'}                     | ${'],3.0['}
+      ${'[1.0,1.2.3],[1.3,1.5)'}                                   | ${'1.2.4'}                   | ${'[1.0,1.2.4],[1.3,1.5)'}
+      ${'[1.0,1.2.3],[1.3,1.5['}                                   | ${'1.2.4'}                   | ${'[1.0,1.2.4],[1.3,1.5['}
+      ${'[1.2.3,)'}                                                | ${'1.2.4'}                   | ${'[1.2.4,)'}
+      ${'[1.2.3,['}                                                | ${'1.2.4'}                   | ${'[1.2.4,['}
+      ${'[1.2.3,]'}                                                | ${'1.2.4'}                   | ${'[1.2.3,]'}
+      ${'[0.21,0.22)'}                                             | ${'0.20.21'}                 | ${'[0.21,0.22)'}
+      ${'[0.21,0.22)'}                                             | ${'0.21.1'}                  | ${'[0.21,0.22)'}
+      ${'[0.21,0.22.0)'}                                           | ${'0.22.1'}                  | ${'[0.21,0.22.2)'}
+      ${'[0.21,0.22)'}                                             | ${'0.23'}                    | ${'[0.23,0.24)'}
+      ${'[1.8,1.9)'}                                               | ${'1.9.0.1'}                 | ${'[1.9,1.10)'}
+      ${'[1.8a,1.9)'}                                              | ${'1.9.0.1'}                 | ${'[1.8a,1.10)'}
+      ${'[1.8,1.9.0)'}                                             | ${'1.9.0.1'}                 | ${'[1.8,1.10.0)'}
+      ${'[1.8,1.9.0.0)'}                                           | ${'1.9.0.1'}                 | ${'[1.8,1.9.0.2)'}
+      ${'[1.8,1.9.0.0)'}                                           | ${'1.10.1'}                  | ${'[1.8,1.10.2.0)'}
+      ${'[1.8,1.9)'}                                               | ${'1.9.1'}                   | ${'[1.9,1.10)'}
+      ${'[1.8,1.9)'}                                               | ${'1.10.0'}                  | ${'[1.10,1.11)'}
+      ${'[1.8,1.9)'}                                               | ${'1.10.1'}                  | ${'[1.10,1.11)'}
+      ${'(,1.0.0]'}                                                | ${'2.0.0'}                   | ${'(,2.0.0]'}
+      ${'(,1.0]'}                                                  | ${'2.0.0'}                   | ${'(,2.0]'}
+      ${'(,1]'}                                                    | ${'2.0.0'}                   | ${'(,2]'}
+      ${'(,1.0.0-foobar]'}                                         | ${'2.0.0'}                   | ${'(,2.0.0]'}
+      ${'[1,2]'}                                                   | ${'2'}                       | ${'[1,2]'}
+      ${'[1,2)'}                                                   | ${'2'}                       | ${'[2,3)'}
+      ${'[0,2)'}                                                   | ${'2'}                       | ${'[0,3)'}
+      ${'[1.2,1.3]'}                                               | ${'1.3'}                     | ${'[1.2,1.3]'}
+      ${'[1.2,1.3)'}                                               | ${'1.3'}                     | ${'[1.3,1.4)'}
+      ${'[1-2,1-3)'}                                               | ${'1-3'}                     | ${'[1-3,1-4)'}
+      ${'[1.1,1.3)'}                                               | ${'1.3'}                     | ${'[1.1,1.4)'}
+      ${'[1.2.3,1.2.4]'}                                           | ${'1.2.4'}                   | ${'[1.2.3,1.2.4]'}
+      ${'[1.2.3,1.2.4)'}                                           | ${'1.2.4'}                   | ${'[1.2.4,1.2.5)'}
+      ${'[1.2.1,1.2.4)'}                                           | ${'1.2.4'}                   | ${'[1.2.1,1.2.5)'}
+      ${'[1,1.2.3)'}                                               | ${'1.2.3'}                   | ${'[1,1.2.4)'}
+      ${'[v3,v4)'}                                                 | ${'v4.3.2'}                  | ${'[v4,v5)'}
+      ${'],v1.0]'}                                                 | ${'v2.0'}                    | ${'],v2.0]'}
+      ${'(,v1.0)'}                                                 | ${'v2.0'}                    | ${'(,v3.0)'}
+      ${'[v1.2.3,]'}                                               | ${'v1.2.4'}                  | ${'[v1.2.3,]'}
+      ${'[3,4-alpha)'}                                             | ${'4.3.2'}                   | ${'[4,5-alpha)'}
+      ${'[v3,v4-alpha)'}                                           | ${'v4.3.2'}                  | ${'[v4,v5-alpha)'}
+      ${'[binding_version_v2___v4,binding_version_v2___v5)'}       | ${'binding_version_v2___v7'} | ${'[binding_version_v2___v7,binding_version_v2___v8)'}
+      ${'[binding_version_v2___v4,binding_version_v2___v5-alpha)'} | ${'binding_version_v2___v7'} | ${'[binding_version_v2___v7,binding_version_v2___v8-alpha)'}
     `(
       'autoExtendMavenRange("$range", "$version") === $expected',
       ({ range, version, expected }) => {

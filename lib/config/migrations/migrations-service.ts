@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration.ts';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration.ts';
 import { CompatibilityMigration } from './custom/compatibility-migration.ts';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration.ts';
+import { ConstraintsMigration } from './custom/constraints-migration.ts';
 import { CustomManagersMigration } from './custom/custom-managers-migration.ts';
 import { DatasourceMigration } from './custom/datasource-migration.ts';
 import { DepTypesMigration } from './custom/dep-types-migration.ts';
@@ -90,6 +91,7 @@ export class MigrationsService {
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
+    ['allowCustomCrateRegistries', 'allowCustomCrateGitRegistries'],
     ['allowedPostUpgradeCommands', 'allowedCommands'],
     ['azureAutoApprove', 'autoApprove'],
     ['customChangelogUrl', 'changelogUrl'],
@@ -112,6 +114,7 @@ export class MigrationsService {
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
     ['baseBranches', 'baseBranchPatterns'],
+    ['renovate-config-presets', 'renovate-config'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [
@@ -171,6 +174,7 @@ export class MigrationsService {
     PlatformCommitMigration,
     FileMatchMigration,
     UpdateLockFilesMigration,
+    ConstraintsMigration,
   ];
 
   static run(

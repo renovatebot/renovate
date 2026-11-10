@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import {
   massage as massageToml,
   parse as parseToml,
@@ -32,7 +33,7 @@ export function parsePyProject(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -44,7 +45,7 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   const pythonConstraint = def.project?.['requires-python'];
-  const extractedConstraints: Record<string, string> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   if (pythonConstraint) {
     extractedConstraints.python = pythonConstraint;
     deps.push({
@@ -62,10 +63,7 @@ export async function extractPackageFile(
     deps.push(...projectDependencies);
   }
 
-  const dependencyGroups = def['dependency-groups'];
-  if (dependencyGroups) {
-    deps.push(...dependencyGroups);
-  }
+  deps.push(...def['dependency-groups']);
 
   const projectOptionalDependencies = def.project?.['optional-dependencies'];
   if (projectOptionalDependencies) {
@@ -86,6 +84,7 @@ export async function extractPackageFile(
       def,
       processedDeps,
       packageFile,
+      config,
     );
 
     const processedLockFiles = await processor.getLockfiles(def, packageFile);

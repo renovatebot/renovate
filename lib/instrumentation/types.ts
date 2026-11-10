@@ -1,9 +1,12 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
+import type { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import type { RenovateSplit } from '../config/types.ts';
+import type { PlatformId } from '../constants/index.ts';
 import type { BunyanRecord } from '../logger/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import type { GitOperationType } from '../util/git/types.ts';
+import type { ProcessStatus } from '../workers/repository/result.ts';
 
 export type RenovateSpanOptions = {
   attributes?: RenovateSpanAttributes;
@@ -12,6 +15,10 @@ export type RenovateSpanOptions = {
 export type RenovateSpanAttributes = {
   [ATTR_RENOVATE_SPLIT]?: RenovateSplit;
   [ATTR_VCS_GIT_OPERATION_TYPE]?: GitOperationType;
+  [ATTR_CODE_FUNCTION_NAME]?: string;
+  [ATTR_RENOVATE_DATASOURCE]?: string;
+  [ATTR_RENOVATE_REGISTRY_URL]?: string;
+  [ATTR_RENOVATE_PACKAGE_NAME]?: string;
 } & Attributes;
 
 /**
@@ -49,6 +56,31 @@ interface RepoReport {
   branches: Partial<BranchCache>[];
   packageFiles: Record<string, PackageFile[]>;
   libYearsWithStatus?: LibYearsWithStatus;
+  /**
+   * The platform type of the repository (ex: `github`, `gitlab`).
+   */
+  platform?: PlatformId;
+  /**
+   * The default branch name of the repository.
+   */
+  defaultBranch?: string;
+  /**
+   * The issue number of the Dependency Dashboard, or `null` if none exists.
+   */
+  dependencyDashboardIssue?: number | null;
+  /**
+   * Path to the repository's Renovate config file (ex: `.github/renovate.json5`).
+   * Omitted when the repository has no in-repo config file.
+   */
+  configFileName?: string;
+  /**
+   * The repository's processing status (ex: `onboarding`, `onboarded`, `activated`).
+   */
+  status?: ProcessStatus;
+  /**
+   * The number of the open (unmerged) onboarding PR, or `null` if none exists.
+   */
+  onboardingPrNumber?: number | null;
 }
 
 export interface LibYearsWithStatus {
@@ -67,6 +99,21 @@ export interface DependencyStatus {
 }
 
 export const ATTR_RENOVATE_SPLIT = 'renovate.split';
+
+/**
+ * The name of a Renovate datasource (ex: `github-tags`, `npm`, `docker`, etc).
+ */
+export const ATTR_RENOVATE_DATASOURCE = 'renovate.datasource';
+
+/**
+ * The registry URL of a registry URL as might be used with a datasource and package name.
+ */
+export const ATTR_RENOVATE_REGISTRY_URL = 'renovate.registryUrl';
+
+/**
+ * The package name of a package.
+ */
+export const ATTR_RENOVATE_PACKAGE_NAME = 'renovate.packageName';
 
 /**
  * the Git Version Control System (VCS)'s Operation Type

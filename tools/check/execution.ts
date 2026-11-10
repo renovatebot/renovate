@@ -15,7 +15,7 @@ export async function runCommand(
 ): Promise<{ success: boolean; output: string }> {
   const subprocess = execa(cmd, args, {
     env,
-    signal: processManager.abortController.signal,
+    cancelSignal: processManager.abortController.signal,
     all: true,
     reject: false,
   });
@@ -40,6 +40,7 @@ export async function runChecksParallel(
         check.cmd,
         check.args,
         processManager,
+        check.env,
       );
       const duration = (Date.now() - start) / 1000;
 

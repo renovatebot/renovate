@@ -1,9 +1,19 @@
+import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
+import { partial } from '~test/util.ts';
+import { getToolConfig } from '../../util/exec/containerbase.ts';
+import type { ToolName } from '../../util/exec/types.ts';
 import { loadModules } from '../../util/modules.ts';
+import { coerceObject } from '../../util/object.ts';
 import { getDatasourceList } from '../datasource/index.ts';
+import { get as getVersioning } from '../versioning/index.ts';
 import * as customManager from './custom/index.ts';
 import * as manager from './index.ts';
-import type { ManagerApi } from './types.ts';
+import type {
+  ManagerApi,
+  NpmrcPackageFileContent,
+  PackageFileContent,
+} from './types.ts';
 
 vi.mock('../../util/fs/index.ts');
 
@@ -25,13 +35,67 @@ describe('modules/manager/index', () => {
   });
 
   describe('lockFileNames', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileNames for ${name}`, () => {
+        expect(mgr.lockFileNames).toBeNonEmptyArray();
+      });
+    }
+  });
+
+  describe('lockFileMaintenanceIsDelegatedToPackageManager', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
+        expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
+          (value) => isBoolean(value) || isString(value),
+        );
+      });
+    }
+  });
+
+  describe('minimumReleaseAgeSupport', () => {
     for (const [name, mgr] of manager.getManagers()) {
-      if (mgr.supportsLockFileMaintenance) {
-        it(`has lockFileNames for ${name}`, () => {
-          expect(mgr.lockFileNames).toBeNonEmptyArray();
+      for (const [tool, support] of Object.entries(
+        coerceObject(mgr.minimumReleaseAgeSupport),
+      )) {
+        it(`has valid version ranges for ${tool} of ${name}`, () => {
+          const versioning = getVersioning(
+            getToolConfig(tool as ToolName)!.versioning,
+          );
+          const ranges = [
+            support.passesMinimumReleaseAge,
+            support.readsConfiguredAge,
+            support.enforcedInLockFile,
+          ].filter(isString);
+          expect(ranges.filter((range) => !versioning.isValid(range))).toEqual(
+            [],
+          );
         });
       }
     }
+  });
+
+  describe('supportsNpmrc', () => {
+    interface Base {
+      defaultConfig: Record<string, unknown>;
+      supportedDatasources: string[];
+    }
+    type ReturnsNpmrc = Base & {
+      extractPackageFile(): NpmrcPackageFileContent | null;
+    };
+
+    it('is required for a manager returning an npmrc', () => {
+      expectTypeOf<
+        ReturnsNpmrc & { supportsNpmrc: true }
+      >().toExtend<ManagerApi>();
+      expectTypeOf<ReturnsNpmrc>().not.toExtend<ManagerApi>();
+      expectTypeOf<
+        Base & { extractPackageFile(): PackageFileContent | null }
+      >().toExtend<ManagerApi>();
+    });
   });
 
   describe('get()', () => {
@@ -39,6 +103,48 @@ describe('modules/manager/index', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager
       expect(manager.get('regex', 'extractPackageFile')).not.toBeNull(); // gets custom manager
     });
+  });
+
+  describe('enforcesMinimumReleaseAge()', () => {
+    afterEach(() => {
+      manager.getManagers().delete('stub-manager');
+    });
+
+    it('returns false for a manager which does not implement it', async () => {
+      await expect(
+        manager.enforcesMinimumReleaseAge('dockerfile', {}),
+      ).resolves.toBe(false);
+    });
+
+    it('returns false for an unknown manager', async () => {
+      await expect(
+        manager.enforcesMinimumReleaseAge('unknown-manager', {}),
+      ).resolves.toBe(false);
+    });
+
+    it.each([true, false])(
+      'returns %s as reported by the manager',
+      async (enforces) => {
+        const enforcesMinimumReleaseAge = vi.fn().mockResolvedValue(enforces);
+        manager.getManagers().set(
+          'stub-manager',
+          partial<ManagerApi>({
+            defaultConfig: {},
+            supportedDatasources: [],
+            enforcesMinimumReleaseAge,
+          }),
+        );
+        const config = { minimumReleaseAgeExtracted: '3 days' };
+
+        const res = await manager.enforcesMinimumReleaseAge(
+          'stub-manager',
+          config,
+        );
+
+        expect(res).toBe(enforces);
+        expect(enforcesMinimumReleaseAge).toHaveBeenCalledWith(config);
+      },
+    );
   });
 
   describe('getManagerList()', () => {
@@ -106,7 +212,7 @@ describe('modules/manager/index', () => {
 
   describe('detectGlobalConfig()', () => {
     it('iterates through managers', async () => {
-      expect(await manager.detectAllGlobalConfig()).toEqual({});
+      await expect(manager.detectAllGlobalConfig()).resolves.toEqual({});
     });
   });
 
@@ -116,12 +222,12 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(
-        await manager.extractAllPackageFiles('unknown', {} as any, []),
-      ).toBeNull();
-      expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
-      ).toBeNull();
+      await expect(
+        manager.extractAllPackageFiles('unknown', {}, []),
+      ).resolves.toBeNull();
+      await expect(
+        manager.extractAllPackageFiles('dummy', {}, []),
+      ).resolves.toBeNull();
     });
 
     it('returns non-null', async () => {
@@ -130,9 +236,9 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
         extractAllPackageFiles: () => Promise.resolve([]),
       });
-      expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
-      ).not.toBeNull();
+      await expect(
+        manager.extractAllPackageFiles('dummy', {}, []),
+      ).resolves.not.toBeNull();
     });
 
     afterEach(() => {
@@ -258,6 +364,28 @@ describe('modules/manager/index', () => {
     it('returns false', () => {
       expect(manager.isKnownManager('npm-unkown')).toBeFalse();
       expect(manager.isKnownManager('custom.unknown')).toBeFalse();
+    });
+  });
+
+  describe('getPrettyDepType', () => {
+    it('when no manager found, returns undefined', () => {
+      expect(
+        manager.getPrettyDepType('invalid-manager', 'unused'),
+      ).toBeUndefined();
+    });
+
+    it('when manager found, but no prettyDepType found, returns undefined', () => {
+      expect(manager.getPrettyDepType('npm', 'foo-bar-baz')).toBeUndefined();
+    });
+
+    it('when manager found, but no prettyDepType found, returns undefined', () => {
+      expect(manager.getPrettyDepType('regex', 'foo-bar-baz')).toBeUndefined();
+    });
+
+    it('when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType', () => {
+      expect(manager.getPrettyDepType('npm', 'dependencies')).toEqual(
+        'dependency',
+      );
     });
   });
 });

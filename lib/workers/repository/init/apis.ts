@@ -28,14 +28,14 @@ async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await getJsonFile(getDefaultConfigFileName(config));
+    const renovateConfig = await getJsonFile(getDefaultConfigFileName());
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
     /*
      * The following is to support a use case within Mend customers where:
-     *  - Bot admins configure install the bot into every repo
-     *  - Bot admins configure `extends: [':disableRenovate'] in order to skip repos by default
+     *  - Admins configure and install Renovate into every repo
+     *  - Admins configure `extends: [':disableRenovate'] in order to skip repos by default
      *  - Repo users can push a `renovate.json` containing `extends: [':enableRenovate']` to re-enable Renovate
      */
     if (config.extends?.includes(':disableRenovate')) {
@@ -60,7 +60,7 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
-    const defaultConfigFile = getDefaultConfigFileName(config);
+    const defaultConfigFile = getDefaultConfigFileName();
     const repoConfig = await getJsonFile(defaultConfigFile);
     if (!repoConfig) {
       logger.debug(

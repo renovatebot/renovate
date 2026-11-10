@@ -23,6 +23,13 @@ function getPkgReleasesCached(
   return cachedResult;
 }
 
+function isStableVersionAtLeast(version: string, minVersion: string): boolean {
+  if (!semver.isVersion(version) || !semver.isStable(version)) {
+    return false;
+  }
+  return version === minVersion || semver.isGreaterThan(version, minVersion);
+}
+
 /**
  * Finds the first stable version of parentName after parentStartingVersion which either:
  * - depends on targetDepName@targetVersion or a range which it satisfies, OR
@@ -55,13 +62,7 @@ export async function findFirstParentVersion(
     }
     const targetVersions = targetDep.releases
       .map((release) => release.version)
-      .filter(
-        (version) =>
-          semver.isVersion(version) &&
-          semver.isStable(version) &&
-          (version === targetVersion ||
-            semver.isGreaterThan(version, targetVersion)),
-      );
+      .filter((version) => isStableVersionAtLeast(version, targetVersion));
     const parentDep = await getPkgReleasesCached(parentName);
     /* v8 ignore next -- needs test */
     if (!parentDep) {
@@ -73,12 +74,8 @@ export async function findFirstParentVersion(
     }
     const parentVersions = parentDep.releases
       .map((release) => release.version)
-      .filter(
-        (version) =>
-          semver.isVersion(version) &&
-          semver.isStable(version) &&
-          (version === parentStartingVersion ||
-            semver.isGreaterThan(version, parentStartingVersion)),
+      .filter((version) =>
+        isStableVersionAtLeast(version, parentStartingVersion),
       )
       .sort((v1, v2) => semver.sortVersions(v1, v2));
     // iterate through parentVersions in sorted order
@@ -118,8 +115,7 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn(
       { parentName, parentStartingVersion, targetDepName, targetVersion, err },
       'findFirstParentVersion error',

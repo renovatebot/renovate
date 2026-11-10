@@ -17,6 +17,7 @@ export type PrAutomergeBlockReason =
   | 'BranchNotGreen'
   | 'Conflicted'
   | 'DryRun'
+  | 'InMergeQueue'
   | 'PlatformNotReady'
   | 'PlatformRejection'
   | 'off schedule';
@@ -39,6 +40,7 @@ export async function checkAutoMerge(
     automergeStrategy,
     pruneBranchAfterAutomerge,
     automergeComment,
+    automergeLabel,
     ignoreTests,
     rebaseRequested,
   } = config;
@@ -48,6 +50,15 @@ export async function checkAutoMerge(
     return {
       automerged: false,
       prAutomergeBlockReason: 'off schedule',
+    };
+  }
+  const mergeQueueEnabled =
+    await platform.isBranchMergeQueueEnabled?.(baseBranch);
+  if (mergeQueueEnabled && (await platform.isPrInMergeQueue?.(pr.number))) {
+    logger.debug(`PR #${pr.number} is already in the merge queue`);
+    return {
+      automerged: false,
+      prAutomergeBlockReason: 'InMergeQueue',
     };
   }
   const isConflicted =
@@ -117,6 +128,25 @@ export async function checkAutoMerge(
     });
     return { automerged: true, branchRemoved: false };
   }
+  if (automergeType === 'label') {
+    // TODO: types (#22198)
+    logger.debug(`Applying automerge label: ${automergeLabel!}`);
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(`DRY-RUN: Would add automerge label to PR #${pr.number}`);
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+    }
+    if (!pr.labels?.includes(automergeLabel!)) {
+      await platform.updatePr({
+        number: pr.number,
+        prTitle: pr.title,
+        addLabels: [automergeLabel!],
+      });
+    }
+    return { automerged: true, branchRemoved: false };
+  }
   // Let's merge this
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -139,6 +169,19 @@ export async function checkAutoMerge(
     strategy: automergeStrategy,
   });
   if (res) {
+    if (mergeQueueEnabled) {
+      logger.info(
+        { pr: pr.number, prTitle: pr.title },
+        'PR added to the merge queue',
+      );
+      // The PR is not merged yet and the base branch is unchanged, so this is
+      // not reported as automerged. Deleting the branch would close the PR
+      // and drop the merge queue entry.
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      };
+    }
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     if (!pruneBranchAfterAutomerge) {
       logger.info('Skipping pruning of merged branch');

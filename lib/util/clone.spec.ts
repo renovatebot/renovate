@@ -1,7 +1,7 @@
 import { clone } from './clone.ts';
 
 describe('util/clone', () => {
-  test.each`
+  it.each`
     input        | expected
     ${undefined} | ${undefined}
     ${null}      | ${null}

@@ -5,18 +5,19 @@ import {
   excludeBlockStartRegex,
   parseLine,
 } from './line-parser.ts';
+import type { GoModManagerData } from './types.ts';
 
 function findMatchingModule(
-  tool: PackageDependency,
-  deps: PackageDependency[],
-): PackageDependency | undefined {
-  let bestMatch: PackageDependency | undefined;
-  const normalizedTool = tool.depName! + '/';
+  tool: PackageDependency<GoModManagerData>,
+  deps: PackageDependency<GoModManagerData>[],
+): PackageDependency<GoModManagerData> | undefined {
+  let bestMatch: PackageDependency<GoModManagerData> | undefined;
+  const normalizedTool = `${tool.depName!}/`;
 
   // Find the longest matching prefix for the tool within the dependencies
   for (const dep of deps) {
     if (
-      normalizedTool.startsWith(dep.depName! + '/') &&
+      normalizedTool.startsWith(`${dep.depName!}/`) &&
       dep.depName!.length > (bestMatch?.depName!.length ?? 0)
     ) {
       bestMatch = dep;
@@ -26,9 +27,11 @@ function findMatchingModule(
   return bestMatch;
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
-  const tools: PackageDependency[] = [];
+export function extractPackageFile(
+  content: string,
+): PackageFileContent<GoModManagerData> | null {
+  const deps: PackageDependency<GoModManagerData>[] = [];
+  const tools: PackageDependency<GoModManagerData>[] = [];
   let inExcludeBlock = false;
 
   const lines = content.split(newlineRegex);
@@ -72,5 +75,61 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     return null;
   }
 
-  return { deps };
+  const packageFile: PackageFileContent<GoModManagerData> = {
+    deps,
+  };
+
+  const goDirective = packageFile.deps.find(
+    (dep) =>
+      dep.depName === 'go' &&
+      dep.depType === 'golang' &&
+      dep.datasource === 'golang-version',
+  );
+  if (goDirective?.currentValue) {
+    packageFile.extractedConstraints ??= {};
+    const range = convertGoDirectiveToSemVerRange(goDirective.currentValue);
+    // v8 ignore else -- a parsed go directive always yields a version
+    if (range.version) {
+      packageFile.extractedConstraints['%goMod'] = range.version;
+
+      packageFile.constraintsVersioning ??= {};
+      packageFile.constraintsVersioning['%goMod'] = range.versioning;
+    }
+  }
+
+  const toolchainDirective = packageFile.deps.find(
+    (dep) =>
+      dep.depName === 'go' &&
+      dep.depType === 'toolchain' &&
+      dep.datasource === 'golang-version',
+  );
+  if (toolchainDirective?.currentValue) {
+    packageFile.extractedConstraints ??= {};
+    packageFile.extractedConstraints.golang = toolchainDirective.currentValue;
+  }
+
+  return packageFile;
+}
+
+export function convertGoDirectiveToSemVerRange(
+  goDirective: string | undefined,
+):
+  | {
+      version: string;
+      versioning: string;
+    }
+  | {
+      version: undefined;
+    } {
+  if (!goDirective) {
+    return {
+      version: undefined,
+    };
+  }
+
+  const parts = goDirective.split('.');
+  return {
+    version: `<=${parts[0]}.${parts[1]}.x`,
+    versioning: 'semver-coerced',
+  };
 }

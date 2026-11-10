@@ -1,5 +1,5 @@
-import { createReadStream } from 'fs';
-import { copyFile, stat } from 'fs-extra';
+import { createReadStream } from 'node:fs';
+import { copyFile, stat } from 'node:fs/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -18,6 +18,8 @@ import {
   getPackageUrl,
   getRegistryUrl,
 } from './url.ts';
+
+vi.unmock('../../../util/mutex.ts');
 
 const debBaseUrl = 'http://deb.debian.org';
 
@@ -277,7 +279,6 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should not lead to a race condition on parallel lookups', async () => {
-      vi.unmock('../../../util/mutex');
       const packages = [
         'album',
         'album-data',
@@ -419,8 +420,7 @@ export function mockFetchInReleaseContent(
   const mockCall = httpMock
     .scope(debBaseUrl)
     .get(
-      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
-        '/InRelease',
+      `${getBaseSuiteUrl(getComponentUrl('', release, component, arch))}/InRelease`,
     );
 
   if (error) {

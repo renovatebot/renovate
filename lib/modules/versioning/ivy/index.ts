@@ -16,7 +16,7 @@ import {
 
 export const id = 'ivy';
 export const displayName = 'Ivy';
-export const urls = ['https://ant.apache.org/ivy/'];
+export const urls = ['[Apache Ivy](https://ant.apache.org/ivy/)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -24,7 +24,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 const {
   equals,
   getMajor,
@@ -35,7 +35,7 @@ const {
   matches: mavenMatches,
   sortVersions,
 } = maven;
-/* eslint-enable @typescript-eslint/unbound-method */
+/* oxlint-enable typescript/unbound-method */
 
 function isValid(str: string): boolean {
   if (!str) {
@@ -79,12 +79,10 @@ function matches(a: string, b: string): boolean {
     if (!value) {
       return true;
     }
-    const tokens = tokenize(a);
-    if (tokens.length) {
-      const token = tokens[tokens.length - 1];
-      if (token.type === TYPE_QUALIFIER) {
-        return token.val.toLowerCase() === value;
-      }
+    // `tokenize` always yields at least one token for a non-empty version
+    const token = tokenize(a).at(-1)!;
+    if (token.type === TYPE_QUALIFIER) {
+      return token.val.toLowerCase() === value;
     }
     return false;
   }

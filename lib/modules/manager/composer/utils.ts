@@ -2,9 +2,11 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
-import { logger } from '../../../logger/index.ts';
 import type { CombinedHostRule } from '../../../types/index.ts';
-import type { ToolConstraint } from '../../../util/exec/types.ts';
+import type {
+  ConstraintName,
+  ToolConstraint,
+} from '../../../util/exec/types.ts';
 import { coerceNumber } from '../../../util/number.ts';
 import {
   api,
@@ -35,7 +37,7 @@ export function getComposerArguments(
       }
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
-        args += ' --ignore-platform-req ' + quote(req);
+        args += ` --ignore-platform-req ${quote(req)}`;
       });
     }
   }
@@ -70,19 +72,6 @@ export function getComposerUpdateArguments(
   return args;
 }
 
-export function getPhpConstraint(
-  constraints: Record<string, string>,
-): string | null {
-  const { php } = constraints;
-
-  if (php) {
-    logger.debug('Using php constraint from config');
-    return php;
-  }
-
-  return null;
-}
-
 export function requireComposerDependencyInstallation({
   packages,
   packagesDev,
@@ -96,7 +85,7 @@ export function requireComposerDependencyInstallation({
 export function extractConstraints(
   { config, require, requireDev }: PackageFile,
   { pluginApiVersion }: Lockfile,
-): Record<string, string> {
+): Partial<Record<ConstraintName, string>> {
   const res: Record<string, string> = { composer: '1.*' };
 
   // extract php

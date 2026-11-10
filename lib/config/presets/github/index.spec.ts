@@ -2,7 +2,11 @@ import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util.ts';
 import * as github from './index.ts';
 
 const githubApiHost = github.Endpoint;
@@ -28,6 +32,25 @@ describe('config/presets/github/index', () => {
         githubApiHost,
         undefined,
       );
+      expect(res).toEqual({ from: 'api' });
+    });
+
+    it('fetches from the endpoint host even for a hostile repo string', async () => {
+      // the repo part of a preset string has no host component: whatever it contains only ever becomes a path on the configured endpoint (`..` segments are normalized within it)
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/evil.example.com/x/contents/default.json')
+        .reply(200, {
+          content: toBase64('{"from":"api"}'),
+        });
+
+      const res = await github.fetchJSONFile(
+        'some/repo/../../evil.example.com/x',
+        'default.json',
+        githubApiHost,
+        undefined,
+      );
+
       expect(res).toEqual({ from: 'api' });
     });
 
@@ -59,7 +82,9 @@ describe('config/presets/github/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        PRESET_DEP_NOT_FOUND,
+      );
     });
 
     it('throws if invalid content', async () => {
@@ -140,6 +165,20 @@ describe('config/presets/github/index', () => {
       expect(content).toEqual({ foo: 'bar' });
     });
 
+    it('should query preset within the file when .jsonc extension provided', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.jsonc`)
+        .reply(200, {
+          content: toBase64('{"foo":/* nothing to see here */"bar"}'),
+        });
+      const content = await github.getPreset({
+        repo: 'some/repo',
+        presetName: 'somefile.jsonc',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
     it('should query subpreset', async () => {
       httpMock
         .scope(githubApiHost)
@@ -210,9 +249,9 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github.getPresetFromEndpoint('some/repo', 'default', undefined),
-      ).toEqual({ from: 'api' });
+      await expect(
+        github.getPresetFromEndpoint('some/repo', 'default', undefined),
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint', async () => {
@@ -222,8 +261,8 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github
+      await expect(
+        github
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -232,7 +271,7 @@ describe('config/presets/github/index', () => {
             undefined,
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -242,15 +281,15 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github.getPresetFromEndpoint(
+      await expect(
+        github.getPresetFromEndpoint(
           'some/repo',
           'default',
           undefined,
           githubApiHost,
           'someTag',
         ),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -260,8 +299,8 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github
+      await expect(
+        github
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -270,7 +309,7 @@ describe('config/presets/github/index', () => {
             'someTag',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
   });
 });

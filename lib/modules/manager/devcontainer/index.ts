@@ -5,6 +5,7 @@ import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const name = 'Dev Container';
@@ -16,6 +17,7 @@ export const defaultConfig = {
   managerFilePatterns: [
     '/^.devcontainer/devcontainer.json$/',
     '/^.devcontainer.json$/',
+    '/^.devcontainer/[^/]+/devcontainer.json$/',
   ],
 };
 

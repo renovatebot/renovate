@@ -4,14 +4,18 @@ import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
 } from '../util/interpolator.ts';
+import { coerceObject } from '../util/object.ts';
 import { regEx } from '../util/regex.ts';
 import { addSecretForSanitizing } from '../util/sanitize.ts';
 import type { AllConfig, RenovateConfig } from './types.ts';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`, 'g');
-const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`, 'g');
+const secretTemplateRegex = regEx(`{{ *secrets\\.(${namePattern}) *}}`, 'g');
+const variableTemplateRegex = regEx(
+  `{{ *variables\\.(${namePattern}) *}}`,
+  'g',
+);
 
 export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
   secrets: {
@@ -74,14 +78,14 @@ export function applySecretsAndVariablesToConfig(
 
   const configWithVars = replaceInterpolatedValuesInObject(
     config,
-    variables ?? {},
+    coerceObject(variables),
     options.variables,
     deleteVariables,
   );
 
   return replaceInterpolatedValuesInObject(
     configWithVars,
-    secrets ?? {},
+    coerceObject(secrets),
     options.secrets,
     deleteSecrets,
   );

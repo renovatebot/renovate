@@ -2,22 +2,28 @@ import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
 } from '../../config/types.ts';
+import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type { ModuleApi } from '../../types/index.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+} from '../../util/exec/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 
-export interface GetDigestInputConfig {
-  datasource: string;
-  packageName: string;
+/**
+ * The inputs of registry URL resolution, see `resolveRegistryUrls()` in the
+ * datasource index.
+ */
+export interface RegistryUrlsConfig {
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
-  registryUrl?: string;
-  lookupName?: string;
   additionalRegistryUrls?: string[];
-  currentValue?: string;
-  currentDigest?: string;
-  replacementName?: string;
 }
 
+/**
+ * What a datasource's `getDigest()` receives: a single, already resolved
+ * registry.
+ */
 export interface DigestConfig {
   packageName: string;
   lookupName?: string;
@@ -26,31 +32,46 @@ export interface DigestConfig {
   currentDigest?: string;
 }
 
+/**
+ * What the datasource index's `getDigest()` receives from the lookup worker.
+ */
+export interface GetDigestInputConfig extends DigestConfig, RegistryUrlsConfig {
+  datasource: string;
+  replacementName?: string;
+}
+
+/**
+ * What a datasource's `getReleases()` receives: a single, already resolved
+ * registry.
+ */
 export interface GetReleasesConfig {
   customDatasources?: Record<string, CustomDatasourceConfig>;
   datasource?: string;
   packageName: string;
   registryUrl?: string;
   currentValue?: string;
+  constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
-export interface GetPkgReleasesConfig {
-  customDatasources?: Record<string, CustomDatasourceConfig>;
-  npmrc?: string;
-  defaultRegistryUrls?: string[];
-  registryUrls?: string[] | null;
-  additionalRegistryUrls?: string[];
+/**
+ * What the datasource index's `getPkgReleases()` receives from the lookup
+ * worker: the registry URL inputs plus the settings applied to the result.
+ */
+export interface GetPkgReleasesConfig
+  extends GetReleasesConfig, RegistryUrlsConfig {
   datasource: string;
-  packageName: string;
-  currentValue?: string;
+  npmrc?: string;
   versioning?: string;
   extractVersion?: string;
   versionCompatibility?: string;
   currentCompatibility?: string;
-  constraints?: Record<string, string>;
   replacementName?: string;
   replacementVersion?: string;
-  constraintsFiltering?: ConstraintsFilter;
   registryStrategy?: RegistryStrategy;
 }
 
@@ -66,8 +87,8 @@ export interface Release {
   version: string;
   /** The original value to which `extractVersion` was applied */
   versionOrig?: string;
-  newDigest?: string | undefined;
-  constraints?: Record<string, string[]>;
+  newDigest?: string | null;
+  constraints?: Partial<Record<ConstraintName, string[]>>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
@@ -78,11 +99,17 @@ export interface Release {
   attestation?: boolean;
 }
 
+export interface ReleaseTags {
+  /** The latest release, according to the datasource **/
+  latest?: string;
+  [key: string]: string | undefined;
+}
+
 export interface ReleaseResult {
   deprecationMessage?: string;
   isPrivate?: boolean;
   releases: Release[];
-  tags?: Record<string, string> | undefined;
+  tags?: ReleaseTags | undefined;
   changelogContent?: string;
   // URL metadata
   changelogUrl?: string;
@@ -92,6 +119,11 @@ export interface ReleaseResult {
   sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
+  /**
+   * The datasource which served the lookup when another one was configured,
+   * e.g. `github-tags` for a `go` module hosted on GitHub.
+   */
+  effectiveDatasource?: DatasourceName;
   replacementName?: string;
   replacementVersion?: string;
   lookupName?: string;
@@ -101,6 +133,14 @@ export interface ReleaseResult {
   respectLatest?: boolean;
 }
 
+/**
+ * A single tag as returned by a git hosting provider.
+ *
+ * `gitRef` is filled in by the `*-tags` datasource base class, which always
+ * mirrors the tag name.
+ */
+export type GitHostTag = Omit<Release, 'gitRef'>;
+
 export interface PostprocessReleaseConfig {
   packageName: string;
   registryUrl: string | null;
@@ -108,28 +148,59 @@ export interface PostprocessReleaseConfig {
 
 export type PostprocessReleaseResult = Release | 'reject';
 
-export type RegistryStrategy = 'first' | 'hunt' | 'merge';
+export type RegistryStrategy =
+  /**
+   * Only the first registry URL is queried.
+   *
+   * If multiple URLs are configured a warning is logged and the rest are ignored. Returns whatever the first registry returns, including `null`.
+   *
+   * The default.
+   */
+  | 'first'
+  /**
+   * Registries are tried in order, returning the first non-null result.
+   *
+   * `null` results and non-fatal errors (HTTP 401/403/404 and generic errors) are skipped and the next registry is tried.
+   * An `ExternalHostError` aborts immediately (unless the cause is `HOST_DISABLED`, which returns `null`).
+   *
+   * Returns `null` when all registries are exhausted without a result.
+   */
+  | 'hunt'
+  /**
+   * All registries are queried.
+   *
+   * Releases are merged and deduplicated by version; tags are merged with later registries' values taking precedence for duplicate keys.
+   *
+   * An `ExternalHostError` aborts immediately.
+   *
+   * Returns `null` when all registries fail.
+   */
+  | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  defaultRegistryUrls?: string[] | (() => string[]);
+  /** Return registry URLs for package-specific datasource defaults. */
+  getDefaultRegistryUrls(packageName: string): string[] | undefined;
+  /** Return whether custom registry URLs are supported for this package. */
+  supportsCustomRegistry(packageName: string): boolean;
   defaultVersioning?: string | undefined;
   defaultConfig?: Record<string, unknown> | undefined;
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
-   * - `first`: only the first registryUrl will be tried and others ignored
-   * - `hunt`: registryUrls will be tried in order until one returns a result
-   * - `merge`: all registryUrls will be tried and the results merged if more than one returns a result
+   * Defaults to `first`.
+   *
+   * @see RegistryStrategy
    */
-  registryStrategy?: RegistryStrategy | undefined;
-
-  /**
-   * Whether custom registryUrls are allowed.
-   */
-  customRegistrySupport: boolean;
+  registryStrategy: RegistryStrategy;
 
   /**
    * Whether release timestamp can be returned.
@@ -173,7 +244,7 @@ export interface DatasourceApi extends ModuleApi {
    *
    * In other cases, the original `Release` parameter should be returned.
    */
-  postprocessRelease(
+  postprocessRelease?(
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult>;

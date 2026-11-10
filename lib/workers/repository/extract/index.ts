@@ -9,10 +9,12 @@ import {
   hashMap,
 } from '../../../modules/manager/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExtractResult, WorkerExtractConfig } from '../../types.ts';
 import { getMatchingFiles } from './file-match.ts';
 import { getManagerPackageFiles } from './manager-files.ts';
 import { processSupersedesManagers } from './supersedes.ts';
+import { hasVulnerabilityAlertsRules } from './vulnerability-alerts.ts';
 
 export async function extractAllDependencies(
   config: RenovateConfig,
@@ -20,28 +22,35 @@ export async function extractAllDependencies(
   const managerList = getEnabledManagersList(config.enabledManagers);
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
+  const hasAlertRules = hasVulnerabilityAlertsRules(config);
 
-  const tryConfig = (managerConfig: ManagerConfig): void => {
+  function tryConfig(managerConfig: ManagerConfig): void {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push({ ...managerConfig, fileList: matchingFileList });
+      extractList.push({
+        ...managerConfig,
+        hasVulnerabilityAlertsRules: hasAlertRules,
+        fileList: matchingFileList,
+      });
     }
-  };
+  }
 
   instrument('filter packageFiles for managers', () => {
     for (const manager of managerList) {
-      const managerConfig = getManagerConfig(config, manager);
-      managerConfig.manager = manager;
-      if (isCustomManager(manager)) {
-        const filteredCustomManagers = (config.customManagers ?? []).filter(
-          (mgr) => mgr.customType === manager,
-        );
-        for (const customManager of filteredCustomManagers) {
-          tryConfig(mergeChildConfig(managerConfig, customManager));
+      instrument(`filter packageFiles for manager=${manager}`, () => {
+        const managerConfig = getManagerConfig(config, manager);
+        managerConfig.manager = manager;
+        if (isCustomManager(manager)) {
+          const filteredCustomManagers = coerceArray(
+            config.customManagers,
+          ).filter((mgr) => mgr.customType === manager);
+          for (const customManager of filteredCustomManagers) {
+            tryConfig(mergeChildConfig(managerConfig, customManager));
+          }
+        } else {
+          tryConfig(managerConfig);
         }
-      } else {
-        tryConfig(managerConfig);
-      }
+      });
     }
   });
 
@@ -73,8 +82,16 @@ export async function extractAllDependencies(
   // De-duplicate results using supersedesManagers
   processSupersedesManagers(extractResults);
 
+  // Sort alphabetically for stable log output. See #40091
+  const sortedExtractDurations = Object.keys(extractDurations)
+    .sort()
+    .reduce<Record<string, number>>((acc, key) => {
+      acc[key] = extractDurations[key];
+      return acc;
+    }, {});
+
   logger.debug(
-    { managers: extractDurations },
+    { managers: sortedExtractDurations },
     'manager extract durations (ms)',
   );
   let fileCount = 0;

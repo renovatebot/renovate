@@ -33,10 +33,15 @@ export async function tryDecrypt(
   repository: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
-  const decryptedObjStr =
-    getEnv().RENOVATE_X_USE_OPENPGP === 'true'
-      ? await tryDecryptOpenPgp(key, encryptedStr)
-      : await tryDecryptBcPgp(key, encryptedStr);
+  // Written as an if/else rather than a ternary on purpose: v8 gives the branch
+  // that follows an `await` inside a ternary a negative hit count, which the
+  // coverage reporters then read as uncovered.
+  let decryptedObjStr: string | null;
+  if (getEnv().RENOVATE_X_USE_OPENPGP === 'true') {
+    decryptedObjStr = await tryDecryptOpenPgp(key, encryptedStr);
+  } else {
+    decryptedObjStr = await tryDecryptBcPgp(key, encryptedStr);
+  }
   if (decryptedObjStr) {
     decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
   }
@@ -183,7 +188,7 @@ export async function decryptConfig<T extends RenovateConfig = AllConfig>(
             error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
 Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
 
-Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`;
+Refer to migration documents here: ${GlobalConfig.get('productLinks').documentation}mend-hosted/migrating-secrets/`;
           }
           throw error;
         } else {

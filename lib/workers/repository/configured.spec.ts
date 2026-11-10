@@ -19,13 +19,13 @@ describe('workers/repository/configured', () => {
 
     it('throws if disabled', () => {
       config.enabled = false;
-      expect(() => checkIfConfigured(config)).toThrow();
+      expect(() => checkIfConfigured(config)).toThrow('disabled-by-config');
     });
 
     it('throws if unconfigured fork', () => {
       config.enabled = true;
       config.isFork = true;
-      expect(() => checkIfConfigured(config)).toThrow();
+      expect(() => checkIfConfigured(config)).toThrow('fork');
     });
   });
 });

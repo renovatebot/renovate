@@ -1,16 +1,22 @@
-import { isArray, isString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNullOrUndefined,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import {
   getParentDir,
   getSiblingFileName,
 } from '../../../../../util/fs/index.ts';
-import type { PackageFile } from '../../../types.ts';
+import { coerceObject } from '../../../../../util/object.ts';
+import type { NpmrcPackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { detectPnpmWorkspaces } from '../pnpm.ts';
 import { matchesAnyPattern } from '../utils.ts';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[],
+  packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[],
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting workspaces');
@@ -22,6 +28,7 @@ export async function detectMonorepos(
       hasPackageManager,
       workspacesPackages,
       yarnLock,
+      repoNpmrc,
     } = managerData;
 
     const packages = workspacesPackages as string[] | undefined;
@@ -37,7 +44,7 @@ export async function detectMonorepos(
       );
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.managerData?.packageJsonName)
-        .filter(Boolean);
+        .filter(isTruthy);
 
       p.deps?.forEach((dep) => {
         if (
@@ -49,14 +56,20 @@ export async function detectMonorepos(
       });
 
       for (const subPackage of internalPackageFiles) {
-        subPackage.managerData = subPackage.managerData ?? {};
+        subPackage.managerData = coerceObject(subPackage.managerData);
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
         subPackage.managerData.yarnLock ??= yarnLock;
         subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
         subPackage.managerData.workspacesPackages = workspacesPackages;
-        subPackage.npmrc ??= npmrc;
+        if (isNullOrUndefined(subPackage.npmrc)) {
+          subPackage.npmrc = npmrc;
+          // so that the inherited `npmrc` is rebuilt the same way from the cache
+          if (repoNpmrc) {
+            subPackage.managerData.repoNpmrc = repoNpmrc;
+          }
+        }
 
         if (p.extractedConstraints) {
           subPackage.extractedConstraints = {
@@ -66,7 +79,10 @@ export async function detectMonorepos(
         }
 
         subPackage.deps?.forEach((dep) => {
-          if (internalPackageNames.includes(dep.depName)) {
+          if (
+            isString(dep.depName) &&
+            internalPackageNames.includes(dep.depName)
+          ) {
             dep.isInternal = true;
           }
         });

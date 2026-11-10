@@ -41,3 +41,6 @@ directories:
     githubRelease:
       slug: test/test
       tag: "7.10.1"
+  - path: openapi
+    http:
+      url: https://raw.githubusercontent.com/mend/renovate-ce-ee/refs/heads/main/docs/openapi-community.yaml

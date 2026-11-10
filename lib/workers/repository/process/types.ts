@@ -6,9 +6,12 @@ import type { VersioningApi } from '../../../modules/versioning/index.ts';
 export interface Vulnerability {
   packageFileConfig: RenovateConfig & PackageFile;
   packageName: string;
+  osvPackageName: string;
+  depType?: string;
   depVersion: string;
   fixedVersion: string | null;
   datasource: string;
+  versioning?: string;
   vulnerability: Osv.Vulnerability;
   affected: Osv.Affected;
 }

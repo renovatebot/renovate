@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../../../../config/types.ts';
+import { PLATFORM_FAMILIES } from '../../../../../constants/index.ts';
 import type { PrDebugData } from '../../../../../modules/platform/index.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
 import { detectPlatform } from '../../../../../util/common.ts';
@@ -34,18 +35,14 @@ function massageUpdateMetadata(config: BranchConfig): void {
       newNameLinked = `[${newNameLinked}](${primaryLink})`;
     }
 
-    let sourceRootPath = 'tree/HEAD';
-    if (sourceUrl) {
-      const sourcePlatform = detectPlatform(sourceUrl);
-      if (sourcePlatform === 'bitbucket') {
-        sourceRootPath = 'src/HEAD';
-      } else if (sourcePlatform === 'bitbucket-server') {
-        sourceRootPath = 'browse';
-      }
-    }
+    const sourcePlatform = sourceUrl ? detectPlatform(sourceUrl) : null;
+    const sourceRootPath = sourcePlatform
+      ? PLATFORM_FAMILIES[sourcePlatform].webDirPath
+      : 'tree/HEAD';
 
     const otherLinks = [];
-    if (sourceUrl && (!!sourceDirectory || homepage)) {
+    const hasSourceDirectoryOrHomepage = !!sourceDirectory || homepage;
+    if (sourceUrl && hasSourceDirectoryOrHomepage) {
       otherLinks.push(
         `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
       );

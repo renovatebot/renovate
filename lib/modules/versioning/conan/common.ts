@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import * as semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
@@ -10,7 +11,7 @@ export function makeVersion(
   const prerelease = semver.prerelease(version, options);
 
   if (prerelease && !options.includePrerelease) {
-    if (!Number.isNaN(parseInt(prerelease.toString()[0]))) {
+    if (!Number.isNaN(parseInt(prerelease.toString()[0], 10))) {
       const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
       return semver.valid(stringVersion, options);
     }
@@ -77,6 +78,16 @@ export function matchesWithOptions(
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }
 
+function isBetterCandidate(
+  cur: any,
+  curSV: any,
+  candidate: string,
+  options: semver.Options,
+  compareRt: number,
+): boolean {
+  return !cur || semver.compare(curSV, candidate, options) === compareRt;
+}
+
 export function findSatisfyingVersion(
   versions: string[],
   range: string,
@@ -90,19 +101,17 @@ export function findSatisfyingVersion(
 
   for (const v of versions) {
     const versionFromList = makeVersion(v, options);
-    if (typeof versionFromList === 'string') {
+    if (isString(versionFromList)) {
       const cleanedVersion = cleanVersion(versionFromList);
       const options = getOptions(range);
       const cleanRange = cleanVersion(range);
-      if (matchesWithOptions(cleanedVersion, cleanRange, options)) {
-        if (
-          !cur ||
-          semver.compare(curSV, versionFromList, options) === compareRt
-        ) {
-          cur = versionFromList;
-          curIndex = index;
-          curSV = new semver.SemVer(cur, options);
-        }
+      if (
+        matchesWithOptions(cleanedVersion, cleanRange, options) &&
+        isBetterCandidate(cur, curSV, versionFromList, options, compareRt)
+      ) {
+        cur = versionFromList;
+        curIndex = index;
+        curSV = new semver.SemVer(cur, options);
       }
     }
     index += 1;

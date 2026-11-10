@@ -1,6 +1,6 @@
 import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
-import type { Repo } from './types.ts';
+import type { PRMergeMethod, Repo } from './schema.ts';
 import {
   getMergeMethod,
   getRepoUrl,
@@ -11,8 +11,8 @@ import {
 describe('modules/platform/gitea/utils', () => {
   const mockRepo = partial<Repo>({
     allow_rebase: true,
-    clone_url: 'https://gitea.renovatebot.com/some/repo.git',
-    ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
+    clone_url: 'https://forgejo.renovatebot.com/some/repo.git',
+    ssh_url: 'git@forgejo.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
     permissions: {
@@ -24,27 +24,27 @@ describe('modules/platform/gitea/utils', () => {
   });
 
   it('trimTrailingApiPath', () => {
-    expect(trimTrailingApiPath('https://gitea.renovatebot.com/api/v1')).toBe(
-      'https://gitea.renovatebot.com/',
+    expect(trimTrailingApiPath('https://forgejo.renovatebot.com/api/v1')).toBe(
+      'https://forgejo.renovatebot.com/',
     );
-    expect(trimTrailingApiPath('https://gitea.renovatebot.com/api/v1/')).toBe(
-      'https://gitea.renovatebot.com/',
+    expect(trimTrailingApiPath('https://forgejo.renovatebot.com/api/v1/')).toBe(
+      'https://forgejo.renovatebot.com/',
     );
-    expect(trimTrailingApiPath('https://gitea.renovatebot.com/')).toBe(
-      'https://gitea.renovatebot.com/',
+    expect(trimTrailingApiPath('https://forgejo.renovatebot.com/')).toBe(
+      'https://forgejo.renovatebot.com/',
     );
-    expect(trimTrailingApiPath('https://gitea.renovatebot.com')).toBe(
-      'https://gitea.renovatebot.com',
+    expect(trimTrailingApiPath('https://forgejo.renovatebot.com')).toBe(
+      'https://forgejo.renovatebot.com',
     );
     expect(
-      trimTrailingApiPath('https://gitea.renovatebot.com/api/gitea/api/v1'),
-    ).toBe('https://gitea.renovatebot.com/api/gitea/');
+      trimTrailingApiPath('https://forgejo.renovatebot.com/api/forgejo/api/v1'),
+    ).toBe('https://forgejo.renovatebot.com/api/forgejo/');
   });
 
   describe('getRepoUrl', () => {
     it('should abort when endpoint is not valid', () => {
       expect.assertions(1);
-      expect(() => getRepoUrl(mockRepo, 'endpoint', 'abc')).toThrow(
+      expect(() => getRepoUrl(mockRepo, 'endpoint', 'abc', 'gitea')).toThrow(
         CONFIG_GIT_URL_UNAVAILABLE,
       );
     });
@@ -59,7 +59,37 @@ describe('modules/platform/gitea/utils', () => {
     ${'rebase'}       | ${'rebase-merge'}
     ${'squash'}       | ${'squash'}
   `('getMergeMethod("$value") == "$expected"', ({ value, expected }) => {
-    expect(getMergeMethod(value)).toBe(expected);
+    expect(getMergeMethod(value, new Set())).toBe(expected);
+  });
+
+  describe('getMergeMethod("fast-forward") with allowedMergeMethods', () => {
+    it('returns "fast-forward-only" when repo allows only fast-forward-only', () => {
+      const allowedMergeMethods = new Set<PRMergeMethod>(['fast-forward-only']);
+      expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
+        'fast-forward-only',
+      );
+    });
+
+    it('returns "rebase" when repo allows only rebase', () => {
+      const allowedMergeMethods = new Set<PRMergeMethod>(['rebase']);
+      expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
+        'rebase',
+      );
+    });
+
+    it('prefers "fast-forward-only" when repo allows both', () => {
+      const allowedMergeMethods = new Set<PRMergeMethod>([
+        'fast-forward-only',
+        'rebase',
+      ]);
+      expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
+        'fast-forward-only',
+      );
+    });
+
+    it('returns "rebase" when allowedMergeMethods is empty', () => {
+      expect(getMergeMethod('fast-forward', new Set())).toBe('rebase');
+    });
   });
 
   describe('usableRepo', () => {
