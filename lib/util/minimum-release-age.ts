@@ -136,6 +136,7 @@ export function calculatePackageManagerMinimumReleaseAgeMs(
 
 export interface MinimumReleaseAgeExemptionConfig
   extends MinimumReleaseAgeConfig, PackageManagerMinimumReleaseAgeConfig {
+  datasource?: string;
   depName?: string;
   releaseTimestamp?: Timestamp | null;
 }
@@ -152,14 +153,19 @@ export interface MinimumReleaseAgeExemption<
 }
 
 /**
- * Whether the release of `upgrade` is younger than `ageMs` or has no timestamp.
+ * Whether the release of `upgrade` is at least `ageMs` old, where a release
+ * without a timestamp passes only an age of `0`.
  */
-function isYoungerThan(
-  upgrade: MinimumReleaseAgeExemptionConfig,
+export function isReleaseOldEnough(
+  upgrade: { releaseTimestamp?: Timestamp | null },
   ageMs: number,
 ): boolean {
+  if (!ageMs) {
+    return true;
+  }
   return (
-    !upgrade.releaseTimestamp || getElapsedMs(upgrade.releaseTimestamp) < ageMs
+    !!upgrade.releaseTimestamp &&
+    getElapsedMs(upgrade.releaseTimestamp) >= ageMs
   );
 }
 
@@ -174,25 +180,25 @@ function getOwnAgeMs(upgrade: MinimumReleaseAgeExemptionConfig): number {
 }
 
 /**
- * Returns the updates of `manager` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age without `minimumReleaseAgeBuffer` is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
- *
- * It does not filter by `packageFile`, so callers must pass only the updates of one lock file.
+ * Returns the updates of `manager` and `datasource` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age without `minimumReleaseAgeBuffer` is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none. Callers pass only the updates of one lock file.
  */
 export function getMinimumReleaseAgeExemption<
   T extends MinimumReleaseAgeExemptionConfig,
 >(
   upgrades: T[],
   manager: string,
+  datasource: string,
   ageMs: number,
 ): MinimumReleaseAgeExemption<T> | null {
   const exempted = upgrades.filter(
     (upgrade) =>
       upgrade.manager === manager &&
+      upgrade.datasource === datasource &&
       upgrade.minimumReleaseAgePackageManagerSync === true &&
       !upgrade.isLockFileMaintenance &&
       !upgrade.isVulnerabilityAlert &&
       getOwnAgeMs(upgrade) < ageMs &&
-      isYoungerThan(upgrade, ageMs),
+      !isReleaseOldEnough(upgrade, ageMs),
   );
   if (!exempted.length) {
     return null;

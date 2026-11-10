@@ -8,6 +8,7 @@ import {
   calculatePackageManagerMinimumReleaseAgeMs,
   checkMinimumReleaseAge,
   getMinimumReleaseAgeExemption,
+  isReleaseOldEnough,
 } from './minimum-release-age.ts';
 import { toMs } from './pretty-time.ts';
 import type { Timestamp } from './timestamp.ts';
@@ -276,6 +277,7 @@ describe('util/minimum-release-age', () => {
     const ageMs = toMs('3 days') ?? 0;
     const releaseTimestamp = '2021-01-01T00:00:00.000Z' as Timestamp;
     const update = {
+      datasource: 'pypi',
       depName: 'dep1',
       manager: 'poetry',
       minimumReleaseAge: '1 day',
@@ -295,6 +297,7 @@ describe('util/minimum-release-age', () => {
       const res = getMinimumReleaseAgeExemption(
         [...upgrades, { ...update, manager: 'pep621' }],
         'poetry',
+        'pypi',
         ageMs,
       );
 
@@ -304,7 +307,12 @@ describe('util/minimum-release-age', () => {
     it('returns the updates without release timestamp', () => {
       const upgrade = { ...update, releaseTimestamp: undefined };
 
-      const res = getMinimumReleaseAgeExemption([upgrade], 'poetry', ageMs);
+      const res = getMinimumReleaseAgeExemption(
+        [upgrade],
+        'poetry',
+        'pypi',
+        ageMs,
+      );
 
       expect(res).toEqual({
         ageMs: toMs('1 day'),
@@ -326,7 +334,12 @@ describe('util/minimum-release-age', () => {
         },
       ];
 
-      const res = getMinimumReleaseAgeExemption(upgrades, 'poetry', ageMs);
+      const res = getMinimumReleaseAgeExemption(
+        upgrades,
+        'poetry',
+        'pypi',
+        ageMs,
+      );
 
       expect(res).toEqual({
         ageMs: toMs('1 day'),
@@ -338,14 +351,15 @@ describe('util/minimum-release-age', () => {
     it('returns null if the release is older than the age', () => {
       dateUtil.getElapsedMs.mockReturnValue(toMs('4 days') ?? 0);
 
-      expect(getMinimumReleaseAgeExemption([update], 'poetry', ageMs)).toBe(
-        null,
-      );
+      expect(
+        getMinimumReleaseAgeExemption([update], 'poetry', 'pypi', ageMs),
+      ).toBe(null);
     });
 
     it.each`
       name                                             | upgrade
       ${'of another manager'}                          | ${{ ...update, manager: 'pep621' }}
+      ${'of another datasource'}                       | ${{ ...update, datasource: 'github-tags' }}
       ${'for lock file maintenance'}                   | ${{ ...update, isLockFileMaintenance: true }}
       ${'for security updates'}                        | ${{ ...update, isVulnerabilityAlert: true }}
       ${'with an own age of the age'}                  | ${{ ...update, minimumReleaseAge: '3 days' }}
@@ -354,9 +368,9 @@ describe('util/minimum-release-age', () => {
     `('returns null for updates $name', ({ upgrade }) => {
       dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
 
-      expect(getMinimumReleaseAgeExemption([upgrade], 'poetry', ageMs)).toBe(
-        null,
-      );
+      expect(
+        getMinimumReleaseAgeExemption([upgrade], 'poetry', 'pypi', ageMs),
+      ).toBe(null);
     });
 
     it('returns null without an age', () => {
@@ -364,10 +378,33 @@ describe('util/minimum-release-age', () => {
         getMinimumReleaseAgeExemption(
           [{ ...update, minimumReleaseAge: null, releaseTimestamp: undefined }],
           'poetry',
+          'pypi',
           0,
         ),
       ).toBe(null);
     });
+  });
+
+  describe('.isReleaseOldEnough()', () => {
+    const releaseTimestamp = '2021-01-01T00:00:00.000Z' as Timestamp;
+
+    it.each`
+      timestamp           | elapsed     | age         | expected
+      ${undefined}        | ${'0 days'} | ${'0 days'} | ${true}
+      ${undefined}        | ${'0 days'} | ${'1 day'}  | ${false}
+      ${releaseTimestamp} | ${'2 days'} | ${'1 day'}  | ${true}
+      ${releaseTimestamp} | ${'1 day'}  | ${'1 day'}  | ${true}
+      ${releaseTimestamp} | ${'1 day'}  | ${'2 days'} | ${false}
+    `(
+      'returns $expected for a release of $timestamp, $elapsed old, and an age of $age',
+      ({ timestamp, elapsed, age, expected }) => {
+        dateUtil.getElapsedMs.mockReturnValue(toMs(elapsed) ?? 0);
+
+        expect(
+          isReleaseOldEnough({ releaseTimestamp: timestamp }, toMs(age) ?? 0),
+        ).toBe(expected);
+      },
+    );
   });
 
   describe('.checkMinimumReleaseAge()', () => {
