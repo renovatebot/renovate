@@ -179,7 +179,7 @@ export class CrateDatasource extends Datasource {
     info: RegistryInfo,
   ): Promise<RegistryConfig | null> {
     const cacheKey = CrateDatasource.registryConfigCacheKey(info.rawUrl);
-    const cached = memCache.get<RegistryConfig>(cacheKey);
+    const cached = memCache.get<RegistryConfig | undefined>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -469,7 +469,7 @@ export class CrateDatasource extends Datasource {
         gitTimeout,
       );
       try {
-        const cached = memCache.get<CloneResult>(cacheKey);
+        const cached = memCache.get<CloneResult | undefined>(cacheKey);
 
         if (cached?.err) {
           logger.warn(
@@ -608,7 +608,7 @@ export class CrateDatasource extends Datasource {
     if (!rawUrl) {
       return release;
     }
-    const config = memCache.get<RegistryConfig>(
+    const config = memCache.get<RegistryConfig | undefined>(
       CrateDatasource.registryConfigCacheKey(rawUrl),
     );
     if (!config?.api) {

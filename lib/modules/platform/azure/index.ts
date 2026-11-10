@@ -178,7 +178,7 @@ export async function getRawFile(
       return null;
     }
 
-    let item: GitItem | undefined;
+    let item: GitItem | null | undefined;
     const versionDescriptor: GitVersionDescriptor = {
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
@@ -186,7 +186,8 @@ export async function getRawFile(
     for (const versionType of [GitVersionType.Tag, GitVersionType.Branch]) {
       versionDescriptor.versionType = versionType;
 
-      item = await azureApiGit.getItem(
+      // the Azure client resolves a 404 response with null
+      item = (await azureApiGit.getItem(
         repoId, // repositoryId
         fileName, // path
         undefined, // project
@@ -197,7 +198,7 @@ export async function getRawFile(
         undefined, // download
         branchOrTag ? versionDescriptor : undefined, // versionDescriptor
         true, // includeContent
-      );
+      )) as GitItem | null;
       if (item) {
         break; // exit loop if item is found
       } else {
@@ -387,7 +388,7 @@ export async function findPr({
   try {
     if (includeOtherAuthors) {
       const azureApiGit = await azureApi.gitApi();
-      const [pr] = await getRepoPullRequests({
+      const openPrs = await getRepoPullRequests({
         gitApi: azureApiGit,
         searchCriteria: {
           sourceRefName: getNewBranchName(branchName),
@@ -400,6 +401,7 @@ export async function findPr({
         skip: 0,
         top: 1,
       });
+      const pr = openPrs.at(0);
       return pr ? getRenovatePRFormat(pr) : null;
     }
 
@@ -474,7 +476,9 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
   );
 }
 
-const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
+const azureToRenovateStatusMapping: Partial<
+  Record<GitStatusState, BranchStatus>
+> = {
   [GitStatusState.Succeeded]: 'green',
   [GitStatusState.NotApplicable]: 'green',
   [GitStatusState.NotSet]: 'yellow',
@@ -822,7 +826,7 @@ export async function ensureComment({
   let threadIdFound: number | undefined;
   let commentIdFound: number | undefined;
   let commentNeedsUpdating = false;
-  threads.forEach((thread) => {
+  for (const thread of threads) {
     const firstCommentContent = thread.comments?.[0].content;
     const isMatchingComment = topic
       ? firstCommentContent?.startsWith(header) === true
@@ -832,7 +836,7 @@ export async function ensureComment({
       commentIdFound = thread.comments?.[0].id;
       commentNeedsUpdating = firstCommentContent !== body;
     }
-  });
+  }
 
   if (!threadIdFound) {
     await azureApiGit.createThread(

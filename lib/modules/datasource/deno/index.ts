@@ -89,7 +89,7 @@ export class DenoDatasource extends Datasource {
     moduleAPIURL: string,
   ): Promise<ReleaseResult> {
     const detailsCacheKey = buildCacheKey('details', moduleAPIURL);
-    const releasesCache: Record<string, Release> = coerceObject(
+    const releasesCache: Partial<Record<string, Release>> = coerceObject(
       await packageCache.get(
         `datasource-${DenoDatasource.id}`,
         detailsCacheKey,
@@ -133,6 +133,7 @@ export class DenoDatasource extends Datasource {
     );
 
     // v8 ignore else -- needs every release already present in the cache
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- assigned in the pMap callback
     if (cacheModified) {
       // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
       await packageCache.set(

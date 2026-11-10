@@ -50,7 +50,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   // convenience method for passing a string into a Version given current config.
   protected _parse(version: string): RegExpVersion | null {
-    const groups = this._config?.exec(version)?.groups;
+    const groups = this._config.exec(version)?.groups;
     if (!groups) {
       return null;
     }

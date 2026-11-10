@@ -98,7 +98,7 @@ export class CdnjsDatasource extends Datasource {
 
     const body = await this.fetchJsonOrNull(url, CdnjsAPISriResponse);
 
-    return body?.sri?.[assetName] ?? null;
+    return body?.sri[assetName] ?? null;
   }
 
   override getDigest(

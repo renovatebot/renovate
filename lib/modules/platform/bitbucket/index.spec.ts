@@ -1025,7 +1025,7 @@ describe('modules/platform/bitbucket/index', () => {
         },
         draftPR: false,
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('posts draft PR', async () => {
@@ -1054,7 +1054,7 @@ describe('modules/platform/bitbucket/index', () => {
         },
         draftPR: true,
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('removes inactive reviewers when creating pr', async () => {
@@ -1137,7 +1137,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbUseDefaultReviewers: true,
         },
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('removes default reviewers no longer member of the workspace when creating pr', async () => {
@@ -1200,7 +1200,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbUseDefaultReviewers: true,
         },
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('throws exception when unable to check default reviewers workspace membership', async () => {
@@ -1303,7 +1303,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbUseDefaultReviewers: true,
         },
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('rethrows exception when PR create error due to unknown reviewers error', async () => {
@@ -1459,7 +1459,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbAutoResolvePrTasks: true,
         },
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('swallows list PR error and PR creation succeeds', async () => {
@@ -1488,7 +1488,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbAutoResolvePrTasks: true,
         },
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
 
     it('swallows resolve PR task error and PR creation succeeds', async () => {
@@ -1536,7 +1536,7 @@ describe('modules/platform/bitbucket/index', () => {
           bbAutoResolvePrTasks: true,
         },
       });
-      expect(pr?.number).toBe(5);
+      expect(pr.number).toBe(5);
     });
   });
 

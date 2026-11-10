@@ -87,7 +87,7 @@ export const GithubVulnerabilityAlerts = LooseArray(
     },
   },
 ).transform((alerts) =>
-  alerts.filter((alert) => alert.security_vulnerability?.package?.ecosystem),
+  alerts.filter((alert) => alert.security_vulnerability?.package.ecosystem),
 );
 export type GithubVulnerabilityAlerts = z.infer<
   typeof GithubVulnerabilityAlerts

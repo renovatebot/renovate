@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Ini } from '../../../util/schema-utils/index.ts';
 import { fromBase64 } from '../../../util/string.ts';
@@ -51,7 +52,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   };
   // Generate hostRules
   const hostType = 'npm';
-  const hosts: Record<string, HostRule> = {};
+  const hosts: Partial<Record<string, HostRule>> = {};
   for (const [key, value] of Object.entries(npmrc)) {
     if (!isNonEmptyString(value)) {
       continue;
@@ -62,7 +63,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     if (keyParts.length) {
       matchHost = getMatchHostFromNpmrcHost(keyParts.join(':'));
     }
-    const rule: HostRule = hosts[matchHost] || {};
+    const rule = coerceObject(hosts[matchHost]);
     if (keyType === '_authToken' || keyType === '_auth') {
       rule.token = value;
       if (keyType === '_auth') {

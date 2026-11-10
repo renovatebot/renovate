@@ -21,7 +21,7 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
   }
 
   protected override _parse(version: string): RegExpVersion | null {
-    const groups = this._config?.exec(version)?.groups;
+    const groups = this._config.exec(version)?.groups;
 
     if (!groups) {
       return null;

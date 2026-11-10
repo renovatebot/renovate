@@ -48,14 +48,16 @@ export class JenkinsPluginsDatasource extends Datasource {
     }
     const updateSiteUrl = ensureTrailingSlash(registryUrl);
 
-    const plugins = await this.getJenkinsPluginInfo(updateSiteUrl);
+    const plugins: Partial<Record<string, ReleaseResult>> =
+      await this.getJenkinsPluginInfo(updateSiteUrl);
     const plugin = plugins[packageName];
     if (!plugin) {
       return null;
     }
 
     const result = clone(plugin);
-    const versions = await this.getJenkinsPluginVersions(updateSiteUrl);
+    const versions: Partial<Record<string, Release[]>> =
+      await this.getJenkinsPluginVersions(updateSiteUrl);
     const releases = versions[packageName];
     result.releases = releases ? clone(releases) : [];
     return result;

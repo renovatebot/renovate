@@ -211,12 +211,12 @@ class ApkVersioningApi extends GenericVersioningApi {
       minor,
       patch,
       extra,
-      letter,
+      letter = '',
       prereleaseType,
       prereleaseNum,
       packageFixType,
       packageFixNum,
-      releaseNum,
+      releaseNum = '',
     } = match.groups;
 
     const packageFixFull = packageFixType ? packageFixType + packageFixNum : '';
@@ -225,7 +225,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       (minor ? `.${minor}` : '') + (patch ? `.${patch}` : '') + extra;
 
     // For version comparison, we only include the base version + package fix, not prerelease
-    const versionStr = major + minorPatchStr + (letter ?? '') + packageFixFull;
+    const versionStr = major + minorPatchStr + letter + packageFixFull;
 
     let prerelease: string | undefined;
     if (prereleaseType) {
@@ -251,7 +251,7 @@ class ApkVersioningApi extends GenericVersioningApi {
     }
 
     // Extract release string (just the number part)
-    const releaseString = releaseNum ?? '';
+    const releaseString = releaseNum;
 
     return {
       version: versionStr,

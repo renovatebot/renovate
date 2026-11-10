@@ -1461,7 +1461,7 @@ describe('modules/datasource/pypi/index', () => {
       });
 
       expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
-      expect(res?.releases?.[0].releaseTimestamp).toBeUndefined();
+      expect(res?.releases[0].releaseTimestamp).toBeUndefined();
     });
 
     it('parses JSON body served with an HTML content-type', async () => {

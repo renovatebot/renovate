@@ -13,6 +13,7 @@ describe('modules/versioning/git/index', () => {
     ${'29c7921'}                                  | ${true}
     ${'29c792109259545157f4bc3f8d43f47ffcf34e20'} | ${true}
     ${'foobar'}                                   | ${false}
+    ${undefined}                                  | ${false}
   `('isValid("$input") === $expected', ({ input, expected }) => {
     expect(git.isValid(input)).toBe(expected);
   });

@@ -73,8 +73,12 @@ function get(
   packageName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
-  const conf = { versioning, datasource: ClojureDatasource.id, packageName };
-  return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
+  return getPkgReleases({
+    versioning,
+    datasource: ClojureDatasource.id,
+    packageName,
+    registryUrls,
+  });
 }
 
 describe('modules/datasource/clojure/index', () => {

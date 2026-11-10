@@ -19,7 +19,7 @@ import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
 
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
-  if (!repoCache?.platform?.github?.pullRequestsCache) {
+  if (!repoCache.platform?.github?.pullRequestsCache) {
     logger.debug('PR cache: cached data not found, creating new cache');
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
@@ -136,7 +136,7 @@ export async function getPrCache(
 
         if (username) {
           const filteredPage = page.filter(
-            (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
+            (ghPr) => ghPr.user?.login && ghPr.user.login === username,
           );
 
           logger.debug(
@@ -213,7 +213,7 @@ export async function isPrInMergeQueue(
     const res = await http.requestGraphql<{
       repository: {
         pullRequest: { isInMergeQueue: boolean } | null;
-      };
+      } | null;
     }>(prIsInMergeQueueQuery, {
       variables: { owner, name, number: prNo },
       readOnly: true,
@@ -226,7 +226,7 @@ export async function isPrInMergeQueue(
       );
       return false;
     }
-    return res?.data?.repository?.pullRequest?.isInMergeQueue === true;
+    return res?.data.repository?.pullRequest?.isInMergeQueue === true;
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err;

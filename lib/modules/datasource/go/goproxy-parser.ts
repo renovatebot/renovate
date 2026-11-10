@@ -27,7 +27,7 @@ export function parseGoproxy(
   }
 
   const cacheKey = buildCacheKey('goproxy', input);
-  const cachedResult = memCache.get<GoproxyItem[]>(cacheKey);
+  const cachedResult = memCache.get<GoproxyItem[] | undefined>(cacheKey);
   if (cachedResult) {
     return cachedResult;
   }
@@ -107,7 +107,7 @@ export function parseNoproxy(
   }
 
   const cacheKey = buildCacheKey('noproxy', input);
-  const cachedResult = memCache.get<RegExp | null>(cacheKey);
+  const cachedResult = memCache.get<RegExp | null | undefined>(cacheKey);
   if (cachedResult !== undefined) {
     return cachedResult;
   }

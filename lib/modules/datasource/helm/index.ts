@@ -85,7 +85,8 @@ export class HelmDatasource extends Datasource {
       return null;
     }
 
-    const repositoryData = await this.getRepositoryData(helmRepository);
+    const repositoryData: Partial<HelmRepository> =
+      await this.getRepositoryData(helmRepository);
     const releases = repositoryData[packageName];
     if (!releases) {
       logger.debug(

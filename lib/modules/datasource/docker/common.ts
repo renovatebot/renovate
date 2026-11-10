@@ -351,7 +351,7 @@ export function getRegistryRepository(
     hostType: dockerDatasourceId,
     url: registryHost,
   });
-  if (opts?.insecureRegistry) {
+  if (opts.insecureRegistry) {
     registryHost = registryHost.replace('https', 'http');
   }
   if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {

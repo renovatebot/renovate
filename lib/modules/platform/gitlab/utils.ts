@@ -28,22 +28,23 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     number: mr.iid,
     title: mr.title,
     createdAt: mr.created_at,
-    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- most callers pass responses without schema validation
+    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.at(0)?.id),
     bodyStruct: getPrBodyStruct(mr.description),
 
     ...(mr.target_branch && { targetBranch: mr.target_branch }),
 
     ...(mr.head_pipeline?.status && {
-      headPipelineStatus: mr.head_pipeline?.status,
+      headPipelineStatus: mr.head_pipeline.status,
     }),
-    ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
-    ...(mr.head_pipeline?.id && { headPipelineId: mr.head_pipeline?.id }),
+    ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline.sha }),
+    ...(mr.head_pipeline?.id && { headPipelineId: mr.head_pipeline.id }),
     ...(mr.head_pipeline?.source && {
-      headPipelineSource: mr.head_pipeline?.source,
+      headPipelineSource: mr.head_pipeline.source,
     }),
 
     ...(isNonEmptyArray(mr.reviewers) && {
-      reviewers: mr.reviewers?.map(({ username }) => username),
+      reviewers: mr.reviewers.map(({ username }) => username),
     }),
 
     ...(mr.labels && { labels: mr.labels }),

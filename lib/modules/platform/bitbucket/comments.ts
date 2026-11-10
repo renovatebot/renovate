@@ -165,11 +165,10 @@ export async function ensureCommentRemoval(
 
     let commentId: number | undefined = undefined;
 
-    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       const topic = deleteConfig.topic;
       commentId = comments.find((comment) => byTopic(comment, topic))?.id;
-    } else if (deleteConfig.type === 'by-content') {
+    } else {
       const content = deleteConfig.content;
       commentId = comments.find((comment) => byContent(comment, content))?.id;
     }

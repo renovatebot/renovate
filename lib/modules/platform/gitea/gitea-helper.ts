@@ -484,7 +484,9 @@ export const toRenovateStatusMapping: Record<CommitStatusType, BranchStatus> = {
   error: 'red',
 };
 
-export const toPlatformStatusMapping: Record<BranchStatus, CommitStatusType> = {
+export const toPlatformStatusMapping: Partial<
+  Record<BranchStatus, CommitStatusType>
+> = {
   green: 'success',
   yellow: 'pending',
   red: 'failure',
@@ -493,7 +495,7 @@ export const toPlatformStatusMapping: Record<BranchStatus, CommitStatusType> = {
 function filterStatus(data: CommitStatus[]): CommitStatus[] {
   const ret: Record<string, CommitStatus> = {};
   for (const i of data) {
-    if (!ret[i.context] || ret[i.context].id < i.id) {
+    if (!Object.hasOwn(ret, i.context) || ret[i.context].id < i.id) {
       ret[i.context] = i;
     }
   }

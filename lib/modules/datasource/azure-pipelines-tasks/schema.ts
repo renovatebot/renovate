@@ -22,5 +22,5 @@ export const AzurePipelinesJSON = z.object({
 
 export const AzurePipelinesFallbackTasks = z.record(
   z.string(),
-  z.string().array(),
+  z.string().array().optional(),
 );

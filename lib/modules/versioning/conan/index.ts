@@ -53,7 +53,7 @@ function isValid(input: string): boolean {
   const version = cleanVersion(input);
   const qualifiers = getOptions(input);
   if (makeVersion(version, qualifiers)) {
-    return version !== null;
+    return true;
   }
 
   return semver.validRange(version, qualifiers) !== null;
