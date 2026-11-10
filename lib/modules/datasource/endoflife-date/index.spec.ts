@@ -91,22 +91,22 @@ describe('modules/datasource/endoflife-date/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(200, []);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

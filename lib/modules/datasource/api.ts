@@ -1,3 +1,4 @@
+import { ApkDatasource } from './apk/index.ts';
 import { ArtifactoryDatasource } from './artifactory/index.ts';
 import { AwsEKSAddonDataSource } from './aws-eks-addon/index.ts';
 import { AwsMachineImageDatasource } from './aws-machine-image/index.ts';
@@ -55,6 +56,7 @@ import { HexpmBobDatasource } from './hexpm-bob/index.ts';
 import { JavaVersionDatasource } from './java-version/index.ts';
 import { JenkinsPluginsDatasource } from './jenkins-plugins/index.ts';
 import { JsrDatasource } from './jsr/index.ts';
+import { JuliaGeneralMetadataDatasource } from './julia-general-metadata/index.ts';
 import { KubernetesApiDatasource } from './kubernetes-api/index.ts';
 import { MavenDatasource } from './maven/index.ts';
 import { NextcloudDatasource } from './nextcloud/index.ts';
@@ -84,6 +86,7 @@ import { Unity3dPackagesDatasource } from './unity3d-packages/index.ts';
 const api = new Map<string, DatasourceApi>();
 export default api;
 
+api.set(ApkDatasource.id, new ApkDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsEKSAddonDataSource.id, new AwsEKSAddonDataSource());
 api.set(AwsMachineImageDatasource.id, new AwsMachineImageDatasource());
@@ -144,6 +147,10 @@ api.set(HexpmBobDatasource.id, new HexpmBobDatasource());
 api.set(JavaVersionDatasource.id, new JavaVersionDatasource());
 api.set(JenkinsPluginsDatasource.id, new JenkinsPluginsDatasource());
 api.set(JsrDatasource.id, new JsrDatasource());
+api.set(
+  JuliaGeneralMetadataDatasource.id,
+  new JuliaGeneralMetadataDatasource(),
+);
 api.set(KubernetesApiDatasource.id, new KubernetesApiDatasource());
 api.set(MavenDatasource.id, new MavenDatasource());
 api.set(NextcloudDatasource.id, new NextcloudDatasource());

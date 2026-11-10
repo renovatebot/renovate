@@ -4,6 +4,7 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import type { MockInstance } from 'vitest';
 import { expect } from 'vitest';
 import { logger } from '../../../../logger/index.ts';
 import customConfig from './__fixtures__/config.cjs';
@@ -54,9 +55,9 @@ describe('workers/global/config/parse/file', () => {
         './__fixtures__/',
         filePath,
       );
-      expect(
-        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
-      ).toEqual(customConfig);
+      await expect(
+        file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
+      ).resolves.toEqual(customConfig);
     });
 
     it('migrates', async () => {
@@ -67,8 +68,9 @@ describe('workers/global/config/parse/file', () => {
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
-      expect(res).toMatchSnapshot();
-      expect(res.rangeStrategy).toBe('bump');
+      expect(res).toEqual({
+        rangeStrategy: 'bump',
+      });
     });
 
     it('warns if config is invalid', async () => {
@@ -85,10 +87,6 @@ describe('workers/global/config/parse/file', () => {
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
       await fs.promises.unlink(configFile);
-    });
-
-    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
-      expect(await file.getConfig({})).toBeDefined();
     });
 
     it.each([
@@ -180,6 +178,36 @@ describe('workers/global/config/parse/file', () => {
       await fs.promises.unlink(configFile);
     });
 
+    describe('default config file', () => {
+      let cwdSpy: MockInstance<typeof process.cwd>;
+
+      // resolve the default `config.js` in a directory without such a file
+      beforeEach(() => {
+        cwdSpy = vi
+          .spyOn(process, 'cwd')
+          .mockReturnValue(upath.join(tmp.path, 'no-config'));
+      });
+
+      afterEach(() => {
+        cwdSpy.mockRestore();
+      });
+
+      it('returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
+        await expect(file.getConfig({})).resolves.toEqual({});
+      });
+
+      it('skips an unreadable default config file', async () => {
+        fsPathExistsSpy.mockResolvedValueOnce(true as never);
+
+        const res = await file.getConfig({});
+
+        expect(res).toEqual({});
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Error reading or parsing file - skipping',
+        );
+      });
+    });
+
     it('exports env variables to environment from processEnv object', async () => {
       const configFile = upath.resolve(tmp.path, 'config2.js');
       const fileContent1 = codeBlock`
@@ -202,7 +230,7 @@ describe('workers/global/config/parse/file', () => {
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       await fs.promises.unlink(configFile);
-      delete process.env.SOME_KEY;
+      vi.stubEnv('SOME_KEY', undefined);
     });
 
     it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
@@ -231,8 +259,8 @@ describe('workers/global/config/parse/file', () => {
       expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
       await fs.promises.unlink(configFile);
-      delete process.env.SOME_KEY;
-      delete process.env.valid_Key;
+      vi.stubEnv('SOME_KEY', undefined);
+      vi.stubEnv('valid_Key', undefined);
     });
   });
 

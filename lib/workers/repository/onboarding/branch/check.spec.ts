@@ -86,6 +86,23 @@ describe('workers/repository/onboarding/branch/check', () => {
     expect(platform.ensureComment).toHaveBeenCalledOnce();
   });
 
+  it('skips the closing comment when the notification is suppressed', async () => {
+    cache.getCache.mockReturnValue({});
+    platform.findPr.mockResolvedValue(
+      partial<Pr>({
+        title: 'Configure Renovate',
+        bodyStruct,
+      }),
+    );
+    scm.getFileList.mockResolvedValue([]);
+
+    await expect(
+      isOnboarded({ ...config, suppressNotifications: ['onboardingClose'] }),
+    ).rejects.toThrow(REPOSITORY_CLOSED_ONBOARDING);
+
+    expect(platform.ensureComment).not.toHaveBeenCalled();
+  });
+
   describe('when closedPr exists and onboardingAutoCloseAge is set', () => {
     beforeAll(() => {
       vi.useFakeTimers();

@@ -23,6 +23,10 @@ import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
 import type { Vulnerability } from './process/types.ts';
 import { Vulnerabilities } from './process/vulnerabilities.ts';
+import type {
+  DependencyDashboardCheck,
+  DependencyDashboardListItemType,
+} from './types.ts';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -183,7 +187,10 @@ export async function readDashboardBody(
     dependencyDashboardAllRateLimited: false,
   };
   const stringifiedConfig = JSON.stringify(config);
-  if (
+  // mode=silent never updates the dashboard, so checkboxes left on an existing one would never be cleared
+  if (config.mode === 'silent') {
+    logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
+  } else if (
     config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
@@ -199,9 +206,10 @@ export async function readDashboardBody(
 
   const checkedBranches = GlobalConfig.get('checkedBranches');
   if (isNonEmptyArray(checkedBranches)) {
-    const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      checkedBranches.map((branchName) => [branchName, 'global-config']),
-    );
+    const checkedBranchesRec: Record<string, DependencyDashboardCheck> =
+      Object.fromEntries(
+        checkedBranches.map((branchName) => [branchName, 'global-config']),
+      );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
       ...checkedBranchesRec,
@@ -215,11 +223,21 @@ export async function readDashboardBody(
   Object.assign(config, dashboardChecks);
 }
 
+function needsDashboardApproval(branch: BranchConfig): boolean {
+  return (
+    !!branch.dependencyDashboardApproval ||
+    !!branch.dependencyDashboardPrApproval
+  );
+}
+
 function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
-function getListItem(branch: BranchConfig, type: string): string {
+function getListItem(
+  branch: BranchConfig,
+  type: DependencyDashboardListItemType,
+): string {
   let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
@@ -260,7 +278,10 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   return { categories, uncategorized, hasCategorized, hasUncategorized };
 }
 
-function getBranchList(branches: BranchConfig[], listItemType: string): string {
+function getBranchList(
+  branches: BranchConfig[],
+  listItemType: DependencyDashboardListItemType,
+): string {
   return branches
     .map((branch: BranchConfig): string => getListItem(branch, listItemType))
     .join('');
@@ -275,7 +296,7 @@ function getBranchesListMd(
   ) => unknown,
   title: string,
   description: string,
-  listItemType = 'approvePr',
+  listItemType: DependencyDashboardListItemType = 'approvePr',
   bulkComment?: string,
   bulkMessage?: string,
   bulkIcon?: '🔐',
@@ -353,19 +374,13 @@ export async function ensureDependencyDashboard(
       branch.result !== 'automerged' &&
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
-  if (
-    !(
-      config.dependencyDashboard === true ||
-      config.dependencyDashboardApproval === true ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
-        true ||
-      branches.some(
-        (branch) =>
-          !!branch.dependencyDashboardApproval ||
-          !!branch.dependencyDashboardPrApproval,
-      )
-    )
-  ) {
+  if (!(
+    config.dependencyDashboard === true ||
+    config.dependencyDashboardApproval === true ||
+    config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+      true ||
+    branches.some(needsDashboardApproval)
+  )) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -374,6 +389,7 @@ export async function ensureDependencyDashboard(
     } else {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      delete config.dependencyDashboardIssue;
     }
     return;
   }
@@ -398,7 +414,7 @@ export async function ensureDependencyDashboard(
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
-          const name = dep.packageName ?? dep.depName;
+          const name = dep.packageName;
           const replacementUpdate = dep.updates?.find(
             (update) => update.updateType === 'replacement',
           );
@@ -413,7 +429,9 @@ export async function ensureDependencyDashboard(
                 replacementUpdate.newName,
               )
             );
-          if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
+          const deprecationOrReplacement =
+            dep.deprecationMessage ?? hasAnyReplacement;
+          if (name && deprecationOrReplacement) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {
@@ -440,6 +458,7 @@ export async function ensureDependencyDashboard(
     } else {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      delete config.dependencyDashboardIssue;
     }
     return;
   }
@@ -463,7 +482,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Deprecations / Replacements\n';
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
-      'The following dependencies are either deprecated or have replacements available.\n\n';
+      '> The following dependencies are either deprecated or have replacements available.\n\n';
     issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -552,6 +571,7 @@ export async function ensureDependencyDashboard(
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+    'unpend',
   );
   issueBody += getBranchesListMd(
     branches,
@@ -669,13 +689,19 @@ export async function ensureDependencyDashboard(
       'DRY-RUN: Would ensure Dependency Dashboard',
     );
   } else {
-    await platform.ensureIssue({
+    const result = await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });
+    // ensureIssue doesn't return the issue, so a newly created (or renamed)
+    // dashboard needs a lookup to record its number
+    if (result && !config.dependencyDashboardIssue) {
+      const issue = await platform.findIssue(config.dependencyDashboardTitle!);
+      config.dependencyDashboardIssue = issue?.number;
+    }
   }
 }
 
@@ -715,13 +741,15 @@ export function getAbandonedPackagesMd(
   abandonedMd +=
     'The following dependencies have not received updates for an extended period and may be unmaintained.\n\n';
 
-  abandonedMd += '<details>\n';
-  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
-
+  // Keep the note outside the `<details>` block: GitHub only renders alert
+  // callouts at the top level of a body, not inside collapsible sections.
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
+  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
+
+  abandonedMd += '<details>\n';
+  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += '| Datasource | Package | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';
@@ -767,11 +795,19 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += '## Vulnerabilities\n\n';
 
-  const vulnerabilityFetcher = await Vulnerabilities.create();
-  const vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
-    config,
-    packageFiles,
-  );
+  let vulnerabilities: Vulnerability[];
+  try {
+    const vulnerabilityFetcher = await Vulnerabilities.create();
+    vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
+      config,
+      packageFiles,
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Unable to read vulnerability information');
+    result +=
+      'Renovate was unable to fetch CVE information from [osv.dev](https://osv.dev) this run.\n\n';
+    return result;
+  }
 
   if (vulnerabilities.length === 0) {
     result +=

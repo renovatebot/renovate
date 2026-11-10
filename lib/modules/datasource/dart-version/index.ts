@@ -1,10 +1,10 @@
 import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { api as semver } from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { DartResponse } from './schema.ts';
 
-export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 /**
  * The server returns old svn versions which would need mapping to a version.
  * They are very old, so we skip them instead.
@@ -19,9 +19,13 @@ export class DartVersionDatasource extends Datasource {
     super(DartVersionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://storage.googleapis.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://storage.googleapis.com'];
+  }
 
   override readonly caching = true;
 
@@ -34,7 +38,7 @@ export class DartVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -70,13 +74,17 @@ export class DartVersionDatasource extends Datasource {
       .map((prefix) => this.getVersionFromPrefix(prefix))
       .filter(isString)
       .filter((version) => {
+        // The API response contains a stable version being released as a non-stable
+        // release. So we filter out these releases here.
+        const isStableAsNonStable =
+          channel !== 'stable' &&
+          semver.isVersion(version) &&
+          semver.isStable(version);
         if (
           version === 'latest' ||
           // skip old svn versions
           svnVersionRegex.test(version) ||
-          // The API response contains a stable version being released as a non-stable
-          // release. So we filter out these releases here.
-          (channel !== 'stable' && stableVersionRegex.test(version))
+          isStableAsNonStable
         ) {
           return false;
         }

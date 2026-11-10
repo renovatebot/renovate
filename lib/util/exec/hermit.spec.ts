@@ -39,7 +39,9 @@ describe('util/exec/hermit', () => {
 
         findUp.mockResolvedValueOnce(upath.join(localDir, hermitLocation));
 
-        expect(await findHermitCwd(cwd)).toBe(upath.join(localDir, expected));
+        await expect(findHermitCwd(cwd)).resolves.toBe(
+          upath.join(localDir, expected),
+        );
 
         expect(findUp.mock.calls[0][1]?.cwd).toBe(cwd);
       },

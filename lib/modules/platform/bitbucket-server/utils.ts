@@ -4,6 +4,7 @@ import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts
 import { logger } from '../../../logger/index.ts';
 import type { GitOptions, GitProtocol } from '../../../types/git.ts';
 import type { HostRule } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as git from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
@@ -34,25 +35,8 @@ export function prInfo(pr: BbsRestPr): BbsPr {
   };
 }
 
-export interface BitbucketCommitStatus {
-  failed: number;
-  inProgress: number;
-  successful: number;
-}
-
-export type BitbucketBranchState =
-  | 'SUCCESSFUL'
-  | 'FAILED'
-  | 'INPROGRESS'
-  | 'STOPPED';
-
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
 export function isInvalidReviewersResponse(err: BitbucketError): boolean {
-  const errors = err?.response?.body?.errors ?? [];
+  const errors = coerceArray(err?.response?.body?.errors);
   return (
     errors.length > 0 &&
     errors.every(
@@ -62,15 +46,17 @@ export function isInvalidReviewersResponse(err: BitbucketError): boolean {
 }
 
 export function getInvalidReviewers(err: BitbucketError): string[] {
-  const errors = err?.response?.body?.errors ?? [];
+  const errors = coerceArray(err?.response?.body?.errors);
   let invalidReviewers: string[] = [];
   for (const error of errors) {
     // v8 ignore else -- TODO: add test #40625
     if (error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION) {
       invalidReviewers = invalidReviewers.concat(
-        error.reviewerErrors
-          ?.map(({ context }) => context)
-          .filter(isNonEmptyString) ?? [],
+        coerceArray(
+          error.reviewerErrors
+            ?.map(({ context }) => context)
+            .filter(isNonEmptyString),
+        ),
       );
     }
   }

@@ -76,7 +76,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     memCacheReset();
     repoCacheReset();
     cache = getCache();
-    delete process.env.GITLAB_IGNORE_REPO_URL;
+    vi.stubEnv('GITLAB_IGNORE_REPO_URL', undefined);
     setBaseUrl('https://gitlab.com/api/v4');
   });
 

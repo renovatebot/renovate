@@ -3,20 +3,13 @@ import { regEx } from '../../../util/regex.ts';
 import { parseVersion } from '../nuget/parser.ts';
 import type { NugetVersion } from '../nuget/types.ts';
 import { versionToString } from '../nuget/version.ts';
+import type {
+  PaketConstraint,
+  PaketInterval,
+  PaketOperator,
+  PaketRange,
+} from './types.ts';
 import { compare, sameReleaseParts } from './version.ts';
-
-export type PaketOperator = '' | '=' | '==' | '>' | '>=' | '<' | '<=' | '~>';
-
-export interface PaketConstraint {
-  operator: PaketOperator;
-  version: NugetVersion;
-}
-
-export interface PaketRange {
-  strategy: '!' | '@' | null;
-  constraints: PaketConstraint[];
-  prereleaseTags: string[];
-}
 
 const constraintOperators: readonly string[] = [
   '=',
@@ -166,25 +159,6 @@ export function twiddle(version: NugetVersion): NugetVersion {
   const precision = Math.max(releaseParts(version).length - 1, 1);
   return bumpAtPrecision(version, precision);
 }
-
-export type PaketInterval =
-  | {
-      kind:
-        | 'specific'
-        | 'override'
-        | 'minimum'
-        | 'greater-than'
-        | 'maximum'
-        | 'less-than';
-      version: NugetVersion;
-    }
-  | {
-      kind: 'range';
-      from: NugetVersion;
-      fromInclusive: boolean;
-      to: NugetVersion;
-      toInclusive: boolean;
-    };
 
 function intervalOfPair(
   first: PaketConstraint,
@@ -367,11 +341,13 @@ export function matches(version: NugetVersion, range: PaketRange): boolean {
       return compare(version, interval.version) === 0;
     case 'minimum': {
       const cmp = compare(version, interval.version);
-      return (
-        cmp === 0 ||
-        (cmp > 0 && isPrereleaseAllowed(version, status)) ||
-        isPrereleaseOfBound(version, interval.version, status)
-      );
+      if (cmp === 0) {
+        return true;
+      }
+      if (cmp > 0 && isPrereleaseAllowed(version, status)) {
+        return true;
+      }
+      return isPrereleaseOfBound(version, interval.version, status);
     }
     case 'greater-than':
       return (
@@ -380,7 +356,10 @@ export function matches(version: NugetVersion, range: PaketRange): boolean {
       );
     case 'maximum': {
       const cmp = compare(version, interval.version);
-      return cmp === 0 || (cmp < 0 && isPrereleaseAllowed(version, status));
+      if (cmp === 0) {
+        return true;
+      }
+      return cmp < 0 && isPrereleaseAllowed(version, status);
     }
     case 'less-than':
       return (
@@ -396,10 +375,10 @@ export function matches(version: NugetVersion, range: PaketRange): boolean {
       const inUpper = toInclusive
         ? upperCmp <= 0
         : upperCmp < 0 && !isPrereleaseOfBound(version, to, status);
-      return (
-        (inLower && inUpper && isPrereleaseAllowed(version, status)) ||
-        isPrereleaseOfBound(version, from, status)
-      );
+      if (inLower && inUpper && isPrereleaseAllowed(version, status)) {
+        return true;
+      }
+      return isPrereleaseOfBound(version, from, status);
     }
   }
 }

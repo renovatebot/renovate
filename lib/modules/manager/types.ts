@@ -1,9 +1,10 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  ToolSettingsOptions,
+  RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
+  VulnerabilityAlertSource,
 } from '../../config/types.ts';
 import type { Category } from '../../constants/index.ts';
 import type {
@@ -17,6 +18,7 @@ import type {
 import type {
   AdditionalConstraintName,
   ConstraintName,
+  ToolName,
 } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
@@ -36,11 +38,48 @@ export interface ExtractConfig extends CustomExtractConfig {
   repository?: string;
   currentDigest?: string;
   newDigest?: string | null;
+  /**
+   * Whether vulnerability remediation is active for this repository, regardless
+   * of where the vulnerability data comes from.
+   *
+   * Managers may use this to surface dependencies which are useless for routine
+   * updates, but which a vulnerability fix needs to be able to match, e.g.
+   * transitive dependencies which only exist in a lock file.
+   */
+  hasVulnerabilityAlertsRules?: boolean;
 }
 
-export interface UpdateArtifactsConfig {
+/**
+ * The part of a manager config that `resolveToolConstraint()` reads. Managers
+ * must not read these properties directly (enforced by the
+ * `renovate/prefer-resolve-tool-constraint` lint rule), so that user config, a
+ * value derived from the updated files and the extracted constraints are always
+ * applied in the same order.
+ */
+export interface ToolConstraintsConfig {
+  /**
+   * Constraints as configured by the user, so they always win over anything a
+   * manager derives itself.
+   */
+  constraints?: Partial<Record<ConstraintName, string>> | null;
+  /**
+   * Constraints collected during extraction, merged over all upgrades of the
+   * branch. They describe the package files as they were on the base branch, so
+   * they are a fallback for a manager that cannot derive the constraint from
+   * the files it is called with.
+   */
+  extractedConstraints?: Partial<Record<ConstraintName, string>> | null;
+  /**
+   * Tool versions which other managers, like `mise`, share for the directory of
+   * the package files, see {@link SharedConstraintsScope}. They are the versions
+   * a version manager installs, so they win over a range which the package
+   * files only require, if they are within it.
+   */
+  sharedConstraints?: Partial<Record<ConstraintName, string>> | null;
+}
+
+export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
-  constraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
@@ -54,10 +93,12 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
+  minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeExtracted?: Nullish<string>;
 }
 
-export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
+export interface RangeConfig<T = unknown> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
@@ -65,11 +106,13 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy?: RangeStrategy;
 }
 
-export interface PackageFileContent<
-  T = Record<string, any>,
-> extends ManagerData<T> {
+export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Set by the manager to share constraints with the package files of other managers, see {@link SharedConstraintsScope}.
+   */
+  sharedConstraintsScope?: SharedConstraintsScope;
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
@@ -79,17 +122,33 @@ export interface PackageFileContent<
   additionalRegistryUrls?: string[];
   deps: PackageDependency<T>[];
   lockFiles?: string[];
-  npmrc?: string;
   packageFileVersion?: string;
   skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
+  /**
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
+   *
+   * Renovate uses the larger of this and `minimumReleaseAge`.
+   */
+  minimumReleaseAgeExtracted?: string;
 }
 
-export interface PackageFile<
-  T = Record<string, any>,
+export interface PackageFile<T = unknown> extends PackageFileContent<T> {
+  packageFile: string;
+}
+
+/** the package file content of a manager with `supportsNpmrc`, the only kind carrying an `npmrc` */
+export interface NpmrcPackageFileContent<
+  T = unknown,
 > extends PackageFileContent<T> {
+  npmrc?: string;
+}
+
+export interface NpmrcPackageFile<
+  T = unknown,
+> extends NpmrcPackageFileContent<T> {
   packageFile: string;
 }
 
@@ -149,7 +208,7 @@ export interface LookupUpdate {
  * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
  */
 export interface PackageDependency<
-  T = Record<string, any>,
+  T = unknown,
   DepType extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
@@ -171,15 +230,35 @@ export interface PackageDependency<
   sourceUrl?: string | null;
   pinDigests?: boolean;
   currentRawValue?: string;
+  /**
+   * Restrict extracted dependencies to a version range.
+   *
+   * Managers can use this for native selectors which are not Renovate
+   * version ranges but still describe a set of compatible versions.
+   */
+  allowedVersions?: string;
+  /** Whether unstable releases should be excluded from update candidates. */
+  ignoreUnstable?: boolean;
+  /** True when the dependency should only be updated in the lockfile, and the source file should remain untouched. */
+  isLockfileOnly?: boolean;
   major?: { enabled?: boolean };
   prettyDepType?: string;
   newValue?: string;
   warnings?: ValidationMessage[];
+  /** True when the lookup failed with an error that only fails this dependency. */
+  lookupFailed?: boolean;
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  /**
+   * The digest for this dependency is managed externally (for instance in a lockfile) instead of alongside the package file's version,
+   * so Renovate must not pin the digest inline.
+   *
+   * As this is due to the package ecossytem/manager in use, this shouldn't be overridable by `packageRules`
+   */
+  digestManagedExternally?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
   currentVersionTimestamp?: string;
@@ -197,6 +276,7 @@ export interface PackageDependency<
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  versionCompatibility?: string;
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;
@@ -208,6 +288,11 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s, for this dependency alone.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   /**
    * Whether the package registry has attestation information for the given update.
    *
@@ -217,7 +302,7 @@ export interface PackageDependency<
 }
 
 export interface Upgrade<
-  T = Record<string, any>,
+  T = unknown,
   DepType extends string = string,
 > extends PackageDependency<T, DepType> {
   workspace?: string;
@@ -269,17 +354,51 @@ export type UpdateArtifactsResult =
       artifactError?: ArtifactError;
     };
 
-export interface UpdateArtifact<T = Record<string, unknown>> {
+export interface UpdateArtifact<T = unknown> {
   packageFileName: string;
   updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
+  /** Updated lockfile content that is not yet present on disk. */
+  newLockFileContent?: string;
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig<T = Record<string, any>> {
+/**
+ * Input of the `updateLockFile()` skeleton shared by lock file managers.
+ */
+export interface UpdateLockFileConfig {
+  /** The lock file which the update regenerates. */
+  lockFileName: string;
+
+  /**
+   * Content of the lock file before the update, null when it did not exist.
+   * Pass a Buffer for lock files which may be binary, the new content is then
+   * compared and returned as bytes as well.
+   */
+  existingLockFileContent: string | Buffer | null;
+
+  /** Package file to rewrite before the update runs. */
+  packageFile?: { path: string; contents: string };
+
+  /** Whether to delete the lock file first, i.e. for lock file maintenance. */
+  deleteLockFile?: boolean;
+
+  /** Runs the package manager command which regenerates the lock file. */
+  run: () => Promise<unknown>;
+}
+
+export interface UpdateDependencyConfig<T = unknown> {
   fileContent: string;
   packageFile: string;
   upgrade: Upgrade<T>;
+}
+
+export interface UpdateDependencyResult {
+  content: string;
+  /**
+   * The update was also applied outside the package file, e.g. to the checkout on disk, so the package file counts as updated and `updateArtifacts()` runs for it even if `content` is unchanged.
+   */
+  updatedOutOfBand?: boolean;
 }
 
 export interface BumpPackageVersionResult {
@@ -327,7 +446,58 @@ export interface DepTypeMetadata {
   description: string;
 }
 
-interface ManagerApiBase extends ModuleApi {
+/**
+ * A constraint which a package file shares, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraint {
+  /** The dependency which sets the constraint, a branch which updates it uses its new value */
+  depName: string;
+  /** The constraint, or `null` if the tool has a version which is no constraint, like the Rust channel `stable`, so that it hides the constraint of a parent directory */
+  value: string | null;
+}
+
+/**
+ * The constraints which a package file shares with the package files of other managers, and the directory tree in which they apply.
+ */
+export interface SharedConstraintsScope {
+  /** The directory, relative to the repository root, whose package files and subdirectories the constraints apply to */
+  directory: string;
+  /** Decides between package files of the manager in the same directory, the higher one wins */
+  precedence: number;
+  /** The shared constraints, which unlike `extractedConstraints` do not apply to the package file itself */
+  constraints: Partial<Record<ConstraintName, SharedConstraint>>;
+}
+
+/**
+ * The constraints which a package file of a manager shares, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraints extends SharedConstraintsScope {
+  manager: string;
+  packageFile: string;
+}
+
+/**
+ * `true` when supported, or the version range of the package manager that supports it, e.g. `>=11.10.0`.
+ */
+export type MinimumReleaseAgeToolCapability = boolean | string;
+
+export interface MinimumReleaseAgeToolSupport {
+  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
+  /** Renovate reads the package manager's own minimum release age setting */
+  readsConfiguredAge?: MinimumReleaseAgeToolCapability;
+  /** The package manager enforces the minimum release age during lock file maintenance */
+  enforcedInLockFile?: MinimumReleaseAgeToolCapability;
+  /** Markdown note */
+  note?: string;
+}
+
+/** How the package managers of a manager handle `minimumReleaseAge`, used for docs. A missing field means "not supported". */
+export type MinimumReleaseAgeSupport = Partial<
+  Record<ToolName, MinimumReleaseAgeToolSupport>
+>;
+
+export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
@@ -335,9 +505,29 @@ interface ManagerApiBase extends ModuleApi {
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /** How the package managers used by this manager handle `minimumReleaseAge`, used for docs */
+  minimumReleaseAgeSupport?: MinimumReleaseAgeSupport;
+  /** Whether the package files carry an `npmrc` resolved from the repository `.npmrc` and the config, see `NpmrcPackageFile` */
+  supportsNpmrc?: boolean;
+  /**
+   * Whether Renovate delegates to external command(s)/package manager to perform lockFileMaintenance.
+   * A `string` value is a Markdown note describing the nuance of the support, e.g. when it's partial
+   * or conditional, instead of a plain `true`/`false`.
+   */
+  lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+
   lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
+
+  /**
+   * Whether Renovate can perform a Vulnerability Alerts' remediation for a transitive dependency.
+   *
+   * This most likely happens using `lockfile-only` updates.
+   */
+  supportsTransitiveRemediation?: Partial<
+    Record<VulnerabilityAlertSource, true>
+  >;
 
   bumpPackageVersion?(
     content: string,
@@ -361,13 +551,20 @@ interface ManagerApiBase extends ModuleApi {
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
+  /**
+   * Whether the package manager enforces the minimum release age itself when regenerating the lock file for lock file maintenance.
+   */
+  enforcesMinimumReleaseAge?(
+    config: UpdateArtifactsConfig,
+  ): MaybePromise<boolean>;
+
   updateArtifacts?(
     updateArtifact: UpdateArtifact,
   ): MaybePromise<UpdateArtifactsResult[] | null>;
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
-  ): MaybePromise<string | null>;
+  ): MaybePromise<string | UpdateDependencyResult | null>;
 
   updateLockedDependency?(
     config: UpdateLockedConfig,
@@ -376,12 +573,51 @@ interface ManagerApiBase extends ModuleApi {
 
 export type ManagerApi = ManagerApiBase &
   // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
-  (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
+  (
+    | { supportsLockFileMaintenance: true; lockFileNames: string[] }
     | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  ) &
+  // this ensures at compile time that lockFileMaintenanceIsDelegatedToPackageManager is set when manager has supportsLockFileMaintenance=true
+  (
+    | {
+        supportsLockFileMaintenance: true;
+        lockFileMaintenanceIsDelegatedToPackageManager: boolean | string;
+      }
+    | {
+        supportsLockFileMaintenance?: false;
+        lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+      }
+  ) &
+  // this ensures at compile time that only a manager with supportsNpmrc=true returns package files carrying an `npmrc`
+  (
+    | {
+        supportsNpmrc: true;
+        extractAllPackageFiles?(
+          config: ExtractConfig,
+          files: string[],
+        ): MaybePromise<NpmrcPackageFile[] | null>;
+        extractPackageFile?(
+          content: string,
+          packageFile?: string,
+          config?: ExtractConfig,
+        ): MaybePromise<NpmrcPackageFileContent | null>;
+      }
+    | {
+        supportsNpmrc?: false;
+        extractAllPackageFiles?(
+          config: ExtractConfig,
+          files: string[],
+        ): MaybePromise<(PackageFile & { npmrc?: never })[] | null>;
+        extractPackageFile?(
+          content: string,
+          packageFile?: string,
+          config?: ExtractConfig,
+        ): MaybePromise<(PackageFileContent & { npmrc?: never }) | null>;
+      }
   );
 
 // TODO: name and properties used by npm manager
-export interface PostUpdateConfig<T = Record<string, any>>
+export interface PostUpdateConfig<T = unknown>
   extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
   constraints?: Partial<Record<ConstraintName, string>> | null;
@@ -393,12 +629,12 @@ export interface PostUpdateConfig<T = Record<string, any>>
 
   packageFile?: string;
 
-  upgrades: Upgrade[];
+  upgrades: Upgrade<T>[];
   npmLock?: string;
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 
   minimumReleaseAge?: Nullish<string>;
   isLockFileMaintenance?: boolean;

@@ -1,5 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver';
@@ -36,7 +37,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (currentVersion === `v${currentValue}`) {
-    return newVersion.replace(/^v/, '');
+    return stripVersionPrefix(newVersion);
   }
   return newVersion;
 }

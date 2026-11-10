@@ -18,6 +18,12 @@ inputs:
     description: 'Save cache when needed'
     required: false
     default: 'false'
+  use-cache:
+    description: >-
+      Set to `false` to skip restoring the `node_modules` and pnpm store caches, forcing a fresh `pnpm install --frozen-lockfile`. Use this in
+      privileged jobs (e.g. release), so that they never execute cache contents.
+    required: false
+    default: 'true'
 runs:
   using: 'composite'
   steps:
@@ -27,11 +33,13 @@ runs:
       run: |
         error=0
         if [[ -z "${{ inputs.node-version }}" ]]; then
+          # shellcheck disable=SC2016 # the backticks are code formatting, not command substitution
           >&2 echo 'Error: `node-version` is a required argument, but it was empty'
           error=1
         fi
 
         if [[ -z "${{ inputs.os }}" ]]; then
+          # shellcheck disable=SC2016 # the backticks are code formatting, not command substitution
           >&2 echo 'Error: `os` is a required argument, but it was empty'
           error=1
         fi
@@ -53,7 +61,8 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      if: inputs.use-cache == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -67,14 +76,10 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+      uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
       with:
-        standalone: true
-
-    - name: Setup Node
-      uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
-      with:
-        node-version: ${{ inputs.node-version }}
+        install: false
+        runtime: node@${{ inputs.node-version }}
 
     - name: Calculate `PNPM_STORE`
       shell: bash
@@ -82,8 +87,8 @@ runs:
         echo "PNPM_STORE=$(pnpm store path)" >> "$GITHUB_ENV"
 
     - name: Cache and restore `pnpm store`
-      if: env.CACHE_HIT != 'true'
-      uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      if: inputs.use-cache == 'true' && env.CACHE_HIT != 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ env.PNPM_STORE }}
         key: |
@@ -106,7 +111,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -125,4 +130,4 @@ runs:
         git config --global core.autocrlf false
         git config --global core.symlinks true
         git config --global user.email 'renovate@whitesourcesoftware.com'
-        git config --global user.name  'Renovate Bot'
+        git config --global user.name  'Renovate'

@@ -11,6 +11,7 @@ import {
   exactVersion,
   inclusiveBound,
   lowerBound,
+  matchVersion,
   upperBound,
   versionGroup,
 } from './pattern.ts';
@@ -113,15 +114,28 @@ function minSatisfyingVersion(
 }
 
 function isSingleVersion(constraint: string): boolean {
-  return (
-    (constraint.trim().startsWith('==') &&
-      isVersion(constraint.trim().substring(2).trim())) ||
-    isVersion(constraint.trim())
-  );
+  if (
+    constraint.trim().startsWith('==') &&
+    isVersion(constraint.trim().substring(2).trim())
+  ) {
+    return true;
+  }
+  return isVersion(constraint.trim());
 }
 
 function sortVersions(a: string, b: string): number {
   return npm.sortVersions(padZeroes(a), padZeroes(b));
+}
+
+function matchVersionPrecision(
+  currentValue: string,
+  newVersion: string,
+): string | null {
+  if (!matchVersion.test(currentValue) || !isVersion(newVersion)) {
+    return null;
+  }
+  const precision = currentValue.split('.').length;
+  return newVersion.split('.').slice(0, precision).join('.');
 }
 
 function getNewValue({
@@ -129,7 +143,19 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
+  isReplacement,
 }: NewValueConfig): string | null {
+  if (isReplacement) {
+    return newVersion;
+  }
+
+  const precisionMatchedVersion = matchVersionPrecision(
+    currentValue,
+    newVersion,
+  );
+  if (precisionMatchedVersion) {
+    return precisionMatchedVersion;
+  }
   const pep440Value = pep440.getNewValue({
     currentValue: rez2pep440(currentValue),
     rangeStrategy,

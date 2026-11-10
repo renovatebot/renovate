@@ -4,7 +4,6 @@ import type {
   UpdateResult,
 } from '../../workers/repository/process/lookup/types.ts';
 import { getDatasourceFor } from './common.ts';
-import { Datasource } from './datasource.ts';
 import type { Release } from './types.ts';
 
 type Config = Partial<LookupUpdateConfig & UpdateResult>;
@@ -24,10 +23,7 @@ export async function postprocessRelease(
     return release;
   }
 
-  if (
-    ds.constructor.prototype.postprocessRelease ===
-    Datasource.prototype.postprocessRelease
-  ) {
+  if (!ds.postprocessRelease) {
     return release;
   }
 
@@ -40,7 +36,14 @@ export async function postprocessRelease(
     return release;
   }
 
-  const registryUrl = config.registryUrl ?? config.registryUrls?.at(0) ?? null;
+  // Prefer the registry that actually reported this release (set by `mergeRegistries`
+  // for the `merge` registryStrategy) over the configured/default registry, otherwise
+  // we may probe a registry that never had this artifact and wrongly reject it.
+  const registryUrl =
+    release.registryUrl ??
+    config.registryUrl ??
+    config.registryUrls?.at(0) ??
+    null;
 
   try {
     const result = await ds.postprocessRelease(

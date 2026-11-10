@@ -219,6 +219,15 @@ describe('modules/manager/github-actions/parse', () => {
       });
     });
 
+    it('parses ratchet pinned version for action in subdirectory', () => {
+      const result = parseComment('ratchet:actions/cache/restore@v4');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'ratchet:actions/cache/restore@v4',
+        pinnedVersion: 'v4',
+      });
+    });
+
     it('parses version without v prefix', () => {
       const result = parseComment('1.2.3');
       expect(result).toEqual({

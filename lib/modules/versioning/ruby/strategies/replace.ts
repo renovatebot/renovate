@@ -1,7 +1,7 @@
 import { logger } from '../../../../logger/index.ts';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator.ts';
-import type { Range } from '../range.ts';
 import { parseRanges, satisfiesRange, stringifyRanges } from '../range.ts';
+import type { Range } from '../types.ts';
 import { adapt, decrement, floor, increment } from '../version.ts';
 
 // Common logic for replace, widen, and bump strategies

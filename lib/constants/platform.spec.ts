@@ -1,5 +1,7 @@
+import { AzureTagsDatasource } from '../modules/datasource/azure-tags/index.ts';
 import { BitbucketServerTagsDatasource } from '../modules/datasource/bitbucket-server-tags/index.ts';
 import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags/index.ts';
+import { ForgejoTagsDatasource } from '../modules/datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags/index.ts';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
@@ -8,93 +10,169 @@ import { GitlabReleasesDatasource } from '../modules/datasource/gitlab-releases/
 import { GitlabTagsDatasource } from '../modules/datasource/gitlab-tags/index.ts';
 import { HermitDatasource } from '../modules/datasource/hermit/index.ts';
 import { PodDatasource } from '../modules/datasource/pod/index.ts';
-import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github/index.ts';
-import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab/index.ts';
-import {
-  BITBUCKET_API_USING_HOST_TYPES,
-  BITBUCKET_SERVER_API_USING_HOST_TYPES,
-  FORGEJO_API_USING_HOST_TYPES,
-  GITEA_API_USING_HOST_TYPES,
-  GITHUB_API_USING_HOST_TYPES,
-  GITLAB_API_USING_HOST_TYPES,
-} from './platforms.ts';
+import type { PlatformFamilyId } from './platforms.ts';
+import { PLATFORM_FAMILIES } from './platforms.ts';
+
+const {
+  bitbucket,
+  'bitbucket-server': bitbucketServer,
+  forgejo,
+  gitea,
+  github,
+  gitlab,
+} = PLATFORM_FAMILIES;
+
+// `id` of the changelog modules, which cannot be imported here without
+// importing their http clients as well.
+const GITHUB_CHANGELOG_ID = 'github-changelog';
+const GITLAB_CHANGELOG_ID = 'gitlab-changelog';
 
 describe('constants/platform', () => {
-  it('should be part of the GITEA_API_USING_HOST_TYPES', () => {
-    expect(
-      GITEA_API_USING_HOST_TYPES.includes(GiteaTagsDatasource.id),
-    ).toBeTrue();
-    expect(GITEA_API_USING_HOST_TYPES.includes('gitea')).toBeTrue();
+  it('lists the gitea api host types', () => {
+    expect(gitea.apiUsingHostTypes.includes(GiteaTagsDatasource.id)).toBeTrue();
+    expect(gitea.apiUsingHostTypes.includes('gitea')).toBeTrue();
   });
 
-  it('should be part of the FORGEJO_API_USING_HOST_TYPES', () => {
-    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo')).toBeTrue();
-    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo-tags')).toBeTrue();
-    expect(
-      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-releases'),
-    ).toBeTrue();
-    expect(
-      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-changelog'),
-    ).toBeTrue();
-    expect(FORGEJO_API_USING_HOST_TYPES).toHaveLength(4);
+  it('lists the forgejo api host types', () => {
+    expect(forgejo.apiUsingHostTypes.includes('forgejo')).toBeTrue();
+    expect(forgejo.apiUsingHostTypes.includes('forgejo-tags')).toBeTrue();
+    expect(forgejo.apiUsingHostTypes.includes('forgejo-releases')).toBeTrue();
+    expect(forgejo.apiUsingHostTypes.includes('forgejo-changelog')).toBeTrue();
+    expect(forgejo.apiUsingHostTypes).toHaveLength(4);
   });
 
-  it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {
+  it('lists the gitlab api host types', () => {
     expect(
-      GITLAB_API_USING_HOST_TYPES.includes(GitlabTagsDatasource.id),
+      gitlab.apiUsingHostTypes.includes(GitlabTagsDatasource.id),
     ).toBeTrue();
     expect(
-      GITLAB_API_USING_HOST_TYPES.includes(GitlabReleasesDatasource.id),
+      gitlab.apiUsingHostTypes.includes(GitlabReleasesDatasource.id),
     ).toBeTrue();
     expect(
-      GITLAB_API_USING_HOST_TYPES.includes(GitlabPackagesDatasource.id),
+      gitlab.apiUsingHostTypes.includes(GitlabPackagesDatasource.id),
     ).toBeTrue();
-    expect(
-      GITLAB_API_USING_HOST_TYPES.includes(GITLAB_CHANGELOG_ID),
-    ).toBeTrue();
-    expect(GITLAB_API_USING_HOST_TYPES.includes('gitlab')).toBeTrue();
+    expect(gitlab.apiUsingHostTypes.includes(GITLAB_CHANGELOG_ID)).toBeTrue();
+    expect(gitlab.apiUsingHostTypes.includes('gitlab')).toBeTrue();
   });
 
-  it('should be not part of the GITLAB_API_USING_HOST_TYPES', () => {
-    expect(GITLAB_API_USING_HOST_TYPES.includes('github')).toBeFalse();
+  it('does not list github as a gitlab api host type', () => {
+    expect(gitlab.apiUsingHostTypes.includes('github')).toBeFalse();
   });
 
-  it('should be part of the GITHUB_API_USING_HOST_TYPES', () => {
+  it('lists the github api host types', () => {
     expect(
-      GITHUB_API_USING_HOST_TYPES.includes(GithubTagsDatasource.id),
+      github.apiUsingHostTypes.includes(GithubTagsDatasource.id),
     ).toBeTrue();
     expect(
-      GITHUB_API_USING_HOST_TYPES.includes(GithubReleasesDatasource.id),
+      github.apiUsingHostTypes.includes(GithubReleasesDatasource.id),
     ).toBeTrue();
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PodDatasource.id)).toBeTrue();
-    expect(
-      GITHUB_API_USING_HOST_TYPES.includes(HermitDatasource.id),
-    ).toBeTrue();
-    expect(
-      GITHUB_API_USING_HOST_TYPES.includes(GITHUB_CHANGELOG_ID),
-    ).toBeTrue();
-    expect(GITHUB_API_USING_HOST_TYPES.includes('github')).toBeTrue();
+    expect(github.apiUsingHostTypes.includes(PodDatasource.id)).toBeTrue();
+    expect(github.apiUsingHostTypes.includes(HermitDatasource.id)).toBeTrue();
+    expect(github.apiUsingHostTypes.includes(GITHUB_CHANGELOG_ID)).toBeTrue();
+    expect(github.apiUsingHostTypes.includes('github')).toBeTrue();
   });
 
-  it('should be not part of the GITHUB_API_USING_HOST_TYPES', () => {
-    expect(GITHUB_API_USING_HOST_TYPES.includes('gitlab')).toBeFalse();
+  it('does not list gitlab as a github api host type', () => {
+    expect(github.apiUsingHostTypes.includes('gitlab')).toBeFalse();
   });
 
-  it('should be part of the BITBUCKET_API_USING_HOST_TYPES', () => {
+  it('lists the bitbucket api host types', () => {
     expect(
-      BITBUCKET_API_USING_HOST_TYPES.includes(BitbucketTagsDatasource.id),
+      bitbucket.apiUsingHostTypes.includes(BitbucketTagsDatasource.id),
     ).toBeTrue();
-    expect(BITBUCKET_API_USING_HOST_TYPES.includes('bitbucket')).toBeTrue();
+    expect(bitbucket.apiUsingHostTypes.includes('bitbucket')).toBeTrue();
   });
 
-  it('should be part of the BITBUCKET_SERVER_API_USING_HOST_TYPES', () => {
+  it('lists the bitbucket-server api host types', () => {
     expect(
-      BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(
+      bitbucketServer.apiUsingHostTypes.includes(
         BitbucketServerTagsDatasource.id,
       ),
     ).toBeTrue();
     expect(
-      BITBUCKET_SERVER_API_USING_HOST_TYPES.includes('bitbucket-server'),
+      bitbucketServer.apiUsingHostTypes.includes('bitbucket-server'),
     ).toBeTrue();
+  });
+
+  describe('PLATFORM_FAMILIES', () => {
+    // The values every consumer of `detectPlatform` used to hard-code for
+    // itself. Keeping them here pins the table to that behaviour.
+    it.each`
+      family                | tagsDatasource                      | knownHosts                            | webDirPath
+      ${'azure'}            | ${AzureTagsDatasource.id}           | ${['dev.azure.com']}                  | ${'tree/HEAD'}
+      ${'bitbucket'}        | ${BitbucketTagsDatasource.id}       | ${['bitbucket.org', 'bitbucket.com']} | ${'src/HEAD'}
+      ${'bitbucket-server'} | ${BitbucketServerTagsDatasource.id} | ${[]}                                 | ${'browse'}
+      ${'forgejo'}          | ${ForgejoTagsDatasource.id}         | ${['codeberg.org', 'codefloe.com']}   | ${'tree/HEAD'}
+      ${'gitea'}            | ${GiteaTagsDatasource.id}           | ${['gitea.com']}                      | ${'tree/HEAD'}
+      ${'github'}           | ${GithubTagsDatasource.id}          | ${['github.com']}                     | ${'tree/HEAD'}
+      ${'gitlab'}           | ${GitlabTagsDatasource.id}          | ${['gitlab.com']}                     | ${'tree/HEAD'}
+    `(
+      'describes $family',
+      ({
+        family,
+        tagsDatasource,
+        knownHosts,
+        webDirPath,
+      }: {
+        family: PlatformFamilyId;
+        tagsDatasource: string;
+        knownHosts: string[];
+        webDirPath: string;
+      }) => {
+        expect(PLATFORM_FAMILIES[family]).toMatchObject({
+          tagsDatasource,
+          knownHosts,
+          webDirPath,
+        });
+      },
+    );
+
+    it.each`
+      family                | baseUrl                          | apiBaseUrl
+      ${'azure'}            | ${'https://dev.azure.com/'}      | ${null}
+      ${'bitbucket'}        | ${'https://bitbucket.org/'}      | ${'https://api.bitbucket.org/'}
+      ${'bitbucket'}        | ${'https://bitbucket.com/'}      | ${'https://api.bitbucket.org/'}
+      ${'bitbucket-server'} | ${'https://stash.example.com/'}  | ${'https://stash.example.com/rest/api/1.0/'}
+      ${'forgejo'}          | ${'https://codeberg.org/'}       | ${'https://codeberg.org/api/v1/'}
+      ${'gitea'}            | ${'https://gitea.com/'}          | ${'https://gitea.com/api/v1/'}
+      ${'github'}           | ${'https://github.com/'}         | ${'https://api.github.com/'}
+      ${'github'}           | ${'https://github.example.com/'} | ${'https://github.example.com/api/v3/'}
+      ${'gitlab'}           | ${'https://gitlab.com/'}         | ${'https://gitlab.com/api/v4/'}
+    `(
+      'derives the $family api base url from $baseUrl',
+      ({
+        family,
+        baseUrl,
+        apiBaseUrl,
+      }: {
+        family: PlatformFamilyId;
+        baseUrl: string;
+        apiBaseUrl: string | null;
+      }) => {
+        expect(PLATFORM_FAMILIES[family].apiBaseUrl?.(baseUrl) ?? null).toBe(
+          apiBaseUrl,
+        );
+      },
+    );
+
+    it('has pairwise disjoint host types', () => {
+      const seen = new Set<string>();
+      for (const { apiUsingHostTypes } of Object.values(PLATFORM_FAMILIES)) {
+        for (const hostType of apiUsingHostTypes) {
+          expect(seen.has(hostType)).toBeFalse();
+          seen.add(hostType);
+        }
+      }
+    });
+
+    it('has pairwise disjoint known hosts', () => {
+      const seen = new Set<string>();
+      for (const { knownHosts } of Object.values(PLATFORM_FAMILIES)) {
+        for (const host of knownHosts) {
+          expect(seen.has(host)).toBeFalse();
+          seen.add(host);
+        }
+      }
+    });
   });
 });

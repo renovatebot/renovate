@@ -174,21 +174,25 @@ async function generateManagerDefaultConfigs() {
   const { default: managers } = await import('../lib/modules/manager/api.ts');
   const { default: customManagers } =
     await import('../lib/modules/manager/custom/api.ts');
+  const { getDisplayName } = await import('./docs/utils.ts');
 
   const allManagers = new Map([
     ...managers.entries(),
     ...customManagers.entries(),
   ]);
-  /** @type {Record<string, Record<string, unknown>>} */
+  /** @type {Record<string, { displayName: string, defaultConfig: Record<string, unknown> }>} */
   const managerDefaultConfigs = {};
   for (const [name, manager] of allManagers) {
     if (manager.defaultConfig) {
-      managerDefaultConfigs[name] = manager.defaultConfig;
+      managerDefaultConfigs[name] = {
+        displayName: getDisplayName(name, manager),
+        defaultConfig: manager.defaultConfig,
+      };
     }
   }
 
   const content = `
-export const managerDefaultConfigs: Record<string, Record<string, unknown>> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
+export const managerDefaultConfigs: Record<string, { displayName: string; defaultConfig: Record<string, unknown> }> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
 `;
 
   await updateFile('lib/manager-default-configs.generated.ts', content);
@@ -248,6 +252,46 @@ export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.string
 `;
 
   await updateFile('lib/global-config-option-defaults.generated.ts', content);
+}
+
+/**
+ * The field names a repository can influence and reference from a template,
+ * collected from the lists Renovate already maintains:
+ *
+ * - `validMatchFields` -- what a custom manager extracts straight out of a file in
+ *   the repository, so entirely attacker-chosen.
+ * - `exposedConfigOptions` -- config options a repository can set in its own
+ *   `renovate.json` and reference from a template.
+ * - `allowedFields` -- the runtime values exposed to templates, which is where
+ *   most dependency metadata (`depName`, `newVersion`, ...) comes from.
+ *
+ * Written out because the `renovate/no-unquoted-exec-interpolation` lint rule
+ * needs them, and runs inside oxlint where importing `lib/` isn't an option.
+ * `test/other/validate-templatable-fields.spec.ts` fails if this drifts.
+ */
+async function generateTemplatableFields() {
+  const { validMatchFields } =
+    await import('../lib/modules/manager/custom/utils.ts');
+  const { allowedFields, exposedConfigOptions } =
+    await import('../lib/util/template/index.ts');
+
+  const fields = [
+    ...new Set([
+      ...validMatchFields,
+      ...exposedConfigOptions,
+      ...Object.keys(allowedFields),
+    ]),
+  ].sort();
+
+  const content = [
+    '/** Field names a repository can influence and reference from a template. */',
+    'export const templatableFields = [',
+    ...fields.map((field) => `  '${field}',`),
+    '];',
+    '',
+  ].join('\n');
+
+  await updateFile('tools/lint/rules/templatable-fields.generated.ts', content);
 }
 
 async function generateHash() {
@@ -313,6 +357,7 @@ await (async () => {
     await generateVersioningList();
     await generateDatasourceList();
     await generateGlobalConfigOptionDefaults();
+    await generateTemplatableFields();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))

@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import type {
   BranchSummary,
   CommitResult,
@@ -113,7 +114,7 @@ export class InstrumentedSimpleGit {
     return await instrument(
       spanName,
       async () => {
-        if (typeof whatOrOptions === 'string') {
+        if (isString(whatOrOptions)) {
           return await this.git.checkout(whatOrOptions);
         }
         return await this.git.checkout(whatOrOptions);
@@ -221,7 +222,7 @@ export class InstrumentedSimpleGit {
     return await instrument(
       spanName,
       async () => {
-        if (typeof optionOrOptions === 'string') {
+        if (isString(optionOrOptions)) {
           return await this.git.revparse(optionOrOptions);
         }
         return await this.git.revparse(optionOrOptions);
@@ -269,10 +270,6 @@ export class InstrumentedSimpleGit {
     const { spanName, options } = prepareInstrumentation('remote');
 
     await instrument(spanName, () => this.git.addRemote(name, repo), options);
-  }
-  env(env: Record<string, string>): this {
-    this.git = this.git.env(env);
-    return this;
   }
   async catFile(args: string[]): Promise<string> {
     const { spanName, options } = prepareInstrumentation('remote');

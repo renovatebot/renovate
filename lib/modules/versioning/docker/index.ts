@@ -1,8 +1,7 @@
 import { regEx } from '../../../util/regex.ts';
-import { coerceString } from '../../../util/string.ts';
-import type { GenericVersion } from '../generic.ts';
+import { coerceString, stripVersionPrefix } from '../../../util/string.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'docker';
 export const displayName = 'Docker';
@@ -23,7 +22,7 @@ class DockerVersioningApi extends GenericVersioningApi {
     if (commitHashPattern.test(version) && !numericPattern.test(version)) {
       return null;
     }
-    const versionPieces = version.replace(regEx(/^v/), '').split('-');
+    const versionPieces = stripVersionPrefix(version).split('-');
     const [prefix, ...suffixPieces] = versionPieces;
     const matchGroups = prefix?.match(versionPattern)?.groups;
     if (!matchGroups) {
@@ -65,10 +64,11 @@ class DockerVersioningApi extends GenericVersioningApi {
       if (parsed1.prerelease && !parsed2.prerelease) {
         return -1;
       }
-      // alphabetic order
-      if (parsed1.prerelease && parsed2.prerelease) {
-        return parsed1.prerelease.localeCompare(parsed2.prerelease);
-      }
+      // alphabetic order: both are non-empty here, since an empty one is
+      // handled above and two equal ones never enter this block
+      return coerceString(parsed1.prerelease).localeCompare(
+        coerceString(parsed2.prerelease),
+      );
     }
 
     // equals

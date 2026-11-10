@@ -1,4 +1,6 @@
+import { isBigint, isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import type { Range, Token } from './types.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
@@ -6,25 +8,6 @@ const ALPHA_SUFFIX = '-alpha';
 
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
-
-export interface BaseToken {
-  prefix: string;
-  type: typeof TYPE_NUMBER | typeof TYPE_QUALIFIER;
-  val: number | string;
-  isTransition?: boolean;
-}
-
-export interface NumberToken extends BaseToken {
-  type: typeof TYPE_NUMBER;
-  val: number;
-}
-
-export interface QualifierToken extends BaseToken {
-  type: typeof TYPE_QUALIFIER;
-  val: string;
-}
-
-export type Token = NumberToken | QualifierToken;
 
 function iterateChars(
   str: string,
@@ -48,11 +31,15 @@ function isLetter(char: string): boolean {
   return regEx(/^[a-z_+]$/i).test(char);
 }
 
+function isVPrefix(char: string): boolean {
+  return char === 'v' || char === 'V';
+}
+
 function isTransition(prevChar: string, nextChar: string): boolean {
-  return (
-    (isDigit(prevChar) && isLetter(nextChar)) ||
-    (isLetter(prevChar) && isDigit(nextChar))
-  );
+  if (isDigit(prevChar) && isLetter(nextChar)) {
+    return true;
+  }
+  return isLetter(prevChar) && isDigit(nextChar);
 }
 
 function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
@@ -65,7 +52,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val, 10),
+        val: BigInt(val),
         isTransition: transition,
       });
     } else {
@@ -89,7 +76,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       yieldToken();
       currentPrefix = PREFIX_DOT;
       currentVal = '';
-    } else if (prevChar === null && (nextChar === 'v' || nextChar === 'V')) {
+    } else if (prevChar === null && isVPrefix(nextChar)) {
       currentPrefix = nextChar;
     } else {
       if (currentVal !== '' && isTransition(prevChar!, nextChar)) {
@@ -98,7 +85,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
         currentVal = nextChar;
       } else if (
         currentVal === '' &&
-        (currentPrefix === 'v' || currentPrefix === 'V') &&
+        isVPrefix(currentPrefix) &&
         !isDigit(nextChar)
       ) {
         currentVal = currentVal.concat(currentPrefix, nextChar);
@@ -113,7 +100,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
 function isNull(token: Token): boolean {
   const val = token.val;
   return (
-    val === 0 ||
+    val === 0n ||
     val === '' ||
     val === 'final' ||
     val === 'ga' ||
@@ -149,7 +136,7 @@ function nullFor(token: Token): Token {
     ? {
         prefix: token.prefix,
         type: TYPE_NUMBER,
-        val: 0,
+        val: 0n,
       }
     : {
         prefix: token.prefix,
@@ -178,15 +165,22 @@ export const QualifierTypes = {
   SP: 7,
 } as const;
 
+function isQualifier(token: Token, name: string, shortName: string): boolean {
+  if (token.val === name) {
+    return true;
+  }
+  return !!token.isTransition && token.val === shortName;
+}
+
 export function qualifierType(token: Token): number | null {
   const val = token.val;
-  if (val === 'alpha' || (token.isTransition && val === 'a')) {
+  if (isQualifier(token, 'alpha', 'a')) {
     return QualifierTypes.Alpha;
   }
-  if (val === 'beta' || (token.isTransition && val === 'b')) {
+  if (isQualifier(token, 'beta', 'b')) {
     return QualifierTypes.Beta;
   }
-  if (val === 'milestone' || (token.isTransition && val === 'm')) {
+  if (isQualifier(token, 'milestone', 'm')) {
     return QualifierTypes.Milestone;
   }
   if (val === 'rc' || val === 'cr' || val === 'preview') {
@@ -280,7 +274,7 @@ function compare(left: string, right: string): number {
 }
 
 function isVersion(version: unknown): version is string {
-  if (!version || typeof version !== 'string') {
+  if (!version || !isString(version)) {
     return false;
   }
   if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {
@@ -421,15 +415,6 @@ function isValid(str: string): boolean {
   return isVersion(str) || !!parseRange(str);
 }
 
-export interface Range {
-  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT | null;
-  leftValue: string | null;
-  leftBracket: string | null;
-  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT | null;
-  rightValue: string | null;
-  rightBracket: string | null;
-}
-
 function rangeToStr(fullRange: Range[] | null): string | null {
   if (fullRange === null) {
     return null;
@@ -492,8 +477,8 @@ function coerceRangeValue(prev: string, next: string): string {
 function incrementRangeValue(value: string): string {
   const tokens = tokenize(value);
   const lastToken = tokens.at(-1)!;
-  if (typeof lastToken.val === 'number') {
-    lastToken.val += 1;
+  if (isBigint(lastToken.val)) {
+    lastToken.val += 1n;
     return coerceRangeValue(value, tokensToStr(tokens));
   }
   return value;
@@ -524,11 +509,13 @@ function autoExtendMavenRange(
 
   const interval = [...range].reverse().find((elem) => {
     const { rightType, rightValue } = elem;
-    return (
-      rightValue === null ||
-      (rightType === INCLUDING_POINT && compare(rightValue, newValue) === -1) ||
-      (rightType === EXCLUDING_POINT && compare(rightValue, newValue) !== 1)
-    );
+    if (rightValue === null) {
+      return true;
+    }
+    if (rightType === INCLUDING_POINT && compare(rightValue, newValue) === -1) {
+      return true;
+    }
+    return rightType === EXCLUDING_POINT && compare(rightValue, newValue) !== 1;
   });
 
   if (!interval) {
@@ -544,10 +531,12 @@ function autoExtendMavenRange(
     // if a range was detected where incrementing the lower value once results in the upper value
     // and the new version is outside the range, construct a new range that follows the same semantic
     // [1,2) / 4.3.2 => [4,5)
-    if (compare(newValue, leftValue) !== -1) {
-      interval.leftValue = coerceRangeValue(leftValue, newValue);
-      interval.rightValue = incrementRangeValue(interval.leftValue);
-    }
+    //
+    // the interval above is only picked when the new value is at or past the
+    // upper bound, and here the upper bound is the lower one incremented, so
+    // the new value can never sort below the lower bound
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
+    interval.rightValue = incrementRangeValue(interval.leftValue);
   } else if (
     leftValue !== null &&
     rightValue !== null &&
@@ -567,11 +556,16 @@ function autoExtendMavenRange(
     interval.leftValue = coerceRangeValue(leftValue, newValue);
     interval.rightValue =
       incrementRangeValue(interval.leftValue) + ALPHA_SUFFIX;
-  } else if (rightValue !== null) {
+  } else if (rightValue === null) {
+    // an interval never has both bounds open: the parser only nulls the left
+    // bound when the right one is a version, and the right one when the left
+    // is a version
+    interval.leftValue = coerceRangeValue(leftValue!, newValue);
+  } else {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
       const lastToken = tokens.at(-1)!;
-      if (typeof lastToken.val === 'number') {
+      if (isBigint(lastToken.val)) {
         interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {
         interval.rightValue = newValue;
@@ -581,8 +575,6 @@ function autoExtendMavenRange(
         coerceRangeValue(rightValue, newValue),
       );
     }
-  } else if (leftValue !== null) {
-    interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
 
   return rangeToStr(range);

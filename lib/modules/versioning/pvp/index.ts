@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -32,7 +33,7 @@ function getMajor(version: string): number | null {
   if (parts === null) {
     return null;
   }
-  return Number(parts.major.join('.'));
+  return parseFloat(parts.major.join('.'));
 }
 
 function getMinor(version: string): number | null {
@@ -40,7 +41,7 @@ function getMinor(version: string): number | null {
   if (parts === null || parts.minor.length === 0) {
     return null;
   }
-  return Number(parts.minor.join('.'));
+  return parseFloat(parts.minor.join('.'));
 }
 
 function getPatch(version: string): number | null {
@@ -48,7 +49,7 @@ function getPatch(version: string): number | null {
   if (parts === null || parts.patch.length === 0) {
     return null;
   }
-  return Number(`${parts.patch[0]}.${parts.patch.slice(1).join('')}`);
+  return parseFloat(`${parts.patch[0]}.${parts.patch.slice(1).join('')}`);
 }
 
 function matches(version: string, range: string): boolean {
@@ -200,7 +201,7 @@ function subset(subRange: string, superRange: string): boolean | undefined {
 }
 
 function isVersion(maybeRange: string | undefined | null): boolean {
-  return typeof maybeRange === 'string' && parseRange(maybeRange) === null;
+  return isString(maybeRange) && parseRange(maybeRange) === null;
 }
 
 function isValid(ver: string): boolean {

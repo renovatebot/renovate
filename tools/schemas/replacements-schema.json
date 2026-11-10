@@ -6,17 +6,13 @@
     "all": {
       "type": "object",
       "properties": {
-        "description": { "type": "string" },
         "extends": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "ignoreDeps": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
+        "overrideDescription": { "type": "string" }
       },
-      "required": ["description", "extends"]
+      "required": ["extends", "overrideDescription"]
     }
   },
   "patternProperties": {

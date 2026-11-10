@@ -13,6 +13,7 @@ export { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['Cargo.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export { extractPackageFile, updateArtifacts };
 

@@ -43,6 +43,7 @@ export function extractPackageFile(
           lines,
           tfLintPlugin.groups.pluginName,
         );
+        // v8 ignore else -- `extractTFLintPlugin()` always returns a result
         if (result) {
           lineNumber = result.lineNumber;
           deps = deps.concat(result.dependencies);

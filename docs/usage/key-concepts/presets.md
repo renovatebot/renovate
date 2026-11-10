@@ -14,7 +14,7 @@ To learn how to create and host them, read the [Shareable Config Presets](../con
 
 Use presets to:
 
-- Set up the bot with good default settings
+- Set up Renovate with good default settings
 - Avoid duplicating your configuration
 - Share your configuration with others
 - Use somebody else's configuration as-is, or extend it with your own rules

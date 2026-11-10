@@ -5,7 +5,7 @@ import {
 } from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import type { HostRule } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types.ts';
 import {
@@ -18,24 +18,12 @@ import {
 } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
-import { find } from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
-import { parseUrl } from '../../../util/url.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { decodeUserinfo, parseUrl } from '../../../util/url.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { extractPackageFile } from './extract.ts';
-
-export function getMatchingHostRule(url: string): HostRule | null {
-  const parsedUrl = parseUrl(url);
-  if (parsedUrl) {
-    parsedUrl.username = '';
-    parsedUrl.password = '';
-    const urlWithoutCredentials = parsedUrl.toString();
-
-    return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
-  }
-  return null;
-}
 
 async function findPipfileSourceUrlsWithCredentials(
   pipfileContent: string,
@@ -43,23 +31,41 @@ async function findPipfileSourceUrlsWithCredentials(
 ): Promise<URL[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
 
-  return (
+  return coerceArray(
     pipfile?.registryUrls
       ?.map(parseUrl)
       .filter(isUrlInstance)
-      .filter((url) => isNonEmptyStringAndNotWhitespace(url.username)) ?? []
+      .filter((url) => isNonEmptyStringAndNotWhitespace(url.username)),
   );
 }
 
 /**
+ * Matches a whole `$NAME`, `${NAME}`, `${NAME-default}` or `${NAME:-default}` environment variable reference, the braced forms also in single quotes as pipenv accepts them.
+ */
+const environmentVariableReferenceRegex = regEx(
+  /^(?:'\$\{(?<quoted>[a-z_][a-z\d_]*)(?::?-[^{}]*)?\}'|\$(?:\{(?<braced>[a-z_][a-z\d_]*)(?::?-[^{}]*)?\}|(?<plain>[a-z_][a-z\d_]*)))$/i,
+);
+
+/**
  * This will extract the actual variable name from an environment-placeholder:
  * ${USERNAME:-defaultvalue} will yield 'USERNAME'
+ * @returns the variable name, or `null` when `credential` is not exactly one reference, such as a literal value
  */
 export function extractEnvironmentVariableName(
   credential: string,
 ): string | null {
-  const match = regEx('([a-z0-9_]+)', 'i').exec(decodeURI(credential));
-  return match?.length ? match[0] : null;
+  // the URL parser percent-encodes the braces, the quotes and the `:` of `${NAME:-default}`
+  const groups = environmentVariableReferenceRegex.exec(
+    decodeUserinfo(credential),
+  )?.groups;
+  return groups?.quoted ?? groups?.braced ?? groups?.plain ?? null;
+}
+
+/**
+ * Whether the userinfo of `url` holds a literal value rather than environment variable references as pipenv reads them: its password, or its username when it has no password, is not exactly one reference.
+ */
+function hasLiteralUserinfo(url: URL): boolean {
+  return !extractEnvironmentVariableName(url.password || url.username);
 }
 
 export function addExtraEnvVariable(
@@ -97,30 +103,28 @@ async function addCredentialsForSourceUrls(
     newPipfileContent,
     pipfileName,
   );
-  for (const parsedSourceUrl of sourceUrls) {
+  // a source URL with literal credentials carries them itself, and the host rule found for it may hold just those
+  const placeholderSourceUrls = sourceUrls.filter(
+    (url) => !hasLiteralUserinfo(url),
+  );
+  for (const parsedSourceUrl of placeholderSourceUrls) {
     logger.trace(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
-    const matchingHostRule = getMatchingHostRule(parsedSourceUrl.toString());
-    if (matchingHostRule) {
-      const usernameVariableName = extractEnvironmentVariableName(
-        parsedSourceUrl.username,
-      );
-      if (matchingHostRule.username && usernameVariableName) {
-        addExtraEnvVariable(
-          extraEnv,
-          usernameVariableName,
-          matchingHostRule.username,
-        );
-      }
-      const passwordVariableName = extractEnvironmentVariableName(
-        parsedSourceUrl.password,
-      );
-      if (matchingHostRule.password && passwordVariableName) {
-        addExtraEnvVariable(
-          extraEnv,
-          passwordVariableName,
-          matchingHostRule.password,
-        );
-      }
+    const credentials = await findPypiIndexCredentials(
+      parsedSourceUrl.toString(),
+    );
+    const usernameVariableName = extractEnvironmentVariableName(
+      parsedSourceUrl.username,
+    );
+    // v8 ignore else -- needs a host rule carrying only one of the two
+    if (credentials.username && usernameVariableName) {
+      addExtraEnvVariable(extraEnv, usernameVariableName, credentials.username);
+    }
+    const passwordVariableName = extractEnvironmentVariableName(
+      parsedSourceUrl.password,
+    );
+    // v8 ignore else -- needs a host rule carrying only one of the two
+    if (credentials.password && passwordVariableName) {
+      addExtraEnvVariable(extraEnv, passwordVariableName, credentials.password);
     }
   }
 }
@@ -144,12 +148,12 @@ export async function updateArtifacts({
     }
     const cmd = 'pipenv lock';
     const pipfileDir = getParentDir(ensureLocalPath(pipfileName));
-    const tagConstraint =
-      config.constraints?.python ??
-      (await pipenvDetect.getPythonConstraint(pipfileDir));
-    const pipenvConstraint =
-      config.constraints?.pipenv ??
-      (await pipenvDetect.getPipenvConstraint(pipfileDir));
+    const tagConstraint = await resolveToolConstraint(config, 'python', () =>
+      pipenvDetect.getPythonConstraint(pipfileDir),
+    );
+    const pipenvConstraint = await resolveToolConstraint(config, 'pipenv', () =>
+      pipenvDetect.getPipenvConstraint(pipfileDir),
+    );
     const extraEnv: Opt<ExtraEnv> = {
       PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),

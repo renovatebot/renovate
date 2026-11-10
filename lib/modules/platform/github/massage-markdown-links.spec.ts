@@ -45,6 +45,8 @@ describe('modules/platform/github/massage-markdown-links', () => {
     ${'https://github.com/foo/bar/issues/'}
     ${'https://github.com/foo/bar/pull/'}
     ${'api.github.com'}
+    ${'api.github.com/foo/bar/issues/1'}
+    ${'https://api.github.com/foo/bar/issues/1'}
     ${'redirect.github.com'}
     ${'www.redirect.github.com'}
     ${'https://redirect.github.com/foo/bar/releases/tag/v0.20.3'}

@@ -13,6 +13,7 @@ import { streamToString } from '../../../util/streams.ts';
 import { getNewBranchName } from '../util.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import { WrappedException } from './schema.ts';
+import type { AzureBranchObj } from './types.ts';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
@@ -32,11 +33,6 @@ export async function getRefs(
     getBranchNameWithoutRefsPrefix(branchName),
   );
   return refs;
-}
-
-export interface AzureBranchObj {
-  name: string;
-  oldObjectId: string;
 }
 
 export async function getAzureBranchObj(
@@ -152,11 +148,10 @@ export async function getMergeMethod(
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }
   function isRelevantScope(scope: Scope): boolean {
-    if (
-      scope.matchKind === 'DefaultBranch' &&
-      // TODO: types (#22198)
-      (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
-    ) {
+    // TODO: types (#22198)
+    const isDefaultBranchRef =
+      !branchRef || branchRef === `refs/heads/${defaultBranch!}`;
+    if (scope.matchKind === 'DefaultBranch' && isDefaultBranchRef) {
       return true;
     }
     if (scope.repositoryId !== repoId && scope.repositoryId !== null) {

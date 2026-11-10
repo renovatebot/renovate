@@ -27,6 +27,23 @@ Renovate will inflate helm charts referenced in a kustomization if any of the fo
 1. The version Renovate is upgrading from was inflated, OR
 1. The `kustomizeInflateHelmCharts` option in `postUpdateOptions` is enabled
 
+To inflate charts from a private Helm repository, configure its credentials in a `hostRules` entry with `hostType: helm` and both a `username` and a `password`.
+Renovate passes them to `helm pull`.
+For charts from an OCI registry, Renovate logs in with `helm registry login` first, using the `hostRules` entry with `hostType: docker` for that registry.
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "helm",
+      "matchHost": "https://charts.example.com",
+      "username": "user",
+      "password": "secret"
+    }
+  ]
+}
+```
+
 **Note:** To prevent Renovate from updating dependencies in the expanded charts, you'll need to manually exclude the folders from Helm managers.
 For example:
 

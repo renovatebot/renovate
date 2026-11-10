@@ -5,18 +5,12 @@ import type { JsonValue } from 'type-fest';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
 import type { GlobalInheritableConfig } from '../config/types.ts';
-import {
-  AZURE_API_USING_HOST_TYPES,
-  BITBUCKET_API_USING_HOST_TYPES,
-  BITBUCKET_SERVER_API_USING_HOST_TYPES,
-  FORGEJO_API_USING_HOST_TYPES,
-  GITEA_API_USING_HOST_TYPES,
-  GITHUB_API_USING_HOST_TYPES,
-  GITLAB_API_USING_HOST_TYPES,
-} from '../constants/index.ts';
+import type { PlatformFamilyId } from '../constants/index.ts';
+import { PLATFORM_FAMILIES } from '../constants/index.ts';
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 import * as hostRules from './host-rules.ts';
+import { coerceObject } from './object.ts';
 import { parseUrl } from './url.ts';
 
 /**
@@ -25,44 +19,39 @@ import { parseUrl } from './url.ts';
  * @param url the url to detect `platform` from
  * @returns matched `platform` if found, otherwise `null`
  */
-export function detectPlatform(
-  url: string,
-):
-  | 'azure'
-  | 'bitbucket'
-  | 'bitbucket-server'
-  | 'forgejo'
-  | 'gitea'
-  | 'github'
-  | 'gitlab'
-  | null {
-  const { hostname } = parseUrl(url) ?? {};
-  if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
-    return 'azure';
-  }
-  if (hostname === 'bitbucket.org' || hostname === 'bitbucket.com') {
-    return 'bitbucket';
-  }
-  if (hostname?.includes('bitbucket')) {
-    return 'bitbucket-server';
-  }
-  if (hostname?.includes('forgejo')) {
-    return 'forgejo';
-  }
-  if (hostname && ['codeberg.org', 'codefloe.com'].includes(hostname)) {
-    return 'forgejo';
-  }
-  if (
-    hostname &&
-    (['gitea.com'].includes(hostname) || hostname.includes('gitea'))
-  ) {
-    return 'gitea';
-  }
-  if (hostname === 'github.com' || hostname?.includes('github')) {
-    return 'github';
-  }
-  if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {
-    return 'gitlab';
+export function detectPlatform(url: string): PlatformFamilyId | null {
+  const { hostname } = coerceObject(parseUrl(url));
+  if (hostname) {
+    // Azure DevOps kept serving organizations from their Visual Studio Team
+    // Services hostnames, which no other family can claim.
+    if (hostname.endsWith('.visualstudio.com')) {
+      return 'azure';
+    }
+
+    for (const [family, { knownHosts }] of Object.entries(PLATFORM_FAMILIES)) {
+      if (knownHosts.includes(hostname)) {
+        return family as PlatformFamilyId;
+      }
+    }
+
+    // Anything else is matched by name, so a self-hosted instance which was
+    // named after its vendor is recognized without a hostRule. Bitbucket is
+    // tested first because a self-hosted Bitbucket is always Data Center.
+    if (hostname.includes('bitbucket')) {
+      return 'bitbucket-server';
+    }
+    if (hostname.includes('forgejo')) {
+      return 'forgejo';
+    }
+    if (hostname.includes('gitea')) {
+      return 'gitea';
+    }
+    if (hostname.includes('github')) {
+      return 'github';
+    }
+    if (hostname.includes('gitlab')) {
+      return 'gitlab';
+    }
   }
 
   const hostType = hostRules.hostType({ url });
@@ -71,27 +60,12 @@ export function detectPlatform(
     return null;
   }
 
-  if (AZURE_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'azure';
-  }
-
-  if (BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'bitbucket-server';
-  }
-  if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'bitbucket';
-  }
-  if (FORGEJO_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'forgejo';
-  }
-  if (GITEA_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'gitea';
-  }
-  if (GITHUB_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'github';
-  }
-  if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'gitlab';
+  for (const [family, { apiUsingHostTypes }] of Object.entries(
+    PLATFORM_FAMILIES,
+  )) {
+    if (apiUsingHostTypes.includes(hostType)) {
+      return family as PlatformFamilyId;
+    }
   }
 
   return null;

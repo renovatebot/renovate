@@ -1,4 +1,4 @@
-import { mockExecAll } from '~test/exec-util.ts';
+import { exec, mockExecAll } from '~test/exec-util.ts';
 import { hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
@@ -6,7 +6,6 @@ import {
   localPathIsSymbolicLink,
   readLocalSymlink,
 } from '../../../util/fs/index.ts';
-import * as gitAuth from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
@@ -319,20 +318,34 @@ describe('modules/manager/hermit/artifacts', () => {
       ]);
     });
 
-    it('should fail if uninstallation fails', async () => {
-      lstatsMock.mockResolvedValue(true);
-
-      readlinkMock.mockResolvedValue(null);
-      GlobalConfig.set({ localDir: '', binarySource: 'global' });
-
-      mockExecAll(
-        new ExecError('', {
+    it.each([
+      {
+        name: 'returns an update error when uninstallation execution fails',
+        error: new ExecError('', {
           stdout: '',
           stderr: 'error executing hermit uninstall',
           cmd: '',
           options: {},
         }),
-      );
+        artifactError: {
+          fileName: 'from: openjdk-17.0.3, to: openjdk',
+          stderr: 'error executing hermit uninstall',
+        },
+      },
+      {
+        name: 'returns a generic error when uninstallation setup fails',
+        error: new Error('unexpected environment preparation failure'),
+        artifactError: {
+          stderr: 'unexpected environment preparation failure',
+        },
+      },
+    ])('$name', async ({ error, artifactError }) => {
+      lstatsMock.mockResolvedValue(true);
+
+      readlinkMock.mockResolvedValue(null);
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
+
+      mockExecAll(error);
 
       getRepoStatusMock.mockResolvedValue(
         partial<StatusResult>({
@@ -361,10 +374,7 @@ describe('modules/manager/hermit/artifacts', () => {
 
       expect(res).toEqual([
         {
-          artifactError: {
-            fileName: 'from: openjdk-17.0.3, to: openjdk',
-            stderr: 'error executing hermit uninstall',
-          },
+          artifactError,
         },
       ]);
     });
@@ -603,9 +613,12 @@ describe('modules/manager/hermit/artifacts', () => {
           options: {
             env: {
               GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_0:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
                 'url.https://hermit-user:hermit-pass@hermit.example.com/.insteadOf',
               GIT_CONFIG_KEY_4:
@@ -625,11 +638,7 @@ describe('modules/manager/hermit/artifacts', () => {
     });
 
     it('returns generic error when a non-UpdateHermitError propagates from updateHermitPackage', async () => {
-      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
-        () => {
-          throw new Error('unexpected auth failure');
-        },
-      );
+      mockExecAll(new Error('unexpected execution failure'));
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({
@@ -647,19 +656,17 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            stderr: 'unexpected auth failure',
+            stderr: 'unexpected execution failure',
           },
         },
       ]);
     });
 
     it('stringifies non-Error thrown values in the generic fallback', async () => {
-      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
-        () => {
-          // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
-          throw 'raw string failure';
-        },
-      );
+      exec.mockImplementationOnce(() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
+        throw 'raw string failure';
+      });
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({

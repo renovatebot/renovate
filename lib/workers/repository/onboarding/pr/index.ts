@@ -1,4 +1,4 @@
-import { isNumber, isString } from '@sindresorhus/is';
+import { isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
@@ -7,28 +7,27 @@ import type { PackageFile } from '../../../../modules/manager/types.ts';
 import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
-import { hashBody } from '../../../../modules/platform/pr-body.ts';
-import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
 import { getFile } from '../../../../util/git/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
-import * as template from '../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import {
   getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
 } from '../../errors-warnings.ts';
-import { getPlatformPrOptions } from '../../update/pr/index.ts';
-import { prepareLabels } from '../../update/pr/labels.ts';
-import { addParticipants } from '../../update/pr/participants.ts';
+import type { RepositoryResult } from '../../result.ts';
+import { getRebaseCheckbox } from '../../update/pr/body/controls.ts';
+import { getPrFooter } from '../../update/pr/body/footer.ts';
+import { getPrHeader } from '../../update/pr/body/header.ts';
+import { ensureConfigPr } from '../../update/pr/ensure-config-pr.ts';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
   getDefaultConfigFileName,
-  getSemanticCommitPrTitle,
+  getOnboardingPrTitle,
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
@@ -37,6 +36,7 @@ import {
   getPackageFilesSummary,
 } from './package-files.ts';
 import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
+import type { OnboardingPrSections } from './types.ts';
 
 /**
  * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
@@ -85,16 +85,115 @@ async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
   return false;
 }
 
+/**
+ * Full onboarding PRs list package files before the PR list.
+ */
+const FULL_SECTION_ORDER = [
+  'PACKAGE FILES',
+  'CONFIG',
+  'BASEBRANCH',
+  'PRLIST',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+/**
+ * "Summarised" onboarding PRs list PRs before other sections.
+ */
+const SUMMARY_SECTION_ORDER = [
+  'PRLIST',
+  'CONFIG',
+  'BASEBRANCH',
+  'PACKAGE FILES',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+function buildOnboardingPrTemplate(
+  config: RenovateConfig,
+  configFile: string,
+  rebaseCheckBox: string,
+  sectionOrder: readonly string[],
+): string {
+  let prTemplate = `Welcome to [Renovate](${
+    GlobalConfig.get('productLinks').homepage
+  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  prTemplate +=
+    getInheritedOrGlobal('requireConfig') === 'required'
+      ? emojify(
+          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
+        )
+      : emojify(
+          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
+        );
+
+  prTemplate += emojify(
+    `:books: See our [Reading List](${GlobalConfig.get('productLinks').documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
+  // TODO #22198
+  prTemplate += emojify(
+    `
+
+---
+${sectionOrder.map((section) => `{{${section}}}`).join('\n')}
+
+---
+
+:question: Got questions? Check out Renovate's [Docs](${
+      GlobalConfig.get('productLinks').documentation
+    }), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${
+      GlobalConfig.get('productLinks').help
+    }).
+`,
+  );
+  prTemplate += rebaseCheckBox;
+  return prTemplate;
+}
+
+function fillOnboardingPrBody(
+  prTemplate: string,
+  sections: OnboardingPrSections,
+): string {
+  let prBody = prTemplate;
+  if (sections.packageFiles) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', sections.packageFiles)}\n`;
+  } else {
+    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
+  }
+  prBody = prBody.replace('{{CONFIG}}\n', sections.config);
+  prBody = prBody.replace('{{WARNINGS}}\n', sections.warnings);
+  prBody = prBody.replace('{{ERRORS}}\n', sections.errors);
+  prBody = prBody.replace('{{BASEBRANCH}}\n', sections.baseBranch);
+  prBody = prBody.replace('{{PRLIST}}\n', sections.prList);
+  return prBody;
+}
+
+function finalizeOnboardingPrBody(
+  prBody: string,
+  config: RenovateConfig,
+  onboardingConfigHashComment: string,
+): string {
+  return `${getPrHeader(config)}${prBody}${getPrFooter(config)}${onboardingConfigHashComment}`;
+}
+
 export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[],
-): Promise<void> {
-  if (
-    config.repoIsOnboarded === true ||
-    (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
-  ) {
-    return;
+): Promise<RepositoryResult> {
+  if (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested) {
+    return 'onboarding';
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
@@ -121,7 +220,7 @@ export async function ensureOnboardingPr(
         logger.info(
           'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
         );
-        return;
+        return 'onboarding';
       }
       await ensureComment({
         number: existingPr.number,
@@ -130,73 +229,20 @@ export async function ensureOnboardingPr(
           `:warning: This PR has a merge conflict which Renovate is unable to automatically resolve, so updates to this PR description are now paused. Please resolve the merge conflict manually.\n\n`,
         ),
       });
-      return;
+      return 'onboarding';
     }
   }
 
   if (OnboardingState.onboardingCacheValid) {
-    return;
+    return 'onboarding';
   }
 
   const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
-  logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${
-    GlobalConfig.get('productLinks').homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
-  prTemplate +=
-    getInheritedOrGlobal('requireConfig') === 'required'
-      ? emojify(
-          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
-        )
-      : emojify(
-          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
-        );
-
-  prTemplate += emojify(
-    `:books: See our [Reading List](${GlobalConfig.get('productLinks').documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
-  );
-
   const configFile = getDefaultConfigFileName();
-  prTemplate += emojify(
-    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
-  );
-  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
-    config.onboardingRebaseCheckbox
-      ? ' and select the Retry/Rebase checkbox below'
-      : ''
-  }. Renovate will update the Pull Request description the next time it runs.`;
-  prTemplate += '\n\n';
-  // TODO #22198
-  prTemplate += emojify(
-    `
+  logger.debug('Filling in onboarding PR template');
 
----
-{{PACKAGE FILES}}
-{{CONFIG}}
-{{BASEBRANCH}}
-{{PRLIST}}
-{{WARNINGS}}
-{{ERRORS}}
-
----
-
-:question: Got questions? Check out Renovate's [Docs](${
-      GlobalConfig.get('productLinks').documentation
-    }), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${
-      GlobalConfig.get('productLinks').help
-    }).
-`,
-  );
-  prTemplate += rebaseCheckBox;
-  let prBody = prTemplate;
   const packageFilesDesc = getPackageFilesDesc(packageFiles);
-  if (packageFilesDesc) {
-    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
-  } else {
-    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
-  }
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
@@ -204,115 +250,81 @@ If you need any further assistance then you can also [request help here](${
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
-  prBody = prBody.replace('{{CONFIG}}\n', configDesc);
-  prBody = prBody.replace(
-    '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
-  );
-  prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
-  prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
+  const warnings =
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config);
+  const errors = getErrors(config);
+  const baseBranchDesc = getBaseBranchDesc(config);
   const prList = getExpectedPrList(config, branches);
-  prBody = prBody.replace('{{PRLIST}}\n', prList);
-  if (isString(config.prHeader)) {
-    prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
-  }
-  if (isString(config.prFooter)) {
-    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
-  }
 
-  prBody += onboardingConfigHashComment;
+  let prBody = finalizeOnboardingPrBody(
+    fillOnboardingPrBody(
+      buildOnboardingPrTemplate(
+        config,
+        configFile,
+        rebaseCheckBox,
+        FULL_SECTION_ORDER,
+      ),
+      {
+        packageFiles: packageFilesDesc,
+        config: configDesc,
+        baseBranch: baseBranchDesc,
+        prList,
+        warnings,
+        errors,
+      },
+    ),
+    config,
+    onboardingConfigHashComment,
+  );
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
       'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
-      prBody = prBody.replace(
-        packageFilesDesc,
-        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
+      // "What to Expect" should render before "Detected Package Files" in the summary view,
+      // so rebuild from a template with that section order rather than reordering the rendered body.
+      prBody = finalizeOnboardingPrBody(
+        fillOnboardingPrBody(
+          buildOnboardingPrTemplate(
+            config,
+            configFile,
+            rebaseCheckBox,
+            SUMMARY_SECTION_ORDER,
+          ),
+          {
+            packageFiles: packageFilesSummary,
+            config: configDesc,
+            baseBranch: baseBranchDesc,
+            prList: prListSummary,
+            warnings,
+            errors,
+          },
+        ),
+        config,
+        onboardingConfigHashComment,
       );
-    }
-  }
-
-  logger.trace(`prBody:\n${prBody}`);
-
-  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
-
-  if (existingPr) {
-    logger.debug('Found open onboarding PR');
-    // Check if existing PR needs updating
-    const prBodyHash = hashBody(prBody);
-    if (existingPr.bodyStruct?.hash === prBodyHash) {
-      logger.debug(`Pull Request #${existingPr.number} does not need updating`);
-      return;
-    }
-    // PR must need updating
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would update onboarding PR');
     } else {
-      await platform.updatePr({
-        number: existingPr.number,
-        prTitle: existingPr.title,
-        prBody,
-      });
-      logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
+      prBody = prBody.replace(prList, prListSummary);
     }
-    return;
-  }
-  logger.debug('Creating onboarding PR');
-  const labels: string[] = prepareLabels(config);
-  try {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create onboarding PR');
-    } else {
-      // TODO #22198
-      const prTitle =
-        config.semanticCommits === 'enabled'
-          ? getSemanticCommitPrTitle(config)
-          : getInheritedOrGlobal('onboardingPrTitle')!;
-      const pr = await platform.createPr({
-        sourceBranch: onboardingBranch,
-        targetBranch: config.defaultBranch!,
-        prTitle,
-        prBody,
-        labels,
-        platformPrOptions: getPlatformPrOptions({
-          ...config,
-          automerge: false,
-        }),
-      });
-      logger.info(
-        { pr: `Pull Request #${pr!.number}` },
-        'Onboarding PR created',
-      );
-      await addParticipants(config, pr!);
-    }
-  } catch (err) {
-    if (
-      err.response?.statusCode === 422 &&
-      err.response?.body?.errors?.[0]?.message?.startsWith(
-        'A pull request already exists',
-      )
-    ) {
-      logger.warn(
-        'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
-      );
-      await scm.deleteBranch(onboardingBranch);
-      return;
-    }
-    throw err;
-  }
-}
-
-function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
-  let rebaseCheckBox = '';
-  if (onboardingRebaseCheckbox) {
-    // Create markdown checkbox
-    rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
   }
 
-  return rebaseCheckBox;
+  await ensureConfigPr({
+    branchName: onboardingBranch,
+    // TODO #22198
+    targetBranch: config.defaultBranch!,
+    // Keep the title of an existing onboarding PR, because renaming it is the
+    // documented way to request a fresh onboarding PR.
+    prTitle: existingPr?.title ?? getOnboardingPrTitle(config),
+    prBody,
+    config,
+    existingPr,
+    type: 'onboarding',
+  });
+
+  return 'onboarding';
 }
 
 async function getOnboardingConfigHashComment(): Promise<string> {

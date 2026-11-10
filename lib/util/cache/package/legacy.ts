@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { decompressFromBase64, decompressFromBuffer } from '../../compress.ts';
 
@@ -25,7 +26,7 @@ export async function decodeLegacyEntry(data: Buffer): Promise<LegacyEntry> {
 async function decodeLegacyJsonEntry(data: Buffer): Promise<LegacyEntry> {
   const cached = JSON.parse(data.toString('utf8')) as LegacyJsonEntry;
 
-  if (typeof cached.value !== 'string' || typeof cached.expiry !== 'string') {
+  if (!isString(cached.value) || !isString(cached.expiry)) {
     throw new Error('Invalid legacy JSON package cache entry');
   }
 

@@ -1,4 +1,4 @@
-import { isUndefined } from '@sindresorhus/is';
+import { isString, isUndefined } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import {
@@ -6,6 +6,7 @@ import {
   LooseRecord,
   Nullish,
 } from '../../../util/schema-utils/index.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -105,7 +106,7 @@ export function extractReleaseResult(
 
   for (const composerReleasesArray of composerReleasesArrays) {
     for (const composerRelease of composerReleasesArray) {
-      const version = composerRelease.version.replace(/^v/, '');
+      const version = stripVersionPrefix(composerRelease.version);
       const gitRef = composerRelease.version;
 
       const dep: Release = { version, gitRef };
@@ -163,7 +164,7 @@ export function extractReleaseResult(
 
 function getAbandonedMessage(abandoned: string | boolean): string {
   const message = 'This package is abandoned and no longer maintained.';
-  if (typeof abandoned === 'string') {
+  if (isString(abandoned)) {
     return `${message} The author suggests using the \`${abandoned}\` package instead.`;
   }
   return message;
@@ -253,16 +254,19 @@ export const RegistryMeta = z
       ['providers-url']: providersUrl,
       ['metadata-url']: metadataUrl,
       ['available-packages']: availablePackages,
-    }) => ({
-      packages,
-      includesFiles,
-      providerPackages,
-      files,
-      providersUrl,
-      providersLazyUrl,
-      metadataUrl,
-      includesPackages: {} as Record<string, ReleaseResult | null>,
-      availablePackages,
-    }),
+    }) => {
+      const includesPackages: Record<string, ReleaseResult | null> = {};
+      return {
+        packages,
+        includesFiles,
+        providerPackages,
+        files,
+        providersUrl,
+        providersLazyUrl,
+        metadataUrl,
+        includesPackages,
+        availablePackages,
+      };
+    },
   );
 export type RegistryMeta = z.infer<typeof RegistryMeta>;

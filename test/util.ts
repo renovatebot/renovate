@@ -41,7 +41,8 @@ export const platform = vi.mocked(partial<Required<Platform>>(_platform));
 export const scm = vi.mocked(_scm);
 export const env = vi.mocked(_env);
 export const hostRules = vi.mocked(_hostRules);
-export const logger = vi.mocked(_logger, true);
+export const logger: ReturnType<typeof vi.mockObject<typeof _logger>> =
+  vi.mocked(_logger, true);
 
 export type { RenovateConfig };
 
@@ -94,4 +95,27 @@ export function fakeSha(
   algorithm: 'sha1' | 'sha256' = 'sha1',
 ): LongCommitSha {
   return toLongCommitSha(hash(seed, algorithm));
+}
+
+/**
+ * Variables that `vi.stubEnv()` treats as booleans: it maps them onto '1' / ''
+ * rather than deleting them, so they cannot be cleared through a stub.
+ * Vitest sets them itself, and nothing under test reads them.
+ */
+const unstubbableEnvVars = new Set(['PROD', 'DEV', 'SSR']);
+
+/**
+ * Clear every environment variable for the duration of the current test.
+ *
+ * Replacing `process.env` wholesale would break `vi.stubEnv()`, which captures
+ * the original object when the worker starts and would keep deleting from it.
+ * Stubbing each key instead keeps that intact, and `unstubEnvs` restores them
+ * all before the next test.
+ */
+export function clearEnv(): void {
+  for (const key of Object.keys(process.env)) {
+    if (!unstubbableEnvVars.has(key)) {
+      vi.stubEnv(key, undefined);
+    }
+  }
 }

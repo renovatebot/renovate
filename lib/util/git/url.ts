@@ -9,6 +9,35 @@ export function parseGitUrl(url: string): gitUrlParse.GitUrl {
   return gitUrlParse(url);
 }
 
+/**
+ * Gives a token without a `:` the username and non-empty password expected by the given platform.
+ * Tokens containing a `:` and tokens of other platforms are returned unchanged.
+ */
+export function getTokenCredentials(
+  platform: string | null | undefined,
+  token: string,
+): string {
+  if (token.includes(':')) {
+    return token;
+  }
+  switch (platform) {
+    case 'gitlab':
+      return `gitlab-ci-token:${token}`;
+    case 'azure':
+    case 'github':
+    case 'scm-manager':
+      return `x-access-token:${token}`;
+    case 'bitbucket':
+    case 'bitbucket-server':
+      return `x-token-auth:${token}`;
+    case 'gitea':
+    case 'forgejo':
+      return `${token}:x-oauth-basic`;
+    default:
+      return token;
+  }
+}
+
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = parseGitUrl(url);
 
@@ -24,21 +53,16 @@ export function getHttpUrl(url: string, token?: string): string {
   parsedUrl.user = '';
   parsedUrl.token = token ?? '';
 
-  switch (detectPlatform(parsedUrl.toString(protocol))) {
-    case 'gitlab':
-      if (token) {
-        parsedUrl.token = token.includes(':')
-          ? token
-          : `gitlab-ci-token:${token}`;
-      }
-      break;
-    case 'github':
-      if (token) {
-        parsedUrl.token = token.includes(':')
-          ? token
-          : `x-access-token:${token}`;
-      }
-      break;
+  const platform = detectPlatform(parsedUrl.toString(protocol));
+  if (token) {
+    parsedUrl.token = getTokenCredentials(platform, token);
+    // git-url-parse would prefix `x-token-auth:` again on bitbucket.org
+    if (parsedUrl.source === 'bitbucket.org') {
+      parsedUrl.source = 'bitbucket';
+    }
+  }
+
+  switch (platform) {
     case 'bitbucket-server':
       // SSH URLs look like ssh://git@git.my.com:7999/project/repo.git
       // HTTPS URLs look like https://git.my.com/scm/project/repo.git

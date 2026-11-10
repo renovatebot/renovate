@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/swift/extract', () => {
@@ -39,6 +40,46 @@ describe('modules/manager/swift/extract', () => {
       `;
       const result = extractPackageFile(content);
       expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: 'from: "1.0.0"',
+          },
+        ],
+      });
+    });
+
+    it('ignores a comma where `from` expects a colon', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.com/example/repo", from, "1.0.0")
+          ]
+        )
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: expect.stringContaining('from'),
+          },
+        ],
+      });
+    });
+
+    it('ignores a comma where `from:` expects a version', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.com/example/repo", from:, "1.0.0")
+          ]
+        )
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
         deps: [
           {
             datasource: 'github-tags',
@@ -278,8 +319,9 @@ describe('modules/manager/swift/extract', () => {
 
       expect(result?.deps).toHaveLength(10);
 
-      const githubDeps =
-        result?.deps.filter((dep) => dep.datasource === 'github-tags') ?? [];
+      const githubDeps = coerceArray(
+        result?.deps.filter((dep) => dep.datasource === 'github-tags'),
+      );
       expect(githubDeps).toHaveLength(10);
 
       expect(result?.deps).toContainEqual({
