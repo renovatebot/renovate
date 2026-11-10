@@ -1,6 +1,9 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { setRepositoryLogLevelRemaps } from '../../../logger/remap.ts';
 import { platform } from '../../../modules/platform/index.ts';
@@ -15,6 +18,7 @@ import type { WorkerPlatformConfig } from './apis.ts';
 import { initApis } from './apis.ts';
 import { initializeCaches, resetCaches } from './cache.ts';
 import { getRepoConfig } from './config.ts';
+import { applyRepoConfigDefaults } from './defaults.ts';
 import { detectVulnerabilityAlerts } from './vulnerability.ts';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
@@ -26,7 +30,7 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
   };
 }
 
-function warnOnUnsupportedOptions(config: RenovateConfig): void {
+function warnOnUnsupportedOptions(config: RenovateConfigFile): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
     const platform = GlobalConfig.get('platform');
     logger.warn(
@@ -48,35 +52,40 @@ export async function initRepo(
   config_: RenovateConfig,
 ): Promise<RenovateConfig> {
   PackageFiles.clear();
-  let config: RenovateConfig = initializeConfig(config_);
+  const initialConfig = initializeConfig(config_);
   await resetCaches();
   logger.once.reset();
   memCache.init();
   initMutexes();
-  config = await initApis(config);
-  await initializeCaches(config as WorkerPlatformConfig);
-  config = await getRepoConfig(config);
-  platform.applyRepoConfig?.(config);
-  setRepositoryLogLevelRemaps(config.logLevelRemap);
-  if (config.mode === 'silent') {
+  const platformConfig = await initApis(initialConfig);
+  await initializeCaches(platformConfig as WorkerPlatformConfig);
+  const mergedConfig = await getRepoConfig(platformConfig);
+  platform.applyRepoConfig?.(mergedConfig);
+  setRepositoryLogLevelRemaps(mergedConfig.logLevelRemap);
+  if (mergedConfig.mode === 'silent') {
     logger.info(
       'Repository is running with mode=silent and will not make Issues or PRs by default',
     );
   }
-  checkIfConfigured(config);
-  warnOnUnsupportedOptions(config);
-  config = applySecretsAndVariablesToConfig({
-    config,
+  checkIfConfigured(mergedConfig);
+  warnOnUnsupportedOptions(mergedConfig);
+  const config = applySecretsAndVariablesToConfig({
+    config: mergedConfig,
   });
   setUserRepoConfig(config);
-  config = await detectVulnerabilityAlerts(config);
+  const repoConfig = applyRepoConfigDefaults(
+    await detectVulnerabilityAlerts(config),
+  );
   // istanbul ignore if
-  if (config.printConfig) {
+  if (repoConfig.printConfig) {
     logger.info(
-      { config, hostRules: getAll() },
+      { config: repoConfig, hostRules: getAll() },
       'Full resolved config and hostRules including presets',
     );
   }
-  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
-  return config;
+  await cloneSubmodules(
+    repoConfig.cloneSubmodules,
+    repoConfig.cloneSubmodulesFilter,
+  );
+  return repoConfig;
 }

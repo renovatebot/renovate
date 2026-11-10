@@ -121,7 +121,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformPrOptions?: PlatformPrOptions;
   draftPR?: boolean;
-  milestone?: number;
+  milestone?: number | null;
 }
 export interface UpdatePrConfig {
   number: number;
@@ -161,7 +161,7 @@ export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
   body: string;
-  labels?: string[];
+  labels?: string[] | null;
   once?: boolean;
   shouldReOpen?: boolean;
   confidential?: boolean;

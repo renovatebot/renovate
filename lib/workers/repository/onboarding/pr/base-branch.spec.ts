@@ -7,7 +7,7 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = partial<RenovateConfig>();
+      config = partial<RenovateConfig>({ baseBranchPatterns: [] });
     });
 
     it('returns empty if no baseBranch', () => {

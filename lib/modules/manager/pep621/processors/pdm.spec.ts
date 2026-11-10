@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type {
@@ -10,7 +11,7 @@ import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as hostRules from '../../../../util/host-rules.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import type { UpdateArtifact } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
@@ -21,7 +22,7 @@ vi.mock('../../../datasource/index.ts');
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -36,7 +37,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
     it('throws TEMPORARY_ERROR', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
       const result = processor.updateArtifacts(
-        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({
+          config: updateArtifactsConfig(),
+        }),
         partial(),
       );
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);
@@ -81,7 +84,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: { constraints: {} },
+          config: updateArtifactsConfig({ constraints: {} }),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -138,7 +141,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
           // no `requires-python` in the pyproject, so the extracted one is used
-          config: { extractedConstraints: { python: '==3.11.1' } },
+          config: updateArtifactsConfig({
+            extractedConstraints: { python: '==3.11.1' },
+          }),
           updatedDeps: [{ packageName: 'dep1' }],
         },
         parsePyProject('')!,
@@ -169,7 +174,10 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: { constraints: {}, extractedConstraints: { pdm: '2.6.1' } },
+          config: updateArtifactsConfig({
+            constraints: {},
+            extractedConstraints: { pdm: '2.6.1' },
+          }),
           updatedDeps: [{ packageName: 'dep1' }],
         },
         parsePyProject('')!,
@@ -194,7 +202,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -267,7 +275,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -333,7 +341,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -362,9 +370,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             isLockFileMaintenance: true,
-          },
+          }),
           updatedDeps: [],
         },
         parsePyProject('')!,
@@ -412,9 +420,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             isLockFileMaintenance: true,
-          },
+          }),
           updatedDeps: [],
         },
         parsePyProject('')!,

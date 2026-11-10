@@ -5,7 +5,7 @@ import { dequal } from 'dequal';
 import upath from 'upath';
 import { massageConfig } from '../../../../config/massage.ts';
 import { migrateConfig } from '../../../../config/migration.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { validateConfig } from '../../../../config/validation.ts';
 import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
@@ -13,9 +13,9 @@ import { readSystemFile } from '../../../../util/fs/index.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 
 export async function migrateAndValidateConfig(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   configType: string,
-): Promise<RenovateConfig> {
+): Promise<RenovateConfigFile> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -41,12 +41,14 @@ export async function migrateAndValidateConfig(
   return massagedConfig;
 }
 
-export async function getParsedContent(file: string): Promise<RenovateConfig> {
+export async function getParsedContent(
+  file: string,
+): Promise<RenovateConfigFile> {
   if (upath.basename(file) === '.renovaterc') {
     return parseJson(
       await readSystemFile(file, 'utf8'),
       file,
-    ) as RenovateConfig;
+    ) as RenovateConfigFile;
   }
   switch (upath.extname(file)) {
     case '.yaml':
@@ -58,7 +60,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       return parseJson(
         await readSystemFile(file, 'utf8'),
         file,
-      ) as RenovateConfig;
+      ) as RenovateConfigFile;
     case '.cts':
     case '.mts':
     case '.ts':
@@ -96,12 +98,12 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 
       /* v8 ignore next -- not testable */
       let config =
-        (tmpConfig as { default?: RenovateConfig }).default ?? tmpConfig;
+        (tmpConfig as { default?: RenovateConfigFile }).default ?? tmpConfig;
       // Allow the config to be a function
       if (isFunction(config)) {
         config = config();
       }
-      return config as RenovateConfig;
+      return config as RenovateConfigFile;
     }
     default:
       throw new Error('Unsupported file type');

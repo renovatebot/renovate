@@ -1,4 +1,5 @@
 import { exec, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -24,7 +25,7 @@ describe('modules/manager/gleam/artifacts', () => {
     beforeEach(() => {
       GlobalConfig.set(globalConfig);
       updateArtifact = {
-        config: {},
+        config: updateArtifactsConfig(),
         newPackageFileContent: '',
         packageFileName: '/fake/test/pkg/dir/gleam.toml',
         updatedDeps: [],

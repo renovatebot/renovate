@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 
 import {
   CONFIG_SECRETS_EXPOSED,
@@ -90,7 +90,7 @@ function getExitCode(res: RepositoryResult): number {
 }
 
 export function processResult(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   res: RepositoryResult,
 ): ProcessResult {
   const enabledStatuses = [

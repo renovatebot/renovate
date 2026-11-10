@@ -1,3 +1,4 @@
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -27,7 +28,7 @@ describe('modules/manager/bun/artifacts', () => {
     beforeEach(() => {
       GlobalConfig.set(globalConfig);
       updateArtifact = {
-        config: {},
+        config: updateArtifactsConfig(),
         newPackageFileContent: '',
         packageFileName: '',
         updatedDeps: [],
@@ -336,7 +337,9 @@ describe('modules/manager/bun/artifacts', () => {
     });
 
     it('falls back to the extracted bun constraint', async () => {
-      updateArtifact.config = { extractedConstraints: { bun: '1.1.0' } };
+      updateArtifact.config = updateArtifactsConfig({
+        extractedConstraints: { bun: '1.1.0' },
+      });
       updateArtifact.updatedDeps = [
         { manager: 'bun', lockFiles: ['bun.lock'] },
       ];
@@ -358,21 +361,6 @@ describe('modules/manager/bun/artifacts', () => {
     it('check install options with configs', async () => {
       const lockfileFormats = ['bun.lockb', 'bun.lock'];
       const testCases = [
-        {
-          allowScripts: undefined,
-          ignoreScripts: undefined,
-          expectedCmd: 'bun install --ignore-scripts',
-        },
-        {
-          allowScripts: false,
-          ignoreScripts: undefined,
-          expectedCmd: 'bun install --ignore-scripts',
-        },
-        {
-          allowScripts: true,
-          ignoreScripts: undefined,
-          expectedCmd: 'bun install',
-        },
         {
           allowScripts: undefined,
           ignoreScripts: true,
@@ -412,7 +400,9 @@ describe('modules/manager/bun/artifacts', () => {
             allowScripts: testCase.allowScripts,
           });
           const updateArtifact: UpdateArtifact = {
-            config: { ignoreScripts: testCase.ignoreScripts },
+            config: updateArtifactsConfig({
+              ignoreScripts: testCase.ignoreScripts,
+            }),
             newPackageFileContent: '',
             packageFileName: '',
             updatedDeps: [{ manager: 'bun', lockFiles: [lockFile] }],

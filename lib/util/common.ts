@@ -2,6 +2,7 @@ import { isNumber } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { parse as jsoncWeaverParse } from 'jsonc-weaver';
 import type { JsonValue } from 'type-fest';
+import type { GlobalConfigValue } from '../config/global.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
 import type { GlobalInheritableConfig } from '../config/types.ts';
@@ -124,7 +125,7 @@ export function parseJsonc(content: string): JsonValue {
  */
 export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
   key: Key,
-): GlobalInheritableConfig[Key] {
+): GlobalConfigValue<Key> {
   const inheritedValue = InheritConfig.get(key);
   const globalValue = GlobalConfig.get(key);
   if (inheritedValue !== NOT_PRESENT) {
@@ -138,7 +139,8 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
       return globalValue;
     }
 
-    return inheritedValue;
+    // the inherited value is the type of the option, which `GlobalConfigValue` only narrows by the key being generic
+    return inheritedValue as GlobalConfigValue<Key>;
   }
 
   return globalValue;

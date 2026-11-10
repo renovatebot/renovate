@@ -47,7 +47,7 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsPR()', () => {
     it('returns 2 pr warnings text dependencyDashboard true', () => {
-      const config: RenovateConfig = {};
+      const config = { suppressNotifications: [] };
       const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -99,7 +99,10 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns 2 pr warnings text dependencyDashboard true with issue link', () => {
-      const config: RenovateConfig = { dependencyDashboardIssue: 123 };
+      const config = {
+        dependencyDashboardIssue: 123,
+        suppressNotifications: [],
+      };
       const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -122,7 +125,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns 2 pr warnings text dependencyDashboard false', () => {
-      const config: RenovateConfig = {};
+      const config = { suppressNotifications: [] };
       const dependencyDashboard = false;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -170,16 +173,16 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('PR warning returns empty string', () => {
-      const config: RenovateConfig = {};
+      const config = { suppressNotifications: [] };
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsPR(packageFiles, config);
       expect(res).toBe('');
     });
 
     it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         suppressNotifications: ['dependencyLookupWarnings'],
-      };
+      });
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsPR(packageFiles, config);
       expect(res).toBe('');
@@ -188,7 +191,9 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsDashboard()', () => {
     it('returns dependency dashboard warning text', () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -238,16 +243,18 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('dependency dashboard warning returns empty string', () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsDashboard(packageFiles, config);
       expect(res).toBe('');
     });
 
     it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         suppressNotifications: ['dependencyLookupWarnings'],
-      };
+      });
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsDashboard(packageFiles, config);
       expect(res).toBe('');
@@ -291,7 +298,9 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsOnboardingPR()', () => {
     it('returns onboarding warning text', () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -347,7 +356,9 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('handle empty package files', () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         npm: undefined as never,
       };
@@ -358,16 +369,19 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         suppressNotifications: ['dependencyLookupWarnings'],
-      };
+      });
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsOnboardingPR(packageFiles, config);
       expect(res).toBe('');
     });
 
     it('handles undefined', () => {
-      const res = getDepWarningsOnboardingPR(undefined as never, {});
+      const res = getDepWarningsOnboardingPR(
+        undefined as never,
+        partial<RenovateConfig>({ suppressNotifications: [] }),
+      );
       expect(res).toBe('');
     });
   });

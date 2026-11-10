@@ -4,7 +4,7 @@ import { codeBlock } from 'common-tags';
 import { execa } from 'execa';
 import { dir } from 'tmp-promise';
 import { getConfigFileNames } from './config/app-strings.ts';
-import type { AllConfig, RenovateConfig } from './config/types.ts';
+import type { AllConfig, RenovateConfigFile } from './config/types.ts';
 
 const CLI = path.resolve('lib/config-validator.ts');
 
@@ -37,7 +37,7 @@ async function withTmpDir<T>(fn: (dirPath: string) => Promise<T>): Promise<T> {
 async function writeRepoConfig(
   dirPath: string,
   name: string,
-  content: RenovateConfig,
+  content: RenovateConfigFile,
 ): Promise<string> {
   const filePath = path.join(dirPath, name);
   await fs.writeFile(filePath, JSON.stringify(content, null, 2));
@@ -85,7 +85,7 @@ describe.concurrent('config-validator', () => {
         // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid unknown option to test validator error handling
         const file = await writeRepoConfig(dirPath, 'renovate.json', {
           notARealOption: true,
-        } as RenovateConfig);
+        } as RenovateConfigFile);
 
         const { exitCode, all } = await runValidator(['--no-global', file]);
 

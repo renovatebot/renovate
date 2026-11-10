@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractConfig } from '~test/manager-config.ts';
 import { extractPackageFile } from './index.ts';
 
 const file1 = Fixtures.get('config.yml');
@@ -10,7 +11,9 @@ const file4 = Fixtures.get('config4.yml');
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(
+        extractPackageFile('nothing here', '', extractConfig()),
+      ).toBeNull();
     });
 
     it('handles registry alias', () => {
@@ -46,7 +49,7 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('extracts multiple image and resolves yaml anchors', () => {
-      const res = extractPackageFile(file1);
+      const res = extractPackageFile(file1, '', extractConfig());
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
@@ -91,7 +94,7 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('extracts orbs too', () => {
-      const res = extractPackageFile(file2);
+      const res = extractPackageFile(file2, '', extractConfig());
       expect(res?.deps).toEqual([
         {
           currentValue: '4.1.0',
@@ -198,7 +201,7 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('extracts image without leading dash', () => {
-      const res = extractPackageFile(file3);
+      const res = extractPackageFile(file3, '', extractConfig());
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
@@ -225,17 +228,21 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts and exclude android images', () => {
       expect(
-        extractPackageFile(codeBlock`
+        extractPackageFile(
+          codeBlock`
           jobs:
             build:
               machine:
                 image: android:202102-01
-        `),
+        `,
+          '',
+          extractConfig(),
+        ),
       ).toBeNull();
     });
 
     it('extracts orbs without jobs', () => {
-      const res = extractPackageFile(file4);
+      const res = extractPackageFile(file4, '', extractConfig());
       expect(res?.deps).toEqual([
         {
           currentValue: '5.2.0',
@@ -249,12 +256,16 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('extracts executors', () => {
-      const res = extractPackageFile(codeBlock`
+      const res = extractPackageFile(
+        codeBlock`
         executors:
           my-executor:
             docker:
               - image: cimg/ruby:3.0.3-browsers
-      `);
+      `,
+        '',
+        extractConfig(),
+      );
 
       expect(res?.deps).toEqual([
         {
@@ -271,7 +282,8 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('extracts orb definitions', () => {
-      const res = extractPackageFile(codeBlock`
+      const res = extractPackageFile(
+        codeBlock`
         version: 2.1
 
         orbs:
@@ -295,7 +307,10 @@ describe('modules/manager/circleci/extract', () => {
           Test:
             jobs:
               - myorb/test_image
-      `);
+      `,
+        '',
+        extractConfig(),
+      );
 
       expect(res).toEqual({
         deps: [
@@ -338,7 +353,8 @@ describe('modules/manager/circleci/extract', () => {
       // the entire file is skipped. CircleCI itself parses these files as
       // YAML 1.1, where merge keys are valid and additive, so Renovate must
       // do the same to avoid silently missing every dep in the file.
-      const res = extractPackageFile(codeBlock`
+      const res = extractPackageFile(
+        codeBlock`
         version: 2.1
 
         aliases:
@@ -358,7 +374,10 @@ describe('modules/manager/circleci/extract', () => {
             <<: *node-env
             steps:
               - checkout
-      `);
+      `,
+        '',
+        extractConfig(),
+      );
 
       expect(res?.deps).toEqual([
         {

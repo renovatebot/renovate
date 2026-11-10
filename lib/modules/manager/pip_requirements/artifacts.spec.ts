@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -9,7 +10,6 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 const datasource = vi.mocked(_datasource);
@@ -28,9 +28,9 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {
+const config = updateArtifactsConfig({
   constraints: { python: '3.10.2', hashin: '0.17.0' },
-};
+});
 
 /*
  * Sample package file content that exhibits dependencies with and without
@@ -291,10 +291,10 @@ describe('modules/manager/pip_requirements/artifacts', () => {
       packageFileName: 'requirements.txt',
       updatedDeps: [{ depName: 'atomicwrites' }],
       newPackageFileContent,
-      config: {
+      config: updateArtifactsConfig({
         constraints: {},
         extractedConstraints: { python: '3.10.2', hashin: '0.17.0' },
-      },
+      }),
     });
 
     expect(execSnapshots).toMatchObject([

@@ -214,7 +214,7 @@ export async function updateArtifacts({
         .map(quote)
         .join(' ');
       args = `update ${deps}`.trim();
-      args += config.postUpdateOptions?.includes('composerWithAll')
+      args += config.postUpdateOptions.includes('composerWithAll')
         ? ' --with-all-dependencies'
         : ' --with-dependencies';
     }

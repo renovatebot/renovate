@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import type { RenovateConfig } from '../../lib/config/types.ts';
+import type { RenovateConfigFile } from '../../lib/config/types.ts';
 import type { Category } from '../../lib/constants/index.ts';
 import {
   getCustomManagers,
@@ -75,7 +75,7 @@ export async function generateManagers(
 
   for (const [manager, definition] of allManagers) {
     const { defaultConfig, supportedDatasources, urls } = definition;
-    const { managerFilePatterns } = defaultConfig as RenovateConfig;
+    const { managerFilePatterns } = defaultConfig as RenovateConfigFile;
     const displayName = getDisplayName(manager, definition);
     const isCustomMgr = isCustomManager(manager);
 

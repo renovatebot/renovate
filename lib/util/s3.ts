@@ -28,7 +28,7 @@ function newS3Client(
 ): S3Client {
   const endpoint = s3Endpoint ?? GlobalConfig.get('s3Endpoint');
   const forcePathStyle = isUndefined(s3PathStyle)
-    ? !!GlobalConfig.get('s3PathStyle')
+    ? GlobalConfig.get('s3PathStyle')
     : s3PathStyle;
   return new S3Client({
     ...(endpoint && { endpoint }),

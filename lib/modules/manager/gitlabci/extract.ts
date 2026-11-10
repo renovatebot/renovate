@@ -6,7 +6,7 @@ import { parseYaml } from '../../../util/yaml.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { id as semverPartialId } from '../../versioning/semver-partial/index.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
@@ -26,13 +26,11 @@ const componentReferenceRegex = regEx(
 
 function extractDepFromIncludeComponent(
   component: string,
-  registryAliases?: Record<string, string>,
+  registryAliases: Record<string, string>,
 ): PackageDependency | null {
   let componentUrl = component;
-  if (registryAliases) {
-    for (const key in registryAliases) {
-      componentUrl = componentUrl.replace(key, registryAliases[key]);
-    }
+  for (const key in registryAliases) {
+    componentUrl = componentUrl.replace(key, registryAliases[key]);
   }
   const componentReference = componentReferenceRegex.exec(componentUrl)?.groups;
   if (!componentReference) {
@@ -65,7 +63,7 @@ function extractDepFromIncludeComponent(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
@@ -120,7 +118,7 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const filesToExamine = [...packageFiles];

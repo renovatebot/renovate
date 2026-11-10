@@ -1,12 +1,10 @@
-import {
-  isArray,
-  isNonEmptyArray,
-  isNumber,
-  isUndefined,
-} from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isUndefined } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -58,7 +56,17 @@ import {
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 export function getPlatformPrOptions(
-  config: RenovateConfig & PlatformPrOptions,
+  config: RenovateConfigFile &
+    PlatformPrOptions &
+    Pick<
+      RenovateConfig,
+      | 'autoApprove'
+      | 'azureWorkItemId'
+      | 'bbAutoResolvePrTasks'
+      | 'bbUseDefaultReviewers'
+      | 'forkModeDisallowMaintainerEdits'
+      | 'gitLabIgnoreApprovals'
+    >,
 ): PlatformPrOptions {
   const isPrOrBranchAutomerge =
     config.automergeType === 'pr' || config.automergeType === 'branch';
@@ -67,14 +75,14 @@ export function getPlatformPrOptions(
   );
 
   return {
-    autoApprove: !!config.autoApprove,
+    autoApprove: config.autoApprove,
     automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
-    azureWorkItemId: config.azureWorkItemId ?? 0,
-    bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
-    bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
-    gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
-    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
+    azureWorkItemId: config.azureWorkItemId,
+    bbAutoResolvePrTasks: config.bbAutoResolvePrTasks,
+    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
+    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -145,7 +153,6 @@ function addPullRequestNoteIfAttestationHasBeenLost(
     currentReleaseHasAttestation === true &&
     newRelease.attestation !== true
   ) {
-    upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
       emojify(
         codeBlock`
@@ -177,7 +184,7 @@ export async function ensurePr(
     hasAttestation: currentReleaseHasAttestation,
   } = config;
   const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests),
+    resolveBranchStatus(branchName, internalChecksAsSuccess, ignoreTests),
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
@@ -220,15 +227,14 @@ export async function ensurePr(
   if (!existingPr) {
     // Only create a PR if a branch automerge has failed
     if (
-      config.automerge === true &&
-      config.automergeType?.startsWith('branch') &&
+      config.automerge &&
+      config.automergeType.startsWith('branch') &&
       !config.forcePr
     ) {
       logger.debug(`Branch automerge is enabled`);
       if (
         config.stabilityStatus !== 'yellow' &&
-        (await getBranchStatus()) === 'yellow' &&
-        isNumber(config.prNotPendingHours)
+        (await getBranchStatus()) === 'yellow'
       ) {
         logger.debug('Checking how long this branch has been pending');
         const lastCommitTime = await getBranchLastCommitTime(branchName);
@@ -266,9 +272,7 @@ export async function ensurePr(
         const elapsedHours = getElapsedHours(lastCommitTime);
         const isStabilityPending =
           !!config.stabilityStatus && config.stabilityStatus !== 'yellow';
-        const isWithinNotPendingHours =
-          isNumber(config.prNotPendingHours) &&
-          elapsedHours < config.prNotPendingHours;
+        const isWithinNotPendingHours = elapsedHours < config.prNotPendingHours;
         const isAwaitingTests = isStabilityPending || isWithinNotPendingHours;
         if (!dependencyDashboardCheck && isAwaitingTests) {
           logger.debug(
@@ -345,7 +349,6 @@ export async function ensurePr(
           }
         }
       } else if (logJSON.error === 'MissingGithubToken') {
-        upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes.push(
           emojify(
             codeBlock`
@@ -566,7 +569,7 @@ export async function ensurePr(
           prBody,
           labels: configuredLabels,
           platformPrOptions: getPlatformPrOptions(config),
-          draftPR: !!config.draftPR,
+          draftPR: config.draftPR,
           milestone: config.milestone,
         });
 
@@ -599,7 +602,7 @@ export async function ensurePr(
     if (
       pr &&
       config.branchAutomergeFailureMessage &&
-      !config.suppressNotifications?.includes('branchAutomergeFailure')
+      !config.suppressNotifications.includes('branchAutomergeFailure')
     ) {
       const topic = 'Branch automerge failure';
       let content =

@@ -1,4 +1,4 @@
-import { isArray, isNumber, isString } from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import type { SimpleGitOptions } from 'simple-git';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
@@ -41,7 +41,7 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
 
   // https://github.com/steveukx/git-js/pull/591
   const gitTimeout = GlobalConfig.get('gitTimeout');
-  if (isNumber(gitTimeout) && gitTimeout > 0) {
+  if (gitTimeout > 0) {
     config.timeout = { block: gitTimeout };
   }
   return config;

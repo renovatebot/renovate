@@ -7,7 +7,7 @@ import { getOnboardingCommitMessage } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
 export async function createOnboardingBranch(
-  config: Partial<RenovateConfig>,
+  config: RenovateConfig,
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
   const configFile = getDefaultConfigFileName();
@@ -17,7 +17,7 @@ export async function createOnboardingBranch(
 
   return await commitConfigFile({
     config,
-    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    branchName: getInheritedOrGlobal('onboardingBranch'),
     // TODO #22198
     getFiles: () => [{ type: 'addition', path: configFile, contents }],
     message: getOnboardingCommitMessage(config, configFile),

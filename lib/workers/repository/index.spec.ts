@@ -2,6 +2,7 @@ import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { renovateRepository } from './index.ts';
+import { applyRepoConfigDefaults } from './init/defaults.ts';
 import { initRepo } from './init/index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
 import * as _process from './process/index.ts';
@@ -18,7 +19,7 @@ describe('workers/repository/index', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
       config.localDir = '';
     });
 

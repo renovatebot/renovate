@@ -3201,6 +3201,9 @@ Renovate applies `overrideDescription` when it resolves presets, so the resolved
 If multiple rules match a dependency, configurations from matching rules will be merged together.
 The order of rules matters, because later rules may override configuration options from earlier ones, if they both specify the same option.
 
+A rule which sets an option with a default value to `null` gives it that default value, instead of the value from your config or from an earlier rule.
+Options which document their own meaning for `null`, like `minimumReleaseAgeBuffer`, keep that meaning.
+
 The matching process for a package rule:
 
 - Each package rule must include at least one `match...` matcher.

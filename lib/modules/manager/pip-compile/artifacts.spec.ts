@@ -3,6 +3,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -13,7 +14,7 @@ import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
+import type { Upgrade } from '../types.ts';
 import { constructPipCompileCmd } from './artifacts.ts';
 import { extractHeaderCommand } from './common.ts';
 import { updateArtifacts } from './index.ts';
@@ -70,7 +71,7 @@ const dockerAdminConfig = {
 
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('modules/manager/pip-compile/artifacts', () => {

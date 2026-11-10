@@ -1,5 +1,5 @@
 // TODO #22198
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfig, RenovateConfigFile } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import type { PackageFile } from '../../modules/manager/types.ts';
 import { coerceArray } from '../../util/array.ts';
@@ -8,7 +8,7 @@ import { coerceObject } from '../../util/object.ts';
 import { regEx } from '../../util/regex.ts';
 import type { DepWarnings } from '../types.ts';
 
-export function getWarnings(config: RenovateConfig): string {
+export function getWarnings(config: RenovateConfigFile): string {
   if (!config.warnings?.length) {
     return '';
   }
@@ -68,7 +68,7 @@ export function getDepWarningsOnboardingPR(
   config: RenovateConfig,
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+  if (config.suppressNotifications.includes('dependencyLookupWarnings')) {
     return '';
   }
   let warningText = '';
@@ -86,11 +86,14 @@ export function getDepWarningsOnboardingPR(
 
 export function getDepWarningsPR(
   packageFiles: Record<string, PackageFile[]>,
-  config: RenovateConfig,
+  config: Pick<
+    RenovateConfig,
+    'suppressNotifications' | 'dependencyDashboardIssue'
+  >,
   dependencyDashboard?: boolean,
 ): string {
   const { warnings } = getDepWarnings(packageFiles);
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+  if (config.suppressNotifications.includes('dependencyLookupWarnings')) {
     return '';
   }
   let warningText = '';
@@ -114,7 +117,7 @@ export function getDepWarningsDashboard(
   packageFiles: Record<string, PackageFile[]>,
   config: RenovateConfig,
 ): string {
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+  if (config.suppressNotifications.includes('dependencyLookupWarnings')) {
     return '';
   }
   const { warnings, warningFiles } = getDepWarnings(packageFiles);

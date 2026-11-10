@@ -19,7 +19,7 @@ export function commitFilesToBranch(
   // istanbul ignore if
   if (isNonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
-      const matchesExcludePaths = config.excludeCommitPaths!.some(
+      const matchesExcludePaths = config.excludeCommitPaths.some(
         (excludedPath) =>
           minimatch(excludedPath, { dot: true }).match(filePath),
       );
@@ -53,7 +53,7 @@ export function commitFilesToBranch(
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
-    message: config.commitMessage!,
+    message: config.commitMessage,
     trailers: config.commitTrailers,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,

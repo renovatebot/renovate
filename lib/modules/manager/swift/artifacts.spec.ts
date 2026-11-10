@@ -1,3 +1,4 @@
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs, logger, scm } from '~test/util.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -86,7 +87,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -99,7 +100,7 @@ describe('modules/manager/swift/artifacts', () => {
       packageFileName: 'Package.swift',
       updatedDeps: [],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -118,7 +119,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: { isLockFileMaintenance: true },
+      config: updateArtifactsConfig({ isLockFileMaintenance: true }),
     });
 
     expect(result).toBeNull();
@@ -138,7 +139,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -163,7 +164,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -185,7 +186,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -243,7 +244,7 @@ describe('modules/manager/swift/artifacts', () => {
           },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       }),
     ).resolves.toEqual([
       {
@@ -295,7 +296,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -328,7 +329,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -354,7 +355,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -376,7 +377,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -407,7 +408,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(2);
@@ -434,7 +435,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -462,7 +463,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -484,7 +485,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -506,7 +507,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -534,7 +535,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -558,7 +559,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -586,7 +587,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -629,7 +630,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -670,7 +671,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -695,7 +696,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -721,7 +722,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -745,7 +746,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -767,7 +768,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -791,7 +792,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -811,7 +812,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -832,7 +833,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -860,7 +861,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -884,7 +885,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -912,7 +913,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toBeNull();
@@ -942,7 +943,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -1019,7 +1020,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     // Only the direct dependent (pinned at the from-version 6.2.1) is updated;
@@ -1070,7 +1071,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);
@@ -1115,7 +1116,7 @@ describe('modules/manager/swift/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(result).toHaveLength(1);

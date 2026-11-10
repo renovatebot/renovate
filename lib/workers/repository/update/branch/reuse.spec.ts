@@ -1,6 +1,6 @@
 import { partial, platform, scm } from '~test/util.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import type { BranchReuseDecisionInput } from './reuse.ts';
 import { decideBranchReuse, shouldReuseExistingBranch } from './reuse.ts';
 
@@ -16,14 +16,14 @@ describe('workers/repository/update/branch/reuse', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         manager: 'some-manager',
         branchName: 'renovate/some-branch',
         baseBranch: 'base',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
         upgrades: [],
-      };
+      });
     });
 
     it('returns false if branch does not exist', async () => {
@@ -47,24 +47,24 @@ describe('workers/repository/update/branch/reuse', () => {
 
     it('returns false if does not need rebasing but has upgrades that need lockfile maintenance along with upgrades that do not', async () => {
       config.upgrades = [
-        {
+        partial<BranchUpgradeConfig>({
           manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'replace',
           branchName: 'current',
-        },
-        {
+        }),
+        partial<BranchUpgradeConfig>({
           manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
-        },
-        {
+        }),
+        partial<BranchUpgradeConfig>({
           manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'in-range-only',
           branchName: 'current',
-        },
+        }),
       ];
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(false);
@@ -74,18 +74,18 @@ describe('workers/repository/update/branch/reuse', () => {
 
     it('returns true if does not need rebasing and lockfile update is on different packages', async () => {
       config.upgrades = [
-        {
+        partial<BranchUpgradeConfig>({
           manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'replace',
           branchName: 'current',
-        },
-        {
+        }),
+        partial<BranchUpgradeConfig>({
           manager: 'some-manager',
           packageFile: 'subpackage/package.json',
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
-        },
+        }),
       ];
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(false);
@@ -341,12 +341,12 @@ describe('workers/repository/update/branch/reuse', () => {
 
     beforeEach(() => {
       input = {
-        config: {
+        config: partial<BranchConfig>({
           manager: 'some-manager',
           branchName: 'renovate/some-branch',
           baseBranch: 'base',
           upgrades: [],
-        },
+        }),
         branchPr: null,
         branchExists: true,
         dependencyDashboardCheck: undefined,

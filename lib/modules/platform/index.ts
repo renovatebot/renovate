@@ -46,7 +46,7 @@ export function setPlatformApi(name: PlatformId): void {
   setPlatformScmApi(name);
 }
 
-export async function initPlatform(config: AllConfig): Promise<AllConfig> {
+export async function initPlatform<T extends AllConfig>(config: T): Promise<T> {
   setPrivateKey(config.gitPrivateKey, config.gitPrivateKeyPassphrase);
   setNoVerify(coerceArray(config.gitNoVerify));
   // TODO: `platform` (#22198)

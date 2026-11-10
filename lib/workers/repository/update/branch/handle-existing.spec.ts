@@ -16,7 +16,7 @@ describe('workers/repository/update/branch/handle-existing', () => {
 
   beforeEach(() => {
     GlobalConfig.reset();
-    config = {
+    config = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
@@ -28,7 +28,7 @@ describe('workers/repository/update/branch/handle-existing', () => {
         ignoreDigest: 'ignore-digest',
         ignoreOther: 'ignore-other',
       },
-    };
+    });
   });
 
   describe('handleClosedPr', () => {

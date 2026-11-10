@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { getPreset } from '../../../../config/presets/local/index.ts';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util.ts';
 import type {
-  RenovateConfig,
+  RenovateConfigFile,
   RenovateSharedConfig,
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -14,7 +14,7 @@ import {
 } from '../../../../util/json-writer/index.ts';
 
 async function getOnboardingConfig(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
 ): Promise<RenovateSharedConfig | undefined> {
   let onboardingConfig = clone(getInheritedOrGlobal('onboardingConfig'));
 
@@ -106,7 +106,7 @@ async function searchDefaultOnboardingPreset(
 }
 
 async function getOnboardingConfigContents(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   fileName: string,
 ): Promise<string> {
   const codeFormat = await EditorConfig.getCodeFormat(fileName);

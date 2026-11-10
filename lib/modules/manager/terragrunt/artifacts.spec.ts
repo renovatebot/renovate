@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -6,7 +7,6 @@ import type {
   UpdateType,
 } from '../../../config/types.ts';
 import * as terraformLockfile from '../terraform/lockfile/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../terraform/lockfile/index.ts');
@@ -42,10 +42,10 @@ describe('modules/manager/terragrunt/artifacts', () => {
   });
 
   it('calls terraform updateArtifacts if the update type is lockfileMaintenance', async () => {
-    const localConfig: UpdateArtifactsConfig = {
+    const localConfig = updateArtifactsConfig({
       isLockFileMaintenance: true,
       ...config,
-    };
+    });
 
     const param = {
       packageFileName: '',
@@ -62,10 +62,10 @@ describe('modules/manager/terragrunt/artifacts', () => {
   it.each(updateTypes)(
     'does not call terraform updateArtifacts if the update type is %s',
     async (updateType) => {
-      const localConfig: UpdateArtifactsConfig = {
+      const localConfig = updateArtifactsConfig({
         updateType,
         ...config,
-      };
+      });
 
       await updateArtifacts({
         packageFileName: '',

@@ -81,13 +81,20 @@ describe('workers/repository/update/pr/index', () => {
       targetBranch: 'base',
     };
 
-    const config: BranchConfig = {
+    const config = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: sourceBranch,
       baseBranch: 'base',
       upgrades: [],
       prTitle,
-    };
+      labels: [],
+      addLabels: [],
+      assignees: [],
+      reviewers: [],
+      additionalReviewers: [],
+      automergeType: 'pr',
+      suppressNotifications: [],
+    });
 
     beforeEach(() => {
       GlobalConfig.reset();
@@ -1362,6 +1369,7 @@ describe('workers/repository/update/pr/index', () => {
               // but the update we're updating to does not
               { version: '2.3.4', attestation: false },
             ],
+            prBodyNotes: [],
           });
 
           it('warns the user', async () => {

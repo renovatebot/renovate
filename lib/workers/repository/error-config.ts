@@ -53,7 +53,7 @@ async function raiseWarningIssue(
   }
 
   const pr = await platform.getBranchPr(
-    getInheritedOrGlobal('onboardingBranch')!,
+    getInheritedOrGlobal('onboardingBranch'),
     config.baseBranch,
   );
   if (pr?.state === 'open') {
@@ -69,7 +69,7 @@ async function raiseWarningIssue(
     return;
   }
 
-  if (config.suppressNotifications?.includes(notificationName)) {
+  if (config.suppressNotifications.includes(notificationName)) {
     logger.info(
       { notificationName },
       'Configuration failure, issues will be suppressed',

@@ -1,9 +1,8 @@
 import { isScheduledNow } from '../../../workers/repository/update/branch/schedule.ts';
-import type { RenovateConfig } from '../../types.ts';
 import { presets } from './schedule.preset.ts';
 
 describe('config/presets/internal/schedule', () => {
-  let config: RenovateConfig;
+  let config: Parameters<typeof isScheduledNow>[0];
 
   beforeAll(() => {
     vi.useFakeTimers();
@@ -12,7 +11,7 @@ describe('config/presets/internal/schedule', () => {
   beforeEach(() => {
     vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
-    config = {};
+    config = { schedule: ['at any time'], automergeSchedule: ['at any time'] };
   });
 
   describe('daily', () => {
@@ -24,7 +23,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-30T03:50:00.000'} | ${true}
       ${'2017-06-30T04:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.daily.schedule;
+      config = { ...config, ...presets.daily };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -40,7 +39,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-26T04:50:00.000'} | ${false}
       ${'2017-06-30T00:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.earlyMondays.schedule;
+      config = { ...config, ...presets.earlyMondays };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -56,7 +55,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-01T04:50:00.000'} | ${false}
       ${'2017-06-02T00:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.monthly.schedule;
+      config = { ...config, ...presets.monthly };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -76,7 +75,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-01T23:50:00.000'} | ${true}
       ${'2017-06-03T09:50:00.000'} | ${true}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.nonOfficeHours.schedule;
+      config = { ...config, ...presets.nonOfficeHours };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -106,7 +105,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-04T17:50:00.000'} | ${false}
       ${'2017-06-04T18:10:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.officeHours.schedule;
+      config = { ...config, ...presets.officeHours };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -125,7 +124,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-10-01T03:50:00.000'} | ${true}
       ${'2017-02-01T04:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.quarterly.schedule;
+      config = { ...config, ...presets.quarterly };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -142,7 +141,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-06T10:50:00.000'} | ${true}
       ${'2017-06-07T11:50:00.000'} | ${true}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.weekdays.schedule;
+      config = { ...config, ...presets.weekdays };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -159,7 +158,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-06T10:50:00.000'} | ${false}
       ${'2017-06-07T11:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.weekends.schedule;
+      config = { ...config, ...presets.weekends };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
@@ -172,7 +171,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-02-02T01:50:00.000'} | ${false}
       ${'2018-01-01T02:50:00.000'} | ${true}
     `('$datetime', ({ datetime, expected }) => {
-      config.schedule = presets.yearly.schedule;
+      config = { ...config, ...presets.yearly };
       vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });

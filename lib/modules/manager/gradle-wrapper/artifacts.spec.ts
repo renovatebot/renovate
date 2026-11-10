@@ -5,6 +5,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -15,7 +16,7 @@ import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
-import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
+import type { UpdateArtifactsResult } from '../types.ts';
 import { updateBuildFile, updateLockFiles } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -37,9 +38,9 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {
+const config = updateArtifactsConfig({
   newValue: '5.6.4',
-};
+});
 
 const osPlatformSpy = vi.spyOn(os, 'platform');
 
@@ -239,7 +240,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(result).toBeNull();
@@ -549,7 +550,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     it('returns early if build script file not found', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
 
-      const res = await updateLockFiles('', {});
+      const res = await updateLockFiles('', updateArtifactsConfig());
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'build.gradle or build.gradle.kts not found',

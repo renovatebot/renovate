@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractConfig } from '~test/manager-config.ts';
 import { extractPackageFile } from './index.ts';
 
 const validApplication = Fixtures.get('validApplication.yml');
@@ -10,17 +11,27 @@ const validApplicationSet = Fixtures.get('validApplicationSet.yml');
 describe('modules/manager/argocd/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', 'applications.yml')).toBeNull();
+      expect(
+        extractPackageFile('nothing here', 'applications.yml', extractConfig()),
+      ).toBeNull();
     });
 
     it('returns null for invalid', () => {
       expect(
-        extractPackageFile(`${malformedApplication}\n123`, 'applications.yml'),
+        extractPackageFile(
+          `${malformedApplication}\n123`,
+          'applications.yml',
+          extractConfig(),
+        ),
       ).toBeNull();
     });
 
     it('return null for kubernetes manifest', () => {
-      const result = extractPackageFile(randomManifest, 'applications.yml');
+      const result = extractPackageFile(
+        randomManifest,
+        'applications.yml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
@@ -28,6 +39,7 @@ describe('modules/manager/argocd/extract', () => {
       const result = extractPackageFile(
         malformedApplication,
         'applications.yml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -44,6 +56,7 @@ spec:
     targetRevision: 2.4.1
         `,
         'applications.yml',
+        extractConfig(),
       );
       expect(result).toMatchObject({
         deps: [
@@ -71,6 +84,7 @@ spec:
     targetRevision: 2.4.1
         `,
         'applications.yml',
+        extractConfig(),
       );
       expect(result).toMatchObject({
         deps: [
@@ -130,7 +144,11 @@ spec:
     });
 
     it('full test', () => {
-      const result = extractPackageFile(validApplication, 'applications.yml');
+      const result = extractPackageFile(
+        validApplication,
+        'applications.yml',
+        extractConfig(),
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -262,6 +280,7 @@ spec:
       const result = extractPackageFile(
         validApplicationSet,
         'applicationsets.yml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [

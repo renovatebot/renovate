@@ -1,16 +1,16 @@
 import * as massage from './massage.ts';
-import type { RenovateConfig } from './types.ts';
+import type { RenovateConfigFile } from './types.ts';
 
 describe('config/massage', () => {
   describe('massageConfig', () => {
     it('returns empty', () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfigFile = {};
       const res = massage.massageConfig(config);
       expect(res).toEqual({});
     });
 
     it('massages strings to array', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         schedule: 'before 5am' as never,
       };
       const res = massage.massageConfig(config);
@@ -18,7 +18,7 @@ describe('config/massage', () => {
     });
 
     it('normalizes zero minimumReleaseAge to null', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         minimumReleaseAge: '0 days',
       };
 
@@ -28,7 +28,7 @@ describe('config/massage', () => {
     });
 
     it('normalizes zero minimumReleaseAge in packageRules', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         packageRules: [
           {
             matchPackageNames: ['foo'],
@@ -56,7 +56,7 @@ describe('config/massage', () => {
     });
 
     it('massages packageRules matchUpdateTypes', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         packageRules: [
           {
             matchPackageNames: ['foo'],
@@ -93,7 +93,7 @@ describe('config/massage', () => {
     });
 
     it('filters packageRules with only match/exclude', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         packageRules: [
           {
             matchBaseBranches: ['main'],
@@ -108,7 +108,7 @@ describe('config/massage', () => {
     });
 
     it('does not massage lockFileMaintenance', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         packageRules: [
           {
             matchManagers: ['helmv3'],

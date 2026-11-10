@@ -3,7 +3,7 @@ import { parseYaml } from '../../../util/yaml.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -13,7 +13,7 @@ import { removeRepositoryName } from './util.ts';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageFileContent | null {
   const definitions = parseYaml(content, {
     customSchema: ProfileDefinition,
@@ -32,7 +32,7 @@ export function extractPackageFile(
 
 export function extractDefinition(
   definition: ProfileDefinition,
-  config?: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageDependency[] {
   return processAppSpec(definition, config);
 }
@@ -67,7 +67,7 @@ function processHelmCharts(
 
 function processAppSpec(
   definition: ProfileDefinition,
-  config?: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -79,7 +79,7 @@ function processAppSpec(
       : definition.spec?.helmCharts;
 
   for (const source of coerceArray(helmCharts)) {
-    const dep = processHelmCharts(source, config?.registryAliases);
+    const dep = processHelmCharts(source, config.registryAliases);
     dep.depType = depType;
     deps.push(dep);
   }

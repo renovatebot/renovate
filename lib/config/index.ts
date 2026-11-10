@@ -2,10 +2,12 @@ import { logger } from '../logger/index.ts';
 import { getDefaultConfig } from '../modules/datasource/index.ts';
 import { allManagersList, get } from '../modules/manager/index.ts';
 import * as options from './options/index.ts';
+import { isFilteredOption } from './stages.ts';
 import type {
   AllConfig,
   ManagerConfig,
   RenovateConfig,
+  RenovateConfigFile,
   RenovateConfigStage,
 } from './types.ts';
 import { mergeChildConfig } from './utils.ts';
@@ -50,10 +52,10 @@ export async function applyDatasourceDefaultConfig<
 }
 
 export function removeGlobalConfig(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   keepInherited: boolean,
-): RenovateConfig {
-  const outputConfig: RenovateConfig = { ...config };
+): RenovateConfigFile {
+  const outputConfig: RenovateConfigFile = { ...config };
   for (const option of options.getOptions()) {
     if (keepInherited && option.inheritConfigSupport) {
       continue;
@@ -72,18 +74,8 @@ export function filterConfig<T extends AllConfig = AllConfig>(
 ): T {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: T = { ...inputConfig };
-  const stages: (string | undefined)[] = [
-    'global',
-    'inherit',
-    'repository',
-    'package',
-    'branch',
-    'pr',
-  ];
-  const targetIndex = stages.indexOf(targetStage);
   for (const option of options.getOptions()) {
-    const optionIndex = stages.indexOf(option.stage);
-    if (optionIndex !== -1 && optionIndex < targetIndex) {
+    if (isFilteredOption(option, targetStage)) {
       // @ts-expect-error -- not easily typed
       delete outputConfig[option.name];
     }

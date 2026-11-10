@@ -93,7 +93,7 @@ export async function generateUpdate(
     update.isBreaking = update.updateType === 'major';
   }
   const { datasource, packageName, packageRules } = config;
-  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
+  if (packageRules.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
     update.mergeConfidenceLevel = await getMergeConfidenceLevel(
       datasource,
       packageName,

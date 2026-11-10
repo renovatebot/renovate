@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises';
 import upath from 'upath';
-import type { RenovateConfig } from '../types.ts';
+import type { RenovateConfigFile } from '../types.ts';
 import { AbstractMigration } from './base/abstract-migration.ts';
 import { MigrationsService } from './migrations-service.ts';
 import type { Migration } from './types.ts';
@@ -8,7 +8,7 @@ import type { Migration } from './types.ts';
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
     for (const property of MigrationsService.removedProperties) {
-      const originalConfig: RenovateConfig = {
+      const originalConfig: RenovateConfigFile = {
         [property]: 'test',
       };
 
@@ -25,7 +25,7 @@ describe('config/migrations/migrations-service', () => {
       oldPropertyName,
       newPropertyName,
     ] of MigrationsService.renamedProperties.entries()) {
-      const originalConfig: RenovateConfig = {
+      const originalConfig: RenovateConfigFile = {
         [oldPropertyName]: 'test',
       };
 
@@ -59,7 +59,7 @@ describe('config/migrations/migrations-service', () => {
 
   it('should allow custom migrations by regexp', () => {
     let isMigrationDone = false;
-    const originalConfig: RenovateConfig = {
+    const originalConfig: RenovateConfigFile = {
       // @ts-expect-error --  testing
       fooBar: 'one',
     };
@@ -74,8 +74,8 @@ describe('config/migrations/migrations-service', () => {
 
     class CustomMigrationsService extends MigrationsService {
       public static override getMigrations(
-        original: RenovateConfig,
-        migrated: RenovateConfig,
+        original: RenovateConfigFile,
+        migrated: RenovateConfigFile,
       ): readonly Migration[] {
         return [new CustomMigration(original, migrated)];
       }

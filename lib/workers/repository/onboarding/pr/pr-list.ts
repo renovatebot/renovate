@@ -5,13 +5,13 @@ import {
   type RenovateConfig,
   type UpdateType,
   UpdateTypesOptions,
+  type VulnerabilityAlertsConfig,
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { calcLimit } from '../../../global/limits.ts';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 /**
  * The different categories of dependency updates to output, when providing the summary view.
@@ -47,9 +47,7 @@ interface ConcurrentLimit {
  * restrictive - otherwise we'd misattribute the limit to a setting the user never touched.
  */
 function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
-  const configAsUpgrade: BranchUpgradeConfig = {
-    branchName: '',
-    manager: '',
+  const configAsUpgrade = {
     prConcurrentLimit: config.prConcurrentLimit,
     branchConcurrentLimit: config.branchConcurrentLimit,
   };
@@ -83,23 +81,17 @@ function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
 function resolveVulnerabilityConcurrentLimit(
   config: RenovateConfig,
 ): ConcurrentLimit {
-  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
-  // `branchConcurrentLimit`, even though both are valid nested options (see docs for `vulnerabilityAlerts`).
-  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
-  const vulnerabilityAlerts = config.vulnerabilityAlerts as
-    RenovateConfig | undefined;
-  const vulnerabilityAlertsDefault = getDefault(
+  const { vulnerabilityAlerts } = config;
+  const vulnerabilityAlertsDefault: VulnerabilityAlertsConfig = getDefault(
     getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
-  ) as RenovateConfig;
-  const configAsUpgrade: BranchUpgradeConfig = {
-    branchName: '',
-    manager: '',
+  );
+  const configAsUpgrade = {
     prConcurrentLimit:
-      vulnerabilityAlerts?.prConcurrentLimit ??
+      vulnerabilityAlerts.prConcurrentLimit ??
       vulnerabilityAlertsDefault.prConcurrentLimit,
     // `undefined` and `null` are handled identically by `calcLimit()` (both inherit `prConcurrentLimit`),
     // so there's no default value to duplicate here - unlike `prConcurrentLimit` above.
-    branchConcurrentLimit: vulnerabilityAlerts?.branchConcurrentLimit,
+    branchConcurrentLimit: vulnerabilityAlerts.branchConcurrentLimit,
   };
   const prConcurrentLimit = calcLimit([configAsUpgrade], 'prConcurrentLimit');
   const branchConcurrentLimit = calcLimit(
@@ -110,7 +102,7 @@ function resolveVulnerabilityConcurrentLimit(
   const isBelowPrLimit =
     prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit;
   if (
-    typeof vulnerabilityAlerts?.branchConcurrentLimit === 'number' &&
+    typeof vulnerabilityAlerts.branchConcurrentLimit === 'number' &&
     branchConcurrentLimit > 0 &&
     isBelowPrLimit
   ) {
@@ -203,8 +195,8 @@ export function getExpectedPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
-  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
-  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const prHourlyLimit = config.prHourlyLimit;
+  const commitHourlyLimit = config.commitHourlyLimit;
   const securityBypassNote =
     securityBranchCount > 0
       ? ` Security update Pull Request${securityBranchCount > 1 ? 's are' : ' is'} not subject to this limit and will be created straight away.`
@@ -474,8 +466,8 @@ export function getExpectedPrListSummary(
   const sortedBases = sortBaseBranches(Object.keys(stats.prCountByBase));
   const hasMultipleBaseBranches = sortedBases.length > 1;
 
-  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
-  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const prHourlyLimit = config.prHourlyLimit;
+  const commitHourlyLimit = config.commitHourlyLimit;
   const concurrentLimit = resolveConcurrentLimit(config);
   const vulnerabilityLimit = resolveVulnerabilityConcurrentLimit(config);
   // Vulnerability alert branches bypass the repository-wide rate/concurrency limits, so they shouldn't

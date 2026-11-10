@@ -1,6 +1,6 @@
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { RenovateConfig } from '../../types.ts';
+import type { RenovateConfigFile } from '../../types.ts';
 import { validateConfig } from '../../validation.ts';
 import { resolveConfigPresets } from '../index.ts';
 import * as npm from '../npm/index.ts';
@@ -19,7 +19,10 @@ const packageRuleFragmentGroups = ['monorepo', 'packages'];
 
 // Every other preset is validated the way `inheritConfig` and repository config consume it: resolved into the config extending it and validated as a whole.
 // This deliberately does not use the `isPreset` leniency of `validateConfig()`, which lets a preset source keep selectors at its top level.
-function presetUsage(groupName: string, presetName: string): RenovateConfig {
+function presetUsage(
+  groupName: string,
+  presetName: string,
+): RenovateConfigFile {
   const preset = `${groupName}:${presetName}`;
   if (packageRuleFragmentGroups.includes(groupName)) {
     return { packageRules: [{ extends: [preset], groupName: presetName }] };

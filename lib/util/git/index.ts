@@ -20,7 +20,7 @@ import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings.ts';
 import { GlobalConfig } from '../../config/global.ts';
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -282,7 +282,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
   logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
-  const localDir = GlobalConfig.get('localDir');
+  const localDir = GlobalConfig.getRequired('localDir');
   const repoExists = await fs.pathExists(upath.join(localDir, '.git/HEAD'));
   if (config.extraCloneOpts && !repoExists) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
@@ -418,7 +418,7 @@ export async function writeGitAuthor(): Promise<void> {
 export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
-}: RenovateConfig): void {
+}: RenovateConfigFile): void {
   config.ignoredAuthors = coerceArray(gitIgnoredAuthors);
   setGitAuthor(gitAuthor);
 }
@@ -525,7 +525,7 @@ export const syncGit = withInstrumenting(
       throw new Error('Cannot sync git when platform=local');
     }
     gitInitialized = true;
-    const localDir = GlobalConfig.get('localDir');
+    const localDir = GlobalConfig.getRequired('localDir');
     logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
     const gitHead = upath.join(localDir, '.git/HEAD');
     let clone = true;
@@ -673,7 +673,7 @@ export const syncGit = withInstrumenting(
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
-    const localDir = GlobalConfig.get('localDir');
+    const localDir = GlobalConfig.getRequired('localDir');
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(
@@ -1417,7 +1417,7 @@ export async function prepareCommit({
   trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
-  const localDir = GlobalConfig.get('localDir');
+  const localDir = GlobalConfig.getRequired('localDir');
   await syncGit();
   logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);

@@ -39,6 +39,12 @@ describe('workers/repository/update/branch/status-checks', () => {
         statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           minimumReleaseAge: 'renovate/stability-days',
         }),
+        statusCheckWhen: {
+          artifactError: 'failed',
+          configValidation: 'always',
+          mergeConfidence: 'always',
+          minimumReleaseAge: 'always',
+        },
       });
       GlobalConfig.reset();
     });
@@ -123,19 +129,6 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
-    it('skips status if statusCheckNames is undefined', async () => {
-      config.stabilityStatus = 'green';
-      await setStability({
-        ...config,
-        statusCheckNames: undefined,
-      });
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
-      );
-      expect(platform.setBranchStatus).not.toHaveBeenCalled();
-    });
-
     it('does not set status in dry mode', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.stabilityStatus = 'green';
@@ -150,7 +143,7 @@ describe('workers/repository/update/branch/status-checks', () => {
     describe('statusCheckWhen.minimumReleaseAge', () => {
       it('skips status entirely when mode is "never"', async () => {
         config.stabilityStatus = 'green';
-        config.statusCheckWhen = { minimumReleaseAge: 'never' };
+        config.statusCheckWhen.minimumReleaseAge = 'never';
         await setStability(config);
         expect(logger.debug).toHaveBeenCalledWith(
           'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
@@ -160,7 +153,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       it('does not log when mode is "never" and no stability status is set', async () => {
-        config.statusCheckWhen = { minimumReleaseAge: 'never' };
+        config.statusCheckWhen.minimumReleaseAge = 'never';
         await setStability(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
           'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
@@ -171,7 +164,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
       it('skips green status when mode is "failed"', async () => {
         config.stabilityStatus = 'green';
-        config.statusCheckWhen = { minimumReleaseAge: 'failed' };
+        config.statusCheckWhen.minimumReleaseAge = 'failed';
         await setStability(config);
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
@@ -179,7 +172,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
       it('sets yellow status when mode is "failed"', async () => {
         config.stabilityStatus = 'yellow';
-        config.statusCheckWhen = { minimumReleaseAge: 'failed' };
+        config.statusCheckWhen.minimumReleaseAge = 'failed';
         await setStability(config);
         expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
         expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -187,7 +180,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
       it('sets green status when mode is "always" (default)', async () => {
         config.stabilityStatus = 'green';
-        config.statusCheckWhen = { minimumReleaseAge: 'always' };
+        config.statusCheckWhen.minimumReleaseAge = 'always';
         await setStability(config);
         expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
         expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -204,6 +197,12 @@ describe('workers/repository/update/branch/status-checks', () => {
         statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           mergeConfidence: 'renovate/merge-confidence',
         }),
+        statusCheckWhen: {
+          artifactError: 'failed',
+          configValidation: 'always',
+          mergeConfidence: 'always',
+          minimumReleaseAge: 'always',
+        },
       };
       GlobalConfig.reset();
     });
@@ -288,20 +287,6 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
-    it('skips status if statusCheckNames is undefined', async () => {
-      config.minimumConfidence = 'high';
-      config.confidenceStatus = 'green';
-      await setConfidence({
-        ...config,
-        statusCheckNames: undefined,
-      });
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
-      );
-      expect(platform.setBranchStatus).not.toHaveBeenCalled();
-    });
-
     it('does not set status in dry mode', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.minimumConfidence = 'high';
@@ -318,7 +303,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       it('skips status entirely when mode is "never"', async () => {
         config.minimumConfidence = 'high';
         config.confidenceStatus = 'yellow';
-        config.statusCheckWhen = { mergeConfidence: 'never' };
+        config.statusCheckWhen.mergeConfidence = 'never';
         await setConfidence(config);
         expect(logger.debug).toHaveBeenCalledWith(
           'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
@@ -329,7 +314,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
       it('does not log when mode is "never" and no confidence status is set', async () => {
         config.minimumConfidence = 'high';
-        config.statusCheckWhen = { mergeConfidence: 'never' };
+        config.statusCheckWhen.mergeConfidence = 'never';
         await setConfidence(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
           'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
@@ -341,7 +326,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       it('skips green status when mode is "failed"', async () => {
         config.minimumConfidence = 'high';
         config.confidenceStatus = 'green';
-        config.statusCheckWhen = { mergeConfidence: 'failed' };
+        config.statusCheckWhen.mergeConfidence = 'failed';
         await setConfidence(config);
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
@@ -350,7 +335,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       it('sets yellow status when mode is "failed"', async () => {
         config.minimumConfidence = 'high';
         config.confidenceStatus = 'yellow';
-        config.statusCheckWhen = { mergeConfidence: 'failed' };
+        config.statusCheckWhen.mergeConfidence = 'failed';
         await setConfidence(config);
         expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
         expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -359,7 +344,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       it('sets green status when mode is "always" (default)', async () => {
         config.minimumConfidence = 'high';
         config.confidenceStatus = 'green';
-        config.statusCheckWhen = { mergeConfidence: 'always' };
+        config.statusCheckWhen.mergeConfidence = 'always';
         await setConfidence(config);
         expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
         expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -379,7 +364,12 @@ describe('workers/repository/update/branch/status-checks', () => {
     function branchConfig(upgrades: Partial<BranchUpgradeConfig>[]) {
       return partial<BranchConfig>({
         branchName: 'renovate/some-branch',
-        upgrades: partial<BranchUpgradeConfig>(upgrades),
+        upgrades: partial<BranchUpgradeConfig>(
+          upgrades.map((upgrade): Partial<BranchUpgradeConfig> => ({
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+            ...upgrade,
+          })),
+        ),
       });
     }
 

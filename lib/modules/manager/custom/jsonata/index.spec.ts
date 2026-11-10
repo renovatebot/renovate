@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { extractConfig } from '~test/manager-config.ts';
 import { logger, partial } from '~test/util.ts';
 import { defaultConfig, extractPackageFile } from './index.ts';
 import type { JsonataExtractConfig } from './types.ts';
@@ -28,6 +29,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null when no content', async () => {
     const res = await extractPackageFile('', 'foo-file', {
+      ...extractConfig(),
       fileFormat: 'json',
       matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
@@ -71,7 +73,10 @@ describe('modules/manager/custom/jsonata/index', () => {
         `,
       ],
     };
-    const res = await extractPackageFile(json, 'unused', config);
+    const res = await extractPackageFile(json, 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(res).toMatchObject({
       ...config,
@@ -126,7 +131,10 @@ describe('modules/manager/custom/jsonata/index', () => {
         `,
       ],
     };
-    const res = await extractPackageFile(json, 'unused', config);
+    const res = await extractPackageFile(json, 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(res).toMatchObject({
       ...config,
@@ -200,7 +208,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       depTypeTemplate:
         '{{#if depType}}{{depType}}{{else}}default-dep-type{{/if}}',
     };
-    const res = await extractPackageFile(json, 'unused', config);
+    const res = await extractPackageFile(json, 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(res).toMatchObject({
       ...config,
@@ -260,7 +271,10 @@ describe('modules/manager/custom/jsonata/index', () => {
         `,
       ],
     };
-    const res = await extractPackageFile(json, 'unused', config);
+    const res = await extractPackageFile(json, 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(res).toBeNull();
 
@@ -277,7 +291,10 @@ describe('modules/manager/custom/jsonata/index', () => {
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
     };
-    const res = await extractPackageFile('{}', 'unused', config);
+    const res = await extractPackageFile('{}', 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
       {
@@ -298,7 +315,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver', // invalid template
     };
-    const res = await extractPackageFile('{}', 'unused', config);
+    const res = await extractPackageFile('{}', 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
     expect(res).toBeNull();
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -315,7 +335,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
       registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
     };
-    const res = await extractPackageFile('{}', 'unused', config);
+    const res = await extractPackageFile('{}', 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
     expect(res).not.toBeNull();
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -331,7 +354,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
     };
-    const res = await extractPackageFile('{}', 'unused', config);
+    const res = await extractPackageFile('{}', 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
     expect(res).toMatchObject({
       ...config,
       deps: [
@@ -356,7 +382,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
     };
-    const res = await extractPackageFile('{}', 'unused', config);
+    const res = await extractPackageFile('{}', 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
       {
@@ -385,7 +414,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       datasourceTemplate: 'npm',
       autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
     };
-    const res = await extractPackageFile('{}', 'unused', config);
+    const res = await extractPackageFile('{}', 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
     expect(res).toMatchObject({
       deps: [
         {
@@ -440,7 +472,10 @@ describe('modules/manager/custom/jsonata/index', () => {
         `,
       ],
     };
-    const res = await extractPackageFile(json, 'unused', config);
+    const res = await extractPackageFile(json, 'unused', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(res).toMatchObject({
       ...config,
@@ -474,7 +509,10 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
       datasourceTemplate: 'docker',
     };
-    const res = await extractPackageFile(yaml, 'some.yaml', config);
+    const res = await extractPackageFile(yaml, 'some.yaml', {
+      ...extractConfig(),
+      ...config,
+    });
 
     expect(res).toEqual({
       datasourceTemplate: 'docker',

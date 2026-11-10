@@ -14,7 +14,7 @@ import { tryDecryptBcPgp } from './decrypt/bcpgp.ts';
 import { tryDecryptOpenPgp } from './decrypt/openpgp.ts';
 import { GlobalConfig } from './global.ts';
 import { DecryptedObject } from './schema.ts';
-import type { AllConfig, RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfigFile } from './types.ts';
 
 let privateKey: string | undefined;
 let privateKeyOld: string | undefined;
@@ -135,7 +135,7 @@ export function validateDecryptedValue(
   return null;
 }
 
-export async function decryptConfig<T extends RenovateConfig = AllConfig>(
+export async function decryptConfig<T extends RenovateConfigFile = AllConfig>(
   config: T,
   repository: string,
   existingPath = '$',
@@ -203,8 +203,8 @@ Refer to migration documents here: ${GlobalConfig.get('productLinks').documentat
         if (isObject(item) && !isArray(item)) {
           const path = `${existingPath}.${key}[${index}]`;
           // @ts-expect-error -- type can't be narrowed
-          (decryptedConfig[key] as RenovateConfig[]).push(
-            await decryptConfig(item as RenovateConfig, repository, path),
+          (decryptedConfig[key] as RenovateConfigFile[]).push(
+            await decryptConfig(item as RenovateConfigFile, repository, path),
           );
         } else {
           // @ts-expect-error -- type can't be narrowed
@@ -215,7 +215,7 @@ Refer to migration documents here: ${GlobalConfig.get('productLinks').documentat
       const path = `${existingPath}.${key}`;
       // @ts-expect-error -- type can't be narrowed
       decryptedConfig[key] = await decryptConfig(
-        val as RenovateConfig,
+        val as RenovateConfigFile,
         repository,
         path,
       );

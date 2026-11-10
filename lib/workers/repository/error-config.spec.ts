@@ -18,6 +18,7 @@ beforeEach(() => {
     onboardingBranch: 'configure/renovate',
     configWarningReuseIssue: true,
     confidential: false,
+    suppressNotifications: [],
   });
 });
 

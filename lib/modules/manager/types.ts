@@ -50,6 +50,13 @@ export interface ExtractConfig extends CustomExtractConfig {
 }
 
 /**
+ * The {@link ExtractConfig} which Renovate extracts the package files with, which has the `registryAliases` of the repository config.
+ */
+export interface DefaultedExtractConfig extends ExtractConfig {
+  registryAliases: Record<string, string>;
+}
+
+/**
  * The part of a manager config that `resolveToolConstraint()` reads. Managers
  * must not read these properties directly (enforced by the
  * `renovate/prefer-resolve-tool-constraint` lint rule), so that user config, a
@@ -80,18 +87,18 @@ export interface ToolConstraintsConfig {
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
-  composerIgnorePlatformReqs?: string[];
-  goGetDirs?: string[];
+  composerIgnorePlatformReqs?: string[] | null;
+  goGetDirs: string[];
   currentValue?: string;
-  postUpdateOptions?: string[];
-  ignorePlugins?: boolean;
-  ignoreScripts?: boolean;
+  postUpdateOptions: string[];
+  ignorePlugins: boolean;
+  ignoreScripts: boolean;
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
-  registryAliases?: Record<string, string>;
-  skipArtifactsUpdate?: boolean;
+  registryAliases: Record<string, string>;
+  skipArtifactsUpdate: boolean;
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
@@ -103,7 +110,7 @@ export interface RangeConfig<T = unknown> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string;
-  rangeStrategy?: RangeStrategy;
+  rangeStrategy: RangeStrategy;
 }
 
 export interface PackageFileContent<T = unknown> extends ManagerData<T> {
@@ -539,14 +546,14 @@ export interface ManagerApiBase extends ModuleApi {
   detectGlobalConfig?(): MaybePromise<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
-    config: ExtractConfig,
+    config: DefaultedExtractConfig,
     files: string[],
   ): MaybePromise<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
-    packageFile?: string,
-    config?: ExtractConfig,
+    packageFile: string,
+    config: DefaultedExtractConfig,
   ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
@@ -593,25 +600,25 @@ export type ManagerApi = ManagerApiBase &
     | {
         supportsNpmrc: true;
         extractAllPackageFiles?(
-          config: ExtractConfig,
+          config: DefaultedExtractConfig,
           files: string[],
         ): MaybePromise<NpmrcPackageFile[] | null>;
         extractPackageFile?(
           content: string,
-          packageFile?: string,
-          config?: ExtractConfig,
+          packageFile: string,
+          config: DefaultedExtractConfig,
         ): MaybePromise<NpmrcPackageFileContent | null>;
       }
     | {
         supportsNpmrc?: false;
         extractAllPackageFiles?(
-          config: ExtractConfig,
+          config: DefaultedExtractConfig,
           files: string[],
         ): MaybePromise<(PackageFile & { npmrc?: never })[] | null>;
         extractPackageFile?(
           content: string,
-          packageFile?: string,
-          config?: ExtractConfig,
+          packageFile: string,
+          config: DefaultedExtractConfig,
         ): MaybePromise<(PackageFileContent & { npmrc?: never }) | null>;
       }
   );
@@ -622,10 +629,10 @@ export interface PostUpdateConfig<T = unknown>
   // TODO: remove null
   constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
-  postUpdateOptions?: string[];
-  skipArtifactsUpdate?: boolean;
+  postUpdateOptions: string[];
+  skipArtifactsUpdate: boolean;
   skipInstalls?: boolean | null;
-  ignoreScripts?: boolean;
+  ignoreScripts: boolean;
 
   packageFile?: string;
 

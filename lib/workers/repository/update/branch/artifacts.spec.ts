@@ -10,7 +10,7 @@ describe('workers/repository/update/branch/artifacts', () => {
 
   beforeEach(() => {
     GlobalConfig.set({});
-    config = {
+    config = partial<BranchConfig>({
       baseBranch: 'base-branch',
       manager: 'some-manager',
       branchName: 'renovate/pin',
@@ -19,7 +19,13 @@ describe('workers/repository/update/branch/artifacts', () => {
       statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         artifactError: 'renovate/artifact',
       }),
-    } satisfies BranchConfig;
+      statusCheckWhen: {
+        artifactError: 'failed',
+        configValidation: 'always',
+        mergeConfidence: 'always',
+        minimumReleaseAge: 'always',
+      },
+    });
   });
 
   describe('setArtifactsErrorStatus', () => {
@@ -68,18 +74,6 @@ describe('workers/repository/update/branch/artifacts', () => {
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
-    it('skips status if statusCheckNames is undefined', async () => {
-      await setArtifactErrorStatus({
-        ...config,
-        statusCheckNames: undefined,
-      });
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
-      );
-      expect(platform.setBranchStatus).not.toHaveBeenCalled();
-    });
-
     it('skips status (dry-run)', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       await setArtifactErrorStatus(config);
@@ -95,7 +89,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     describe('statusCheckWhen.artifactError', () => {
       it('sets green status when mode is "always" and no errors', async () => {
         config.artifactErrors = [];
-        config.statusCheckWhen = { artifactError: 'always' };
+        config.statusCheckWhen.artifactError = 'always';
         platform.getBranchStatusCheck.mockResolvedValueOnce(null);
         await setArtifactErrorStatus(config);
         expect(platform.setBranchStatus).toHaveBeenCalledWith(
@@ -107,7 +101,7 @@ describe('workers/repository/update/branch/artifacts', () => {
       });
 
       it('sets red status when mode is "always" and there are errors', async () => {
-        config.statusCheckWhen = { artifactError: 'always' };
+        config.statusCheckWhen.artifactError = 'always';
         platform.getBranchStatusCheck.mockResolvedValueOnce(null);
         await setArtifactErrorStatus(config);
         expect(platform.setBranchStatus).toHaveBeenCalledWith(
@@ -120,7 +114,7 @@ describe('workers/repository/update/branch/artifacts', () => {
 
       it('skips status entirely when mode is "never" with no errors', async () => {
         config.artifactErrors = [];
-        config.statusCheckWhen = { artifactError: 'never' };
+        config.statusCheckWhen.artifactError = 'never';
         await setArtifactErrorStatus(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
           'statusCheckWhen.artifactError is set to "never", skipping artifacts status check.',
@@ -130,7 +124,7 @@ describe('workers/repository/update/branch/artifacts', () => {
       });
 
       it('skips status entirely when mode is "never" even with errors', async () => {
-        config.statusCheckWhen = { artifactError: 'never' };
+        config.statusCheckWhen.artifactError = 'never';
         config.artifactErrors = [{ fileName: 'some' }];
         await setArtifactErrorStatus(config);
         expect(logger.debug).toHaveBeenCalledWith(
@@ -142,14 +136,14 @@ describe('workers/repository/update/branch/artifacts', () => {
 
       it('does not update when status already matches (always mode, green)', async () => {
         config.artifactErrors = [];
-        config.statusCheckWhen = { artifactError: 'always' };
+        config.statusCheckWhen.artifactError = 'always';
         platform.getBranchStatusCheck.mockResolvedValueOnce('green');
         await setArtifactErrorStatus(config);
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
       });
 
       it('sets red status in failed mode (default) when there are errors', async () => {
-        config.statusCheckWhen = { artifactError: 'failed' };
+        config.statusCheckWhen.artifactError = 'failed';
         platform.getBranchStatusCheck.mockResolvedValueOnce(null);
         await setArtifactErrorStatus(config);
         expect(platform.setBranchStatus).toHaveBeenCalledWith(
@@ -161,7 +155,7 @@ describe('workers/repository/update/branch/artifacts', () => {
       });
 
       it('skips status in failed mode when no errors', async () => {
-        config.statusCheckWhen = { artifactError: 'failed' };
+        config.statusCheckWhen.artifactError = 'failed';
         config.artifactErrors = [];
         await setArtifactErrorStatus(config);
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
@@ -171,7 +165,7 @@ describe('workers/repository/update/branch/artifacts', () => {
       it('handles dry-run with always mode', async () => {
         GlobalConfig.set({ dryRun: 'full' });
         config.artifactErrors = [];
-        config.statusCheckWhen = { artifactError: 'always' };
+        config.statusCheckWhen.artifactError = 'always';
         platform.getBranchStatusCheck.mockResolvedValueOnce(null);
         await setArtifactErrorStatus(config);
         expect(platform.setBranchStatus).not.toHaveBeenCalled();

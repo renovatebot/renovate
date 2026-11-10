@@ -105,7 +105,7 @@ async function runDotnetRestore(
       )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
   );
 
-  if (config.postUpdateOptions?.includes('dotnetWorkloadRestore')) {
+  if (config.postUpdateOptions.includes('dotnetWorkloadRestore')) {
     cmds.unshift(
       `dotnet workload restore --configfile ${quote(nugetConfigFile)}`,
     );

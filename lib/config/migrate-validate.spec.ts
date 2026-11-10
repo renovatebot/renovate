@@ -1,9 +1,10 @@
-import { type RenovateConfig, logger } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { getConfig } from './defaults.ts';
 import { migrateAndValidate } from './migrate-validate.ts';
 import * as configMigration from './migration.ts';
+import type { RenovateConfigFile } from './types.ts';
 
-let config: RenovateConfig;
+let config: RenovateConfigFile;
 
 beforeEach(() => {
   config = getConfig();
@@ -20,7 +21,7 @@ describe('config/migrate-validate', () => {
     });
 
     it('handles migration', async () => {
-      const input: RenovateConfig = { automerge: 'none' as any };
+      const input: RenovateConfigFile = { automerge: 'none' as any };
       const res = await migrateAndValidate(config, input);
       expect(res).toEqual({
         automerge: false,
@@ -31,7 +32,7 @@ describe('config/migrate-validate', () => {
 
     it('handles invalid', async () => {
       // @ts-expect-error -- invalid option
-      const input: RenovateConfig = { foo: 'none' };
+      const input: RenovateConfigFile = { foo: 'none' };
       const res = await migrateAndValidate(config, input);
       expect(res).toEqual({
         errors: [
@@ -46,7 +47,7 @@ describe('config/migrate-validate', () => {
     });
 
     it('isOnboarded', async () => {
-      const input: RenovateConfig = {};
+      const input: RenovateConfigFile = {};
       const res = await migrateAndValidate(
         { ...config, repoIsOnboarded: true },
         input,

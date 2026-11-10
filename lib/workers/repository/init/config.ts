@@ -11,6 +11,5 @@ export async function getRepoConfig(
   config.baseBranch = config.defaultBranch;
   config = await mergeInheritedConfig(config);
   config = await checkOnboardingBranch(config);
-  config = await mergeRenovateConfig(config);
-  return config;
+  return await mergeRenovateConfig(config);
 }

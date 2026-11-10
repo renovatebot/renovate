@@ -7,11 +7,11 @@ import {
 import { Fixtures } from '~test/fixtures.ts';
 import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
-import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import { setCustomEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
+import { applyGlobalConfigDefaults } from './config/defaults.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
 
 vi.mock('@renovatebot/base-image', { spy: true });
@@ -33,7 +33,7 @@ describe('workers/global/initialize', () => {
 
   it('configures the containerbase logger', async () => {
     git.validateGitVersion.mockResolvedValueOnce(true);
-    await expect(globalInitialize({})).toResolve();
+    await expect(globalInitialize(applyGlobalConfigDefaults({}))).toResolve();
     expect(configure).toHaveBeenCalledExactlyOnceWith({
       logger: logger.logger,
     });
@@ -41,7 +41,7 @@ describe('workers/global/initialize', () => {
 
   describe('checkVersions()', () => {
     it('throws if invalid version', async () => {
-      const config: RenovateConfig = {};
+      const config = applyGlobalConfigDefaults({});
       git.validateGitVersion.mockResolvedValueOnce(false);
       await expect(globalInitialize(config)).rejects.toThrow(
         'Init: git version needs upgrading',
@@ -49,22 +49,24 @@ describe('workers/global/initialize', () => {
     });
 
     it('returns if valid git version', async () => {
-      const config: RenovateConfig = { prCommitsPerRunLimit: 2 };
+      const config = applyGlobalConfigDefaults({
+        prCommitsPerRunLimit: 2,
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
 
     it('supports containerbase', async () => {
-      const config: AllConfig = { binarySource: 'docker' };
+      const config = applyGlobalConfigDefaults({ binarySource: 'docker' });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
 
     it('supports containerbase cache dir', async () => {
-      const config: AllConfig = {
+      const config = applyGlobalConfigDefaults({
         binarySource: 'docker',
         containerbaseDir: '/tmp/containerbase',
-      };
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
@@ -80,14 +82,14 @@ describe('workers/global/initialize', () => {
     });
 
     it('skips the check outside of containerbase', async () => {
-      await expect(globalInitialize({})).toResolve();
+      await expect(globalInitialize(applyGlobalConfigDefaults({}))).toResolve();
       expect(validateContainerbaseVersion).not.toHaveBeenCalled();
     });
 
     it('validates the version in containerbase', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       Fixtures.mock({ [containerbaseVersionFile]: `${packageVersion}\n` });
-      await expect(globalInitialize({})).toResolve();
+      await expect(globalInitialize(applyGlobalConfigDefaults({}))).toResolve();
       expect(validateContainerbaseVersion).toHaveBeenCalledOnce();
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { version: packageVersion },
@@ -98,14 +100,18 @@ describe('workers/global/initialize', () => {
     it('throws if the version is not compatible', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       Fixtures.mock({ [containerbaseVersionFile]: '1.0.0\n' });
-      await expect(globalInitialize({})).rejects.toThrow(
+      await expect(
+        globalInitialize(applyGlobalConfigDefaults({})),
+      ).rejects.toThrow(
         `Init: containerbase image version check failed: The containerbase image version 1.0.0 is not compatible with @containerbase/base ${packageVersion}, it needs the same major version and the same or a newer minor or patch version. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
       );
     });
 
     it('throws if the version file is missing', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
-      await expect(globalInitialize({})).rejects.toThrow(
+      await expect(
+        globalInitialize(applyGlobalConfigDefaults({})),
+      ).rejects.toThrow(
         `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is missing. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
       );
     });
@@ -113,7 +119,9 @@ describe('workers/global/initialize', () => {
     it('throws if the version file is empty', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       Fixtures.mock({ [containerbaseVersionFile]: '' });
-      await expect(globalInitialize({})).rejects.toThrow(
+      await expect(
+        globalInitialize(applyGlobalConfigDefaults({})),
+      ).rejects.toThrow(
         `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is empty. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
       );
     });
@@ -122,7 +130,7 @@ describe('workers/global/initialize', () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       setCustomEnv({ RENOVATE_X_IGNORE_CONTAINERBASE_VERSION: 'true' });
       Fixtures.mock({ [containerbaseVersionFile]: `${packageVersion}\n` });
-      await expect(globalInitialize({})).toResolve();
+      await expect(globalInitialize(applyGlobalConfigDefaults({}))).toResolve();
       expect(validateContainerbaseVersion).toHaveBeenCalledOnce();
       setCustomEnv({});
     });
@@ -130,7 +138,7 @@ describe('workers/global/initialize', () => {
     it('skips the check if ignored', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       vi.stubEnv('RENOVATE_X_IGNORE_CONTAINERBASE_VERSION', 'true');
-      await expect(globalInitialize({})).toResolve();
+      await expect(globalInitialize(applyGlobalConfigDefaults({}))).toResolve();
       expect(validateContainerbaseVersion).not.toHaveBeenCalled();
       expect(logger.logger.info).toHaveBeenCalledWith(
         'Containerbase version check is skipped via RENOVATE_X_IGNORE_CONTAINERBASE_VERSION',
@@ -164,9 +172,9 @@ describe('workers/global/initialize', () => {
         return Promise.resolve(r);
       });
 
-      const config: RenovateConfig = {
+      const config = applyGlobalConfigDefaults({
         hostRules: [hostRule],
-      };
+      });
 
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
@@ -175,14 +183,14 @@ describe('workers/global/initialize', () => {
     it("does not filter the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
       // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      const config: RenovateConfig = {
+      const config = applyGlobalConfigDefaults({
         hostRules: [
           {
             matchHost: 'registry.example.com',
             headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
           },
         ],
-      };
+      });
 
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
@@ -208,7 +216,9 @@ describe('workers/global/initialize', () => {
     });
 
     it('sets env vars when cloud metadata services disabled', async () => {
-      const config: RenovateConfig = { useCloudMetadataServices: false };
+      const config = applyGlobalConfigDefaults({
+        useCloudMetadataServices: false,
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
       expect(process.env.AWS_EC2_METADATA_DISABLED).toBe('true');
@@ -216,7 +226,9 @@ describe('workers/global/initialize', () => {
     });
 
     it('does not set env vars when cloud metadata services enabled', async () => {
-      const config: RenovateConfig = { useCloudMetadataServices: true };
+      const config = applyGlobalConfigDefaults({
+        useCloudMetadataServices: true,
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
       expect(process.env.AWS_EC2_METADATA_DISABLED).toBeUndefined();

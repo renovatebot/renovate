@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { hostRules, platform } from '~test/util.ts';
+import { hostRules, partial, platform } from '~test/util.ts';
 import {
   getConfigFileNames,
   setUserConfigFileNames,
@@ -26,13 +26,13 @@ describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    config = {
+    config = partial<RenovateConfig>({
       repository: 'test/repo',
       inheritConfig: true,
       inheritConfigRepoName: 'inherit/repo',
       inheritConfigFileName: 'config.json',
       inheritConfigStrict: false,
-    };
+    });
     InheritConfig.reset();
     GlobalConfig.reset();
   });
@@ -44,7 +44,8 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('should return the same config if inheritConfigRepoName or inheritConfigFileName is not a string', async () => {
-    config.inheritConfigRepoName = undefined;
+    const partialConfig: Partial<RenovateConfig> = config;
+    partialConfig.inheritConfigRepoName = undefined;
     const result = await mergeInheritedConfig(config);
     expect(result).toEqual(config);
   });

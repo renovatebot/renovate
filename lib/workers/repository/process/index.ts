@@ -4,7 +4,10 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   PlatformErrors,
@@ -123,7 +126,7 @@ async function readBaseBranchConfig(
     error.validationMessage = parseResult.validationMessage;
     throw error;
   }
-  const rawBranchConfig = parseResult.parsedContents as RenovateConfig;
+  const rawBranchConfig = parseResult.parsedContents as RenovateConfigFile;
   logger.debug({ config: rawBranchConfig }, 'Base branch config raw');
 
   const migratedConfig = await migrateAndValidate(config, rawBranchConfig);
@@ -206,8 +209,10 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
-export function isMultiBaseBranch(config: RenovateConfig): boolean {
-  if (!config.baseBranchPatterns?.length) {
+export function isMultiBaseBranch(
+  config: Pick<RenovateConfig, 'baseBranchPatterns'>,
+): boolean {
+  if (!config.baseBranchPatterns.length) {
     return false;
   }
 
@@ -229,7 +234,7 @@ export async function extractDependencies(
   };
   if (
     GlobalConfig.get('platform') !== 'local' &&
-    config.baseBranchPatterns?.length
+    config.baseBranchPatterns.length
   ) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,

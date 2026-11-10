@@ -5,15 +5,14 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
-  return `${config.semanticCommitType ?? 'chore'}: ${getInheritedOrGlobal('onboardingPrTitle')}`;
+  return `${config.semanticCommitType}: ${getInheritedOrGlobal('onboardingPrTitle')}`;
 }
 
 export function getOnboardingPrTitle(config: RenovateConfig): string {
   if (config.semanticCommits === 'enabled') {
     return getSemanticCommitPrTitle(config);
   }
-  // TODO #22198
-  return getInheritedOrGlobal('onboardingPrTitle')!;
+  return getInheritedOrGlobal('onboardingPrTitle');
 }
 
 export function getDefaultConfigFileName(): string {
@@ -21,8 +20,8 @@ export function getDefaultConfigFileName(): string {
   const onboardingConfigFileName = getInheritedOrGlobal(
     'onboardingConfigFileName',
   );
-  return configFileNames.includes(onboardingConfigFileName!)
-    ? onboardingConfigFileName!
+  return configFileNames.includes(onboardingConfigFileName)
+    ? onboardingConfigFileName
     : configFileNames[0];
 }
 

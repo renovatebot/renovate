@@ -11,9 +11,4 @@ describe('modules/manager/paket/range', () => {
     const config: RangeConfig = { rangeStrategy: 'auto' };
     expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
-
-  it('returns update-lockfile if rangeStrategy is not defined', () => {
-    const config: RangeConfig = {};
-    expect(getRangeStrategy(config)).toBe('update-lockfile');
-  });
 });

@@ -55,7 +55,7 @@ import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
-  RenovateConfig,
+  RenovateConfigFile,
   RenovateOptions,
   StatusCheckKey,
   StatusCheckWhen,
@@ -220,8 +220,8 @@ function initOptions(): void {
  * is fetched, so they must not be passed to `resolveConfigPresets()` during
  * validation. They are still syntax checked by the `extends` validation.
  */
-function stripRelativePresets(packageRule: RenovateConfig): {
-  rule: RenovateConfig;
+function stripRelativePresets(packageRule: RenovateConfigFile): {
+  rule: RenovateConfigFile;
   hasRelativePresets: boolean;
 } {
   const rule = clone(packageRule);

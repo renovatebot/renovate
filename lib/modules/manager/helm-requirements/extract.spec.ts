@@ -1,3 +1,4 @@
+import { extractConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -182,7 +183,7 @@ describe('modules/manager/helm-requirements/extract', () => {
           repository: '@placeholder'
       `;
       const fileName = 'requirements.yaml';
-      const result = extractPackageFile(content, fileName, {});
+      const result = extractPackageFile(content, fileName, extractConfig());
       expect(result).toEqual({
         datasource: 'helm',
         deps: [
@@ -341,7 +342,11 @@ describe('modules/manager/helm-requirements/extract', () => {
       version: 0.1.0
       `);
         const fileName = 'requirements.yaml';
-        const result = extractPackageFile(params.content, fileName, {});
+        const result = extractPackageFile(
+          params.content,
+          fileName,
+          extractConfig(),
+        );
         expect(result).toEqual(params.want);
       });
     });
@@ -367,7 +372,7 @@ describe('modules/manager/helm-requirements/extract', () => {
           repository: https://charts.helm.sh/stable/
       `;
       const fileName = 'requirements.yaml';
-      const result = extractPackageFile(content, fileName, {});
+      const result = extractPackageFile(content, fileName, extractConfig());
       expect(result).toEqual({
         datasource: 'helm',
         deps: [

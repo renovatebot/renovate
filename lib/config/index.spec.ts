@@ -1,4 +1,5 @@
 import * as datasource from '../modules/datasource/index.ts';
+import { applyRepoConfigDefaults } from '../workers/repository/init/defaults.ts';
 import { getConfig } from './defaults.ts';
 import {
   applyDatasourceDefaultConfig,
@@ -7,7 +8,7 @@ import {
   mergeChildConfig,
   removeGlobalConfig,
 } from './index.ts';
-import type { RenovateConfig } from './types.ts';
+import type { RenovateConfigFile } from './types.ts';
 
 vi.mock('../modules/datasource/npm/index.ts');
 vi.mock('../../config.ts', () => ({ default: {} }));
@@ -124,6 +125,67 @@ describe('config/index', () => {
       ]);
     });
 
+    describe('an option set to null', () => {
+      it('gives an option with a default its default over a value of the parent', () => {
+        const parentConfig = applyRepoConfigDefaults({ rangeStrategy: 'pin' });
+        const childConfig: Record<string, unknown> = {
+          enabled: null,
+          rangeStrategy: null,
+        };
+
+        const config = mergeChildConfig(parentConfig, childConfig);
+
+        expect(config.enabled).toBeTrue();
+        expect(config.rangeStrategy).toBe('auto');
+      });
+
+      it('gives an option with a default its default when it is forced', () => {
+        const parentConfig = applyRepoConfigDefaults({});
+        const childConfig: Record<string, unknown> = {
+          force: { automergeType: null },
+        };
+
+        const config = mergeChildConfig(parentConfig, childConfig);
+
+        expect(config.automergeType).toBe('pr');
+      });
+
+      it('keeps null where the parent has no value', () => {
+        const childConfig: Record<string, unknown> = { rangeStrategy: null };
+
+        const config = mergeChildConfig({}, childConfig);
+
+        expect(config).toEqual({ rangeStrategy: null });
+      });
+
+      it.each`
+        name                    | description
+        ${'groupName'}          | ${'has no default'}
+        ${'commitMessageTopic'} | ${'is nullable'}
+        ${'onboarding'}         | ${'is not kept in the repository config'}
+      `('keeps null for an option which $description', ({ name }) => {
+        const parentConfig: Record<string, unknown> = { [name]: 'value' };
+
+        const config = mergeChildConfig(parentConfig, { [name]: null });
+
+        expect(config[name]).toBeNull();
+      });
+
+      it('keeps null within a mergeable option', () => {
+        const parentConfig = applyRepoConfigDefaults({
+          major: { automerge: true },
+        });
+
+        const childConfig: Record<string, unknown> = {
+          major: { automerge: null },
+        };
+
+        const config = mergeChildConfig(parentConfig, childConfig);
+
+        expect(config.major).toEqual({ automerge: null });
+      });
+    });
+
     it('handles undefined childConfig', () => {
       const parentConfig = { ...defaultConfig };
       const config = mergeChildConfig(parentConfig, undefined);
@@ -131,7 +193,7 @@ describe('config/index', () => {
     });
 
     it('getManagerConfig()', () => {
-      const parentConfig = { ...defaultConfig };
+      const parentConfig = applyRepoConfigDefaults({ ...defaultConfig });
       const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
         [
@@ -200,7 +262,7 @@ describe('config/index', () => {
 
     it('keeps the config as-is without a datasource', async () => {
       const getDefaultConfig = vi.spyOn(datasource, 'getDefaultConfig');
-      const config: RenovateConfig = { depName: 'dep' };
+      const config: RenovateConfigFile = { depName: 'dep' };
 
       const res = await applyDatasourceDefaultConfig(config);
 

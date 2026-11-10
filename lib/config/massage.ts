@@ -3,14 +3,14 @@ import { coerceArray } from '../util/array.ts';
 import { clone } from '../util/clone.ts';
 import { toMs } from '../util/pretty-time.ts';
 import { getOptions } from './options/index.ts';
-import type { PackageRule, RenovateConfig, UpdateType } from './types.ts';
+import type { PackageRule, RenovateConfigFile, UpdateType } from './types.ts';
 
 const options = getOptions();
 
 let allowedStrings: string[];
 
 // Returns a massaged config
-export function massageConfig(config: RenovateConfig): RenovateConfig {
+export function massageConfig(config: RenovateConfigFile): RenovateConfigFile {
   if (!allowedStrings) {
     allowedStrings = [];
     options.forEach((option) => {
@@ -32,7 +32,9 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       val.forEach((item) => {
         if (isObject(item)) {
           // @ts-expect-error -- TODO: fix me
-          (massagedConfig[key] as RenovateConfig[]).push(massageConfig(item));
+          (massagedConfig[key] as RenovateConfigFile[]).push(
+            massageConfig(item),
+          );
         } else {
           // @ts-expect-error -- TODO: fix me
           (massagedConfig[key] as unknown[]).push(item);

@@ -1,14 +1,15 @@
+import { partial } from '~test/util.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import type { LookupUpdateConfig } from './types.ts';
 import { determineNewReplacementName, stripNoopUpdates } from './utils.ts';
 
-const lookupConfig: LookupUpdateConfig = {
+const lookupConfig = partial<LookupUpdateConfig>({
   datasource: 'npm',
   packageName: 'b',
   currentValue: '1.0.0',
   versioning: 'semver',
   rangeStrategy: 'replace',
-};
+});
 
 describe('workers/repository/process/lookup/utils', () => {
   describe('determineNewReplacementName()', () => {

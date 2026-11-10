@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import type {
   MinimumReleaseAgeBehaviour,
   RenovateConfig,
+  RenovateConfigFile,
   UpdateType,
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -76,13 +77,22 @@ async function setStatusCheck({
   }
 }
 
-export interface StabilityConfig extends RenovateConfig {
+/**
+ * The config options of the status checks, which a branch has with their defaults applied.
+ */
+type StatusCheckConfig = Omit<
+  RenovateConfigFile,
+  'statusCheckNames' | 'statusCheckWhen'
+> &
+  Pick<RenovateConfig, 'statusCheckNames' | 'statusCheckWhen'>;
+
+export interface StabilityConfig extends StatusCheckConfig {
   stabilityStatus?: BranchStatus;
   branchName: string;
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
-  const mode = config.statusCheckWhen?.minimumReleaseAge ?? 'always';
+  const mode = config.statusCheckWhen.minimumReleaseAge;
 
   if (mode === 'never') {
     if (config.stabilityStatus) {
@@ -101,7 +111,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     return;
   }
 
-  const context = config.statusCheckNames?.minimumReleaseAge;
+  const context = config.statusCheckNames.minimumReleaseAge;
   if (!context) {
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
@@ -128,13 +138,13 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   });
 }
 
-export interface ConfidenceConfig extends RenovateConfig {
+export interface ConfidenceConfig extends StatusCheckConfig {
   confidenceStatus?: BranchStatus;
   minimumConfidence?: MergeConfidence | undefined;
 }
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
-  const mode = config.statusCheckWhen?.mergeConfidence ?? 'always';
+  const mode = config.statusCheckWhen.mergeConfidence;
 
   if (mode === 'never') {
     if (config.branchName && config.confidenceStatus) {
@@ -159,7 +169,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     return;
   }
 
-  const context = config.statusCheckNames?.mergeConfidence;
+  const context = config.statusCheckNames.mergeConfidence;
   if (!context) {
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
@@ -193,14 +203,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
 async function checkUpgradeMinimumReleaseAge(
   upgrade: BranchUpgradeConfig,
 ): Promise<MinimumReleaseAgeCheckResult> {
-  const result = checkMinimumReleaseAge(
-    {
-      ...upgrade,
-      minimumReleaseAgeBehaviour:
-        upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required',
-    },
-    upgrade.releaseTimestamp,
-  );
+  const result = checkMinimumReleaseAge(upgrade, upgrade.releaseTimestamp);
   if (!result.minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
     return result;
   }

@@ -5,7 +5,6 @@ import { fakeSha, logger, partial } from '~test/util.ts';
 import * as hostRules from '../../../../../lib/util/host-rules.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
-import type { AllConfig } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { CustomDatasource } from '../../../../modules/datasource/custom/index.ts';
 import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
@@ -7010,7 +7009,7 @@ describe('workers/repository/process/lookup/index', () => {
 
     describe('handles merge confidence', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
-      const mcConfig: AllConfig = {
+      const mcConfig = {
         mergeConfidenceEndpoint: defaultApiBaseUrl,
         mergeConfidenceDatasources: presetSupportedDatasources,
       };

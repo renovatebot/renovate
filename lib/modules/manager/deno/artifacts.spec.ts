@@ -1,6 +1,7 @@
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -13,9 +14,9 @@ import type { DenoManagerData } from './types.ts';
 vi.mock('../../../util/fs/index.ts');
 
 const updateArtifact: UpdateArtifact<DenoManagerData> = {
-  config: {
+  config: updateArtifactsConfig({
     constraints: { deno: '2.4.5' },
-  },
+  }),
   newPackageFileContent: '',
   packageFileName: '',
   updatedDeps: [],
@@ -149,7 +150,9 @@ describe('modules/manager/deno/artifacts', () => {
 
       await updateArtifacts({
         ...updateArtifact,
-        config: { extractedConstraints: { deno: '2.4.5' } },
+        config: updateArtifactsConfig({
+          extractedConstraints: { deno: '2.4.5' },
+        }),
         updatedDeps: [{ lockFiles: ['deno.lock'] }],
       });
 
@@ -214,7 +217,7 @@ describe('modules/manager/deno/artifacts', () => {
 
   it('depType tasks returns an error', async () => {
     const updateArtifact: UpdateArtifact<DenoManagerData> = {
-      config: {},
+      config: updateArtifactsConfig(),
       newPackageFileContent: '',
       packageFileName: '',
       updatedDeps: [
@@ -240,7 +243,7 @@ describe('modules/manager/deno/artifacts', () => {
 
   it('depType tasks.command returns an error', async () => {
     const updateArtifact: UpdateArtifact<DenoManagerData> = {
-      config: {},
+      config: updateArtifactsConfig(),
       newPackageFileContent: '',
       packageFileName: '',
       updatedDeps: [
@@ -293,7 +296,7 @@ describe('modules/manager/deno/artifacts', () => {
 
   it('deno command execution', async () => {
     const updateArtifact: UpdateArtifact<DenoManagerData> = {
-      config: {},
+      config: updateArtifactsConfig(),
       newPackageFileContent: '',
       packageFileName: '',
       updatedDeps: [{ lockFiles: ['deno.lock'] }],
@@ -318,10 +321,10 @@ describe('modules/manager/deno/artifacts', () => {
   describe('private registries', () => {
     it('should add private registries to deno install command allow-import option', async () => {
       const updateArtifact: UpdateArtifact<DenoManagerData> = {
-        config: {
+        config: updateArtifactsConfig({
           isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],
-        },
+        }),
         newPackageFileContent: '',
         packageFileName: '',
         updatedDeps: [],
@@ -356,10 +359,10 @@ describe('modules/manager/deno/artifacts', () => {
 
     it('quotes the allow-import list when a hostRule resolvedHost contains shell metacharacters', async () => {
       const updateArtifact: UpdateArtifact<DenoManagerData> = {
-        config: {
+        config: updateArtifactsConfig({
           isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],
-        },
+        }),
         newPackageFileContent: '',
         packageFileName: '',
         updatedDeps: [],

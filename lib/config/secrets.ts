@@ -7,7 +7,7 @@ import {
 import { coerceObject } from '../util/object.ts';
 import { regEx } from '../util/regex.ts';
 import { addSecretForSanitizing } from '../util/sanitize.ts';
-import type { AllConfig, RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfigFile } from './types.ts';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
@@ -45,26 +45,45 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
 }
 
 export function validateConfigSecretsAndVariables(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
 ): void {
   validateNestedInterpolatedValues(config, 'secrets');
   validateNestedInterpolatedValues(config, 'variables');
 }
 
-interface ApplySecretsAndVariablesConfig {
-  config: RenovateConfig;
-  secrets?: RenovateConfig['secrets'];
-  variables?: RenovateConfig['variables'];
+interface ApplySecretsAndVariablesConfig<
+  T extends RenovateConfigFile = RenovateConfigFile,
+> {
+  config: T;
+  secrets?: RenovateConfigFile['secrets'];
+  variables?: RenovateConfigFile['variables'];
   deleteSecrets?: boolean;
   deleteVariables?: boolean;
 }
 
 /**
  * Applies both variables and secrets to the Renovate config by interpolating values
+ *
+ * The config keeps its type other than the secrets and variables it deletes, as interpolating only replaces strings.
  */
+export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
+  applyConfig: ApplySecretsAndVariablesConfig<T> & {
+    deleteSecrets: false;
+    deleteVariables: false;
+  },
+): T;
+export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
+  applyConfig: ApplySecretsAndVariablesConfig<T> & {
+    deleteSecrets?: true;
+    deleteVariables?: true;
+  },
+): Omit<T, 'secrets' | 'variables'>;
 export function applySecretsAndVariablesToConfig(
   applyConfig: ApplySecretsAndVariablesConfig,
-): RenovateConfig {
+): RenovateConfigFile;
+export function applySecretsAndVariablesToConfig(
+  applyConfig: ApplySecretsAndVariablesConfig,
+): RenovateConfigFile {
   const { config, deleteSecrets, deleteVariables } = applyConfig;
   const secrets = applyConfig.secrets ?? config.secrets;
   const variables = applyConfig.variables ?? config.variables;

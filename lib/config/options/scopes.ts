@@ -34,26 +34,26 @@ const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
 /**
  * The scopes of an option which is honoured wherever per-update config is applied, which is most of our options.
  */
-export const sharedScopes: ConfigScope[] = [
+export const sharedScopes = [
   'repo',
   'packageRule',
   'manager',
   'updateType',
   'vulnerabilityAlert',
   'group',
-];
+] satisfies [ConfigScope, ...ConfigScope[]];
 
 /**
  * The scopes of an option which is honoured when we look up a dependency's updates.
  *
  * That happens before we know an update's type, and before a group's config is merged in, so an option which shapes the updates we find isn't honoured in either.
  */
-export const lookupScopes: ConfigScope[] = [
+export const lookupScopes = [
   'repo',
   'packageRule',
   'manager',
   'vulnerabilityAlert',
-];
+] satisfies [ConfigScope, ...ConfigScope[]];
 
 /**
  * Every object an option can be used in, from the objects it names in `parents` and the kinds of place it names in `scopes`.

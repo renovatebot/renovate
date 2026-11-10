@@ -12,7 +12,7 @@ import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
 import { massageConfig } from './config/massage.ts';
 import { migrateConfig } from './config/migration.ts';
-import type { RenovateConfig } from './config/types.ts';
+import type { RenovateConfigFile } from './config/types.ts';
 import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
@@ -52,7 +52,7 @@ async function partiallyGlobalInitialize(): Promise<void> {
 async function validate(
   configType: 'global' | 'repo',
   desc: string,
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   strict: boolean,
   isPreset = false,
 ): Promise<void> {
@@ -121,8 +121,8 @@ async function validate(
 }
 
 interface PackageJson {
-  renovate?: RenovateConfig;
-  'renovate-config'?: Record<string, RenovateConfig>;
+  renovate?: RenovateConfigFile;
+  'renovate-config'?: Record<string, RenovateConfigFile>;
 }
 
 (async () => {

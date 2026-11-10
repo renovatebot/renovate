@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -25,7 +25,7 @@ import { transformRulesImgCalls } from './rules-img.ts';
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): Promise<PackageFileContent | null> {
   try {
     const records = parse(content);
@@ -40,7 +40,7 @@ export async function extractPackageFile(
           // Use getDep to handle registry aliases properly
           const processedDep = getDep(imageRef, {
             specifyReplaceString: false,
-            registryAliases: config?.registryAliases,
+            registryAliases: config.registryAliases,
           });
           return {
             ...processedDep,

@@ -109,7 +109,7 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
-  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
+  config: PostUpdateConfig<NpmManagerData>,
   upgrades: Upgrade<NpmManagerData>[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
@@ -297,7 +297,7 @@ export async function generateLockFile(
     // postUpdateOptions
     ['fewer', 'highest'].forEach((s) => {
       if (
-        config.postUpdateOptions?.includes(
+        config.postUpdateOptions.includes(
           `yarnDedupe${s.charAt(0).toUpperCase()}${s.slice(1)}`,
         )
       ) {

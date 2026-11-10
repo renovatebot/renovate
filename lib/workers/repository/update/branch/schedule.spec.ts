@@ -1,4 +1,5 @@
 import cronstrue from 'cronstrue';
+import { partial } from '~test/util.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import * as schedule from './schedule.ts';
 
@@ -148,10 +149,11 @@ describe('workers/repository/update/branch/schedule', () => {
     beforeEach(() => {
       vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
-      config = {};
+      config = partial<RenovateConfig>();
     });
 
-    it('returns true if no schedule', () => {
+    it('returns true if the schedule is empty', () => {
+      config.schedule = [];
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });

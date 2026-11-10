@@ -72,12 +72,12 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
   return unique.map(([from, to]) => `-v "${from}":"${to}"`);
 }
 
-function getContainerName(name: string, prefix?: string): string {
-  return `${prefix ?? 'renovate_'}${name}`.replace(regEx(/\//g), '_');
+function getContainerName(name: string, prefix: string): string {
+  return `${prefix}${name}`.replace(regEx(/\//g), '_');
 }
 
-function getContainerLabel(prefix: string | undefined): string {
-  return `${prefix ?? 'renovate_'}child`;
+function getContainerLabel(prefix: string): string {
+  return `${prefix}child`;
 }
 
 export async function removeDockerContainer(
@@ -151,14 +151,9 @@ export async function generateDockerCommand(
 ): Promise<string> {
   const { envVars, cwd } = options;
   const volumes = coerceArray(options.volumes);
-  const {
-    localDir,
-    cacheDir,
-    containerbaseDir,
-    dockerUser,
-    dockerChildPrefix,
-    dockerCliOptions,
-  } = GlobalConfig.get();
+  const { localDir, cacheDir, containerbaseDir, dockerUser, dockerCliOptions } =
+    GlobalConfig.get();
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
   const result = ['docker run --rm'];
   const containerName = getContainerName(sideCarName, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);

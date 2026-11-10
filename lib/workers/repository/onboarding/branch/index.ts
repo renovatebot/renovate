@@ -12,6 +12,7 @@ import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
 import { coerceObject } from '../../../../util/object.ts';
 import { checkIfConfigured } from '../../configured.ts';
 import { extractAllDependencies } from '../../extract/index.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { mergeRenovateConfig } from '../../init/merge.ts';
 import { OnboardingState } from '../common.ts';
 import { getOnboardingPr, isOnboarded } from './check.ts';
@@ -50,12 +51,12 @@ export async function checkOnboardingBranch(
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
   // TODO #22198
-  const branchList = [onboardingBranch!];
+  const branchList = [onboardingBranch];
   if (onboardingPr) {
     logger.debug('Onboarding PR already exists');
 
     isModified = await isOnboardingBranchModified(
-      onboardingBranch!,
+      onboardingBranch,
       defaultBranch,
     );
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
@@ -81,7 +82,7 @@ export async function checkOnboardingBranch(
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
-      isOnboardingCacheValid(defaultBranch, onboardingBranch!) &&
+      isOnboardingCacheValid(defaultBranch, onboardingBranch) &&
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
       logger.debug(
@@ -92,23 +93,27 @@ export async function checkOnboardingBranch(
     }
     OnboardingState.onboardingCacheValid = false;
     if (isModified) {
-      if (hasOnboardingBranchChanged(onboardingBranch!)) {
+      if (hasOnboardingBranchChanged(onboardingBranch)) {
         invalidateExtractCache(config.baseBranch!);
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        onboardingBranch!,
+        onboardingBranch,
       );
     }
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);
-    let mergedConfig = mergeChildConfig(config, onboardingConfig);
-    mergedConfig = await mergeRenovateConfig(mergedConfig);
+    const mergedConfig = await mergeRenovateConfig(
+      mergeChildConfig(config, onboardingConfig),
+    );
 
+    // extract with the defaults applied, like a repository run does, on a copy so that the onboarding branch is still created from the config as merged
+    const { packageFiles } = await extractAllDependencies(
+      applyRepoConfigDefaults({ ...mergedConfig }),
+    );
     if (
-      Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
-        .length === 0 &&
+      Object.entries(packageFiles).length === 0 &&
       getInheritedOrGlobal('onboardingNoDeps') !== 'enabled'
     ) {
       throw new Error(REPOSITORY_NO_PACKAGE_FILES);
@@ -129,11 +134,11 @@ export async function checkOnboardingBranch(
   // TODO #22198
   if (!GlobalConfig.get('dryRun') && !isConflicted) {
     logger.debug('Merge onboarding branch in default branch');
-    await scm.mergeToLocal(onboardingBranch!);
+    await scm.mergeToLocal(onboardingBranch);
   }
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,
-    getBranchCommit(onboardingBranch!)!,
+    getBranchCommit(onboardingBranch)!,
     isConflicted,
     isModified,
   );

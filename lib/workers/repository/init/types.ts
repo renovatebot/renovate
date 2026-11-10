@@ -1,5 +1,7 @@
+import type { WithDefaults } from '../../../config/defaults.ts';
 import type {
-  RenovateConfig,
+  RenovateConfigFile,
+  RepoDefaultedConfigKey,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 
@@ -9,12 +11,20 @@ import type {
  * resolution happens in the correct order.
  *
  * Also extends `RepoGlobalConfig` directly to carry fields like `allowedCommands`,
- * `binarySource`, and `dryRun` that `RenovateConfig` does not include.
+ * `binarySource`, and `dryRun` that `RenovateConfigFile` does not include.
  */
 export interface RepositoryWorkerConfig
-  extends RenovateConfig, RepoGlobalConfig {
-  repositoryEntryConfig?: RenovateConfig;
+  extends RenovateConfigFile, RepoGlobalConfig {
+  repositoryEntryConfig?: RenovateConfigFile;
 }
+
+/**
+ * The {@link RepositoryWorkerConfig} which `getRepositoryConfig()` gives the repository worker, which keeps the defaults that `parseConfigs()` gave the global config.
+ */
+export type ResolvedRepositoryWorkerConfig = WithDefaults<
+  RepositoryWorkerConfig,
+  RepoDefaultedConfigKey
+>;
 
 export interface RepoConfigError {
   validationError: string;
@@ -23,7 +33,7 @@ export interface RepoConfigError {
 
 export interface RepoFileConfig {
   configFileName?: string;
-  configFileParsed?: any;
+  configFileParsed?: RenovateConfigFile;
   configFileParseError?: RepoConfigError;
 }
 
