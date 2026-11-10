@@ -148,6 +148,27 @@ export function isValidLocalPath(path: string): boolean {
   return isValidPath(path, 'localDir');
 }
 
+async function* walkLocalSiblingAndParents(
+  existingFileNameWithPath: string,
+  otherFileName: string,
+): AsyncGenerator<string> {
+  if (
+    upath.isAbsolute(existingFileNameWithPath) ||
+    upath.isAbsolute(otherFileName)
+  ) {
+    return;
+  }
+
+  let current = existingFileNameWithPath;
+  while (current !== '') {
+    current = getParentDir(current);
+    const candidate = upath.join(current, otherFileName);
+    if (await localPathExists(candidate)) {
+      yield candidate;
+    }
+  }
+}
+
 /**
  * Finds `otherFileName` in the directory where `existingFileNameWithPath` is,
  * then in its parent directory, then in the grandparent,
@@ -158,24 +179,9 @@ export async function findLocalSiblingAndParents(
   existingFileNameWithPath: string,
   otherFileName: string,
 ): Promise<string[]> {
-  if (upath.isAbsolute(existingFileNameWithPath)) {
-    return [];
-  }
-  if (upath.isAbsolute(otherFileName)) {
-    return [];
-  }
-
-  const fileNames: string[] = [];
-  let current = existingFileNameWithPath;
-  while (current !== '') {
-    current = getParentDir(current);
-    const candidate = upath.join(current, otherFileName);
-    if (await localPathExists(candidate)) {
-      fileNames.push(candidate);
-    }
-  }
-
-  return fileNames;
+  return await Array.fromAsync(
+    walkLocalSiblingAndParents(existingFileNameWithPath, otherFileName),
+  );
 }
 
 /**
@@ -188,11 +194,13 @@ export async function findLocalSiblingOrParent(
   existingFileNameWithPath: string,
   otherFileName: string,
 ): Promise<string | null> {
-  return (
-    (
-      await findLocalSiblingAndParents(existingFileNameWithPath, otherFileName)
-    )[0] ?? null
-  );
+  for await (const candidate of walkLocalSiblingAndParents(
+    existingFileNameWithPath,
+    otherFileName,
+  )) {
+    return candidate;
+  }
+  return null;
 }
 
 /**
