@@ -12,48 +12,40 @@ export interface MinimumReleaseAgeCheckResult {
   hasTimestamp: boolean;
 }
 
-export interface MinimumReleaseAgeConfig {
+/**
+ * Calculates the effective minimum release age in milliseconds, extended by
+ * the `minimumReleaseAgeBuffer` duration if configured.
+ */
+export function calculateMinimumReleaseAgeMs(config: {
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
-  /** The minimum release age which a manager extracted from the package manager's own configuration. */
-  minimumReleaseAgeExtracted?: string | null;
-}
-
-function durationToMs(duration: string | null | undefined): number {
-  return isNonEmptyString(duration) ? coerceNumber(toMs(duration), 0) : 0;
-}
-
-/**
- * Calculates the effective minimum release age in milliseconds: the larger of
- * `minimumReleaseAge` and `minimumReleaseAgeExtracted`, extended by the
- * `minimumReleaseAgeBuffer` duration if configured.
- */
-export function calculateMinimumReleaseAgeMs(
-  config: MinimumReleaseAgeConfig,
-): number {
-  const minimumReleaseAgeMs = Math.max(
-    durationToMs(config.minimumReleaseAge),
-    durationToMs(config.minimumReleaseAgeExtracted),
-  );
+}): number {
+  const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
+    ? coerceNumber(toMs(config.minimumReleaseAge), 0)
+    : 0;
 
   if (!minimumReleaseAgeMs) {
     return 0;
   }
 
-  const bufferMs = durationToMs(config.minimumReleaseAgeBuffer);
+  const bufferMs = isNonEmptyString(config.minimumReleaseAgeBuffer)
+    ? coerceNumber(toMs(config.minimumReleaseAgeBuffer), 0)
+    : 0;
 
   return minimumReleaseAgeMs + Math.max(bufferMs, 0);
 }
 
 /**
- * Checks whether a release satisfies the effective minimum release age, see
- * `calculateMinimumReleaseAgeMs()`.
+ * Checks whether a release satisfies `minimumReleaseAge`, extended by
+ * `minimumReleaseAgeBuffer` if configured.
  *
  * Separate from `internalChecksFilter` to allow reuse, and lives here so that
  * managers can import it without an import cycle.
  */
 export function checkMinimumReleaseAge(
-  config: MinimumReleaseAgeConfig & {
+  config: {
+    minimumReleaseAge?: string | null;
+    minimumReleaseAgeBuffer?: string | null;
     minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour | null;
   },
   releaseTimestamp: Timestamp | null | undefined,

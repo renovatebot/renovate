@@ -2,10 +2,10 @@ import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options/index.ts';
 import { getAllowedParents } from '../../lib/config/options/scopes.ts';
-import { unsupportedUpdateTypeRules } from '../../lib/config/presets/internal/security.preset.ts';
-import type { RenovateOptions } from '../../lib/config/types.ts';
+import type { RenovateOptions, UpdateType } from '../../lib/config/types.ts';
 import { regEx } from '../../lib/util/regex.ts';
 import { templateHelperNames } from '../../lib/util/template/index.ts';
+import { isMinimumReleaseAgeApplicable } from '../../lib/workers/repository/process/lookup/filter-checks.ts';
 
 const options = getOptions();
 
@@ -379,15 +379,12 @@ describe('docs/documentation', () => {
         return table;
       }
 
-      it('matches the update types which the security presets exempt', async () => {
+      it('matches isMinimumReleaseAgeApplicable() for every documented update type', async () => {
         const table = await getUpdateTypeSupportTable();
-        const unsupportedUpdateTypes = new Set<string>(
-          unsupportedUpdateTypeRules.flatMap(
-            (rule) => rule.matchUpdateTypes ?? [],
-          ),
-        );
         for (const [updateType, docsSupport] of Object.entries(table)) {
-          expect(unsupportedUpdateTypes.has(updateType)).toBe(!docsSupport);
+          expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
+            docsSupport,
+          );
         }
       });
     });

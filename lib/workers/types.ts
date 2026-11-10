@@ -104,7 +104,6 @@ export interface BranchUpgradeConfig
   remediationNotPossible?: boolean;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
-  minimumReleaseAgeExtracted?: string;
   sourceDirectory?: string;
   sourceRepoSlug?: string;
 
