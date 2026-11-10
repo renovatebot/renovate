@@ -107,6 +107,9 @@ export async function checkReconfigureBranch(
   let newConfig = GlobalConfig.set(
     applySecretsAndVariablesToConfig({
       config: repoConfig,
+      // keep them for the presets resolved by mergeRenovateConfig
+      deleteSecrets: false,
+      deleteVariables: false,
     }),
   );
   newConfig.defaultBranch = config.defaultBranch;
@@ -118,6 +121,9 @@ export async function checkReconfigureBranch(
   try {
     newConfig = await mergeInheritedConfig(newConfig);
     newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
+    // Presets resolved by mergeRenovateConfig can contribute new templates, so
+    // apply secrets and variables again like initRepo does after getRepoConfig
+    newConfig = applySecretsAndVariablesToConfig({ config: newConfig });
     await scm.checkoutBranch(config.defaultBranch!);
     extractResult = await extractDependencies(newConfig, false);
   } catch (err) {
