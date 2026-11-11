@@ -7,12 +7,17 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
+const actualFs = await vi.importActual<
+  typeof import('../../../util/fs/index.ts')
+>('../../../util/fs/index.ts');
+
 const localDir = '/tmp/github/some/repo';
 
 describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
+      fs.isValidLocalPath.mockImplementation(actualFs.isValidLocalPath);
     });
 
     it('skip null YAML document', async () => {
@@ -573,6 +578,45 @@ describe('modules/manager/helmfile/extract', () => {
           },
         ],
         managerData: { needKustomize: true },
+      });
+    });
+
+    it('skips kustomization check for local charts outside the repository', async () => {
+      fs.localPathExists.mockImplementation((path) => {
+        if (!actualFs.isValidLocalPath(path)) {
+          throw new Error(FILE_ACCESS_VIOLATION_ERROR);
+        }
+        return Promise.resolve(false);
+      });
+      fs.getParentDir.mockReturnValue('');
+      const content = codeBlock`
+        releases:
+          - name: templated
+            chart: "{{ .Values.chartRepo }}/my-chart"
+          - name: outside
+            chart: ../../../../other-repo/charts/my-chart
+          - name: memcached
+            version: 6.0.0
+            chart: bitnami/memcached
+      `;
+
+      const result = await extractPackageFile(content, 'helmfile.yaml', {
+        registryAliases: {
+          bitnami: 'https://charts.bitnami.com/bitnami',
+        },
+      });
+
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          { depName: 'templated', skipReason: 'local-chart' },
+          { depName: 'outside', skipReason: 'local-chart' },
+          {
+            depName: 'memcached',
+            currentValue: '6.0.0',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+        ],
       });
     });
 
