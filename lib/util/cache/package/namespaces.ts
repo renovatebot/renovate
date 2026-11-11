@@ -86,6 +86,7 @@ export const packageCacheNamespaces = [
   'datasource-maven:pom-cache-provider',
   'datasource-maven:postprocess-reject',
   'datasource-nextcloud',
+  'datasource-nimble-packages',
   'datasource-node-version',
   'datasource-npm:cache-provider',
   'datasource-nuget-v3',

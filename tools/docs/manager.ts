@@ -55,6 +55,7 @@ export const CategoryNames: Record<Category, string> = {
   js: 'JavaScript',
   julia: 'Julia',
   kubernetes: 'Kubernetes',
+  nim: 'Nim',
   node: 'Node.js',
   perl: 'Perl',
   php: 'PHP',
