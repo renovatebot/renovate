@@ -10,7 +10,12 @@ import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import { intersectsWith } from '../../../versioning/common.ts';
 import { api as npmVersioning } from '../../../versioning/npm/index.ts';
-import type { ExtractedPackageRule, PackageFile } from '../../types.ts';
+import type {
+  ExtractConfig,
+  ExtractedPackageRule,
+  PackageFile,
+} from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { DAY_MS, MINUTE_MS } from '../constants.ts';
 import { YarnrcMinimalAgeGate } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
@@ -263,13 +268,18 @@ export function getYarnMinimumReleaseAgeRules(
  */
 export async function setYarnMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
+  config: ExtractConfig,
 ): Promise<void> {
   for (const {
     lockFile: yarnLock,
     packageFiles: lockFilePackageFiles,
     root,
   } of groupByLockFile(packageFiles, 'yarnLock')) {
-    const yarnConstraint = root?.extractedConstraints?.yarn;
+    const yarnConstraint = await resolveToolConstraint(
+      config,
+      'yarn',
+      () => root?.extractedConstraints?.yarn,
+    );
     if (isYarn1Constraint(yarnConstraint)) {
       continue;
     }

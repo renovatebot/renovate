@@ -14,5 +14,5 @@ export async function postExtract(
   await getLockedVersions(packageFiles);
   setNpmrcMinimumReleaseAge(packageFiles);
   await setPnpmMinimumReleaseAge(packageFiles, config);
-  await setYarnMinimumReleaseAge(packageFiles);
+  await setYarnMinimumReleaseAge(packageFiles, config);
 }

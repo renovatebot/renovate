@@ -332,7 +332,7 @@ Yarn enforces the minimum release age during lock file maintenance of a `yarn.lo
 - the Yarn version used is v4.10.0 or later
 
 Renovate reads the Yarn version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), or the extracted constraints of tool managers.
-For the workspace packages and the `.yarnrc.yml`, Renovate uses the Yarn version of the `package.json` next to the `yarn.lock`.
+For the workspace packages and the `.yarnrc.yml`, Renovate uses the `constraints` config, or else the Yarn version of the `package.json` next to the `yarn.lock`.
 
 For example, with Yarn v4.17.0 and this config:
 

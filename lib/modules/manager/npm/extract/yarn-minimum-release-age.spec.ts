@@ -274,7 +274,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         packageFile('none/package.json'),
       ];
 
-      await setYarnMinimumReleaseAge(packageFiles);
+      await setYarnMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles.map((p) => p.packageRules)).toEqual([
         [rule('4320 minutes')],
@@ -308,7 +308,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         ),
       ];
 
-      await setYarnMinimumReleaseAge(packageFiles);
+      await setYarnMinimumReleaseAge(packageFiles, {});
 
       expect(
         packageFiles.map((p) => p.managerData?.yarnMinimalAgeGate),
@@ -329,7 +329,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         ),
       ];
 
-      await setYarnMinimumReleaseAge(packageFiles);
+      await setYarnMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles[0].packageRules).toEqual([rule('60 minutes')]);
     });
@@ -352,7 +352,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
           ),
         ];
 
-        await setYarnMinimumReleaseAge(packageFiles);
+        await setYarnMinimumReleaseAge(packageFiles, {});
 
         expect(packageFiles[0].packageRules).toBeUndefined();
       },
@@ -377,9 +377,34 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
           ),
         ];
 
-        await setYarnMinimumReleaseAge(packageFiles);
+        await setYarnMinimumReleaseAge(packageFiles, {});
 
         expect(packageFiles[0].packageRules).toEqual(expected);
+      },
+    );
+
+    it.each`
+      constraints           | expectedRules             | expectedConstraint
+      ${{ yarn: '4.15.0' }} | ${[rule('1440 minutes')]} | ${'4.15.0'}
+      ${{}}                 | ${undefined}              | ${'^3.0.0'}
+    `(
+      'resolves the Yarn version with the constraints config $constraints',
+      async ({ constraints, expectedRules, expectedConstraint }) => {
+        mockYarnrc('nodeLinker: node-modules\n');
+        const packageFiles = [
+          packageFile(
+            'some-dir/package.json',
+            { yarnLock: 'some-dir/yarn.lock' },
+            '^3.0.0',
+          ),
+        ];
+
+        await setYarnMinimumReleaseAge(packageFiles, { constraints });
+
+        expect(packageFiles[0].packageRules).toEqual(expectedRules);
+        expect(packageFiles[0].managerData?.yarnMinimalAgeGate).toEqual({
+          yarnConstraint: expectedConstraint,
+        });
       },
     );
 
@@ -404,7 +429,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
           ),
         ];
 
-        await setYarnMinimumReleaseAge(packageFiles);
+        await setYarnMinimumReleaseAge(packageFiles, {});
 
         expect(
           packageFiles[0].packageRules?.find((r) =>
@@ -433,7 +458,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         ),
       ];
 
-      await setYarnMinimumReleaseAge(packageFiles);
+      await setYarnMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles[0].packageRules).toEqual([
         {
@@ -465,7 +490,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         ),
       ];
 
-      await setYarnMinimumReleaseAge(packageFiles);
+      await setYarnMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles[0].packageRules).toEqual([
         rule('4320 minutes'),
@@ -499,7 +524,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
           ),
         ];
 
-        await setYarnMinimumReleaseAge(packageFiles);
+        await setYarnMinimumReleaseAge(packageFiles, {});
 
         expect(packageFiles[0].managerData?.yarnMinimalAgeGate).toEqual(
           expected,
