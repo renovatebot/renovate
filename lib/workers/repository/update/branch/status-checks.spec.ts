@@ -72,7 +72,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       );
     });
 
-    it('honours a custom productLinks documentation url', async () => {
+    it('honors a custom productLinks documentation url', async () => {
       config.stabilityStatus = 'green';
       GlobalConfig.set({
         productLinks: { documentation: 'https://example.com/docs/' },
