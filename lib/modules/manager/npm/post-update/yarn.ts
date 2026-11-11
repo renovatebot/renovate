@@ -372,20 +372,21 @@ export async function generateLockFile(
     const yarnConstraints = yarnUpdate
       ? [yarnCompatibility, yarnUpdate.currentValue]
       : [yarnCompatibility];
-    const minimalAgeGateEnv =
+    if (
       syncAgeMs !== null &&
       yarnConstraints.every((constraint) =>
         isSubsetOf(npmVersioning, constraint, minimumReleaseAgeYarnRange),
       )
-        ? await getMinimalAgeGateEnv(
-            lockFileDir,
-            syncAgeMs,
-            upgrades,
-            yarnCompatibility,
-          )
-        : null;
-    if (minimalAgeGateEnv) {
-      Object.assign(extraEnv, minimalAgeGateEnv);
+    ) {
+      const minimalAgeGateEnv = await getMinimalAgeGateEnv(
+        lockFileDir,
+        syncAgeMs,
+        upgrades,
+        yarnCompatibility,
+      );
+      if (minimalAgeGateEnv) {
+        Object.assign(extraEnv, minimalAgeGateEnv);
+      }
     }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       if (isYarn1) {
