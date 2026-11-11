@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { fs, logger } from '~test/util.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { setCustomEnv, setUserEnv } from '../../../util/env.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import type { Upgrade } from '../types.ts';
@@ -723,6 +725,63 @@ describe('modules/manager/cargo/minimum-release-age', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cargo does not enforce the minimum release age, as the lock file has packages from git repositories, which cargo updates without checking their age',
       );
+    });
+
+    describe('publish age variables set by the user', () => {
+      beforeEach(() => {
+        memCache.init();
+      });
+
+      afterEach(() => {
+        setCustomEnv({});
+        memCache.reset();
+        vi.unstubAllEnvs();
+      });
+
+      function stubProcessEnv(env: Record<string, string>): void {
+        for (const [key, value] of Object.entries(env)) {
+          vi.stubEnv(key, value);
+        }
+      }
+
+      it.each`
+        source                    | setEnv
+        ${'customEnvVariables'}   | ${setCustomEnv}
+        ${'env'}                  | ${setUserEnv}
+        ${'the Renovate process'} | ${stubProcessEnv}
+      `(
+        'returns false if $source sets a publish age variable',
+        async ({ setEnv }) => {
+          setEnv({ CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE: 'allow' });
+
+          await expect(
+            enforcesMinimumReleaseAge({ constraints: { rust: '1.100.0' } }),
+          ).resolves.toBe(false);
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            'Cargo does not enforce the minimum release age, as CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE is set by the environment of Renovate, customEnvVariables or env, which overrides the value which Renovate passes',
+          );
+        },
+      );
+
+      it('returns false if env sets the global min publish age', async () => {
+        setUserEnv({ CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE: '1 day' });
+
+        await expect(
+          enforcesMinimumReleaseAge({ constraints: { rust: '1.100.0' } }),
+        ).resolves.toBe(false);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Cargo does not enforce the minimum release age, as CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE is set by the environment of Renovate, customEnvVariables or env, which overrides the value which Renovate passes',
+        );
+      });
+
+      it('returns true if only other variables are set', async () => {
+        setCustomEnv({ CARGO_HOME: '/tmp/cargo' });
+        setUserEnv({ RUSTFLAGS: '-D warnings' });
+
+        await expect(
+          enforcesMinimumReleaseAge({ constraints: { rust: '1.100.0' } }),
+        ).resolves.toBe(true);
+      });
     });
 
     it('uses the extracted Rust constraint', async () => {

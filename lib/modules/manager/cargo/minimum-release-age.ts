@@ -1,6 +1,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { escape as escapeGlob } from 'minimatch';
 import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
 import { detachUrlCredentials } from '../../../util/host-rules.ts';
 import {
   calculateMinimumReleaseAgeMs,
@@ -340,8 +341,21 @@ function registriesEnforceMinimumReleaseAge(
   return true;
 }
 
+const minPublishAgeEnvKeys = [
+  'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+  'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+];
+
 /**
- * Whether cargo enforces the minimum release age when it regenerates the lock file, which requires a Rust constraint of at least `minPublishAgeRustRange`, a lock file without git sources, and no registry of the cargo config with a `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.
+ * Returns the publish age variable which the environment of Renovate, `customEnvVariables` or `env` sets, as it overrides the value which Renovate passes.
+ */
+function getUserSetMinPublishAgeEnvKey(): string | undefined {
+  const env = getEnv();
+  return minPublishAgeEnvKeys.find((key) => isString(env[key]));
+}
+
+/**
+ * Whether cargo enforces the minimum release age when it regenerates the lock file, which requires a Rust constraint of at least `minPublishAgeRustRange`, a lock file without git sources, no publish age variable set by the environment of Renovate, `customEnvVariables` or `env`, and no registry of the cargo config with a `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.
  */
 export async function enforcesMinimumReleaseAge(
   config: CargoEnforcesMinimumReleaseAgeConfig,
@@ -349,6 +363,13 @@ export async function enforcesMinimumReleaseAge(
   if (config.managerData?.lockFileHasGitSources) {
     logger.debug(
       'Cargo does not enforce the minimum release age, as the lock file has packages from git repositories, which cargo updates without checking their age',
+    );
+    return false;
+  }
+  const userSetKey = getUserSetMinPublishAgeEnvKey();
+  if (userSetKey) {
+    logger.debug(
+      `Cargo does not enforce the minimum release age, as ${userSetKey} is set by the environment of Renovate, customEnvVariables or env, which overrides the value which Renovate passes`,
     );
     return false;
   }

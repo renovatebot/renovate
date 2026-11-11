@@ -368,7 +368,8 @@ Renovate takes the `rust` constraint from your config, or from the Rust version 
 Cargo enforces the minimum release age during lock file maintenance, so Renovate creates the branch without waiting for release timestamps, if:
 
 - the `rust` constraint only allows Rust 1.100.0 or later, for example `1.100.0` or `1.100`,
-- the lock file has no packages from git repositories, as cargo updates them without checking their age, and
+- the lock file has no packages from git repositories, as cargo updates them without checking their age,
+- neither `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` nor `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE` is set in the environment of Renovate, `customEnvVariables` or `env`, as such a value takes precedence over the one Renovate passes, and
 - no registry in the cargo config has a `min-publish-age` which is smaller than the `minimumReleaseAge` of lock file maintenance, invalid, or `"0"`
 
 For example, with this config:
