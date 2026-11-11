@@ -62,14 +62,6 @@ function extractImages(
       const dep = getDep(currentFrom, {
         registryAliases: config.registryAliases,
       });
-      logger.debug(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Kubernetes image',
-      );
       deps.push(dep);
     }
   }
@@ -88,14 +80,6 @@ function extractImageVolumes(
       const dep = getDep(currentFrom, {
         registryAliases: config.registryAliases,
       });
-      logger.debug(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Kubernetes image volume',
-      );
       deps.push(dep);
     }
   }

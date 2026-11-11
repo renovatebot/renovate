@@ -108,6 +108,41 @@ describe('workers/repository/process/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
 
+    it('leaves branches of groups with a failed lookup unchanged', async () => {
+      const branches: BranchConfig[] = [
+        {
+          baseBranch: 'main',
+          branchName: 'group',
+          manager: 'npm',
+          skippedForLookupFailure: true,
+          upgrades: [],
+        },
+        {
+          baseBranch: 'main',
+          branchName: 'regular',
+          manager: 'npm',
+          upgrades: [],
+        },
+      ];
+      scm.branchExists.mockResolvedValue(true);
+      branchWorker.processBranch.mockResolvedValue({
+        branchExists: true,
+        result: 'pr-created',
+      });
+
+      const res = await writeUpdates(config, branches);
+
+      expect(res).toBe('done');
+      expect(branchWorker.processBranch).toHaveBeenCalledTimes(1);
+      expect(branchWorker.processBranch).toHaveBeenCalledWith(branches[1]);
+      expect(branches[0].result).toBe('error');
+      expect(branches[1].result).toBe('pr-created');
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(
+        config,
+        branches,
+      );
+    });
+
     it('counts vulnerability alert branches separately', async () => {
       const branches = partial<BranchConfig[]>([
         {

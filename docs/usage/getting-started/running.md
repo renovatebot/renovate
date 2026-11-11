@@ -2,24 +2,24 @@
 
 As end user, you can choose from these ways to run Renovate:
 
-- You use the Mend Renovate App
+- You use the Mend Renovate app
 - You self-administer/host your own Renovate instance
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
+If you are using the Mend Renovate app, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
-When self-hosting Renovate you're the "administrator" of that deployment, this means you:
+When self-hosting Renovate you are the "administrator" of that deployment, this means you:
 
 - provide the infrastructure that Renovate runs on,
 - provision Renovate's global config,
 - make sure Renovate runs regularly,
 - make sure Renovate itself is updated
 
-If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate.
+If you are self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate.
 
-If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
+If you are running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
 
 ### Available distributions
 
@@ -38,7 +38,7 @@ Renovate is also distributed as Docker images on Docker Hub (`renovate/renovate`
 These Docker images work on all the hosting platforms that Renovate supports.
 
 Both `linux/amd64` and `linux/arm64` architectures are supported, but you may still find some bugs in the `arm64` image.
-You can't run the Docker images in a Windows or macOS container.
+You cannot run the Docker images in a Windows or macOS container.
 
 In general, you can run Renovate natively on Windows as long as you have all tools it will need (e.g. `npm`, `pipenv`, etc.) preinstalled before you run Renovate.
 
@@ -61,7 +61,7 @@ Use the [`containerbaseDir` config option](../self-hosted-configuration.md#conta
   The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
-You'll need to set `binarySource=docker` for this to work.
+You will need to set `binarySource=docker` for this to work.
 Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
 
 ##### The full image
@@ -69,7 +69,7 @@ Read the [`binarySource` config option docs](../self-hosted-configuration.md#bin
 The `-full` image comes with most package managers that Renovate supports, but not _all_ package managers.
 Update your Docker images regularly to keep the pre-installed tools up-to-date.
 
-The full image is for users who don't want to download or install things at runtime.
+The full image is for users who do not want to download or install things at runtime.
 This image has some downsides, because it:
 
 - Comes pre-installed with _one_ version of each language/manager - usually the latest
@@ -96,7 +96,7 @@ It is built similarly to the default "full" Renovate image described above, but 
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
 - It is released every 2 weeks in a slightly slower and more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL-3.0-only)
+- It is licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL-3.0-only)
 
 Plus, the Enterprise Edition has:
 
@@ -120,7 +120,7 @@ Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbuc
 
 #### Forking Renovate app
 
-"Forking Renovate" is the sister app to the Mend Renovate App.
+"Forking Renovate" is the sister app to the Mend Renovate app.
 The difference is that Forking Renovate does not need `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
@@ -132,7 +132,7 @@ Forking Renovate needs only `read` level access to the code of any repository it
 
 ##### Drawbacks
 
-If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
+If you use Forking Renovate, you will miss out on these features of the regular Mend Renovate app:
 
 - Automerge
 - The `baseBranchPatterns` config option
@@ -162,7 +162,7 @@ By default Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.ts`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
-Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
+Behavior wise this config is similar to the file config, except that it has higher priority than the default config file.
 
 Some config is global-only, meaning that either it is only applicable to the administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -175,11 +175,11 @@ If you are configuring Renovate using environment variables, there are two possi
 - Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
 - Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, for example: `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
 
-If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
+If you combine both of the above then any single config option in the environment variable will override what is in `RENOVATE_CONFIG`.
 Mergeable options, like `hostRules` or `packageRules`, are combined instead: lists are appended and objects are merged.
 
 !!! note
-  It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
+  It is also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
   For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 #### Using `config.js`
@@ -226,7 +226,7 @@ The `.mts` extension is always treated as an ES module, and `.cts` is always tre
 ### Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
-We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
+We recommend you use `@renovate-bot` as username if you are on a self-hosted server where you can set all usernames.
 We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate <renovate@some.domain.test>"`.
 
 !!! warning
@@ -250,11 +250,11 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 
 If you are running on any platform except github.com, you should also set the environment variable `RENOVATE_GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
-It's used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
-It's also OK to configure the same as a host rule instead, if you prefer that.
+It is used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
+It is also OK to configure the same as a host rule instead, if you prefer that.
 
 !!! note
-  If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
+  If you are using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
   Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples

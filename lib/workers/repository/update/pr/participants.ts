@@ -16,10 +16,10 @@ async function addCodeOwners(
 ): Promise<string[]> {
   const codeOwners = await codeOwnersForPr(pr);
 
-  const assignees =
-    config.expandCodeOwnersGroups && platform.expandGroupMembers
-      ? await platform.expandGroupMembers(codeOwners)
-      : codeOwners;
+  let assignees = codeOwners;
+  if (config.expandCodeOwnersGroups && platform.expandGroupMembers) {
+    assignees = await platform.expandGroupMembers(codeOwners);
+  }
 
   return [...new Set(assigneesOrReviewers.concat(assignees))];
 }

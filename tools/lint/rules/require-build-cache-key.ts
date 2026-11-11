@@ -184,7 +184,7 @@ function getAssignmentTargetName(
  * argument of `packageCache.get()`, `packageCache.set()`,
  * `packageCache.setWithRawTtl()`, `memCache.get()` and `memCache.set()`, the
  * values returned from functions whose name ends in `cacheKey`, and the
- * initialisers of and values assigned to variables and class properties whose
+ * initializers of and values assigned to variables and class properties whose
  * name ends in `cacheKey` or is `memKey`.
  */
 export default defineRule({

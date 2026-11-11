@@ -9,6 +9,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
         - 'hkusu/review-assign-action@5bee595fdb9765d4a0bd35724b6302fa15569158'
     '.github/workflows/build.yml':
+        - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346'
@@ -18,11 +19,12 @@ workflows:
         - 'astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2'
         - 'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5'
         - 'docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1'
-        - 'jdx/jactionlint@baa8d685e2b27ff5821558c9eeabb2051c1da61b'
-        - 'jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
+        - 'jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d'
+        - 'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b'
+        - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
         - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
-        - 'sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6'
+        - 'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532'
         - 'slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
         - 'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd'
     '.github/workflows/cancel-stale-merge-queue-workflows.yml':
@@ -40,7 +42,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26'
+        - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
     '.github/workflows/dependency-review.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294'
@@ -66,18 +68,23 @@ workflows:
     '.github/workflows/scorecard.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26'
+        - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
         - 'ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e'
     '.github/workflows/undesirable-test-additions.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/update-data.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c'
+        - 'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b'
         - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
     '.github/workflows/ws_scan.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
 dependencies:
+    'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6':
+        ref: 'v4.2.2'
+        commit: 'sha1-1e69f48acb82d1966a394da916b4c1698aa569d6'
+        owner_id: 44036562
+        repo_id: 760701061
     'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9':
         ref: 'v6.1.0'
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
@@ -167,14 +174,14 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
-    'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26':
-        ref: 'v4.39.2'
-        commit: 'sha1-1fc58d04a4d4374f921bdac573c3811c240f9c26'
-        owner_id: 9919
-        repo_id: 259445878
     'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2':
         ref: 'v4.38.2'
         commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
+        owner_id: 9919
+        repo_id: 259445878
+    'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066':
+        ref: 'v4.39.3'
+        commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
     'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
@@ -187,22 +194,22 @@ dependencies:
         commit: 'sha1-5bee595fdb9765d4a0bd35724b6302fa15569158'
         owner_id: 6157540
         repo_id: 306380934
-    'jdx/jactionlint@baa8d685e2b27ff5821558c9eeabb2051c1da61b':
-        ref: 'v2.4.0'
-        commit: 'sha1-baa8d685e2b27ff5821558c9eeabb2051c1da61b'
+    'jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d':
+        ref: 'v2.5.0'
+        commit: 'sha1-9e87e8f34edfc00b849a27807e26eff9d00b936d'
         owner_id: 216188
         repo_id: 1404951382
         uses:
             - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-    'jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c':
-        ref: 'v5.2.6'
-        commit: 'sha1-f5be966e4a917d54244728e6a5fdcd1d93a35e6c'
+    'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b':
+        ref: 'v5.2.7'
+        commit: 'sha1-b44d12e7d0d8ee7461bb893e1b1993500433185b'
         owner_id: 216188
         repo_id: 738284564
-    'jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6':
+    'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6':
         ref: 'v2.0.0'
         commit: 'sha1-ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
-        owner_id: 11770469
+        owner_id: 330458550
         repo_id: 506133999
     'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60':
         ref: 'v4.0.0'
@@ -224,9 +231,9 @@ dependencies:
         commit: 'sha1-fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
         owner_id: 21320719
         repo_id: 1235693694
-    'sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6':
-        ref: 'v4.1.2'
-        commit: 'sha1-6f9f17788090df1f26f669e9d70d6ae9567deba6'
+    'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532':
+        ref: 'v4.1.3'
+        commit: 'sha1-756fe2d284c7292c4e9b62c8a28f1e5629c59532'
         owner_id: 71096353
         repo_id: 351211695
     'slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d':

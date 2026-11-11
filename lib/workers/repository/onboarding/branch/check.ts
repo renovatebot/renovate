@@ -25,9 +25,12 @@ async function findFile(fileName: string): Promise<boolean> {
 
 async function configFileExists(): Promise<boolean> {
   for (const fileName of getConfigFileNames()) {
-    if (fileName !== 'package.json' && (await findFile(fileName))) {
-      logger.debug(`Config file exists, fileName: ${fileName}`);
-      return true;
+    if (fileName !== 'package.json') {
+      const found = await findFile(fileName);
+      if (found) {
+        logger.debug(`Config file exists, fileName: ${fileName}`);
+        return true;
+      }
     }
   }
   return false;
@@ -47,20 +50,21 @@ async function packageJsonConfigExists(): Promise<boolean> {
 }
 
 async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
-  return (
-    (await platform.findPr({
-      branchName: getInheritedOrGlobal('onboardingBranch')!,
-      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
-      state: '!open',
-      targetBranch: config.baseBranch,
-    })) ??
-    (await platform.findPr({
-      branchName: getInheritedOrGlobal('onboardingBranch')!,
-      prTitle: getSemanticCommitPrTitle(config),
-      state: '!open',
-      targetBranch: config.baseBranch,
-    }))
-  );
+  const closedPr = await platform.findPr({
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    prTitle: getInheritedOrGlobal('onboardingPrTitle'),
+    state: '!open',
+    targetBranch: config.baseBranch,
+  });
+  if (closedPr) {
+    return closedPr;
+  }
+  return await platform.findPr({
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    prTitle: getSemanticCommitPrTitle(config),
+    state: '!open',
+    targetBranch: config.baseBranch,
+  });
 }
 
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {

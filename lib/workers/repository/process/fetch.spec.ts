@@ -919,7 +919,72 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       });
+      expect(packageFiles.maven[0].deps[0]).not.toHaveProperty('lookupFailed');
     });
+
+    it('throws external host errors for onboarded repos', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
+          },
+        ],
+      };
+      const err = new ExternalHostError(new Error('some error'));
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await expect(
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
+      ).rejects.toThrow(err);
+    });
+
+    it.each`
+      repoIsOnboarded
+      ${true}
+      ${false}
+    `(
+      'marks the dependency as failed for dependency-only external host errors (repoIsOnboarded=$repoIsOnboarded)',
+      async ({ repoIsOnboarded }: { repoIsOnboarded: boolean }) => {
+        config.rangeStrategy = 'auto';
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        const err = new ExternalHostError(
+          new Error('some error'),
+          undefined,
+          true,
+        );
+        lookupUpdates.mockRejectedValueOnce(err);
+
+        await fetchUpdates({ ...config, repoIsOnboarded }, packageFiles);
+
+        expect(packageFiles.maven[0].deps[0]).toMatchObject({
+          depName: 'bbb',
+          updates: [],
+          lookupFailed: true,
+          warnings: [{ topic: 'Lookup Error', message: 'bbb: some error' }],
+        });
+      },
+    );
 
     it('removes URL credentials from external host warnings', async () => {
       config.rangeStrategy = 'auto';

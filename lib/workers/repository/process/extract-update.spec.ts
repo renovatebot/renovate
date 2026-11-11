@@ -1087,7 +1087,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     describe('malicious package detection', () => {
-      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behaviour
+      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behavior
       describe('when using mocks', () => {
         it('skips malicious package updates', async () => {
           const packageFiles: Record<string, PackageFile[]> = {

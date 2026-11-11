@@ -162,7 +162,7 @@ describe('modules/manager/poetry/schema', () => {
 
     it('source with priority="primary" disables the implicit PyPI source', () => {
       // A configured primary source is sufficient to disable the implicit
-      // PyPI source, matching Poetry's own resolution behaviour:
+      // PyPI source, matching Poetry's own resolution behavior:
       // https://python-poetry.org/docs/1.8/repositories/#default-package-source-deprecated
       expect(
         PoetrySources.parse([

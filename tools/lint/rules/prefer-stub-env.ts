@@ -29,7 +29,7 @@ const PER_TEST_CONTEXTS = new Set(['beforeEach', 'afterEach', 'it', 'test']);
 
 /**
  * Resolve the name a suite function is called by, so that `it.each(...)(...)`
- * and `it.only(...)` are recognised the same way as a plain `it(...)`.
+ * and `it.only(...)` are recognized the same way as a plain `it(...)`.
  */
 function getCalleeName(callee: ESTree.Node): string | null {
   switch (callee.type) {

@@ -5,6 +5,7 @@ import { JuliaGeneralMetadataDatasource } from './index.ts';
 
 const baseUrl = 'https://juliaregistries.github.io/GeneralMetadata.jl/api';
 const datasource = JuliaGeneralMetadataDatasource.id;
+const exampleUuid = '7876af07-990d-54b4-ab0e-23690620f79a';
 
 describe('modules/datasource/julia-general-metadata/index', () => {
   describe('getReleases', () => {
@@ -137,6 +138,49 @@ describe('modules/datasource/julia-general-metadata/index', () => {
           releaseTimestamp: '2024-01-01T00:00:00.000Z',
         },
       ]);
+    });
+
+    it('returns releases when the UUID matches', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, { name: 'Example', uuid: exampleUuid })
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      const res = await getPkgReleases({
+        datasource,
+        packageName: `Example=${exampleUuid.toUpperCase()}`,
+      });
+      expect(res?.releases).toEqual([
+        { version: '0.5.0', releaseTimestamp: '2018-08-09T10:04:18.000Z' },
+      ]);
+    });
+
+    it('returns null when the UUID does not match', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, { name: 'Example', uuid: exampleUuid })
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'Example=b89da37c-15e8-11e9-0b03-ab0995a60613',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when General has no package of that name', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(404)
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      await expect(
+        getPkgReleases({ datasource, packageName: `Example=${exampleUuid}` }),
+      ).resolves.toBeNull();
     });
   });
 });

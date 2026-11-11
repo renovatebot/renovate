@@ -3,6 +3,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { isSemVerXRange, normalizeLegacyXRanges } from '../semver/common.ts';
 import type { NewValueConfig } from '../types.ts';
 
@@ -57,7 +58,7 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
 }
 
 function stripV(value: string): string {
-  return value.replace(regEx(/^v/), '');
+  return stripVersionPrefix(value);
 }
 
 function satisfiesRange(version: string, range: string): boolean {

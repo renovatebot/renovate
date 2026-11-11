@@ -14,7 +14,7 @@ Suppose you have data:
 }
 ```
 
-If you paste it to the left input, you'll get the decoded data copied to your clipboard:
+If you paste it to the left input, you will get the decoded data copied to your clipboard:
 
 <img width="1152" alt="imagen" src="https://user-images.githubusercontent.com/1239644/198538355-915b3110-4cc2-4e5b-ba24-d524617a7b4c.png">
 

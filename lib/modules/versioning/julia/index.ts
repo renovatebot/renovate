@@ -265,7 +265,7 @@ function getNewValue({
   // Julia's bare-version-is-caret default.
   if (newJulia.startsWith('^') && !currentValue.startsWith('^')) {
     const withoutCaret = newJulia.substring(1);
-    // Cutting to the current precision is a `replace` behaviour; under `bump`
+    // Cutting to the current precision is a `replace` behavior; under `bump`
     // it would throw the bump away.
     newJulia =
       rangeStrategy === 'replace'

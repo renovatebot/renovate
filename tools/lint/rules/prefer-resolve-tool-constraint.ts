@@ -1,7 +1,11 @@
 import type { ESTree } from '@oxlint/plugins';
 import { defineRule } from '@oxlint/plugins';
 
-const constraintKeys = new Set(['constraints', 'extractedConstraints']);
+const constraintKeys = new Set([
+  'constraints',
+  'extractedConstraints',
+  'sharedConstraints',
+]);
 
 /**
  * Parameter types under which a destructured `constraints` is the manager
@@ -111,11 +115,12 @@ function isConfigPattern(
 }
 
 /**
- * Flags reading `constraints` or `extractedConstraints` from a manager config
- * directly. `resolveToolConstraint()` in `lib/modules/manager/util.ts` is the
- * one place that decides how the user's `constraints`, a value derived from the
- * updated package files and the constraints collected during extraction are
- * combined, so every tool constraint has to be resolved through it.
+ * Flags reading `constraints`, `extractedConstraints` or `sharedConstraints`
+ * from a manager config directly. `resolveToolConstraint()` in
+ * `lib/modules/manager/util.ts` is the one place that decides how the user's
+ * `constraints`, a value derived from the updated package files, the
+ * constraints collected during extraction and those which other managers share
+ * are combined, so every tool constraint has to be resolved through it.
  *
  * Writes (`config.constraints = …`) are not reads and are left alone, as are
  * the same properties on package files (`packageFile.extractedConstraints`),
@@ -126,7 +131,7 @@ export default defineRule({
     type: 'problem',
     messages: {
       preferResolveToolConstraint:
-        'Do not read `{{name}}` from the config directly. Resolve tool constraints with `resolveToolConstraint()` from `lib/modules/manager/util.ts`, which applies user config, a value derived from the updated files and the extracted constraints in one consistent order.',
+        'Do not read `{{name}}` from the config directly. Resolve tool constraints with `resolveToolConstraint()` from `lib/modules/manager/util.ts`, which applies user config, a value derived from the updated files, the extracted and the shared constraints in one consistent order.',
     },
   },
   createOnce(context) {
