@@ -110,17 +110,17 @@ describe('modules/platform/github/scm', () => {
     });
   });
 
-  it('checks the branch PR before committing', async () => {
+  it('checks the merge queue before committing', async () => {
     await githubScm.commitAndPush(commitObj);
 
-    expect(github.preparePrPush).toHaveBeenCalledExactlyOnceWith(commitObj);
-    expect(github.preparePrPush.mock.invocationCallOrder[0]).toBeLessThan(
-      git.commitFiles.mock.invocationCallOrder[0],
+    expect(github.assertPrNotInMergeQueue).toHaveBeenCalledExactlyOnceWith(
+      'branch',
+      'main',
     );
   });
 
   it('does not commit if the branch PR is in the merge queue', async () => {
-    github.preparePrPush.mockRejectedValueOnce(
+    github.assertPrNotInMergeQueue.mockRejectedValueOnce(
       new Error(PR_ALREADY_IN_MERGE_QUEUE),
     );
 
