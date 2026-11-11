@@ -55,6 +55,7 @@ import { HexDatasource } from './hex/index.ts';
 import { HexpmBobDatasource } from './hexpm-bob/index.ts';
 import { JavaVersionDatasource } from './java-version/index.ts';
 import { JenkinsPluginsDatasource } from './jenkins-plugins/index.ts';
+import { JsDelivrDatasource } from './jsdelivr/index.ts';
 import { JsrDatasource } from './jsr/index.ts';
 import { JuliaGeneralMetadataDatasource } from './julia-general-metadata/index.ts';
 import { KubernetesApiDatasource } from './kubernetes-api/index.ts';
@@ -146,6 +147,7 @@ api.set(HexDatasource.id, new HexDatasource());
 api.set(HexpmBobDatasource.id, new HexpmBobDatasource());
 api.set(JavaVersionDatasource.id, new JavaVersionDatasource());
 api.set(JenkinsPluginsDatasource.id, new JenkinsPluginsDatasource());
+api.set(JsDelivrDatasource.id, new JsDelivrDatasource());
 api.set(JsrDatasource.id, new JsrDatasource());
 api.set(
   JuliaGeneralMetadataDatasource.id,
