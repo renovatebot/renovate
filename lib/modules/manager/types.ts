@@ -288,6 +288,7 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  isSourceArchived?: boolean;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s, for this dependency alone.

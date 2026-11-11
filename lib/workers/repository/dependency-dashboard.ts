@@ -718,7 +718,11 @@ export function getAbandonedPackagesMd(
     string,
     Record<
       string,
-      { mostRecentTimestamp?: string | null; sourceUrl?: string | null }
+      {
+        mostRecentTimestamp?: string | null;
+        sourceUrl?: string | null;
+        isSourceArchived?: boolean;
+      }
     >
   > = {};
   let abandonedCount = 0;
@@ -732,6 +736,7 @@ export function getAbandonedPackagesMd(
           abandonedPackages[manager][dep.depName] = {
             mostRecentTimestamp: dep.mostRecentTimestamp,
             sourceUrl: dep.sourceUrl,
+            isSourceArchived: dep.isSourceArchived,
           };
         }
       }
@@ -762,11 +767,14 @@ export function getAbandonedPackagesMd(
   for (const manager of Object.keys(abandonedPackages).sort()) {
     const deps = abandonedPackages[manager];
     for (const depName of Object.keys(deps).sort()) {
-      const { mostRecentTimestamp, sourceUrl } = deps[depName];
+      const { mostRecentTimestamp, sourceUrl, isSourceArchived } =
+        deps[depName];
       const formattedDate = mostRecentTimestamp
         ? DateTime.fromISO(mostRecentTimestamp).toFormat('yyyy-MM-dd')
         : 'unknown';
-      const packageName = formatAsMarkdownLink(depName, sourceUrl);
+      const packageName =
+        formatAsMarkdownLink(depName, sourceUrl) +
+        (isSourceArchived ? ' (repository archived)' : '');
       abandonedMd += `| ${manager} | ${packageName} | \`${formattedDate}\` |\n`;
     }
   }
