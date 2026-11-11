@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const AdoptiumJavaVersion = z.object({
   semver: z.string(),
@@ -15,6 +16,7 @@ export const MiseJavaRelease = z.object({
   image_type: z.string(),
   vendor: z.string(),
   version: z.string(),
+  created_at: MaybeTimestamp,
 });
 
 export type MiseJavaRelease = z.infer<typeof MiseJavaRelease>;

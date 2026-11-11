@@ -304,6 +304,23 @@ describe('config/presets/internal/workarounds', () => {
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
+      it('does not apply to GraalVM CE, whose versions are not Java versions', async () => {
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
+          datasource: 'java-version',
+          depName: 'java',
+          manager: 'asdf',
+          packageName: 'graalvm-ce-jdk',
+          currentValue: '22.3.1',
+          versioning: 'loose',
+          packageRules,
+        });
+
+        expect(res.allowedVersions).toBeUndefined();
+        expect(res.versioning).toBe('loose');
+      });
+
       it('keeps regex versioning for java-version values in other managers', async () => {
         const res = await applyPackageRules<
           PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
