@@ -39,6 +39,42 @@ query($owner: String!, $name: String!, $user: String) {
 }
 `;
 
+export const prAutoMergeStateQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
+export const disableAutoMergeMutation = `
+mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId }) {
+    pullRequest {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
 export const getIssuesQuery = `
 query(
   $owner: String!,
