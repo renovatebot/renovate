@@ -159,9 +159,20 @@ export interface ReattemptPlatformAutomergeConfig {
 }
 export interface CancelPlatformAutomergeConfig {
   number: number;
-  /** Expected platform login. On GitHub, include [bot] for app accounts. */
-  enabledBy: string;
+  /**
+   * Expected platform login, defaults to the Renovate user.
+   * On GitHub, include [bot] for app accounts.
+   */
+  enabledBy?: string;
+  /** Options with the new commit message; auto-merge with the same message is kept */
+  platformPrOptions?: PlatformPrOptions;
 }
+export type CancelPlatformAutomergeResult =
+  | { cancelled: true }
+  | {
+      cancelled: false;
+      reason: 'enabled-by-other' | 'not-enabled' | 'unchanged' | 'unconfirmed';
+    };
 export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
@@ -319,19 +330,14 @@ export interface Platform {
   ): Promise<void>;
   /**
    * Cancels platform auto-merge for the expected actor without scheduling restoration.
-   * Returns true if disabled at the response, false for another actor or unconfirmed state.
+   * Returns cancelled if this request disabled it, otherwise the reason:
+   * another actor, auto-merge not enabled, unchanged commit message or unconfirmed state.
    * Does not confirm the PR is open or prevent queued merges or re-enablement.
    * Propagates request failures.
    */
   cancelPlatformAutomerge?(
     prConfig: CancelPlatformAutomergeConfig,
-  ): Promise<boolean>;
-  /**
-   * Re-enables platform automerge which the platform disabled while pushing to the PR's branch in this run, does nothing otherwise.
-   */
-  restorePlatformAutomerge?(
-    prConfig: ReattemptPlatformAutomergeConfig,
-  ): Promise<void>;
+  ): Promise<CancelPlatformAutomergeResult>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,

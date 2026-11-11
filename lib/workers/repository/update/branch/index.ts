@@ -74,6 +74,8 @@ export async function processBranch(
   forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
+  // PR whose platform automerge was cancelled before the push
+  let automergeCancelledPrNo: number | undefined;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
@@ -539,11 +541,36 @@ export async function processBranch(
       // compiled after the body, as before, so the trailer context sees the full commit message
       config.commitTrailers = compileCommitTrailers(config, config);
 
+      // platform auto-merge keeps the commit message it was enabled with
+      const platformPrOptions = getPlatformPrOptions(config);
+      if (
+        branchPr &&
+        platformPrOptions.usePlatformAutomerge &&
+        platform.cancelPlatformAutomerge
+      ) {
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would check platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          // auto-merge which is not Renovate's own is left as it is
+          const cancellation = await platform.cancelPlatformAutomerge({
+            number: branchPr.number,
+            platformPrOptions,
+          });
+          if (cancellation.cancelled) {
+            automergeCancelledPrNo = branchPr.number;
+          }
+        }
+      }
+
       commitSha = await commitFilesToBranch(config);
-      if (!commitSha && branchPr && platform.restorePlatformAutomerge) {
-        await platform.restorePlatformAutomerge({
-          number: branchPr.number,
-          platformPrOptions: getPlatformPrOptions(config),
+      if (!commitSha && automergeCancelledPrNo) {
+        const number = automergeCancelledPrNo;
+        automergeCancelledPrNo = undefined;
+        await platform.reattemptPlatformAutomerge?.({
+          number,
+          platformPrOptions,
         });
       }
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
@@ -585,6 +612,7 @@ export async function processBranch(
             `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
           );
         } else {
+          automergeCancelledPrNo = undefined;
           await platform.reattemptPlatformAutomerge({
             number: branchPr.number,
             platformPrOptions,
@@ -682,22 +710,31 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    // re-enable platform automerge which the platform disabled for the push
-    let restoreRateLimitErr: Error | undefined;
-    if (branchPr && platform.restorePlatformAutomerge) {
+    // re-enable platform automerge which was cancelled before the push,
+    // unless the repository, branch or PR is gone or the rate limit is hit
+    const canReattempt = !(
+      err?.statusCode === 404 ||
+      err?.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
+      err?.message === REPOSITORY_CHANGED
+    );
+    let reattemptRateLimitErr: Error | undefined;
+    if (automergeCancelledPrNo && canReattempt) {
       try {
-        await platform.restorePlatformAutomerge({
-          number: branchPr.number,
+        await platform.reattemptPlatformAutomerge?.({
+          number: automergeCancelledPrNo,
           platformPrOptions: getPlatformPrOptions(config),
         });
-      } catch (restoreErr) {
+      } catch (reattemptErr) {
         // keep handling the original error
-        logger.warn({ err: restoreErr }, 'Error restoring platform automerge');
+        logger.warn(
+          { err: reattemptErr },
+          'Error re-enabling platform automerge',
+        );
         if (
-          restoreErr instanceof Error &&
-          restoreErr.message === PLATFORM_RATE_LIMIT_EXCEEDED
+          reattemptErr instanceof Error &&
+          reattemptErr.message === PLATFORM_RATE_LIMIT_EXCEEDED
         ) {
-          restoreRateLimitErr = restoreErr;
+          reattemptRateLimitErr = reattemptErr;
         }
       }
     }
@@ -707,9 +744,9 @@ export async function processBranch(
       commitSha,
       updatesVerified,
     });
-    // the original error was handled without being passed up, so pass up the rate limit hit while restoring
-    if (restoreRateLimitErr) {
-      throw restoreRateLimitErr;
+    // the original error was handled without being passed up, so pass up the rate limit hit while re-enabling
+    if (reattemptRateLimitErr) {
+      throw reattemptRateLimitErr;
     }
     return result;
   }

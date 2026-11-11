@@ -6,7 +6,6 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PR_ALREADY_IN_MERGE_QUEUE,
-  PR_AUTOMERGE_ENABLED_BY_OTHER,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -74,20 +73,6 @@ describe('workers/repository/update/branch/errors', () => {
         result: 'done',
         commitSha: 'abc123',
       });
-    });
-
-    it('returns done if platform automerge was enabled by someone else', () => {
-      const err = new Error(PR_AUTOMERGE_ENABLED_BY_OTHER);
-
-      expect(handleBranchError(err, context)).toEqual({
-        branchExists: true,
-        prNo: 12,
-        result: 'done',
-        commitSha: 'abc123',
-      });
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Branch PR has platform automerge enabled by someone else - skipping branch update',
-      );
     });
 
     it('returns error for a bundler artifact error', () => {
