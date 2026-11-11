@@ -1001,6 +1001,46 @@ awscli    2.8.6
       });
     });
 
+    it.each`
+      version                      | currentValue  | javaMajor
+      ${'graalvm-22.3.1+java17'}   | ${'22.3.1'}   | ${'17'}
+      ${'graalvm-22.3.0+java17'}   | ${'22.3.0'}   | ${'17'}
+      ${'graalvm-22.0.0.2+java17'} | ${'22.0.0.2'} | ${'17'}
+      ${'graalvm-21.3.3.1+java11'} | ${'21.3.3.1'} | ${'11'}
+      ${'graalvm-22.3.1+java19'}   | ${'22.3.1'}   | ${'19'}
+      ${'graalvm-20.3.6+java8'}    | ${'20.3.6'}   | ${'8'}
+    `(
+      'can handle java GraalVM CE $version',
+      ({ version, currentValue, javaMajor }) => {
+        const res = extractPackageFile(`java ${version}`);
+        expect(res).toEqual({
+          deps: [
+            {
+              currentValue,
+              datasource: 'java-version',
+              depName: 'java',
+              packageName: 'graalvm-ce-jdk',
+              extractVersion: `^(?<version>\\d+(?:\\.\\d+)+)\\+java${javaMajor}$`,
+              versioning: 'loose',
+            },
+          ],
+        });
+      },
+    );
+
+    it.each`
+      version
+      ${'graalvm-19.2.1'}
+      ${'graalvm-22.3.1'}
+      ${'graalvm-22.3.1+java'}
+      ${'graalvm-22+java17'}
+      ${'graalvm-community-22.3.1+java17'}
+    `('skips unsupported java GraalVM CE $version', ({ version }) => {
+      expect(extractPackageFile(`java ${version}`)).toEqual({
+        deps: [{ depName: 'java', skipReason: 'unsupported-datasource' }],
+      });
+    });
+
     it('can handle scala v 2 & 3', () => {
       const v2Res = extractPackageFile('scala 2.0.0');
       expect(v2Res).toEqual({

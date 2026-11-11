@@ -15,7 +15,7 @@ export function parsePackage(packageName: string): PackageConfig {
   const pathname = trimLeadingSlash(u.pathname);
   const vendor = getVendor(pathname);
   const useSystem = u.searchParams.get('system') === 'true';
-  const useGraalvmDefaults = vendor === 'oracle-graalvm' && !useSystem;
+  const useGraalvmDefaults = vendor !== 'adoptium' && !useSystem;
   return {
     vendor,
     imageType: getImageType(pathname),
@@ -35,7 +35,18 @@ function getVendor(name: string): JavaVendor {
   if (name.includes('oracle-graalvm')) {
     return 'oracle-graalvm';
   }
+  if (name.includes('graalvm-ce')) {
+    return 'graalvm-ce';
+  }
   return 'adoptium'; // Default for backwards compatibility
+}
+
+/**
+ * Whether the package is served from the mise-java metadata
+ * (https://mise-java.jdx.dev) instead of the Adoptium API.
+ */
+export function usesGraalvmRegistry(packageName: string): boolean {
+  return getVendor(packageName) !== 'adoptium';
 }
 
 function parseReleaseType(value: string | null): PackageConfig['releaseType'] {
@@ -57,9 +68,9 @@ function getSystemArchitecture(
     return null;
   }
 
-  return vendor === 'oracle-graalvm'
-    ? getGraalvmArchitecture()
-    : getAdoptiumArchitecture();
+  return vendor === 'adoptium'
+    ? getAdoptiumArchitecture()
+    : getGraalvmArchitecture();
 }
 
 function getGraalvmArchitecture(): Nullish<string> {
@@ -107,7 +118,7 @@ function getSystemOs(useSystem: boolean, vendor: JavaVendor): Nullish<string> {
     return null;
   }
 
-  return vendor === 'oracle-graalvm' ? getGraalvmOs() : getAdoptiumOs();
+  return vendor === 'adoptium' ? getAdoptiumOs() : getGraalvmOs();
 }
 
 function getGraalvmOs(): Nullish<string> {

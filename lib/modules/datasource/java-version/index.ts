@@ -3,7 +3,7 @@ import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
-import { datasource, parsePackage } from './common.ts';
+import { datasource, parsePackage, usesGraalvmRegistry } from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
 
 export class JavaVersionDatasource extends Datasource {
@@ -14,13 +14,13 @@ export class JavaVersionDatasource extends Datasource {
   }
 
   override getDefaultRegistryUrls(packageName: string): string[] {
-    return packageName.includes('oracle-graalvm')
+    return usesGraalvmRegistry(packageName)
       ? [graalvmRegistryUrl]
       : [adoptiumRegistryUrl];
   }
 
   override supportsCustomRegistry(packageName: string): boolean {
-    return packageName.includes('oracle-graalvm');
+    return usesGraalvmRegistry(packageName);
   }
 
   private async fetchReleases({
@@ -34,11 +34,12 @@ export class JavaVersionDatasource extends Datasource {
     );
 
     try {
-      if (pkgConfig.vendor === 'oracle-graalvm') {
+      const { vendor } = pkgConfig;
+      if (vendor !== 'adoptium') {
         const effectiveRegistryUrl = registryUrl ?? graalvmRegistryUrl;
         return await getGraalvmReleases(
           this.http,
-          pkgConfig,
+          { ...pkgConfig, vendor },
           effectiveRegistryUrl,
         );
       }
