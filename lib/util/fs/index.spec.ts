@@ -15,6 +15,7 @@ import {
   ensureCacheDir,
   ensureDir,
   ensureLocalDir,
+  findLocalSiblingAndParents,
   findLocalSiblingOrParent,
   findUpLocal,
   getLocalFiles,
@@ -389,6 +390,42 @@ describe('util/fs/index', () => {
         findLocalSiblingOrParent('other', '/etc/hosts'),
       ).resolves.toBeNull();
     });
+  });
+
+  describe('findLocalSiblingAndParents', () => {
+    it('returns every matching path from the sibling through its parents', async () => {
+      await writeLocalFile('crates/one/Cargo.toml', 'foo');
+      await writeLocalFile('crates/one/Cargo.lock', 'bar');
+      await writeLocalFile('crates/Cargo.lock', 'bar');
+      await writeLocalFile('Cargo.lock', 'bar');
+
+      const result = await findLocalSiblingAndParents(
+        'crates/one/Cargo.toml',
+        'Cargo.lock',
+      );
+
+      expect(result).toEqual([
+        'crates/one/Cargo.lock',
+        'crates/Cargo.lock',
+        'Cargo.lock',
+      ]);
+    });
+
+    it.each`
+      existingFileNameWithPath | otherFileName
+      ${'/etc/hosts'}          | ${'other'}
+      ${'other'}               | ${'/etc/hosts'}
+    `(
+      'returns no paths when a path is absolute',
+      async ({ existingFileNameWithPath, otherFileName }) => {
+        const result = await findLocalSiblingAndParents(
+          existingFileNameWithPath,
+          otherFileName,
+        );
+
+        expect(result).toEqual([]);
+      },
+    );
   });
 
   describe('readLocalDirectory', () => {

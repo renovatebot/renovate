@@ -148,6 +148,47 @@ export function isValidLocalPath(path: string): boolean {
   return isValidPath(path, 'localDir');
 }
 
+async function* walkLocalSiblingAndParents(
+  existingFileNameWithPath: string,
+  otherFileName: string,
+): AsyncGenerator<string> {
+  if (
+    upath.isAbsolute(existingFileNameWithPath) ||
+    upath.isAbsolute(otherFileName)
+  ) {
+    return;
+  }
+
+  let current = existingFileNameWithPath;
+  while (current !== '') {
+    current = getParentDir(current);
+    const candidate = upath.join(current, otherFileName);
+    if (await localPathExists(candidate)) {
+      yield candidate;
+    }
+  }
+}
+
+/**
+ * Finds `otherFileName` in the directory where `existingFileNameWithPath` is,
+ * then in its parent directory, then in the grandparent,
+ * until we reach the top-level directory and found all files.
+ * All paths must be relative to `localDir`.
+ */
+export async function findLocalSiblingAndParents(
+  existingFileNameWithPath: string,
+  otherFileName: string,
+): Promise<string[]> {
+  const candidates: string[] = [];
+  for await (const candidate of walkLocalSiblingAndParents(
+    existingFileNameWithPath,
+    otherFileName,
+  )) {
+    candidates.push(candidate);
+  }
+  return candidates;
+}
+
 /**
  * Tries to find `otherFileName` in the directory where
  * `existingFileNameWithPath` is, then in its parent directory, then in the
@@ -158,22 +199,12 @@ export async function findLocalSiblingOrParent(
   existingFileNameWithPath: string,
   otherFileName: string,
 ): Promise<string | null> {
-  if (upath.isAbsolute(existingFileNameWithPath)) {
-    return null;
+  for await (const candidate of walkLocalSiblingAndParents(
+    existingFileNameWithPath,
+    otherFileName,
+  )) {
+    return candidate;
   }
-  if (upath.isAbsolute(otherFileName)) {
-    return null;
-  }
-
-  let current = existingFileNameWithPath;
-  while (current !== '') {
-    current = getParentDir(current);
-    const candidate = upath.join(current, otherFileName);
-    if (await localPathExists(candidate)) {
-      return candidate;
-    }
-  }
-
   return null;
 }
 
