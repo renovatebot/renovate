@@ -264,6 +264,8 @@ export const presets: Record<string, Preset> = {
           'java-jre',
           'sapmachine',
         ],
+        // GraalVM CE versions (e.g. `22.3.3+java17`) are not Java versions
+        matchPackageNames: ['!graalvm-ce-jdk'],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
