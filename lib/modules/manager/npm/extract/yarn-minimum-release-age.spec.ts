@@ -17,9 +17,21 @@ import {
 
 vi.mock('../../../../util/fs/index.ts');
 
-function mockYarnrc(content: string | null): void {
+function mockYarnrc(
+  content: string | null,
+  yarnLock = 'some-dir/yarn.lock',
+  yarnrcFile = 'some-dir/.yarnrc.yml',
+): void {
+  fs.findLocalSiblingOrParent.mockImplementation(
+    (existingFileNameWithPath: string, otherFileName: string) =>
+      Promise.resolve(
+        existingFileNameWithPath === yarnLock && otherFileName === '.yarnrc.yml'
+          ? yarnrcFile
+          : null,
+      ),
+  );
   fs.readLocalFile.mockImplementation((fileName: string) =>
-    Promise.resolve(fileName === 'some-dir/.yarnrc.yml' ? content : null),
+    Promise.resolve(fileName === yarnrcFile ? content : null),
   );
 }
 
@@ -73,6 +85,15 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
       await expect(
         readYarnrcMinimalAgeGate('some-dir/yarn.lock'),
       ).resolves.toEqual(expected);
+    });
+
+    it('returns no settings without a .yarnrc.yml', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValue(null);
+
+      await expect(
+        readYarnrcMinimalAgeGate('some-dir/yarn.lock'),
+      ).resolves.toEqual({});
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
   });
 
@@ -292,6 +313,29 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
       ]);
       // the .yarnrc.yml is read once per lock file
       expect(fs.readLocalFile).toHaveBeenCalledOnce();
+    });
+
+    it('uses the .yarnrc.yml of the repository root for a nested Yarn lock file', async () => {
+      mockYarnrc(
+        'npmMinimalAgeGate: 3d\n',
+        'packages/app/yarn.lock',
+        '.yarnrc.yml',
+      );
+      const packageFiles = [
+        packageFile(
+          'packages/app/package.json',
+          { yarnLock: 'packages/app/yarn.lock' },
+          '4.12.0',
+        ),
+      ];
+
+      await setYarnMinimumReleaseAge(packageFiles, {});
+
+      expect(packageFiles[0].packageRules).toEqual([rule('4320 minutes')]);
+      expect(fs.findLocalSiblingOrParent).toHaveBeenCalledWith(
+        'packages/app/yarn.lock',
+        '.yarnrc.yml',
+      );
     });
 
     it('keeps the Yarn constraint of the root package.json for every package file of the lock file', async () => {

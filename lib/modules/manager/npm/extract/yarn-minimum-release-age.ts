@@ -1,9 +1,11 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
-import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
-import { readLocalFile } from '../../../../util/fs/index.ts';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
 import { coerceObject } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
@@ -87,12 +89,15 @@ function getMinutes(
 }
 
 /**
- * Reads the minimum release age settings of the `.yarnrc.yml` next to a Yarn lock file, and ignores invalid ages.
+ * Reads the minimum release age settings of the nearest `.yarnrc.yml` in the directory of a Yarn lock file or a parent directory, and ignores invalid ages.
  */
 export async function readYarnrcMinimalAgeGate(
   yarnLock: string,
 ): Promise<YarnrcMinimalAgeGateSettings> {
-  const yarnrcFile = upath.join(upath.dirname(yarnLock), '.yarnrc.yml');
+  const yarnrcFile = await findLocalSiblingOrParent(yarnLock, '.yarnrc.yml');
+  if (!yarnrcFile) {
+    return {};
+  }
   const content = await readLocalFile(yarnrcFile, 'utf8');
   if (!content) {
     return {};
@@ -264,7 +269,7 @@ export function getYarnMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the Yarn minimum release age to the package files of each Yarn lock file, from the `.yarnrc.yml` next to it or the Yarn default, and keeps the settings of the lock file in the `managerData` of each of its package files, except for Yarn 1, which has no minimum release age.
+ * Adds `packageRules` with the Yarn minimum release age to the package files of each Yarn lock file, from the nearest `.yarnrc.yml` in its directory or a parent directory or the Yarn default, and keeps the settings of the lock file in the `managerData` of each of its package files, except for Yarn 1, which has no minimum release age.
  */
 export async function setYarnMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],

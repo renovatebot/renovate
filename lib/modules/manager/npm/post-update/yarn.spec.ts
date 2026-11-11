@@ -1343,6 +1343,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
     );
 
+    it('passes at least the npmMinimalAgeGate of the .yarnrc.yml of a parent directory', async () => {
+      mockYarnFiles();
+      Fixtures.mock({ '.yarnrc.yml': 'npmMinimalAgeGate: 7d\n' }, '.');
+
+      const { res, env } = await generateLockFile([
+        { ...update, minimumReleaseAgeRepository: '1 hour' },
+      ]);
+
+      expect(res).toEqual({ lockFile: 'package-lock-contents' });
+      expect(env.YARN_NPM_MINIMAL_AGE_GATE).toBe('10080');
+    });
+
     it.each`
       yarn        | upgrade
       ${'^4.0.0'} | ${{}}

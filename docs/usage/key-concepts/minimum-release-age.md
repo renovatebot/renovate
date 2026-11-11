@@ -299,6 +299,8 @@ For an update of Yarn itself, both the current and the new Yarn version must be 
 Renovate does not set it for security updates, as they bypass `minimumReleaseAge`.
 
 Renovate passes the larger of `minimumReleaseAge`, rounded up to whole minutes, and the `npmMinimalAgeGate` of the project's `.yarnrc.yml`.
+Renovate reads the `.yarnrc.yml` in the directory of the `yarn.lock`, or else the nearest one in a parent directory.
+Unlike Yarn, Renovate does not merge it with the `.yarnrc.yml` files of further parent directories.
 If the `.yarnrc.yml` does not set it, Yarn v4.15.0 and later use their default of 1 day.
 The variable takes precedence over the `.yarnrc.yml`.
 Renovate does not change `npmScopes.<scope>.npmMinimalAgeGate`, so a scope can have a smaller age or `0`, which takes precedence over the value Renovate passes.
