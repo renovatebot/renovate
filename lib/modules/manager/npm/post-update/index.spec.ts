@@ -309,6 +309,48 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(written.packages['node_modules/@vue-repro/app']).toBeDefined();
     });
 
+    it('leaves a transitive dependency in the lock file for `npm update`', async () => {
+      const lockFile = JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+          '': { name: 'root', workspaces: ['packages/*'] },
+          'node_modules/braces': { version: '3.0.2' },
+          'node_modules/chokidar': {
+            version: '3.6.0',
+            dependencies: { braces: '~3.0.2' },
+          },
+        },
+      });
+      git.getFile.mockResolvedValueOnce(lockFile);
+      const config = {
+        ...baseConfig,
+        upgrades: [
+          {
+            depName: 'braces',
+            depType: 'package-lock.json',
+            lockedVersion: '3.0.2',
+            newVersion: '3.0.3',
+            isLockfileUpdate: true,
+            managerData: { npmLock: 'package-lock.json' },
+          },
+        ],
+      };
+
+      await writeExistingFiles(config, {
+        npm: [
+          {
+            packageFile: 'package.json',
+            managerData: { npmLock: 'package-lock.json' },
+          },
+        ],
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+        'package-lock.json',
+        lockFile,
+      );
+    });
+
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {
         npm: [
@@ -912,6 +954,28 @@ describe('modules/manager/npm/post-update/index', () => {
         { npmLock: 'package-lock.json' },
         'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.',
       );
+    });
+
+    it('adds artifact notice for a transitive update which differs from the plan', async () => {
+      spyNpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: '{}',
+        notice: 'some notice',
+      });
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
+        if (f === '.npmrc') {
+          return Promise.resolve('# dummy');
+        }
+        return Promise.resolve('');
+      });
+      const res = await getAdditionalFiles(
+        { ...updateConfig, reuseExistingBranch: true },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        { file: 'package-lock.json', message: 'some notice' },
+      ]);
     });
 
     it('detects if lock file contents are unchanged(reuseExistingBranch=true)', async () => {

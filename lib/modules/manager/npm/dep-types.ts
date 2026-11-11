@@ -2,6 +2,8 @@ import type { DepTypeMetadata } from '../types.ts';
 
 export const pnpmWorkspaceOverrides = 'pnpm-workspace.overrides' as const;
 
+export const packageLockTransitive = 'package-lock.json' as const;
+
 export const knownDepTypes = [
   {
     depType: 'dependencies',
@@ -72,6 +74,12 @@ export const knownDepTypes = [
     depType: pnpmWorkspaceOverrides,
     prettyDepType: 'overrides',
     description: 'Listed under `overrides` in a pnpm workspace YAML file',
+  },
+  {
+    depType: packageLockTransitive,
+    prettyDepType: 'transitive',
+    description:
+      'Transitive dependency resolved in `package-lock.json` or `npm-shrinkwrap.json`. Only extracted when vulnerability alerts are enabled, and only updated to remediate a vulnerability.',
   },
 ] as const satisfies readonly DepTypeMetadata[];
 

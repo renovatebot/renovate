@@ -193,6 +193,24 @@ export const PackageLock = Json.pipe(
   return { lockedVersions, lockfileVersion };
 });
 
+const PackageLockEntry = z.object({
+  name: z.string().optional(),
+  version: z.string().optional(),
+  resolved: z.string().optional(),
+  link: z.boolean().optional(),
+  inBundle: z.boolean().optional(),
+});
+
+export type PackageLockEntry = z.infer<typeof PackageLockEntry>;
+
+/**
+ * Every entry of the `packages` section, keyed by its install path, which
+ * `lockfileVersion` 2 and 3 have, and `lockfileVersion` 1 does not.
+ */
+export const PackageLockPackages = Json.pipe(
+  z.object({ packages: LooseRecord(PackageLockEntry) }),
+).transform(({ packages }) => packages);
+
 export const NpmrcCooldown = Ini.pipe(
   z.object({
     before: z.string().optional().catch(undefined),

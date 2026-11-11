@@ -1640,7 +1640,7 @@ You can choose from:
 - `all` list all CVEs
 
 You will only get OSV-based vulnerability alerts for direct dependencies.
-The only exception today is the `pep621` manager, for `uv` projects.
+The only exceptions today are the `pep621` manager, for `uv` projects, and the `npm` manager, for `package-lock.json` (and `npm-shrinkwrap.json`).
 
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
@@ -3137,7 +3137,7 @@ Renovate integrates with [OSV](https://osv.dev/), an Open Source vulnerability d
 Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
-The only exception today is the `pep621` manager, for `uv` projects.
+The only exceptions today are the `pep621` manager, for `uv` projects, and the `npm` manager, for `package-lock.json` (and `npm-shrinkwrap.json`).
 Renovate only queries the OSV database for dependencies that use one of these datasources:
 
 - [`crate`](./modules/datasource/crate/index.md)
