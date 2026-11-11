@@ -312,8 +312,15 @@ export async function setYarnMinimumReleaseAge(
     if (!rules.length) {
       continue;
     }
+    const globalAge = minutes ? `${minutes} minutes` : 'none';
+    const scopeAges = Object.entries(scopeMinutes).map(
+      ([scope, scopeAge]) => `@${scope} ${scopeAge} minutes`,
+    );
+    const scopeAgesText = scopeAges.length
+      ? `, scopes ${scopeAges.join(', ')}`
+      : '';
     logger.debug(
-      `Found Yarn minimum release age of ${minutes ?? 0} minutes for ${yarnLock}`,
+      `Found Yarn minimum release age for ${yarnLock}: global ${globalAge}${scopeAgesText}`,
     );
     for (const packageFile of lockFilePackageFiles) {
       packageFile.packageRules = [

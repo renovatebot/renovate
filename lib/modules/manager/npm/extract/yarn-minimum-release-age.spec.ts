@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
+import { logger } from '../../../../logger/index.ts';
 import type { PackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
@@ -441,6 +442,9 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
           minimumReleaseAgeExtracted: '2880 minutes',
         },
       ]);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Found Yarn minimum release age for some-dir/yarn.lock: global none, scopes @myorg 2880 minutes',
+      );
     });
 
     it('honors the scopes and preapproved packages', async () => {
