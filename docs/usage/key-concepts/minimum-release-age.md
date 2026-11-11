@@ -139,7 +139,7 @@ This ensures that Poetry only resolves package versions that are at least as old
 Poetry added this setting and `solver.min-release-age-exclude` in v2.4.0, and older versions ignore them.
 Renovate rounds the value up to whole days.
 
-##### Default Poetry behaviour
+##### Default Poetry behavior
 
 Renovate sets the variable when the update has a `minimumReleaseAge`, including a value from `packageRules`, and does not read `poetry.toml`.
 
