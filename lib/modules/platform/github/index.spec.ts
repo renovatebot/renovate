@@ -5678,11 +5678,18 @@ describe('modules/platform/github/index', () => {
       },
     };
     const disabledPr = { id: 'abcd', autoMergeRequest: null };
+    const cancelled = { cancelled: true };
+    const enabledByOther = { cancelled: false, reason: 'enabled-by-other' };
+    const unconfirmed = { cancelled: false, reason: 'unconfirmed' };
+    const notEnabled = { cancelled: false, reason: 'not-enabled' };
 
-    async function mockScope(autoMergeAllowed = true): Promise<httpMock.Scope> {
+    async function mockScope(
+      autoMergeAllowed = true,
+      renovateUsername?: string,
+    ): Promise<httpMock.Scope> {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo', { autoMergeAllowed });
-      await github.initRepo({ repository: 'some/repo' });
+      await github.initRepo({ repository: 'some/repo', renovateUsername });
       return scope;
     }
 
@@ -5788,7 +5795,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(cancelled);
     });
 
     it.each`
@@ -5823,7 +5830,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge({ number: 123, enabledBy }),
-        ).resolves.toBeTrue();
+        ).resolves.toEqual(cancelled);
       },
     );
 
@@ -5845,9 +5852,35 @@ describe('modules/platform/github/index', () => {
             number: 123,
             enabledBy: expectedActor,
           }),
-        ).resolves.toBeFalse();
+        ).resolves.toEqual(enabledByOther);
       },
     );
+
+    it('defaults the expected actor to the Renovate user', async () => {
+      const scope = await mockScope(true, 'renovate[bot]');
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', cancellationBody)
+        .reply(200, {
+          data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
+        });
+
+      await expect(
+        github.cancelPlatformAutomerge({ number: 123 }),
+      ).resolves.toEqual(cancelled);
+    });
+
+    it('refuses to cancel without an expected actor', async () => {
+      const scope = await mockScope();
+      scope.post('/graphql', autoMergeQueryBody).reply(200, {
+        data: { repository: { pullRequest: enabledPr } },
+      });
+
+      await expect(
+        github.cancelPlatformAutomerge({ number: 123 }),
+      ).resolves.toEqual(enabledByOther);
+    });
 
     it('checks the actor again after a caller has read the state', async () => {
       const scope = await mockScope();
@@ -5872,7 +5905,7 @@ describe('modules/platform/github/index', () => {
       await expect(github.getPrAutoMergeState(123)).resolves.toEqual(enabledPr);
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeFalse();
+      ).resolves.toEqual(enabledByOther);
     });
 
     it('does not mutate again after a successful cancellation', async () => {
@@ -5889,13 +5922,13 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(cancelled);
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(notEnabled);
     });
 
-    it('confirms already-disabled auto-merge without a mutation', async () => {
+    it('reports already-disabled auto-merge without a mutation', async () => {
       const scope = await mockScope();
       scope.post('/graphql', autoMergeQueryBody).reply(200, {
         data: { repository: { pullRequest: disabledPr } },
@@ -5903,7 +5936,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(notEnabled);
     });
 
     it.each`
@@ -5929,7 +5962,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toBeFalse();
+        ).resolves.toEqual(enabledByOther);
       },
     );
 
@@ -5947,10 +5980,10 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(notEnabled);
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(cancelled);
     });
 
     it('cancels requests without a stored message', async () => {
@@ -5978,7 +6011,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeTrue();
+      ).resolves.toEqual(cancelled);
     });
 
     it.each`
@@ -6001,7 +6034,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toBeFalse();
+        ).resolves.toEqual(unconfirmed);
       },
     );
 
@@ -6028,7 +6061,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toBeFalse();
+        ).resolves.toEqual(unconfirmed);
       },
     );
 
@@ -6041,15 +6074,15 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeFalse();
+      ).resolves.toEqual(unconfirmed);
     });
 
     it.each`
       currentPr                         | expected
-      ${enabledPr}                      | ${false}
-      ${null}                           | ${false}
-      ${{ ...disabledPr, id: 'other' }} | ${false}
-      ${disabledPr}                     | ${true}
+      ${enabledPr}                      | ${unconfirmed}
+      ${null}                           | ${unconfirmed}
+      ${{ ...disabledPr, id: 'other' }} | ${unconfirmed}
+      ${disabledPr}                     | ${notEnabled}
     `(
       'checks the state again after a failed cancellation: $expected',
       async ({ currentPr, expected }) => {
@@ -6067,7 +6100,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toBe(expected);
+        ).resolves.toEqual(expected);
       },
     );
 
