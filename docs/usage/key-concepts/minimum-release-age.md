@@ -224,7 +224,7 @@ Renovate passes the exclusions if it may install pnpm v10.19.0 or later, which a
 An open range such as `>=9` from a v9 `pnpm-lock.yaml` without a `packageManager` field allows such a version.
 For pnpm v10.16.0 to v10.18.x, if Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate passes the smaller value, rounded down to whole minutes but not below the value that pnpm uses, and adds a notice to the PR.
 Renovate neither passes exclusions for nor lowers the value for versions which `minimumReleaseAgeExclude` already excludes.
-Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `pnpm-lock.yaml`, and passes no exclusions.
+Lock file maintenance uses the larger of its own `minimumReleaseAge` and `minimumReleaseAgePackageManager`, as it regenerates the whole `pnpm-lock.yaml`, and passes no exclusions.
 
 Renovate also uses the larger of the project's pnpm setting and `minimumReleaseAge` when it looks up updates.
 If neither the `pnpm-workspace.yaml` nor the `.npmrc` sets it, Renovate uses the pnpm v11 default of 1 day, but only if the pnpm version is v11 or later.
