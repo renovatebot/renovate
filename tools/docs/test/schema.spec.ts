@@ -54,6 +54,9 @@ async function compileSchema(
 ): Promise<ValidateFunction> {
   const ajv = new Ajv({ schemaId: '$id', strict: false });
   addFormats(ajv);
+  if (opts.isGlobal) {
+    ajv.addSchema(await buildSchema());
+  }
   return ajv.compile(await buildSchema(opts));
 }
 

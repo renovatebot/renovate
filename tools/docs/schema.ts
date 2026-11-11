@@ -203,6 +203,12 @@ function createSingleConfig(
     temp.$ref = '#';
   }
 
+  if (option.name === 'customPresets') {
+    temp.additionalProperties = {
+      $ref: 'renovate-schema.json',
+    };
+  }
+
   if (option.name === 'repositories') {
     temp.items = {
       oneOf: [
