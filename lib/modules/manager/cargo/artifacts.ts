@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -155,14 +156,15 @@ async function updateArtifactsImpl(
   }
 
   const rustConstraint = await resolveToolConstraint(config, 'rust');
-  const minPublishAge =
-    inheritedMinPublishAge ??
-    (await getMinPublishAgeEnv({
+  let minPublishAge = inheritedMinPublishAge;
+  if (isNullOrUndefined(minPublishAge)) {
+    minPublishAge = await getMinPublishAgeEnv({
       config,
       manager: 'cargo',
       packageFile: packageFileName,
       upgrades: updatedDeps,
-    }));
+    });
+  }
   const { env: extraEnv, notice } = minPublishAge;
 
   try {
