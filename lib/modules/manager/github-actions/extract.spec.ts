@@ -5655,12 +5655,7 @@ describe('modules/manager/github-actions/extract', () => {
             - uses: docker://alpine:3.20
     `;
 
-    const lockfile = codeBlock`
-      version: 'v0.0.2'
-      workflows:
-          '.github/workflows/ci.yml':
-              - 'actions/checkout@v4.3.1'
-    `;
+    const lockfile = Fixtures.get('actions.lock');
 
     it('marks digests as externally managed for an onboarded workflow', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockfile);
@@ -5739,7 +5734,7 @@ describe('modules/manager/github-actions/extract', () => {
 
     it('marks a local composite action when the lockfile has onboarded nothing', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
-        "version: 'v0.0.2'\nworkflows: {}",
+        "version: 'v0.0.3'\nworkflows: {}",
       );
 
       // a composite action isn't keyed by `workflows:`, so it's still managed even when that key is missing entirely

@@ -1,0 +1,237 @@
+{
+  "versions": {
+    "cli": "v0.4.1",
+    "module": "v0.0.6",
+    "schema": "v0.0.3"
+  },
+  "schemas": {
+    "v0.0.1": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://gh.io/actions-lockfile/v0.0.1.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "version": {
+          "const": "v0.0.1",
+          "description": "Lockfile schema version. Only v0.0.1 is supported."
+        },
+        "workflows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/pin"
+            }
+          },
+          "description": "Map of repo-relative workflow path to the flat, transitive list of canonical pin keys it depends on."
+        },
+        "dependencies": {
+          "description": "Deduplicated action graph keyed by canonical pin. Each entry records the resolved metadata for one action tarball.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/action"
+          }
+        }
+      },
+      "title": "GitHub Actions dependency lockfile",
+      "description": "Machine-generated lockfile describing the pinned action dependency graph for a repository's workflows. Written and updated by `gh actions-lock`.",
+      "$defs": {
+        "pin": {
+          "description": "Canonical dependency pin: OWNER/REPO@REF:ALGO-HEX (e.g. actions/checkout@v4:sha1-abc123...).",
+          "type": "string",
+          "pattern": "^[^/@:]+/[^/@:]+@[^:]+:(sha1|sha256)-[a-f0-9]+$"
+        },
+        "action": {
+          "description": "Resolved metadata for a single pinned action.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["commit", "owner_id", "repo_id"],
+          "properties": {
+            "tag": {
+              "description": "The tag the commit was resolved from, if any.",
+              "type": "string"
+            },
+            "branch": {
+              "description": "The branch the commit was resolved from, if no tag was available.",
+              "type": "string"
+            },
+            "commit": {
+              "description": "The exact commit the action resolves to, in algo-prefixed digest form (e.g. sha1-...).",
+              "type": "string"
+            },
+            "owner_id": {
+              "description": "The numeric ID of the action's owner (user or org).",
+              "type": "integer",
+              "minimum": 1
+            },
+            "repo_id": {
+              "description": "The numeric ID of the action's repository.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "uses": {
+              "description": "The action's own direct dependencies, as canonical pin keys.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pin"
+              }
+            }
+          }
+        }
+      }
+    },
+    "v0.0.2": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://gh.io/actions-lockfile/v0.0.2.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "version": {
+          "const": "v0.0.2",
+          "description": "Lockfile schema version. Only v0.0.2 is supported."
+        },
+        "workflows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/pin"
+            }
+          },
+          "description": "Map of repo-relative workflow path to the flat, transitive list of canonical pin keys it depends on."
+        },
+        "dependencies": {
+          "description": "Deduplicated action graph keyed by canonical pin. Each entry records the resolved metadata for one action tarball.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/action"
+          }
+        }
+      },
+      "title": "GitHub Actions dependency lockfile",
+      "description": "Machine-generated lockfile describing the pinned action dependency graph for a repository's workflows. Written and updated by `gh actions-lock`.",
+      "$defs": {
+        "pin": {
+          "description": "Canonical dependency pin: OWNER/REPO@REF (e.g. actions/checkout@v4).",
+          "type": "string",
+          "pattern": "^[^/@:]+/[^/@:]+@[^:]+$"
+        },
+        "action": {
+          "description": "Resolved metadata for a single pinned action.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ref", "commit", "owner_id", "repo_id"],
+          "properties": {
+            "ref": {
+              "description": "The git ref the commit was resolved from. Required: every dep that passes impostor checks has a resolvable ref. The CLI picks the best ref with priority: full semver tag > any tag > branch (protected > default > release/v* > any). The parser enforces presence; priority ordering is the CLI's concern.",
+              "type": "string",
+              "minLength": 1
+            },
+            "commit": {
+              "description": "The exact commit the action resolves to, in algo-prefixed digest form (e.g. sha1-...). This is the immutable identity the runner checks out; tags and branches can be moved, this cannot.",
+              "type": "string"
+            },
+            "owner_id": {
+              "description": "The numeric ID of the action's owner (user or org). Pinned because names can be deleted and re-registered by someone else; the ID cannot, so it ties the pin to the original owner.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "repo_id": {
+              "description": "The numeric ID of the action's repository. Pinned because a repo can be renamed or deleted and the name reclaimed; the ID detects that the repo behind the name has changed.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "uses": {
+              "description": "The action's own direct dependencies, as canonical pin keys, so the full dependency graph stays pinned and verifiable end to end. Required for composite actions (which can call other actions); absent for leaf actions that have no dependencies of their own.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pin"
+              }
+            }
+          }
+        }
+      }
+    },
+    "v0.0.3": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://gh.io/actions-lockfile/v0.0.3.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "version": {
+          "const": "v0.0.3",
+          "description": "Lockfile schema version. Only v0.0.3 is supported."
+        },
+        "workflows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/pin"
+            }
+          },
+          "description": "Map of repo-relative workflow path to the flat, transitive list of canonical pin keys it depends on."
+        },
+        "dependencies": {
+          "description": "Deduplicated action graph keyed by canonical pin. Each entry records the resolved metadata for one action tarball.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/action"
+          }
+        }
+      },
+      "title": "GitHub Actions dependency lockfile",
+      "description": "Machine-generated lockfile describing the pinned action dependency graph for a repository's workflows. Written and updated by `gh actions-lock`.",
+      "$defs": {
+        "pin": {
+          "description": "Canonical dependency pin: OWNER/REPO@REF (e.g. actions/checkout@v4).",
+          "type": "string",
+          "pattern": "^[^/@:]+/[^/@:]+@[^:]+$"
+        },
+        "action": {
+          "description": "Resolved metadata for a single pinned action.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ref", "commit", "owner_id", "repo_id"],
+          "properties": {
+            "hostname": {
+              "description": "The GitHub instance that owns and resolves this dependency. Omitted means the home host: the tenant on a GHE.com data-residency instance, or github.com on github.com. Producers omit it for home-host pins and write github.com only for github.com-bound pins on a GHE.com data-residency instance. When present, the value must be github.com or a lowercase GHE tenant hostname such as octocorp.ghe.com; schemes, ports, paths, query strings, fragments, and surrounding whitespace are not allowed.",
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(github\\.com|[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.ghe\\.com)$"
+            },
+            "ref": {
+              "description": "The git ref the commit was resolved from. Required: every dep that passes impostor checks has a resolvable ref. The CLI picks the best ref with priority: full semver tag > any tag > branch (protected > default > release/v* > any). The parser enforces presence; priority ordering is the CLI's concern.",
+              "type": "string",
+              "minLength": 1
+            },
+            "commit": {
+              "description": "The exact commit the action resolves to, in algo-prefixed digest form (e.g. sha1-...). This is the immutable identity the runner checks out; tags and branches can be moved, this cannot.",
+              "type": "string"
+            },
+            "owner_id": {
+              "description": "The numeric ID of the action's owner (user or org) on the recorded hostname. Pinned because names can be deleted and re-registered by someone else; the ID cannot, so it ties the pin to the original owner.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "repo_id": {
+              "description": "The numeric ID of the action's repository on the recorded hostname. Pinned because a repo can be renamed or deleted and the name reclaimed; the ID detects that the repo behind the name has changed.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "uses": {
+              "description": "The action's own direct dependencies, as canonical pin keys, so the full dependency graph stays pinned and verifiable end to end. Required for composite actions (which can call other actions); absent for leaf actions that have no dependencies of their own.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pin"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
