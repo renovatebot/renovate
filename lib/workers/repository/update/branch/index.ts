@@ -12,6 +12,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
@@ -129,7 +130,7 @@ export async function processBranch(
   );
   try {
     // Check if branch already existed
-    let existingPr: Awaited<ReturnType<typeof prAlreadyExisted>> | undefined;
+    let existingPr: Pr | null | undefined;
     if (!branchPr || config.automerge) {
       existingPr = await prAlreadyExisted(config);
     }

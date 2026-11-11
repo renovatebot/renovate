@@ -270,7 +270,8 @@ try {
 
 Never use `Promise.resolve` in async functions.
 Never use `Promise.reject` in async functions, instead throw an `Error` class type.
-Never put `await` inside a ternary branch or on the right side of `&&`, `||` or `??`; use `if`/`else`, as V8 coverage misreports such constructs.
+Never put `await` in a position that is only evaluated conditionally; use `if`/`else`, as V8 coverage misreports such constructs.
+This covers ternary branches, the right side of `&&`, `||`, `??`, `&&=`, `||=` and `??=`, the arguments and computed keys of an optional chain (`a?.b(await c)`), and default values in destructuring (`const { v = await d } = o`).
 Never use a ternary as an operand of `&&`, `||`, `??` or their assignment forms `&&=`, `||=`, `??=`.
 
 ## Dates and times

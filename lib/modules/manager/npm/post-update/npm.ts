@@ -1,5 +1,10 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isNumber,
+  isString,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -127,10 +132,12 @@ export async function generateLockFile(
             'npm',
             await lazyPkgJson.getValue(),
           );
-          npmVersion ??= await getNpmConstraintFromPackageLock(
-            lockFileDir,
-            filename,
-          );
+          if (isNullOrUndefined(npmVersion)) {
+            npmVersion = await getNpmConstraintFromPackageLock(
+              lockFileDir,
+              filename,
+            );
+          }
           return npmVersion;
         })) ?? null,
     };

@@ -23,6 +23,14 @@ ruleTester.run('no-complex-conditional-expression', rule, {
     `async function f() { const x = (await a) && b; }`,
     `async function f() { const x = await (a ? b : c); }`,
     `async function f() { if (a) { await b; } }`,
+    `async function f() { x = await a; }`,
+    `async function f() { x += await a; }`,
+    // optional links after the await, or before it only in the object
+    `async function f() { return foo(await a)?.b; }`,
+    `async function f() { return (await a)?.b(c); }`,
+    `async function f() { return a.b(await c); }`,
+    `async function f() { return a[await k]; }`,
+    `async function f() { const { v } = await o; }`,
     // a nested function starts a new evaluation context
     `const x = a ? async () => { await b; } : c;`,
     `const x = a && (async () => await b);`,
@@ -71,6 +79,59 @@ ruleTester.run('no-complex-conditional-expression', rule, {
     },
     {
       code: `async function f() { if (a ?? (await b)!.c) { return; } }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { x ??= await y; }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { x ||= await y; }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { x &&= foo(await y); }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a ? ((await b) satisfies T) : c; }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a ?? ((await b) as T); }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      // reported once, even though two branches enclose it
+      code: `async function f() { return a ? b : c ? await d : e; }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a?.b(await c); }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a?.b.c(await d); }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a!?.b!.c(await d); }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a.b?.(await c); }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { return a?.[await k]; }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { const { v = await d } = o; }`,
+      errors: [{ messageId: 'conditionalAwait' }],
+    },
+    {
+      code: `async function f() { const [v = await d] = o; }`,
       errors: [{ messageId: 'conditionalAwait' }],
     },
     {

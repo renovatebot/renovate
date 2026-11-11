@@ -1,5 +1,9 @@
 // TODO: types (#22198)
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
+  isString,
+} from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -395,7 +399,9 @@ export async function updateYarnBinary(
   let yarnrcYml = existingYarnrcYmlContent;
   try {
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
-    yarnrcYml ??= (await getFile(yarnrcYmlFilename)) ?? undefined;
+    if (isNullOrUndefined(yarnrcYml)) {
+      yarnrcYml = (await getFile(yarnrcYmlFilename)) ?? undefined;
+    }
     const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
     if (!isString(yarnrcYml) || !isString(newYarnrcYml)) {
       return existingYarnrcYmlContent;

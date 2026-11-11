@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { MergeStrategy } from '../../../config/types.ts';
@@ -252,13 +257,17 @@ export async function initPlatform({
   if (username) {
     renovateUsername = username;
   } else if (platformConfig.isGHApp) {
-    platformConfig.userDetails ??= await getAppDetails(token);
+    if (isNullOrUndefined(platformConfig.userDetails)) {
+      platformConfig.userDetails = await getAppDetails(token);
+    }
     renovateUsername = platformConfig.userDetails.username;
   } else {
-    platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.host.apiUrl.href,
-      token,
-    );
+    if (isNullOrUndefined(platformConfig.userDetails)) {
+      platformConfig.userDetails = await getUserDetails(
+        platformConfig.host.apiUrl.href,
+        token,
+      );
+    }
     renovateUsername = platformConfig.userDetails.username;
   }
 
@@ -274,21 +283,24 @@ export async function initPlatform({
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
-      platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: coverage error #40625
+      if (isNullOrUndefined(platformConfig.userDetails)) {
+        platformConfig.userDetails = await getAppDetails(token);
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
-      platformConfig.userDetails ??= await getUserDetails(
-        platformConfig.host.apiUrl.href,
-        token,
-      );
-      // v8 ignore next -- TODO: coverage error #40625
+      if (isNullOrUndefined(platformConfig.userDetails)) {
+        platformConfig.userDetails = await getUserDetails(
+          platformConfig.host.apiUrl.href,
+          token,
+        );
+      }
       platformConfig.userEmail = platformConfig.userDetails.email;
-      // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail ??= await getUserEmail(
-        platformConfig.host.apiUrl.href,
-        token,
-      );
+      if (isNullOrUndefined(platformConfig.userEmail)) {
+        platformConfig.userEmail = await getUserEmail(
+          platformConfig.host.apiUrl.href,
+          token,
+        );
+      }
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -993,12 +1005,12 @@ export async function getPr(
     return fetchPr(prNo);
   }
   const prList = await getPrList();
-  let pr = prList.find(({ number }) => number === prNo) ?? null;
+  const pr = prList.find(({ number }) => number === prNo) ?? null;
   if (pr) {
     logger.debug('Returning PR from cache');
+    return pr;
   }
-  pr ??= await fetchPr(prNo);
-  return pr;
+  return fetchPr(prNo);
 }
 
 function matchesState(state: string, desiredState: string): boolean {

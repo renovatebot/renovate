@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
@@ -266,10 +267,12 @@ export class SbtPackageDatasource extends MavenDatasource {
   ): Promise<PomInfo | null> {
     // istanbul ignore next: will be covered later
     let packageUrls = pkgUrls;
-    packageUrls ??= await packageCache.get<string[]>(
-      'datasource-sbt-package',
-      getPackageUrlsCacheKey(registryUrl, packageName),
-    );
+    if (isNullOrUndefined(packageUrls)) {
+      packageUrls = await packageCache.get<string[]>(
+        'datasource-sbt-package',
+        getPackageUrlsCacheKey(registryUrl, packageName),
+      );
+    }
 
     // istanbul ignore if
     if (!packageUrls?.length) {

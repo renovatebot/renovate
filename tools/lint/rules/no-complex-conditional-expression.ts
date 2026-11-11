@@ -45,14 +45,45 @@ function isLogicalOperator(
   );
 }
 
+// Whether an optional link (`?.`) at or below this member or call can skip the
+// evaluation of its arguments and computed keys.
+function hasOptionalLink(node: Node): boolean {
+  let current = node;
+  for (;;) {
+    if (current.type === 'MemberExpression') {
+      if (current.optional) {
+        return true;
+      }
+      current = current.object;
+    } else if (current.type === 'CallExpression') {
+      if (current.optional) {
+        return true;
+      }
+      current = current.callee;
+    } else if (current.type === 'TSNonNullExpression') {
+      current = current.expression;
+    } else {
+      return false;
+    }
+  }
+}
+
 function isConditionallyEvaluated(child: Node, parent: Node): boolean {
-  if (parent.type === 'ConditionalExpression') {
-    return parent.consequent === child || parent.alternate === child;
+  switch (parent.type) {
+    case 'ConditionalExpression':
+      return parent.consequent === child || parent.alternate === child;
+    case 'LogicalExpression':
+    case 'AssignmentPattern':
+      return parent.right === child;
+    case 'AssignmentExpression':
+      return isLogicalOperator(parent) && parent.right === child;
+    case 'CallExpression':
+      return parent.callee !== child && hasOptionalLink(parent);
+    case 'MemberExpression':
+      return parent.property === child && hasOptionalLink(parent);
+    default:
+      return false;
   }
-  if (parent.type === 'LogicalExpression') {
-    return parent.right === child;
-  }
-  return false;
 }
 
 export default defineRule({
@@ -66,7 +97,7 @@ export default defineRule({
       ternaryInLogical:
         'Do not use a ternary as an operand of `{{operator}}`; extract it into a variable or use `if`/`else`.',
       conditionalAwait:
-        'Do not `await` inside a ternary branch or on the right side of `&&`, `||` or `??`; await in a separate statement or use `if`/`else`.',
+        'Do not `await` in a conditionally evaluated position (ternary branch, right side of `&&`, `||`, `??` or their assignments, optional chain argument or key, default value); await in a separate statement or use `if`/`else`.',
     },
   },
   createOnce(context) {

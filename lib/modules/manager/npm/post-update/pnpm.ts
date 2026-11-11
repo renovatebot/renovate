@@ -1,4 +1,4 @@
-import { isNumber, isNumericString } from '@sindresorhus/is';
+import { isNullOrUndefined, isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -55,16 +55,20 @@ export async function generateLockFile(
     // if pnpm is being upgraded, it comes first
     let pnpmConstraint: string | null | undefined =
       getPnpmConstraintFromUpgrades(upgrades);
-    pnpmConstraint ??= await resolveToolConstraint(config, 'pnpm', async () => {
-      // look in package.json > packageManager or engines
-      let pnpmVersion = getPackageManagerVersion(
-        'pnpm',
-        await lazyPgkJson.getValue(),
-      );
-      // use lockfileVersion to find pnpm version range
-      pnpmVersion ??= await getConstraintFromLockFile(lockFileName);
-      return pnpmVersion;
-    });
+    if (isNullOrUndefined(pnpmConstraint)) {
+      pnpmConstraint = await resolveToolConstraint(config, 'pnpm', async () => {
+        // look in package.json > packageManager or engines
+        let pnpmVersion = getPackageManagerVersion(
+          'pnpm',
+          await lazyPgkJson.getValue(),
+        );
+        // use lockfileVersion to find pnpm version range
+        if (isNullOrUndefined(pnpmVersion)) {
+          pnpmVersion = await getConstraintFromLockFile(lockFileName);
+        }
+        return pnpmVersion;
+      });
+    }
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint: pnpmConstraint,

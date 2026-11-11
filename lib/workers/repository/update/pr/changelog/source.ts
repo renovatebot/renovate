@@ -147,10 +147,10 @@ export abstract class ChangeLogSource {
           return null;
         }
 
-        let releases:
-          | Awaited<ReturnType<typeof getInRangeReleases>>
-          | typeof config.releases = config.releases;
-        releases ??= await getInRangeReleases(config);
+        let releases: Release[] | null | undefined = config.releases;
+        if (isNullOrUndefined(releases)) {
+          releases = await getInRangeReleases(config);
+        }
         // v8 ignore next -- `getInRangeReleases` only returns null on paths it already ignores
         if (!releases?.length) {
           logger.debug('No releases');

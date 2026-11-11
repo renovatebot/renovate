@@ -1940,6 +1940,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(msg).toContain('past message2');
       });
 
+      it('should keep a given currentBranch when fetching an existing checkout', async () => {
+        await git.initRepo({
+          url: origin.path,
+          currentBranch: defaultBranch,
+        });
+
+        await expect(git.syncGit()).resolves.toBeUndefined();
+        await expect(git.getCommitMessages()).resolves.toEqual([
+          'master message',
+          'past message',
+        ]);
+      });
+
       it('should set branch prefix', async () => {
         const repo = simpleGit(base.path);
         await repo.checkout(['-b', 'renovate/test', defaultBranch]);

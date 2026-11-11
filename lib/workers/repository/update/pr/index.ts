@@ -1,6 +1,7 @@
 import {
   isArray,
   isNonEmptyArray,
+  isNullOrUndefined,
   isNumber,
   isUndefined,
 } from '@sindresorhus/is';
@@ -186,7 +187,9 @@ export async function ensurePr(
     dependencyDashboardCheck === 'unpend';
   // Check if PR already exists
   let existingPr = await platform.getBranchPr(branchName, config.baseBranch);
-  existingPr ??= await tryReuseAutoclosedPr(branchName, prTitle);
+  if (isNullOrUndefined(existingPr)) {
+    existingPr = await tryReuseAutoclosedPr(branchName, prTitle);
+  }
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');

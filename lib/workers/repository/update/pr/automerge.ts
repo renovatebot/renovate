@@ -1,4 +1,5 @@
 // TODO #22198
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -65,7 +66,9 @@ export async function checkAutoMerge(
     }
   }
   let isConflicted = config.isConflicted;
-  isConflicted ??= await scm.isBranchConflicted(baseBranch, branchName);
+  if (isNullOrUndefined(isConflicted)) {
+    isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
+  }
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {

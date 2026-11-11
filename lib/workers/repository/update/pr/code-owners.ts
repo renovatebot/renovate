@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger/index.ts';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform/index.ts';
@@ -88,11 +88,19 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
   try {
     // Find CODEOWNERS file
-    let codeOwnersFile = await readLocalFile('CODEOWNERS', 'utf8');
-    codeOwnersFile ??= await readLocalFile('.bitbucket/CODEOWNERS', 'utf8');
-    codeOwnersFile ??= await readLocalFile('.github/CODEOWNERS', 'utf8');
-    codeOwnersFile ??= await readLocalFile('.gitlab/CODEOWNERS', 'utf8');
-    codeOwnersFile ??= await readLocalFile('docs/CODEOWNERS', 'utf8');
+    let codeOwnersFile: string | null = null;
+    for (const path of [
+      'CODEOWNERS',
+      '.bitbucket/CODEOWNERS',
+      '.github/CODEOWNERS',
+      '.gitlab/CODEOWNERS',
+      'docs/CODEOWNERS',
+    ]) {
+      codeOwnersFile = await readLocalFile(path, 'utf8');
+      if (!isNullOrUndefined(codeOwnersFile)) {
+        break;
+      }
+    }
 
     if (!codeOwnersFile) {
       logger.debug('No CODEOWNERS file found');

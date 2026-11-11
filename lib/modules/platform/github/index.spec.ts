@@ -447,6 +447,66 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
+    it('should reuse cached user details on repeated init', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      const expected = {
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      };
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual(
+        expected,
+      );
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual(
+        expected,
+      );
+    });
+
+    it('should fetch user details for gitAuthor when only username is set', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      await expect(
+        github.initPlatform({ token: '123test', username: 'renovate-bot' }),
+      ).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
+    it('should fetch app details for gitAuthor when only username is set with GitHub App', async () => {
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      await expect(
+        github.initPlatform({
+          token: 'x-access-token:ghs_123test',
+          username: 'my-app[bot]',
+        }),
+      ).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
     it('should fall back to user/emails when there is no public email', async () => {
       httpMock
         .scope(githubApiHost)

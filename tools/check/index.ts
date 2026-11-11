@@ -354,7 +354,7 @@ async function main(): Promise<void> {
   );
   const hasFailure = allResults.some((r) => !r.result.success);
 
-  let coverage: Awaited<ReturnType<typeof collectCoverage>> = [];
+  let coverage: CoverageInfo[] = [];
   if (testChecks.length > 0) {
     coverage = await collectCoverage(args);
   }

@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -123,18 +123,23 @@ export async function generateLockFile(
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     let yarnCompatibility = yarnUpdate?.newValue;
-    yarnCompatibility ??= await resolveToolConstraint(
-      config,
-      'yarn',
-      async () => {
-        let yarnVersion = getPackageManagerVersion(
-          'yarn',
-          await lazyPgkJson.getValue(),
-        );
-        yarnVersion ??= getYarnVersionFromLock(await getYarnLock(lockFileName));
-        return yarnVersion;
-      },
-    );
+    if (isNullOrUndefined(yarnCompatibility)) {
+      yarnCompatibility = await resolveToolConstraint(
+        config,
+        'yarn',
+        async () => {
+          let yarnVersion = getPackageManagerVersion(
+            'yarn',
+            await lazyPgkJson.getValue(),
+          );
+          if (isNullOrUndefined(yarnVersion)) {
+            const yarnLock = await getYarnLock(lockFileName);
+            yarnVersion = getYarnVersionFromLock(yarnLock);
+          }
+          return yarnVersion;
+        },
+      );
+    }
     const yarnRange = semver.validRange(yarnCompatibility);
     const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;

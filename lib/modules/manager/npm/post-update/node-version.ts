@@ -1,4 +1,4 @@
-import { isArray } from '@sindresorhus/is';
+import { isArray, isNullOrUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -76,15 +76,23 @@ export async function getNodeConstraint(
   pkg: LazyPackageJson,
 ): Promise<string | null> {
   let constraint: string | null | undefined = getNodeUpdate(upgrades);
-  constraint ??= await resolveToolConstraint(config, 'node', async () => {
-    let nodeConstraint = await getDevEnginesConstraint(pkg);
-    nodeConstraint ??= await getNodeFile(upath.join(lockFileDir, '.nvmrc'));
-    nodeConstraint ??= await getNodeFile(
-      upath.join(lockFileDir, '.node-version'),
-    );
-    nodeConstraint ??= await getPackageJsonConstraint(pkg);
-    return nodeConstraint;
-  });
+  if (isNullOrUndefined(constraint)) {
+    constraint = await resolveToolConstraint(config, 'node', async () => {
+      let nodeConstraint = await getDevEnginesConstraint(pkg);
+      if (isNullOrUndefined(nodeConstraint)) {
+        nodeConstraint = await getNodeFile(upath.join(lockFileDir, '.nvmrc'));
+      }
+      if (isNullOrUndefined(nodeConstraint)) {
+        nodeConstraint = await getNodeFile(
+          upath.join(lockFileDir, '.node-version'),
+        );
+      }
+      if (isNullOrUndefined(nodeConstraint)) {
+        nodeConstraint = await getPackageJsonConstraint(pkg);
+      }
+      return nodeConstraint;
+    });
+  }
   constraint ??= null;
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
