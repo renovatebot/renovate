@@ -908,6 +908,51 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe('package-lock-contents');
   });
 
+  it('supports corepack on grouping when only a later upgrade has the flag', async () => {
+    vi.stubEnv('CONTAINERBASE', 'true');
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json': '{}',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir',
+    );
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '0.10.0' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      constraints: {
+        yarn: '^3.0.0',
+      },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      {
+        managerData: { key: 'some-dep/some-transitive-dep' },
+      },
+      {
+        managerData: { hasPackageManager: true },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
   it('supports customizing corepack version via config constraints', async () => {
     vi.stubEnv('CONTAINERBASE', 'true');
 

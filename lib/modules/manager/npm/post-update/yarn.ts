@@ -153,10 +153,10 @@ export async function generateLockFile(
       constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
     };
 
-    // check first upgrade, see #17786
+    // check all upgrades, see #17786
     let packageManagerDeclared =
       !!config.managerData?.hasPackageManager ||
-      !!upgrades[0]?.managerData?.hasPackageManager;
+      upgrades.some((upgrade) => !!upgrade.managerData?.hasPackageManager);
     // dep-level managerData can shadow the flag (e.g. nested resolutions), see #25853
     if (!isYarn1 && !packageManagerDeclared) {
       packageManagerDeclared = await hasPackageManager(lockFileDir);
