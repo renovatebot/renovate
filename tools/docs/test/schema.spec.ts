@@ -49,12 +49,24 @@ function headings(repo: string[], global: string[] = []): DocsHeadings {
   return { repo: new Set(repo), global: new Set(global) };
 }
 
-async function compileSchema(
-  opts: { isGlobal?: boolean } = {},
-): Promise<ValidateFunction> {
+async function compileSchema(isGlobal: boolean): Promise<ValidateFunction> {
   const ajv = new Ajv({ schemaId: '$id', strict: false });
   addFormats(ajv);
-  return ajv.compile(await buildSchema(opts));
+  return ajv.compile(await buildSchema({ isGlobal }));
+}
+
+const compiledSchemas = new Map<boolean, Promise<ValidateFunction>>();
+
+/**
+ * Compiles the repository or global schema once for the whole file, as each compilation takes several seconds.
+ */
+function getSchema(isGlobal: boolean): Promise<ValidateFunction> {
+  let schema = compiledSchemas.get(isGlobal);
+  if (!schema) {
+    schema = compileSchema(isGlobal);
+    compiledSchemas.set(isGlobal, schema);
+  }
+  return schema;
 }
 
 /**
@@ -193,8 +205,11 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
     let globalSchema: ValidateFunction;
 
     beforeAll(async () => {
-      repoSchema = await compileSchema();
-      globalSchema = await compileSchema({ isGlobal: true });
+      repoSchema = await getSchema(false);
+    }, 30000);
+
+    beforeAll(async () => {
+      globalSchema = await getSchema(true);
     }, 30000);
 
     it('allows a map of values to use any key', () => {
@@ -332,7 +347,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
     let repoSchema: ValidateFunction;
 
     beforeAll(async () => {
-      repoSchema = await compileSchema();
+      repoSchema = await getSchema(false);
     }, 30000);
 
     it('suggests the managers we know about, without rejecting a pattern', () => {
@@ -405,8 +420,11 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
     let globalSchema: ValidateFunction;
 
     beforeAll(async () => {
-      repoSchema = await compileSchema();
-      globalSchema = await compileSchema({ isGlobal: true });
+      repoSchema = await getSchema(false);
+    }, 30000);
+
+    beforeAll(async () => {
+      globalSchema = await getSchema(true);
     }, 30000);
 
     function getPresetsRejectedBySchema(): string[] {
