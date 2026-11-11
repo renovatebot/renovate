@@ -848,5 +848,24 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const res = await getConstraintFromLockFile('some-file-name');
       expect(res).toBe('>=9');
     });
+
+    it('uses the last document of a multi-document lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          ---
+          lockfileVersion: '6.0'
+          importers:
+            .:
+              configDependencies: {}
+          ---
+          lockfileVersion: '9.0'
+          importers:
+            .: {}
+        `,
+      );
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=9');
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
   });
 });

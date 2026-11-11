@@ -395,8 +395,9 @@ export async function getConstraintFromLockFile(
       logger.trace(`Empty pnpm lock file: ${lockFileName}`);
       return null;
     }
-    // TODO: use schema (#9610)
-    const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
+    // the main lockfile is the last document, see `getPnpmLock`
+    const pnpmLock = parseYaml(lockfileContent).at(-1) as
+      PnpmLockFile | undefined;
     if (
       !isNumber(pnpmLock?.lockfileVersion) &&
       !isNumericString(pnpmLock?.lockfileVersion)
