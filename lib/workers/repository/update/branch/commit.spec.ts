@@ -1,7 +1,6 @@
 import { fakeSha, logger, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { BranchConfig } from '../../../types.ts';
-import { getPlatformPrOptions } from '../pr/index.ts';
 import { commitFilesToBranch } from './commit.ts';
 
 describe('workers/repository/update/branch/commit', () => {
@@ -54,7 +53,6 @@ describe('workers/repository/update/branch/commit', () => {
             force: false,
             message: 'some commit message',
             platformCommit: 'auto',
-            platformPrOptions: getPlatformPrOptions(config),
           },
         ],
       ]);

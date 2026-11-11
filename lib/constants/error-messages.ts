@@ -115,7 +115,6 @@ export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
 
 // PR Error
 export const PR_ALREADY_IN_MERGE_QUEUE = 'pr-already-in-merge-queue';
-export const PR_AUTOMERGE_ENABLED_BY_OTHER = 'pr-automerge-enabled-by-other';
 
 // Bundler Error
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
