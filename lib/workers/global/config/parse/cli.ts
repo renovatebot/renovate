@@ -31,6 +31,7 @@ function createProgram(): Command<[string[]]> {
         optionString,
         option.description,
         coersions[option.type],
+        option.default,
       );
     }
   });
