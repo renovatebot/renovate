@@ -60,7 +60,12 @@ function compileSchema({
   let compiled = compiledSchemas.get(isGlobal);
   if (!compiled) {
     compiled = buildSchema({ isGlobal }).then((schema) => {
-      const ajv = new Ajv({ schemaId: '$id', strict: false });
+      const ajv = new Ajv({
+        schemaId: '$id',
+        strict: false,
+        inlineRefs: false,
+        code: { optimize: false },
+      });
       addFormats(ajv);
       return ajv.compile(schema);
     });
