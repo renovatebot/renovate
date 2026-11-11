@@ -1,6 +1,7 @@
 import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import {
   isNonEmptyObject,
+  isNullOrUndefined,
   isNumber,
   isNumericString,
   isObject,
@@ -431,13 +432,13 @@ export async function resolvePnpmConstraint(
   pnpmLockFile: string,
   getPackageJsonConstraint: () => MaybePromise<string | null | undefined>,
 ): Promise<string | undefined> {
-  return await resolveToolConstraint(
-    config,
-    'pnpm',
-    async () =>
-      (await getPackageJsonConstraint()) ??
-      (await getConstraintFromLockFile(pnpmLockFile)),
-  );
+  return await resolveToolConstraint(config, 'pnpm', async () => {
+    let pnpmVersion = await getPackageJsonConstraint();
+    if (isNullOrUndefined(pnpmVersion)) {
+      pnpmVersion = await getConstraintFromLockFile(pnpmLockFile);
+    }
+    return pnpmVersion;
+  });
 }
 
 /**
