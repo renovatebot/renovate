@@ -1402,7 +1402,12 @@ function describeAllowedValues(option: RenovateOptions): string {
     const page = option.globalOnly
       ? 'self-hosted-configuration'
       : 'configuration-options';
-    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${option.name.toLowerCase()}`;
+    // options which can only be used in one parent, like `packageRules`, are documented under it
+    const heading =
+      option.parents?.length === 1
+        ? `${option.parents[0]}${option.name}`
+        : option.name;
+    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${heading.toLowerCase()}`;
   }
   return `allowedValues: ${JSON.stringify(allowedValues)}`;
 }
