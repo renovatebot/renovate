@@ -601,7 +601,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: true,
     scopes: ['repo', 'packageRule', 'manager', 'updateType'],
-    parents: ['hostRules', 'vulnerabilityAlerts'],
+    parents: ['dependencyDashboard', 'hostRules', 'vulnerabilityAlerts'],
   },
   {
     name: 'constraintsFiltering',
@@ -1037,10 +1037,96 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'dependencyDashboard',
     scopes: ['repo'],
+    description: 'Configuration for the "Dependency Dashboard" issue.',
+    type: 'object',
+    default: {
+      enabled: false,
+      autoclose: false,
+      title: 'Dependency Dashboard',
+      header:
+        'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
+      osvVulnerabilitySummary: 'none',
+      reportAbandonment: true,
+      customize: {},
+    },
+    mergeable: true,
+    additionalProperties: false,
+  },
+  {
+    name: 'autoclose',
     description:
-      'Whether to create a "Dependency Dashboard" issue in the repository.',
+      'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
+    parents: ['dependencyDashboard'],
     default: false,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'title',
+    description: 'Title for the Dependency Dashboard issue.',
+    type: 'string',
+    parents: ['dependencyDashboard'],
+    default: `Dependency Dashboard`,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'header',
+    description:
+      'Any text added here will be placed first in the Dependency Dashboard issue body.',
+    type: 'string',
+    parents: ['dependencyDashboard'],
+    default:
+      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
+    supportsTemplating: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'footer',
+    description:
+      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
+    type: 'string',
+    parents: ['dependencyDashboard'],
+    supportsTemplating: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'osvVulnerabilitySummary',
+    description:
+      'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev).',
+    type: 'string',
+    parents: ['dependencyDashboard'],
+    allowedValues: ['none', 'all', 'unresolved'],
+    default: 'none',
+    experimental: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'reportAbandonment',
+    description:
+      'Controls whether abandoned packages are reported in the Dependency Dashboard issue.',
+    type: 'boolean',
+    parents: ['dependencyDashboard'],
+    default: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'customize',
+    description: 'Customize sections in the Dependency Dashboard issue.',
+    type: 'object',
+    parents: ['dependencyDashboard'],
+    default: {},
+    freeChoice: true,
+    additionalProperties: {
+      type: 'string',
+    },
+    cli: false,
+    env: false,
   },
   {
     name: 'dependencyDashboardApproval',
@@ -1051,21 +1137,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
-    name: 'dependencyDashboardAutoclose',
-    scopes: ['repo'],
-    description:
-      'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
-    type: 'boolean',
-    default: false,
-  },
-  {
-    name: 'dependencyDashboardTitle',
-    scopes: ['repo'],
-    description: 'Title for the Dependency Dashboard issue.',
-    type: 'string',
-    default: `Dependency Dashboard`,
-  },
-  {
     name: 'dependencyDashboardCategory',
     scopes: sharedScopes,
     description:
@@ -1074,44 +1145,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: null,
     cli: false,
     env: false,
-  },
-  {
-    name: 'dependencyDashboardHeader',
-    scopes: ['repo'],
-    description:
-      'Any text added here will be placed first in the Dependency Dashboard issue body.',
-    type: 'string',
-    default:
-      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
-    supportsTemplating: true,
-  },
-  {
-    name: 'dependencyDashboardFooter',
-    scopes: ['repo'],
-    description:
-      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
-    type: 'string',
-    supportsTemplating: true,
-  },
-  {
-    name: 'dependencyDashboardLabels',
-    scopes: ['repo'],
-    description:
-      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
-    type: 'array',
-    subType: 'string',
-    default: null,
-    supportsTemplating: true,
-  },
-  {
-    name: 'dependencyDashboardOSVVulnerabilitySummary',
-    scopes: ['repo'],
-    description:
-      'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev).',
-    type: 'string',
-    allowedValues: ['none', 'all', 'unresolved'],
-    default: 'none',
-    experimental: true,
   },
   {
     name: 'configWarningReuseIssue',
@@ -2468,14 +2501,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: null,
   },
   {
-    name: 'dependencyDashboardReportAbandonment',
-    scopes: ['repo'],
-    description:
-      'Controls whether abandoned packages are reported in the dependency dashboard.',
-    type: 'boolean',
-    default: true,
-  },
-  {
     name: 'internalChecksAsSuccess',
     scopes: sharedScopes,
     description:
@@ -2916,17 +2941,6 @@ const options: Readonly<RenovateOptions>[] = [
     supportsTemplating: true,
   },
   {
-    name: 'customizeDashboard',
-    scopes: ['repo'],
-    description: 'Customize sections in the Dependency Dashboard issue.',
-    type: 'object',
-    default: {},
-    freeChoice: true,
-    additionalProperties: {
-      type: 'string',
-    },
-  },
-  {
     name: 'lockFileMaintenance',
     scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration for lock file maintenance.',
@@ -3005,7 +3019,9 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'labels',
     scopes: sharedScopes,
-    description: 'Labels to set in Pull Request.',
+    parents: ['dependencyDashboard'],
+    description:
+      'Labels to set in Pull Request, or on the Dependency Dashboard issue when used in `dependencyDashboard`.',
     type: 'array',
     subType: 'string',
     supportsTemplating: true,

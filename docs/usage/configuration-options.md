@@ -1493,14 +1493,6 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
-## `customizeDashboard`
-
-You may use the `customizeDashboard` object to customize the Dependency Dashboard.
-
-Supported fields:
-
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
-
 ## `defaultRegistryUrls`
 
 Override a datasource's default registries with this config option.
@@ -1518,7 +1510,7 @@ Compare that to `registryUrls`, which are a way to _override_ registries.
 
 Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:recommended` preset.
 
-To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard.enabled` to `false`.
 
 ```json
 {
@@ -1526,7 +1518,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 }
 ```
 
-Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
+Configuring `dependencyDashboard.enabled` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
 This issue has a list of all PRs pending, open, closed (unmerged) or in error.
 The goal of this issue is to give visibility into all updates that Renovate is managing.
 
@@ -1542,6 +1534,72 @@ Examples of what having a Dependency Dashboard will allow you to do:
   Renovate still creates and manages PRs, and still follows your schedules and rate limits.
   The Dependency Dashboard gives you extra visibility and control over your updates.
 
+The `dependencyDashboard` object configures the Dependency Dashboard issue itself:
+
+```json
+{
+  "dependencyDashboard": {
+    "enabled": true,
+    "title": "Renovate Dashboard",
+    "labels": ["dependencies"]
+  }
+}
+```
+
+Set `labels` within `dependencyDashboard` to always apply these labels on the Dependency Dashboard issue.
+The labels support templating, in the same way as `dependencyDashboard.header` and `dependencyDashboard.footer`.
+The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
+It is pointless to edit the labels, as Renovate restores the labels on each run.
+
+!!! note
+  Before the `dependencyDashboard` object was introduced, these settings were separate options, such as `dependencyDashboardTitle`, `dependencyDashboardLabels` and `customizeDashboard`.
+  Renovate migrates them into the `dependencyDashboard` object.
+  `dependencyDashboardApproval` and `dependencyDashboardCategory` remain separate options, as they apply to updates rather than to the Dependency Dashboard issue.
+
+### `dependencyDashboard.autoclose`
+
+You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
+
+### `dependencyDashboard.customize`
+
+You may use the `customize` object to customize sections in the Dependency Dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
+
+### `dependencyDashboard.footer`
+
+### `dependencyDashboard.header`
+
+### `dependencyDashboard.osvVulnerabilitySummary`
+
+Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
+You can choose from:
+
+- `none` (default) do not list any CVEs
+- `unresolved` list CVEs that have no fixes
+- `all` list all CVEs
+
+You will only get OSV-based vulnerability alerts for direct dependencies.
+
+This feature is independent of the `osvVulnerabilityAlerts` option.
+
+The source of these CVEs is [OSV.dev](https://osv.dev/).
+
+### `dependencyDashboard.reportAbandonment`
+
+Controls whether abandoned packages are reported in the Dependency Dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the Dependency Dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
+
+Set this to `false` if you prefer not to see abandoned packages in your Dependency Dashboard.
+
+### `dependencyDashboard.title`
+
+Configure this option if you prefer a different title for the Dependency Dashboard.
+
 ## `dependencyDashboardApproval`
 
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
@@ -1550,7 +1608,7 @@ By setting `dependencyDashboardApproval` to `true` in config (including within `
 You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 !!! tip
-  When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
+  When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard.enabled` explicitly.
 
 You can configure Renovate to wait for approval for:
 
@@ -1590,10 +1648,6 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 }
 ```
 
-## `dependencyDashboardAutoclose`
-
-You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
-
 ## `dependencyDashboardCategory`
 
 You can use this to categorize updates on the Dependency Dashboard.
@@ -1620,46 +1674,6 @@ If there are categories in that section, the action will be put in an extra "All
 This is to explicitly clarify that the action applies to all updates in the section, not to just a specific category.
 
 The Dependency Dashboard categories are only used to visually organize updates within the Dependency Dashboard issue. They do not impact grouping of updates into a single update like how e.g. `branchName` and `groupName` do.
-
-## `dependencyDashboardFooter`
-
-## `dependencyDashboardHeader`
-
-## `dependencyDashboardLabels`
-
-The labels support templating, in the same way as `dependencyDashboardHeader` and `dependencyDashboardFooter`.
-
-The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
-It is pointless to edit the labels, as Renovate restores the labels on each run.
-
-## `dependencyDashboardOSVVulnerabilitySummary`
-
-Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
-You can choose from:
-
-- `none` (default) do not list any CVEs
-- `unresolved` list CVEs that have no fixes
-- `all` list all CVEs
-
-You will only get OSV-based vulnerability alerts for direct dependencies.
-The only exception today is the `pep621` manager, for `uv` projects.
-
-This feature is independent of the `osvVulnerabilityAlerts` option.
-
-The source of these CVEs is [OSV.dev](https://osv.dev/).
-
-## `dependencyDashboardReportAbandonment`
-
-Controls whether abandoned packages are reported in the dependency dashboard.
-
-When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
-This helps you identify dependencies that may need attention due to lack of maintenance.
-
-Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
-
-## `dependencyDashboardTitle`
-
-Configure this option if you prefer a different title for the Dependency Dashboard.
 
 ## `description`
 
@@ -3021,7 +3035,7 @@ Examples of how you can use `minimumReleaseAge`:
 #### Suppress branch/PR creation for X days
 
 If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
-We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
+We recommend you set `dependencyDashboard.enabled=true`, so you can see these pending PRs.
 
 !!! warning
   `prCreation="not-pending"` only opens the PR once branch checks complete.
