@@ -95,7 +95,7 @@ export function decideBranchReuse({
   }
 
   // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
-  // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+  // an edited branch only gets here when the user ticked it on the dashboard or requested a rebase
   if (branchPr?.targetBranch && branchPr.targetBranch !== config.baseBranch) {
     logger.debug(
       'Base branch changed by user, rebasing the branch onto new base',
