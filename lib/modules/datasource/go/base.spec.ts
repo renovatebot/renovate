@@ -419,6 +419,44 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('handles go-import with self-hosted github ssh source with port', async () => {
+        const meta =
+          '<meta name="go-import" content="go.example.com/fnx/my-service git ssh://git@github.example.com:7999/my-org/my-service">';
+        httpMock
+          .scope('https://go.example.com')
+          .get('/fnx/my-service?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'go.example.com/fnx/my-service',
+        );
+
+        expect(res).toEqual({
+          datasource: GithubTagsDatasource.id,
+          registryUrl: 'https://github.example.com',
+          packageName: 'my-org/my-service',
+        });
+      });
+
+      it('handles go-import with self-hosted github https source with port', async () => {
+        const meta =
+          '<meta name="go-import" content="go.example.com/fnx/my-service git https://github.example.com:8443/my-org/my-service">';
+        httpMock
+          .scope('https://go.example.com')
+          .get('/fnx/my-service?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'go.example.com/fnx/my-service',
+        );
+
+        expect(res).toEqual({
+          datasource: GithubTagsDatasource.id,
+          registryUrl: 'https://github.example.com:8443',
+          packageName: 'my-org/my-service',
+        });
+      });
+
       it('handles go-import with gitlab source', async () => {
         const meta =
           '<meta name="go-import" content="my.custom.domain/golang/myrepo git https://gitlab.com/golang/myrepo.git">';

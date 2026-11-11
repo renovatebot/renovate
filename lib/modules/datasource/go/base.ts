@@ -6,6 +6,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import {
+  isHttpUrl,
   parseUrl,
   trimLeadingSlash,
   trimTrailingSlash,
@@ -360,14 +361,15 @@ export class BaseGoDatasource {
           .split('/')
           .slice(-2)
           .join('/');
-        // the GitHub API is only served over http(s), so an ssh import URL must not leak into the registryUrl
-        const protocol = parsedUrl.protocol.startsWith('http')
-          ? parsedUrl.protocol
-          : 'https:';
+        // the GitHub API is only served over http(s); for ssh import URLs fall back
+        // to https on the default port, as the ssh port is not the API port
+        const registryUrl = isHttpUrl(parsedUrl)
+          ? `${parsedUrl.protocol}//${parsedUrl.host}`
+          : `https://${parsedUrl.hostname}`;
 
         return {
           datasource: GithubTagsDatasource.id,
-          registryUrl: `${protocol}//${parsedUrl.host}`,
+          registryUrl,
           packageName,
         };
       }
