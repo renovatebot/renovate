@@ -2,6 +2,7 @@
 	<scm>
 		<!-- example taken from https://maven.apache.org/scm/git.html -->
 		<url>scm:git:git://www.github.com/parent-scm/parent</url>
+		<tag>v1.0.0</tag>
 	</scm>
 	<url>https://parent-home.example.com</url>
 </project>

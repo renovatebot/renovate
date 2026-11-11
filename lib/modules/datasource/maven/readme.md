@@ -37,6 +37,18 @@ For example:
 
 This is what allows `Renovate` to determine the `sourceUrl`, that it then uses to fetch the changelogs.
 
+If your repository uses non-standard tags for releases, also configure `scm.tag` in your published POM.
+Renovate uses this exact value to match release tags when fetching release notes.
+
+For example:
+
+```xml
+<scm>
+    <url>scm:git:https://gitlab.com/path_to_repository</url>
+    <tag>release/v1.2.3</tag>
+</scm>
+```
+
 !!! note
   This also works for private repositories.
   It can leverage the same `token` that you had to configure in order to be able to reach the private Artifactory.
