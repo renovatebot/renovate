@@ -475,9 +475,33 @@ describe('modules/manager/cargo/minimum-release-age', () => {
       function run(
         upgrades: Upgrade<CargoManagerData>[],
         config = {},
+        rustConstraint = '1.100.0',
       ): Promise<MinPublishAgeEnv> {
-        return getMinPublishAgeEnv({ ...options, config, upgrades });
+        return getMinPublishAgeEnv({
+          ...options,
+          config,
+          upgrades,
+          rustConstraint,
+        });
       }
+
+      it.each`
+        rustConstraint
+        ${'1.99.0'}
+        ${'stable'}
+        ${'invalid'}
+      `(
+        'lowers the age without a notice for the Rust constraint $rustConstraint',
+        async ({ rustConstraint }) => {
+          await expect(
+            run(
+              [{ ...crate, minimumReleaseAge: '3 days' }],
+              {},
+              rustConstraint,
+            ),
+          ).resolves.toEqual(env('3 days'));
+        },
+      );
 
       it.each`
         description            | releaseTimestamp

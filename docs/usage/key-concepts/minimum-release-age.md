@@ -357,7 +357,8 @@ A registry which publishes no times gives Renovate no release timestamps, so its
 For such a registry, set `minimumReleaseAgeBehaviour` to `timestamp-optional` in a `packageRules` entry with `matchRegistryUrls`.
 
 Cargo has no per-package exclude.
-If a `minimumReleaseAge` from `packageRules` lowers the age of an updated crate whose release is younger than the passed age or has no timestamp, Renovate passes that smaller age, but not less than `registry.global-min-publish-age`, and adds a notice to the pull request.
+If a `minimumReleaseAge` from `packageRules` lowers the age of an updated crate whose release is younger than the passed age or has no timestamp, Renovate passes that smaller age, but not less than `registry.global-min-publish-age`.
+If the `rust` constraint only allows Rust 1.100.0 or later, Renovate also adds a notice to the pull request.
 The smaller age applies to all crates of the lock file whose registry has no `min-publish-age` of its own.
 
 Renovate passes the age in the largest unit which keeps it a whole number, for example `36 hours`.
@@ -389,7 +390,7 @@ For example, with this config:
 
 - Without a cargo config, Renovate runs `cargo update` with `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE=7 days` and `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=deny`.
 - If a `rust-toolchain.toml` pins Rust `1.100.0`, lock file maintenance does not wait for release timestamps.
-- An update of `cc` to a release which is 2 days old sets neither variable, and the PR notes that cargo checked no publish age instead of 7 days.
+- An update of `cc` to a release which is 2 days old sets neither variable, and with Rust `1.100.0` the PR notes that cargo checked no publish age instead of 7 days.
 - With `registry.global-min-publish-age = "10 days"` in the `.cargo/config.toml`, Renovate waits 10 days before it raises an update, also for `cc`, and sets neither variable, as cargo applies its own 10 days.
 - With `registries.crates-io.min-publish-age = "2 days"` in the `.cargo/config.toml`, Renovate still waits 7 days and passes `7 days`, but cargo checks 2 days for crates from crates.io.
   Lock file maintenance waits for release timestamps, as 2 days is smaller than its `minimumReleaseAge`.

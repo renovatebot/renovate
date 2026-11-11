@@ -26,6 +26,8 @@ export interface CargoLockFileVersions {
 
 export interface MinPublishAgeEnvOptions extends PackageManagerMinimumReleaseAgeOptions {
   upgrades: Upgrade<CargoManagerData>[];
+  /** The Rust constraint, which decides whether cargo reads the environment variables. */
+  rustConstraint?: string;
 }
 
 export interface MinPublishAgeEnv {

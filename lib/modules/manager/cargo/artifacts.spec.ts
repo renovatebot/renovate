@@ -758,7 +758,7 @@ describe('modules/manager/cargo/artifacts', () => {
               packageFileName: 'Cargo.toml',
               updatedDeps: deps,
               newPackageFileContent: '{}',
-              config,
+              config: { ...config, constraints: { rust: '1.100.0' } },
             }),
           ).resolves.toEqual([
             {
@@ -782,6 +782,35 @@ describe('modules/manager/cargo/artifacts', () => {
           expect(env).not.toHaveProperty(
             'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
           );
+        });
+
+        it('lowers the publish age without a notice before Rust 1.100.0', async () => {
+          fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+          git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+          const execSnapshots = mockExecAll();
+          fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+          mockReadLocalFile(['Old Cargo.lock', 'New Cargo.lock']);
+
+          await expect(
+            cargo.updateArtifacts({
+              packageFileName: 'Cargo.toml',
+              updatedDeps: [{ ...deps[0], minimumReleaseAge: '3 days' }],
+              newPackageFileContent: '{}',
+              config: { ...config, constraints: { rust: '1.99.0' } },
+            }),
+          ).resolves.toEqual([
+            {
+              file: {
+                type: 'addition',
+                path: 'Cargo.lock',
+                contents: 'New Cargo.lock',
+              },
+            },
+          ]);
+          expect(execSnapshots[0].options?.env).toMatchObject({
+            CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE: '3 days',
+            CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE: 'deny',
+          });
         });
 
         it('returns null for an unchanged lock file', async () => {
@@ -840,7 +869,7 @@ describe('modules/manager/cargo/artifacts', () => {
               },
             ],
             newPackageFileContent: '{}',
-            config,
+            config: { ...config, constraints: { rust: '1.100.0' } },
           });
 
           expect(res).toEqual([

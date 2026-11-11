@@ -163,6 +163,7 @@ async function updateArtifactsImpl(
       manager: 'cargo',
       packageFile: packageFileName,
       upgrades: updatedDeps,
+      rustConstraint,
     });
   }
   const { env: extraEnv, notice } = minPublishAge;

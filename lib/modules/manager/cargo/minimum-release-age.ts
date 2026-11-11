@@ -245,7 +245,7 @@ function toMinPublishAgeEnv(
 }
 
 /**
- * Returns the environment variables which pass the minimum release age of `calculatePackageManagerMinimumReleaseAgeMs`, raised to `registry.global-min-publish-age`, to cargo, lowered to the smaller `minimumReleaseAge` of exempted crates but not below `registry.global-min-publish-age`, and the notice for such a lowering. Returns nothing without `minimumReleaseAgePackageManagerSync`.
+ * Returns the environment variables which pass the minimum release age of `calculatePackageManagerMinimumReleaseAgeMs`, raised to `registry.global-min-publish-age`, to cargo, lowered to the smaller `minimumReleaseAge` of exempted crates but not below `registry.global-min-publish-age`, and the notice for such a lowering if `rustConstraint` is within `minPublishAgeRustRange`. Returns nothing without `minimumReleaseAgePackageManagerSync`.
  */
 export async function getMinPublishAgeEnv(
   options: MinPublishAgeEnvOptions,
@@ -286,9 +286,17 @@ export async function getMinPublishAgeEnv(
   logger.debug(
     `Cargo checks ${checked} instead of ${age}, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
   );
+  const env = toMinPublishAgeEnv(loweredMs, appliedConfigAgeMs);
+  // cargo before Rust 1.100.0 ignores the environment variables, so it checks
+  // nothing which the notice could name
+  if (
+    !isSubsetOf(rustVersioning, options.rustConstraint, minPublishAgeRustRange)
+  ) {
+    return { env };
+  }
   const crates = exemption.depNames.map((crate) => `\`${crate}\``).join(', ');
   return {
-    env: toMinPublishAgeEnv(loweredMs, appliedConfigAgeMs),
+    env,
     notice: `Cargo checked ${checked} instead of ${age} for this update, because the \`minimumReleaseAge\` of ${crates} is smaller.`,
   };
 }
