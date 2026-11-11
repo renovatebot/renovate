@@ -135,7 +135,7 @@ This ensures existing lock files are never broken by the `--before` flag.
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
-##### Default npm behaviour
+##### Default npm behavior
 
 Renovate passes `--before` for the `minimumReleaseAge` of the update, including a value from `packageRules`, and does not read the `.npmrc` when it looks up updates.
 
