@@ -1093,7 +1093,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         ${undefined}   | ${{}}                              | ${`${flag} ${foo} ${foo}`}
         ${'>=10.19.0'} | ${{}}                              | ${`${flag} ${foo} ${foo}`}
         ${'~10.18.0'}  | ${{}}                              | ${flag}
-        ${'>=9'}       | ${{}}                              | ${flag}
+        ${'>=9'}       | ${{}}                              | ${`${flag} ${foo} ${foo}`}
+        ${'<10.19.0'}  | ${{}}                              | ${flag}
+        ${'^9.0.0'}    | ${{}}                              | ${flag}
         ${'^11.0.0'}   | ${{ isLockFileMaintenance: true }} | ${flag}
       `(
         'passes $expected for pnpm $pnpm and $upgrade',
@@ -1122,6 +1124,44 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           ]);
         },
       );
+
+      it('passes exact-version excludes for a lock file without packageManager', async () => {
+        const execSnapshots = mockExecAll();
+        fs.getSiblingFileName.mockReturnValue(
+          'some-folder/pnpm-workspace.yaml',
+        );
+        fs.readLocalFile.mockImplementation((fileName: string) =>
+          Promise.resolve(
+            fileName === 'some-folder/pnpm-lock.yaml'
+              ? "lockfileVersion: '9.0'\n"
+              : null,
+          ),
+        );
+        fs.localPathExists.mockResolvedValueOnce(false); // pnpm-workspace.yaml
+
+        const res = await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          { ...config, constraints: {} },
+          [
+            {
+              ...update,
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              minimumReleaseAge: '1 day',
+              minimumReleaseAgeRepository: '3 days',
+              releaseTimestamp: new Date(
+                Date.now() - 2 * 24 * 60 * 60 * 1000,
+              ).toISOString() as Timestamp,
+            },
+          ],
+        );
+
+        expect(res.minimumReleaseAgeNotice).toBeUndefined();
+        expect(execSnapshots).toMatchObject([
+          { cmd: `${pnpmInstall} ${flag} ${foo} ${foo} --no-frozen-lockfile` },
+        ]);
+      });
 
       it('passes the excludes to lock file updates', async () => {
         const execSnapshots = mockExecAll();
@@ -1356,7 +1396,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       const res = await pnpmHelper.generateLockFile(
         'some-folder',
         {},
-        { ...config, constraints: { pnpm: '>=9' } },
+        { ...config, constraints: { pnpm: '>=9 <10.19.0' } },
         [
           {
             manager: 'npm',

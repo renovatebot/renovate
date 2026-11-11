@@ -28,7 +28,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
-import { intersectsWith, isSubsetOf } from '../../../versioning/common.ts';
+import { intersectsWith } from '../../../versioning/common.ts';
 import { api as npmVersioning } from '../../../versioning/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { artifactErrorMessageFromExecError } from '../../util.ts';
@@ -76,7 +76,7 @@ interface MinimumReleaseAgeArgs {
 }
 
 /**
- * Whether the pnpm version supports exact versions in `minimumReleaseAgeExclude`, where an unknown version counts as the latest pnpm.
+ * Whether Renovate may install a pnpm version which supports exact versions in `minimumReleaseAgeExclude`, where an unknown or invalid constraint counts as the latest pnpm.
  */
 function supportsExactVersionExclude(
   pnpmConstraint: string | null | undefined,
@@ -85,7 +85,7 @@ function supportsExactVersionExclude(
     isNonEmptyString(pnpmConstraint) && npmVersioning.isValid(pnpmConstraint);
   return (
     !isKnownVersion ||
-    isSubsetOf(npmVersioning, pnpmConstraint, pnpmExactVersionExcludeRange)
+    intersectsWith(npmVersioning, pnpmConstraint, pnpmExactVersionExcludeRange)
   );
 }
 
