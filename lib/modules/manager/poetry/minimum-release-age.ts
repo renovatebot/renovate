@@ -53,7 +53,7 @@ export async function readPoetryMinReleaseAgeConfig(
 }
 
 /**
- * Returns the rules which set `minimumReleaseAgeExtracted` of PyPI packages to `solver.min-release-age`, and to `null` for the packages of `solver.min-release-age-exclude`.
+ * Returns the rules which set `minimumReleaseAgeExtracted` of PyPI packages to `solver.min-release-age` rounded up to whole days, and to `null` for the packages of `solver.min-release-age-exclude`.
  */
 export function getPoetryMinReleaseAgeRules({
   days,
@@ -65,7 +65,7 @@ export function getPoetryMinReleaseAgeRules({
   return [
     {
       matchDatasources: [PypiDatasource.id],
-      minimumReleaseAgeExtracted: `${days} days`,
+      minimumReleaseAgeExtracted: `${Math.ceil(days)} days`,
     },
     ...exclude.map((packageName) => ({
       matchDatasources: [PypiDatasource.id],
@@ -118,12 +118,11 @@ export async function getMinReleaseAgeEnv(
     return {};
   }
   const poetryConfig = await readPoetryMinReleaseAgeConfig(packageFileName);
+  const renovateDays = Math.ceil(Duration.fromMillis(ageMs).as('days'));
   // the environment variable replaces `solver.min-release-age`, so Renovate never passes less
-  const days = Math.max(
-    Math.ceil(Duration.fromMillis(ageMs).as('days')),
-    poetryConfig.days,
-  );
-  const minReleaseAgeEnv = toMinReleaseAgeEnv(days, poetryConfig.days);
+  const minReleaseAgeEnv = toMinReleaseAgeEnv(renovateDays, poetryConfig.days);
+  // a non-integer `solver.min-release-age` stays unrounded, as Poetry applies it
+  const days = Math.max(renovateDays, poetryConfig.days);
   // Poetry checks no age for the packages of `solver.min-release-age-exclude`
   const exemption = getMinimumReleaseAgeExemption(
     updatedDeps.filter(
@@ -193,13 +192,13 @@ function getNormalizedName(dep: Upgrade): string {
 }
 
 /**
- * Returns `POETRY_SOLVER_MIN_RELEASE_AGE` for `days`, or nothing if `days` is the `solver.min-release-age` which Poetry applies itself.
+ * Returns `POETRY_SOLVER_MIN_RELEASE_AGE` for the whole `renovateDays`, or nothing if they are not larger than the possibly non-integer `solver.min-release-age` of `configDays`, which Poetry applies itself.
  */
 function toMinReleaseAgeEnv(
-  days: number,
+  renovateDays: number,
   configDays: number,
 ): NodeJS.ProcessEnv {
-  return days > configDays
-    ? { POETRY_SOLVER_MIN_RELEASE_AGE: days.toString() }
+  return renovateDays > configDays
+    ? { POETRY_SOLVER_MIN_RELEASE_AGE: renovateDays.toString() }
     : {};
 }

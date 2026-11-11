@@ -1411,6 +1411,52 @@ describe('modules/manager/poetry/artifacts', () => {
           expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
         });
 
+        it('passes the age of Renovate if it equals a non-integer Poetry value rounded up', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2.5
+          `,
+            [
+              {
+                depName: 'dep1',
+                datasource: 'pypi',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '3 days',
+                minimumReleaseAgeRepository: '3 days',
+              },
+            ],
+          );
+          expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '3' });
+        });
+
+        it('excludes a release older than a non-integer Poetry value', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2.5
+          `,
+            [
+              {
+                depName: 'dep1',
+                datasource: 'pypi',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '3 days',
+                releaseTimestamp: releasedDaysAgo(2.75),
+              },
+            ],
+          );
+          expect(env).toMatchObject({
+            POETRY_SOLVER_MIN_RELEASE_AGE: '3',
+            POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'dep1',
+          });
+        });
+
         it('passes no age if the Poetry value is not smaller', async () => {
           const { env } = await runWithPoetryToml(
             codeBlock`

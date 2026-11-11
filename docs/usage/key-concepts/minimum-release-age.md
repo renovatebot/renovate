@@ -150,8 +150,8 @@ For example, with `minimumReleaseAge` set to `3 days` in the `poetry` config and
 Renovate sets the variable when the repository or manager config sets `minimumReleaseAge`.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
 Renovate reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`.
-Renovate rounds a `solver.min-release-age` which is not a whole number up to whole days.
-It never passes less than `solver.min-release-age`, and sets no variable if the value equals it, so Poetry applies its own config.
+For its own wait before it raises an update, Renovate rounds a `solver.min-release-age` which is not a whole number up to whole days.
+It only passes its own value if it is larger than `solver.min-release-age`, and otherwise sets no variable, so Poetry applies its own config.
 If an updated PyPI package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate adds it to `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, as it already applied its own `minimumReleaseAge` to it.
 The variable replaces `solver.min-release-age-exclude`, so Renovate passes those entries first.
 Poetry still checks the passed value for all other packages, including new transitive dependencies.
