@@ -2512,7 +2512,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: null,
     experimental: true,
     experimentalDescription:
-      'The behaviour may change while the integration with each package manager is completed.',
+      'The behavior may change while the integration with each package manager is completed.',
     experimentalIssues: [41652],
   },
   {
