@@ -93,6 +93,7 @@ import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
+  pinIssueMutation,
   prAutoMergeStateQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
@@ -1489,6 +1490,18 @@ async function closeIssue(issueNumber: number): Promise<void> {
   }
 }
 
+async function pinIssue(issueId: string): Promise<void> {
+  logger.debug(`pinIssue(${issueId})`);
+  const res = await githubApi.requestGraphql(pinIssueMutation, {
+    variables: { issueId },
+  });
+  if (res?.errors) {
+    logger.debug({ errors: res.errors }, 'Issue could not be pinned');
+    return;
+  }
+  logger.debug('Issue pinned');
+}
+
 export async function ensureIssue({
   title,
   reuseTitle,
@@ -1496,6 +1509,7 @@ export async function ensureIssue({
   labels,
   once = false,
   shouldReOpen = true,
+  shouldPin = false,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   /* v8 ignore next -- specs initialize repos with issues enabled */
@@ -1564,6 +1578,9 @@ export async function ensureIssue({
         );
         GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
+        if (shouldPin && updatedIssue.node_id) {
+          await pinIssue(updatedIssue.node_id);
+        }
         return 'updated';
       }
     }
@@ -1581,6 +1598,9 @@ export async function ensureIssue({
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
+    if (shouldPin && createdIssue.node_id) {
+      await pinIssue(createdIssue.node_id);
+    }
     return 'created';
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
