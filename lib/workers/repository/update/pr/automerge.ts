@@ -1,4 +1,5 @@
 // TODO #22198
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -54,16 +55,20 @@ export async function checkAutoMerge(
   }
   const mergeQueueEnabled =
     await platform.isBranchMergeQueueEnabled?.(baseBranch);
-  if (mergeQueueEnabled && (await platform.isPrInMergeQueue?.(pr.number))) {
-    logger.debug(`PR #${pr.number} is already in the merge queue`);
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'InMergeQueue',
-    };
+  if (mergeQueueEnabled) {
+    const prInMergeQueue = await platform.isPrInMergeQueue?.(pr.number);
+    if (prInMergeQueue) {
+      logger.debug(`PR #${pr.number} is already in the merge queue`);
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      };
+    }
   }
-  const isConflicted =
-    config.isConflicted ??
-    (await scm.isBranchConflicted(baseBranch, branchName));
+  let isConflicted = config.isConflicted;
+  if (isNullOrUndefined(isConflicted)) {
+    isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
+  }
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {

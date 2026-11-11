@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -67,9 +67,10 @@ export async function checkYarnrc(
         // resolve binary relative to `yarnrc`
         yarnPath = upath.join(lockFileDir, yarnPath);
       }
-      const yarnBinaryExists = yarnPath
-        ? await localPathIsFile(yarnPath)
-        : false;
+      let yarnBinaryExists = false;
+      if (yarnPath) {
+        yarnBinaryExists = await localPathIsFile(yarnPath);
+      }
       let scrubbedYarnrc = yarnrc
         .replace('--install.pure-lockfile true', '')
         .replace('--install.frozen-lockfile true', '');
@@ -121,15 +122,24 @@ export async function generateLockFile(
       await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility =
-      yarnUpdate?.newValue ??
-      (await resolveToolConstraint(
+    let yarnCompatibility = yarnUpdate?.newValue;
+    if (isNullOrUndefined(yarnCompatibility)) {
+      yarnCompatibility = await resolveToolConstraint(
         config,
         'yarn',
-        async () =>
-          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-          getYarnVersionFromLock(await getYarnLock(lockFileName)),
-      ));
+        async () => {
+          let yarnVersion = getPackageManagerVersion(
+            'yarn',
+            await lazyPgkJson.getValue(),
+          );
+          if (isNullOrUndefined(yarnVersion)) {
+            const yarnLock = await getYarnLock(lockFileName);
+            yarnVersion = getYarnVersionFromLock(yarnLock);
+          }
+          return yarnVersion;
+        },
+      );
+    }
     const yarnRange = semver.validRange(yarnCompatibility);
     const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;

@@ -58,8 +58,10 @@ export async function updateArtifacts({
       packageFileName,
       'mix.lock',
     );
-    existingLockFileContent =
-      parentLockFileName && (await readLocalFile(parentLockFileName, 'utf8'));
+    existingLockFileContent = null;
+    if (parentLockFileName) {
+      existingLockFileContent = await readLocalFile(parentLockFileName, 'utf8');
+    }
 
     if (parentLockFileName && existingLockFileContent) {
       lockFileName = parentLockFileName;

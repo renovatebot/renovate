@@ -384,9 +384,12 @@ export async function validateConfig(
               });
             }
           }
-          const parentName =
-            parentOptionName ??
-            (isRepoRootPath(parentPath) ? '.' : getParentName(parentPath));
+          let parentName = parentOptionName;
+          if (is.undefined(parentName)) {
+            parentName = isRepoRootPath(parentPath)
+              ? '.'
+              : getParentName(parentPath);
+          }
           if (
             !isPreset &&
             parentName &&

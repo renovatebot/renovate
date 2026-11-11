@@ -368,11 +368,10 @@ function getConfigFromTooling(
     return null;
   } // Return null if no toolDefinition is found
 
-  return (
-    (isFunction(toolDefinition.config)
-      ? toolDefinition.config(version)
-      : toolDefinition.config) ?? null
-  ); // Ensure null is returned instead of undefined
+  const config = isFunction(toolDefinition.config)
+    ? toolDefinition.config(version)
+    : toolDefinition.config;
+  return config ?? null; // Ensure null is returned instead of undefined
 }
 
 function getLtsDatasource(

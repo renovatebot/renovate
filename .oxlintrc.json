@@ -79,6 +79,7 @@
 
     "renovate/cached-response-headers": "error",
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-complex-conditional-expression": "error",
     "renovate/no-nested-logical-expressions": ["error", { "max": 1 }],
     "renovate/no-number-constructor": "error",
     "renovate/prefer-nullish-util": "error",

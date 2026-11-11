@@ -4,6 +4,7 @@ import {
   isBoolean,
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
   isString,
   isTruthy,
 } from '@sindresorhus/is';
@@ -539,8 +540,9 @@ export const syncGit = withInstrumenting(
           await git.raw(['remote', 'set-url', 'origin', config.url]);
           const fetchStart = Date.now();
           await gitRetry(() => git.fetch(['--prune', 'origin']));
-          config.currentBranch =
-            config.currentBranch || (await getDefaultBranch(git));
+          if (!config.currentBranch) {
+            config.currentBranch = await getDefaultBranch(git);
+          }
           await resetToBranch(config.currentBranch);
           await cleanLocalBranches();
           const durationMs = Math.round(Date.now() - fetchStart);
@@ -624,10 +626,11 @@ export const syncGit = withInstrumenting(
       }
       logger.warn({ err }, 'Cannot retrieve latest commit');
     }
-    config.currentBranch =
-      config.currentBranch ??
-      config.defaultBranch ??
-      (await getDefaultBranch(git));
+    let currentBranch = config.currentBranch ?? config.defaultBranch;
+    if (isNullOrUndefined(currentBranch)) {
+      currentBranch = await getDefaultBranch(git);
+    }
+    config.currentBranch = currentBranch;
     /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
@@ -1513,12 +1516,15 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`,
     );
-    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
-      logger.debug(
-        { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
-        'No file changes detected. Skipping commit',
-      );
-      return null;
+    if (!force) {
+      const hasChanges = await hasDiff('HEAD', `origin/${branchName}`);
+      if (!hasChanges) {
+        logger.debug(
+          { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
+          'No file changes detected. Skipping commit',
+        );
+        return null;
+      }
     }
 
     const commitSha = toLongCommitSha(
