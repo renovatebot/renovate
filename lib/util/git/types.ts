@@ -1,5 +1,4 @@
 import type { PlatformCommitOptions } from '../../config/types.ts';
-import type { PlatformPrOptions } from '../../modules/platform/types.ts';
 import type { GitOptions } from '../../types/git.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
@@ -110,8 +109,6 @@ export interface CommitFilesConfig {
   prTitle?: string;
   /** Only needed by Gerrit platform */
   autoApprove?: boolean;
-  /** Only needed by GitHub platform */
-  platformPrOptions?: PlatformPrOptions;
 }
 
 export interface PushFilesConfig {

@@ -10,7 +10,6 @@ import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
-import { getPlatformPrOptions } from '../pr/index.ts';
 
 /**
  * Creates the local commit of the branch's updated files, or returns `null` if there is nothing to commit or in dry-run mode.
@@ -65,8 +64,6 @@ export async function prepareBranchCommit(
     prTitle: config.prTitle,
     // Only needed by Gerrit platform
     autoApprove: config.autoApprove,
-    // Only needed by GitHub platform
-    platformPrOptions: getPlatformPrOptions(config),
   };
 
   if (GlobalConfig.get('dryRun')) {
