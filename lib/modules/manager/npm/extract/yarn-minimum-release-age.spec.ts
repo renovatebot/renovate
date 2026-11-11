@@ -443,7 +443,7 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
       ]);
     });
 
-    it('honours the scopes and preapproved packages', async () => {
+    it('honors the scopes and preapproved packages', async () => {
       mockYarnrc(codeBlock`
         npmMinimalAgeGate: 3d
         npmPreapprovedPackages:
