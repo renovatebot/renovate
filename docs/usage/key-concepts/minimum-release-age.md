@@ -313,7 +313,7 @@ Renovate already applied its own `minimumReleaseAge` to the updated versions, so
 Renovate does not exempt a release which is younger than the `.yarnrc.yml` value, a version which `npmPreapprovedPackages` already exempts, or a package of a scope with its own age.
 New transitive dependencies still get the passed value.
 The variable replaces the `npmPreapprovedPackages` list of the `.yarnrc.yml`, so Renovate passes those entries first.
-Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `yarn.lock`, and exempts no packages.
+Lock file maintenance uses the larger of its own `minimumReleaseAge` and `minimumReleaseAgePackageManager`, as it regenerates the whole `yarn.lock`, and exempts no packages.
 
 Renovate also uses the larger of the project's Yarn setting and `minimumReleaseAge` when it looks up updates.
 If the `.yarnrc.yml` does not set `npmMinimalAgeGate`, Renovate uses the Yarn default of 1 day, unless the Yarn version is older than v4.15.0.
