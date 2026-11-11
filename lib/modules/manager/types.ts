@@ -91,6 +91,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  defaultRegistryUrls?: string[];
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
@@ -327,6 +328,7 @@ export interface Upgrade<
   isVulnerabilityAlert?: boolean;
   vulnerabilitySeverity?: string;
   registryUrls?: string[] | null;
+  defaultRegistryUrls?: string[];
   currentVersion?: string;
   replaceString?: string;
   replacementApproach?: 'replace' | 'alias';
