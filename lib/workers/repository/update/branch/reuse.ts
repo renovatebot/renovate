@@ -25,6 +25,7 @@ export interface BranchReuseDecisionInput {
   config: BranchConfig;
   branchPr: Pr | null;
   branchExists: boolean;
+  branchIsModified: boolean;
   dependencyDashboardCheck: string | undefined;
   forceRebase: boolean;
 }
@@ -38,6 +39,7 @@ export function decideBranchReuse({
   config,
   branchPr,
   branchExists,
+  branchIsModified,
   dependencyDashboardCheck,
   forceRebase,
 }: BranchReuseDecisionInput): BranchReuseDecision {
@@ -110,8 +112,10 @@ export function decideBranchReuse({
 
   // without a cached fingerprint, fall back to the one kept in the PR, so a branch whose upgrades shrank is rebuilt
   // debug data proves the platform keeps it, so a PR without a fingerprint predates it and is rebuilt once
+  // an edited branch is left to the existing checks, so its user commits are kept
   const debugData = branchPr?.bodyStruct?.debugData;
   if (
+    !branchIsModified &&
     config.cacheFingerprintMatch === 'no-fingerprint' &&
     debugData &&
     debugData.upgradesFingerprint !== config.upgradesFingerprint

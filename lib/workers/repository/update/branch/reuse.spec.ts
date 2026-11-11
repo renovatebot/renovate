@@ -349,6 +349,7 @@ describe('workers/repository/update/branch/reuse', () => {
         },
         branchPr: null,
         branchExists: true,
+        branchIsModified: false,
         dependencyDashboardCheck: undefined,
         forceRebase: false,
       };
@@ -511,6 +512,16 @@ describe('workers/repository/update/branch/reuse', () => {
           });
         },
       );
+
+      it('checks the branch itself if the user modified it', () => {
+        input.branchIsModified = true;
+        input.config.cacheFingerprintMatch = 'no-fingerprint';
+        withPrFingerprint('previous');
+        expect(decideBranchReuse(input)).toEqual({
+          action: 'check-reuse',
+          userRebaseRequested: false,
+        });
+      });
     });
 
     it('checks the branch itself otherwise', () => {

@@ -357,5 +357,25 @@ describe(
       await expectContents(branchName, ['dep-a', 'dep-b']);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
+
+    it('keeps user commits on an edited branch approved via the dashboard after cache loss', async () => {
+      await run(branch());
+      const repo = git.createSimpleGit({ config: { baseDir: origin.path } });
+      await repo.checkout(branchName);
+      await fs.writeFile(`${origin.path}/USER.md`, 'user\n');
+      await repo.add('USER.md');
+      await repo.commit('User change', undefined, {
+        '--author': 'User <user@example.com>',
+      });
+      await repo.checkout('main');
+      resetCache();
+
+      await run({
+        ...branch(['dep-a', 'dep-b']),
+        dependencyDashboardChecks: { [branchName]: 'unpend' },
+      });
+
+      await expect(git.getFile('USER.md', branchName)).resolves.toBe('user\n');
+    });
   },
 );
