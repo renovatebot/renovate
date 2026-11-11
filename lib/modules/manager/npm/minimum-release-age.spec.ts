@@ -71,6 +71,25 @@ describe('modules/manager/npm/minimum-release-age', () => {
       },
     );
 
+    it.each`
+      npmrcFileName        | expected
+      ${'some-dir/.npmrc'} | ${true}
+      ${'.npmrc'}          | ${false}
+    `(
+      'returns $expected for a before in the .npmrc $npmrcFileName',
+      async ({ npmrcFileName, expected }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: { ...npmLockManagerData, npmrcFileName },
+            minimumReleaseAgePackageManagerSync: true,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: null,
+            npmrc: 'before=2026-06-01T00:00:00.000Z\n',
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
     it('returns false without minimumReleaseAgePackageManagerSync', async () => {
       await expect(
         enforcesMinimumReleaseAge({

@@ -6,7 +6,7 @@ import { isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
-import { parseNpmrcCooldown } from './extract/npmrc.ts';
+import { isNpmrcOfLockFile, parseNpmrcCooldown } from './extract/npmrc.ts';
 import type { NpmManagerData } from './types.ts';
 
 // npm supports `min-release-age` since v11.10.0
@@ -38,7 +38,10 @@ export async function enforcesMinimumReleaseAge(
     return false;
   }
 
-  const npmrcCooldown = parseNpmrcCooldown(config.npmrc);
+  // the lock file generation ignores an `.npmrc` of a parent directory
+  const npmrcCooldown = isNpmrcOfLockFile(config)
+    ? parseNpmrcCooldown(config.npmrc)
+    : null;
   // the value which Renovate passes as `--before` to npm
   const minimumReleaseAgeMs =
     calculatePackageManagerMinimumReleaseAgeMs({

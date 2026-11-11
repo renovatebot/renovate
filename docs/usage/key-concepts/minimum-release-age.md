@@ -152,6 +152,7 @@ A lowered `--before` also uses the older `before=<date>` of the `.npmrc`, and th
 Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
 A `before=<date>` setting counts as the time elapsed since that date.
 This applies to the npm dependencies of every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
+For the minimum release age, Renovate uses the `.npmrc` next to the lock file or the `npmrc` config option, and not an `.npmrc` of a parent directory.
 
 Lock file maintenance does not retry after an `ETARGET` error, and reports it as an artifact error instead.
 

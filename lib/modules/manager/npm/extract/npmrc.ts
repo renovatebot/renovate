@@ -1,12 +1,20 @@
 import { isNonEmptyString, isNumericString } from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { UtcDate } from '../../../../util/schema-utils/index.ts';
+import { coerceString } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { NpmrcPackageFile } from '../../types.ts';
 import { NpmrcCooldown as NpmrcCooldownSchema } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { NpmrcCooldown } from './types.ts';
+
+interface NpmrcLockFileConfig {
+  managerData?: NpmManagerData;
+  packageFile?: string;
+}
 
 function parseNpmrcDays(value: string, lenient: boolean): number {
   if (lenient) {
@@ -68,6 +76,21 @@ export function getNpmrcMinimumReleaseAge(
 }
 
 /**
+ * Whether npm reads the `.npmrc` of the package file when it generates the lock file, which is the case for the `npmrc` option and for an `.npmrc` next to the lock file, or next to the package file without a lock file.
+ */
+export function isNpmrcOfLockFile({
+  managerData,
+  packageFile,
+}: NpmrcLockFileConfig): boolean {
+  const { npmLock, npmrcFileName } = coerceObject(managerData);
+  if (!npmrcFileName) {
+    return true;
+  }
+  const lockFileDir = upath.dirname(coerceString(npmLock ?? packageFile));
+  return npmrcFileName === upath.join(lockFileDir, '.npmrc');
+}
+
+/**
  * Adds a `packageRules` entry with the minimum release age of the merged `.npmrc` (the `npmrc` option and the repository `.npmrc`, as used by npm at post-update) to the package files which are not managed by Yarn or pnpm.
  */
 export function setNpmrcMinimumReleaseAge(
@@ -79,6 +102,12 @@ export function setNpmrcMinimumReleaseAge(
   for (const packageFile of npmPackageFiles) {
     const { managerData } = packageFile;
     const minimumReleaseAge = getNpmrcMinimumReleaseAge(packageFile.npmrc);
+    if (minimumReleaseAge && !isNpmrcOfLockFile(packageFile)) {
+      logger.debug(
+        `Ignoring the minimum release age in the .npmrc ${managerData?.npmrcFileName} for ${packageFile.packageFile}, as it is not next to the lock file`,
+      );
+      continue;
+    }
     if (minimumReleaseAge) {
       logger.debug(
         `Found minimum release age ${minimumReleaseAge} in the .npmrc ${managerData?.npmrcFileName ?? '(config)'} for ${packageFile.packageFile}`,

@@ -141,8 +141,9 @@ describe('modules/manager/npm/extract/npmrc', () => {
     function packageFile(
       managerData: NpmManagerData,
       npmrc?: string,
+      fileName = 'package.json',
     ): Partial<NpmrcPackageFile<NpmManagerData>> {
-      return { packageFile: 'package.json', managerData, npmrc };
+      return { packageFile: fileName, managerData, npmrc };
     }
 
     const npmrc = 'min-release-age=3\n';
@@ -159,6 +160,41 @@ describe('modules/manager/npm/extract/npmrc', () => {
         { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '3 days' },
       ];
       expect(packageFiles).toMatchObject([{ packageRules }, { packageRules }]);
+    });
+
+    it('uses the .npmrc next to the lock file', () => {
+      const packageFiles = [
+        packageFile(
+          { npmLock: 'package-lock.json', npmrcFileName: '.npmrc' },
+          npmrc,
+          'packages/a/package.json',
+        ),
+        packageFile({ npmrcFileName: 'sub/.npmrc' }, npmrc, 'sub/package.json'),
+      ];
+
+      setNpmrcMinimumReleaseAge(packageFiles);
+
+      const packageRules = [
+        { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '3 days' },
+      ];
+      expect(packageFiles).toMatchObject([{ packageRules }, { packageRules }]);
+    });
+
+    it('ignores an .npmrc of a parent directory of the lock file', () => {
+      const packageFiles = [
+        packageFile(
+          { npmLock: 'sub/package-lock.json', npmrcFileName: '.npmrc' },
+          npmrc,
+          'sub/package.json',
+        ),
+        packageFile({ npmrcFileName: '.npmrc' }, npmrc, 'sub/package.json'),
+      ];
+
+      setNpmrcMinimumReleaseAge(packageFiles);
+
+      for (const file of packageFiles) {
+        expect(file.packageRules).toBeUndefined();
+      }
     });
 
     it('uses the merged npmrc, which includes the npmrc option', () => {
