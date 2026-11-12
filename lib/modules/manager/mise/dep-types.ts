@@ -13,7 +13,7 @@ export const knownDepTypes = [
   {
     depType: 'task-include',
     description:
-      'A remote task source (`git::` or `oci::`) referenced in the `[task_config] includes` array',
+      'A remote task source (`git::` or `oci::`) referenced in the `[task_config] includes` array. Other remote forms (`zip::`) are skipped as unsupported, and local paths are ignored.',
   },
 ] as const satisfies readonly DepTypeMetadata[];
 

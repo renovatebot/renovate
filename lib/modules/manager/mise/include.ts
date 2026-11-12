@@ -1,9 +1,13 @@
+import { regEx } from '../../../util/regex.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractGitReference } from './git-reference.ts';
 
 const ociPrefix = 'oci::';
-const gitPrefix = 'git::';
+
+// Every remote include form uses the mise `<backend>::` prefix, e.g.
+// `git::`, `oci::` or `zip::`; local paths never do.
+const remotePrefixRegex = regEx(/^[a-z][a-z0-9_-]*::/);
 
 /**
  * Extracts a remote include entry of a mise configuration file: either a
@@ -33,16 +37,17 @@ export function extractInclude(
 }
 
 /**
- * Extracts a remote `[task_config] includes` entry, which supports the same
- * remote forms as `include`. Local paths are ignored, as they carry no version.
- * @link https://mise.jdx.dev/tasks/toml-tasks.html#task-config-includes
+ * Extracts a remote `[task_config] includes` entry. Remote forms carry the
+ * mise `<backend>::` prefix (`git::`, `oci::`, `zip::`, …); entries without
+ * one are local paths, which carry no version and are ignored.
+ * @link https://mise.jdx.dev/tasks/task-discovery.html#include-task-files-and-directories
  */
 export function extractTaskConfigInclude(
   include: string,
   content: string,
 ): PackageDependency | null {
   const trimmed = include.trim();
-  if (!trimmed.startsWith(ociPrefix) && !trimmed.startsWith(gitPrefix)) {
+  if (!remotePrefixRegex.test(trimmed)) {
     return null;
   }
   return extractInclude(trimmed, content, 'task-include');

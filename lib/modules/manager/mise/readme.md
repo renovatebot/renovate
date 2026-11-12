@@ -41,6 +41,7 @@ Renovate supports the remote forms of the top level [`include`](https://mise.jdx
 
 Renovate supports the same forms in the [`task_config.includes`](https://mise.jdx.dev/tasks/task-configuration.html#task_config-includes) array, which is how mise shares task directories between repositories.
 The extracted dependencies have the `depType` `include` for top level entries and `task-include` for `[task_config] includes` entries.
+Remote forms Renovate can not update (e.g. `zip::` URLs) are skipped as unsupported, and local paths are ignored entirely.
 
 A tag `ref` is updated to the newest tag:
 

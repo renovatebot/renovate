@@ -2402,6 +2402,23 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('skips remote forms without versioning support', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = ["zip::https://example.com/shared-tasks-1.0.0.zip"]
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'zip::https://example.com/shared-tasks-1.0.0.zip',
+            depType: 'task-include',
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
+    });
+
     it('extracts a sha ref with a comment hint', async () => {
       const sha = '0123456789abcdef0123456789abcdef01234567';
       const content = codeBlock`
