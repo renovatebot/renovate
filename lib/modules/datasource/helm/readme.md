@@ -2,9 +2,10 @@ This datasource reads `index.yaml` from a Helm chart repository.
 
 ## OCI registries
 
-`oci://` registry URLs are not supported by this datasource.
-Renovate logs a warning and skips the lookup.
-To look up a Helm chart stored in an OCI registry, use the `docker` datasource and set `packageName` to the full chart path, for example `ghcr.io/grafana/helm-charts/grafana-operator`.
+An `oci://` registry URL is supported by looking the chart up with the `docker` datasource.
+For example, the `grafana-operator` chart with the registry URL `oci://ghcr.io/grafana/helm-charts` is looked up as `ghcr.io/grafana/helm-charts/grafana-operator`.
+
+Authentication uses the `docker` host rules, so set `hostType` to `docker` for private registries.
 
 ## Amazon S3 repositories
 
