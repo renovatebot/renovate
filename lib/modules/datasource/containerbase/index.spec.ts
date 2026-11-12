@@ -116,6 +116,23 @@ describe('modules/datasource/containerbase/index', () => {
       },
     );
 
+    it('sets the latest tag', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/tool-versions/index.json')
+        .reply(200, rootIndex)
+        .get('/tool-versions/v1/pnpm.json')
+        .reply(200, {
+          ...pnpm,
+          latest: '10.0.0',
+          versions: [{ version: '11.0.0-rc.0' }, { version: '10.0.0' }],
+        });
+
+      const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+      expect(res?.tags).toEqual({ latest: '10.0.0' });
+    });
+
     describe('minCb', () => {
       const versions = [
         { version: '12.0.0' },

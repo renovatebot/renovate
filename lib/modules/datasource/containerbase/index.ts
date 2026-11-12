@@ -157,7 +157,8 @@ export class ContainerbaseDatasource extends Datasource {
 
   /**
    * Converts a tool file to the release result, or `null` without versions.
-   * Versions which need a newer containerbase get a `containerbase` constraint.
+   * Versions which need a newer containerbase get a `containerbase` constraint,
+   * and the upstream `latest` version becomes the `latest` tag.
    */
   private toReleaseResult(
     body: ContainerbaseToolVersions,
@@ -186,6 +187,9 @@ export class ContainerbaseDatasource extends Datasource {
         },
       ),
     };
+    if (body.latest) {
+      result.tags = { latest: body.latest };
+    }
 
     return result.releases.length ? result : null;
   }

@@ -12,6 +12,7 @@ Other errors, like a `401` from a mirror, and failed requests outside of Contain
 
 The versions are in exactly the format `install-tool` accepts, for example `21.0.5+11.0.LTS` for `java`.
 Prereleases are marked as unstable.
+The `latest` version of a file, like the npm `latest` dist-tag, is returned as the `latest` tag, so Renovate doesn't update past it unless `respectLatest` is disabled.
 Runtime constraints of a version, like the `node` versions an npm tool supports, are passed on as release constraints for `constraintsFiltering`.
 A version which needs a newer Containerbase, by the `minCb` ranges of its file, gets a `containerbase` release constraint like `>=14.57.1`.
 Set `constraints.containerbase` to your Containerbase version, together with `constraintsFiltering=strict`, to only get the versions it can install.
