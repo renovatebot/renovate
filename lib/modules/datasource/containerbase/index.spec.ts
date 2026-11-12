@@ -116,6 +116,62 @@ describe('modules/datasource/containerbase/index', () => {
       },
     );
 
+    it('sets the latest tag', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/tool-versions/index.json')
+        .reply(200, rootIndex)
+        .get('/tool-versions/v1/pnpm.json')
+        .reply(200, {
+          ...pnpm,
+          latest: '10.0.0',
+          versions: [{ version: '11.0.0-rc.0' }, { version: '10.0.0' }],
+        });
+
+      const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+      expect(res?.tags).toEqual({ latest: '10.0.0' });
+    });
+
+    describe('arch', () => {
+      const java = {
+        $schema,
+        tool: 'java',
+        updatedAt: '2026-10-09T03:00:00.000Z',
+        versions: [
+          { version: '25.0.1+8', archs: ['amd64'] },
+          { version: '25.0.0+36', archs: ['amd64', 'arm64'] },
+          { version: '21.0.9+10' },
+        ],
+      };
+
+      it.each`
+        packageName                  | arch       | versions
+        ${'java'}                    | ${'arm64'} | ${['21.0.9+10', '25.0.0+36', '25.0.1+8']}
+        ${'java?architecture=arm64'} | ${'x64'}   | ${['21.0.9+10', '25.0.0+36']}
+        ${'java?architecture=amd64'} | ${'arm64'} | ${['21.0.9+10', '25.0.0+36', '25.0.1+8']}
+        ${'java?architecture=foo'}   | ${'arm64'} | ${['21.0.9+10', '25.0.0+36', '25.0.1+8']}
+        ${'java?system=true'}        | ${'arm64'} | ${['21.0.9+10', '25.0.0+36']}
+        ${'java?system=true'}        | ${'x64'}   | ${['21.0.9+10', '25.0.0+36', '25.0.1+8']}
+        ${'java?system=true'}        | ${'s390x'} | ${['21.0.9+10', '25.0.0+36', '25.0.1+8']}
+      `(
+        'filters $packageName on $arch',
+        async ({ packageName, arch, versions }) => {
+          vi.spyOn(process, 'arch', 'get').mockReturnValue(arch);
+          httpMock
+            .scope(baseUrl)
+            .get('/tool-versions/index.json')
+            .reply(200, rootIndex)
+            .get('/tool-versions/v1/java.json')
+            .reply(200, java);
+
+          const res = await getPkgReleases({ datasource, packageName });
+
+          expect(res?.releases.map(({ version }) => version)).toEqual(versions);
+        },
+      );
+    });
+
     describe('minCb', () => {
       const versions = [
         { version: '12.0.0' },
