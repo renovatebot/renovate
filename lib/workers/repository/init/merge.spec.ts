@@ -393,6 +393,31 @@ describe('workers/repository/init/merge', () => {
       expect(res.ignorePaths).toEqual(config.ignorePaths);
     });
 
+    it('gives an option which the repository config sets to null its default', async () => {
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      const repoConfig = { warnings: [], errors: [] };
+      Object.assign(repoConfig, {
+        automerge: null,
+        rangeStrategy: null,
+        composerIgnorePlatformReqs: null,
+      });
+      migrateAndValidate.migrateAndValidate.mockResolvedValue(repoConfig);
+      Object.assign(config, {
+        automerge: true,
+        rangeStrategy: 'pin',
+        composerIgnorePlatformReqs: ['ext-zip'],
+      });
+
+      const res = await mergeRenovateConfig(config);
+
+      expect(res).toMatchObject({
+        automerge: false,
+        rangeStrategy: 'auto',
+        composerIgnorePlatformReqs: null,
+      });
+    });
+
     it('continues if no errors', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
