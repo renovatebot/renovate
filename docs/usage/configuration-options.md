@@ -3114,10 +3114,6 @@ Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimu
 For lock file maintenance, Renovate compares it with the `minimumReleaseAge` of [`lockFileMaintenance`](#lockfilemaintenance) instead.
 This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minimumreleaseagepackagemanagersync) is `true`.
 
-Renovate passes the value to these package managers:
-
-- Poetry, as `POETRY_SOLVER_MIN_RELEASE_AGE`
-
 Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
 
 This option does not change when Renovate raises an update.
