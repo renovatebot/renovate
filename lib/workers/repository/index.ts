@@ -8,7 +8,11 @@ import {
 } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
 import { instrument } from '../../instrumentation/index.ts';
-import { addExtractionStats } from '../../instrumentation/reporting.ts';
+import {
+  addExtractionStats,
+  addRepositoryFinish,
+  addRepositoryStart,
+} from '../../instrumentation/reporting.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types.ts';
 import { logger, setMeta } from '../../logger/index.ts';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
@@ -76,6 +80,7 @@ export async function renovateRepository(
       await removeDanglingContainers();
       setMeta({ repository: config.repository });
       logger.info({ renovateVersion: pkg.version }, 'Repository started');
+      addRepositoryStart(config);
       logger.trace({ config });
       queue.clear();
       throttle.clear();
@@ -224,6 +229,7 @@ export async function renovateRepository(
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   GitOperationStats.report();
+  addRepositoryFinish(repoConfig);
   const cloned = isCloned();
   /* v8 ignore next -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
   logger.info(
