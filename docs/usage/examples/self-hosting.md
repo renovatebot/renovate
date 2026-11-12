@@ -455,7 +455,7 @@ If your environment uses an HTTP proxy configured via environment variables (`HT
 In some cases, you may need to adjust the `NO_PROXY` variable if Renovate encounters network or TLS errors when accessing internal or excluded domains.
 
 Renovate applies the proxy settings to all of its own HTTP requests, for example to the platform API and to package registries.
-It uses the [built-in proxy support of Node.js](https://nodejs.org/docs/latest-v24.x/api/http.html#httpsetglobalproxyfromenvproxyenv) where it's available (Node.js v24.14.0 and newer).
+It uses the [built-in proxy support of Node.js](https://nodejs.org/docs/latest-v24.x/api/http.html#httpsetglobalproxyfromenvproxyenv) where it is available (Node.js v24.14.0 and newer).
 On older Node.js versions, or if you set `RENOVATE_X_GLOBAL_AGENT=true`, Renovate uses the [global-agent](https://github.com/gajus/global-agent) library instead.
 Tools that Renovate runs, such as git or package managers, read the proxy environment variables themselves.
 
