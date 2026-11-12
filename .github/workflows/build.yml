@@ -299,7 +299,7 @@ jobs:
         run: pnpm lint-documentation
 
       - name: Install Vale
-        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
           # only install Vale; Node.js and pnpm come from the setup-node action
           install_args: vale
