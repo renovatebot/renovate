@@ -12,6 +12,7 @@ export const presets: Record<string, Preset> = {
       ':pinDevDependencies',
       'abandonments:recommended',
       'security:minimumReleaseAgeNpm',
+      'security:minimumReleaseAgePypi',
       ':maintainLockFilesWeekly',
     ],
   },
