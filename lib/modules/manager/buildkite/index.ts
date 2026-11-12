@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -13,9 +14,16 @@ export const defaultConfig = {
   commitMessageTopic: 'buildkite plugin {{depName}}',
   commitMessageExtra:
     'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{newValue}}}{{/if}}',
+  packageRules: [
+    {
+      matchDepTypes: ['docker'],
+      commitMessageTopic: '{{depName}}',
+    },
+  ],
 };
 
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   BitbucketTagsDatasource.id,
+  DockerDatasource.id,
 ];
