@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { GithubGraphqlResponse } from '../../http/github.ts';
@@ -579,6 +580,29 @@ describe('util/github/graphql/datasource-fetcher', () => {
 
         expect(res).toEqual([cachedItem]);
         expect(packageCache.set).not.toHaveBeenCalled();
+      });
+
+      it('reuses the pending query within a run', async () => {
+        memCache.init();
+        mockCache(true);
+
+        const first = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+          { refresh: true },
+        );
+        const cacheReads = packageCache.get.mock.calls.length;
+        const second = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+          { refresh: true },
+        );
+
+        expect(second).toEqual(first);
+        expect(packageCache.get).toHaveBeenCalledTimes(cacheReads);
+        memCache.reset();
       });
 
       it('performs the regular query when the persistence flag is not set', async () => {
