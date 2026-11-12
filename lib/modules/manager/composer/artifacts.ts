@@ -65,6 +65,7 @@ function getAuthJson(): string | null {
   const gitTagsHostRule = hostRules.find({
     hostType: GitTagsDatasource.id,
     url: 'https://github.com',
+    readOnly: true,
   });
 
   const selectedGithubToken = takePersonalAccessTokenIfPossible(

@@ -38,6 +38,31 @@ describe('util/check-token', () => {
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
+    it('does not skip GitHub dependencies when a readonly token is configured', () => {
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        readOnly: true,
+        token: '123',
+      });
+      const packageFiles: Record<string, PackageFileContent[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'foo/bar',
+                datasource: GithubTagsDatasource.id,
+              },
+            ],
+          },
+        ],
+      };
+
+      checkGithubToken(packageFiles);
+
+      expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
+    });
+
     it('returns early if token warnings are disabled', () => {
       GlobalConfig.set({ githubTokenWarn: false });
       checkGithubToken({});

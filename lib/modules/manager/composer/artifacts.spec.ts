@@ -293,6 +293,42 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('prefers a readonly token over a git-tags token for COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'write-token',
+    });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'github.com',
+      readOnly: true,
+      token: 'readonly-token',
+    });
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+
+    await expect(
+      composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).resolves.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"readonly-token"}}',
+          },
+        },
+      },
+    ]);
+  });
+
   it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: 'github',
