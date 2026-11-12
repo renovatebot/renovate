@@ -618,11 +618,12 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
       logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
       try {
-        const labels = Array.isArray(labelNames)
-          ? await map(labelNames, (name) =>
-              lookupLabelByName(http, config, name),
-            )
-          : [];
+        let labels: (number | null)[] = [];
+        if (Array.isArray(labelNames)) {
+          labels = await map(labelNames, (name) =>
+            lookupLabelByName(http, config, name),
+          );
+        }
         const gpr = await helper.createPR(http, config.repository, {
           base,
           head,
@@ -849,13 +850,14 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           issues = issueList.filter((i) => i.title === reuseTitle);
         }
 
-        const labels = Array.isArray(labelNames)
-          ? (
-              await Promise.all(
-                labelNames.map((name) => lookupLabelByName(http, config, name)),
-              )
-            ).filter(isNumber)
-          : undefined;
+        let labels: number[] | undefined;
+        if (Array.isArray(labelNames)) {
+          labels = (
+            await Promise.all(
+              labelNames.map((name) => lookupLabelByName(http, config, name)),
+            )
+          ).filter(isNumber);
+        }
 
         // Update any matching issues which currently exist
         if (issues.length) {

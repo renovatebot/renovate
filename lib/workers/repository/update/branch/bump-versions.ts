@@ -2,6 +2,7 @@ import { type ReleaseType, inc } from 'semver';
 import type { BumpVersionConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
+import { parsePartialVersion } from '../../../../modules/versioning/semver-partial/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
@@ -193,15 +194,14 @@ async function bumpVersion(
           }
         } else {
           // Existing logic for major/minor/patch
-          const parts = regEx('^(?<major>\\d+)(?:\\.(?<minor>\\d+))?$').exec(
-            version,
-          );
-          if (parts?.groups) {
-            const { major, minor } = parts.groups;
+          const partial = parsePartialVersion(version);
+          if (partial) {
+            const { major, minor } = partial;
+            const prefix = version.startsWith('v') ? 'v' : '';
             if (bumpType === 'major') {
-              newVersion = `${parseInt(major, 10) + 1}${minor ? `.0` : ''}`;
-            } else if (bumpType === 'minor') {
-              newVersion = `${major}.${parseInt(minor, 10) + 1}`;
+              newVersion = `${prefix}${major + 1}${minor === undefined ? '' : '.0'}`;
+            } else if (bumpType === 'minor' && minor !== undefined) {
+              newVersion = `${prefix}${major}.${minor + 1}`;
             } else {
               throw new Error(
                 `Unsupported bump type for {major}.{minor} version: ${bumpType}`,

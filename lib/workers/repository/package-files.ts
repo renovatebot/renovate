@@ -29,6 +29,14 @@ export class PackageFiles {
     this.data.clear();
   }
 
+  /** Returns true if any dependency of any base branch failed its lookup. */
+  static hasLookupFailure(): boolean {
+    return [...this.data.values()]
+      .filter(isTruthy)
+      .flatMap((managers) => Object.values(managers).flat())
+      .some((file) => file.deps.some((dep) => dep.lookupFailed));
+  }
+
   /**
    * Truncates the detected dependencies' section until it fits the available space
    * i.e. It has length smaller than maxLength.
@@ -142,10 +150,12 @@ export class PackageFiles {
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
+                // A lock file only dep has no value to update, only a version
                 dep.updates?.map((update) =>
                   update.isLockfileUpdate && update.newVersion
                     ? `\`lock file @ ${update.newVersion}\``
-                    : `\`${update.newValue}\``,
+                    : `\`${update.newValue ?? update.newVersion}\``,
+                ),
                 ),
               ),
             ];

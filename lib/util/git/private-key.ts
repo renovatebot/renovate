@@ -1,5 +1,8 @@
 import os from 'node:os';
-import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
@@ -61,7 +64,9 @@ abstract class PrivateKey {
 
   async writeKey(): Promise<void> {
     try {
-      this.keyId ??= await this.importKey();
+      if (isNullOrUndefined(this.keyId)) {
+        this.keyId = await this.importKey();
+      }
       logger.debug('gitPrivateKey: imported');
     } catch (err) {
       logger.warn({ err }, 'gitPrivateKey: error importing');

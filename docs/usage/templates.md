@@ -197,7 +197,7 @@ You can reference environment variables like so:
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option, which will also be available to all child processes.
+If you are self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option, which will also be available to all child processes.
 
 See also: [environment variable handling](./environment-variable-handling.md).
 

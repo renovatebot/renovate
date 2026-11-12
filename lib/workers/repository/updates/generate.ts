@@ -5,6 +5,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import type { SharedConstraints } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -15,6 +16,10 @@ import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
 import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import {
+  getSharedConstraints,
+  updateSharedConstraints,
+} from '../extract/shared-constraints.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
 function prettifyVersion(version: string): string {
@@ -203,6 +208,7 @@ const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
+  sharedConstraints: SharedConstraints[] = [],
 ): BranchConfig {
   let branchUpgrades = upgrades;
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
@@ -524,18 +530,32 @@ export function generateBranchConfig(
     }
   }
 
+  // a branch which updates a shared constraint, like the version in a `rust-toolchain.toml` file, uses its new value
+  const branchSharedConstraints = updateSharedConstraints(
+    sharedConstraints,
+    config.upgrades,
+  );
   config.constraints = {};
   config.extractedConstraints = {};
+  config.sharedConstraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
-    if (upgrade.extractedConstraints) {
-      config.extractedConstraints = {
-        ...config.extractedConstraints,
-        ...upgrade.extractedConstraints,
-      };
+    // the constraints which other managers share for the directory of the package file, also on the upgrade, which the branch worker reads on its own
+    const shared = getSharedConstraints(
+      branchSharedConstraints,
+      upgrade.manager,
+      upgrade.packageFile ?? '',
+    );
+    if (Object.keys(shared).length) {
+      upgrade.sharedConstraints = shared;
+      config.sharedConstraints = { ...config.sharedConstraints, ...shared };
     }
+    config.extractedConstraints = {
+      ...config.extractedConstraints,
+      ...upgrade.extractedConstraints,
+    };
   }
 
   config.minimumGroupSize = getMinimumGroupSize(config.upgrades);

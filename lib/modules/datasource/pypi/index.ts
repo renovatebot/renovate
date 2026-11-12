@@ -374,7 +374,7 @@ export class PypiDatasource extends Datasource {
         httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
       // A registry which cannot serve any of the negotiated types may pick a content type of its own, answer `406`, or answer `300`; the spec mandates none of them, but `406` is the common choice.
       // https://packaging.python.org/en/latest/specifications/simple-repository-api/#version-format-selection
-      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behaviour of a plain request.
+      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behavior of a plain request.
       if (!isNotAcceptable(statusCode)) {
         throw err;
       }

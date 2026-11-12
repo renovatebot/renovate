@@ -11,7 +11,7 @@ For example, the `Alpine Linux 3.12` repository has this URL: `https://repology.
 
 **Usage Example**
 
-Say you're using system packages in a Dockerfile and want to update them with Repology.
+Say you are using system packages in a Dockerfile and want to update them with Repology.
 With the Repology datasource you can "pin" each dependency, and get automatic updates.
 
 First you would set a custom manager in your `renovate.json` file for `Dockerfile`:
@@ -50,4 +50,4 @@ When the operating system package for `gcc` of `Alpine Linux 3.12` is updated, R
 
 !!! tip
   We recommend you try `loose` or `deb` versioning for distribution packages first.
-  This is because the version number usually doesn't match Renovate's default `semver-coerced` specification.
+  This is because the version number usually does not match Renovate's default `semver-coerced` specification.

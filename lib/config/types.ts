@@ -126,6 +126,7 @@ export interface RenovateSharedConfig {
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
+  minimumReleaseAgePackageManagerSync?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -346,7 +347,7 @@ export type RenovateRepositoryEntry = AllConfig & {
 
 export type RenovateRepository = string | RenovateRepositoryEntry;
 
-export type UseBaseBranchConfigType = 'merge' | 'none';
+export type UseBaseBranchConfigType = 'merge' | 'merge-if-present' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
   'timestamp-required' | 'timestamp-optional';
@@ -427,16 +428,9 @@ export interface RenovateConfig
 
   fileList?: string[];
   configWarningReuseIssue?: boolean;
-  dependencyDashboard?: boolean;
-  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboard?: DependencyDashboardConfig;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardHeader?: string;
-  dependencyDashboardFooter?: string;
-  dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
-  dependencyDashboardReportAbandonment?: boolean;
   mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
@@ -487,8 +481,6 @@ export interface RenovateConfig
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
-
-  customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
@@ -664,6 +656,7 @@ export const namedParents = [
   'bumpVersions',
   'customDatasources',
   'customManagers',
+  'dependencyDashboard',
   'group',
   'hostRules',
   'logLevelRemap',
@@ -687,7 +680,7 @@ export interface RenovateOptionBase {
    *
    * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
    *
-   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   * After this check has been performed, additional filtering (for defense in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
    */
   requiresCheckAtTrustBoundary?: boolean;
 
@@ -939,6 +932,19 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface DependencyDashboardConfig {
+  enabled?: boolean;
+  autoclose?: boolean;
+  title?: string;
+  header?: string;
+  footer?: string;
+  labels?: string[];
+  osvVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  reportAbandonment?: boolean;
+  pinned?: boolean;
+  customize?: Record<string, string>;
 }
 
 export interface BumpVersionConfig {

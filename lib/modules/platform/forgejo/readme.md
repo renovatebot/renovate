@@ -29,7 +29,7 @@ If you use Forgejo packages, add the `read:packages` scope.
 
 ## Unsupported platform features/concepts
 
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Forgejo versions older than v10.0.0 do not support required branch autodelete for automerge.
 
 ## Features awaiting implementation
 

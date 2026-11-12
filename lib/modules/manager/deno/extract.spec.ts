@@ -26,6 +26,13 @@ describe('modules/manager/deno/extract', () => {
       expect(result).toEqual(['deno.lock']);
     });
 
+    it('configured lock file is not a file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
+      fs.localPathIsFile.mockResolvedValue(false);
+      const result = await getLockFiles('custom.lock', 'deno.json');
+      expect(result).toEqual([]);
+    });
+
     it('not found lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package-lock.json');
       const result = await getLockFiles(false, 'deno.json');

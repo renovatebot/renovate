@@ -1,10 +1,10 @@
 import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { api as semver } from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { DartResponse } from './schema.ts';
 
-export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 /**
  * The server returns old svn versions which would need mapping to a version.
  * They are very old, so we skip them instead.
@@ -77,7 +77,9 @@ export class DartVersionDatasource extends Datasource {
         // The API response contains a stable version being released as a non-stable
         // release. So we filter out these releases here.
         const isStableAsNonStable =
-          channel !== 'stable' && stableVersionRegex.test(version);
+          channel !== 'stable' &&
+          semver.isVersion(version) &&
+          semver.isStable(version);
         if (
           version === 'latest' ||
           // skip old svn versions

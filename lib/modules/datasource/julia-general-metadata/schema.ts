@@ -26,3 +26,5 @@ export const JuliaPackageMetadata = LooseRecord(
     );
     return { releases };
   });
+
+export const JuliaPackageInfo = z.object({ uuid: z.string() });

@@ -6,6 +6,7 @@ import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerErrKey from './rules/logger-err-key.ts';
 import loggerStaticMessage from './rules/logger-static-message.ts';
+import noComplexConditionalExpression from './rules/no-complex-conditional-expression.ts';
 import noDevDependencyImport from './rules/no-dev-dependency-import.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
@@ -29,7 +30,9 @@ import preferNullishUtil from './rules/prefer-nullish-util.ts';
 import preferParserPipe from './rules/prefer-parser-pipe.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
+import preferStripVersionPrefix from './rules/prefer-strip-version-prefix.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
+import preferVersioningHelpers from './rules/prefer-versioning-helpers.ts';
 import requireBuildCacheKey from './rules/require-build-cache-key.ts';
 import requireCachePrivacy from './rules/require-cache-privacy.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
@@ -53,6 +56,7 @@ export default definePlugin({
     'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-err-key': loggerErrKey,
     'logger-static-message': loggerStaticMessage,
+    'no-complex-conditional-expression': noComplexConditionalExpression,
     'no-dev-dependency-import': noDevDependencyImport,
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
@@ -76,7 +80,9 @@ export default definePlugin({
     'prefer-parser-pipe': preferParserPipe,
     'prefer-partial-in-specs': preferPartialInSpecs,
     'prefer-resolve-tool-constraint': preferResolveToolConstraint,
+    'prefer-strip-version-prefix': preferStripVersionPrefix,
     'prefer-stub-env': preferStubEnv,
+    'prefer-versioning-helpers': preferVersioningHelpers,
     'require-build-cache-key': requireBuildCacheKey,
     'require-cache-privacy': requireCachePrivacy,
     'require-regex-util': requireRegexUtil,

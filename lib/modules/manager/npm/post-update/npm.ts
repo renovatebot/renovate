@@ -1,5 +1,10 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isNumber,
+  isString,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -122,13 +127,19 @@ export async function generateLockFile(
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint:
-        (await resolveToolConstraint(
-          config,
-          'npm',
-          async () =>
-            getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
-            (await getNpmConstraintFromPackageLock(lockFileDir, filename)),
-        )) ?? null,
+        (await resolveToolConstraint(config, 'npm', async () => {
+          let npmVersion = getPackageManagerVersion(
+            'npm',
+            await lazyPkgJson.getValue(),
+          );
+          if (isNullOrUndefined(npmVersion)) {
+            npmVersion = await getNpmConstraintFromPackageLock(
+              lockFileDir,
+              filename,
+            );
+          }
+          return npmVersion;
+        })) ?? null,
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
@@ -342,14 +353,16 @@ export async function generateLockFile(
     });
 
     // massage to shrinkwrap if necessary
-    if (
-      filename === 'npm-shrinkwrap.json' &&
-      (await localPathExists(upath.join(lockFileDir, 'package-lock.json')))
-    ) {
-      await renameLocalFile(
+    if (filename === 'npm-shrinkwrap.json') {
+      const lockExists = await localPathExists(
         upath.join(lockFileDir, 'package-lock.json'),
-        upath.join(lockFileDir, 'npm-shrinkwrap.json'),
       );
+      if (lockExists) {
+        await renameLocalFile(
+          upath.join(lockFileDir, 'package-lock.json'),
+          upath.join(lockFileDir, 'npm-shrinkwrap.json'),
+        );
+      }
     }
 
     // Read the result

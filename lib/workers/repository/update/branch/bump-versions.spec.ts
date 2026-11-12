@@ -666,6 +666,70 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
+    it.each`
+      bumpType   | current   | expected
+      ${'major'} | ${'3'}    | ${'4'}
+      ${'major'} | ${'v1'}   | ${'v2'}
+      ${'minor'} | ${'v1.2'} | ${'v1.3'}
+    `(
+      'bumps $current with $bumpType to $expected',
+      async ({ bumpType, current, expected }) => {
+        const config = partial<BranchConfig>({
+          bumpVersions: [
+            {
+              filePatterns: ['\\.release-version'],
+              bumpType,
+              matchStrings: ['^(?<version>.+)$'],
+            },
+          ],
+          updatedPackageFiles: [
+            { type: 'addition', path: 'foo', contents: 'bar' },
+          ],
+        });
+        scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+        fs.readLocalFile.mockResolvedValueOnce(current);
+        await bumpVersions(config);
+
+        expect(config).toMatchObject({
+          updatedArtifacts: [
+            {
+              type: 'addition',
+              path: '.release-version',
+              contents: expected,
+            },
+          ],
+        });
+      },
+    );
+
+    it('throws for minor bump of a major only version', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          { type: 'addition', path: 'foo', contents: 'bar' },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        artifactErrors: [
+          {
+            fileName: '.release-version',
+            stderr:
+              'Failed to calculate new version for bumpVersions: Unsupported bump type for {major}.{minor} version: minor',
+          },
+        ],
+      });
+    });
+
     it('throws for invalid bump type and short version', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [

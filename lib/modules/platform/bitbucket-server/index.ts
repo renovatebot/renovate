@@ -370,10 +370,27 @@ export async function getPr(
     opts.cacheProvider = memCacheProvider;
   }
 
-  const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    opts,
-  );
+  let res: HttpResponse<BbsRestPr>;
+  try {
+    res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
+      opts,
+    );
+  } catch (err) {
+    if (!isNotFound(err)) {
+      throw err;
+    }
+    // Bitbucket Server PRs can be hard-deleted, which the PR list sync never reports
+    logger.debug(`PR #${prNo} not found - removing it from the PR cache`);
+    BbsPrCache.deletePr(
+      config.projectKey,
+      config.repositorySlug,
+      config.ignorePrAuthor,
+      config.username,
+      prNo,
+    );
+    return null;
+  }
 
   const pr: BbsPr = {
     ...utils.prInfo(res.body),
