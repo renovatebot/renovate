@@ -109,7 +109,10 @@ export function coerceString(
  *     .replaceAll(regEx(/{#.+?#}/gs), '')
  * ```
  */
-export function stripTemplates(content: string): string {
+export function stripTemplates(
+  content: string,
+  onRemove?: (start: number, end: number) => void,
+): string {
   const result: string[] = [];
 
   const len = content.length;
@@ -155,6 +158,7 @@ export function stripTemplates(content: string): string {
           }
 
           // Move `idx` past the closing tag
+          onRemove?.(idx, end + closing.length);
           idx = end + closing.length;
           lastPos = idx; // Update the last position
           continue;
