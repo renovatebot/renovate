@@ -130,6 +130,55 @@ describe('util/markdown', () => {
       `);
     });
 
+    it.each([3, 4, 5, 10])(
+      'should only add zero-width space to @ outside a %d-backtick code block',
+      (length) => {
+        const fence = '`'.repeat(length);
+        const inner = '`'.repeat(length - 1);
+        expect(
+          sanitizeMarkdown(
+            `${fence}md\n${inner}\n@scope/pkg\n${inner}\n${fence}\n\nThanks @user!\n`,
+          ),
+        ).toEqual(
+          `${fence}md\n${inner}\n@scope/pkg\n${inner}\n${fence}\n\nThanks @&#8203;user!\n`,
+        );
+      },
+    );
+
+    it('should not add zero-width space to @ inside a tilde code block', () => {
+      expect(sanitizeMarkdown('~~~\n@scope/pkg\n~~~\n\n@user')).toEqual(
+        '~~~\n@scope/pkg\n~~~\n\n@&#8203;user',
+      );
+    });
+
+    it('should not add zero-width space to @ inside a double-backtick code span', () => {
+      expect(sanitizeMarkdown('Use `` `@scope/pkg` `` with @user')).toEqual(
+        'Use `` `@scope/pkg` `` with @&#8203;user',
+      );
+    });
+
+    it('should not add zero-width space to @ inside code in a list item', () => {
+      const input = codeBlock`
+        - Thanks @user!
+
+          \`\`\`\`md
+          @scope/pkg
+          \`\`\`\`
+
+        - Thanks @other!
+      `;
+
+      expect(sanitizeMarkdown(input)).toEqual(codeBlock`
+        - Thanks @&#8203;user!
+
+          \`\`\`\`md
+          @scope/pkg
+          \`\`\`\`
+
+        - Thanks @&#8203;other!
+      `);
+    });
+
     it('should not add zero-width space to @ inside inline code spans', () => {
       const input = 'Use `@atlaskit/tokens` here';
       expect(sanitizeMarkdown(input)).toEqual(input);
