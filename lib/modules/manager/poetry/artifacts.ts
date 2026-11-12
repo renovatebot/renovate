@@ -4,6 +4,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
@@ -21,6 +22,7 @@ import {
 import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
+  artifactError,
   artifactErrorResult,
   resolveToolConstraint,
   updateLockFile,
@@ -216,6 +218,7 @@ export async function updateArtifacts({
         }
 
         const execOptions: ExecOptions = {
+          abortOnTimeout: false,
           cwdFile: packageFileName,
           extraEnv,
           docker: {},
@@ -233,6 +236,9 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, `Failed to update ${lockFileName} file`);
+    if (err instanceof ExecError && err.timedOut) {
+      return [artifactError(lockFileName, err.message, true)];
+    }
     return artifactErrorResult(lockFileName, err);
   }
 }
