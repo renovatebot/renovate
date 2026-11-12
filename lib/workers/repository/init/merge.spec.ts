@@ -13,6 +13,7 @@ import type { AllConfig } from '../../../config/types.ts';
 import * as configValidation from '../../../config/validation.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import * as nugetApi from '../../../modules/datasource/nuget/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
@@ -27,6 +28,7 @@ import { OnboardingState } from '../onboarding/common.ts';
 import {
   applyHostRules,
   applyNpmrc,
+  applyNugetConfig,
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
@@ -323,6 +325,21 @@ describe('workers/repository/init/merge', () => {
       config.repository = 'some-org/some-repo';
       const res = await mergeRenovateConfig(config);
       expect(res).toBeDefined();
+    });
+
+    it('applies nugetConfig and logs debug when nugetConfigMerge is false', async () => {
+      const setNugetConfigSpy = vi.spyOn(nugetApi, 'setNugetConfig');
+      scm.getFileList.mockResolvedValue([]);
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        nugetConfig: '<configuration />',
+        warnings: [],
+        errors: [],
+      });
+      config.mode = 'silent';
+      config.repository = 'some-org/some-repo';
+      const res = await mergeRenovateConfig(config);
+      expect(res.nugetConfig).toBe('<configuration />');
+      expect(setNugetConfigSpy).toHaveBeenCalledWith('<configuration />');
     });
 
     it('throws error if misconfigured', async () => {
@@ -1003,6 +1020,29 @@ describe('workers/repository/init/merge', () => {
       expect(setNpmrcSpy).toHaveBeenCalledExactlyOnceWith(
         'something_authToken=token',
       );
+    });
+  });
+
+  describe('applyNugetConfig', () => {
+    it('does nothing if nugetConfig is missing', () => {
+      const setNugetConfigSpy = vi.spyOn(nugetApi, 'setNugetConfig');
+
+      applyNugetConfig({});
+
+      expect(setNugetConfigSpy).not.toHaveBeenCalled();
+    });
+
+    it('sets nugetConfig', () => {
+      const setNugetConfigSpy = vi.spyOn(nugetApi, 'setNugetConfig');
+      const config = {
+        nugetConfig: '<configuration />',
+      };
+
+      applyNugetConfig(config);
+      applyNugetConfig(config, 'resolved');
+
+      expect(setNugetConfigSpy).toHaveBeenCalledTimes(2);
+      expect(setNugetConfigSpy).toHaveBeenCalledWith('<configuration />');
     });
   });
 

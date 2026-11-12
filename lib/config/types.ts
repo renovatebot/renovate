@@ -129,6 +129,8 @@ export interface RenovateSharedConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
+  nugetConfig?: string;
+  nugetConfigMerge?: boolean;
 
   pinDigests?: boolean;
   platformAutomerge?: boolean;

@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement, XmlNodeBase } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
@@ -9,18 +10,41 @@ import {
 } from '../../../util/fs/index.ts';
 import { minimatch } from '../../../util/minimatch.ts';
 import { regEx } from '../../../util/regex.ts';
-import { nugetOrg } from '../../datasource/nuget/index.ts';
+import {
+  extractAndRegisterPackageSourceCredentials,
+  nugetOrg,
+} from '../../datasource/nuget/index.ts';
 import { GlobalJson } from './schema.ts';
-import type { NugetPackageDependency, Registry } from './types.ts';
+import type {
+  ApplyNuGetConfigOptions,
+  NugetPackageDependency,
+  Registry,
+} from './types.ts';
+
+export function parseXmlDocument(
+  content: string,
+  file?: string,
+): XmlDocument | undefined {
+  try {
+    const doc = new XmlDocument(content);
+    // don't return empty documents
+    return doc?.firstChild ? doc : undefined;
+  } catch (err) {
+    logger.debug({ err, file }, `failed to parse file as XML document`);
+    return undefined;
+  }
+}
 
 export async function readFileAsXmlDocument(
   file: string,
 ): Promise<XmlDocument | undefined> {
   try {
     // TODO #22198
-    const doc = new XmlDocument((await readLocalFile(file, 'utf8'))!);
-    // don't return empty documents
-    return doc?.firstChild ? doc : undefined;
+    const content = await readLocalFile(file, 'utf8');
+    if (!content) {
+      return undefined;
+    }
+    return parseXmlDocument(content, file);
   } catch (err) {
     logger.debug({ err, file }, `failed to parse file as XML document`);
     return undefined;
@@ -35,41 +59,15 @@ export function getDefaultRegistries(): Registry[] {
   return [{ url: nugetOrg, name: 'nuget.org' }];
 }
 
-export async function getConfiguredRegistries(
-  packageFile: string,
-): Promise<Registry[] | undefined> {
-  // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
-  const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
-  // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
-  const nuGetConfigPath = await findUpLocal(
-    nuGetConfigFileNames,
-    upath.dirname(packageFile),
-  );
-  if (!nuGetConfigPath) {
-    return undefined;
-  }
-
-  logger.debug(`Found NuGet.config at ${nuGetConfigPath}`);
-  const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
-
-  if (!nuGetConfig) {
-    return undefined;
-  }
-
+export function applyNuGetConfigFile(
+  nuGetConfig: XmlDocument,
+  initialRegistries: Registry[],
+  options?: ApplyNuGetConfigOptions,
+): Registry[] {
+  extractAndRegisterPackageSourceCredentials(nuGetConfig, options?.isFromRepo);
+  let registries = [...initialRegistries];
   const packageSources = nuGetConfig.childNamed('packageSources');
-
-  if (!packageSources) {
-    // If there are no packageSources, don't even look for any
-    // disabledPackageSources
-    // Even if NuGet default source (nuget.org) was among the
-    // disabledPackageSources, Renovate will default to the default source
-    // (nuget.org) anyway
-    return undefined;
-  }
-
   const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
-
-  let registries = getDefaultRegistries();
 
   // Map optional source mapped package patterns to default registries
   for (const registry of registries) {
@@ -78,48 +76,52 @@ export async function getConfiguredRegistries(
       ?.childrenNamed('package')
       .map((packagePattern) => packagePattern.attr.pattern);
 
-    registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
+    if (sourceMappedPackagePatterns) {
+      registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
+    }
   }
 
-  for (const child of packageSources.children) {
-    if (isXmlElement(child)) {
-      if (child.name === 'clear') {
-        logger.debug(`clearing registry URLs`);
-        registries.length = 0;
-      } else if (child.name === 'add') {
-        const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
-        if (isHttpUrl) {
-          let registryUrl = child.attr.value;
-          if (child.attr.protocolVersion) {
-            registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
-          }
-          const sourceMappedPackagePatterns = packageSourceMapping
-            ?.childWithAttribute('key', child.attr.key)
-            ?.childrenNamed('package')
-            .map((packagePattern) => packagePattern.attr.pattern);
+  if (packageSources) {
+    for (const child of packageSources.children) {
+      if (isXmlElement(child)) {
+        if (child.name === 'clear') {
+          logger.debug(`clearing registry URLs`);
+          registries.length = 0;
+        } else if (child.name === 'add') {
+          const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
+          if (isHttpUrl) {
+            let registryUrl = child.attr.value;
+            if (child.attr.protocolVersion) {
+              registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+            }
+            const sourceMappedPackagePatterns = packageSourceMapping
+              ?.childWithAttribute('key', child.attr.key)
+              ?.childrenNamed('package')
+              .map((packagePattern) => packagePattern.attr.pattern);
 
-          logger.debug(
-            {
+            logger.debug(
+              {
+                name: child.attr.key,
+                registryUrl,
+                sourceMappedPackagePatterns,
+              },
+              `Adding registry URL ${registryUrl}`,
+            );
+
+            registries.push({
               name: child.attr.key,
-              registryUrl,
+              url: registryUrl,
               sourceMappedPackagePatterns,
-            },
-            `Adding registry URL ${registryUrl}`,
-          );
-
-          registries.push({
-            name: child.attr.key,
-            url: registryUrl,
-            sourceMappedPackagePatterns,
-          });
-        } else {
-          logger.debug(
-            { registryUrl: child.attr.value },
-            'ignoring local registry URL',
-          );
+            });
+          } else {
+            logger.debug(
+              { registryUrl: child.attr.value },
+              'ignoring local registry URL',
+            );
+          }
         }
+        // child.name === 'remove' not supported
       }
-      // child.name === 'remove' not supported
     }
   }
 
@@ -141,19 +143,95 @@ export async function getConfiguredRegistries(
     }
   }
 
-  // Deduplicate registries with #procolVersion=3
-  // Keep any which include sourceMappedPackagePatterns
+  return registries;
+}
+
+export function deduplicateRegistries(registries: Registry[]): Registry[] {
   const plainRegistryUrls = registries
     .filter((r) => !r.sourceMappedPackagePatterns)
     .map((r) => r.url);
-  registries = registries.filter((r) => {
+  return registries.filter((r) => {
     return (
       r.sourceMappedPackagePatterns ??
       !plainRegistryUrls.includes(`${r.url}#protocolVersion=3`)
     );
   });
+}
 
-  return registries;
+export async function getConfiguredRegistries(
+  packageFile?: string,
+  config?: { nugetConfig?: string; nugetConfigMerge?: boolean },
+): Promise<Registry[] | undefined> {
+  const hasConfigNuget = isNonEmptyString(config?.nugetConfig);
+  const globalNugetConfig = hasConfigNuget
+    ? parseXmlDocument(config.nugetConfig!)
+    : undefined;
+
+  // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
+  const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
+  // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
+  const nuGetConfigPath = packageFile
+    ? await findUpLocal(nuGetConfigFileNames, upath.dirname(packageFile))
+    : undefined;
+
+  if (nuGetConfigPath) {
+    logger.debug(`Found NuGet.config at ${nuGetConfigPath}`);
+  }
+
+  if (hasConfigNuget && !config?.nugetConfigMerge) {
+    if (nuGetConfigPath) {
+      logger.info(
+        { nuGetConfigPath },
+        'Repo nuget.config file is ignored due to config.nugetConfig with config.nugetConfigMerge=false',
+      );
+    }
+    const globalPackageSources =
+      globalNugetConfig?.childNamed('packageSources');
+    if (!globalPackageSources) {
+      return undefined;
+    }
+    const registries = applyNuGetConfigFile(
+      globalNugetConfig!,
+      getDefaultRegistries(),
+      { isFromRepo: false },
+    );
+    return deduplicateRegistries(registries);
+  }
+
+  if (!nuGetConfigPath && !globalNugetConfig) {
+    return undefined;
+  }
+
+  const repoNugetConfig = nuGetConfigPath
+    ? await readFileAsXmlDocument(nuGetConfigPath)
+    : undefined;
+
+  if (!repoNugetConfig && !globalNugetConfig) {
+    return undefined;
+  }
+
+  const globalPackageSources = globalNugetConfig?.childNamed('packageSources');
+  const repoPackageSources = repoNugetConfig?.childNamed('packageSources');
+
+  if (!globalPackageSources && !repoPackageSources) {
+    return undefined;
+  }
+
+  let registries = getDefaultRegistries();
+
+  if (globalNugetConfig) {
+    registries = applyNuGetConfigFile(globalNugetConfig, registries, {
+      isFromRepo: false,
+    });
+  }
+
+  if (repoNugetConfig) {
+    registries = applyNuGetConfigFile(repoNugetConfig, registries, {
+      isFromRepo: true,
+    });
+  }
+
+  return deduplicateRegistries(registries);
 }
 
 export function isXmlElement(child: XmlNodeBase): child is XmlElement {

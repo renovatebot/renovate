@@ -42,6 +42,7 @@ import {
 import { addMetaData, stripMetadataUrlCredentials } from './metadata.ts';
 import { setNpmrc } from './npm/index.ts';
 import { resolveRegistryUrl } from './npm/npmrc.ts';
+import { setNugetConfig } from './nuget/index.ts';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -460,6 +461,9 @@ async function fetchReleases(
         registryUrls: [resolveRegistryUrl(config.packageName)],
       };
     }
+  }
+  if (datasourceName === 'nuget' && isString(config.nugetConfig)) {
+    setNugetConfig(config.nugetConfig);
   }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: needs test
