@@ -3087,6 +3087,104 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('proposes an older fix when minimumReleaseAge holds the lowest vulnerability fix', async () => {
+      config.currentValue = '1.4.4';
+      config.packageName = 'some/action';
+      config.datasource = GithubReleasesDatasource.id;
+      config.minimumReleaseAge = '14 days';
+      config.internalChecksFilter = 'strict';
+      config.isVulnerabilityAlert = true;
+      config.allowedVersions = '>= 1.4.6';
+      config.vulnerabilityFixVersions = ['1.4.5', '1.4.6'];
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const lastMonth = new Date();
+      lastMonth.setDate(lastMonth.getDate() - 30);
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.4.4' },
+          {
+            version: '1.4.5',
+            releaseTimestamp: lastMonth.toISOString() as Timestamp,
+          },
+          {
+            version: '1.4.6',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 5,
+          newValue: '1.4.5',
+          newVersion: '1.4.5',
+          pendingVersions: ['1.4.6'],
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: expect.any(String),
+          updateType: 'patch',
+          hasAttestation: undefined,
+        },
+      ]);
+    });
+
+    it('keeps the lowest vulnerability fix pending when no older fix is old enough', async () => {
+      config.currentValue = '1.4.4';
+      config.packageName = 'some/action';
+      config.datasource = GithubReleasesDatasource.id;
+      config.minimumReleaseAge = '14 days';
+      config.internalChecksFilter = 'strict';
+      config.isVulnerabilityAlert = true;
+      config.allowedVersions = '>= 1.4.6';
+      config.vulnerabilityFixVersions = ['1.4.6'];
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const lastMonth = new Date();
+      lastMonth.setDate(lastMonth.getDate() - 30);
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.4.4' },
+          {
+            version: '1.4.5',
+            releaseTimestamp: lastMonth.toISOString() as Timestamp,
+          },
+          {
+            version: '1.4.6',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 6,
+          newValue: '1.4.6',
+          newVersion: '1.4.6',
+          pendingChecks: true,
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: expect.any(String),
+          updateType: 'patch',
+          hasAttestation: undefined,
+        },
+      ]);
+    });
+
     it('should return pendingVersions', async () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';

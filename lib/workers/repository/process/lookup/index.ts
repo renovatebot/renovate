@@ -1,4 +1,9 @@
-import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import type { ValidationMessage } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
@@ -54,7 +59,10 @@ import {
   matchVersionCompatibility,
   restoreVersionCompatibility,
 } from './version-compatibility.ts';
-import { applyVulnerabilityFixFilter } from './vulnerability.ts';
+import {
+  applyVulnerabilityFixFilter,
+  findVulnerabilityFixFallback,
+} from './vulnerability.ts';
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -78,6 +86,24 @@ async function getTimestamp(
 
   const remoteRelease = await postprocessRelease(config, currentRelease);
   return remoteRelease?.releaseTimestamp;
+}
+
+function isCompatibleRelease(
+  release: Release,
+  config: LookupUpdateConfig,
+  versioningApi: allVersioning.VersioningApi,
+  compareValue: string | undefined,
+  unconstrainedValue: boolean,
+): boolean {
+  if (config.isLockfileOnly) {
+    return true;
+  }
+
+  // Leave only compatible versions
+  return (
+    unconstrainedValue ||
+    versioningApi.isCompatible(release.version, compareValue)
+  );
 }
 
 export async function lookupUpdates(
@@ -403,25 +429,48 @@ export async function lookupUpdates(
         res.skipReason = 'invalid-version';
         return Result.ok(res);
       }
+      const releasesToFilter = inRangeOnlyStrategy
+        ? allSatisfyingVersions
+        : allVersions;
       // Filter latest, unstable, etc
       // TODO #22198
       let filteredReleases = filterVersions(
         config,
         currentVersion,
         latestVersion!,
-        inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
+        releasesToFilter,
         versioningApi,
-      ).filter((v) => {
-        if (config.isLockfileOnly) {
-          return true;
-        }
-
-        // Leave only compatible versions
-        return (
-          unconstrainedValue ||
-          versioningApi.isCompatible(v.version, compareValue)
+      ).filter((release) =>
+        isCompatibleRelease(
+          release,
+          config,
+          versioningApi,
+          compareValue,
+          unconstrainedValue,
+        ),
+      );
+      let fixFallbackCandidates: Release[] = [];
+      if (
+        config.isVulnerabilityAlert &&
+        config.vulnerabilityFixStrategy !== 'highest' &&
+        isNonEmptyArray(config.vulnerabilityFixVersions)
+      ) {
+        fixFallbackCandidates = filterVersions(
+          { ...config, allowedVersions: undefined },
+          currentVersion,
+          latestVersion!,
+          releasesToFilter,
+          versioningApi,
+        ).filter((release) =>
+          isCompatibleRelease(
+            release,
+            config,
+            versioningApi,
+            compareValue,
+            unconstrainedValue,
+          ),
         );
-      });
+      }
       const vulnerabilityFix = applyVulnerabilityFixFilter(
         config,
         res,
@@ -442,13 +491,32 @@ export async function lookupUpdates(
         const sortedReleases = releases.sort((r1, r2) =>
           versioningApi.sortVersions(r1.version, r2.version),
         );
-        const { release, pendingChecks, pendingReleases } =
+        let { release, pendingChecks, pendingReleases } =
           await filterInternalChecks(
             depResultConfig,
             versioningApi,
             bucket,
             sortedReleases,
           );
+        if (
+          release &&
+          pendingChecks &&
+          shrinkedViaVulnerability &&
+          fixFallbackCandidates.length
+        ) {
+          const fallback = await findVulnerabilityFixFallback(
+            depResultConfig,
+            versioningApi,
+            bucket,
+            release,
+            fixFallbackCandidates,
+          );
+          if (fallback) {
+            pendingReleases = [release];
+            release = fallback;
+            pendingChecks = false;
+          }
+        }
         // `filterInternalChecks()` normally yields a release, falling back to
         // the newest pending one; only a datasource rejecting every candidate
         // during postprocessing leaves none - see #40625

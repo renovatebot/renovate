@@ -5483,6 +5483,10 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
 When a vulnerability fix is available, Renovate will default to picking the lowest fixed version (`vulnerabilityFixStrategy=lowest`).
 For example, if the current version is `1.0.0`, and a vulnerability is fixed in `1.1.0`, while the latest version is `1.2.0`, then Renovate will propose an update to `1.1.0` as the vulnerability fix.
 
+If [`minimumReleaseAge`](#minimumreleaseage) holds back that version, Renovate proposes the lowest release that is old enough and fixes as many of the advisories as possible, and lists the held version under Pending in the pull request.
+For example, if one advisory is fixed in `1.1.0` and another in `1.2.0`, and `1.2.0` is too young, then Renovate will propose `1.1.0` until `1.2.0` is old enough.
+This needs [`osvVulnerabilityAlerts`](#osvvulnerabilityalerts), which records the fixed version of each advisory.
+
 If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its normal strategy for picking upgrades, e.g. in the above example it will propose an update to `1.2.0` to fix the vulnerability.
 
 ```json title="Setting vulnerabilityFixStrategy to highest"
