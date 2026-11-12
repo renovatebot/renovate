@@ -40,6 +40,8 @@ import type {
 
 const { fromVector } = aeCvss;
 
+const maxFixVersionSteps = 10;
+
 export class Vulnerabilities {
   private static osvOffline: Promise<OsvOffline> | undefined;
 
@@ -304,6 +306,13 @@ export class Vulnerabilities {
         }
       }
 
+      this.followFixVersion(
+        osvVulnerabilities,
+        vulnerabilities,
+        ecosystem,
+        versioningApi,
+      );
+
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
@@ -520,6 +529,130 @@ export class Vulnerabilities {
       this.includedInVersions(depVersion, affected) ||
       this.includedInRanges(depVersion, affected, versioningApi)
     );
+  }
+
+  /**
+   * The highest fixed version of the advisories affecting a dependency is the
+   * floor Renovate proposes. While another advisory for the same package
+   * affects that floor, the floor moves to that advisory's fix, so that the
+   * proposed version is not itself vulnerable. Advisories found this way are
+   * added to the list, so they are reported and raise the floor like the rest.
+   */
+  private followFixVersion(
+    osvVulnerabilities: Osv.Vulnerability[],
+    vulnerabilities: Vulnerability[],
+    ecosystem: Ecosystem,
+    versioningApi: VersioningApi,
+  ): void {
+    if (isEmptyArray(vulnerabilities)) {
+      return;
+    }
+    const {
+      packageName,
+      osvPackageName,
+      depType,
+      depVersion,
+      versioning,
+      datasource,
+      packageFileConfig,
+    } = vulnerabilities[0];
+
+    let fixVersion = this.highestFixVersion(
+      vulnerabilities,
+      depVersion,
+      versioningApi,
+    );
+    for (let step = 0; fixVersion && step < maxFixVersionSteps; step += 1) {
+      const affecting: Vulnerability[] = [];
+      for (const osvVulnerability of osvVulnerabilities) {
+        if (osvVulnerability.withdrawn) {
+          continue;
+        }
+        for (const affected of coerceArray(osvVulnerability.affected)) {
+          if (
+            !this.isPackageVulnerable(
+              ecosystem,
+              osvPackageName,
+              fixVersion,
+              affected,
+              versioningApi,
+            )
+          ) {
+            continue;
+          }
+
+          logger.debug(
+            `Vulnerability ${osvVulnerability.id} affects ${packageName} ${fixVersion}, the version proposed to fix ${packageName} ${depVersion}`,
+          );
+          affecting.push({
+            packageName,
+            osvPackageName,
+            vulnerability: osvVulnerability,
+            affected,
+            depType,
+            depVersion,
+            versioning,
+            fixedVersion: this.getFixedVersion(
+              ecosystem,
+              fixVersion,
+              affected,
+              versioningApi,
+            ),
+            datasource,
+            packageFileConfig,
+          });
+        }
+      }
+      if (isEmptyArray(affecting)) {
+        return;
+      }
+      vulnerabilities.push(...affecting);
+      fixVersion = this.highestFixVersion(affecting, fixVersion, versioningApi);
+    }
+  }
+
+  private highestFixVersion(
+    vulnerabilities: Vulnerability[],
+    version: string,
+    versioningApi: VersioningApi,
+  ): string | null {
+    let highest: string | null = null;
+    for (const { affected } of vulnerabilities) {
+      const fix = this.lowestFixAbove(version, affected, versioningApi);
+      if (!fix) {
+        continue;
+      }
+      if (!highest || this.isVersionGt(fix, highest, versioningApi)) {
+        highest = fix;
+      }
+    }
+    return highest;
+  }
+
+  private lowestFixAbove(
+    version: string,
+    affected: Osv.Affected,
+    versioningApi: VersioningApi,
+  ): string | null {
+    const fixedVersions: string[] = [];
+    for (const range of coerceArray(affected.ranges)) {
+      if (range.type === 'GIT') {
+        continue;
+      }
+      for (const event of range.events) {
+        if (
+          isNonEmptyString(event.fixed) &&
+          versioningApi.isVersion(event.fixed)
+        ) {
+          fixedVersions.push(event.fixed);
+        }
+      }
+    }
+    fixedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
+    const lowest = fixedVersions.find((fixed) =>
+      this.isVersionGt(fixed, version, versioningApi),
+    );
+    return lowest ?? null;
   }
 
   private getFixedVersion(
