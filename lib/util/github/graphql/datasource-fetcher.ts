@@ -392,7 +392,13 @@ export class GithubGraphqlDatasourceFetcher<
       this.getCacheKey(),
     );
     let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
-    resultPromise ??= refresh ? this.doRefreshQuery() : this.doCachedQuery();
+    if (resultPromise === undefined) {
+      if (refresh) {
+        resultPromise = this.doRefreshQuery();
+      } else {
+        resultPromise = this.doCachedQuery();
+      }
+    }
     memCache.set(cacheKey, resultPromise);
     return resultPromise;
   }
