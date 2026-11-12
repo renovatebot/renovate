@@ -6,7 +6,12 @@ import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
 import { getPkgReleases } from '../index.ts';
 import { adoptiumRegistryUrl } from './adoptium.ts';
-import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
+import {
+  datasource,
+  defaultRegistryUrl,
+  miseJavaRegistryUrl,
+  pageSize,
+} from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
 import { JavaVersionDatasource } from './index.ts';
 
@@ -576,6 +581,71 @@ describe('modules/datasource/java-version/index', () => {
           registryUrls: [graalvmRegistryUrl],
         });
         expect(graalvmRes?.releases).toHaveLength(3);
+      });
+    });
+
+    describe('OpenJDK', () => {
+      const openjdkMetadataUrl = '/jvm/ga/linux/x86_64.json';
+
+      it('filters the mise JVM catalog to OpenJDK JDK releases', async () => {
+        httpMock
+          .scope(miseJavaRegistryUrl)
+          .get(openjdkMetadataUrl)
+          .reply(200, [
+            {
+              image_type: 'jdk',
+              vendor: 'openjdk',
+              version: '21.0.2',
+            },
+            {
+              image_type: 'jdk',
+              vendor: 'temurin',
+              version: '21.0.8+9',
+            },
+            {
+              image_type: 'jre',
+              vendor: 'openjdk',
+              version: '21.0.2',
+            },
+          ]);
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'openjdk-jdk?os=linux&architecture=x86_64',
+        });
+        expect(res?.releases).toEqual([{ version: '21.0.2' }]);
+      });
+
+      it('returns null for an empty OpenJDK catalog', async () => {
+        httpMock
+          .scope(miseJavaRegistryUrl)
+          .get(openjdkMetadataUrl)
+          .reply(200, []);
+        await expect(
+          getPkgReleases({
+            datasource,
+            packageName: 'openjdk-jdk?os=linux&architecture=x86_64',
+          }),
+        ).resolves.toBeNull();
+      });
+
+      it('returns null when the OpenJDK catalog is unavailable', async () => {
+        httpMock.scope(miseJavaRegistryUrl).get(openjdkMetadataUrl).reply(404);
+        await expect(
+          getPkgReleases({
+            datasource,
+            packageName: 'openjdk-jdk?os=linux&architecture=x86_64',
+          }),
+        ).resolves.toBeNull();
+      });
+
+      it('throws for OpenJDK catalog server errors', async () => {
+        httpMock.scope(miseJavaRegistryUrl).get(openjdkMetadataUrl).reply(502);
+        await expect(
+          getPkgReleases({
+            datasource,
+            packageName: 'openjdk-jdk?os=linux&architecture=x86_64',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
     });
   });

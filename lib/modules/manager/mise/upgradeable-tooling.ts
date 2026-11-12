@@ -68,7 +68,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   java: {
     misePluginUrl: 'https://mise.jdx.dev/lang/java.html',
     config: (version) => {
-      // no prefix is shorthand for openjdk
+      // The vendor for a bare version depends on mise version/configuration.
+      // Keep the datasource default unless the mise file explicitly configures it.
       const versionMatch =
         regEx(/^(?<version>\d\S+)/).exec(version)?.groups?.version;
       if (versionMatch) {
