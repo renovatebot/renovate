@@ -2601,7 +2601,7 @@ This option could be used to avoid rate limits for certain platforms like GitHub
 This option is also useful to allow for differently scoped write and read tokens.
 This is particularly relevant for GitHub, which cannot issue a token with write access to some repositories and read access to others.
 You can scope `RENOVATE_TOKEN` to a single repository where Renovate opens pull requests, and then specify a read-only token with wider access for the purposes of dependency updates.
-Some managers use `github.com` and others `api.github.com`, so you'll want to specify a host rule for both:
+Some managers use `github.com` and others `api.github.com`, so you will want to specify a host rule for both:
 
 ```json
 {
