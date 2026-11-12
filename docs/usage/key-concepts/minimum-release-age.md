@@ -103,11 +103,11 @@ To protect against this, it is recommended to ensure that your package manager c
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
-With `minimumReleaseAgePackageManagerSync`, the package managers listed under [`minimumReleaseAgePackageManager`](../configuration-options.md#minimumreleaseagepackagemanager) receive the `minimumReleaseAge` of your repository or manager config, but not a larger `minimumReleaseAge` from `packageRules`.
+With `minimumReleaseAgePackageManagerSync`, the package managers in the table below receive the `minimumReleaseAge` of your repository or manager config, but not a larger `minimumReleaseAge` from `packageRules`.
 A package manager applies the minimum release age to every package of the lock file, so a larger value for some updates, such as major updates, would fail on packages which other updates locked.
 A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an update.
 Renovate never passes [`minimumReleaseAgeBuffer`](../configuration-options.md#minimumreleaseagebuffer) to the package manager.
-Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
+Set [`minimumReleaseAgePackageManager`](../configuration-options.md#minimumreleaseagepackagemanager) at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
 How Renovate does this depends on the package manager, for example Poetry excludes an updated package from its check only if its constraint pins a single version.
