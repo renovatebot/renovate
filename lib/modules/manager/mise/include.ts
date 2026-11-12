@@ -3,6 +3,7 @@ import type { PackageDependency } from '../types.ts';
 import { extractGitReference } from './git-reference.ts';
 
 const ociPrefix = 'oci::';
+const gitPrefix = 'git::';
 
 /**
  * Extracts a remote include entry of a mise configuration file: either a
@@ -29,4 +30,20 @@ export function extractInclude(
     depType,
     skipReason: 'unsupported-url',
   };
+}
+
+/**
+ * Extracts a remote `[task_config] includes` entry, which supports the same
+ * remote forms as `include`. Local paths are ignored, as they carry no version.
+ * @link https://mise.jdx.dev/tasks/toml-tasks.html#task-config-includes
+ */
+export function extractTaskConfigInclude(
+  include: string,
+  content: string,
+): PackageDependency | null {
+  const trimmed = include.trim();
+  if (!trimmed.startsWith(ociPrefix) && !trimmed.startsWith(gitPrefix)) {
+    return null;
+  }
+  return extractInclude(trimmed, content, 'task-include');
 }

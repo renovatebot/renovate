@@ -2344,7 +2344,7 @@ describe('modules/manager/mise/extract', () => {
   });
 
   describe('task_config includes', () => {
-    it('extracts a github git ref', async () => {
+    it('extracts a github git ref and ignores local paths', async () => {
       const content = codeBlock`
         [task_config]
         includes = [
@@ -2366,13 +2366,18 @@ describe('modules/manager/mise/extract', () => {
             autoReplaceStringTemplate:
               'git::https://github.com/org/tasks.git//tasks?ref={{newValue}}',
           },
-          {
-            depName: 'local-tasks',
-            depType: 'task-include',
-            skipReason: 'unsupported-url',
-          },
         ],
       });
+    });
+
+    it('ignores files with only local task_config includes', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = [".mise/tasks", "./tasks"]
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
     });
 
     it('extracts an oci ref', async () => {

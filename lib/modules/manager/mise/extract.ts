@@ -4,6 +4,7 @@ import {
   isNonEmptyObject,
   isNonEmptyString,
   isObject,
+  isTruthy,
 } from '@sindresorhus/is';
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
@@ -42,7 +43,7 @@ import {
   isLockedVersionOf,
 } from './constraints.ts';
 import { extractGitReference } from './git-reference.ts';
-import { extractInclude } from './include.ts';
+import { extractInclude, extractTaskConfigInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
@@ -119,9 +120,9 @@ export async function extractPackageFile(
     extractInclude(include, content),
   );
 
-  const taskConfigIncludeDeps = misefile.task_config.includes.map((include) =>
-    extractInclude(include, content, 'task-include'),
-  );
+  const taskConfigIncludeDeps = misefile.task_config.includes
+    .map((include) => extractTaskConfigInclude(include, content))
+    .filter(isTruthy);
 
   if (
     !toolEntries.length &&
