@@ -52,20 +52,23 @@ The match of the image string is extracted as a docker image dependency.
 #### Type 2: Extract ImageVolumes
 
 Next, the manager looks for image volumes defined in Kubernetes resource definitions.
-For this extraction, each file must be a valid YAML file containing one or more Kubernetes resource definitions.
-Each resource definition must contain an `apiVersion`, `kind`, and `metadata` field. The `metadata` field must include a `name` property.
+For this extraction, the file must contain one or more valid (after stripping templates) YAML documents containing Kubernetes resource definitions.
+Each resource definition must contain an `apiVersion`, `kind`, and `metadata` field.
+The `metadata` field must include a `name` property.
 
-- For resources of `kind` `Pod`, the manager extracts the values of `spec.volumes[].image.reference`.
-- For resources of `kind`, `DaemonSet`, `Deployment`, `Job`, `ReplicaSet`, `ReplicationController`, and `StatefulSet`, the manager extracts the values of `spec.template.spec.volumes[].image.reference`.
-- For resources of `kind` `CronJob`, the manager extracts the values of `spec.jobTemplate.spec.template.spec.volumes[].image.reference`.
-- For all other resource kinds, the manager does not extract image volume references.
+- For resources of `kind` `Pod`, the manager extracts the values of `spec.volumes[].image.reference`
+- For resources of `kind` `DaemonSet`, `Deployment`, `Job`, `ReplicaSet`, `ReplicationController`, and `StatefulSet`, the manager extracts the values of `spec.template.spec.volumes[].image.reference`
+- For resources of `kind` `CronJob`, the manager extracts the values of `spec.jobTemplate.spec.template.spec.volumes[].image.reference`
+- For all other resource kinds, the manager does not extract image volume references
 
 All extracted image volume references are extracted as docker image dependencies.
 
 #### Type 3: Extract ApiVersions
 
 Finally, the manager extracts the `apiVersion` field from each Kubernetes resource definition of supported APIs.
-For this extraction, each file must be a valid YAML file containing one or more Kubernetes resource definitions.
-In this case a dependency with the [`kubernetes-api` datasource](../../datasource/kubernetes-api.md) is created with the `kind` as the dep name and the `apiVersion` as the current value.
+For this extraction, the file must contain one or more valid (after stripping templates) YAML documents containing Kubernetes resource definitions.
+Each resource definition must contain an `apiVersion`, `kind`, and `metadata` field.
+The `metadata` field must include a `name` property.
+In this case a dependency with the [`kubernetes-api` datasource](../../datasource/kubernetes-api/index.md) is created with the `kind` as the dep name and the `apiVersion` as the current value.
 
 For supported APIs, see the [source code](https://github.com/renovatebot/renovate/blob/main/data/kubernetes-api.json5).
