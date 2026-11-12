@@ -404,6 +404,45 @@ describe('workers/repository/process/fetch', () => {
       );
     });
 
+    it('looks up a lockfile-only dep which a vulnerability alert matches by a pattern', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['/^transitive-/'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).not.toHaveProperty('skipReason');
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          depName: 'transitive-dep',
+          isVulnerabilityAlert: true,
+        }),
+      );
+    });
+
     it('matches a vulnerability alert against a lockfile-only dep using the datasource versioning', async () => {
       // `2024.1.1` is a version under pypi's own versioning, but not under the
       // default one, so the alert only matches once the datasource default has
