@@ -69,6 +69,8 @@ describe('modules/versioning/loose/index', () => {
     ${'1.1.5-100'}                  | ${'1.1.5-99'}                   | ${true}
     ${'2026051723231779060208'}     | ${'2026051723231779060202'}     | ${true}
     ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${false}
+    ${'27.0.1.0.3+5'}               | ${'27.0.1+11'}                  | ${true}
+    ${'27.0.1+11'}                  | ${'27.0.1+5'}                   | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
   });
@@ -84,6 +86,10 @@ describe('modules/versioning/loose/index', () => {
     ${'minor'} | ${'1'}                          | ${'1.0.1'}                      | ${true}
   `('isSame("$type", "$a", "$b") === $expected', ({ type, a, b, expected }) => {
     expect(loose.isSame?.(type, a, b)).toBe(expected);
+  });
+
+  it('treats a java hotfix build as stable', () => {
+    expect(loose.isStable('27.0.1.0.3+5')).toBe(true);
   });
 
   it.each`

@@ -12,6 +12,7 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
+import * as looseVersioning from '../../versioning/loose/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { ToolingDefinition } from './types.ts';
@@ -438,6 +439,35 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
           currentValue: temurinJreMatches.version,
+        };
+      }
+      // Liberica NIK tags pair the NIK and JDK versions (`25.0.4+1-25.0.4+10`);
+      // anchor on the JDK major so a pin stays on its own JDK line.
+      const libericaNikMatches = regEx(
+        /^liberica-nik-(?:(?:javafx|musl)-)?openjdk(?<jdk>\d+)-(?<version>\d+\.\d+\.\d+\S*)$/,
+      ).exec(version)?.groups;
+      if (libericaNikMatches) {
+        return {
+          datasource: GithubReleasesDatasource.id,
+          packageName: 'bell-sw/LibericaNIK',
+          currentValue: libericaNikMatches.version,
+          extractVersion: `^(?<version>[^-]+)-${libericaNikMatches.jdk}\\.`,
+          versioning: looseVersioning.id,
+        };
+      }
+      // Liberica tags (`27.0.1+11`, `27.0.1.0.3+5`, `27+36`, `8u513+5`) match the
+      // version ids. Exact versions only; flavours are not filtered per release.
+      const libericaMatches = regEx(
+        /^liberica-(?:(?:jre|javafx|jre-javafx|musl|jre-musl|lite|lite-musl|crac|crac-musl|musl-crac)-)?(?<version>\d+\.\d+\.\d+\S*|\d+u\d+\S*|\d+\+\d+\S*)$/,
+      ).exec(version)?.groups;
+      if (libericaMatches) {
+        return {
+          datasource: GithubReleasesDatasource.id,
+          packageName: 'bell-sw/Liberica',
+          currentValue: libericaMatches.version,
+          // drops early-access tags (`26+29-ea`), published as normal releases
+          extractVersion: '^(?<version>\\d[^-]*)$',
+          versioning: looseVersioning.id,
         };
       }
 
