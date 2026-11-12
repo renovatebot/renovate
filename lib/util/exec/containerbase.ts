@@ -97,12 +97,22 @@ let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
 > | null = null;
 
+/**
+ * Looks up the releases of a tool which containerbase can install on this
+ * host: for its arch, its containerbase version and, when possible, the
+ * runtime versions already resolved for the other tools.
+ */
 async function getPkgReleases(
   toolConfig: ToolConfig,
   resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
+  // only the releases with files for the arch the tool is installed on
+  const config: ToolConfig = {
+    ...toolConfig,
+    packageName: `${toolConfig.packageName}?system=true`,
+  };
   // drop releases which need a newer containerbase, a development build has no
   // release version and skips it like the containerbase cli
   const containerbase: Partial<Record<ConstraintName, string>> =
@@ -110,7 +120,7 @@ async function getPkgReleases(
   if (Object.keys(resolvedTools).length) {
     // drop releases whose runtime constraints (e.g. `engines.node`) exclude the runtime versions we install
     const compatible = await getPkgReleases({
-      ...toolConfig,
+      ...config,
       constraintsFiltering: 'strict',
       constraints: { ...resolvedTools, ...containerbase },
     });
@@ -118,15 +128,15 @@ async function getPkgReleases(
       return compatible;
     }
     logger.debug(
-      { toolConfig, resolvedTools },
+      { toolConfig: config, resolvedTools },
       'No tool releases compatible with resolved tools - ignoring their constraints',
     );
   }
   if (!Object.keys(containerbase).length) {
-    return getPkgReleases(toolConfig);
+    return getPkgReleases(config);
   }
   return getPkgReleases({
-    ...toolConfig,
+    ...config,
     constraintsFiltering: 'strict',
     constraints: containerbase,
   });

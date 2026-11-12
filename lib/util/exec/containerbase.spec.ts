@@ -370,7 +370,7 @@ describe('util/exec/containerbase', () => {
       // the containerbase constraint is kept
       expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
         datasource: 'containerbase',
-        packageName: 'npm',
+        packageName: 'npm?system=true',
         versioning: 'npm',
         constraintsFiltering: 'strict',
         constraints: { containerbase: containerbase.version },
@@ -471,7 +471,7 @@ describe('util/exec/containerbase', () => {
       );
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
         datasource: 'containerbase',
-        packageName: 'composer',
+        packageName: 'composer?system=true',
         versioning: 'composer',
       });
       containerbase.version = '14.0.0';
@@ -513,7 +513,7 @@ describe('util/exec/containerbase', () => {
       ]);
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
         datasource: 'containerbase',
-        packageName: 'composer',
+        packageName: 'composer?system=true',
         versioning: 'composer',
         constraintsFiltering: 'strict',
         constraints: { containerbase: containerbase.version },
@@ -531,7 +531,7 @@ describe('util/exec/containerbase', () => {
       ]);
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
         datasource: 'containerbase',
-        packageName: 'npm',
+        packageName: 'npm?system=true',
         versioning: 'npm',
         constraintsFiltering: 'strict',
         constraints: { node: '20.17.0', containerbase: containerbase.version },
