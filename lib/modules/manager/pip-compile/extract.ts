@@ -187,6 +187,10 @@ export async function extractAllPackageFiles(
           }
         }
         for (const dep of packageFileContent.deps) {
+          if (dep.depType === 'requires-python') {
+            // the Python version constraint is not a package, so it is never pinned in a lock file
+            continue;
+          }
           const lockedVersion = lockedDeps?.find(
             (lockedDep) => lockedDep.packageName === dep.packageName,
           )?.currentVersion;
