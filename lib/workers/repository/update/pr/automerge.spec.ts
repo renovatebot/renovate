@@ -67,6 +67,32 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
+    it('should automerge label', async () => {
+      config.automerge = true;
+      config.automergeType = 'label';
+      config.automergeLabel = 'merge';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.updatePr).toHaveBeenCalledWith({
+        number: pr.number,
+        prTitle: pr.title,
+        addLabels: ['merge'],
+      });
+      expect(platform.mergePr).not.toHaveBeenCalled();
+    });
+
+    it('should not re-add automerge label if already present', async () => {
+      config.automerge = true;
+      config.automergeType = 'label';
+      config.automergeLabel = 'merge';
+      pr.labels = ['merge'];
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.updatePr).not.toHaveBeenCalled();
+    });
+
     it('should remove previous automerge comment when rebasing', async () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';
@@ -169,6 +195,17 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
 
+    it('should use the conflict state from config without checking the branch', async () => {
+      config.automerge = true;
+      config.isConflicted = true;
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'Conflicted',
+      });
+      expect(scm.isBranchConflicted).not.toHaveBeenCalled();
+    });
+
     it('dryRun full should not automerge', async () => {
       config.automerge = true;
       GlobalConfig.set({ dryRun: 'full' });
@@ -191,6 +228,22 @@ describe('workers/repository/update/pr/automerge', () => {
       GlobalConfig.set({ dryRun: 'full' });
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual(expectedResult);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('dryRun full label', async () => {
+      config.automerge = true;
+      config.automergeType = 'label';
+      config.automergeLabel = 'merge';
+      const expectedResult = {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      GlobalConfig.set({ dryRun: 'full' });
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual(expectedResult);
+      expect(platform.updatePr).not.toHaveBeenCalled();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });

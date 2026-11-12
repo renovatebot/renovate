@@ -19,7 +19,7 @@ This option will be skipped in [umbrella projects](https://hexdocs.pm/elixir/dep
 ### Default `rangeStrategy=auto` behavior
 
 Renovate's default [`rangeStrategy`](../../../configuration-options.md#rangestrategy) is `"auto"`.
-Here's how `"auto"` works with the `mix` manager:
+Here is how `"auto"` works with the `mix` manager:
 
 | Version type             | New version | Old range             | New range after update | What Renovate does                                                        |
 | :----------------------- | :---------- | :-------------------- | :--------------------- | :------------------------------------------------------------------------ |

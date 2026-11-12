@@ -45,8 +45,14 @@ export async function prAlreadyExisted(
   if (pr) {
     logger.debug('Found closed PR with current title');
     const prDetails = await platform.getPr(pr.number);
+
+    if (!prDetails) {
+      logger.debug(`PR #${pr.number} no longer exists`);
+      return null;
+    }
+
     // istanbul ignore if
-    if (prDetails!.state === 'open') {
+    if (prDetails.state === 'open') {
       logger.debug('PR reopened - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }

@@ -746,6 +746,44 @@ describe('workers/repository/update/pr/index', () => {
         expect(participants.addParticipants).toHaveBeenCalled();
       });
 
+      it('does not add assignees for PR automerge with non-red status', async () => {
+        const changedPr: Pr = {
+          ...pr,
+          hasAssignees: false,
+        };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(participants.addParticipants).not.toHaveBeenCalled();
+      });
+
+      it('automerges branch without pending check when stabilityStatus is yellow', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          stabilityStatus: 'yellow',
+          prNotPendingHours: 1,
+        });
+
+        expect(res).toEqual({
+          type: 'without-pr',
+          prBlockedBy: 'BranchAutomerge',
+        });
+        expect(git.getBranchLastCommitTime).not.toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
       it('skips branch automerge and forces PR creation due to artifact errors', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 

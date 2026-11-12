@@ -187,8 +187,23 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
 }
 
 /**
+ * Whether Renovate checks the minimum release age of `upgrade`, ignoring
+ * `minimumReleaseAgeExtracted` for security updates.
+ */
+function hasMinimumReleaseAge(upgrade: BranchUpgradeConfig): boolean {
+  if (isNonEmptyString(upgrade.minimumReleaseAge)) {
+    return true;
+  }
+  return (
+    !upgrade.isVulnerabilityAlert &&
+    isNonEmptyString(upgrade.minimumReleaseAgeExtracted)
+  );
+}
+
+/**
  * Checks the minimum release age of `upgrade`, which is skipped for lock file
- * maintenance if the package manager enforces it itself.
+ * maintenance if `minimumReleaseAgePackageManagerSync` is enabled and the
+ * package manager enforces it itself.
  */
 async function checkUpgradeMinimumReleaseAge(
   upgrade: BranchUpgradeConfig,
@@ -201,7 +216,11 @@ async function checkUpgradeMinimumReleaseAge(
     },
     upgrade.releaseTimestamp,
   );
-  if (!result.minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
+  if (
+    !result.minimumReleaseAgeMs ||
+    !upgrade.isLockFileMaintenance ||
+    !upgrade.minimumReleaseAgePackageManagerSync
+  ) {
     return result;
   }
   if (!(await enforcesMinimumReleaseAge(upgrade.manager, upgrade))) {
@@ -228,8 +247,7 @@ export async function computeInternalChecksStatus(
 ): Promise<InternalChecksStatus | null> {
   const internalChecksConfigured = config.upgrades.some(
     (upgrade) =>
-      isNonEmptyString(upgrade.minimumReleaseAge) ||
-      isNonEmptyString(upgrade.minimumReleaseAgeExtracted) ||
+      hasMinimumReleaseAge(upgrade) ||
       isActiveConfidenceLevel(upgrade.minimumConfidence!),
   );
   if (!internalChecksConfigured) {

@@ -7,7 +7,7 @@ Most of the information on this page is meant for users who want to self-host Re
 For users on GitHub Cloud (`github.com`), the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
 When you use the app, Mend will:
 
-- authenticate the Renovate app to GitHub
+- authenticate the Mend Renovate app to GitHub
 - keep the tokens safe
 - maintain and update the Renovate version used
 
@@ -43,7 +43,7 @@ You can choose where you want to set `endpoint`:
 - In a CLI parameter
 
 !!! tip "Labels and forking mode"
-  If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
+  If you are self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
   The `triage` level allows the PAT to apply/dismiss existing labels.
 
 ## Running using a fine-grained token
@@ -113,7 +113,7 @@ Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterpr
   Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 !!! tip "Third-party tools to regenerate installation tokens"
-  If you're self-hosting Renovate within a GitHub Actions workflow, then you can use the [`actions/create-github-app-token`](https://github.com/actions/create-github-app-token) action.
+  If you are self-hosting Renovate within a GitHub Actions workflow, then you can use the [`actions/create-github-app-token`](https://github.com/actions/create-github-app-token) action.
   If you use Node.js/CLI, then you can use the [`github-app-installation-token`](https://github.com/gagoar/github-app-installation-token) package.
   If you use Docker, then you can use the [`mshekow/github-app-installation-token`](https://github.com/MShekow/github-app-installation-token) image.
 
@@ -144,4 +144,4 @@ When Renovate runs against repositories on `github.com`, and the environment var
 - `rubygems.pkg.github.com`
 
 !!! warning
-  We reverted the Package Registry Credentials feature to experimental mode, because users reported it's not working correctly with app tokens.
+  We reverted the Package Registry Credentials feature to experimental mode, because users reported it is not working correctly with app tokens.

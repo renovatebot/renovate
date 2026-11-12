@@ -12,6 +12,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
@@ -129,10 +130,10 @@ export async function processBranch(
   );
   try {
     // Check if branch already existed
-    const existingPr =
-      !branchPr || config.automerge
-        ? await prAlreadyExisted(config)
-        : undefined;
+    let existingPr: Pr | null | undefined;
+    if (!branchPr || config.automerge) {
+      existingPr = await prAlreadyExisted(config);
+    }
     if (existingPr?.state === 'merged') {
       logger.debug(`Matching PR #${existingPr.number} was merged previously`);
       if (config.automerge) {
@@ -225,7 +226,7 @@ export async function processBranch(
       };
     }
     if (branchExists) {
-      // check if branch is labelled to stop
+      // check if branch is labeled to stop
       config.stopUpdating = branchPr?.labels?.includes(
         config.stopUpdatingLabel!,
       );
@@ -304,15 +305,14 @@ export async function processBranch(
             };
           }
         }
-      } else if (
-        branchIsModified &&
-        !dependencyDashboardCheck &&
-        !(await findClosedPrForModifiedBranch(config))
-      ) {
-        return {
-          branchExists,
-          result: 'pr-edited',
-        };
+      } else if (branchIsModified && !dependencyDashboardCheck) {
+        const closedPr = await findClosedPrForModifiedBranch(config);
+        if (!closedPr) {
+          return {
+            branchExists,
+            result: 'pr-edited',
+          };
+        }
       }
     }
 
@@ -524,9 +524,15 @@ export async function processBranch(
       }
       const forcedManually = userRebaseRequested || !branchExists;
 
-      config.isConflicted ??=
-        branchExists &&
-        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
+      if (config.isConflicted === undefined) {
+        config.isConflicted = false;
+        if (branchExists) {
+          config.isConflicted = await scm.isBranchConflicted(
+            config.baseBranch,
+            config.branchName,
+          );
+        }
+      }
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs

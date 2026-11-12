@@ -103,7 +103,14 @@ export interface BranchUpgradeConfig
   remediationNotPossible?: boolean;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
-  minimumReleaseAgeExtracted?: string;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
+  minimumReleaseAgeExtracted?: string | null;
+  /**
+   * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
+   *
+   * Package managers apply a minimum release age to every package they resolve, so Renovate passes them this value instead of a `minimumReleaseAge` from `packageRules`.
+   */
+  minimumReleaseAgeRepository?: string | null;
   sourceDirectory?: string;
   sourceRepoSlug?: string;
 
@@ -165,6 +172,7 @@ export type CacheFingerprintMatchResult =
 export interface BranchConfig
   extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
   automergeComment?: string;
+  automergeLabel?: string;
   automergedPreviously?: boolean;
   baseBranch: string;
   branchAutomergeFailureMessage?: string;

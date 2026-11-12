@@ -108,9 +108,10 @@ async function updateArtifactsImpl(
     packageFileName,
     'Cargo.lock',
   );
-  const existingLockFileContent = lockFileName
-    ? await readLocalFile(lockFileName, 'utf8')
-    : null;
+  let existingLockFileContent: string | null = null;
+  if (lockFileName) {
+    existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  }
   if (!existingLockFileContent || !lockFileName) {
     logger.debug('No Cargo.lock found');
     return null;

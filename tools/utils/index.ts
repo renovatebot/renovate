@@ -10,9 +10,10 @@ export const newFiles = new Set();
  * @returns {Promise<void>}
  */
 export async function updateFile(file: string, code: string): Promise<void> {
-  const oldCode = (await fs.pathExists(file))
-    ? await fs.readFile(file, 'utf8')
-    : null;
+  let oldCode: string | null = null;
+  if (await fs.pathExists(file)) {
+    oldCode = await fs.readFile(file, 'utf8');
+  }
   if (code !== oldCode) {
     if (!code) {
       logger.error({ file }, 'Missing content');
