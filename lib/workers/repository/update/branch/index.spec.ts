@@ -908,6 +908,30 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
+    it('does not warn about artifact errors in dry-run', async () => {
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [
+          partial<ArtifactError>({ fileName: 'package-lock.json' }),
+        ],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'no-work',
+      });
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Branch not created because artifact update failed',
+      );
+    });
+
     it('returns if pending checks', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
