@@ -3,6 +3,7 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'github-actions';
@@ -17,7 +18,7 @@ const floatingMinorTagRegex = regEx(/^\d+(?:\.\d+)?$/);
 const majorOnlyRegex = regEx(/^\d+$/);
 
 function massageValue(input: string): string {
-  return input.trim().replace(regEx(/^v/i), '');
+  return stripVersionPrefix(input.trim());
 }
 
 function parseVersion(input: string): SemVer | null {

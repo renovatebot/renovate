@@ -55,17 +55,17 @@ const minimumReleaseAgeDatasources: Partial<
 > = {
   crate: {
     description:
-      "Wait until the Crate version is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in crates, and b) reduces the risk of upgrading to a newly published crate that its owner deletes during crates.io's initial 72-hour deletion window.",
+      "Wait until the Crate version is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behavior in crates, and b) reduces the risk of upgrading to a newly published crate that its owner deletes during crates.io's initial 72-hour deletion window.",
     minimumReleaseAge: '3 days',
   },
   npm: {
     description:
-      'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
+      'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behavior in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
     minimumReleaseAge: '3 days',
   },
   pypi: {
     description:
-      'Wait until the Python package is three days old before raising the update. This introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages.',
+      'Wait until the Python package is three days old before raising the update. This introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behavior in packages.',
     minimumReleaseAge: '3 days',
   },
 };

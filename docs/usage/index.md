@@ -118,7 +118,7 @@ You can run Renovate as:
 - a [pre-built Open Source image on GitHub Container Registry](https://github.com/renovatebot/renovate/pkgs/container/renovate)
 - a [pre-built Open Source image on Docker Hub](https://hub.docker.com/r/renovate/renovate)
 
-Or you can use [the Mend Renovate App](https://github.com/marketplace/renovate) which is hosted by [Mend](https://www.mend.io/).
+Or you can use [the Mend Renovate app](https://github.com/marketplace/renovate) which is hosted by [Mend](https://www.mend.io/).
 
 [Install the Mend Renovate app for GitHub](https://github.com/marketplace/renovate){ .md-button .md-button--primary }
 [Check out our tutorial](https://github.com/renovatebot/tutorial){ .md-button }

@@ -1,4 +1,7 @@
-import semverPartial from './index.ts';
+import semverPartial, {
+  isPartialVersion,
+  parsePartialVersion,
+} from './index.ts';
 
 describe('modules/versioning/semver-partial/index', () => {
   describe('.isValid()', () => {
@@ -452,5 +455,23 @@ describe('modules/versioning/semver-partial/index', () => {
         ).toBe(expected);
       },
     );
+  });
+
+  describe('parsePartialVersion() and isPartialVersion()', () => {
+    it.each`
+      version      | expected
+      ${'21'}      | ${{ major: 21 }}
+      ${'v2'}      | ${{ major: 2 }}
+      ${'3.3'}     | ${{ major: 3, minor: 3 }}
+      ${'v2.0'}    | ${{ major: 2, minor: 0 }}
+      ${'3.3.6'}   | ${null}
+      ${'3.x'}     | ${null}
+      ${'~latest'} | ${null}
+      ${'3.'}      | ${null}
+      ${''}        | ${null}
+    `('$version', ({ version, expected }) => {
+      expect(parsePartialVersion(version)).toEqual(expected);
+      expect(isPartialVersion(version)).toBe(expected !== null);
+    });
   });
 });

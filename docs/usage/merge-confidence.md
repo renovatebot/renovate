@@ -6,7 +6,7 @@ Look at the Merge Confidence badges before merging to:
 - See at a glance if you should update
 
 Merge Confidence finds and flags undeclared breaking releases.
-It analyzes test and release adoption data from the Mend Renovate App users.
+It analyzes test and release adoption data from the Mend Renovate app users.
 
 ![Renovate PR with Merge Confidence badges](assets/images/merge-confidence.png)
 
@@ -41,9 +41,9 @@ We plan to support more languages soon.
 
 ## Enabling and disabling
 
-If you use the Mend Renovate App then the badges are enabled automatically.
+If you use the Mend Renovate app then the badges are enabled automatically.
 
-If you're self-hosting Renovate, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
+If you are self-hosting Renovate, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
 
 ```json
 {
@@ -54,7 +54,7 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 !!! note
   The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
 
-If you want to disable the badges in the Mend Renovate App, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
+If you want to disable the badges in the Mend Renovate app, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
 
 ```json
 {
@@ -66,14 +66,14 @@ If you want to disable the badges in the Mend Renovate App, add the `mergeConfid
 
 Merge Confidence uses the following confidence levels:
 
-- **Low**: We think the update contains breaking changes. Often this is expected because it's a `major` version update, but updates can have unknown breaking changes
-- **Neutral**: We don't have enough data about the update, or we can't decide if the update should be Low or High confidence
-- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there's a very low chance of breaking changes
+- **Low**: We think the update contains breaking changes. Often this is expected because it is a `major` version update, but updates can have unknown breaking changes
+- **Neutral**: We do not have enough data about the update, or we cannot decide if the update should be Low or High confidence
+- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there is a very low chance of breaking changes
 - **Very High**: We only use this for updates which are months old and have either high `Adoption` or have very high test `Passing` scores
 
 ## How it works
 
-The Mend Renovate App created millions of pull requests on `github.com` to help developers update their dependencies since 2017.
+The Mend Renovate app created millions of pull requests on `github.com` to help developers update their dependencies since 2017.
 We bundle and analyze metrics such as package `Age`, package `Adoption`, and `Passing` tests.
 This way we can find packages that have undeclared breaking changes.
 
@@ -102,7 +102,7 @@ This is why npm packages can only get the **High** Confidence badge when they ar
 ### Percentage values weighting
 
 The percentages for `Adoption` and `Passing` are weighted towards Organizations, private repositories, and projects with high test reliability.
-This means those values aren't _raw_ percentages.
+This means those values are not _raw_ percentages.
 
 ## Questions and feedback
 

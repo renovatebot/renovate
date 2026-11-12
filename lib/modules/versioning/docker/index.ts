@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
-import { coerceString } from '../../../util/string.ts';
+import { coerceString, stripVersionPrefix } from '../../../util/string.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { GenericVersion, VersioningApi } from '../types.ts';
 
@@ -22,7 +22,7 @@ class DockerVersioningApi extends GenericVersioningApi {
     if (commitHashPattern.test(version) && !numericPattern.test(version)) {
       return null;
     }
-    const versionPieces = version.replace(regEx(/^v/), '').split('-');
+    const versionPieces = stripVersionPrefix(version).split('-');
     const [prefix, ...suffixPieces] = versionPieces;
     const matchGroups = prefix?.match(versionPattern)?.groups;
     if (!matchGroups) {

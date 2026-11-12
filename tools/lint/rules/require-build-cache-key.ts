@@ -112,11 +112,9 @@ function getCacheKeyArgument(
  */
 function getFunctionNames(node: ESTree.Node): (string | undefined)[] {
   const names: (string | undefined)[] = [];
-  if (
-    (node.type === 'FunctionDeclaration' ||
-      node.type === 'FunctionExpression') &&
-    node.id
-  ) {
+  const isFunctionNode =
+    node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression';
+  if (isFunctionNode && node.id) {
     names.push(node.id.name);
   }
 
@@ -186,7 +184,7 @@ function getAssignmentTargetName(
  * argument of `packageCache.get()`, `packageCache.set()`,
  * `packageCache.setWithRawTtl()`, `memCache.get()` and `memCache.set()`, the
  * values returned from functions whose name ends in `cacheKey`, and the
- * initialisers of and values assigned to variables and class properties whose
+ * initializers of and values assigned to variables and class properties whose
  * name ends in `cacheKey` or is `memKey`.
  */
 export default defineRule({

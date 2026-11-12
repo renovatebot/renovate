@@ -1,5 +1,7 @@
 name: 'Label Actions'
 
+# NOTE that if adding any new events, these must be allowlisted via an Actions Policy due to its use of `pull_request_target`
+# https://github.com/renovatebot/renovate/settings/actions/rules/12707
 on:
   issues:
     types: [labeled]

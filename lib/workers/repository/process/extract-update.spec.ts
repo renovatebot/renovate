@@ -816,6 +816,68 @@ describe('workers/repository/process/extract-update', () => {
       });
     });
 
+    describe('packageRules of package files', () => {
+      let cache: { scan: Record<string, BaseBranchCache> };
+
+      beforeEach(() => {
+        cache = { scan: {} };
+        repositoryCache.getCache.mockReturnValue(cache);
+        scm.getBranchCommit.mockResolvedValue(branchSha);
+        scm.checkoutBranch.mockResolvedValue(branchSha);
+      });
+
+      function createPackageFiles(): Record<string, PackageFile[]> {
+        return {
+          poetry: [
+            {
+              packageFile: 'pyproject.toml',
+              packageRules: [
+                {
+                  matchDatasources: ['pypi'],
+                  minimumReleaseAgeExtracted: '3 days',
+                },
+              ],
+              deps: [],
+            },
+            { packageFile: 'other/pyproject.toml', deps: [] },
+          ],
+          pep621: [{ packageFile: 'pyproject.toml', deps: [] }],
+        };
+      }
+
+      it('are dropped without minimumReleaseAgePackageManagerSync, but cached', async () => {
+        const config = { repoIsOnboarded: true, baseBranch: 'master' };
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: createPackageFiles(),
+          extractionFingerprints: {},
+        });
+
+        const res = await extract(config);
+
+        expect(res.poetry[0]).not.toHaveProperty('packageRules');
+        expect(cache.scan.master.packageFiles).toEqual(createPackageFiles());
+      });
+
+      it('are kept from the cache with minimumReleaseAgePackageManagerSync in the manager config', async () => {
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+          poetry: { minimumReleaseAgePackageManagerSync: true },
+        };
+        cache.scan.master = {
+          revision: EXTRACT_CACHE_REVISION,
+          sha: branchSha,
+          configHash: fingerprint(generateFingerprintConfig(config)),
+          extractionFingerprints: {},
+          packageFiles: createPackageFiles(),
+        };
+
+        const res = await extract(config);
+
+        expect(res).toEqual(createPackageFiles());
+      });
+    });
+
     describe('npmrc', () => {
       const configNpmrc = '//registry.npmjs.org/:_authToken=secret';
       const repoNpmrc = {
@@ -1087,7 +1149,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     describe('malicious package detection', () => {
-      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behaviour
+      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behavior
       describe('when using mocks', () => {
         it('skips malicious package updates', async () => {
           const packageFiles: Record<string, PackageFile[]> = {

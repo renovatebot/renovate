@@ -256,18 +256,22 @@ export async function lookupUpdates(
           });
           return Result.ok(res);
         }
-        allVersions = allVersions.filter(
-          (v) =>
-            v.version === taggedVersion ||
-            (v.version === compareValue &&
-              versioningApi.isGreaterThan(taggedVersion, compareValue)),
-        );
+        allVersions = allVersions.filter((v) => {
+          if (v.version === taggedVersion) {
+            return true;
+          }
+          return (
+            v.version === compareValue &&
+            versioningApi.isGreaterThan(taggedVersion, compareValue)
+          );
+        });
       }
 
       const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
       // Check that existing constraint can be satisfied
+      const restrictsToRange = inRangeOnlyStrategy || config.rollbackPrs;
       const allSatisfyingVersions =
-        (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
+        restrictsToRange && !unconstrainedValue
           ? allVersions.filter((v) =>
               // TODO #22198
               versioningApi.matches(v.version, compareValue!),

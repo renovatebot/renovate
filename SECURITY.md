@@ -25,6 +25,6 @@ If there is a timeline you are working towards for intended publishing, please l
 
 In the past the Renovate project did not request a CVE ID for security advisories.
 
-This was because we felt that GHSA IDs are more than sufficient for the ecosystem's ability to reason about security advisories, and requesting a CVE ID on top of this generally doesn't add any additional benefit.
+This was because we felt that GHSA IDs are more than sufficient for the ecosystem's ability to reason about security advisories, and requesting a CVE ID on top of this generally does not add any additional benefit.
 
 _However_ we will request a CVE ID for all future published advisories, at the time of publishing.

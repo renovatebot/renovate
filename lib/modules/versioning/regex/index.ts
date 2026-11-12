@@ -100,10 +100,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   override isSingleVersion(input: string): boolean {
     const range = parseRange(input, (v) => this.isVersion(v));
     if (range) {
-      return (
-        range.length === 1 &&
-        (range[0].operator === '=' || range[0].operator === '==')
-      );
+      return range.length === 1 && ['=', '=='].includes(range[0].operator);
     }
     return this.isVersion(input);
   }

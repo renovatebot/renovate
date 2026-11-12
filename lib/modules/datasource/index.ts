@@ -19,6 +19,11 @@ import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { detachUrlCredentials } from '../../util/host-rules.ts';
+import {
+  isForbidden,
+  isNotFound,
+  isUnauthorized,
+} from '../../util/http/status.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
 import { DatasourceCacheStats } from '../../util/stats.ts';
 import { safeStringify } from '../../util/stringify.ts';
@@ -88,10 +93,10 @@ function toGetReleasesConfig(
 
 // TODO: fix error Type
 function logError(datasource: string, packageName: string, err: any): void {
-  const { statusCode, code: errCode, url } = err;
-  if (statusCode === 404) {
+  const { code: errCode, url } = err;
+  if (isNotFound(err)) {
     logger.debug({ datasource, packageName, url }, 'Datasource 404');
-  } else if (statusCode === 401 || statusCode === 403) {
+  } else if (isUnauthorized(err) || isForbidden(err)) {
     logger.debug({ datasource, packageName, url }, 'Datasource unauthorized');
   } else if (errCode) {
     logger.debug(

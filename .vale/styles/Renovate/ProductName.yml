@@ -1,0 +1,10 @@
+extends: existence
+message: "Write 'Renovate' as the product name, not '%s'."
+link: https://docs.renovatebot.com/development/style-guide/#use-the-name-renovate
+level: error
+ignorecase: false
+nonword: true
+tokens:
+  - '\bRenovate Bot\b'
+  - '\bRenovateBot\b'
+  - '\bRenovatebot\b'

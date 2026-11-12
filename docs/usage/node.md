@@ -6,7 +6,7 @@ description: Node.js versions support in Renovate
 # Node.js Versions
 
 Renovate can upgrade the [Node.js](https://nodejs.org/en/) runtime used by your project.
-This way you're using the latest bug fixes, performance improvements, security mitigations, etc.
+This way you are using the latest bug fixes, performance improvements, security mitigations, etc.
 
 ## LTS codenames
 
@@ -34,7 +34,7 @@ Renovate can manage the package manager version in the following fields in [`pac
 
 ## Configuring which version of npm Renovate uses
 
-When `binarySource=install`, such as in the Mend Renovate App, Renovate will choose and install an `npm` version dynamically.
+When `binarySource=install`, such as in the Mend Renovate app, Renovate will choose and install an `npm` version dynamically.
 
 To control which version or constraint is installed, you should use the `engines.npm` property in your `package.json` file.
 Renovate will then use that version constraint for npm when it creates a pull request.
