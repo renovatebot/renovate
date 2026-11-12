@@ -588,6 +588,7 @@ export async function processBranch(
           await platform.reattemptPlatformAutomerge({
             number: branchPr.number,
             platformPrOptions,
+            sha: commitSha,
           });
         }
       }

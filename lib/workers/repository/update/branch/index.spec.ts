@@ -4079,5 +4079,30 @@ describe('workers/repository/update/branch/index', () => {
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );
     });
+
+    it('reattempts platform automerge with the pushed commit', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 123,
+          state: 'open',
+        }),
+      );
+
+      await branchWorker.processBranch(config);
+
+      expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledWith({
+        number: 123,
+        platformPrOptions: { usePlatformAutomerge: true },
+        sha: commitSha,
+      });
+    });
   });
 });
