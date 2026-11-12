@@ -56,10 +56,11 @@ Renovate can update the version attribute of `helm_release` resources. This appl
 | Name             | Public hosting | Private hosting |
 | ---------------- | :------------: | :-------------: |
 | chart repository |      yes       |       yes       |
+| OCI registry     |      yes       |       yes       |
 
 #### Docker
 
-Renovate can update image references of the Docker provider resources (`docker\_\*`).
+Renovate can update image references of the Docker provider resources and data sources (`docker_*`).
 
 | Name            | Public hosting | Private hosting |
 | --------------- | :------------: | :-------------: |
@@ -67,7 +68,15 @@ Renovate can update image references of the Docker provider resources (`docker\_
 
 #### Kubernetes
 
-Renovate can update image references of Kubernetes provider resources (`kubernetes\_\*`).
+Renovate can update image references of Kubernetes provider resources (`kubernetes_*`).
+
+| Name            | Public hosting | Private hosting |
+| --------------- | :------------: | :-------------: |
+| Docker registry |      yes       |       yes       |
+
+#### Google
+
+Renovate can update image references of Google provider resources (`google_*`).
 
 | Name            | Public hosting | Private hosting |
 | --------------- | :------------: | :-------------: |
@@ -94,31 +103,49 @@ Renovate understands these Terraform range constraints:
 
 You can use these `depTypes` for fine-grained control, for example to disable parts of the Terraform manager.
 
-| Resource                             |               `depType`                |                                   Notes                                    |
-| ------------------------------------ | :------------------------------------: | :------------------------------------------------------------------------: |
-| Terraform provider                   |               `provider`               |                                                                            |
-| required Terraform provider          |          `required_provider`           |                                                                            |
-| required Terraform version           |           `required_version`           |          This handles the `required_version` in terraform blocks           |
-| TFE workspace                        |            `tfe_workspace`             | This handles the `terraform_version` argument in `tfe_workspace` resources |
-| Terraform module                     |                `module`                |                                                                            |
-| Helm release                         |             `helm_release`             |                                                                            |
-| Docker container                     |           `docker_container`           |                                                                            |
-| Docker image                         |             `docker_image`             |                                                                            |
-| Docker service                       |            `docker_service`            |                                                                            |
-| Kubernetes CronJob                   |         `kubernetes_cron_job`          |                                                                            |
-| Kubernetes CronJob v1                |        `kubernetes_cron_job_v1`        |                                                                            |
-| Kubernetes DaemonSet                 |        `kubernetes_daemon_set`         |                                                                            |
-| Kubernetes DaemonSet v1              |       `kubernetes_daemon_set_v1`       |                                                                            |
-| Kubernetes Deployment                |        `kubernetes_deployment`         |                                                                            |
-| Kubernetes Deployment v1             |       `kubernetes_deployment_v1`       |                                                                            |
-| Kubernetes Job                       |            `kubernetes_job`            |                                                                            |
-| Kubernetes Job v1                    |          `kubernetes_job_v1`           |                                                                            |
-| Kubernetes Pod                       |            `kubernetes_pod`            |                                                                            |
-| Kubernetes Pod v1                    |          `kubernetes_pod_v1`           |                                                                            |
-| Kubernetes Replication Controller    |  `kubernetes_replication_controller`   |                                                                            |
-| Kubernetes Replication Controller v1 | `kubernetes_replication_controller_v1` |                                                                            |
-| Kubernetes StatefulSet               |       `kubernetes_stateful_set`        |                                                                            |
-| Kubernetes StatefulSet v1            |      `kubernetes_stateful_set_v1`      |                                                                            |
+| Resource                                 |                        `depType`                         |                                   Notes                                    |
+| ---------------------------------------- | :------------------------------------------------------: | :------------------------------------------------------------------------: |
+| Terraform provider                       |                        `provider`                        |                                                                            |
+| required Terraform provider              |                   `required_provider`                    |                                                                            |
+| required Terraform version               |                    `required_version`                    |          This handles the `required_version` in terraform blocks           |
+| TFE workspace                            |                     `tfe_workspace`                      | This handles the `terraform_version` argument in `tfe_workspace` resources |
+| Terraform module                         |                         `module`                         |                                                                            |
+| Helm release                             |                      `helm_release`                      |                                                                            |
+| Docker container                         |                    `docker_container`                    |                                                                            |
+| Docker image                             |                      `docker_image`                      |                                                                            |
+| Docker service                           |                     `docker_service`                     |                                                                            |
+| Kubernetes CronJob                       |                  `kubernetes_cron_job`                   |                                                                            |
+| Kubernetes CronJob v1                    |                 `kubernetes_cron_job_v1`                 |                                                                            |
+| Kubernetes DaemonSet                     |                  `kubernetes_daemonset`                  |                                                                            |
+| Kubernetes DaemonSet v1                  |                `kubernetes_daemon_set_v1`                |                                                                            |
+| Kubernetes Deployment                    |                 `kubernetes_deployment`                  |                                                                            |
+| Kubernetes Deployment v1                 |                `kubernetes_deployment_v1`                |                                                                            |
+| Kubernetes Job                           |                     `kubernetes_job`                     |                                                                            |
+| Kubernetes Job v1                        |                   `kubernetes_job_v1`                    |                                                                            |
+| Kubernetes Pod                           |                     `kubernetes_pod`                     |                                                                            |
+| Kubernetes Pod v1                        |                   `kubernetes_pod_v1`                    |                                                                            |
+| Kubernetes Replication Controller        |           `kubernetes_replication_controller`            |                                                                            |
+| Kubernetes Replication Controller v1     |          `kubernetes_replication_controller_v1`          |                                                                            |
+| Kubernetes StatefulSet                   |                `kubernetes_stateful_set`                 |                                                                            |
+| Kubernetes StatefulSet v1                |               `kubernetes_stateful_set_v1`               |                                                                            |
+| Google Cloud Run service                 |                `google_cloud_run_service`                |                                                                            |
+| Google Cloud Run v2 service              |              `google_cloud_run_v2_service`               |                                                                            |
+| Google Cloud Run v2 worker pool          |            `google_cloud_run_v2_worker_pool`             |                                                                            |
+| Google Cloud Run v2 job                  |                `google_cloud_run_v2_job`                 |                                                                            |
+| Google App Engine flexible app version   |         `google_app_engine_flexible_app_version`         |                                                                            |
+| Google Workstations workstation config   |         `google_workstations_workstation_config`         |                                                                            |
+| Google Dataproc batch                    |                 `google_dataproc_batch`                  |                                                                            |
+| Google Dataproc session template         |            `google_dataproc_session_template`            |                                                                            |
+| Google Dataplex task                     |                  `google_dataplex_task`                  |                                                                            |
+| Google Vertex AI reasoning engine        |           `google_vertex_ai_reasoning_engine`            |                                                                            |
+| Google Vertex AI Model Garden deployment | `google_vertex_ai_endpoint_with_model_garden_deployment` |                                                                            |
+| Google Firebase App Hosting build        |           `google_firebase_app_hosting_build`            |                                                                            |
+| Google BigQuery routine                  |                `google_bigquery_routine`                 |                                                                            |
+| Google Cloud Build trigger               |               `google_cloudbuild_trigger`                |                                                                            |
+| Google Network Services Wasm plugin      |          `google_network_services_wasm_plugin`           |                                                                            |
+| Google Dataproc GDC Spark application    |         `google_dataproc_gdc_spark_application`          |                                                                            |
+| Google Cloud Deploy custom target type   |         `google_clouddeploy_custom_target_type`          |                                                                            |
+| Google Cloud Deploy delivery pipeline    |          `google_clouddeploy_delivery_pipeline`          |                                                                            |
 
 | Data Source           |        `depType`        | Notes |
 | --------------------- | :---------------------: | :---: |
