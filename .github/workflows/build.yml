@@ -377,7 +377,7 @@ jobs:
           sparse-checkout: .github/
 
       - name: Check workflow files
-        uses: jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d # v2.5.0
+        uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
         with:
           args: --color --profile correctness
 
