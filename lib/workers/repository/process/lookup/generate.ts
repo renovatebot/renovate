@@ -9,6 +9,36 @@ import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index
 import type { LookupUpdateConfig } from './types.ts';
 import { classifyRelease } from './update-type.ts';
 
+function getBumpedValue(
+  versioningApi: VersioningApi,
+  currentValue: string,
+  currentVersion: string,
+  newVersion: string,
+  allVersions: Set<string>,
+): string | null {
+  try {
+    if (versioningApi.matches(newVersion, currentValue)) {
+      return null;
+    }
+    const bumpedValue = versioningApi.getNewValue({
+      currentValue,
+      rangeStrategy: 'bump',
+      currentVersion,
+      newVersion,
+      allVersions,
+    });
+    if (bumpedValue && versioningApi.matches(newVersion, bumpedValue)) {
+      return bumpedValue;
+    }
+  } catch (err) {
+    logger.debug(
+      { err, currentValue, currentVersion, newVersion },
+      'Could not bump the range for a vulnerability fix',
+    );
+  }
+  return null;
+}
+
 export async function generateUpdate(
   config: LookupUpdateConfig,
   currentValue: string | undefined,
@@ -61,6 +91,21 @@ export async function generateUpdate(
           newVersion,
           allVersions,
         })!;
+        if (
+          config.isVulnerabilityAlert &&
+          rangeStrategy === 'update-lockfile'
+        ) {
+          const bumpedValue = getBumpedValue(
+            versioningApi,
+            currentValue,
+            currentVersion,
+            newVersion,
+            allVersions,
+          );
+          if (bumpedValue) {
+            update.newValue = bumpedValue;
+          }
+        }
       }
     } catch (err) {
       logger.warn(
