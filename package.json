@@ -238,6 +238,7 @@
     "ms": "2.1.3",
     "neotraverse": "1.0.1",
     "node-html-parser": "9.0.6",
+    "oci-common": "2.144.0",
     "p-all": "5.0.1",
     "p-map": "7.1.1",
     "p-queue": "9.3.5",
