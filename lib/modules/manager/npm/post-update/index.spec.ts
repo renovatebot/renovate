@@ -713,6 +713,40 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it('adds a changeset with the changesets option', async () => {
+      fs.readLocalFile.mockImplementation((f) =>
+        Promise.resolve(f === '.changeset/config.json' ? '{}' : null),
+      );
+      git.getFile.mockImplementation((f) =>
+        Promise.resolve(
+          f === 'packages/core/package.json'
+            ? '{"name":"core","dependencies":{"postcss":"^7.0.0"}}'
+            : null,
+        ),
+      );
+
+      const result = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          postUpdateOptions: ['changesets'],
+          updatedPackageFiles: [
+            {
+              type: 'addition',
+              path: 'packages/core/package.json',
+              contents: '{"name":"core","dependencies":{"postcss":"^8.0.0"}}',
+            },
+          ],
+        },
+        additionalFiles,
+      );
+
+      expect(result.updatedArtifacts).toContainEqual({
+        type: 'addition',
+        path: expect.stringMatching(/^\.changeset\/renovate-\w+\.md$/),
+        contents: expect.stringContaining('"core": patch'),
+      });
+    });
+
     it('works for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       fs.readLocalFile.mockImplementation((f): Promise<string> => {
