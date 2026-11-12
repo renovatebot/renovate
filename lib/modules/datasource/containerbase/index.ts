@@ -1,4 +1,5 @@
 import {
+  type Arch,
   isContainerbase,
   minCbByVersion,
   toolVersionsFormat,
@@ -47,6 +48,46 @@ function toConstraints(
     result.containerbase = [semver.valid(minCb) ? `>=${minCb}` : '<0.0.0-0'];
   }
   return Object.keys(result).length ? result : undefined;
+}
+
+/** A package name split into the containerbase tool and the arch to filter by. */
+interface ToolPackage {
+  tool: string;
+  arch: Arch | undefined;
+}
+
+/** The containerbase arch of the host, or `undefined` for other archs. */
+function getSystemArch(): Arch | undefined {
+  switch (process.arch) {
+    case 'x64':
+      return 'amd64';
+    case 'arm64':
+      return 'arm64';
+    default:
+      logger.debug(
+        { arch: process.arch },
+        'Unknown system architecture for containerbase, not filtering by arch',
+      );
+      return undefined;
+  }
+}
+
+/**
+ * Parses a package name like `java?architecture=arm64` or `java?system=true`,
+ * where `system=true` uses the arch of the host. Without either, or with an
+ * unknown arch, releases aren't filtered by arch.
+ */
+function parsePackageName(packageName: string): ToolPackage {
+  const [tool, query = ''] = packageName.split('?', 2);
+  const params = new URLSearchParams(query);
+  const architecture = params.get('architecture');
+  if (architecture === 'amd64' || architecture === 'arm64') {
+    return { tool, arch: architecture };
+  }
+  if (architecture === null && params.get('system') === 'true') {
+    return { tool, arch: getSystemArch() };
+  }
+  return { tool, arch: undefined };
 }
 
 /**
@@ -137,12 +178,12 @@ export class ContainerbaseDatasource extends Datasource {
    * Renovate doesn't run on Containerbase or the file is missing or invalid.
    */
   private async readEmbedded(
-    packageName: string,
+    tool: string,
   ): Promise<ContainerbaseToolVersions | null> {
     if (!isContainerbase()) {
       return null;
     }
-    const file = `${toolVersionsPath}/${toolVersionsFormatPath}/${packageName}.json`;
+    const file = `${toolVersionsPath}/${toolVersionsFormatPath}/${tool}.json`;
     try {
       const content = await readSystemFile(file, 'utf8');
       return Json.pipe(ContainerbaseToolVersions).parse(content);
@@ -158,18 +199,23 @@ export class ContainerbaseDatasource extends Datasource {
   /**
    * Converts a tool file to the release result, or `null` without versions.
    * Versions which need a newer containerbase get a `containerbase` constraint,
-   * and the upstream `latest` version becomes the `latest` tag.
+   * and the upstream `latest` version becomes the `latest` tag. With an `arch`,
+   * versions whose files are for other archs only are dropped.
    */
   private toReleaseResult(
     body: ContainerbaseToolVersions,
     registryUrl: string | undefined,
+    arch: Arch | undefined,
   ): ReleaseResult | null {
     const minCb = minCbByVersion(body);
+    const versions = arch
+      ? body.versions.filter(({ archs }) => !archs || archs.includes(arch))
+      : body.versions;
     const result: ReleaseResult = {
       registryUrl,
       sourceUrl: body.sourceUrl,
       homepage: body.homepage,
-      releases: body.versions.map(
+      releases: versions.map(
         ({ version, prerelease, releaseTimestamp, constraints }) => {
           const release: Release = {
             version,
@@ -194,10 +240,10 @@ export class ContainerbaseDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  private async fetchReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async fetchReleases(
+    { tool, arch }: ToolPackage,
+    registryUrl: string | undefined,
+  ): Promise<ReleaseResult | null> {
     /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
@@ -207,21 +253,18 @@ export class ContainerbaseDatasource extends Datasource {
     const [, body] = await Promise.all([
       this.checkFormat(registryUrl),
       this.fetchJsonOrNull(
-        joinUrlParts(
-          registryUrl,
-          toolVersionsFormatPath,
-          `${packageName}.json`,
-        ),
+        joinUrlParts(registryUrl, toolVersionsFormatPath, `${tool}.json`),
         ContainerbaseToolVersions,
       ),
     ]);
-    return body ? this.toReleaseResult(body, registryUrl) : null;
+    return body ? this.toReleaseResult(body, registryUrl, arch) : null;
   }
 
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName, registryUrl } = config;
+    const toolPackage = parsePackageName(packageName);
     // the package name is a containerbase tool, nothing else is published
-    if (!isToolName(packageName)) {
+    if (!isToolName(toolPackage.tool)) {
       logger.warn(
         { datasource: this.id, packageName },
         'Unknown containerbase tool',
@@ -230,13 +273,14 @@ export class ContainerbaseDatasource extends Datasource {
     }
 
     try {
+      // keyed by the resolved arch, `system=true` differs between hosts
       return await this.cached(
         {
-          key: buildCacheKey(registryUrl, packageName),
+          key: buildCacheKey(registryUrl, toolPackage.tool, toolPackage.arch),
           public: true,
           fallback: true,
         },
-        () => this.fetchReleases(config),
+        () => this.fetchReleases(toolPackage, registryUrl),
       );
     } catch (err) {
       // only when the site can't be reached and there is no cached result,
@@ -244,7 +288,7 @@ export class ContainerbaseDatasource extends Datasource {
       if (!isUnreachable(err)) {
         throw err;
       }
-      const embedded = await this.readEmbedded(packageName);
+      const embedded = await this.readEmbedded(toolPackage.tool);
       if (!embedded) {
         throw err;
       }
@@ -257,7 +301,7 @@ export class ContainerbaseDatasource extends Datasource {
         { err, datasource: this.id, packageName, registryUrl },
         'Using the tool-versions data embedded in the containerbase image',
       );
-      return this.toReleaseResult(embedded, registryUrl);
+      return this.toReleaseResult(embedded, registryUrl, toolPackage.arch);
     }
   }
 }
