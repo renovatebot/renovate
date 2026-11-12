@@ -701,5 +701,1397 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the docker-compose plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-compose#v4.16.0:
+                run-image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v4.16.0',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image from docker-compose when run-image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-compose#v4.16.0:
+                run: app
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v4.16.0',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it("does not extract the docker-cache image, since it is the plugin's own build output", () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-cache#v1.6.0:
+                image: "myorg/myapp"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.6.0',
+          datasource: 'github-tags',
+          depName: 'docker-cache',
+          packageName: 'buildkite-plugins/docker-cache-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the image embedded in the jameslnewell/docker-run plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              jameslnewell/docker-run#v1.2.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.2.0',
+          datasource: 'github-tags',
+          depName: 'jameslnewell/docker-run',
+          packageName: 'jameslnewell/docker-run-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('recognises a known third-party plugin referenced via a git URL', () => {
+      const fileContent = codeBlock`
+        steps:
+          - ssh://git@github.com/jameslnewell/docker-run-buildkite-plugin#v1.2.0:
+              image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.2.0',
+          datasource: 'github-tags',
+          depName: 'jameslnewell/docker-run-buildkite-plugin',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts the image embedded in the oasislabs/docker plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              oasislabs/docker#v3.0.1:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.0.1',
+          datasource: 'github-tags',
+          depName: 'oasislabs/docker',
+          packageName: 'oasislabs/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts the image embedded in the improbable-eng/docker-service plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              improbable-eng/docker-service#v2.1.0:
+                container: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'improbable-eng/docker-service',
+          packageName: 'improbable-eng/docker-service-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts the image embedded in the equinixmetal-buildkite/kind-cluster plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              equinixmetal-buildkite/kind-cluster#v1.0.0:
+                custom_image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'equinixmetal-buildkite/kind-cluster',
+          packageName: 'equinixmetal-buildkite/kind-cluster-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image from kind-cluster when custom_image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              equinixmetal-buildkite/kind-cluster#v1.0.0:
+                k8s_version: "1.29"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'equinixmetal-buildkite/kind-cluster',
+          packageName: 'equinixmetal-buildkite/kind-cluster-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the image embedded in the joscha/codecov plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              joscha/codecov#v1.0.0:
+                docker_image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'joscha/codecov',
+          packageName: 'joscha/codecov-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image for joscha/codecov when docker_image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              joscha/codecov#v1.0.0:
+                token: xyz
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'joscha/codecov',
+          packageName: 'joscha/codecov-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts an explicit image for golangci-lint', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golangci-lint#v1.0.0:
+                docker_image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golangci-lint',
+          packageName: 'buildkite-plugins/golangci-lint-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image for golangci-lint when docker_image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golangci-lint#v1.0.0:
+                version: v1.55.2
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golangci-lint',
+          packageName: 'buildkite-plugins/golangci-lint-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image for golangci-lint when use_docker is false', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golangci-lint#v1.0.0:
+                docker_image: "myorg/myapp:1.2.3"
+                use_docker: false
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golangci-lint',
+          packageName: 'buildkite-plugins/golangci-lint-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts an explicit ruby-image for junit-annotate', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              junit-annotate#v2.7.0:
+                ruby-image: "ruby:3.2-alpine"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.7.0',
+          datasource: 'github-tags',
+          depName: 'junit-annotate',
+          packageName: 'buildkite-plugins/junit-annotate-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '3.2-alpine',
+          datasource: 'docker',
+          depName: 'ruby',
+          packageName: 'ruby',
+          depType: 'docker',
+          replaceString: 'ruby:3.2-alpine',
+        },
+      ]);
+    });
+
+    it('does not extract an image for junit-annotate when ruby-image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              junit-annotate#v2.7.0:
+                artifacts: "junit-*.xml"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.7.0',
+          datasource: 'github-tags',
+          depName: 'junit-annotate',
+          packageName: 'buildkite-plugins/junit-annotate-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image for junit-annotate when run-in-docker is false', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              junit-annotate#v2.7.0:
+                ruby-image: "ruby:3.2-alpine"
+                run-in-docker: false
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.7.0',
+          datasource: 'github-tags',
+          depName: 'junit-annotate',
+          packageName: 'buildkite-plugins/junit-annotate-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image for shellcheck when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                files: ["*.sh"]
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the default shellcheck image name when only version is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                version: "stable"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+        {
+          currentValue: 'stable',
+          datasource: 'docker',
+          depName: 'koalaman/shellcheck',
+          packageName: 'koalaman/shellcheck',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('extracts an explicit image and version for shellcheck', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                image: "myorg/shellcheck"
+                version: "v0.9.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+        {
+          currentValue: 'v0.9.0',
+          datasource: 'docker',
+          depName: 'myorg/shellcheck',
+          packageName: 'myorg/shellcheck',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('treats an already-tagged shellcheck image as complete, ignoring version', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                image: "myorg/shellcheck:v0.8.0"
+                version: "v0.9.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.8.0',
+          datasource: 'docker',
+          depName: 'myorg/shellcheck',
+          packageName: 'myorg/shellcheck',
+          depType: 'docker',
+          replaceString: 'myorg/shellcheck:v0.8.0',
+        },
+      ]);
+    });
+
+    it('does not extract an image for shellcheck when its config is not an object', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract the docker-image-push image, since it is a local image being pushed, not a dependency', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-image-push#v2.8.0:
+                image: "myorg/myapp"
+                tag: "1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.8.0',
+          datasource: 'github-tags',
+          depName: 'docker-image-push',
+          packageName: 'buildkite-plugins/docker-image-push-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the image for grapl-security/codecov when image and tag are set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/codecov#v1.0.0:
+                image: "myorg/myapp"
+                tag: "1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/codecov',
+          packageName: 'grapl-security/codecov-buildkite-plugin',
+        },
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for grapl-security/codecov when tag is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/codecov#v1.0.0:
+                image: "myorg/myapp"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/codecov',
+          packageName: 'grapl-security/codecov-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the default image for grapl-security/vault-login when only tag is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/vault-login#v1.0.0:
+                tag: "1.10.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/vault-login',
+          packageName: 'grapl-security/vault-login-buildkite-plugin',
+        },
+        {
+          currentValue: '1.10.0',
+          datasource: 'docker',
+          depName: 'hashicorp/vault',
+          packageName: 'hashicorp/vault',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for grapl-security/vault-login when tag is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/vault-login#v1.0.0:
+                role: deploy
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/vault-login',
+          packageName: 'grapl-security/vault-login-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the default image for grapl-security/vault-env when only tag is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/vault-env#v1.0.0:
+                tag: "1.10.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/vault-env',
+          packageName: 'grapl-security/vault-env-buildkite-plugin',
+        },
+        {
+          currentValue: '1.10.0',
+          datasource: 'docker',
+          depName: 'hashicorp/envconsul',
+          packageName: 'hashicorp/envconsul',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('extracts the golang image from the golang plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang#v1.0.0:
+                version: "1.21"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang',
+          packageName: 'buildkite-plugins/golang-buildkite-plugin',
+        },
+        {
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for golang when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang#v1.0.0:
+                flags: "-v"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang',
+          packageName: 'buildkite-plugins/golang-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the ossf/scorecard image from the ossf-scorecard plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ossf-scorecard#v1.0.0:
+                version: "v5.4.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'ossf-scorecard',
+          packageName: 'buildkite-plugins/ossf-scorecard-buildkite-plugin',
+        },
+        {
+          currentValue: 'v5.4.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard',
+          packageName: 'ghcr.io/ossf/scorecard',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for ossf-scorecard when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ossf-scorecard#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'ossf-scorecard',
+          packageName: 'buildkite-plugins/ossf-scorecard-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image for plugin-linter when image-version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-linter#v3.3.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'plugin-linter',
+          packageName: 'buildkite-plugins/plugin-linter-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the buildkite/plugin-linter image when image-version is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-linter#v3.3.0:
+                image-version: "v2.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'plugin-linter',
+          packageName: 'buildkite-plugins/plugin-linter-buildkite-plugin',
+        },
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'docker',
+          depName: 'buildkite/plugin-linter',
+          packageName: 'buildkite/plugin-linter',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for plugin-tester when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-tester#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'plugin-tester',
+          packageName: 'buildkite-plugins/plugin-tester-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the buildkite/plugin-tester image when version is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-tester#v1.0.0:
+                version: "v4.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'plugin-tester',
+          packageName: 'buildkite-plugins/plugin-tester-buildkite-plugin',
+        },
+        {
+          currentValue: 'v4.0.0',
+          datasource: 'docker',
+          depName: 'buildkite/plugin-tester',
+          packageName: 'buildkite/plugin-tester',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('extracts the markdownlint image from the johnsyweb/markdownlint plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              johnsyweb/markdownlint#v2.1.0:
+                version: "0.37.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'johnsyweb/markdownlint',
+          packageName: 'johnsyweb/markdownlint-buildkite-plugin',
+        },
+        {
+          currentValue: '0.37.0',
+          datasource: 'docker',
+          depName: 'markdownlint/markdownlint',
+          packageName: 'markdownlint/markdownlint',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('extracts a golang image per target with a version, skipping targets without one', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang-cross-compile#v1.0.0:
+                targets:
+                  - version: "1.21"
+                    goos: linux
+                  - goos: darwin
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang-cross-compile',
+          packageName:
+            'buildkite-plugins/golang-cross-compile-buildkite-plugin',
+        },
+        {
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not let one non-string target version drop the other targets', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang-cross-compile#v1.0.0:
+                targets:
+                  - version: 1.20
+                    goos: linux
+                  - version: "1.21"
+                    goos: darwin
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang-cross-compile',
+          packageName:
+            'buildkite-plugins/golang-cross-compile-buildkite-plugin',
+        },
+        {
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image from golang-cross-compile when targets is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang-cross-compile#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang-cross-compile',
+          packageName:
+            'buildkite-plugins/golang-cross-compile-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts a single image from the ecs-deploy plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ecs-deploy#v3.3.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'ecs-deploy',
+          packageName: 'buildkite-plugins/ecs-deploy-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts one image per entry when ecs-deploy image is an array', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ecs-deploy#v3.3.0:
+                image:
+                  - "myorg/app-one:1.0.0"
+                  - "myorg/app-two:2.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'ecs-deploy',
+          packageName: 'buildkite-plugins/ecs-deploy-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'myorg/app-one',
+          packageName: 'myorg/app-one',
+          depType: 'docker',
+          replaceString: 'myorg/app-one:1.0.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '2.0.0',
+          datasource: 'docker',
+          depName: 'myorg/app-two',
+          packageName: 'myorg/app-two',
+          depType: 'docker',
+          replaceString: 'myorg/app-two:2.0.0',
+        },
+      ]);
+    });
+
+    it('does not extract an image for ecs-deploy when image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ecs-deploy#v3.3.0:
+                cluster: my-cluster
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'ecs-deploy',
+          packageName: 'buildkite-plugins/ecs-deploy-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the image-uri for aws-lambda-deploy when package-type is Image', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              aws-lambda-deploy#v2.1.0:
+                package-type: Image
+                image-uri: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'aws-lambda-deploy',
+          packageName: 'buildkite-plugins/aws-lambda-deploy-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract image-uri for aws-lambda-deploy when package-type defaults to Zip', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              aws-lambda-deploy#v2.1.0:
+                function-name: my-function
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'aws-lambda-deploy',
+          packageName: 'buildkite-plugins/aws-lambda-deploy-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the image for affirm/docker, without a chown image by default', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract a chown image for affirm/docker when chown-image is absent, even if chown is true', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+                chown: true
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract a chown image for affirm/docker when mount-checkout is false, even if chown is true', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+                chown: true
+                chown-image: "myorg/chowner:1.0.0"
+                mount-checkout: false
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts an explicit chown image for affirm/docker', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+                chown: true
+                chown-image: "myorg/chowner:1.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'myorg/chowner',
+          packageName: 'myorg/chowner',
+          depType: 'docker',
+          replaceString: 'myorg/chowner:1.0.0',
+        },
+      ]);
+    });
+
+    it('does not extract any image for affirm/docker when its config is not an object', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts a string-form image from the forumone/extract plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts an object-form image with repository and tag from forumone/extract', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                image:
+                  repository: "myorg/myapp"
+                  tag: "1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image from forumone/extract object form without a tag', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                image:
+                  repository: "myorg/myapp"
+                  service: "web"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image from forumone/extract when image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                from: "/src"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract the wiz scan-target image, since it is disabled', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              wiz#v1.0.0:
+                image-address: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'wiz',
+          packageName: 'buildkite-plugins/wiz-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract the equinixmetal-buildkite/trivy scan-target image, since it is disabled', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              equinixmetal-buildkite/trivy#v1.0.0:
+                image-ref: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'equinixmetal-buildkite/trivy',
+          packageName: 'equinixmetal-buildkite/trivy-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts an immutable image override from a runners entry in github-actions plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              github-actions#v1.0.0:
+                workflow: ".github/workflows/ci.yml"
+                runners:
+                  - runs-on: ubuntu-latest
+                    queue: hosted
+                    image: "buildkite.namespace-images.com/agent-base@sha256:62a45683afffaae9edfd669c16d2fee23b5a571679f31715e1063dada667ea24"
+                  - runs-on: macos-14
+                    queue: macos-sonoma-arm64
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'github-actions',
+          packageName: 'buildkite-plugins/github-actions-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:62a45683afffaae9edfd669c16d2fee23b5a571679f31715e1063dada667ea24',
+          datasource: 'docker',
+          depName: 'buildkite.namespace-images.com/agent-base',
+          packageName: 'buildkite.namespace-images.com/agent-base',
+          depType: 'docker',
+          replaceString:
+            'buildkite.namespace-images.com/agent-base@sha256:62a45683afffaae9edfd669c16d2fee23b5a571679f31715e1063dada667ea24',
+        },
+      ]);
+    });
+
+    it('does not extract an image from github-actions plugin config when runners is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              github-actions#v1.0.0:
+                workflow: ".github/workflows/ci.yml"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'github-actions',
+          packageName: 'buildkite-plugins/github-actions-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image from github-actions plugin config when it is not an object', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              github-actions#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'github-actions',
+          packageName: 'buildkite-plugins/github-actions-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
