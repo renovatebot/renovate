@@ -23,9 +23,25 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:groupings',
+      'workarounds:helmDocs',
+      'workarounds:guavaVariants',
+      'workarounds:aospTagVersioning',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
+    ],
+  },
+  aospTagVersioning: {
+    description: 'Use regex versioning for AOSP submodule tags.',
+    packageRules: [
+      {
+        matchDatasources: ['git-refs'],
+        matchManagers: ['git-submodules'],
+        matchSourceUrls: ['https://android.googlesource.com/**'],
+        versioning:
+          'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
+      },
     ],
   },
   bitnamiDockerImageVersioning: {
@@ -132,6 +148,49 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
+      },
+    ],
+  },
+  groupings: {
+    description: 'Groupings for specific package updates.',
+    packageRules: [
+      {
+        description:
+          'Group commander major updates, they depend on each other.',
+        groupName: 'commander',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@commander-js/extra-typings', 'commander'],
+        matchUpdateTypes: ['major'],
+      },
+      {
+        description:
+          'Group SimpleWebAuthn major updates to keep browser and server compatible.',
+        groupName: 'SimpleWebAuthn',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          '@simplewebauthn/browser',
+          '@simplewebauthn/server',
+        ],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
+  guavaVariants: {
+    description: 'Keep Guava on its `-jre` or `-android` variant.',
+    packageRules: [
+      {
+        matchDatasources: ['maven', 'sbt-package'],
+        matchPackageNames: ['com.google.guava:guava'],
+        versionCompatibility: '^(?<version>.+)-(?<compatibility>jre|android)$',
+      },
+    ],
+  },
+  helmDocs: {
+    description: 'Block helm-docs calver-like versions from 2019',
+    packageRules: [
+      {
+        allowedVersions: '!/^19\\.(0614|0110)$/',
+        matchPackageNames: ['norwoodj/helm-docs'],
       },
     ],
   },
@@ -243,6 +302,14 @@ export const presets: Record<string, Preset> = {
           'sapmachine',
         ],
         versioning: 'docker',
+      },
+      {
+        description:
+          'Use partial semver versioning for partial mise and GitHub Actions Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+        matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
+        matchDatasources: ['java-version'],
+        matchManagers: ['github-actions', 'mise'],
+        versioning: 'semver-partial',
       },
       {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',
@@ -364,6 +431,7 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel7**',
           'registry.access.redhat.com/rhel8/**',
           'registry.access.redhat.com/rhel9/**',
+          'registry.access.redhat.com/rhel10/**',
           'registry.access.redhat.com/rhscl/**',
           'registry.access.redhat.com/ubi*{,/}**',
           'redhat/**',

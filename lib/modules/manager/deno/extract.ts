@@ -57,8 +57,11 @@ export async function getLockFiles(
 ): Promise<string[]> {
   let lockFile: string | undefined;
 
-  if (lock && (await localPathIsFile(lock))) {
-    lockFile = lock;
+  if (lock) {
+    const lockIsFile = await localPathIsFile(lock);
+    if (lockIsFile) {
+      lockFile = lock;
+    }
   }
 
   if (!lockFile) {

@@ -1,7 +1,7 @@
 # Renovate Developer Docs
 
 > [!NOTE]
-> If you're an end-user of Renovate, please read the [Renovate documentation](https://docs.renovatebot.com).
+> If you are an end-user of Renovate, please read the [Renovate documentation](https://docs.renovatebot.com).
 
 The `docs/development` directory is for developers and contributors.
 The Markdown files explain how to work on Renovate's code.

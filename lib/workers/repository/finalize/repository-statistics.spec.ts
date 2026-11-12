@@ -4,6 +4,7 @@ import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
+import type { Pr } from '../../../modules/platform/types.ts';
 import * as cache from '../../../util/cache/repository/index.ts';
 import type {
   BaseBranchCache,
@@ -50,6 +51,42 @@ describe('workers/repository/finalize/repository-statistics', () => {
             closed: 1,
             merged: 1,
           },
+          lastPRMergedAt: '2024-01-15T10:00:00Z',
+        },
+        `Renovate repository PR statistics`,
+      );
+    });
+
+    it('reports the date of the most recently merged PR', () => {
+      const prs = [
+        partial<Pr>({
+          title: 'Update dependency foo to v1',
+          state: 'merged',
+          closedAt: '2024-01-10T10:00:00Z',
+        }),
+        partial<Pr>({
+          title: 'Update dependency baz to v1',
+          state: 'merged',
+          closedAt: undefined,
+        }),
+        partial<Pr>({
+          title: 'Update dependency bar to v1',
+          state: 'merged',
+          closedAt: '2024-03-05T10:00:00Z',
+        }),
+      ];
+
+      runRenovateRepoStats(config, prs);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          stats: {
+            total: 3,
+            open: 0,
+            closed: 0,
+            merged: 3,
+          },
+          lastPRMergedAt: '2024-03-05T10:00:00Z',
         },
         `Renovate repository PR statistics`,
       );

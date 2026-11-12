@@ -130,20 +130,23 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it.each`
-      arg                              | config
-      ${'--endpoints='}                | ${{ hostRules: [] }}
-      ${'--azure-auto-complete=false'} | ${{ platformAutomerge: false }}
-      ${'--azure-auto-complete=true'}  | ${{ platformAutomerge: true }}
-      ${'--azure-auto-complete'}       | ${{ platformAutomerge: true }}
-      ${'--git-lab-automerge=false'}   | ${{ platformAutomerge: false }}
-      ${'--git-lab-automerge=true'}    | ${{ platformAutomerge: true }}
-      ${'--git-lab-automerge'}         | ${{ platformAutomerge: true }}
-      ${'--recreate-closed=false'}     | ${{ recreateWhen: 'auto' }}
-      ${'--recreate-closed=true'}      | ${{ recreateWhen: 'always' }}
-      ${'--recreate-closed'}           | ${{ recreateWhen: 'always' }}
-      ${'--recreate-when=auto'}        | ${{ recreateWhen: 'auto' }}
-      ${'--recreate-when=always'}      | ${{ recreateWhen: 'always' }}
-      ${'--recreate-when=never'}       | ${{ recreateWhen: 'never' }}
+      arg                               | config
+      ${'--endpoints='}                 | ${{ hostRules: [] }}
+      ${'--azure-auto-complete=false'}  | ${{ platformAutomerge: false }}
+      ${'--azure-auto-complete=true'}   | ${{ platformAutomerge: true }}
+      ${'--azure-auto-complete'}        | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge=false'}    | ${{ platformAutomerge: false }}
+      ${'--git-lab-automerge=true'}     | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge'}          | ${{ platformAutomerge: true }}
+      ${'--recreate-closed=false'}      | ${{ recreateWhen: 'auto' }}
+      ${'--recreate-closed=true'}       | ${{ recreateWhen: 'always' }}
+      ${'--recreate-closed'}            | ${{ recreateWhen: 'always' }}
+      ${'--recreate-when=auto'}         | ${{ recreateWhen: 'auto' }}
+      ${'--recreate-when=always'}       | ${{ recreateWhen: 'always' }}
+      ${'--recreate-when=never'}        | ${{ recreateWhen: 'never' }}
+      ${'--dependency-dashboard'}       | ${{ dependencyDashboard: { enabled: true } }}
+      ${'--dependency-dashboard=true'}  | ${{ dependencyDashboard: { enabled: true } }}
+      ${'--dependency-dashboard=false'} | ${{ dependencyDashboard: { enabled: false } }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);
@@ -212,6 +215,16 @@ describe('workers/global/config/parse/cli', () => {
     it('requireConfig boolean false', () => {
       argv.push('--require-config=false');
       expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
+    });
+
+    it('dryRun keeps a value that is already current', () => {
+      argv.push('--dry-run=extract');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: 'extract' });
+    });
+
+    it('requireConfig keeps a value that is already current', () => {
+      argv.push('--require-config=ignored');
+      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'ignored' });
     });
   });
 

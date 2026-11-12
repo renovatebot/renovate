@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { hash } from '../../../util/hash.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 
 const slugify = _slugify;
@@ -50,8 +51,8 @@ function cleanBranchName(
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
     .replace(regEx(/[[\]?:\\^~<>]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~ < >
-    .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
-    .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
+    .replace(regEx(/(?<pre>^|\/)-+/g), '$<pre>') // leading dashes
+    .replace(regEx(/-+(?<post>\/|$)/g), '$<post>') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
@@ -84,7 +85,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
       } else {
         update.groupSlug = update.groupName;
       }
-      update.groupSlug = slugify(update.groupSlug, {
+      update.groupSlug = slugify(withoutUrlCredentials(update.groupSlug), {
         lower: true,
       });
       if (update.updateType === 'major' && update.separateMajorMinor) {
@@ -132,7 +133,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
 
     // Compile extra times in case of nested templates
     hashInput = template.compile(hashInput, update);
-    hashInput = template.compile(hashInput, update);
+    hashInput = withoutUrlCredentials(template.compile(hashInput, update));
 
     const hashedInput = hash(hashInput);
 
@@ -146,7 +147,9 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
 
     // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);
-    update.branchName = template.compile(update.branchName, update);
+    update.branchName = withoutUrlCredentials(
+      template.compile(update.branchName, update),
+    );
   }
   update.branchName = cleanBranchName(
     update.branchName,

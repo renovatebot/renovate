@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -10,8 +10,9 @@ import { EndoflifeDateVersions } from './schema.ts';
 export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;
 
-  override readonly defaultRegistryUrls = [registryUrl];
-  override readonly caching = true;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [registryUrl];
+  }
   override readonly defaultVersioning = 'loose';
 
   override readonly releaseTimestampSupport = true;
@@ -22,7 +23,7 @@ export class EndoflifeDateDatasource extends Datasource {
     super(EndoflifeDateDatasource.id);
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -38,26 +39,20 @@ export class EndoflifeDateDatasource extends Datasource {
 
     const url = joinUrlParts(registryUrl, `${packageName}.json`);
 
-    try {
-      const response = await this.http.getJson(url, EndoflifeDateVersions);
+    const body = await this.fetchJson(url, EndoflifeDateVersions);
 
-      result.releases.push(...response.body);
+    result.releases.push(...body);
 
-      return result.releases.length ? result : null;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    return result.releases.length ? result : null;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl!}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

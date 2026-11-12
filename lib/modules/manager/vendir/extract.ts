@@ -4,8 +4,7 @@ import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { getDep } from '../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -24,18 +23,11 @@ export function extractHelmChart(
   aliases?: Record<string, string>,
 ): PackageDependency {
   if (isOCIRegistry(helmChart.repository.url)) {
-    const dep = getDep(
-      `${removeOCIPrefix(helmChart.repository.url)}/${helmChart.name}:${helmChart.version}`,
-      false,
-      aliases,
-    );
     return {
-      ...dep,
+      ...getOciChartDep(helmChart.repository.url, helmChart.name, aliases),
       depName: helmChart.name,
       depType: 'HelmChart',
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      pinDigests: false,
+      currentValue: helmChart.version,
     };
   }
   return {

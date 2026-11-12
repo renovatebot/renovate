@@ -1,4 +1,4 @@
-import type { ReadableSpan } from '@opentelemetry/sdk-trace-base';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import { partial } from '~test/util.ts';
 import {

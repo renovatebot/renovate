@@ -42,8 +42,9 @@ async function partiallyGlobalInitialize(): Promise<void> {
   GlobalConfig.set(globalConfig);
 
   if (globalConfig.hostRules) {
+    // this is the self-hosted admin's own config, so its `headers` are exempt from `allowedHeaders` altogether - see `hostRules.add()`
     for (const hostRule of globalConfig.hostRules) {
-      addHostRule(hostRule);
+      addHostRule(hostRule, { trusted: true });
     }
   }
 }
@@ -56,8 +57,9 @@ async function validate(
   isPreset = false,
 ): Promise<void> {
   if (config.hostRules) {
+    // a `global` config is the self-hosted administrator's own, so its `headers` are exempt from `allowedHeaders` altogether - see `hostRules.add()`; a `repo` config's `hostRules` are still constrained by this instance's `allowedHeaders`
     for (const hostRule of config.hostRules) {
-      addHostRule(hostRule);
+      addHostRule(hostRule, { trusted: configType === 'global' });
     }
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
@@ -305,7 +307,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
   // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
   if (
     e instanceof CommanderError &&
-    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+    ['commander.helpDisplayed', 'commander.version'].includes(e.code)
   ) {
     return;
   }

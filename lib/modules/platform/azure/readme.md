@@ -4,7 +4,7 @@
 
 ### Personal Access Token (PAT)
 
-First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the bot account.
+First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the Renovate account.
 Let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
@@ -117,7 +117,7 @@ steps:
 
   - bash: |
       git config --global user.email 'bot@renovateapp.com'
-      git config --global user.name 'Renovate Bot'
+      git config --global user.name 'Renovate'
       npx --userconfig .npmrc renovate
     env:
       RENOVATE_PLATFORM: azure
@@ -254,7 +254,7 @@ Make sure the user has the following permissions on the work item's _area path_:
 - Edit work items in this node
 - View work items in this node
 
-If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
+If the user does not have these permissions, Renovate still creates a PR but it will not have a link to the work item.
 
 ### Dependency Dashboard work item state
 

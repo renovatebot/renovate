@@ -1,4 +1,8 @@
-import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isString,
+} from '@sindresorhus/is';
 
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
@@ -76,4 +80,56 @@ function getNewVersion(config: LookupUpdateConfig): string | null {
     return template.compile(config.replacementVersionTemplate, config, true);
   }
   return null;
+}
+
+function isRenamed(update: LookupUpdate, config: LookupUpdateConfig): boolean {
+  return isString(update.newName) && update.newName !== config.packageName;
+}
+
+function hasChangedDigest(
+  update: LookupUpdate,
+  config: LookupUpdateConfig,
+): boolean {
+  // TODO #22198
+  return (
+    !!update.newDigest && !update.newDigest.startsWith(config.currentDigest!)
+  );
+}
+
+/**
+ * Drop every update which would not actually change the package file, plus the
+ * updates excluded by `rangeStrategy=in-range-only` and by the `rollbackPrs` +
+ * `followTag` edge case.
+ */
+export function stripNoopUpdates(
+  config: LookupUpdateConfig,
+  updates: LookupUpdate[],
+): LookupUpdate[] {
+  let result = updates
+    .filter(
+      (update) => update.newValue !== null || config.currentValue === null,
+    )
+    .filter((update) => update.newDigest !== null)
+    .filter(
+      (update) =>
+        isRenamed(update, config) ||
+        update.isReplacement === true ||
+        update.newValue !== config.currentValue ||
+        update.isLockfileUpdate === true ||
+        hasChangedDigest(update, config),
+    );
+
+  // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
+  if (config.rangeStrategy === 'in-range-only') {
+    result = result.filter((update) => update.newValue === config.currentValue);
+  }
+
+  // Handle a weird edge case involving followTag and fallbacks
+  if (config.rollbackPrs && config.followTag) {
+    result = result.filter(
+      (update) => update.updateType !== 'rollback' || result.length === 1,
+    );
+  }
+
+  return result;
 }

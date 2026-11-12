@@ -8,11 +8,12 @@ import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { typ
 import _addFormats from 'ajv-formats';
 import fs from 'fs-extra';
 import { glob } from 'glob';
+import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
-import type Token from 'markdown-it/lib/token.mjs';
 import { GlobalConfig } from '../lib/config/global.ts';
 import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
+import { presets as globalPresets } from '../lib/config/presets/internal/global.preset.ts';
 import type { RenovateConfig } from '../lib/config/types.ts';
 import { validateConfig } from '../lib/config/validation.ts';
 import { init } from '../lib/logger/index.ts';
@@ -126,10 +127,11 @@ async function checkValidJs(
 }
 
 function isJsCheckAllowed(file: string): boolean {
+  if (file.startsWith('docs/')) {
+    return true;
+  }
   return (
-    file.startsWith('docs/') ||
-    (file.startsWith('lib/') &&
-      path.basename(file).toLowerCase() === 'readme.md')
+    file.startsWith('lib/') && path.basename(file).toLowerCase() === 'readme.md'
   );
 }
 
@@ -178,7 +180,7 @@ function checkMigrationStatus(
 
 async function processFile(file: string): Promise<void> {
   const text = await fs.readFile(file, 'utf8');
-  const tokens = markdown.parse(text, undefined);
+  const tokens = markdown.parse(text, {});
 
   for (const [index, token] of tokens.entries()) {
     if (token.type !== 'fence') {
@@ -187,9 +189,11 @@ async function processFile(file: string): Promise<void> {
 
     const lang = token.info.trim().split(/\s+/)[0];
     const isJsFamily = lang === 'js' || lang === 'javascript';
+    if (isJsFamily && !isJsCheckAllowed(file)) {
+      continue;
+    }
     if (
       !['json', 'jsonc', 'js', 'javascript'].includes(lang) ||
-      (isJsFamily && !isJsCheckAllowed(file)) ||
       tokens.at(index - 2)?.content === fenceCheckDisableComment
     ) {
       continue;
@@ -256,8 +260,9 @@ void (async () => {
   GlobalConfig.set({
     // any environment vars that any repository configuration in the documentation references
     allowedEnv: [
+      // In a real deployment, we'd use `globalExtends: ['global:safeEnv']`, but when validating like this, `GlobalConfig.set()` does not resolve presets, so we need to inline the `allowedEnv` values
+      ...globalPresets.safeEnv.allowedEnv!,
       'SOME_ENV_VARIABLE',
-      'GONOSUMDB',
       'SOME_ENV_*',
       'EXTRA_ENV_NAME',
     ],

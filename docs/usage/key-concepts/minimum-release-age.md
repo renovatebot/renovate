@@ -68,15 +68,22 @@ As long as the registry/datasource provides the release timestamp, Renovate will
 We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
 
 Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
-Renovate does not currently have the ability to determine the `minimumReleaseAge` from your package manager's configuration.
+A manager may read the minimum release age from the configuration of your package manager.
+If it does, Renovate uses the larger of that value and `minimumReleaseAge`.
+Setting `minimumReleaseAge` to `null` does not turn off the value from the configuration of your package manager.
 
 When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.
 In some cases, this can lead to a transitive dependency being introduced, [which Renovate is not aware of](#what-happens-to-transitive-dependencies), and so could lead to a dependency being introduced without Renovate's `minimumReleaseAge` check being followed.
 
-To protect against this, it's recommended to ensure that your package manager configuration includes the relevant minimum release age checks, too.
+To protect against this, it is recommended to ensure that your package manager configuration includes the relevant minimum release age checks, too.
 
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
+
+The table below lists the managers with a known integration, per package manager.
+Managers that are not listed do not integrate with the minimum release age of their package manager.
+
+<!-- Autogenerate managerMinimumReleaseAgeSupport -->
 
 #### npm
 
@@ -96,16 +103,17 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
+Poetry added this setting in v2.4.0, and older versions ignore it.
 
 The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 !!! warning
-  Renovate 42 changed the behaviour detailed below.
+  Renovate 42 changed the behavior detailed below.
   In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
   Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
-  If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
+  If using Renovate prior you can opt into the more secure behavior (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
 
 Consider that:
 
@@ -151,7 +159,7 @@ If no branch is created, Renovate will not raise a PR, regardless of [`prCreatio
 
 #### Recommended settings
 
-The recommendation is to set `internalChecksFilter=strict` when using `minimumReleaseAge`, so Renovate will create neither branches (nor PRs) on updates that haven't yet met minimum release age checks.
+The recommendation is to set `internalChecksFilter=strict` when using `minimumReleaseAge`, so Renovate will create neither branches (nor PRs) on updates that have not yet met minimum release age checks.
 
 ### Which update types take `minimumReleaseAge` into account?
 
@@ -175,13 +183,13 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#digest-updates).           |
 | `pinDigest`           | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#pindigest-updates).        |
-| `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
+| `lockFileMaintenance` | ❌                            | It can only be enforced by your package manager. [See below for more info](#lockfilemaintenance-updates). |
 | `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
 | `bump`                | ❌                            |                                                                                                           |
 | `replacement`         | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/39400)                                 |
 
-You can validate which update types may have release timestamps by following something similar to how [verify if the registry you're using](#which-registries-support-release-timestamps).
+You can validate which update types may have release timestamps by following something similar to how [verify if the registry you are using](#which-registries-support-release-timestamps).
 
 #### `digest` updates
 
@@ -223,13 +231,13 @@ For instance:
 +    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 ```
 
-Unlike a `digest` update, `pinDigest` doesn't repoint the reference to a different value - it freezes whatever the current value already resolves to.
+Unlike a `digest` update, `pinDigest` does not repoint the reference to a different value - it freezes whatever the current value already resolves to.
 The reference itself (e.g. the `v7` major tag above) is floating though, so what it resolves to right now may not be what `currentVersion` would resolve to under your configured `rangeStrategy` (for example, `rangeStrategy=bump` resolves `currentVersion` to the _oldest_ matching release).
 So, like `digest`, a `pinDigest` update is aged against the release timestamp of the newest version matching the current value, not whatever `currentVersion` resolves to.
 
 Unlike `digest` updates, an _unversioned_ current value (such as `latest`) is exempt from `minimumReleaseAge` entirely, rather than being held indefinitely: pinning a reference which already floats to the latest content is strictly safer than leaving it unpinned, so holding it back would only prolong the less-safe, unpinned state.
 
-If the current value _does_ resolve to a version, but that version's datasource doesn't expose a release timestamp (for example GHCR, Quay or ECR), the same caveats as [`digest` updates](#digest-updates) apply: the update is held indefinitely under the default `minimumReleaseAgeBehaviour=timestamp-required`, and needs `minimumReleaseAgeBehaviour=timestamp-optional` configured to raise it without an age check.
+If the current value _does_ resolve to a version, but that version's datasource does not expose a release timestamp (for example GHCR, Quay or ECR), the same caveats as [`digest` updates](#digest-updates) apply: the update is held indefinitely under the default `minimumReleaseAgeBehaviour=timestamp-required`, and needs `minimumReleaseAgeBehaviour=timestamp-optional` configured to raise it without an age check.
 
 ##### Avoiding `pinDigest` updates not being raised due to frequently-releasing packages
 
@@ -263,6 +271,17 @@ This decouples "how fresh must a release be before I trust it enough to upgrade 
 ```
 
 These are functionally identical options.
+
+#### `lockFileMaintenance` updates
+
+Lock file maintenance delegates to the package manager to update package(s), so the updated packages have no release timestamp for Renovate to check.
+
+A manager can tell Renovate that its package manager enforces the minimum release age itself while it regenerates the lock file.
+In that case, Renovate does not wait for a release timestamp, and the `renovate/stability-days` status check of the lock file maintenance branch passes straight away.
+
+For all other managers, lock file maintenance is treated like any other update without a release timestamp.
+With the default `minimumReleaseAgeBehaviour=timestamp-required`, the `renovate/stability-days` status check stays pending while `minimumReleaseAge` is set.
+The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
 
 ### What happens to security updates?
 

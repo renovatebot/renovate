@@ -6,6 +6,7 @@ import { isOCIRegistry } from '../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import type { TerraformDefinitionFile } from './hcl/types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
+import type { TerraformManagerData } from './types.ts';
 import {
   applyOciDependency,
   getLockedVersion,
@@ -37,11 +38,11 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
   );
 
   protected analyzeTerraformProvider(
-    dep: PackageDependency,
+    dep: PackageDependency<TerraformManagerData>,
     locks: ProviderLock[],
     depType: string,
     config: ExtractConfig,
-  ): PackageDependency {
+  ): PackageDependency<TerraformManagerData> {
     dep.depType = depType;
     dep.depName = dep.managerData?.moduleName;
     dep.datasource = TerraformProviderDatasource.id;

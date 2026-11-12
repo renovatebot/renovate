@@ -5,14 +5,21 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import type { SharedConstraints } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
 import * as template from '../../../util/template/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import {
+  getSharedConstraints,
+  updateSharedConstraints,
+} from '../extract/shared-constraints.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
 function prettifyVersion(version: string): string {
@@ -52,9 +59,8 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   }
   const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = packageName ?? depName;
-  if (datasource && name && currentVersion && newVersion) {
-    return [datasource, name, currentVersion, newVersion];
+  if (datasource && packageName && currentVersion && newVersion) {
+    return [datasource, packageName, currentVersion, newVersion];
   }
   logger.trace(
     {
@@ -91,7 +97,9 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
     upgrade,
   );
   upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
-  upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+  upgrade.commitMessage = withoutUrlCredentials(
+    template.compile(upgrade.commitMessage, upgrade),
+  );
   // istanbul ignore if
   if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
     logger.debug(
@@ -103,8 +111,8 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
   upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
   upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
   upgrade.commitMessage = upgrade.commitMessage.replace(
-    regEx(/to vv(\d)/),
-    'to v$1',
+    regEx(/to vv(?<digit>\d)/),
+    'to v$<digit>',
   );
   if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
     // We only need to lowercase the first line
@@ -124,10 +132,12 @@ function compilePrTitle(
   if (upgrade.prTitle) {
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-    upgrade.prTitle = template
-      .compile(upgrade.prTitle, upgrade)
-      .trim()
-      .replace(regEx(/\s+/g), ' ');
+    upgrade.prTitle = withoutUrlCredentials(
+      template
+        .compile(upgrade.prTitle, upgrade)
+        .trim()
+        .replace(regEx(/\s+/g), ' '),
+    );
     // istanbul ignore if
     if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
       logger.debug(
@@ -165,7 +175,9 @@ function compilePrTitle(
     }
   }
   // Compile again to allow for nested templates
-  upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+  upgrade.prTitle = withoutUrlCredentials(
+    template.compile(upgrade.prTitle, upgrade),
+  );
   logger.trace(`prTitle: ${JSON.stringify(upgrade.prTitle)}`);
 }
 
@@ -196,6 +208,7 @@ const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
+  sharedConstraints: SharedConstraints[] = [],
 ): BranchConfig {
   let branchUpgrades = upgrades;
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
@@ -271,10 +284,11 @@ export function generateBranchConfig(
       }
     }
   }
+  const hasMultipleValuesWithoutVersion = !toVersions[0] && newValue.length > 1;
   const groupEligible =
     depNames.length > 1 ||
     toVersions.length > 1 ||
-    (!toVersions[0] && newValue.length > 1);
+    hasMultipleValuesWithoutVersion;
 
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
@@ -282,10 +296,10 @@ export function generateBranchConfig(
   const singleUpdateGroup =
     hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
   logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
-  const useGroupSettings =
-    hasGroupName &&
-    (groupEligible ||
-      (singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true));
+  const groupSingleUpdate =
+    singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true;
+  const isGroupUsable = groupEligible || groupSingleUpdate;
+  const useGroupSettings = hasGroupName && isGroupUsable;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
@@ -330,6 +344,8 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
+    const isDigestUpgrade =
+      upgrade.isDigest === true || upgrade.isPinDigest === true;
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&
@@ -340,10 +356,7 @@ export function generateBranchConfig(
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
-    } else if (
-      newValue.length > 1 &&
-      (upgrade.isDigest || upgrade.isPinDigest)
-    ) {
+    } else if (newValue.length > 1 && isDigestUpgrade) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
@@ -498,11 +511,51 @@ export function generateBranchConfig(
     }
   }
 
+  // a branch which updates a tool constraint should use its new value, i.e. when installing tools for `postUpgradeTasks` or artifact updates
+  const constraintUpdates = config.upgrades.flatMap(
+    ({ manager, depType, depName, currentValue, newValue }) =>
+      manager === 'renovate-config' &&
+      depType === 'tool-constraint' &&
+      isConstraintName(depName) &&
+      newValue
+        ? [{ depName, currentValue, newValue }]
+        : [],
+  );
+  for (const upgrade of config.upgrades) {
+    for (const { depName, currentValue, newValue } of constraintUpdates) {
+      // only replace the constraint being updated, not a different value which may have been configured i.e. via `packageRules`
+      if (upgrade.constraints?.[depName] === currentValue) {
+        upgrade.constraints = { ...upgrade.constraints, [depName]: newValue };
+      }
+    }
+  }
+
+  // a branch which updates a shared constraint, like the version in a `rust-toolchain.toml` file, uses its new value
+  const branchSharedConstraints = updateSharedConstraints(
+    sharedConstraints,
+    config.upgrades,
+  );
   config.constraints = {};
+  config.extractedConstraints = {};
+  config.sharedConstraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
+    // the constraints which other managers share for the directory of the package file, also on the upgrade, which the branch worker reads on its own
+    const shared = getSharedConstraints(
+      branchSharedConstraints,
+      upgrade.manager,
+      upgrade.packageFile ?? '',
+    );
+    if (Object.keys(shared).length) {
+      upgrade.sharedConstraints = shared;
+      config.sharedConstraints = { ...config.sharedConstraints, ...shared };
+    }
+    config.extractedConstraints = {
+      ...config.extractedConstraints,
+      ...upgrade.extractedConstraints,
+    };
   }
 
   config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
@@ -548,7 +601,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += `\n\n${markdownTable(table)}\n`;
+    config.commitMessage += `\n\n${withoutUrlCredentials(markdownTable(table))}\n`;
   }
   const additionalReviewers = uniq(
     config.upgrades

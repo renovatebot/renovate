@@ -281,7 +281,7 @@ describe('modules/manager/pixi/lockfile', () => {
         {
           artifactError: {
             fileName: 'pixi.lock',
-            stderr: 'Error: exec failed',
+            stderr: 'exec failed',
           },
         },
       ]);

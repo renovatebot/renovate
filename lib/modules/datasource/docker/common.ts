@@ -1,5 +1,6 @@
 import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import {
+  HOST_BLOCKED,
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
 } from '../../../constants/error-messages.ts';
@@ -12,11 +13,20 @@ import { toSha256 } from '../../../util/hash.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { Http } from '../../../util/http/index.ts';
+import {
+  isForbidden,
+  isNotFound,
+  isOk,
+  isRateLimited,
+  isServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type {
   HttpOptions,
   HttpResponse,
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
 import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -56,24 +66,30 @@ export async function getAuthHeaders(
   registryHost: string,
   dockerRepository: string,
   apiCheckUrl = `${registryHost}/v2/`,
-): Promise<OutgoingHttpHeaders | null> {
+): Promise<OutgoingHttpHeaders | undefined> {
   try {
     const options = {
       throwHttpErrors: false,
       noAuth: true,
       cacheProvider: memCacheProvider,
     };
-    const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
-      ? await http.get(apiCheckUrl, options)
-      : // use json request, as this will be cached for tags, so it returns json
-        // TODO: add cache test
-        await http.getJsonUnchecked(apiCheckUrl, options);
+    // Written as an if/else rather than a ternary on purpose: v8 gives the
+    // branch that follows an `await` inside a ternary a negative hit count,
+    // which the coverage reporters then read as uncovered.
+    let apiCheckResponse: HttpResponse<unknown>;
+    if (apiCheckUrl.endsWith('/v2/')) {
+      apiCheckResponse = await http.get(apiCheckUrl, options);
+    } else {
+      // use json request, as this will be cached for tags, so it returns json
+      // TODO: add cache test
+      apiCheckResponse = await http.getJsonUnchecked(apiCheckUrl, options);
+    }
 
-    if (apiCheckResponse.statusCode === 200) {
+    if (isOk(apiCheckResponse)) {
       logger.debug(`No registry auth required for ${apiCheckUrl}`);
       return {};
     }
-    if (apiCheckResponse.statusCode === 404) {
+    if (isNotFound(apiCheckResponse)) {
       logger.debug(`Page Not Found ${apiCheckUrl}`);
       // throw error up to be caught and potentially retried with library/ prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
@@ -90,14 +106,14 @@ export async function getAuthHeaders(
       return getAuthHeaders(http, registryHost, dockerRepository);
     }
     if (
-      apiCheckResponse.statusCode !== 401 ||
+      !isUnauthorized(apiCheckResponse) ||
       !isNonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(
         { apiCheckUrl, res: apiCheckResponse },
         'Invalid registry response',
       );
-      return null;
+      return undefined;
     }
 
     const rule = hostRules.find({
@@ -181,7 +197,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository, authenticateHeader },
         `Invalid realm, testing direct auth`,
       );
-      return opts.headers ?? null;
+      return opts.headers ?? undefined;
     }
 
     // already guarded by above clause
@@ -218,7 +234,7 @@ export async function getAuthHeaders(
     /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
-      return null;
+      return undefined;
     }
     // sanitize token
     addSecretForSanitizing(token);
@@ -229,50 +245,53 @@ export async function getAuthHeaders(
     /* v8 ignore if -- quay.io errors are swallowed pending #9604, not reproduced in specs */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
-      return null;
+      return undefined;
     }
     /* v8 ignore if -- registry auth rejection is logged and swallowed, not mocked in specs */
-    if (err.statusCode === 401) {
+    if (isUnauthorized(err)) {
       logger.debug(
         { registryHost, dockerRepository },
         'Unauthorized docker lookup',
       );
       logger.debug({ err });
-      return null;
+      return undefined;
     }
     /* v8 ignore if -- registry permission rejection is logged and swallowed, not mocked in specs */
-    if (err.statusCode === 403) {
+    if (isForbidden(err)) {
       logger.debug(
         { registryHost, dockerRepository },
         'Not allowed to access docker registry',
       );
       logger.debug({ err });
-      return null;
+      return undefined;
     }
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
     /* v8 ignore if -- Docker Hub rate limiting maps to ExternalHostError, not mocked in specs */
-    if (err.statusCode === 429 && isDockerHost(registryHost)) {
+    if (isRateLimited(err) && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
     /* v8 ignore if -- registry server errors map to ExternalHostError, not mocked in specs */
-    if (err.statusCode >= 500 && err.statusCode < 600) {
+    if (isServerError(err)) {
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {
       throw err;
     }
     /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
-    if (err.message === HOST_DISABLED) {
-      logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
-      return null;
+    if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+      logger.trace(
+        { registryHost, dockerRepository, err },
+        refusedHostMessage(err),
+      );
+      return undefined;
     }
     logger.warn(
       { registryHost, dockerRepository, err },
       'Error obtaining docker token',
     );
-    return null;
+    return undefined;
   }
 }
 
@@ -305,7 +324,8 @@ export function getRegistryRepository(
   }
   let registryHost = registryUrl;
   const split = packageName.split('/');
-  if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
+  const hasRegistryHost = split[0].includes('.') || split[0].includes(':');
+  if (split.length > 1 && hasRegistryHost) {
     [registryHost] = split;
     split.shift();
   }

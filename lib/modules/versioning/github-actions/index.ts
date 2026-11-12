@@ -3,6 +3,7 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'github-actions';
@@ -13,11 +14,11 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
-const floatingMinorTagRegex = regEx(/^\d+(\.\d+)?$/);
+const floatingMinorTagRegex = regEx(/^\d+(?:\.\d+)?$/);
 const majorOnlyRegex = regEx(/^\d+$/);
 
 function massageValue(input: string): string {
-  return input.trim().replace(regEx(/^v/i), '');
+  return stripVersionPrefix(input.trim());
 }
 
 function parseVersion(input: string): SemVer | null {
@@ -27,7 +28,12 @@ function parseVersion(input: string): SemVer | null {
     return v;
   }
   // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to major.minor.0-prerelease
-  return semver.parse(stripped.replace(regEx(/^(\d+\.\d+)(-.+)$/), '$1.0$2'));
+  return semver.parse(
+    stripped.replace(
+      regEx(/^(?<majorMinor>\d+\.\d+)(?<prerelease>-.+)$/),
+      '$<majorMinor>.0$<prerelease>',
+    ),
+  );
 }
 
 interface Range {

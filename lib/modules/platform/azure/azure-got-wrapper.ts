@@ -31,8 +31,8 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   return getPersonalAccessTokenHandler(config.token!, true);
 }
 
-export function azureObj(): azure.WebApi {
-  const config = hostRules.find({ hostType, url: endpoint });
+export function azureObj(credentials?: HostRule): azure.WebApi {
+  const config = credentials ?? hostRules.find({ hostType, url: endpoint });
   if (!config.token && !(config.username && config.password)) {
     throw new Error(`No config found for azure`);
   }
@@ -43,8 +43,8 @@ export function azureObj(): azure.WebApi {
   });
 }
 
-export function gitApi(): Promise<IGitApi> {
-  return azureObj().getGitApi();
+export function gitApi(credentials?: HostRule): Promise<IGitApi> {
+  return azureObj(credentials).getGitApi();
 }
 
 export function coreApi(): Promise<ICoreApi> {
@@ -59,12 +59,27 @@ export function workItemTrackingApi(): Promise<IWorkItemTrackingApi> {
   return azureObj().getWorkItemTrackingApi();
 }
 
+export async function getAuthenticatedUserId(
+  credentials: HostRule,
+): Promise<string | undefined> {
+  try {
+    const { authenticatedUser } = await azureObj(credentials).connect();
+    if (!authenticatedUser?.id) {
+      logger.debug('Azure: authenticated user ID is unavailable');
+    }
+    return authenticatedUser?.id;
+  } catch (err) {
+    logger.debug({ err }, 'Azure: could not determine authenticated user ID');
+    return undefined;
+  }
+}
+
 /**
  * Whether the endpoint is Azure DevOps Services (cloud) rather than Azure
  * DevOps Server (on-premises). Read from the location service's
  * `_apis/connectionData`, which reports the deployment type authoritatively.
  * Defaults to `false` (on-premises) when the type cannot be determined, so
- * callers stay on the behaviour that both products support.
+ * callers stay on the behavior that both products support.
  */
 export async function isHosted(): Promise<boolean> {
   try {

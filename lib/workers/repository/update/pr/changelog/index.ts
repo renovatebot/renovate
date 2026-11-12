@@ -2,6 +2,7 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import { ExternalHostError } from '../../../../../types/errors/external-host-error.ts';
 import { detectPlatform } from '../../../../../util/common.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import api from './api.ts';
@@ -48,8 +49,15 @@ export async function getChangeLogJSON(
       }
 
       return await changeLogSource.getChangeLogJSON(config);
-    } catch (err) /* istanbul ignore next */ {
-      logger.error({ config, err }, 'getChangeLogJSON error');
+    } catch (err) {
+      // A changelog fetch is best-effort: on failure we return null and the
+      // update proceeds. A transient external host error must not be logged at
+      // error level, because logged errors alone cause a non-zero run exit.
+      if (err instanceof ExternalHostError) {
+        logger.warn({ config, err }, 'getChangeLogJSON error');
+      } else {
+        logger.error({ config, err }, 'getChangeLogJSON error');
+      }
       return null;
     }
   });

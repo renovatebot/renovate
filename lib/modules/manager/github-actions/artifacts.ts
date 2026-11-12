@@ -12,10 +12,14 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { PackageFile, PostUpdateConfig } from '../types.ts';
-import { artifactErrorMessageFromExecError } from '../util.ts';
+import { api as semver } from '../../versioning/semver/index.ts';
+import type { PackageFile, PostUpdateConfig, Upgrade } from '../types.ts';
+import {
+  artifactErrorMessageFromExecError,
+  resolveToolConstraint,
+} from '../util.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
-import { ActionsLockfile } from './schema.ts';
+import { ActionsLockfile, type Finding, FindingsOutput } from './schema.ts';
 import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 
 /** The `gh` CLI extension that generates and verifies the lockfile. */
@@ -23,6 +27,18 @@ const extensionName = 'github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
 const lockedDepTypes = ['action', 'workflow', 'docker'];
+
+/** The first `gh-actions-lock` release with `--ignore-local-actions`, and a plain run which keeps moved floating refs locked. */
+const minPlainRunVersion = '0.3.0';
+
+/** Whether a `gh-actions-lock` release tag predates `--ignore-local-actions` and needs `--relock` to write after a floating ref moved. */
+function needsRelock(version: string | undefined): boolean {
+  return (
+    !!version &&
+    semver.isVersion(version) &&
+    semver.isGreaterThan(minPlainRunVersion, version)
+  );
+}
 
 function findToken(url: string): string | undefined {
   return findGithubToken(
@@ -71,13 +87,13 @@ function getTokenEnv(): ExtraEnv {
 }
 
 /**
- * Whether any updated dependency is one the lockfile records an edge for, and sits in a file `gh actions-lock` will look at.
+ * The updated dependencies which the lockfile records an edge for, and which sit in a file `gh actions-lock` will look at.
  */
-function hasLockedUpdate(
+function getLockedUpgrades(
   config: PostUpdateConfig,
   onboardedWorkflows: OnboardedWorkflows,
-): boolean {
-  return config.upgrades.some((upgrade) => {
+): Upgrade[] {
+  return config.upgrades.filter((upgrade) => {
     if (upgrade.manager !== 'github-actions') {
       return false;
     }
@@ -93,6 +109,17 @@ function hasLockedUpdate(
 
     return isLockfileManaged(packageFile, onboardedWorkflows);
   });
+}
+
+/** One line per finding, followed by how the tool suggests fixing it. */
+function formatFindings(findings: Finding[]): string {
+  return findings
+    .map(({ workflow, dependency, detail, remediation }) => {
+      const location = dependency ? `${workflow}: ${dependency}` : workflow;
+      const fix = remediation ? ` (${remediation})` : '';
+      return `${location}: ${detail}${fix}`;
+    })
+    .join('\n');
 }
 
 /**
@@ -135,7 +162,11 @@ export async function updateActionsLockfile(
     return empty;
   }
 
-  if (!hasLockedUpdate(config, parsedLockfile.data.workflows)) {
+  const lockedUpgrades = getLockedUpgrades(
+    config,
+    parsedLockfile.data.workflows,
+  );
+  if (!lockedUpgrades.length) {
     logger.debug(`No locked dependencies updated for ${actionsLockFile}`);
     return empty;
   }
@@ -159,6 +190,12 @@ export async function updateActionsLockfile(
 
   const tokenEnv = getTokenEnv();
 
+  const ghConstraint = await resolveToolConstraint(config, 'gh');
+  const ghActionsLockConstraint = await resolveToolConstraint(
+    config,
+    'ghActionsLock',
+  );
+
   const execOptions: ExecOptions = {
     // The tool rescans every workflow, so it runs from the repository root
     cwd: GlobalConfig.get('localDir'),
@@ -166,16 +203,44 @@ export async function updateActionsLockfile(
     // The token we resolved from the host rules must not be shadowed by an ambient `GH_TOKEN`, so force it as well.
     extraEnv: tokenEnv,
     env: tokenEnv,
-    toolConstraints: [{ toolName: 'gh', constraint: config.constraints?.gh }],
+    toolConstraints: [{ toolName: 'gh', constraint: ghConstraint }],
     docker: {},
   };
 
-  // `--no-interactive`: we have no terminal to answer prompts with
-  // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
-  // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
-  const commands = [
-    'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
+  // A replacement introduces a package the workflow did not use before, which `--no-onboard` refuses to add
+  const hasReplacement = lockedUpgrades.some(
+    (upgrade) => upgrade.updateType === 'replacement',
+  );
+
+  // `binarySource=global` leaves the extension version to the administrator and it is unknown here, so assume v0.3.0 or later and only treat a version we install as old
+  const relock =
+    GlobalConfig.get('binarySource') !== 'global' &&
+    needsRelock(ghActionsLockConstraint);
+
+  // From v0.3.0 a plain run re-pins only the refs whose `uses:` changed, and keeps moved floating refs (like `@v4`) locked, so unrelated pins do not advance.
+  // Before that, a plain run refuses to write when a path or composite action's floating ref has moved, so `--relock` is needed there
+  const flags = [
+    // we have no terminal to answer prompts with
+    '--no-interactive',
+    // do not add workflows which the lockfile does not track yet, as that is unrelated to the update. Omitted for a replacement, as the new action is not in the workflow's lockfile entry yet
+    ...(hasReplacement ? [] : ['--no-onboard']),
+    // keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
+    '--no-narrow',
+    ...(relock
+      ? [
+          // a plain run before v0.3.0 refuses to write when a floating ref has moved upstream. This also advances such refs
+          '--relock',
+          // do not migrate `uses: ./…` to `uses: $/…`. `--ignore-local-actions` does not exist before v0.3.0
+          '--no-migrate-local-actions',
+        ]
+      : [
+          // warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
+          '--ignore-local-actions',
+        ]),
+    // print the findings as JSON on stdout, so a failure can be reported readably. Available since v0.1.6
+    '--json=findings',
   ];
+  const commands = [`gh actions-lock ${flags.join(' ')}`];
 
   // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.
   // They own the extension version, and `constraints.ghActionsLock` does not apply.
@@ -183,14 +248,14 @@ export async function updateActionsLockfile(
   if (GlobalConfig.get('binarySource') === 'global') {
     // Debug rather than warn: `constraints.ghActionsLock` ships with a default, so we cannot tell an explicit override from the default here, and warning would fire for every repository on this `binarySource`.
     logger.once.debug(
-      { constraint: config.constraints?.ghActionsLock },
+      { constraint: ghActionsLockConstraint },
       'Not installing the `gh-actions-lock` extension, and ignoring `constraints.ghActionsLock`, because `binarySource=global` leaves tooling to the administrator',
     );
   } else {
     // `--force` makes an install a no-op when the specified version is already installed
-    if (config.constraints?.ghActionsLock) {
+    if (ghActionsLockConstraint) {
       commands.unshift(
-        `gh extension install ${extensionName} --force --pin ${quote(config.constraints?.ghActionsLock)}`,
+        `gh extension install ${extensionName} --force --pin ${quote(ghActionsLockConstraint)}`,
       );
     } else {
       commands.unshift(`gh extension install ${extensionName} --force`);
@@ -204,13 +269,17 @@ export async function updateActionsLockfile(
       throw err;
     }
     logger.debug({ err }, `Error updating ${actionsLockFile}`);
+    const findings = FindingsOutput.safeParse(err.stdout);
     return {
       updatedArtifacts: [],
       artifactErrors: [
         {
           fileName: actionsLockFile,
           // an `ExecError` always carries a `stderr`, so fall back to the message rather than rendering an artifact error with nothing in it
-          stderr: artifactErrorMessageFromExecError(err, err.message),
+          stderr:
+            findings.success && findings.data.length
+              ? formatFindings(findings.data)
+              : artifactErrorMessageFromExecError(err, err.message),
         },
       ],
     };

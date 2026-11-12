@@ -11,7 +11,10 @@ export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
+  const nameWithHyphens = option.name.replace(
+    regEx(/(?<upper>[A-Z])/g),
+    '-$<upper>',
+  );
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
@@ -84,7 +87,15 @@ function migrateArgs(input: string[]): string[] {
         .replace('--include-forks', '--fork-processing=enabled')
         .replace('--recreate-closed=false', '--recreate-when=auto')
         .replace('--recreate-closed=true', '--recreate-when=always')
-        .replace('--recreate-closed', '--recreate-when=always'),
+        .replace('--recreate-closed', '--recreate-when=always')
+        .replace(
+          regEx(/^--dependency-dashboard(?:=true)?$/),
+          '--dependency-dashboard={"enabled":true}',
+        )
+        .replace(
+          '--dependency-dashboard=false',
+          '--dependency-dashboard={"enabled":false}',
+        ),
     )
     .filter((a) => !a.startsWith('--git-fs'));
 }

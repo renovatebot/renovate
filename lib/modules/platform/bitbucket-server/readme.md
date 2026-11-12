@@ -2,7 +2,7 @@
 
 ## Authentication
 
-First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the bot account.
+First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the Renovate account.
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
 - Set your HTTP access token as a `token` in your `config.js` file
@@ -13,9 +13,9 @@ If you use project or repository based HTTP access tokens, it can only be used a
 
 Remember to set `platform=bitbucket-server` somewhere in your Renovate config file.
 
-If you're not using `@renovate-bot` as username then set your custom `username` for the bot account.
+If you are not using `@renovate-bot` as username then set your custom `username` for the Renovate account.
 
-If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
+If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global self-hosted config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
 ## Unsupported platform features/concepts
 
@@ -38,7 +38,7 @@ docker volume create --name bitbucketVolume
 docker run -v bitbucketVolume:/var/atlassian/application-data/bitbucket --name="bitbucket" -d -p 7990:7990 -p 7999:7999 atlassian/bitbucket-server:8.9.6
 ```
 
-Once it's running and initialized, the quickest way to testing with Renovate is:
+Once it is running and initialized, the quickest way to testing with Renovate is:
 
 1. Create the admin user as prompted
 2. Create a new project and a repository for that project

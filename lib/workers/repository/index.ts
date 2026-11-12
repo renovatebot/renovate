@@ -48,7 +48,7 @@ import { OnboardingState } from './onboarding/common.ts';
 import { ensureOnboardingPr } from './onboarding/pr/index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
 import { extractDependencies, updateRepo } from './process/index.ts';
-import type { ProcessResult } from './result.ts';
+import type { ProcessResult, RepositoryResult } from './result.ts';
 import { processResult } from './result.ts';
 
 // istanbul ignore next
@@ -118,9 +118,12 @@ export async function renovateRepository(
         config.repoIsOnboarded! ||
         !OnboardingState.onboardingCacheValid ||
         OnboardingState.prUpdateRequested;
-      const extractResult = performExtract
-        ? await extractDependencies(config)
-        : emptyExtract();
+      let extractResult: ExtractResult;
+      if (performExtract) {
+        extractResult = await extractDependencies(config);
+      } else {
+        extractResult = emptyExtract();
+      }
       addExtractionStats(config, extractResult);
 
       const { branches, branchList, packageFiles } = extractResult;
@@ -133,26 +136,27 @@ export async function renovateRepository(
         GlobalConfig.get('dryRun') !== 'lookup' &&
         GlobalConfig.get('dryRun') !== 'extract'
       ) {
-        await instrument(
-          'onboarding',
-          () => ensureOnboardingPr(config, packageFiles, branches),
-          {
-            attributes: {
-              [ATTR_RENOVATE_SPLIT]: 'onboarding',
-            },
-          },
-        );
-        addSplit('onboarding');
-        const res = await instrument(
-          'update',
-          () => updateRepo(config, branches),
-          {
+        let res: RepositoryResult;
+        if (config.repoIsOnboarded) {
+          addSplit('onboarding'); // no onboarding work was needed
+          res = await instrument('update', () => updateRepo(config, branches), {
             attributes: {
               [ATTR_RENOVATE_SPLIT]: 'update',
             },
-          },
-        );
-        setMeta({ repository: config.repository });
+          });
+          setMeta({ repository: config.repository });
+        } else {
+          res = await instrument(
+            'onboarding',
+            () => ensureOnboardingPr(config, packageFiles, branches),
+            {
+              attributes: {
+                [ATTR_RENOVATE_SPLIT]: 'onboarding',
+              },
+            },
+          );
+          addSplit('onboarding');
+        }
         addSplit('update');
         if (performExtract) {
           await setBranchCache(branches); // update branch cache if performed extraction
@@ -174,8 +178,7 @@ export async function renovateRepository(
           );
         }
         await finalizeRepo(config, branchList, repoConfig);
-        // TODO #22198
-        repoResult = processResult(config, res!);
+        repoResult = processResult(config, res);
       }
       printRepositoryProblems(config.repository);
     } catch (err) /* istanbul ignore next */ {
@@ -193,7 +196,7 @@ export async function renovateRepository(
     }
   } else {
     logger.debug(
-      { error },
+      { err: error },
       'Skipping the rest to the Renovate run due to error in `init` phase',
     );
   }
@@ -231,6 +234,7 @@ export async function renovateRepository(
       status: repoResult?.status,
       enabled: repoResult?.enabled,
       onboarded: repoResult?.onboarded,
+      exitCode: repoResult?.exitCode,
     },
     'Repository finished',
   );
@@ -261,6 +265,7 @@ function emptyExtract(): ExtractResult {
 
 export function printRepositoryProblems(repository: string | undefined): void {
   const repoProblems = extractRepoProblems(repository);
+  // v8 ignore else -- only called when the repository logged a problem
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },

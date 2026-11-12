@@ -248,6 +248,7 @@ describe('modules/versioning/elm/index', () => {
         ${'1.0.0 <= v < 2.0.0'}   | ${'update-lockfile'} | ${'1.5.0'}  | ${'1.0.0 <= v < 2.0.0'}
         ${'1.0.0 <= v < 2.0.0'}   | ${'update-lockfile'} | ${'2.0.0'}  | ${'2.0.0 <= v < 3.0.0'}
         ${'1.0.0 <= v < 2.0.0'}   | ${'pin'}             | ${'1.5.0'}  | ${'1.5.0'}
+        ${'2.0.0 <= v < 3.0.0'}   | ${'widen'}           | ${'1.5.0'}  | ${'2.0.0 <= v < 3.0.0'}
       `(
         'getNewValue("$currentValue", "$rangeStrategy", "$newVersion") === "$expected"',
         ({ currentValue, rangeStrategy, newVersion, expected }) => {

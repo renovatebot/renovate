@@ -1,5 +1,5 @@
 The `azure-pipelines` manager is disabled by default.
-This is because there's no way for Renovate to know whether new task versions are yet available with the Azure DevOps environment, so new versions proposed by Renovate could fail.
+This is because there is no way for Renovate to know whether new task versions are yet available with the Azure DevOps environment, so new versions proposed by Renovate could fail.
 
 To opt into running it, set the following:
 
@@ -44,7 +44,7 @@ resources:
     - container: linux
       image: ubuntu:24.04
     - container: python
-      image: python:3.14@sha256:4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df
+      image: python:3.14@sha256:d18055009f327b22993de14458aa5a6bac032cdf459ea2a2e9bbdc3d3d49e4fb
 
 stages:
   - stage: StageOne
@@ -71,8 +71,8 @@ The `azure-pipelines` manager can process these files:
 - `azure-pipeline.yml`
 
 !!! warning
-  Renovate can't update (root) container-element in containers jobs, see [issue #21987](https://github.com/renovatebot/renovate/issues/21987).
-  Renovate can't read Azure repositories defined in resource blocks, see [issue #15028](https://github.com/renovatebot/renovate/issues/15028).
+  Renovate cannot update (root) container-element in containers jobs, see [issue #21987](https://github.com/renovatebot/renovate/issues/21987).
+  Renovate cannot read Azure repositories defined in resource blocks, see [issue #15028](https://github.com/renovatebot/renovate/issues/15028).
 
 [resources-docs]: https://learn.microsoft.com/azure/devops/pipelines/yaml-schema/resources
 [tasks-docs]: https://learn.microsoft.com/azure/devops/pipelines/yaml-schema/steps-task

@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { parseGitAuthor } from '../../../util/git/author.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { GitUrlOption } from '../types.ts';
+import type { GithubEnterpriseServerHost, GithubHost } from './types.ts';
 
 export function warnIfDefaultGitAuthorEmail(
   gitAuthor: string | undefined,
@@ -43,11 +44,19 @@ export function getRepoUrl(
   // clone to avoid mutating the caller's URL; href is known-valid
   const url = parseUrl(endpoint.href)!;
   if (authToken) {
-    const [username, password] = authToken.split(':');
+    const [username, password] = authToken.includes(':')
+      ? authToken.split(':')
+      : ['x-access-token', authToken];
     url.username = username;
-    url.password = password ?? '';
+    url.password = password;
   }
   url.host = url.host.replace('api.github.com', 'github.com');
   url.pathname = `${repository}.git`;
   return url.href;
+}
+
+export function isGithubEnterpriseServer(
+  host: GithubHost,
+): host is GithubEnterpriseServerHost {
+  return host.type === 'ghes';
 }

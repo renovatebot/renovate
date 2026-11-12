@@ -1,8 +1,8 @@
-import { isArray } from '@sindresorhus/is';
+import { isArray, isPlainObject } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
-import type { AllConfig } from '../../../../config/types.ts';
+import type { AllConfig, RenovateOptions } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
 import { coersions } from './coersions.ts';
@@ -60,6 +60,18 @@ const migratedKeysWithValues = [
     newName: 'recreateWhen',
     from: 'false',
     to: 'auto',
+  },
+  {
+    oldName: 'dependencyDashboard',
+    newName: 'dependencyDashboard',
+    from: 'true',
+    to: '{"enabled":true}',
+  },
+  {
+    oldName: 'dependencyDashboard',
+    newName: 'dependencyDashboard',
+    from: 'false',
+    to: '{"enabled":false}',
   },
 ];
 
@@ -138,6 +150,25 @@ function massageConvertedExperimentalVars(
   return result;
 }
 
+/**
+ * Combines an env value with the value from `RENOVATE_CONFIG`: mergeable lists are appended, mergeable objects are shallow-merged, anything else is replaced.
+ */
+function mergeEnvValue(
+  option: Readonly<RenovateOptions>,
+  existing: unknown,
+  value: unknown,
+): unknown {
+  if (option.mergeable) {
+    if (isArray(existing) && isArray(value)) {
+      return [...existing, ...value];
+    }
+    if (isPlainObject(existing) && isPlainObject(value)) {
+      return { ...existing, ...value };
+    }
+  }
+  return value;
+}
+
 export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
   configEnvKey = 'RENOVATE_CONFIG',
@@ -164,7 +195,11 @@ export async function getConfig(
         const parsed = JSON5.parse(envVal);
         if (isArray(parsed)) {
           // @ts-expect-error -- type can't be narrowed
-          config[option.name] = parsed;
+          config[option.name] = mergeEnvValue(
+            option,
+            config[option.name as keyof AllConfig],
+            parsed,
+          );
         } else {
           logger.debug(
             { val: envVal, envName },
@@ -181,7 +216,11 @@ export async function getConfig(
       const coerce = coersions[option.type];
       try {
         // @ts-expect-error -- type can't be narrowed
-        config[option.name] = coerce(envVal);
+        config[option.name] = mergeEnvValue(
+          option,
+          config[option.name as keyof AllConfig],
+          coerce(envVal),
+        );
       } catch (e) {
         throw new Error(`${envName} was invalid: ${e}`);
       }

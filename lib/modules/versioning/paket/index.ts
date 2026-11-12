@@ -190,10 +190,8 @@ function pessimisticWithFloor(range: PaketRange, v: NugetVersion): PaketRange {
 
 function replaceRange(range: PaketRange, v: NugetVersion): PaketRange {
   const [first, second] = range.constraints;
-  if (
-    first.operator === '~>' &&
-    (second?.operator === '>' || second?.operator === '>=')
-  ) {
+  const hasFloor = second?.operator === '>' || second?.operator === '>=';
+  if (first.operator === '~>' && hasFloor) {
     return pessimisticWithFloor(range, v);
   }
 

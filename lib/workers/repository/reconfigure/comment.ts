@@ -33,7 +33,7 @@ const SECTION_ORDER = [
   'WARNINGS',
   'ERRORS',
 ] as const;
-// Once the body is summarised, "What to Expect" should render before "Detected Package Files".
+// Once the body is summarized, "What to Expect" should render before "Detected Package Files".
 const SUMMARY_SECTION_ORDER = [
   'PRLIST',
   'CONFIG',
@@ -46,7 +46,7 @@ const SUMMARY_SECTION_ORDER = [
 function buildReconfigurePrCommentTemplate(
   sectionOrder: readonly string[],
 ): string {
-  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
+  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your Renovate settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
   // TODO #22198
   prCommentTemplate += `

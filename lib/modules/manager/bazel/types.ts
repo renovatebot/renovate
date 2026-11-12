@@ -36,9 +36,7 @@ export type Fragment = NestedFragment | StringFragment;
  * which is enough for Renovate purposes.
  */
 export type FragmentData =
-  | string
-  | FragmentData[]
-  | { [k: string]: FragmentData };
+  string | FragmentData[] | { [k: string]: FragmentData };
 
 /**
  * To access a fragment, we provide its path in the tree.

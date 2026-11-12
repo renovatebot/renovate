@@ -1,4 +1,4 @@
-import { isNumber, isNumericString } from '@sindresorhus/is';
+import { isNullOrUndefined, isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -20,6 +20,7 @@ import {
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
 import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -51,13 +52,26 @@ export async function generateLockFile(
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    // if pnpm is being upgraded, it comes first
+    let pnpmConstraint: string | null | undefined =
+      getPnpmConstraintFromUpgrades(upgrades);
+    if (isNullOrUndefined(pnpmConstraint)) {
+      pnpmConstraint = await resolveToolConstraint(config, 'pnpm', async () => {
+        // look in package.json > packageManager or engines
+        let pnpmVersion = getPackageManagerVersion(
+          'pnpm',
+          await lazyPgkJson.getValue(),
+        );
+        // use lockfileVersion to find pnpm version range
+        if (isNullOrUndefined(pnpmVersion)) {
+          pnpmVersion = await getConstraintFromLockFile(lockFileName);
+        }
+        return pnpmVersion;
+      });
+    }
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
-      constraint:
-        getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
-        config.constraints?.pnpm ?? // from user config or extraction
-        getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
-        (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
+      constraint: pnpmConstraint,
     };
 
     const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
@@ -130,8 +144,9 @@ export async function generateLockFile(
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
 
     if (lockUpdates.length !== upgrades.length) {
-      // This command updates the lock file based on package.json
-      commands.push(`pnpm install ${args}`);
+      // This command updates the lock file based on package.json.
+      // Pass `--no-frozen-lockfile` to ensure the lockfile is updated
+      commands.push(`pnpm install ${args} --no-frozen-lockfile`);
     }
 
     // rangeStrategy = update-lockfile

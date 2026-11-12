@@ -25,12 +25,12 @@ describe('modules/datasource/dart-version/index', () => {
 
     it('returns null for error', async () => {
       httpMock.scope(baseUrl).get(urlPath).replyWithError('error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -42,12 +42,12 @@ describe('modules/datasource/dart-version/index', () => {
           )
           .reply(200, { prefixes: [] });
       }
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

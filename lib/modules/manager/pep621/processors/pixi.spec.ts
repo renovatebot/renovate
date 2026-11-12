@@ -263,5 +263,86 @@ requires-pixi = ">=0.38,<0.39"
         },
       ]);
     });
+
+    it('falls back to the extracted pixi constraint', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
+      fs.ensureCacheDir.mockResolvedValueOnce(
+        '/tmp/renovate/cache/others/pixi',
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.38.0' },
+          { version: '0.40.1' },
+          { version: '0.41.4' },
+        ],
+      });
+
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            constraints: {},
+            extractedConstraints: { pixi: '>=0.40,<0.41' },
+          },
+          updatedDeps: [{ depName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots.at(-1)?.cmd).toContain('install-tool pixi 0.40.1');
+    });
+
+    it('prefers the derived pixi constraint over the extracted one', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
+      fs.ensureCacheDir.mockResolvedValueOnce(
+        '/tmp/renovate/cache/others/pixi',
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.38.0' },
+          { version: '0.40.1' },
+          { version: '0.41.4' },
+        ],
+      });
+      const project = parsePyProject(`
+[tool.pixi.project]
+name = "test"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+requires-pixi = ">=0.40,<0.41"
+`);
+
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            constraints: {},
+            extractedConstraints: { pixi: '>=0.38,<0.39' },
+          },
+          updatedDeps: [{ depName: 'dep1' }],
+        },
+        project!,
+      );
+
+      expect(execSnapshots.at(-1)?.cmd).toContain('install-tool pixi 0.40.1');
+    });
   });
 });

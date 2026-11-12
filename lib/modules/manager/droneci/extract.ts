@@ -42,16 +42,17 @@ export function extractPackageFile(
               currentFrom += finalLineMatch.groups.currentFrom;
               replaceString += `\n${finalLineMatch.groups.replaceString}`;
 
-              const dep = getDep(currentFrom, true, config.registryAliases);
-              dep.depType = 'docker';
+              const dep = getDep(currentFrom, {
+                registryAliases: config.registryAliases,
+                depType: 'docker',
+              });
               dep.replaceString = replaceString;
-              if (dep.autoReplaceStringTemplate) {
-                const d = '@{{newDigest}}';
-                const c = firstLineMatch.groups.leading.length + 1;
-                const nd = `\\\n${' '.repeat(c)}${d}`;
-                const replaced = dep.autoReplaceStringTemplate.replace(d, nd);
-                dep.autoReplaceStringTemplate = `"${replaced}"`;
-              }
+              const d = '@{{newDigest}}';
+              const c = firstLineMatch.groups.leading.length + 1;
+              const nd = `\\\n${' '.repeat(c)}${d}`;
+              // getDep always set it, see second parameter
+              const replaced = dep.autoReplaceStringTemplate!.replace(d, nd);
+              dep.autoReplaceStringTemplate = `"${replaced}"`;
               deps.push(dep);
             }
             break;
@@ -62,12 +63,10 @@ export function extractPackageFile(
           /^\s* image:\s*'?"?(?<currentFrom>[^\s'"]+)'?"?\s*$/,
         ).exec(line);
         if (match?.groups) {
-          const dep = getDep(
-            match.groups.currentFrom,
-            true,
-            config.registryAliases,
-          );
-          dep.depType = 'docker';
+          const dep = getDep(match.groups.currentFrom, {
+            registryAliases: config.registryAliases,
+            depType: 'docker',
+          });
           deps.push(dep);
         }
       }

@@ -33,6 +33,13 @@ import {
   type InternalJsonUnsafeOptions,
 } from './http.ts';
 import type { GotLegacyError } from './legacy.ts';
+import {
+  isForbidden,
+  isGone,
+  isServerError,
+  isUnauthorized,
+  isUnprocessableContent,
+} from './status.ts';
 import type {
   GraphqlOptions,
   HttpMethod,
@@ -102,6 +109,18 @@ const GithubErrors = z
   .union([LooseArray(GithubError), GithubError.transform((error) => [error])])
   .catch([]);
 
+/**
+ * Whether `err` is GitHub's response to creating a PR for a branch which already has one, usually because a different user created it so Renovate could not find it.
+ */
+export function isPrAlreadyExistsError(err: any): boolean {
+  return (
+    isUnprocessableContent(err) &&
+    GithubErrors.parse(err.response?.body?.errors).some((e) =>
+      e.message?.startsWith('A pull request already exists'),
+    )
+  );
+}
+
 function handleGotError(
   err: GotLegacyError,
   url: string | URL,
@@ -127,29 +146,29 @@ function handleGotError(
     logger.debug({ err }, '');
     return new ExternalHostError(err, 'github');
   }
-  if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+  if (isServerError(err)) {
     logger.debug({ err }, 'GitHub failure: 5xx');
     return new ExternalHostError(err, 'github');
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err) &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err) &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
     logger.warn({ err }, 'GitHub failure: secondary rate limit');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
-  if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
+  if (isForbidden(err) && message.includes('Upgrade to GitHub Pro')) {
     logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
     return err;
   }
-  if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
+  if (isForbidden(err) && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
 
     const parsed = parseUrl(baseUrl);
@@ -178,7 +197,7 @@ function handleGotError(
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err) &&
     message.startsWith('Resource not accessible by integration')
   ) {
     logger.debug(
@@ -187,7 +206,7 @@ function handleGotError(
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (err.statusCode === 401) {
+  if (isUnauthorized(err)) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
     // v8 ignore else -- TODO: add test #40625
@@ -209,7 +228,7 @@ function handleGotError(
       return new Error(PLATFORM_BAD_CREDENTIALS);
     }
   }
-  if (err.statusCode === 422) {
+  if (isUnprocessableContent(err)) {
     if (
       message.includes('Review cannot be requested from pull request author')
     ) {
@@ -224,16 +243,14 @@ function handleGotError(
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     }
-    if (
-      errors.some((e) => e.message?.startsWith('A pull request already exists'))
-    ) {
+    if (isPrAlreadyExistsError(err)) {
       return err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     return new ExternalHostError(err, 'github');
   }
   if (
-    err.statusCode === 410 &&
+    isGone(err) &&
     err.body?.message === 'Issues are disabled for this repo'
   ) {
     return err;
@@ -247,6 +264,13 @@ interface GraphqlPaginatedContent<T = unknown> {
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 
+function hasVendorAccept(acceptStrings: string[]): boolean {
+  return (
+    acceptStrings.some((x) => x.startsWith('application/vnd.github.')) &&
+    acceptStrings.length >= 2
+  );
+}
+
 function constructAcceptString(input?: unknown): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings = isString(input) ? input.split(regEx(/\s*,\s*/)) : [];
@@ -255,8 +279,7 @@ function constructAcceptString(input?: unknown): string {
   // v8 ignore else -- TODO: add test #40625
   if (
     !acceptStrings.some((x) => x === defaultAccept) &&
-    (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
-      acceptStrings.length < 2)
+    !hasVendorAccept(acceptStrings)
   ) {
     acceptStrings.push(defaultAccept);
   }
@@ -497,10 +520,10 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
               if (nextUrl.origin !== resolvedUrl.origin) {
                 logger.once.warn(
                   {
-                    requestHost: resolvedUrl.host,
-                    paginationHost: nextUrl.host,
+                    requestOrigin: resolvedUrl.origin,
+                    paginationOrigin: nextUrl.origin,
                   },
-                  'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+                  'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
                 );
                 break;
               }
@@ -555,10 +578,10 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
           logger.once.warn(
             {
-              requestHost: resolvedUrl.host,
-              paginationHost: firstPageUrl.host,
+              requestOrigin: resolvedUrl.origin,
+              paginationOrigin: firstPageUrl.origin,
             },
-            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
           );
         }
       }

@@ -88,12 +88,12 @@ describe('modules/datasource/terraform-module/index', () => {
       async ({ variant }) => {
         mockDefaultRegistryLookup(variant);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource,
             packageName: 'hashicorp/consul/aws',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       },
     );
 
@@ -134,13 +134,13 @@ describe('modules/datasource/terraform-module/index', () => {
       async ({ variant }) => {
         mockThirdPartyRegistryLookup(variant);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource,
             packageName: 'hashicorp/consul/aws',
             registryUrls: ['https://terraform.company.com'],
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       },
     );
 
@@ -351,13 +351,13 @@ describe('modules/datasource/terraform-module/index', () => {
         .get('/registry/docs/modules/terraform-aws-modules/vpc/aws/index.json')
         .reply(200, {});
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'terraform-aws-modules/vpc/aws',
           registryUrls: ['https://registry.opentofu.org'],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         homepage:
           'https://search.opentofu.org/module/terraform-aws-modules/vpc/aws',
         sourceUrl: 'https://github.com/terraform-aws-modules/terraform-aws-vpc',

@@ -36,9 +36,10 @@ const DevboxEntry = z
       dep.versioning = versioning.id;
     }
 
+    const versioningApi = versioning?.api ?? api;
     if (
-      !(versioning?.api ?? api).isValid(currentValue) ||
-      !(versioning?.api ?? api).isSingleVersion(currentValue)
+      !versioningApi.isValid(currentValue) ||
+      !versioningApi.isSingleVersion(currentValue)
     ) {
       logger.debug(
         { depName },

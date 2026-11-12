@@ -21,7 +21,9 @@ export const SBT_PLUGINS_REPO =
 export class SbtPluginDatasource extends Datasource {
   static readonly id = 'sbt-plugin';
 
-  override readonly defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [SBT_PLUGINS_REPO, MAVEN_REPO];
+  }
 
   override readonly defaultVersioning = ivyVersioning.id;
 
@@ -32,8 +34,7 @@ export class SbtPluginDatasource extends Datasource {
     'The source URL is determined from the `scm` tags in the results.';
 
   constructor() {
-    super(SbtPluginDatasource.id);
-    this.http = new Http('sbt');
+    super(SbtPluginDatasource.id, new Http('sbt'));
   }
 
   // istanbul ignore next: to be rewritten
@@ -190,6 +191,7 @@ export class SbtPluginDatasource extends Datasource {
           this.http,
           ensureTrailingSlash(searchSubRoot),
         );
+        // v8 ignore else -- needs a nested directory listing fixture
         if (subRootContent) {
           const sbtVersionItems = extractPageLinks(
             subRootContent,
@@ -201,6 +203,7 @@ export class SbtPluginDatasource extends Datasource {
               this.http,
               ensureTrailingSlash(releasesRoot),
             );
+            // v8 ignore else -- needs a nested directory listing fixture
             if (releasesIndexContent) {
               const releasesParsed = extractPageLinks(
                 releasesIndexContent,
@@ -211,6 +214,7 @@ export class SbtPluginDatasource extends Datasource {
           }
         }
       }
+      // v8 ignore else -- needs a nested directory listing fixture
       if (releases.length) {
         return [...new Set(releases)].sort(compare);
       }

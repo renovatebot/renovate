@@ -12,6 +12,7 @@ import * as hostRules from '../../../../util/host-rules.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
+import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { PdmProcessor } from './pdm.ts';
 
@@ -35,7 +36,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
     it('throws TEMPORARY_ERROR', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
       const result = processor.updateArtifacts(
-        partial<UpdateArtifact>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
         partial(),
       );
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);
@@ -111,6 +112,73 @@ describe('modules/manager/pep621/processors/pdm', () => {
             "'",
         },
       ]);
+    });
+
+    it('falls back to the extracted python constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          // no `requires-python` in the pyproject, so the extracted one is used
+          config: { extractedConstraints: { python: '==3.11.1' } },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool python 3.11.1',
+      );
+    });
+
+    it('falls back to the extracted pdm constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: { constraints: {}, extractedConstraints: { pdm: '2.6.1' } },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool pdm 2.6.1',
+      );
     });
 
     it('returns artifact error', async () => {

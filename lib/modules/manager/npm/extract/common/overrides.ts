@@ -1,6 +1,7 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
+import type { OverrideDependency } from '../types.ts';
 import { extractDependency } from './dependency.ts';
 import { setNodeCommitTopic } from './node.ts';
 
@@ -12,9 +13,9 @@ import { setNodeCommitTopic } from './node.ts';
  */
 export function extractOverrideDepsRec(
   parents: string[],
-  child: NpmManagerData,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+  child: OverrideDependency | undefined,
+): PackageDependency<NpmManagerData>[] {
+  const deps: PackageDependency<NpmManagerData>[] = [];
   if (!child || isEmptyObject(child)) {
     return deps;
   }

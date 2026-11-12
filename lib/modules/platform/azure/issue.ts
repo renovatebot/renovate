@@ -122,7 +122,7 @@ export class IssueService {
           // order `Resolved` before `Closed` (e.g. some custom Agile
           // inheritances) still close to `Closed`; fall back to the wider set
           // only when no `Completed` state exists. Keep the full set for
-          // recognising already-closed items.
+          // recognizing already-closed items.
           states.closed = completed?.name ?? closedNames[0];
           states.closedNames = new Set(closedNames);
         }

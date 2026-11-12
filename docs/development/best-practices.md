@@ -1,12 +1,12 @@
 # Best practices
 
 This document explains our best practices.
-Follow these best practices when you're working on our code.
+Follow these best practices when you are working on our code.
 
 ## Git branch names
 
 Branch names should start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
-If you're closing an issue with your PR then put the issue number after the scope.
+If you are closing an issue with your PR then put the issue number after the scope.
 Finally, describe the changes in the branch in a few words.
 
 Some good branch names:
@@ -18,7 +18,7 @@ Some good branch names:
 
 Avoid branch names like `patch-1`.
 
-If you don't know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
+If you do not know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
 
 If you forgot to pick a good branch name when you started work, then rename the branch before creating the pull request.
 Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch) to learn how to rename your branch on GitHub.
@@ -32,9 +32,13 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
   - Only use [`v8` comments](https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#ignore-hints) for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `v8` comments
   - Do not add a line count after `next`, for example `next 3`, because V8 does not honor the count and always exempts only the next code block
+  - Do not remove existing `v8` comments; document why the branch is unreachable instead
+  - Before adding a `v8` comment, try to construct an input that reaches the branch, and prefer a real test
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
 - Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
+- Keep TSDoc to a factual statement of what a function does, without explanatory prose paragraphs
+- Build strings with template literals rather than `+`, at least in code you add or rewrite
 
 ```ts
 /* v8 ignore next -- can never happen */
@@ -74,7 +78,7 @@ Source: [Google TypeScript Style Guide, function declarations](https://google.gi
 ### Write understandable code
 
 Write code that is easier to read, review and maintain.
-Avoid "clever" code that's hard to understand.
+Avoid "clever" code that is hard to understand.
 
 Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
 For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops.
@@ -159,10 +163,13 @@ For `WARN`, `ERROR` and `FATAL` log messages use logger metadata.
 Also use logger metadata the result is a complex metadata object needing a multiple-line pretty stringification.
 
 For `INFO` and `DEBUG` log messages inline the metadata into the log message where feasible.
-It is OK to not inline metadata if it's complex, but in that case first think whether that much information really needs to be logged.
+It is OK to not inline metadata if it is complex, but in that case first think whether that much information really needs to be logged.
 
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a static `msg` component, so they can be automatically grouped or associated.
+
+When logging an error object, always put it under the `err` metadata key, at any log level.
+Bunyan only applies the error serializer (stack handling, redaction) to the `err` key, and a single key keeps error logs searchable.
 
 Good:
 
@@ -170,6 +177,7 @@ Good:
 logger.debug({ config }, 'Full config');
 logger.debug(`Generated branchName: ${branchName}`);
 logger.warn({ presetName }, 'Failed to look up preset');
+logger.debug({ packageFile, err: parsed.error }, 'Failed to parse file');
 ```
 
 Avoid:
@@ -177,6 +185,7 @@ Avoid:
 ```ts
 logger.debug({ branchName }, 'Generated branchName');
 logger.warn(`Failed to look up preset ${presetName}`);
+logger.debug({ packageFile, error: parsed.error }, 'Failed to parse file');
 ```
 
 ## Array constructor
@@ -207,6 +216,7 @@ Use `for ( ... of ...)` loops instead of `[Array|Set|Map].prototype.forEach` and
 - Using `for ( ... in ...)` for objects is error-prone. It will include enumerable properties from the prototype chain
 - Using `for ( ... in ...)` to iterate over arrays, will counterintuitively return the array's indices
 - Avoid `[Array|Set|Map].prototype.forEach`. It makes code harder to debug and defeats some useful compiler checks like reachability
+- Prefer branch-free forms such as `.filter(isTruthy)` or `flatMap` over `if (!x) continue` inside loops; each explicit branch needs its own test for full coverage
 
 Only use `Array.prototype.map()` when the return value is used, otherwise use `for ( ... of ...)`.
 
@@ -260,6 +270,9 @@ try {
 
 Never use `Promise.resolve` in async functions.
 Never use `Promise.reject` in async functions, instead throw an `Error` class type.
+Never put `await` in a position that is only evaluated conditionally; use `if`/`else`, as V8 coverage misreports such constructs.
+This covers ternary branches, the right side of `&&`, `||`, `??`, `&&=`, `||=` and `??=`, the arguments and computed keys of an optional chain (`a?.b(await c)`), and default values in destructuring (`const { v = await d } = o`).
+Never use a ternary as an operand of `&&`, `||`, `??` or their assignment forms `&&=`, `||=`, `??=`.
 
 ## Dates and times
 
@@ -279,6 +292,7 @@ if (end) {
 
 ## Unit testing
 
+- Spec files have exactly one root `describe`, named by the file path (e.g. `describe('workers/repository/process/extract-update', ...)`); nest any grouping inside it
 - Separate the _Arrange_, _Act_ and _Assert_ phases with newlines
 - Use `it.each` rather than `test.each`
 - Prefer [Tagged Template Literal](https://vitest.dev/api/#test-each) style for `it.each`, Prettier will help with formatting
@@ -289,12 +303,12 @@ if (end) {
   - Avoid overwriting functions, for example: (`func = vi.fn();`)
 - Use plain `vi.mock('./module.ts', ()=>({ defaut: vi.fn(), some: vi.fn() }))` when only a few exports are touched, and stub them explicitly
 - Use `vi.mock('./module.ts', () => mockDeep())` only when the module is pulled in transitively and hand-stubbing every export is impractical
-  - `mockDeep` returns a mock for any property access, so typos in mocked names won't fail the test
+  - `mockDeep` returns a mock for any property access, so typos in mocked names will not fail the test
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
-- Avoid `toMatchSnapshot`, only use it for:
-  - huge strings like the Renovate PR body text
-  - huge complex objects where you only need to test parts
+- Do not use snapshot matchers (`toMatchSnapshot`, `toMatchInlineSnapshot`, `toThrowErrorMatchingSnapshot`), write explicit assertions instead
+  - For huge strings like the Renovate PR body text, assert on the sections the test is about with `toContain`, `toStartWith` or `toEndWith`; compare the whole string with `toBe` only when producing exactly that text is the point of the test
+  - For huge complex objects where you only need to test parts, use `toMatchObject`
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required
@@ -304,6 +318,7 @@ if (end) {
 
 Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
 Inline `codeBlock`s improve performance plus are more readable.
+Write them inline with real indentation, not as joined arrays, and do not add a new file under `__fixtures__` for content that fits inline.
 
 ```ts
 import { codeBlock } from 'common-tags';
@@ -361,6 +376,12 @@ if (match?.groups) {
   const { major, minor, patch } = match.groups;
 }
 ```
+
+Before writing a regex, check whether a shared helper already covers the check:
+
+- Versions: use the versioning API from `lib/modules/versioning/` (`get(id)` from `lib/modules/versioning/index.ts`, or a versioning's own exports like `isPseudoVersion()` in `gomod`) instead of patterns like `/^\d+\.\d+\.\d+$/`. If no versioning offers the check, add it to the matching versioning. The `renovate/prefer-versioning-helpers` lint rule flags hand-written version regexes.
+- User-provided regex or glob patterns: `matchRegexOrGlob()` and `getRegexPredicate()` from `lib/util/string-match.ts`.
+- URLs: the helpers in `lib/util/url.ts`, such as `parseUrl()` and `trimTrailingSlash()`.
 
 ## Windows
 

@@ -37,8 +37,8 @@ If you omit a file name from your preset (e.g. `github>abc/foo`) then Renovate w
 If you wish to have an alternative file name, you need to specify it (e.g. `github>abc/foo//alternative-name.json5`).
 
 !!! warning
-  We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
-  If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
+  We have deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
+  If you are using a `renovate.json` file to share your presets, rename it to `default.json`.
 
 ### GitHub
 
@@ -94,9 +94,9 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 ### Self-hosted Git / current Git server
 
 !!! note
-  If you're self-hosting your platform, for instance a GitHub Enterprise Server instance, you'll want to use `local>` to look up presets on the current Git server.
+  If you are self-hosting your platform, for instance a GitHub Enterprise Server instance, you will want to use `local>` to look up presets on the current Git server.
   <br>
-  You can also use `local>` if you're running on `github.com`, and this will work as if you had written `github>`.
+  You can also use `local>` if you are running on `github.com`, and this will work as if you had written `github>`.
   This can make your presets more portable if you run across many different Git platforms.
 
 For instance, if you have `platform=github` and `endpoint=https://github.company.com`:
@@ -113,7 +113,7 @@ For instance, if you have `platform=github` and `endpoint=https://github.company
 | Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
 !!! tip
-  You can't combine the path and sub-preset syntaxes.
+  You cannot combine the path and sub-preset syntaxes.
   This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
   One workaround is to use distinct files instead of sub-presets.
 
@@ -131,8 +131,8 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 ## How to Use Preset Configs
 
-By default, Renovate App's onboarding PR suggests the `["config:recommended"]` preset.
-If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
+By default, the onboarding PR of the Mend Renovate app suggests the `["config:recommended"]` preset.
+If you are self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your self-hosted config.
 
 Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.
 
@@ -144,8 +144,8 @@ A typical onboarding `renovate.json` looks like this:
 }
 ```
 
-Here's an example of using presets to change Renovate's behavior.
-You're happy with the `config:recommended` preset, but want Renovate to create PRs when you're not at the office.
+Here is an example of using presets to change Renovate's behavior.
+You are happy with the `config:recommended` preset, but want Renovate to create PRs when you are not at the office.
 You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
@@ -370,6 +370,11 @@ Parameters are supported similar to other methods:
 }
 ```
 
+!!! note
+  Renovate warns about HTTP requests to internal hosts (loopback, private ranges, and similar) by default, and can be set to block them - see [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess).
+  Because a preset's response becomes configuration, fetching presets from an internal host needs a deliberate grant from the self-hosted administrator: a `hostRules` entry in their own configuration setting [`allowInternal=true`](./self-hosted-configuration.md#hostrulesallowinternal), scoped with a `hostType` or a URL-prefix `matchHost`.
+  This applies to `npm:` presets too, where the scoped grant names the registry, for example `{ "matchHost": "https://registry.corp/", "hostType": "npm", "allowInternal": true }`.
+
 ## Templating presets
 
 You can use [Handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
@@ -410,7 +415,7 @@ Please consider contributing it to the [Renovate repository](https://github.com/
 
 Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
 The maintainers can also help improve the preset, and let you know where to put it in the code.
-If you are proposing a "monorepo" preset addition then it's OK to raise a PR directly as that can be more efficient than a GitHub Discussion.
+If you are proposing a "monorepo" preset addition then it is OK to raise a PR directly as that can be more efficient than a GitHub Discussion.
 
 ## Group/Organization level presets
 
@@ -437,9 +442,9 @@ For example the result may be:
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
 
-Let's say that your username on npm and elsewhere is "fastcore".
+Assume that your username on npm and elsewhere is "fastcore".
 In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`.
-Let's assume you choose `renovate-config-fastcore` as the package name.
+Assume you choose `renovate-config-fastcore` as the package name.
 
 You then need to publish the `renovate-config-fastcore` package where the `package.json` has the field `renovate-config` and then put your config under the field `default`.
 For example:

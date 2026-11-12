@@ -182,6 +182,12 @@ If you want to convert key-value pairs to an object, use `toObject`, e.g.,
 
 `{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
 
+### uppercase
+
+The `uppercase` helper converts a given string to upper case.
+
+`{{{ uppercase depName }}}`
+
 ## Environment variables
 
 By default, templates can only access [a subset of environment variables](./environment-variable-handling.md#with-child-processes) like `HOME` or `PATH`.
@@ -191,7 +197,7 @@ You can reference environment variables like so:
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option, which will also be available to all child processes.
+If you are self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option, which will also be available to all child processes.
 
 See also: [environment variable handling](./environment-variable-handling.md).
 
