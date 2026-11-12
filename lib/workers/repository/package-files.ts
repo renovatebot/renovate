@@ -156,7 +156,6 @@ export class PackageFiles {
                     ? `\`lock file @ ${update.newVersion}\``
                     : `\`${update.newValue ?? update.newVersion}\``,
                 ),
-                ),
               ),
             ];
             if (uniqueUpdates.length > 0) {
