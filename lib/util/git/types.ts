@@ -12,6 +12,8 @@ export interface GitAuthor {
 
 export type GitNoVerifyOption = 'commit' | 'push';
 
+export type GitCredentialPassingOption = 'url' | 'store';
+
 /**
  * Represents a virtual branch tracked as `refs/remotes/origin/<name>`.
  * Used by platforms like Gerrit where changes are represented as refs

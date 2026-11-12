@@ -2,6 +2,8 @@ import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   addGitConfigEnvironmentVariables,
+  getCredentialStoreConfig,
+  setCredentialStoreConfig,
   setNoVerify,
   simpleGitConfig,
 } from './config.ts';
@@ -22,6 +24,18 @@ describe('util/git/config', () => {
         allowUnsafeUrlRewrite: true,
       },
     });
+  });
+
+  it('stores a copy of the credential store config entries', () => {
+    const entries = [{ key: 'credential.https://host.helper', value: 'store' }];
+
+    setCredentialStoreConfig(entries);
+    entries.push({ key: 'other', value: 'value' });
+
+    expect(getCredentialStoreConfig()).toEqual([
+      { key: 'credential.https://host.helper', value: 'store' },
+    ]);
+    setCredentialStoreConfig([]);
   });
 
   it('uses timeout value from GlobalConfig', () => {
