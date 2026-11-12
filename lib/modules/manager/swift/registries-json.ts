@@ -1,8 +1,9 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import type { ParsedRegistries } from './types.ts';
 
 // Subset of the SwiftPM `registries.json` schema we care about. Tolerates
@@ -17,15 +18,7 @@ const DEFAULT_KEY = '[default]';
 
 export function parseRegistriesJson(content: string): ParsedRegistries {
   const result: ParsedRegistries = { named: {} };
-  let raw: unknown;
-  try {
-    raw = JSON.parse(content);
-  } catch (err) {
-    logger.debug({ err }, 'swift: failed to parse registries.json as JSON');
-    return result;
-  }
-
-  const parsed = RegistriesJson.safeParse(raw);
+  const parsed = Json.pipe(RegistriesJson).safeParse(content);
   if (!parsed.success) {
     return result;
   }
@@ -61,11 +54,10 @@ export function parseRegistriesJson(content: string): ParsedRegistries {
 export async function discoverRegistryUrls(
   packageSwiftPath: string,
 ): Promise<string[]> {
-  const lastSlash = packageSwiftPath.lastIndexOf('/');
-  const baseDir = lastSlash >= 0 ? packageSwiftPath.slice(0, lastSlash) : '';
-  const candidate = baseDir
-    ? `${baseDir}/.swiftpm/configuration/registries.json`
-    : '.swiftpm/configuration/registries.json';
+  const candidate = getSiblingFileName(
+    packageSwiftPath,
+    '.swiftpm/configuration/registries.json',
+  );
 
   const urls: string[] = [];
   const seen = new Set<string>();

@@ -239,6 +239,14 @@ describe('modules/manager/swift/index', () => {
       version: 1,
     });
 
+    beforeEach(() => {
+      // `fs` is mocked, so give `getSiblingFileName` the real path behavior.
+      fs.getSiblingFileName.mockImplementation((file, sibling) => {
+        const slash = file.lastIndexOf('/');
+        return slash >= 0 ? `${file.slice(0, slash)}/${sibling}` : sibling;
+      });
+    });
+
     it('returns null when no Package.swift files supplied', async () => {
       await expect(extractAllPackageFiles({}, [])).resolves.toBeNull();
     });
