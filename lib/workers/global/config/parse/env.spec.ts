@@ -96,6 +96,8 @@ describe('workers/global/config/parse/env', () => {
       ${{ RENOVATE_RECREATE_WHEN: 'always' }}          | ${{ recreateWhen: 'always' }}
       ${{ RENOVATE_RECREATE_WHEN: 'never' }}           | ${{ recreateWhen: 'never' }}
       ${{ RENOVATE_BASE_BRANCHES: '["main", "dev"]' }} | ${{ baseBranchPatterns: ['main', 'dev'] }}
+      ${{ RENOVATE_DEPENDENCY_DASHBOARD: 'true' }}     | ${{ dependencyDashboard: { enabled: true } }}
+      ${{ RENOVATE_DEPENDENCY_DASHBOARD: 'false' }}    | ${{ dependencyDashboard: { enabled: false } }}
     `('"$envArg" -> $config', async ({ envArg, config }) => {
       await expect(env.getConfig(envArg)).resolves.toMatchObject(config);
     });
@@ -311,6 +313,71 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.enabled).toBeFalse();
       expect(config.token).toBe('a');
+    });
+
+    it('appends hostRules from env to the ones in RENOVATE_CONFIG', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG:
+          '{"hostRules":[{"hostType":"merge-confidence","token":"mc-token"}]}',
+        RENOVATE_HOST_RULES:
+          '[{"matchHost":"artifactory.example.com","token":"af-token"}]',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.hostRules).toEqual([
+        { hostType: 'merge-confidence', token: 'mc-token' },
+        { matchHost: 'artifactory.example.com', token: 'af-token' },
+      ]);
+    });
+
+    it('appends a mergeable list from env to the one in RENOVATE_CONFIG', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"addLabels":["a"]}',
+        RENOVATE_ADD_LABELS: 'b',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.addLabels).toEqual(['a', 'b']);
+    });
+
+    it('merges a mergeable object from env into the one in RENOVATE_CONFIG', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"registryAliases":{"a":"x","b":"y"}}',
+        RENOVATE_REGISTRY_ALIASES: '{"b":"z"}',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.registryAliases).toEqual({ a: 'x', b: 'z' });
+    });
+
+    it('replaces a non-mergeable option from RENOVATE_CONFIG', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"labels":["a"]}',
+        RENOVATE_LABELS: 'b',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.labels).toEqual(['b']);
+    });
+
+    it.each`
+      key                  | existing      | envKey                         | envValue     | expected
+      ${'addLabels'}       | ${['a']}      | ${'RENOVATE_ADD_LABELS'}       | ${'{"b":1}'} | ${{ b: 1 }}
+      ${'registryAliases'} | ${{ a: 'x' }} | ${'RENOVATE_REGISTRY_ALIASES'} | ${'["b"]'}   | ${['b']}
+    `(
+      'replaces mergeable $key when the env value has a different shape',
+      async ({ key, existing, envKey, envValue, expected }) => {
+        const envParam: NodeJS.ProcessEnv = {
+          RENOVATE_CONFIG: JSON.stringify({ [key]: existing }),
+          [envKey]: envValue,
+        };
+        const config = await env.getConfig(envParam);
+        expect(config[key as keyof typeof config]).toEqual(expected);
+      },
+    );
+
+    it('takes customManagers from env when RENOVATE_CONFIG has none', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CUSTOM_MANAGERS: '[{"customType":"regex"}]',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.customManagers).toEqual([{ customType: 'regex' }]);
     });
 
     it('massages converted experimental env vars', async () => {

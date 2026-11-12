@@ -157,9 +157,31 @@ describe('workers/repository/reconfigure/index', () => {
     expect(prComment.ensureReconfigurePrComment).toHaveBeenCalled();
   });
 
-  it('skips pr comment if error during deps extraction', async () => {
+  it('passes the default branch to the extraction config', async () => {
+    await checkReconfigureBranch(
+      { ...config, defaultBranch: 'main' },
+      repoConfig,
+    );
+    expect(inherited.mergeInheritedConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultBranch: 'main', baseBranch: 'main' }),
+    );
+  });
+
+  it('skips pr comment and fails the status check if error during deps extraction', async () => {
     process.extractDependencies.mockRejectedValue(new Error());
+
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+
     expect(prComment.ensureReconfigurePrComment).not.toHaveBeenCalled();
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err: expect.any(Error) },
+      'Error while extracting dependencies using the reconfigure config',
+    );
+    expect(utils.setBranchStatus).toHaveBeenCalledWith(
+      'prefix/reconfigure',
+      'Failed to extract dependencies using the new config',
+      'red',
+      'config-validation',
+    );
   });
 });

@@ -275,10 +275,8 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    if (
-      oldVersion === newValue &&
-      (!upgrade.newName || upgrade.newName === depName)
-    ) {
+    const isNameUnchanged = !upgrade.newName || upgrade.newName === depName;
+    if (oldVersion === newValue && isNameUnchanged) {
       logger.trace('Version is already updated');
       return fileContent;
     }

@@ -80,9 +80,9 @@ function extractFromSection(
   return deps;
 }
 
-/** Reads `.cargo/config.toml`, or, if not found, `.cargo/config` */
+/** Reads `.cargo/config`, or, if not found, `.cargo/config.toml`, as cargo uses `.cargo/config` if both exist */
 async function readCargoConfig(): Promise<CargoConfig | null> {
-  for (const configName of ['config.toml', 'config']) {
+  for (const configName of ['config', 'config.toml']) {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {

@@ -450,7 +450,7 @@ function stripCrossOriginCredentials(
     }
   }
 
-  // defence in depth: got has removed these already, but they must never reach another origin
+  // defense in depth: got has removed these already, but they must never reach another origin
   delete options.headers.authorization;
   delete options.headers.cookie;
   delete options.headers['private-token'];

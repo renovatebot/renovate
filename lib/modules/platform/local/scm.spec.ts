@@ -1,3 +1,4 @@
+import { glob } from 'glob';
 import { partial } from '~test/util.ts';
 import { rawExec as _rawExec } from '../../../util/exec/common.ts';
 import type { ExecResult } from '../../../util/exec/types.ts';
@@ -62,6 +63,20 @@ describe('modules/platform/local/scm', () => {
   });
 
   describe('getFileList', () => {
+    it('should return file list using glob and cache it', async () => {
+      vi.mocked(glob).mockResolvedValueOnce(['file1', 'file2']);
+      execMock.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      execMock.mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      await expect(localFs.getFileList()).resolves.toHaveLength(2);
+      await expect(localFs.getFileList()).resolves.toHaveLength(2);
+      expect(glob).toHaveBeenCalledOnce();
+    });
+
     it('should return file list using git', async () => {
       execMock.mockReturnValueOnce(
         Promise.resolve(
@@ -75,14 +90,6 @@ describe('modules/platform/local/scm', () => {
       expect(execMock).toHaveBeenCalledExactlyOnceWith('git ls-files', {
         maxBuffer: 1024 * 1024 * 10,
       });
-    });
-
-    it('should return file list using glob', async () => {
-      execMock.mockImplementationOnce(() => {
-        throw new Error();
-      });
-
-      await expect(localFs.getFileList()).resolves.toHaveLength(2);
     });
   });
 

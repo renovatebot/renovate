@@ -254,7 +254,7 @@ Make sure the user has the following permissions on the work item's _area path_:
 - Edit work items in this node
 - View work items in this node
 
-If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
+If the user does not have these permissions, Renovate still creates a PR but it will not have a link to the work item.
 
 ### Dependency Dashboard work item state
 

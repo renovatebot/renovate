@@ -49,7 +49,19 @@ describe('modules/platform/github/utils', () => {
           parseUrl('https://api.github.com')!,
           'token',
         ),
-      ).toBe('https://token@github.com/some/repo.git');
+      ).toBe('https://x-access-token:token@github.com/some/repo.git');
+    });
+
+    it('sets username and password when provided as a username:password combination', () => {
+      expect(
+        getRepoUrl(
+          'some/repo',
+          undefined,
+          null,
+          parseUrl('https://api.github.com')!,
+          'user:pass',
+        ),
+      ).toBe('https://user:pass@github.com/some/repo.git');
     });
 
     it('omits credentials when authToken is null', () => {
@@ -73,7 +85,7 @@ describe('modules/platform/github/utils', () => {
           parseUrl('https://ghe.example.com/api/v3')!,
           'token',
         ),
-      ).toBe('https://token@ghe.example.com/some/repo.git');
+      ).toBe('https://x-access-token:token@ghe.example.com/some/repo.git');
     });
   });
 });

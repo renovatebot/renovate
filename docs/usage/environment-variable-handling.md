@@ -52,7 +52,7 @@ With these option(s) configured, users will be able to set these environment var
 Where possible, Renovate will try and redact secrets in its log messages, and the log output from any child processes.
 This relies on knowing whether the value is a secret for instance those configured through [`secrets`](./self-hosted-configuration.md#secrets) or in [`hostRules`](./configuration-options.md#hostrules).
 
-If specifying an environment variable - through the above - with a value that isn't known to Renovate as a secret, this may lead to the secret being unknowingly exposed in the logs.
+If specifying an environment variable - through the above - with a value that is not known to Renovate as a secret, this may lead to the secret being unknowingly exposed in the logs.
 
 ## Precedence
 

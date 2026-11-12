@@ -1,7 +1,7 @@
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
-import * as condaVersioning from '../../../versioning/conda/index.ts';
 import * as nodeVersioning from '../../../versioning/node/index.ts';
 import * as npmVersioning from '../../../versioning/npm/index.ts';
+import * as semverVersioning from '../../../versioning/semver/index.ts';
 import type { KnownActionConfig } from '../types.ts';
 import {
   actionsVersionsExtractVersion,
@@ -141,6 +141,12 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'casey/just',
     withSchema: valSchema('just-version'),
   },
+  // https://github.com/fluxcd/flux-mirror/tree/main/actions/setup
+  'fluxcd/flux-mirror/actions/setup': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'flux-mirror',
+    packageName: 'fluxcd/flux-mirror',
+  },
   // https://github.com/foundry-rs/foundry-toolchain
   'foundry-rs/foundry-toolchain': {
     datasource: GithubReleasesDatasource.id,
@@ -269,9 +275,11 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'gohugoio/hugo',
     withSchema: valSchema('hugo-version'),
   },
+  // https://github.com/prefix-dev/setup-pixi
+  // pixi tags are v-prefixed, which conda versioning cannot bucket
   'prefix-dev/setup-pixi': {
     datasource: GithubReleasesDatasource.id,
-    versioning: condaVersioning.id,
+    versioning: semverVersioning.id,
     packageName: 'prefix-dev/pixi',
     withSchema: valSchema('pixi-version'),
   },
@@ -306,6 +314,18 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'sigstore/cosign',
     withSchema: valSchema('cosign-release'),
+  },
+  // https://github.com/slsa-framework/actions/tree/main/attest/actions
+  'slsa-framework/actions/attest/actions': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'slsa-framework/attester',
+    withSchema: valSchema('version'),
+  },
+  // https://github.com/slsa-framework/actions/tree/main/slsa_with_provenance
+  'slsa-framework/actions/slsa_with_provenance': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'slsa-framework/source-tool',
+    withSchema: valSchema('version'),
   },
   // https://github.com/stCarolas/setup-maven
   'stCarolas/setup-maven': {

@@ -33,7 +33,7 @@ const SECTION_ORDER = [
   'WARNINGS',
   'ERRORS',
 ] as const;
-// Once the body is summarised, "What to Expect" should render before "Detected Package Files".
+// Once the body is summarized, "What to Expect" should render before "Detected Package Files".
 const SUMMARY_SECTION_ORDER = [
   'PRLIST',
   'CONFIG',

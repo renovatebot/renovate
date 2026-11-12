@@ -2,6 +2,7 @@ import type { lexer, parser } from '@renovatebot/good-enough-parser';
 import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { hash } from '../../../util/hash.ts';
 import { supportedRulesRegex } from './rules/index.ts';
 import type { NestedFragment, RecordFragment } from './types.ts';
@@ -311,7 +312,7 @@ const query = q.tree<Ctx>({
 
 function getCacheKey(input: string): string {
   const hashedInput = hash(input);
-  return `bazel-parser-${hashedInput}`;
+  return buildCacheKey('bazel-parser', hashedInput);
 }
 
 const starlark = lang.createLang('starlark');

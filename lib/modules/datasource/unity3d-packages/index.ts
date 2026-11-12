@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages/index.ts';
@@ -63,7 +64,7 @@ export class Unity3dPackagesDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${Unity3dPackagesDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

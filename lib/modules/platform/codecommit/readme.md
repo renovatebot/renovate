@@ -99,12 +99,12 @@ Change the `Resource` value to the resources you want to use:
 
 ## Running Renovate
 
-Once you have followed method 1, 2 or 3, _and_ have set up the permissions, you're ready to configure Renovate:
+Once you have followed method 1, 2 or 3, _and_ have set up the permissions, you are ready to configure Renovate:
 
 - Set `platform: 'codecommit'`
 - Set `repositories: ['{repository, names, separated, by, comma}']`, or use [Renovate’s `autodiscover` feature](../../../self-hosted-configuration.md#autodiscover)
 
-You're ready to run Renovate now, and it will process your repositories.
+You are ready to run Renovate now, and it will process your repositories.
 
 ## Unsupported platform features/concepts
 
@@ -118,7 +118,7 @@ These Renovate features are not supported on Codecommit:
 
 Limit the number of open Renovate PRs by setting a `prConcurrentLimit`.
 
-If you close a PR but don’t want Renovate to recreate the PR later, then use [package rules](../../../configuration-options.md#packagerules) with the `"enabled": false` key.
+If you close a PR but do not want Renovate to recreate the PR later, then use [package rules](../../../configuration-options.md#packagerules) with the `"enabled": false` key.
 This workaround is needed due to platform limitations.
 
 ## Example configuration

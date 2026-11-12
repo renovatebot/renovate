@@ -292,10 +292,11 @@ export async function extractAllPackageFiles(
       if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
-        dep.depType ??=
-          key.startsWith('buildSrc') && !kotlinSourceFiles.length
-            ? 'devDependencies'
-            : 'dependencies';
+        if (key.startsWith('buildSrc') && !kotlinSourceFiles.length) {
+          dep.depType ??= 'devDependencies';
+        } else {
+          dep.depType ??= 'dependencies';
+        }
       }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(

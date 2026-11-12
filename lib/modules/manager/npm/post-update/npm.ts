@@ -1,6 +1,10 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
-import ini from 'ini';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isNumber,
+  isString,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -30,7 +34,7 @@ import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
-import { PackageLock } from '../schema.ts';
+import { NpmrcCooldown, PackageLock } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -48,7 +52,7 @@ export function parseNpmrcCooldownDate(
     return null;
   }
 
-  const parsed = ini.parse(npmrcContent);
+  const parsed = NpmrcCooldown.parse(npmrcContent);
 
   const before = parsed.before;
   if (isNonEmptyString(before)) {
@@ -123,24 +127,29 @@ export async function generateLockFile(
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint:
-        (await resolveToolConstraint(
-          config,
-          'npm',
-          async () =>
-            getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
-            (await getNpmConstraintFromPackageLock(lockFileDir, filename)),
-        )) ?? null,
+        (await resolveToolConstraint(config, 'npm', async () => {
+          let npmVersion = getPackageManagerVersion(
+            'npm',
+            await lazyPkgJson.getValue(),
+          );
+          if (isNullOrUndefined(npmVersion)) {
+            npmVersion = await getNpmConstraintFromPackageLock(
+              lockFileDir,
+              filename,
+            );
+          }
+          return npmVersion;
+        })) ?? null,
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
       semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     let commands: string[] = [];
     let cmdOptions = '';
-    if (
-      (postUpdateOptions?.includes('npmDedupe') === true &&
-        !supportsPreferDedupeFlag) ||
-      skipInstalls === false
-    ) {
+    const needsDedupeWithoutFlag =
+      postUpdateOptions?.includes('npmDedupe') === true &&
+      !supportsPreferDedupeFlag;
+    if (needsDedupeWithoutFlag || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
@@ -344,14 +353,16 @@ export async function generateLockFile(
     });
 
     // massage to shrinkwrap if necessary
-    if (
-      filename === 'npm-shrinkwrap.json' &&
-      (await localPathExists(upath.join(lockFileDir, 'package-lock.json')))
-    ) {
-      await renameLocalFile(
+    if (filename === 'npm-shrinkwrap.json') {
+      const lockExists = await localPathExists(
         upath.join(lockFileDir, 'package-lock.json'),
-        upath.join(lockFileDir, 'npm-shrinkwrap.json'),
       );
+      if (lockExists) {
+        await renameLocalFile(
+          upath.join(lockFileDir, 'package-lock.json'),
+          upath.join(lockFileDir, 'npm-shrinkwrap.json'),
+        );
+      }
     }
 
     // Read the result

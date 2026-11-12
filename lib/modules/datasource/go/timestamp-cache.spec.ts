@@ -9,7 +9,7 @@ const packageCache = vi.mocked(_packageCache);
 describe('modules/datasource/go/timestamp-cache', () => {
   const baseUrl = 'https://proxy.golang.org';
   const packageName = 'github.com/foo/bar';
-  const cacheKey = 'https://proxy.golang.org@@github.com/foo/bar';
+  const cacheKey = 'https://proxy.golang.org:github.com/foo/bar';
   const ttlMinutes = 100 * 24 * 60;
 
   const v1 = '2018-01-01T00:00:00.000Z' as Timestamp;
@@ -79,7 +79,7 @@ describe('modules/datasource/go/timestamp-cache', () => {
 
     expect(packageCache.set).toHaveBeenCalledWith(
       'datasource-go-proxy-timestamps',
-      'https://artifactory.example.com/api/go/go@@github.com/foo/bar',
+      'https://artifactory.example.com/api/go/go:github.com/foo/bar',
       { 'v1.0.0': v1 },
       ttlMinutes,
     );

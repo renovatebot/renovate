@@ -68,7 +68,7 @@ You have to use the custom manager for this.
 
 **Usage Example**
 
-Here's an example of using the custom manager:
+Here is an example of using the custom manager:
 
 ```javascript
 module.exports = {

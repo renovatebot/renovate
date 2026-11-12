@@ -170,7 +170,7 @@ describe('logger/pretty-stdout', () => {
         },
       };
       // The colorized level strings are built once, when the module is
-      // imported, so whether they carry ANSI codes depends on the colour
+      // imported, so whether they carry ANSI codes depends on the color
       // support of the surrounding environment. Derive the expectation the
       // same way instead of assuming an uncoloured terminal.
       expect(prettyStdout.formatRecord(rec)).toEqual(

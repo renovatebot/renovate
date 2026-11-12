@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -14,10 +15,15 @@ import {
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
-import { parseUrl } from '../../../../util/url.ts';
+import {
+  parseUrl,
+  stripUrlCredentials,
+  trimTrailingSlash,
+} from '../../../../util/url.ts';
 import { findPypiIndexCredentials } from '../../../datasource/pypi/host-rules.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
+  ExtractConfig,
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
@@ -29,18 +35,31 @@ import {
   resolveToolConstraint,
   updateLockFile,
 } from '../../util.ts';
-import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
+import {
+  type PyProject,
+  type UvLockedPackage,
+  UvLockfile,
+  type UvSource,
+} from '../schema.ts';
+import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
 const gitExec = withGitEnvironment(['pep621']);
 
+// uv sources may use the pip-style `git+` prefix; strip it before handing the URL to git.
+const gitPlusPrefixRegex = regEx(/^git\+/);
+
 function isUvIndexSource(
   source: UvSource,
 ): source is Extract<UvSource, { index: string }> {
   return 'index' in source;
 }
+
+// The public PyPI index, as recorded in `uv.lock` package sources. Transitive
+// deps resolved from it use the datasource default, so no `registryUrls` needed.
+const defaultPypiRegistry = 'https://pypi.org/simple';
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -106,7 +125,7 @@ export class UvProcessor extends BasePyProjectProcessor {
             if ('git' in depSource) {
               applyGitSource(
                 dep,
-                depSource.git,
+                depSource.git.replace(gitPlusPrefixRegex, ''),
                 depSource.rev,
                 depSource.tag,
                 depSource.branch,
@@ -154,6 +173,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
+    config?: ExtractConfig,
   ): Promise<PackageDependency[]> {
     const lockFileName = await findLocalSiblingOrParent(
       packageFile,
@@ -172,11 +192,33 @@ export class UvProcessor extends BasePyProjectProcessor {
         if (err) {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
-          for (const dep of deps) {
+          const { packages, declaredNames } = lockFileMapping;
+          for (const dep of deps as PackageDependency<Pep621ManagerData>[]) {
             const packageName = dep.packageName;
-            if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName];
+            if (packageName && packageName in packages) {
+              const locked = packages[packageName];
+              dep.lockedVersion = locked.version;
+              if (locked.hasMultipleEntries) {
+                dep.managerData = {
+                  ...dep.managerData,
+                  hasMultipleLockedEntries: true,
+                };
+              }
             }
+          }
+
+          // Transitive dependencies are only of use to vulnerability
+          // remediation, and a large `uv.lock` holds a lot of them, so don't
+          // surface any unless vulnerability alerts are enabled.
+          //
+          // A workspace shares one lock file between its members, so they are
+          // surfaced once, for the package file which owns it, or every member
+          // would report the others' dependencies as transitive.
+          if (
+            config?.hasVulnerabilityAlertsRules &&
+            upath.dirname(lockFileName) === upath.dirname(packageFile)
+          ) {
+            this.addTransitiveDeps(deps, packages, declaredNames);
           }
         }
       }
@@ -185,8 +227,56 @@ export class UvProcessor extends BasePyProjectProcessor {
     return Promise.resolve(deps);
   }
 
+  /**
+   * Appends the packages which only exist in `uv.lock` to the given dependencies.
+   *
+   * They are skipped, so they produce no routine updates, but
+   * vulnerability alerts can still match them and clear the skip to get a
+   * targeted `uv lock --upgrade-package` when a fixed version exists.
+   */
+  private addTransitiveDeps(
+    deps: PackageDependency[],
+    packages: Record<string, UvLockedPackage>,
+    declaredNames: ReadonlySet<string>,
+  ): void {
+    const declaredPackageNames = new Set([
+      ...declaredNames,
+      ...deps.map((dep) => dep.packageName).filter(isString),
+    ]);
+
+    const transitiveDeps = Object.entries(packages).flatMap(
+      ([packageName, locked]): PackageDependency[] => {
+        const { registryUrl } = locked;
+        // only a registry-sourced package can be remediated by name, which
+        // rules out the workspace root and any virtual/editable/path/git one
+        if (declaredPackageNames.has(packageName) || !registryUrl) {
+          return [];
+        }
+
+        const transitiveDep: PackageDependency = {
+          packageName,
+          depName: packageName,
+          depType: depTypes.uvTransitiveDependencies,
+          datasource: PypiDatasource.id,
+          lockedVersion: locked.version,
+          skipReason: 'lockfile-only',
+          skipStage: 'extract',
+        };
+        if (locked.hasMultipleEntries) {
+          transitiveDep.managerData = { hasMultipleLockedEntries: true };
+        }
+        if (trimTrailingSlash(registryUrl) !== defaultPypiRegistry) {
+          transitiveDep.registryUrls = [registryUrl];
+        }
+        return [transitiveDep];
+      },
+    );
+
+    deps.push(...transitiveDeps);
+  }
+
   async updateArtifacts(
-    updateArtifact: UpdateArtifact,
+    updateArtifact: UpdateArtifact<Pep621ManagerData>,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
@@ -260,7 +350,29 @@ export class UvProcessor extends BasePyProjectProcessor {
   }
 }
 
-function generateCMD(updatedDeps: Upgrade[]): string {
+/**
+ * The `--upgrade-package` argument to move `dep` to the version which was
+ * looked up, or to whichever version `uv` resolves when it cannot be pinned.
+ */
+function pinnedUpgrade(dep: Upgrade<Pep621ManagerData>): string {
+  // A package the lock file holds more than once, e.g. at a version per
+  // resolution marker, can only be upgraded without a version: `uv` reads a
+  // pinned one as a constraint on every marker, so it would downgrade the
+  // other entries, or fail to resolve at all.
+  if (dep.managerData?.hasMultipleLockedEntries) {
+    logger.warn(
+      { packageName: dep.packageName, newVersion: dep.newVersion },
+      'Upgrading a dependency which the lock file holds more than once, without a version: vulnerabilityFixStrategy cannot be honoured, so the version this resolves to may differ from the one Renovate picked',
+    );
+    return dep.packageName!;
+  }
+
+  return dep.newVersion
+    ? `${dep.packageName!}==${dep.newVersion}`
+    : dep.packageName!;
+}
+
+function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
   const deps: string[] = [];
 
   for (const dep of updatedDeps) {
@@ -274,8 +386,21 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         deps.push(dep.depName!);
         break;
       }
+      case depTypes.uvTransitiveDependencies: {
+        // Nothing in `pyproject.toml` constrains a transitive dependency, so an
+        // unpinned upgrade would resolve to the newest release instead of the
+        // version we determined, e.g. the lowest one fixing a vulnerability.
+        deps.push(pinnedUpgrade(dep));
+        break;
+      }
       case depTypes.buildSystemRequires:
-        // build requirements are not locked in the lock files, no need to update.
+        // A build requirement is not locked, unless something depends on it at
+        // runtime as well. Only a vulnerability fix has a reason to move that
+        // locked copy: a routine bump of the requirement leaves it alone, as
+        // it always has.
+        if (dep.isVulnerabilityAlert && dep.lockedVersion) {
+          deps.push(pinnedUpgrade(dep));
+        }
         break;
       default: {
         deps.push(dep.packageName!);
@@ -286,12 +411,29 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
 }
 
+/**
+ * Returns `url` without its userinfo, placeholders included, or `url` unchanged when it cannot be parsed.
+ */
+function withoutAnyUserinfo(url: string): string {
+  return stripUrlCredentials(url) ?? url;
+}
+
 async function getUvExtraIndexUrl(
   project: PyProject,
   deps: Upgrade[],
 ): Promise<NodeJS.ProcessEnv> {
+  // compared without any userinfo, which the registry URLs of the deps may no longer carry
+  const configuredIndexUrls = new Set(
+    coerceArray(project.tool?.uv?.index).map(({ url }) =>
+      trimTrailingSlash(withoutAnyUserinfo(url)),
+    ),
+  );
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
+    // a transitive dependency carries the index `uv.lock` recorded for it, which
+    // `uv` reads from the lock file itself - passing it as an extra index would
+    // instead rank it above the default for every package it resolves
+    .filter((dep) => dep.depType !== depTypes.uvTransitiveDependencies)
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;
@@ -302,12 +444,11 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls = coerceArray(
-        project.tool?.uv?.index?.map(({ url }) => url),
-      );
       return (
         registryUrl !== PypiDatasource.defaultURL &&
-        !configuredIndexUrls.includes(registryUrl)
+        !configuredIndexUrls.has(
+          trimTrailingSlash(withoutAnyUserinfo(registryUrl)),
+        )
       );
     });
 

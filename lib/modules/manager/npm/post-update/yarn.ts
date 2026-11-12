@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -29,6 +29,7 @@ import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
 import { isPackageManagerDepType } from '../dep-types.ts';
+import { hasPackageManager } from '../extract/common/package-file.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -67,9 +68,10 @@ export async function checkYarnrc(
         // resolve binary relative to `yarnrc`
         yarnPath = upath.join(lockFileDir, yarnPath);
       }
-      const yarnBinaryExists = yarnPath
-        ? await localPathIsFile(yarnPath)
-        : false;
+      let yarnBinaryExists = false;
+      if (yarnPath) {
+        yarnBinaryExists = await localPathIsFile(yarnPath);
+      }
       let scrubbedYarnrc = yarnrc
         .replace('--install.pure-lockfile true', '')
         .replace('--install.frozen-lockfile true', '');
@@ -118,15 +120,24 @@ export async function generateLockFile(
       await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility =
-      yarnUpdate?.newValue ??
-      (await resolveToolConstraint(
+    let yarnCompatibility = yarnUpdate?.newValue;
+    if (isNullOrUndefined(yarnCompatibility)) {
+      yarnCompatibility = await resolveToolConstraint(
         config,
         'yarn',
-        async () =>
-          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-          getYarnVersionFromLock(await getYarnLock(lockFileName)),
-      ));
+        async () => {
+          let yarnVersion = getPackageManagerVersion(
+            'yarn',
+            await lazyPgkJson.getValue(),
+          );
+          if (isNullOrUndefined(yarnVersion)) {
+            const yarnLock = await getYarnLock(lockFileName);
+            yarnVersion = getYarnVersionFromLock(yarnLock);
+          }
+          return yarnVersion;
+        },
+      );
+    }
     const yarnRange = semver.validRange(yarnCompatibility);
     const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
@@ -141,11 +152,15 @@ export async function generateLockFile(
     };
 
     // check first upgrade, see #17786
-    const hasPackageManager =
+    let packageManagerDeclared =
       !!config.managerData?.hasPackageManager ||
       !!upgrades[0]?.managerData?.hasPackageManager;
+    // dep-level managerData can shadow the flag (e.g. nested resolutions), see #25853
+    if (!isYarn1 && !packageManagerDeclared) {
+      packageManagerDeclared = await hasPackageManager(lockFileDir);
+    }
 
-    if (!isYarn1 && hasPackageManager) {
+    if (!isYarn1 && packageManagerDeclared) {
       toolConstraints.push({
         toolName: 'corepack',
         constraint: await resolveToolConstraint(config, 'corepack'),
@@ -193,7 +208,11 @@ export async function generateLockFile(
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
-      if (!config.managerData?.yarnZeroInstall) {
+      // check upgrades too, see #17786
+      const yarnZeroInstall =
+        !!config.managerData?.yarnZeroInstall ||
+        upgrades.some((upgrade) => !!upgrade.managerData?.yarnZeroInstall);
+      if (!yarnZeroInstall) {
         logger.debug('Enabling global cache as zero-install is not detected');
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }

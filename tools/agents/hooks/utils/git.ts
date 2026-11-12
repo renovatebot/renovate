@@ -3,6 +3,8 @@ import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git';
 const config: Partial<SimpleGitOptions> = {
   completion: { onClose: true, onExit: false },
   config: ['core.quotePath=false'],
+  // simple-git v4 rejects guarded variables (`PAGER`, `GIT_*`, ...) passed via `.env()` unless allowed
+  allowEnvironment: Object.keys(process.env),
   unsafe: {
     allowUnsafePager: true,
     allowUnsafeEditor: true,

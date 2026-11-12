@@ -50,7 +50,7 @@ Other fields are specific to GitHub tags or GitHub releases.
 
 ## Initial fetch
 
-Let's suppose we perform fetching for the first time.
+Suppose we perform fetching for the first time.
 For simplicity, this example assumes that we are retrieving items in small batches of 5 at a time.
 The cache TTL is assumed to be 30 days.
 
