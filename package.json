@@ -331,7 +331,7 @@
     "npm-run-all2": "9.0.4",
     "nyc": "18.0.0",
     "oxlint": "1.91.0",
-    "oxlint-tsgolint": "7.0.2005",
+    "oxlint-tsgolint": "7.0.2006",
     "rimraf": "6.1.4",
     "semantic-release": "25.0.9",
     "tmp-promise": "3.0.3",
