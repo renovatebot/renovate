@@ -66,7 +66,7 @@ describe('modules/manager/git-submodules/update', () => {
         packageFile: '.gitmodules',
         upgrade,
       });
-      expect(update).toBe('');
+      expect(update).toEqual({ content: '', updatedOutOfBand: true });
     });
 
     it('requests Git authentication for submodule commands', async () => {
@@ -78,7 +78,7 @@ describe('modules/manager/git-submodules/update', () => {
         packageFile: '.gitmodules',
         upgrade,
       });
-      expect(update).toBe('');
+      expect(update).toEqual({ content: '', updatedOutOfBand: true });
       expect(createSimpleGit).toHaveBeenCalledTimes(2);
       expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
         config: { baseDir },
@@ -116,7 +116,10 @@ describe('modules/manager/git-submodules/update', () => {
         packageFile: '.gitmodules',
         upgrade,
       });
-      expect(update).toBe(updatedGitModules);
+      expect(update).toEqual({
+        content: updatedGitModules,
+        updatedOutOfBand: true,
+      });
       expect(gitMock.subModule).toHaveBeenCalledExactlyOnceWith([
         'set-branch',
         '--branch',
@@ -139,7 +142,7 @@ describe('modules/manager/git-submodules/update', () => {
         packageFile: '.gitmodules',
         upgrade,
       });
-      expect(update).toBe('');
+      expect(update).toEqual({ content: '', updatedOutOfBand: true });
       expect(gitMock.subModule).toHaveBeenCalledTimes(0);
     });
   });

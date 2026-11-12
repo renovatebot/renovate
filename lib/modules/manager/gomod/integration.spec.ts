@@ -22,7 +22,7 @@ describe('modules/manager/gomod/integration', () => {
   });
 
   describe('when constraintsFiltering=strict', () => {
-    it('only suggests updates within the minor version of the `go` directive', async () => {
+    it('only suggests updates <= minor version of the `go` directive', async () => {
       // make sure we can validate all suggested releases
       baseConfig.separateMultipleMinor = true;
 
@@ -109,6 +109,17 @@ describe('modules/manager/gomod/integration', () => {
 
       const updates = packageFiles.gomod[0].deps[1].updates;
       expect(updates).toEqual([
+        {
+          bucket: 'v0.2',
+          hasAttestation: undefined,
+          isBreaking: true,
+          newMajor: 0,
+          newMinor: 2,
+          newPatch: 0,
+          newValue: 'v0.2.0',
+          newVersion: 'v0.2.0',
+          updateType: 'minor',
+        },
         {
           bucket: 'v0.3',
           hasAttestation: undefined,

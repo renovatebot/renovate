@@ -4,6 +4,7 @@ import {
   isBoolean,
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
   isString,
   isTruthy,
 } from '@sindresorhus/is';
@@ -103,6 +104,8 @@ interface CreateSimpleGitOptions {
   env?: ExtraEnv;
   authentication?: {
     hostTypes?: readonly string[];
+    /** the URL of the cloned repository: adds the credentials which `detachUrlCredentials()` registered for it with one of `hostTypes` */
+    url?: string;
   };
 }
 
@@ -132,7 +135,11 @@ export function createSimpleGit({
     },
   });
   const gitEnv = authentication
-    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
+    ? getGitEnvironmentVariables(
+        childEnv,
+        authentication.hostTypes,
+        authentication.url,
+      )
     : childEnv;
   return simpleGit({
     ...simpleGitConfig(),
@@ -481,7 +488,7 @@ export async function cloneSubmodules(
         submoduleGit.submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
-      logger.warn({ err, submodule }, `Unable to initialise git submodule`);
+      logger.warn({ err, submodule }, `Unable to initialize git submodule`);
     }
   }
 }
@@ -533,8 +540,9 @@ export const syncGit = withInstrumenting(
           await git.raw(['remote', 'set-url', 'origin', config.url]);
           const fetchStart = Date.now();
           await gitRetry(() => git.fetch(['--prune', 'origin']));
-          config.currentBranch =
-            config.currentBranch || (await getDefaultBranch(git));
+          if (!config.currentBranch) {
+            config.currentBranch = await getDefaultBranch(git);
+          }
           await resetToBranch(config.currentBranch);
           await cleanLocalBranches();
           const durationMs = Math.round(Date.now() - fetchStart);
@@ -618,10 +626,11 @@ export const syncGit = withInstrumenting(
       }
       logger.warn({ err }, 'Cannot retrieve latest commit');
     }
-    config.currentBranch =
-      config.currentBranch ??
-      config.defaultBranch ??
-      (await getDefaultBranch(git));
+    let currentBranch = config.currentBranch ?? config.defaultBranch;
+    if (isNullOrUndefined(currentBranch)) {
+      currentBranch = await getDefaultBranch(git);
+    }
+    config.currentBranch = currentBranch;
     /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
@@ -1199,7 +1208,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(branchName: string): Promise<void> {
+export async function mergeToLocal(
+  branchName: string,
+  { localBranch = false }: { localBranch?: boolean } = {},
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -1222,6 +1234,9 @@ export async function mergeToLocal(branchName: string): Promise<void> {
         'mergeToLocal(): merging virtual branch',
       );
       await git.merge([ref]);
+    } else if (localBranch) {
+      logger.debug(`mergeToLocal(): merging local branch ${branchName}`);
+      await git.merge([`refs/heads/${branchName}`]);
     } else {
       await fetchRevSpec(branchName);
       await gitRetry(() => git.merge(['FETCH_HEAD']));
@@ -1501,12 +1516,15 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`,
     );
-    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
-      logger.debug(
-        { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
-        'No file changes detected. Skipping commit',
-      );
-      return null;
+    if (!force) {
+      const hasChanges = await hasDiff('HEAD', `origin/${branchName}`);
+      if (!hasChanges) {
+        logger.debug(
+          { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
+          'No file changes detected. Skipping commit',
+        );
+        return null;
+      }
     }
 
     const commitSha = toLongCommitSha(

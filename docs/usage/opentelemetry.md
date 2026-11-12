@@ -43,7 +43,7 @@ You can also set the following environment variables:
 The following resource detectors are used:
 
 - `EnvDetector` from @opentelemetry/resources to allow users to add the custom attributes
-- `GithubDetector` from [@opentelemetry/resource-detector-github](https://www.npmjs.com/package/@opentelemetry/resource-detector-github), to determine if it's running in [Renovate's GitHub Action](https://github.com/renovatebot/github-action/), or via the npm package in GitHub Actions
+- `GithubDetector` from [@opentelemetry/resource-detector-github](https://www.npmjs.com/package/@opentelemetry/resource-detector-github), to determine if it is running in [Renovate's GitHub Action](https://github.com/renovatebot/github-action/), or via the npm package in GitHub Actions
 - `AWSDetector` from [@opentelemetry/resource-detector-aws](https://www.npmjs.com/package/@opentelemetry/resource-detector-aws) Users hosting on AWS
 - `GcpDetector` from [@opentelemetry/resource-detector-gcp](https://www.npmjs.com/package/@opentelemetry/resource-detector-gcp) Users hosting on GCP
 - `AzureDetector` from [@opentelemetry/resource-detector-azure](https://www.npmjs.com/package/@opentelemetry/resource-detector-azure) Users hosting on Azure
@@ -76,11 +76,12 @@ This is configured using the `RENOVATE_TRACING_FILE_EXPORTER_PATH` environment v
 
 You can then ingest this data into other tools, for instance:
 
-```sh title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
-while IFS= read -r line; do
+```bash title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+# bash-specific syntax
+while IFS= read -r line || [ -n "$line" ]; do
   curl -s -X POST http://localhost:4318/v1/traces \
     -H 'Content-Type: application/json' \
-    -d "$line"
+    --data-binary @- <<< "$line"
 done < /tmp/traces.jsonl
 ```
 
@@ -120,7 +121,7 @@ You can also set `OTEL_LOG_LEVEL` to control the log level of OpenTelemetry's in
 
 ## Help wanted
 
-We're continually looking to improve Renovate's instrumentation, and are aware there may be gaps in instrumentation.
+We are continually looking to improve Renovate's instrumentation, and are aware there may be gaps in instrumentation.
 
 As with the rest of Renovate, any additional contributions are very welcome!
 

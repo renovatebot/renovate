@@ -1,7 +1,7 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -376,9 +376,8 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (isArray(config.updatedPackageFiles) &&
-      config.updatedPackageFiles.length > 0) ||
-    (isArray(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    isNonEmptyArray(config.updatedPackageFiles) ||
+    isNonEmptyArray(config.updatedArtifacts);
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */

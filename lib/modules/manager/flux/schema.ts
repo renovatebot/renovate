@@ -82,6 +82,12 @@ export const OCIRepository = KubernetesResource.extend({
         digest: z.string().optional(),
       })
       .optional(),
+    layerSelector: z
+      .object({
+        mediaType: z.string().optional(),
+      })
+      .optional()
+      .catch(undefined),
   }),
 });
 

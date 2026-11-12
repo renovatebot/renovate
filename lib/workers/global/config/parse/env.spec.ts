@@ -96,6 +96,8 @@ describe('workers/global/config/parse/env', () => {
       ${{ RENOVATE_RECREATE_WHEN: 'always' }}          | ${{ recreateWhen: 'always' }}
       ${{ RENOVATE_RECREATE_WHEN: 'never' }}           | ${{ recreateWhen: 'never' }}
       ${{ RENOVATE_BASE_BRANCHES: '["main", "dev"]' }} | ${{ baseBranchPatterns: ['main', 'dev'] }}
+      ${{ RENOVATE_DEPENDENCY_DASHBOARD: 'true' }}     | ${{ dependencyDashboard: { enabled: true } }}
+      ${{ RENOVATE_DEPENDENCY_DASHBOARD: 'false' }}    | ${{ dependencyDashboard: { enabled: false } }}
     `('"$envArg" -> $config', async ({ envArg, config }) => {
       await expect(env.getConfig(envArg)).resolves.toMatchObject(config);
     });

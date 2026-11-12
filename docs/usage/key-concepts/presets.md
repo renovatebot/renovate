@@ -21,7 +21,7 @@ Use presets to:
 
 ## How to use presets
 
-Say you're using the `config:recommended` preset, and want to pin your GitHub Action digests.
+Say you are using the `config:recommended` preset, and want to pin your GitHub Action digests.
 Instead of writing your own Renovate config, you search the docs, and find the `helpers:pinGitHubActionDigests` preset.
 Then you add the preset to the `"extends"` array in your Renovate configuration file:
 

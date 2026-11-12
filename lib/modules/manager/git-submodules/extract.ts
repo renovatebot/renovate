@@ -48,9 +48,10 @@ async function getBranch(
     ])
   ).trim();
 
-  return branchFromConfig === '.'
-    ? (await git.branch(['--list'])).current.trim()
-    : branchFromConfig || null;
+  if (branchFromConfig === '.') {
+    return (await git.branch(['--list'])).current.trim();
+  }
+  return branchFromConfig || null;
 }
 
 async function getModules(

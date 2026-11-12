@@ -48,7 +48,7 @@ Global config can contain config which is "global only" as well as any configura
 Previously, this may have been referred to as "bot config", because it is the config passed to Renovate by the person running it.
 We no longer use "bot" terminology, so it is now called "global self-hosted configuration".
 
-If you are an end user of Renovate, for example if you're using the Mend Renovate App, then you don't need to care as much about any global config.
+If you are an end user of Renovate, for example if you are using the Mend Renovate app, then you do not need to care as much about any global config.
 As a end-user you can not change some settings because those settings are global-only.
 If you are an end user, you can skip the rest of this "Global config" section and proceed to "Inherited config".
 
@@ -89,7 +89,7 @@ Global config can be defined using environment variables.
 The config options that you can use in environment variables all have the prefix `RENOVATE_`.
 For example, `RENOVATE_PLATFORM=gitlab` is the same as setting `"platform": "gitlab"` in File config.
 
-Usually there's a clear mapping from configuration option name to the corresponding Environment config name.
+Usually there is a clear mapping from configuration option name to the corresponding Environment config name.
 But we recommend you still check the documentation for the field `env` for each option to make sure.
 If the configuration option lacks a `env` field, the config option also lacks a Environment config variable name.
 
@@ -102,7 +102,7 @@ For mergeable options, like `hostRules`, `packageRules` or `registryAliases`, th
 
 !!! warning
   Make sure to escape any punctuation.
-  Be extra careful if you're passing stringified values.
+  Be extra careful if you are passing stringified values.
 
 Boolean:
 
@@ -173,9 +173,9 @@ We recommend that organizations use shared presets instead of Inherited config, 
 But default settings through Inherited config are useful if:
 
 - You want to avoid setting Repository config in each repo, or
-- You onboarded many repos prior to having a shared org config, and don't want to retrospectively edit each repo's config
+- You onboarded many repos prior to having a shared org config, and do not want to retrospectively edit each repo's config
 
-#### How it's found
+#### How it is found
 
 If `inheritConfig` is `true` in Global config then Renovate will look for Inherited config before processing each repository.
 
@@ -195,7 +195,7 @@ Avoid putting any global-only setting in a Inherited config, as doing so will re
 
 Inherited config may use all Repository config settings, and any Global config options which have the "supportsInheritConfig" property in the docs.
 
-For information on how the Mend Renovate App supports Inherited config, see the dedicated "Mend Renovate App Config" section toward the end of this page.
+For information on how the Mend Renovate app supports Inherited config, see the dedicated "Mend Renovate app Config" section toward the end of this page.
 
 #### Presets handling
 
@@ -305,11 +305,11 @@ In such cases, use `globalExtends` instead of `extends` so that it is resolved i
 
 #### extends
 
-If you use `extends` within Global config then it's important to note that these are _not_ resolved/expanded during Global config processing and instead are passed through unresolved to be part of Repository config.
+If you use `extends` within Global config then it is important to note that these are _not_ resolved/expanded during Global config processing and instead are passed through unresolved to be part of Repository config.
 Passing `extends` through to be part of Repository config has two major consequences:
 
 - It allows repository users to be able to use `ignorePresets` to ignore all or part of the `extends` presets, and
-- Presets defined within `extends` in Global config will take _higher_ precedence that "regular" Global config, because it's resolved later
+- Presets defined within `extends` in Global config will take _higher_ precedence that "regular" Global config, because it is resolved later
 
 ### Using a centralized config
 
@@ -318,20 +318,20 @@ Using "centralized" configs through Renovate presets is important in order to be
 - Save time by not repeating yourself in every repo with the same config, and
 - Being able to change settings across an entire Organization or groups of repositories in one place
 
-Once you've created a centralized preset config, there are multiple ways you can pass it through to repositories:
+Once you have created a centralized preset config, there are multiple ways you can pass it through to repositories:
 
 - Defining it in Global config (either `globalExtends` or `extends`)
 - Using it as your Inherited config, or referencing it from Inherited config using `extends`
-- Ensuring it's referenced in Onboarding config so that it's committed as part of the Repository config
+- Ensuring it is referenced in Onboarding config so that it is committed as part of the Repository config
 
 The above possibilities go from least to most transparent when it comes to end users.
 
 Global config may be invisible to developers without log access, meaning they could be confused by any settings you apply - via presets or directly - within Global config.
-For example the developers wonder why Renovate is behaving differently to its documented default behavior and may even think it's a bug.
+For example the developers wonder why Renovate is behaving differently to its documented default behavior and may even think it is a bug.
 
-Inherited config is visible to developers (it's within a repository they can see) although it's _implicitly_ applied so without log access and if they're not aware to look for an Inherited config repository then they may again be a little confused as to why default behavior has changed.
+Inherited config is visible to developers (it is within a repository they can see) although it is _implicitly_ applied so without log access and if they are not aware to look for an Inherited config repository then they may again be a little confused as to why default behavior has changed.
 
-The recommended approach for using a centralized preset is to explicitly "extend" it from every repository, which can be achieved easily if it's part of your `onboardingConfig`.
+The recommended approach for using a centralized preset is to explicitly "extend" it from every repository, which can be achieved easily if it is part of your `onboardingConfig`.
 By having your centralized preset part of each Repository config `extends`, it has these two benefits:
 
 - You still have the ability to change shared settings in a single location
@@ -339,7 +339,7 @@ By having your centralized preset part of each Repository config `extends`, it h
 
 ## Other
 
-The below contains edge cases which you should avoid if possible, and likely don't need to use.
+The below contains edge cases which you should avoid if possible, and likely do not need to use.
 They are included here because they can cause "exceptions" to some of the previously mentioned rules of config.
 
 ### Optimize for Disabled
@@ -353,4 +353,4 @@ If the file is not present or does not disable Renovate, then Renovate continues
 
 We recommend you avoid the `force` config option, if possible.
 
-It can be used to "force" config over the top of other config or rules which might be merged later, so at times can cause confusion - especially if it's defined in Global config and overriding settings in Repository config.
+It can be used to "force" config over the top of other config or rules which might be merged later, so at times can cause confusion - especially if it is defined in Global config and overriding settings in Repository config.

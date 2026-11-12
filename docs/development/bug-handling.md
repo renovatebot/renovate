@@ -15,7 +15,7 @@ We only create issues in this repository when we:
 - are in a state where someone could work on it
 
 We often need a minimal reproduction or logs, or even _both_, to pinpoint the exact problem.
-Because we need enough information for a actionable bug report, we may close Discussions that lack the needed info, even if it's highly likely the behavior is buggy.
+Because we need enough information for a actionable bug report, we may close Discussions that lack the needed info, even if it is highly likely the behavior is buggy.
 
 We have found that keeping Issues around that are not actionable just leads to them getting stale, and then closed.
 The Issues list is meant as a list of actionable things for a contributor or maintainer to pick up eventually.
@@ -30,21 +30,21 @@ Bug reports are resolved in one of three ways:
 
 ## FAQ
 
-### What's your definition of bug?
+### What is your definition of bug?
 
 Bugs are behavior in Renovate which is _not_ as intended or documented.
 Missing functionality or partial support is not automatically a bug.
-For example, we're probably missing at least one feature from each package manager that Renovate supports.
+For example, we are probably missing at least one feature from each package manager that Renovate supports.
 If we labeled all those missing features as bugs, we lose sight of real bugs.
 
-### Why can't I create Bug Issues directly?
+### Why can I not create Bug Issues directly?
 
 It is really hard for users to decide if something is a bug.
 Only a fraction of the incoming bug reports are for things we consider proper bugs.
 
 A while ago, users were allowed to create Bug Issues.
 We ended up with many "bug, but not really" type issues, that polluted the repository.
-Those issues made it tricky for maintainers and users to see what's really going on in the repository.
+Those issues made it tricky for maintainers and users to see what is really going on in the repository.
 We have since closed many old user-created bug Issues, and now only allow maintainers to create bug Issues.
 This way we do not end up in the same situation again.
 
@@ -55,14 +55,14 @@ We are open to improve our approach to bugs, or this document, in good spirit.
 Please do _not_ post comments like these:
 
 - "How dare you block users from creating Issues?!"
-- "If the behavior was unexpected to me then that means it's a bug."
+- "If the behavior was unexpected to me then that means it is a bug."
 
 Users who want to make our life difficult as maintainers will be blocked.
 Read our [Code of Conduct](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md) to learn more.
 
 ### Why do you close Bug discussions?
 
-It's important to move relevant reports to the next step of an Issue, and focus our attention there.
+It is important to move relevant reports to the next step of an Issue, and focus our attention there.
 Bug reports that are not (going to be) an Issue, are marked as "not a bug".
 This helps future users who browse or search the repository for similar terms, as they will not see any invalid Bug reports.
 

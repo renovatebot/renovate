@@ -59,7 +59,7 @@ For example:
 {"kubernetesVersion":"1.30","addonName":"vpc-cni"}
 ```
 
-Although it's unlikely that EKS might support different addon versions across regions, you can optionally specify the `region` and/or `profile` in the minified JSON object to discover the addon versions specific to this region.
+Although it is unlikely that EKS might support different addon versions across regions, you can optionally specify the `region` and/or `profile` in the minified JSON object to discover the addon versions specific to this region.
 
 ```yaml
 # discover kube-proxy addon versions without specifying a cluster version.
@@ -75,7 +75,7 @@ renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni","reg
 renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni","region":"us-east-1","profile":"renovate-east"}
 ```
 
-Here's an example of using the custom manager to configure this datasource:
+Here is an example of using the custom manager to configure this datasource:
 
 ```js
 {

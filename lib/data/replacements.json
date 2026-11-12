@@ -8,7 +8,9 @@
       "replacements:aws-sdk-smithy-client-to-smithy",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:base-ui-components-to-base-ui",
+      "replacements:clang-format-to-maintenance-fork",
       "replacements:containerbase",
+      "replacements:corentinmusard-otel-cicd-action-to-dash0hq",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:dev-oidc-provider-to-unscoped",
@@ -23,6 +25,7 @@
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:framer-motion-to-motion",
+      "replacements:fseehawer-react-circular-slider-to-fiojs",
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:grafana-oss-to-grafana",
       "replacements:hapi-to-scoped",
@@ -34,6 +37,7 @@
       "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
+      "replacements:monochromata-cucumber-reporting-plugin-to-jvt",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
@@ -62,6 +66,7 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:ucanaccess-to-io-github-spannm",
       "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
@@ -811,6 +816,18 @@
       }
     ]
   },
+  "fseehawer-react-circular-slider-to-fiojs": {
+    "description": "`@fseehawer/react-circular-slider` moved to `@fiojs/react-circular-slider`. Version 3.3.8 under the new name is identical in API and behavior to version 3.3.7, the last one published under the old name.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@fseehawer/react-circular-slider"],
+        "replacementName": "@fiojs/react-circular-slider",
+        "replacementVersion": "3.3.8"
+      }
+    ]
+  },
   "google-github-action-release-please-to-googleapis": {
     "description": "`google-github-action/release-please` was renamed to `googleapis/release-please`.",
     "packageRules": [
@@ -934,6 +951,17 @@
         "matchPackageNames": ["middie"],
         "replacementName": "@fastify/middie",
         "replacementVersion": "8.0.0"
+      }
+    ]
+  },
+  "monochromata-cucumber-reporting-plugin-to-jvt": {
+    "description": "`de.monochromata.cucumber:reporting-plugin` was moved to `me.jvt.cucumber:reporting-plugin`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["de.monochromata.cucumber:reporting-plugin"],
+        "replacementName": "me.jvt.cucumber:reporting-plugin",
+        "replacementVersion": "5.0.0"
       }
     ]
   },
@@ -1312,6 +1340,18 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "ucanaccess-to-io-github-spannm": {
+    "description": "`net.sf.ucanaccess:ucanaccess` is no longer maintained, development continues at `io.github.spannm:ucanaccess`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=5.0.1",
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["net.sf.ucanaccess:ucanaccess"],
+        "replacementName": "io.github.spannm:ucanaccess",
+        "replacementVersion": "5.1.0"
       }
     ]
   },

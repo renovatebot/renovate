@@ -65,7 +65,7 @@ export class TypstDatasource extends Datasource {
         namespace: `datasource-${TypstDatasource.id}:registry-releases`,
         key: config.packageName,
         fallback: true,
-        cacheable: true,
+        public: true,
       },
       () => this._getReleases(config),
     );

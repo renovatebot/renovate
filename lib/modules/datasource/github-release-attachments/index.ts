@@ -9,6 +9,7 @@ import type {
 import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { DigestConfig } from '../types.ts';
 
@@ -143,8 +144,8 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     digestAsset: GithubDigestFile,
     release: GithubRestRelease,
   ): Promise<string | null> {
-    const current = digestAsset.currentVersion.replace(regEx(/^v/), '');
-    const next = release.tag_name.replace(regEx(/^v/), '');
+    const current = stripVersionPrefix(digestAsset.currentVersion);
+    const next = stripVersionPrefix(release.tag_name);
 
     if (digestAsset.digestedFileName) {
       const checksumAssetName = digestAsset.assetName.replace(current, next);

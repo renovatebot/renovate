@@ -659,6 +659,36 @@ describe('modules/datasource/metadata', () => {
     },
   );
 
+  it.each`
+    urlKey             | rawUrl                                           | expectedUrl
+    ${'sourceUrl'}     | ${'https://user:token@example.com/foo/bar'}      | ${'https://example.com/foo/bar'}
+    ${'homepage'}      | ${'https://user:token@example.com/'}             | ${'https://example.com/'}
+    ${'changelogUrl'}  | ${'https://user:token@example.com/CHANGELOG.md'} | ${'https://example.com/CHANGELOG.md'}
+    ${'dependencyUrl'} | ${'https://user:token@example.com/maven2/foo'}   | ${'https://example.com/maven2/foo'}
+  `(
+    'removes userinfo credentials from $urlKey',
+    ({ urlKey, rawUrl, expectedUrl }) => {
+      const dep: ReleaseResult = { releases: [], [urlKey]: rawUrl };
+
+      addMetaData(dep, MavenDatasource.id, 'foobar');
+      expect(dep).toMatchObject({ [urlKey]: expectedUrl });
+    },
+  );
+
+  it('keeps an ssh git@ source URL working', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'git@gitlab.com:group/sub-group/repo.git',
+      releases: [],
+    };
+    const datasource = GitTagsDatasource.id;
+    const packageName = 'some-dep';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/group/sub-group/repo',
+    });
+  });
+
   // for coverage
   it('should handle dep with no releases', () => {
     const dep = partial<ReleaseResult>({});

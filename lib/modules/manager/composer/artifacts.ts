@@ -206,22 +206,17 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       args = 'update';
     } else {
-      args =
-        (
-          'update ' +
-          updatedDeps
-            .map((dep) =>
-              dep.newVersion
-                ? quote(`${dep.depName}:${dep.newVersion}`)
-                : quote(dep.depName!),
-            )
-            .filter(isString)
-            .map((dep) => quote(dep))
-            .join(' ')
-        ).trim() +
-        (config.postUpdateOptions?.includes('composerWithAll')
-          ? ' --with-all-dependencies'
-          : ' --with-dependencies');
+      const deps = updatedDeps
+        .map((dep) =>
+          dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName,
+        )
+        .filter(isString)
+        .map(quote)
+        .join(' ');
+      args = `update ${deps}`.trim();
+      args += config.postUpdateOptions?.includes('composerWithAll')
+        ? ' --with-all-dependencies'
+        : ' --with-dependencies';
     }
     args += getComposerUpdateArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');

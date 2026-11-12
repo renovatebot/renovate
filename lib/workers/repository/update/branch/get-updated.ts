@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isObject } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -225,11 +225,10 @@ export async function getUpdatedPackageFiles(
         config,
       );
     }
+    const isLockFileMissing = !!lockFile && !lockFileContent;
     // istanbul ignore if
-    if (
-      reuseExistingBranch &&
-      (!packageFileContent || (lockFile && !lockFileContent))
-    ) {
+    const isFileMissing = !packageFileContent || isLockFileMissing;
+    if (reuseExistingBranch && isFileMissing) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found',
@@ -352,12 +351,15 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency({
+      const result = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
-      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
+      const { content, updatedOutOfBand } = isObject(result)
+        ? result
+        : { content: result, updatedOutOfBand: false };
+      const newContent = await applyManagerBumpPackageVersion(content, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -392,11 +394,7 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
-      }
-      if (
-        newContent === packageFileContent &&
-        upgrade.manager === 'git-submodules'
-      ) {
+      } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
@@ -552,9 +550,11 @@ export async function getUpdatedPackageFiles(
         );
         sortPackageFiles(config, manager, packageFilesForManager);
         for (const packageFile of packageFilesForManager) {
-          const contents =
-            updatedFileContents[packageFile.path] ||
-            (await getFile(packageFile.path, config.baseBranch));
+          let contents: string | null | undefined =
+            updatedFileContents[packageFile.path];
+          if (!contents) {
+            contents = await getFile(packageFile.path, config.baseBranch);
+          }
           const results = await managerUpdateArtifacts(manager, {
             packageFileName: packageFile.path,
             updatedDeps: [],
@@ -636,7 +636,15 @@ function processUpdateArtifactResults(
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        updatedArtifacts.push(file);
+        // several updateArtifacts() calls can return the same file, keep only the latest
+        const existingIndex = updatedArtifacts.findIndex(
+          (artifact) => artifact.path === file.path,
+        );
+        if (existingIndex === -1) {
+          updatedArtifacts.push(file);
+        } else {
+          updatedArtifacts[existingIndex] = file;
+        }
       }
 
       if (artifactError) {
