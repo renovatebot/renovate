@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { stripVersionPrefix } from '../../../util/string.ts';
@@ -285,6 +285,10 @@ export async function updateArtifacts({
     }
 
     if (updated !== content) {
+      // Renovate calls updateArtifacts once per Package.swift, and keeps only the
+      // last result for a file. Write the edit back so the next call starts from
+      // it, and a Package.resolved shared by several manifests keeps every pin.
+      await writeLocalFile(resolvedFile, updated);
       results.push({
         file: {
           type: 'addition',
