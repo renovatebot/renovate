@@ -194,6 +194,26 @@ To let Renovate use the Azure DevOps internal API, you must set these variables 
 }
 ```
 
+### Connection reuse
+
+By default, Renovate opens a new TCP connection for every request to the Azure DevOps API.
+In large self-hosted setups this can exhaust the SNAT ports of your Azure network.
+To reuse connections within a run, enable `keepAlive` on a host rule with `hostType` `azure`:
+
+```json {title="Example config file in JSON format" configType=global}
+{
+  "hostRules": [
+    {
+      "hostType": "azure",
+      "matchHost": "https://dev.azure.com/",
+      "keepAlive": true
+    }
+  ]
+}
+```
+
+Connection reuse has no effect when the `HTTPS_PROXY` or `https_proxy` environment variable is set.
+
 ### Yarn users
 
 To do a successful `yarn install` you need to match the URL of the registry fully.
