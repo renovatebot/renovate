@@ -311,14 +311,19 @@ export async function asyncMergePr(
 
 /**
  * Merges directly, bypassing the branch rules the token may bypass like the
- * classic merge endpoint. On a branch with a merge queue, the PR is added to
- * the merge queue unless the token may bypass it. The merge queue merges with
- * its own configured merge method.
+ * classic merge endpoint unless `bypassRules` is false. On a branch with a
+ * merge queue, the PR is added to the merge queue unless the token may and
+ * should bypass it. The merge queue merges with its own configured merge
+ * method.
  */
 async function chooseAsyncMergeRequest(
   http: GithubHttp,
   params: AsyncMergeParams,
 ): Promise<AsyncMergeRequest> {
+  // Without bypassing rules the merge queue applies
+  if (params.queueEnabled && !params.bypassRules) {
+    return { merge_action: 'merge_queue' };
+  }
   if (params.queueEnabled) {
     // viewerCanMergeAsAdmin was verified for user tokens, but not for GitHub
     // App installation tokens
@@ -330,7 +335,7 @@ async function chooseAsyncMergeRequest(
   return {
     merge_action: 'direct_merge',
     merge_method: mapMergeStartegy(params.strategy) ?? params.mergeMethod,
-    bypass_rules: true,
+    bypass_rules: params.bypassRules,
   };
 }
 
