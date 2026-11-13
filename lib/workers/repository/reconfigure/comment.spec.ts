@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
+import { smartTruncate } from '../../../modules/platform/utils/pr-body.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import { ensureReconfigurePrComment, getConfigDesc } from './comment.ts';
 
@@ -23,6 +24,7 @@ describe('workers/repository/reconfigure/comment', () => {
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
+      platform.maxBodyLength.mockReturnValue(Infinity);
       platform.ensureComment.mockResolvedValueOnce(true);
       GlobalConfig.reset();
     });
@@ -73,27 +75,27 @@ describe('workers/repository/reconfigure/comment', () => {
 
     describe('when the PR body exceeds the platform limit', () => {
       beforeEach(() => {
-        branches = [
+        branches = Array.from({ length: 40 }, (_, i) =>
           partial<BranchConfig>({
-            prTitle: 'Update dependency foo to v2',
-            branchName: 'renovate/foo-2.x',
+            prTitle: `Update dependency foo${i} to v2`,
+            branchName: `renovate/foo${i}-2.x`,
             baseBranch: 'base',
             manager: 'npm',
             upgrades: [
               partial<BranchUpgradeConfig>({
                 manager: 'npm',
-                branchName: 'renovate/foo-2.x',
+                branchName: `renovate/foo${i}-2.x`,
                 updateType: 'major',
-                depName: 'foo',
+                depName: `foo${i}`,
                 newValue: '2.0.0',
               }),
             ],
           }),
-        ];
+        );
       });
 
       it('replaces the full PR list and package files with their summaries', async () => {
-        platform.maxBodyLength.mockReturnValueOnce(1);
+        platform.maxBodyLength.mockReturnValueOnce(1500);
         await ensureReconfigurePrComment(
           config,
           packageFiles,
@@ -121,7 +123,7 @@ describe('workers/repository/reconfigure/comment', () => {
       });
 
       it('does not attempt to replace package files when none were detected', async () => {
-        platform.maxBodyLength.mockReturnValueOnce(1);
+        platform.maxBodyLength.mockReturnValueOnce(1500);
         await ensureReconfigurePrComment(
           config,
           {},
@@ -132,6 +134,59 @@ describe('workers/repository/reconfigure/comment', () => {
 
         const prBody = platform.ensureComment.mock.calls[0][0].content;
         expect(prBody).not.toContain('Detected Package Files');
+        expect(prBody).toContain('| Manager | major |');
+      });
+
+      it('cuts the warnings when the summaries are still too long', async () => {
+        config.warnings = Array.from({ length: 50 }, (_, i) => ({
+          topic: `some-topic-${i}`,
+          message: 'some warning '.repeat(10),
+        }));
+        platform.maxBodyLength.mockReturnValueOnce(1500);
+        await ensureReconfigurePrComment(
+          config,
+          packageFiles,
+          branches,
+          reconfigureBranch,
+          reconfigurePr,
+        );
+
+        const prBody = platform.ensureComment.mock.calls[0][0].content;
+        expect(prBody.length).toBeLessThanOrEqual(1500);
+        expect(prBody).not.toContain('| Manager | major |');
+        expect(prBody).toContain('Section was truncated to here');
+        expect(prBody).toContain('### What to Expect');
+        expect(prBody.match(/Section was truncated to here/g)).toHaveLength(2);
+        expect(prBody).toContain('# Warnings (50)');
+        expect(prBody).toContain('### Detected Package Files');
+      });
+
+      it('switches to the summaries by the length after the platform massaged the body', async () => {
+        await ensureReconfigurePrComment(
+          config,
+          packageFiles,
+          branches,
+          reconfigureBranch,
+          reconfigurePr,
+        );
+        const fullLength =
+          platform.ensureComment.mock.calls[0][0].content.length;
+        platform.ensureComment.mockResolvedValueOnce(true);
+        platform.massageMarkdown.mockImplementation((input) =>
+          smartTruncate(input.replaceAll('foo', 'foofoo'), 1000000),
+        );
+        platform.maxBodyLength.mockReturnValueOnce(fullLength + 5);
+
+        await ensureReconfigurePrComment(
+          config,
+          packageFiles,
+          branches,
+          reconfigureBranch,
+          reconfigurePr,
+        );
+
+        const prBody = platform.ensureComment.mock.calls[1][0].content;
+        expect(prBody).not.toContain('<details>');
         expect(prBody).toContain('| Manager | major |');
       });
 

@@ -6,6 +6,10 @@ import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ensureComment } from '../../../modules/platform/comment.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
+import {
+  fitSections,
+  getBodyLength,
+} from '../../../modules/platform/utils/pr-body.ts';
 import type { BranchConfig } from '../../types.ts';
 import {
   getDepWarningsOnboardingPR,
@@ -113,9 +117,16 @@ export async function ensureReconfigurePrComment(
     );
   }
 
-  let prBody = render(sections);
+  const maxLength = platform.maxBodyLength();
+  function measure(prSections: ReconfigurePrCommentSections): number {
+    return getBodyLength(
+      render(prSections),
+      (body) => platform.massageMarkdown(body),
+      maxLength,
+    );
+  }
 
-  if (prBody.length > platform.maxBodyLength()) {
+  if (measure(sections) >= maxLength) {
     logger.debug(
       'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
     );
@@ -129,12 +140,24 @@ export async function ensureReconfigurePrComment(
       sectionOrder = SUMMARY_SECTION_ORDER;
       sections.packageFiles = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
     }
-    prBody = render(sections);
   }
 
-  logger.trace(`prBody:\n${prBody}`);
+  const fittedSections = fitSections(
+    sections,
+    ['warnings', 'prList'],
+    measure,
+    maxLength,
+  );
+  if (fittedSections !== sections) {
+    logger.debug(
+      'Reconfigure PR body still exceeds platform limit, truncating "What to Expect" and warnings',
+    );
+  }
+  const renderedBody = render(fittedSections);
 
-  prBody = platform.massageMarkdown(prBody);
+  logger.trace(`prBody:\n${renderedBody}`);
+
+  const prBody = platform.massageMarkdown(renderedBody);
 
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would ensure comment');
