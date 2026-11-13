@@ -274,7 +274,7 @@
     "re2": "1.27.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.5",
+    "@biomejs/biome": "2.6.6",
     "@commander-js/extra-typings": "15.0.0",
     "@containerbase/istanbul-reports-html": "2.0.25",
     "@containerbase/semantic-release-pnpm": "1.4.4",
