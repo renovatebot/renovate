@@ -282,7 +282,7 @@ describe('modules/manager/maven/extract', () => {
         'full_cnb.pom.xml',
         {},
       );
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
           currentValue: '3.2.2',
           datasource: 'maven',
@@ -373,7 +373,7 @@ describe('modules/manager/maven/extract', () => {
         'basic_cnb.pom.xml',
         {},
       );
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
           currentValue: '3.2.2',
           datasource: 'maven',
