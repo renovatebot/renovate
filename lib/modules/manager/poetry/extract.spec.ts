@@ -789,6 +789,15 @@ describe('modules/manager/poetry/extract', () => {
       expect(res).toEqual({
         deps: [
           {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11,<4.0',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+            registryUrls: null,
+          },
+          {
             currentValue: '==2.0.0',
             currentVersion: '2.0.0',
             datasource: 'pypi',
@@ -816,7 +825,7 @@ describe('modules/manager/poetry/extract', () => {
             packageName: 'python-decouple',
           },
         ],
-        extractedConstraints: {},
+        extractedConstraints: { python: '>=3.11,<4.0' },
         packageFileVersion: undefined,
       });
     });

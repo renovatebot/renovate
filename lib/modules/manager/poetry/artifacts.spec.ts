@@ -134,6 +134,34 @@ describe('modules/manager/poetry/artifacts', () => {
       expect(execSnapshots).toEqual([]);
     });
 
+    it('refreshes lock if updatedDeps is just requires-python', async () => {
+      const execSnapshots = mockExecAll();
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      const updatedDeps = [{ depType: 'requires-python' }];
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config,
+        }),
+      ).resolves.toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'poetry.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'poetry lock --no-interaction' },
+      ]);
+    });
+
     it('returns null if unchanged', async () => {
       const execSnapshots = mockExecAll();
       fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
