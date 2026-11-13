@@ -310,6 +310,51 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       ).toEqual(['must NOT have additional properties']);
     });
 
+    it('only allows cache namespaces which exist, or a pattern', () => {
+      expect(
+        schemaErrors(globalSchema, {
+          cacheTtlOverride: {
+            'datasource-docker-hub-tags': 90,
+            'datasource-maven:metadata-not-found': 60,
+            'datasource-*': 60,
+            'datasource-{crate,go}': 90,
+            '/^changelog-/': 45,
+            '*': 30,
+          },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(globalSchema, {
+          // removed in 40.9.0
+          cacheTtlOverride: { 'datasource-maven:metadata-xml': 123 },
+        }),
+      ).toEqual([
+        'must be equal to one of the allowed values',
+        'must match pattern "^!|^/.*/i?$|[*?[\\]{}()]"',
+        'must match a schema in anyOf',
+        'property name must be valid',
+      ]);
+
+      /* only used by our tests, so shouldn't be suggested to anyone */
+      expect(
+        schemaErrors(globalSchema, {
+          cacheTtlOverride: { '_test-namespace': 123 },
+        }),
+      ).toEqual([
+        'must be equal to one of the allowed values',
+        'must match pattern "^!|^/.*/i?$|[*?[\\]{}()]"',
+        'must match a schema in anyOf',
+        'property name must be valid',
+      ]);
+
+      expect(
+        schemaErrors(globalSchema, {
+          cacheTtlOverride: { 'datasource-docker-hub-tags': 'ninety' },
+        }),
+      ).toEqual(['must be number']);
+    });
+
     it('validates the children of a map of configs', () => {
       expect(
         schemaErrors(repoSchema, {
