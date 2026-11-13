@@ -4,6 +4,7 @@ import {
   isNonEmptyObject,
   isNonEmptyString,
   isObject,
+  isTruthy,
 } from '@sindresorhus/is';
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
@@ -42,7 +43,7 @@ import {
   isLockedVersionOf,
 } from './constraints.ts';
 import { extractGitReference } from './git-reference.ts';
-import { extractInclude } from './include.ts';
+import { extractInclude, extractTaskConfigInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
@@ -119,7 +120,16 @@ export async function extractPackageFile(
     extractInclude(include, content),
   );
 
-  if (!toolEntries.length && !taskFileDeps.length && !includeDeps.length) {
+  const taskConfigIncludeDeps = misefile.task_config.includes
+    .map((include) => extractTaskConfigInclude(include, content))
+    .filter(isTruthy);
+
+  if (
+    !toolEntries.length &&
+    !taskFileDeps.length &&
+    !includeDeps.length &&
+    !taskConfigIncludeDeps.length
+  ) {
     return null;
   }
 
@@ -141,7 +151,12 @@ export async function extractPackageFile(
   const toolDeps = toolEntries.map(([name, toolData, depType]) =>
     extractToolEntry(name, toolData, depType, lockFileData),
   );
-  const deps = [...toolDeps, ...taskFileDeps, ...includeDeps];
+  const deps = [
+    ...toolDeps,
+    ...taskFileDeps,
+    ...includeDeps,
+    ...taskConfigIncludeDeps,
+  ];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {
