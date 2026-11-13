@@ -4,7 +4,6 @@ import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import { joinUrlParts } from '../../../../util/url.ts';
 import { getPrFooter } from '../../update/pr/body/footer.ts';
 import { getPrHeader } from '../../update/pr/body/header.ts';
 import { ensureConfigPr } from '../../update/pr/ensure-config-pr.ts';
@@ -17,10 +16,6 @@ export async function ensureConfigMigrationPr(
   migratedConfigData: MigratedData,
 ): Promise<Pr | null> {
   logger.debug('ensureConfigMigrationPr()');
-  const docsLink = joinUrlParts(
-    GlobalConfig.get('productLinks').documentation,
-    'configuration-options/#configmigration',
-  );
   const branchName = getMigrationBranchName(config);
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
@@ -29,7 +24,6 @@ export async function ensureConfigMigrationPr(
 
   const prTitle = commitMessageFactory.getPrTitle();
   const existingPr = await platform.getBranchPr(branchName, config.baseBranch);
-  const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
   let prBody = `The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
 
@@ -37,12 +31,7 @@ export async function ensureConfigMigrationPr(
   prBody += emojify(
     `
 
-${
-  filename.endsWith('.json5')
-    ? `#### [PLEASE NOTE](${docsLink}): ` +
-      `JSON5 config file migrated! All comments & trailing commas were removed.`
-    : ''
-}
+
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
 

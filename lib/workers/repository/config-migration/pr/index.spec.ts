@@ -181,9 +181,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       const prBody = platform.createPr.mock.calls[0][0].prBody;
-      expect(prBody).toContain(
-        '#### [PLEASE NOTE](https://docs.renovatebot.com/configuration-options#configmigration): JSON5 config file migrated! All comments & trailing commas were removed.',
-      );
+      expect(prBody).not.toContain('PLEASE NOTE');
       expect(prBody).toStartWith(
         'The Renovate config in this repository needs migrating.',
       );
