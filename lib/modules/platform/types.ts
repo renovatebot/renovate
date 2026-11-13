@@ -58,6 +58,7 @@ export interface PrDebugData {
   updatedInVer: string;
   targetBranch: string;
   labels?: string[];
+  upgradesFingerprint?: string;
 }
 
 export interface PrBodyStruct {

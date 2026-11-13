@@ -349,6 +349,7 @@ describe('workers/repository/update/branch/reuse', () => {
         },
         branchPr: null,
         branchExists: true,
+        branchIsModified: false,
         dependencyDashboardCheck: undefined,
         forceRebase: false,
       };
@@ -451,6 +452,75 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(decideBranchReuse(input)).toEqual({
         action: 'no-reuse',
         userRebaseRequested: false,
+      });
+    });
+
+    describe('upgrades fingerprint kept in the PR', () => {
+      function withPrFingerprint(upgradesFingerprint?: string): void {
+        input.config.upgradesFingerprint = 'current';
+        input.branchPr = partial<Pr>({
+          bodyStruct: {
+            hash: 'hash',
+            debugData: {
+              createdInVer: '1.0.0',
+              updatedInVer: '1.0.0',
+              targetBranch: 'base',
+              upgradesFingerprint,
+            },
+          },
+        });
+      }
+
+      it.each`
+        prUpgradesFingerprint
+        ${'previous'}
+        ${undefined}
+      `(
+        'does not reuse the branch if the cache has no fingerprint and the PR has $prUpgradesFingerprint',
+        ({ prUpgradesFingerprint }) => {
+          input.config.cacheFingerprintMatch = 'no-fingerprint';
+          withPrFingerprint(prUpgradesFingerprint);
+          expect(decideBranchReuse(input)).toEqual({
+            action: 'no-reuse',
+            userRebaseRequested: false,
+          });
+        },
+      );
+
+      it('checks the branch itself if the platform strips the debug data', () => {
+        input.config.cacheFingerprintMatch = 'no-fingerprint';
+        input.config.upgradesFingerprint = 'current';
+        input.branchPr = partial<Pr>({ bodyStruct: { hash: 'hash' } });
+        expect(decideBranchReuse(input)).toEqual({
+          action: 'check-reuse',
+          userRebaseRequested: false,
+        });
+      });
+
+      it.each`
+        cacheFingerprintMatch | prUpgradesFingerprint
+        ${'no-fingerprint'}   | ${'current'}
+        ${'matched'}          | ${'previous'}
+      `(
+        'checks the branch itself when the cache is $cacheFingerprintMatch and the PR has $prUpgradesFingerprint',
+        ({ cacheFingerprintMatch, prUpgradesFingerprint }) => {
+          input.config.cacheFingerprintMatch = cacheFingerprintMatch;
+          withPrFingerprint(prUpgradesFingerprint);
+          expect(decideBranchReuse(input)).toEqual({
+            action: 'check-reuse',
+            userRebaseRequested: false,
+          });
+        },
+      );
+
+      it('checks the branch itself if the user modified it', () => {
+        input.branchIsModified = true;
+        input.config.cacheFingerprintMatch = 'no-fingerprint';
+        withPrFingerprint('previous');
+        expect(decideBranchReuse(input)).toEqual({
+          action: 'check-reuse',
+          userRebaseRequested: false,
+        });
       });
     });
 

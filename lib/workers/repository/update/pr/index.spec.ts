@@ -63,6 +63,18 @@ describe('workers/repository/update/pr/index', () => {
       expect(res.labels).toBeUndefined();
       expect(res).toMatchObject({ createdInVer: '1.0.0' });
     });
+
+    it('records the upgrades fingerprint', () => {
+      const res = updatePrDebugData('base', ['dep'], undefined, 'fingerprint');
+
+      expect(res.upgradesFingerprint).toBe('fingerprint');
+    });
+
+    it('leaves the upgrades fingerprint out when there is none', () => {
+      const res = updatePrDebugData('base', ['dep'], undefined);
+
+      expect(res).not.toHaveProperty('upgradesFingerprint');
+    });
   });
 
   describe('ensurePr', () => {
@@ -593,6 +605,47 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
 
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Pull Request #123 does not need updating',
+        );
+      });
+
+      it('updates the PR when only the upgrades fingerprint changed', async () => {
+        const legacyPr: Pr = {
+          ...pr,
+          bodyStruct: {
+            ...bodyStruct,
+            debugData: {
+              createdInVer: '1.0.0',
+              updatedInVer: '1.0.0',
+              targetBranch: 'base',
+            },
+          },
+        };
+        platform.getBranchPr.mockResolvedValueOnce(legacyPr);
+
+        const res = await ensurePr({ ...config, upgradesFingerprint: 'new' });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prBody.getPrBody).toHaveBeenCalledWith(
+          expect.anything(),
+          {
+            debugData: expect.objectContaining({ upgradesFingerprint: 'new' }),
+          },
+          expect.anything(),
+        );
+        expect(platform.updatePr).toHaveBeenCalledWith(
+          expect.objectContaining({ number }),
+        );
+      });
+
+      it('does not update the PR for the upgrades fingerprint when the platform strips the debug data', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, upgradesFingerprint: 'new' });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(platform.updatePr).not.toHaveBeenCalled();
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );

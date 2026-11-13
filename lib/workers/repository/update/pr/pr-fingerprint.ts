@@ -41,6 +41,7 @@ export interface PrBodyFingerprintConfig {
   updateType?: UpdateType;
   warnings?: ValidationMessage[];
   pendingVersions?: string[];
+  upgradesFingerprint?: string;
 
   filteredUpgrades?: FilteredBranchUpgradeConfig[];
 }
@@ -81,6 +82,7 @@ export function generatePrBodyFingerprintConfig(
     updateType: config.updateType,
     warnings: config.warnings,
     pendingVersions: config.pendingVersions,
+    upgradesFingerprint: config.upgradesFingerprint,
   };
 }
 
