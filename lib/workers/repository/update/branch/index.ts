@@ -690,6 +690,44 @@ export async function processBranch(
     });
   }
   try {
+    // A branch left behind after its commits landed on the base (the platform
+    // did not delete it, or another MR carried the same commits) has nothing
+    // to propose. `!commitSha` here already implies the branch existed at the
+    // start of this run: a missing branch returns `no-work` above. Creating a
+    // PR anyway is an empty diff. GitHub rejects it; GitLab and Forgejo accept
+    // it, and the next schedule opens another one. An open PR is left alone.
+    if (!commitSha && !branchPr) {
+      let branchAlreadyInBase = false;
+      try {
+        branchAlreadyInBase = await scm.isBranchAncestorOfBase(
+          config.branchName,
+          config.baseBranch,
+        );
+      } catch (err) {
+        logger.debug(
+          { err, branchName: config.branchName },
+          'Failed to check whether the branch is already contained in the base branch',
+        );
+      }
+      if (branchAlreadyInBase) {
+        logger.debug(
+          `Branch ${config.branchName} is already contained in ${config.baseBranch} - skipping empty PR`,
+        );
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would delete branch ${config.branchName} because its commits are already in the base branch`,
+          );
+        } else {
+          await deleteBranchSilently(config.branchName);
+        }
+        return {
+          branchExists: false,
+          result: 'no-work',
+          commitSha,
+        };
+      }
+    }
+
     logger.debug('Ensuring PR');
     logger.debug(
       `There are ${config.errors!.length} errors and ${

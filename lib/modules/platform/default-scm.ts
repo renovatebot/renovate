@@ -35,6 +35,13 @@ export class DefaultGitScm implements PlatformScm {
     return git.isBranchBehindBase(branchName, baseBranch);
   }
 
+  isBranchAncestorOfBase(
+    branchName: string,
+    baseBranch: string,
+  ): Promise<boolean> {
+    return git.isBranchAncestorOfBase(branchName, baseBranch);
+  }
+
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean> {
     return git.isBranchConflicted(baseBranch, branch);
   }
