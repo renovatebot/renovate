@@ -256,6 +256,21 @@ describe('modules/versioning/ruby/index', () => {
   });
 
   it.each`
+    newVersion | currentValue           | expected
+    ${'1.2.3'} | ${'~> 1.2'}            | ${'1.2.3'}
+    ${'1.2.3'} | ${'"~> 1.2"'}          | ${'"1.2.3"'}
+    ${'1.2.3'} | ${"'~> 1.2'"}          | ${"'1.2.3'"}
+    ${'1.2.3'} | ${"'>= 1.0', '< 2.0'"} | ${"'1.2.3'"}
+  `(
+    'getPinnedValue("$newVersion", "$currentValue") === $expected',
+    ({ newVersion, currentValue, expected }) => {
+      expect(semverRuby.getPinnedValue?.(newVersion, currentValue)).toBe(
+        expected,
+      );
+    },
+  );
+
+  it.each`
     currentValue             | rangeStrategy        | currentVersion | newVersion   | expected
     ${'1.0.3'}               | ${'pin'}             | ${'1.0.3'}     | ${'1.2.3'}   | ${'1.2.3'}
     ${'v1.0.3'}              | ${'auto'}            | ${'v1.0.3'}    | ${'v1.2.3'}  | ${'v1.2.3'}
