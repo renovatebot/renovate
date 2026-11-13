@@ -1229,6 +1229,58 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('extracts aube packageManager', async () => {
+      const pJson = {
+        packageManager: 'aube@2.9.0',
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { aube: '2.9.0' },
+        deps: [
+          {
+            commitMessageTopic: 'aube',
+            currentValue: '2.9.0',
+            datasource: 'npm',
+            depName: 'aube',
+            depType: 'packageManager',
+            packageName: '@endevco/aube',
+            prettyDepType: 'packageManager',
+          },
+        ],
+        managerData: {
+          hasPackageManager: true,
+        },
+      });
+    });
+
+    it('extracts aube engines constraint', async () => {
+      const pJson = {
+        engines: { aube: '^2.0.0' },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { aube: '^2.0.0' },
+        deps: [
+          {
+            currentValue: '^2.0.0',
+            depName: 'aube',
+            depType: 'engines',
+            packageName: '@endevco/aube',
+          },
+        ],
+      });
+    });
+
     it('sets hasPackageManager to true when devEngines detected in package file', async () => {
       const pJson = {
         devEngines: {
