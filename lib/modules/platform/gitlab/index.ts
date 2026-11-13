@@ -24,7 +24,9 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
+import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
@@ -39,6 +41,8 @@ import { parseInteger } from '../../../util/number.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import {
   ensureTrailingSlash,
@@ -82,6 +86,8 @@ import type { GitLabMergeRequest } from './schema.ts';
 import { LastPipelineId, MergeTrainCarStatus } from './schema.ts';
 import type {
   GitlabComment,
+  GitlabCommitAction,
+  GitlabCommitResponse,
   GitlabIssue,
   GitlabPr,
   MergeMethod,
@@ -93,6 +99,8 @@ import {
   defaults,
   getRepoUrl,
   prInfo,
+  toAdditionAction,
+  toDeletionAction,
 } from './utils.ts';
 
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
@@ -274,6 +282,75 @@ export async function getJsonFile(
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
+}
+
+export async function commitFiles(
+  commitConfig: CommitFilesConfig,
+): Promise<LongCommitSha | null> {
+  const { baseBranch, branchName, files, message, trailers } = commitConfig;
+  const startBranch = baseBranch ?? config.defaultBranch;
+
+  const commitResult = await git.prepareCommit(commitConfig);
+  if (!commitResult) {
+    logger.debug(
+      { branchName, files: files.map(({ path }) => path) },
+      'GitLab platformCommit: unable to prepare for commit',
+    );
+    return null;
+  }
+
+  logger.debug(
+    { branchName, fileCount: commitResult.files.length },
+    'GitLab platformCommit: preparing commit via GitLab API',
+  );
+
+  const actions: GitlabCommitAction[] = [];
+  for (const file of commitResult.files) {
+    if (file.type === 'deletion') {
+      actions.push(toDeletionAction(file.path));
+    } else {
+      actions.push(await toAdditionAction(file, startBranch));
+    }
+  }
+
+  if (isEmptyArray(actions)) {
+    logger.debug(
+      { branchName },
+      'GitLab platformCommit: no file changes to commit',
+    );
+    return null;
+  }
+
+  try {
+    const res = await gitlabApi.postJson<GitlabCommitResponse>(
+      `projects/${config.repository}/repository/commits`,
+      {
+        body: {
+          branch: branchName,
+          start_branch: startBranch,
+          commit_message: formatCommitMessage(message, trailers),
+          actions,
+          force: true,
+        },
+      },
+    );
+
+    const commitSha = toLongCommitSha(res.body.id);
+    logger.debug(
+      { branchName, commitSha, startBranch },
+      'GitLab platformCommit: created commit via GitLab API',
+    );
+    // Keep local branch state in sync with the platform-created commit,
+    // matching the GitHub platform-commit flow.
+    await git.resetToCommit(commitResult.parentCommitSha);
+    return await git.fetchBranch(branchName);
+  } catch (err) {
+    logger.warn(
+      { err, branchName, startBranch },
+      'GitLab platformCommit: failed to create commit via GitLab API',
+    );
+    return null;
+  }
 }
 
 // Initialize GitLab by getting base branch
