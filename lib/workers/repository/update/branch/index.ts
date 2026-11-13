@@ -133,10 +133,40 @@ export interface ProcessBranchResult {
   commitSha?: string | null;
 }
 
-export async function processBranch(
+interface AutomergeCandidate {
+  type: 'automerge-candidate';
+  branchExists: boolean;
+  commitSha: string | null;
+  config: BranchConfig;
+  fallbackResult: ProcessBranchResult;
+  pr: Pr;
+  updateWasSkipped: boolean;
+}
+
+function isAutomergeCandidate(
+  result: ProcessBranchResult | AutomergeCandidate,
+): result is AutomergeCandidate {
+  return 'type' in result && result.type === 'automerge-candidate';
+}
+
+async function tryPrAutomerge(
+  pr: Pr,
+  config: BranchConfig,
+  branchExists: boolean,
+  commitSha: string | null,
+): Promise<ProcessBranchResult | null> {
+  logger.debug('checking auto-merge');
+  const prAutomergeResult = await checkAutoMerge(pr, config);
+  if (!prAutomergeResult.automerged) {
+    return null;
+  }
+  return { branchExists, result: 'automerged', commitSha };
+}
+
+async function processBranchUpdate(
   branchConfig: BranchConfig,
   forceRebase = false,
-): Promise<ProcessBranchResult> {
+): Promise<ProcessBranchResult | AutomergeCandidate> {
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
@@ -187,6 +217,7 @@ export async function processBranch(
   const artifactNoticeTopic = emojify(
     ':information_source: Artifact update notice',
   );
+  let scheduleResult: ProcessBranchResult | null = null;
   try {
     // Check if branch already existed
     const existingPr =
@@ -382,539 +413,520 @@ export async function processBranch(
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
-        return {
+        scheduleResult = {
           branchExists,
           result: 'not-scheduled',
         };
-      }
-      if (config.updateNotScheduled === false && !config.rebaseRequested) {
-        if (
-          !(
-            config.automerge &&
-            branchPr &&
-            isScheduledNow(config, 'automergeSchedule')
-          )
-        ) {
-          logger.debug('Skipping branch update as not within schedule');
-          return {
-            branchExists,
-            prNo: branchPr?.number,
-            result: 'update-not-scheduled',
-          };
-        }
-        logger.debug(
-          'Branch update is not scheduled - will check PR automerge only',
-        );
-      }
-      if (
+      } else if (
+        config.updateNotScheduled === false &&
+        !config.rebaseRequested
+      ) {
+        logger.debug('Skipping branch update as not within schedule');
+        scheduleResult = {
+          branchExists,
+          prNo: branchPr?.number,
+          result: 'update-not-scheduled',
+        };
+      } else if (
         !branchPr &&
         !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge there's no need for a PR
       ) {
         logger.debug('Skipping PR creation out of schedule');
-        return {
+        scheduleResult = {
           branchExists,
           result: 'not-scheduled',
         };
+      } else {
+        logger.debug(
+          'Branch + PR exists but is not scheduled -- will update if necessary',
+        );
       }
-      logger.debug(
-        'Branch + PR exists but is not scheduled -- will update if necessary',
-      );
     }
-    //stability checks
-    if (
-      config.upgrades.some(
-        (upgrade) =>
-          isNonEmptyString(upgrade.minimumReleaseAge) ||
-          isActiveConfidenceLevel(upgrade.minimumConfidence!),
-      )
-    ) {
-      const depNamesWithoutReleaseTimestamp: Record<
-        MinimumReleaseAgeBehaviour,
-        {
-          depName: string;
-          updateType: UpdateType;
-        }[]
-      > = {
-        'timestamp-required': [],
-        'timestamp-optional': [],
-      };
+    if (!scheduleResult) {
+      //stability checks
+      if (
+        config.upgrades.some(
+          (upgrade) =>
+            isNonEmptyString(upgrade.minimumReleaseAge) ||
+            isActiveConfidenceLevel(upgrade.minimumConfidence!),
+        )
+      ) {
+        const depNamesWithoutReleaseTimestamp: Record<
+          MinimumReleaseAgeBehaviour,
+          {
+            depName: string;
+            updateType: UpdateType;
+          }[]
+        > = {
+          'timestamp-required': [],
+          'timestamp-optional': [],
+        };
 
-      // Only set a stability status check if one or more of the updates contain
-      // both a minimumReleaseAge setting and a releaseTimestamp
-      config.stabilityStatus = 'green';
-      // Default to 'success' but set 'pending' if any update is pending
-      for (const upgrade of config.upgrades) {
-        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
-          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
-          : 0;
+        // Only set a stability status check if one or more of the updates contain
+        // both a minimumReleaseAge setting and a releaseTimestamp
+        config.stabilityStatus = 'green';
+        // Default to 'success' but set 'pending' if any update is pending
+        for (const upgrade of config.upgrades) {
+          const minimumReleaseAgeMs = isNonEmptyString(
+            upgrade.minimumReleaseAge,
+          )
+            ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
+            : 0;
 
-        if (minimumReleaseAgeMs) {
-          const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
-            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
+          if (minimumReleaseAgeMs) {
+            const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
+              upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
 
-          // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
-          if (upgrade.releaseTimestamp) {
-            const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-            if (timeElapsed < minimumReleaseAgeMs) {
-              logger.debug(
-                {
-                  depName: upgrade.depName,
-                  timeElapsed,
-                  minimumReleaseAge: upgrade.minimumReleaseAge,
-                },
-                'Update has not passed minimum release age',
-              );
-              config.stabilityStatus = 'yellow';
-              continue;
-            }
-          } else {
-            // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
-            if (minimumReleaseAgeBehaviour === 'timestamp-required') {
-              depNamesWithoutReleaseTimestamp['timestamp-required'].push({
-                depName: upgrade.depName!,
-                updateType: upgrade.updateType!,
-              });
-              config.stabilityStatus = 'yellow';
-              continue;
+            // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
+            if (upgrade.releaseTimestamp) {
+              const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+              if (timeElapsed < minimumReleaseAgeMs) {
+                logger.debug(
+                  {
+                    depName: upgrade.depName,
+                    timeElapsed,
+                    minimumReleaseAge: upgrade.minimumReleaseAge,
+                  },
+                  'Update has not passed minimum release age',
+                );
+                config.stabilityStatus = 'yellow';
+                continue;
+              }
             } else {
-              // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
-              depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
-                depName: upgrade.depName!,
-                updateType: upgrade.updateType!,
-              });
+              // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
+              if (minimumReleaseAgeBehaviour === 'timestamp-required') {
+                depNamesWithoutReleaseTimestamp['timestamp-required'].push({
+                  depName: upgrade.depName!,
+                  updateType: upgrade.updateType!,
+                });
+                config.stabilityStatus = 'yellow';
+                continue;
+              } else {
+                // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
+                depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
+                  depName: upgrade.depName!,
+                  updateType: upgrade.updateType!,
+                });
+              }
+            }
+          }
+          const datasource = upgrade.datasource!;
+          const depName = upgrade.depName!;
+          const packageName = upgrade.packageName!;
+          const minimumConfidence = upgrade.minimumConfidence!;
+          const updateType = upgrade.updateType!;
+          const currentVersion = upgrade.currentVersion!;
+          const newVersion = upgrade.newVersion!;
+          if (isActiveConfidenceLevel(minimumConfidence)) {
+            const confidence =
+              (await getMergeConfidenceLevel(
+                datasource,
+                packageName,
+                currentVersion,
+                newVersion,
+                updateType,
+              )) ?? 'neutral';
+            if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+              config.confidenceStatus = 'green';
+            } else {
+              logger.debug(
+                { depName, confidence, minimumConfidence },
+                'Update does not meet minimum confidence scores',
+              );
+              config.confidenceStatus = 'yellow';
+              continue;
             }
           }
         }
-        const datasource = upgrade.datasource!;
-        const depName = upgrade.depName!;
-        const packageName = upgrade.packageName!;
-        const minimumConfidence = upgrade.minimumConfidence!;
-        const updateType = upgrade.updateType!;
-        const currentVersion = upgrade.currentVersion!;
-        const newVersion = upgrade.newVersion!;
-        if (isActiveConfidenceLevel(minimumConfidence)) {
-          const confidence =
-            (await getMergeConfidenceLevel(
-              datasource,
-              packageName,
-              currentVersion,
-              newVersion,
-              updateType,
-            )) ?? 'neutral';
-          if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
-            config.confidenceStatus = 'green';
-          } else {
-            logger.debug(
-              { depName, confidence, minimumConfidence },
-              'Update does not meet minimum confidence scores',
-            );
-            config.confidenceStatus = 'yellow';
-            continue;
-          }
+
+        if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
+          logger.once.debug(
+            { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
+            `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
+          );
         }
-      }
+        if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
+          logger.once.warn(
+            "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+          );
+          logger.once.debug(
+            { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
+            `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+          );
+        }
 
-      if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
-        logger.once.debug(
-          { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
-          `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
-        );
-      }
-      if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
-        logger.once.warn(
-          "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
-        );
-        logger.once.debug(
-          { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
-          `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
-        );
-      }
-
-      // Don't create a branch if we know it will be status 'pending'
-      if (
-        !dependencyDashboardCheck &&
-        !branchExists &&
-        config.stabilityStatus === 'yellow' &&
-        ['not-pending', 'status-success'].includes(config.prCreation!)
-      ) {
-        logger.debug(
-          'Skipping branch creation due to internal status checks not met',
-        );
-        return {
-          branchExists,
-          result: 'pending',
-        };
-      }
-    }
-
-    let userRebaseRequested =
-      dependencyDashboardCheck === 'rebase' ||
-      !!config.dependencyDashboardRebaseAllOpen ||
-      !!config.rebaseRequested;
-    const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
-    const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
-    const userOpenAllSchedulePendingPR =
-      !!config.dependencyDashboardAllAwaitingSchedule;
-
-    if (forceRebase) {
-      logger.debug('Force rebase because branch needs updating');
-      config.reuseExistingBranch = false;
-    } else if (userRebaseRequested) {
-      logger.debug('User has requested rebase');
-      config.reuseExistingBranch = false;
-    } else if (dependencyDashboardCheck === 'global-config') {
-      logger.debug(`Manual create/rebase requested via checkedBranches`);
-      config.reuseExistingBranch = false;
-      userRebaseRequested = true;
-    } else if (userApproveAllPendingPR) {
-      logger.debug(
-        'A user manually approved all pending PRs via the Dependency Dashboard.',
-      );
-    } else if (userOpenAllRateLimtedPR) {
-      logger.debug(
-        'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
-      );
-    } else if (userOpenAllSchedulePendingPR) {
-      logger.debug(
-        'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
-      );
-    } else if (
-      !config.isScheduledNow &&
-      !dependencyDashboardCheck &&
-      config.updateNotScheduled === false &&
-      config.automerge &&
-      branchPr
-    ) {
-      await setBranchStatusChecks(config);
-      logger.debug('checking auto-merge');
-      const prAutomergeResult = await checkAutoMerge(branchPr, config);
-      if (prAutomergeResult?.automerged) {
-        return {
-          branchExists,
-          result: 'automerged',
-          commitSha,
-        };
-      }
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'update-not-scheduled',
-      };
-    } else if (
-      branchExists &&
-      config.rebaseWhen === 'never' &&
-      !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
-      !dependencyDashboardCheck
-    ) {
-      logger.debug('rebaseWhen=never so skipping branch update check');
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'no-work',
-      };
-    }
-    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
-    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
-    else if (
-      branchPr?.targetBranch &&
-      branchPr.targetBranch !== config.baseBranch
-    ) {
-      logger.debug(
-        'Base branch changed by user, rebasing the branch onto new base',
-      );
-      config.reuseExistingBranch = false;
-    } else if (config.cacheFingerprintMatch === 'no-match') {
-      logger.debug(
-        'Cache fingerprint does not match, cannot reuse existing branch',
-      );
-      config.reuseExistingBranch = false;
-    } else {
-      config = await shouldReuseExistingBranch(config);
-    }
-    // TODO: types (#22198)
-    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (
-      !(
-        config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
-      )
-    ) {
-      await scm.checkoutBranch(config.baseBranch);
-      const res = await getUpdatedPackageFiles(config);
-      if (res.artifactErrors && config.artifactErrors) {
-        res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
-      }
-      config = { ...config, ...res };
-      if (config.updatedPackageFiles?.length) {
-        logger.debug(
-          `Updated ${config.updatedPackageFiles.length} package files`,
-        );
-        if (config.reuseExistingBranch && !forceRebase) {
+        // Don't create a branch if we know it will be status 'pending'
+        if (
+          !dependencyDashboardCheck &&
+          !branchExists &&
+          config.stabilityStatus === 'yellow' &&
+          ['not-pending', 'status-success'].includes(config.prCreation!)
+        ) {
           logger.debug(
-            'Existing branch needs updating. Restarting processBranch() with a clean branch',
-          );
-          return processBranch(branchConfig, true);
-        }
-      } else {
-        logger.debug('No package files need updating');
-      }
-      const additionalFiles = await getAdditionalFiles(
-        config,
-        branchConfig.packageFiles!,
-      );
-      config.artifactErrors = coerceArray(config.artifactErrors).concat(
-        additionalFiles.artifactErrors,
-      );
-      config.artifactNotices = coerceArray(config.artifactNotices).concat(
-        coerceArray(additionalFiles.artifactNotices),
-      );
-      config.updatedArtifacts = coerceArray(config.updatedArtifacts).concat(
-        additionalFiles.updatedArtifacts,
-      );
-      // `gh actions-lock` rewrites the whole lockfile from the workflows on disk, so like the lock files above it runs once here, after every updated package file has been written, rather than per package file.
-      const actionsLockfile = await updateActionsLockfile(
-        config,
-        branchConfig.packageFiles,
-      );
-      config.artifactErrors = config.artifactErrors.concat(
-        actionsLockfile.artifactErrors,
-      );
-      config.updatedArtifacts = config.updatedArtifacts.concat(
-        actionsLockfile.updatedArtifacts,
-      );
-      if (config.updatedArtifacts?.length) {
-        logger.debug(
-          {
-            updatedArtifacts: config.updatedArtifacts.map((f) =>
-              f.type === 'deletion' ? `${f.path} (delete)` : f.path,
-            ),
-          },
-          `Updated ${config.updatedArtifacts.length} lock files`,
-        );
-        if (config.reuseExistingBranch && !forceRebase) {
-          logger.debug(
-            'Existing branch needs updating. Restarting processBranch() with a clean branch',
-          );
-          return processBranch(branchConfig, true);
-        }
-      } else {
-        logger.debug('No updated lock files in branch');
-      }
-
-      await embedChangelogs({
-        upgrades: config.upgrades,
-        stage: 'branch',
-      });
-
-      const postUpgradeCommandResults =
-        await executePostUpgradeCommands(config);
-
-      if (postUpgradeCommandResults !== null) {
-        const { updatedArtifacts, artifactErrors } = postUpgradeCommandResults;
-        config.updatedArtifacts = updatedArtifacts;
-        config.artifactErrors = artifactErrors;
-      }
-
-      // modifies the file changes in place to allow having a version bump in a packageFile or artifact
-      await bumpVersions(config);
-
-      removeMeta(['dep']);
-
-      if (config.artifactErrors?.length) {
-        if (config.releaseTimestamp) {
-          logger.debug(`Branch timestamp: ${config.releaseTimestamp}`);
-          const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
-          if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
-            logger.debug(
-              'PR is older than 2 hours, raise PR with lock file errors',
-            );
-          } else if (branchExists) {
-            logger.debug(
-              'PR is less than 2 hours old but branchExists so updating anyway',
-            );
-          } else {
-            logger.debug(
-              'PR is less than 2 hours old - raise error instead of PR',
-            );
-            throw new Error(MANAGER_LOCKFILE_ERROR);
-          }
-        } else {
-          logger.debug('PR has no releaseTimestamp');
-        }
-      } else if (config.updatedArtifacts?.length && branchPr) {
-        // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
-          );
-        } else {
-          // Remove artifacts error comment only if this run has successfully updated artifacts
-          await ensureCommentRemoval({
-            type: 'by-topic',
-            number: branchPr.number,
-            topic: artifactErrorTopic,
-          });
-
-          // v8 ignore else -- TODO: add test #40625
-          if (!config.artifactNotices?.length) {
-            await ensureCommentRemoval({
-              type: 'by-topic',
-              number: branchPr.number,
-              topic: artifactNoticeTopic,
-            });
-          }
-        }
-      }
-      const forcedManually = userRebaseRequested || !branchExists;
-
-      config.isConflicted ??=
-        branchExists &&
-        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
-      config.forceCommit = forcedManually || config.isConflicted;
-
-      // compile commit message with body, which maybe needs changelogs
-      if (config.commitBody) {
-        // changelog is on first upgrade
-        config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
-          config.commitBody,
-          {
-            ...config,
-            logJSON: config.upgrades[0].logJSON,
-            releases: config.upgrades[0].releases,
-          },
-        )}`;
-
-        logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
-      }
-
-      if (config.commitTrailers) {
-        // Template expansions can produce broken trailers
-        config.commitTrailers = filterValidCommitTrailers(
-          config.commitTrailers.map((trailer) =>
-            template.compile(trailer, config),
-          ),
-        );
-        logger.trace(
-          `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
-        );
-      }
-
-      commitSha = await commitFilesToBranch(config);
-      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
-      // baseBranch is not checked out at the start of processBranch() due to pull/16246
-      await scm.checkoutBranch(config.baseBranch);
-      updatesVerified = true;
-
-      // only update artifact status if branch was updated
-      // also do before platform automerge reattempt
-      if (commitSha) {
-        await setArtifactErrorStatus(config);
-      }
-    }
-
-    if (branchPr) {
-      const platformPrOptions = getPlatformPrOptions(config);
-      if (
-        commitSha &&
-        platformPrOptions.usePlatformAutomerge &&
-        platform.reattemptPlatformAutomerge
-      ) {
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
-          );
-        } else {
-          await platform.reattemptPlatformAutomerge({
-            number: branchPr.number,
-            platformPrOptions,
-          });
-        }
-      }
-      // v8 ignore else -- TODO: add test #40625
-      if (platform.refreshPr) {
-        await platform.refreshPr(branchPr.number);
-      }
-    }
-    if (!commitSha && !branchExists) {
-      return {
-        branchExists,
-        result: 'no-work',
-      };
-    }
-    if (commitSha) {
-      const action = branchExists ? 'updated' : 'created';
-      logger.info({ commitSha }, `Branch ${action}`);
-    }
-    await setBranchStatusChecks(config);
-    // new commit means status check are pretty sure pending but maybe not reported yet
-    // if PR has not been created + new commit + prCreation !== immediate skip
-    // but do not break when there are artifact errors
-    if (
-      !branchPr &&
-      !config.artifactErrors?.length &&
-      !userRebaseRequested &&
-      commitSha &&
-      config.prCreation !== 'immediate'
-    ) {
-      logger.debug(`Branch status pending, current sha: ${commitSha}`);
-      return {
-        branchExists: true,
-        updatesVerified,
-        result: 'pending',
-        commitSha,
-      };
-    }
-
-    // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    // skip if we have a non-immediate pr and there is an existing PR,
-    // we want to update the PR and skip the Auto merge since status checks aren't done yet
-    if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
-      const mergeStatus = await tryBranchAutomerge(config);
-      logger.debug(`mergeStatus=${mergeStatus}`);
-      if (mergeStatus === 'automerged') {
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(`DRY-RUN: Would delete branch${config.branchName}`);
-        } else {
-          await deleteBranchSilently(config.branchName);
-        }
-        logger.debug('Branch is automerged - returning');
-        return { branchExists: false, result: 'automerged' };
-      }
-      if (mergeStatus === 'off schedule') {
-        if (userRebaseRequested) {
-          config.forcePr = true;
-        } else {
-          logger.debug(
-            'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
+            'Skipping branch creation due to internal status checks not met',
           );
           return {
             branchExists,
-            result: 'not-scheduled',
-            commitSha,
+            result: 'pending',
           };
         }
       }
-      if (
-        mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
-        /* v8 ignore next -- needs test */
-        !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
-      ) {
-        logger.warn(
-          'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',
+
+      let userRebaseRequested =
+        dependencyDashboardCheck === 'rebase' ||
+        !!config.dependencyDashboardRebaseAllOpen ||
+        !!config.rebaseRequested;
+      const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
+      const userOpenAllRateLimtedPR =
+        !!config.dependencyDashboardAllRateLimited;
+      const userOpenAllSchedulePendingPR =
+        !!config.dependencyDashboardAllAwaitingSchedule;
+
+      if (forceRebase) {
+        logger.debug('Force rebase because branch needs updating');
+        config.reuseExistingBranch = false;
+      } else if (userRebaseRequested) {
+        logger.debug('User has requested rebase');
+        config.reuseExistingBranch = false;
+      } else if (dependencyDashboardCheck === 'global-config') {
+        logger.debug(`Manual create/rebase requested via checkedBranches`);
+        config.reuseExistingBranch = false;
+        userRebaseRequested = true;
+      } else if (userApproveAllPendingPR) {
+        logger.debug(
+          'A user manually approved all pending PRs via the Dependency Dashboard.',
         );
-        config.forcePr = true;
-        config.branchAutomergeFailureMessage = mergeStatus;
+      } else if (userOpenAllRateLimtedPR) {
+        logger.debug(
+          'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
+        );
+      } else if (userOpenAllSchedulePendingPR) {
+        logger.debug(
+          'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
+        );
+      } else if (
+        branchExists &&
+        config.rebaseWhen === 'never' &&
+        !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
+        !dependencyDashboardCheck
+      ) {
+        logger.debug('rebaseWhen=never so skipping branch update check');
+        return {
+          branchExists,
+          prNo: branchPr?.number,
+          result: 'no-work',
+        };
       }
-      if (
-        mergeStatus === 'automerge aborted - PR exists' ||
-        mergeStatus === 'branch status error' ||
-        mergeStatus === 'failed'
+      // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+      // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+      else if (
+        branchPr?.targetBranch &&
+        branchPr.targetBranch !== config.baseBranch
       ) {
         logger.debug(
-          `Branch automerge not possible, mergeStatus:${mergeStatus}`,
+          'Base branch changed by user, rebasing the branch onto new base',
         );
-        config.forcePr = true;
-        config.branchAutomergeFailureMessage = mergeStatus;
+        config.reuseExistingBranch = false;
+      } else if (config.cacheFingerprintMatch === 'no-match') {
+        logger.debug(
+          'Cache fingerprint does not match, cannot reuse existing branch',
+        );
+        config.reuseExistingBranch = false;
+      } else {
+        config = await shouldReuseExistingBranch(config);
+      }
+      // TODO: types (#22198)
+      logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
+      if (
+        !(
+          config.reuseExistingBranch &&
+          config.cacheFingerprintMatch === 'matched'
+        )
+      ) {
+        await scm.checkoutBranch(config.baseBranch);
+        const res = await getUpdatedPackageFiles(config);
+        if (res.artifactErrors && config.artifactErrors) {
+          res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
+        }
+        config = { ...config, ...res };
+        if (config.updatedPackageFiles?.length) {
+          logger.debug(
+            `Updated ${config.updatedPackageFiles.length} package files`,
+          );
+          if (config.reuseExistingBranch && !forceRebase) {
+            logger.debug(
+              'Existing branch needs updating. Restarting processBranch() with a clean branch',
+            );
+            return processBranch(branchConfig, true);
+          }
+        } else {
+          logger.debug('No package files need updating');
+        }
+        const additionalFiles = await getAdditionalFiles(
+          config,
+          branchConfig.packageFiles!,
+        );
+        config.artifactErrors = coerceArray(config.artifactErrors).concat(
+          additionalFiles.artifactErrors,
+        );
+        config.artifactNotices = coerceArray(config.artifactNotices).concat(
+          coerceArray(additionalFiles.artifactNotices),
+        );
+        config.updatedArtifacts = coerceArray(config.updatedArtifacts).concat(
+          additionalFiles.updatedArtifacts,
+        );
+        // `gh actions-lock` rewrites the whole lockfile from the workflows on disk, so like the lock files above it runs once here, after every updated package file has been written, rather than per package file.
+        const actionsLockfile = await updateActionsLockfile(
+          config,
+          branchConfig.packageFiles,
+        );
+        config.artifactErrors = config.artifactErrors.concat(
+          actionsLockfile.artifactErrors,
+        );
+        config.updatedArtifacts = config.updatedArtifacts.concat(
+          actionsLockfile.updatedArtifacts,
+        );
+        if (config.updatedArtifacts?.length) {
+          logger.debug(
+            {
+              updatedArtifacts: config.updatedArtifacts.map((f) =>
+                f.type === 'deletion' ? `${f.path} (delete)` : f.path,
+              ),
+            },
+            `Updated ${config.updatedArtifacts.length} lock files`,
+          );
+          if (config.reuseExistingBranch && !forceRebase) {
+            logger.debug(
+              'Existing branch needs updating. Restarting processBranch() with a clean branch',
+            );
+            return processBranch(branchConfig, true);
+          }
+        } else {
+          logger.debug('No updated lock files in branch');
+        }
+
+        await embedChangelogs({
+          upgrades: config.upgrades,
+          stage: 'branch',
+        });
+
+        const postUpgradeCommandResults =
+          await executePostUpgradeCommands(config);
+
+        if (postUpgradeCommandResults !== null) {
+          const { updatedArtifacts, artifactErrors } =
+            postUpgradeCommandResults;
+          config.updatedArtifacts = updatedArtifacts;
+          config.artifactErrors = artifactErrors;
+        }
+
+        // modifies the file changes in place to allow having a version bump in a packageFile or artifact
+        await bumpVersions(config);
+
+        removeMeta(['dep']);
+
+        if (config.artifactErrors?.length) {
+          if (config.releaseTimestamp) {
+            logger.debug(`Branch timestamp: ${config.releaseTimestamp}`);
+            const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
+            if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
+              logger.debug(
+                'PR is older than 2 hours, raise PR with lock file errors',
+              );
+            } else if (branchExists) {
+              logger.debug(
+                'PR is less than 2 hours old but branchExists so updating anyway',
+              );
+            } else {
+              logger.debug(
+                'PR is less than 2 hours old - raise error instead of PR',
+              );
+              throw new Error(MANAGER_LOCKFILE_ERROR);
+            }
+          } else {
+            logger.debug('PR has no releaseTimestamp');
+          }
+        } else if (config.updatedArtifacts?.length && branchPr) {
+          // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
+          if (GlobalConfig.get('dryRun')) {
+            logger.info(
+              `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
+            );
+          } else {
+            // Remove artifacts error comment only if this run has successfully updated artifacts
+            await ensureCommentRemoval({
+              type: 'by-topic',
+              number: branchPr.number,
+              topic: artifactErrorTopic,
+            });
+
+            // v8 ignore else -- TODO: add test #40625
+            if (!config.artifactNotices?.length) {
+              await ensureCommentRemoval({
+                type: 'by-topic',
+                number: branchPr.number,
+                topic: artifactNoticeTopic,
+              });
+            }
+          }
+        }
+        const forcedManually = userRebaseRequested || !branchExists;
+
+        config.isConflicted ??=
+          branchExists &&
+          (await scm.isBranchConflicted(config.baseBranch, config.branchName));
+        config.forceCommit = forcedManually || config.isConflicted;
+
+        // compile commit message with body, which maybe needs changelogs
+        if (config.commitBody) {
+          // changelog is on first upgrade
+          config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
+            config.commitBody,
+            {
+              ...config,
+              logJSON: config.upgrades[0].logJSON,
+              releases: config.upgrades[0].releases,
+            },
+          )}`;
+
+          logger.trace(
+            `commitMessage: ${JSON.stringify(config.commitMessage)}`,
+          );
+        }
+
+        if (config.commitTrailers) {
+          // Template expansions can produce broken trailers
+          config.commitTrailers = filterValidCommitTrailers(
+            config.commitTrailers.map((trailer) =>
+              template.compile(trailer, config),
+            ),
+          );
+          logger.trace(
+            `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
+          );
+        }
+
+        commitSha = await commitFilesToBranch(config);
+        // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
+        // baseBranch is not checked out at the start of processBranch() due to pull/16246
+        await scm.checkoutBranch(config.baseBranch);
+        updatesVerified = true;
+
+        // only update artifact status if branch was updated
+        // also do before platform automerge reattempt
+        if (commitSha) {
+          await setArtifactErrorStatus(config);
+        }
+      }
+
+      if (branchPr) {
+        const platformPrOptions = getPlatformPrOptions(config);
+        if (
+          commitSha &&
+          platformPrOptions.usePlatformAutomerge &&
+          platform.reattemptPlatformAutomerge
+        ) {
+          if (GlobalConfig.get('dryRun')) {
+            logger.info(
+              `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
+            );
+          } else {
+            await platform.reattemptPlatformAutomerge({
+              number: branchPr.number,
+              platformPrOptions,
+            });
+          }
+        }
+        // v8 ignore else -- TODO: add test #40625
+        if (platform.refreshPr) {
+          await platform.refreshPr(branchPr.number);
+        }
+      }
+      if (!commitSha && !branchExists) {
+        return {
+          branchExists,
+          result: 'no-work',
+        };
+      }
+      if (commitSha) {
+        const action = branchExists ? 'updated' : 'created';
+        logger.info({ commitSha }, `Branch ${action}`);
+      }
+      await setBranchStatusChecks(config);
+      // new commit means status check are pretty sure pending but maybe not reported yet
+      // if PR has not been created + new commit + prCreation !== immediate skip
+      // but do not break when there are artifact errors
+      if (
+        !branchPr &&
+        !config.artifactErrors?.length &&
+        !userRebaseRequested &&
+        commitSha &&
+        config.prCreation !== 'immediate'
+      ) {
+        logger.debug(`Branch status pending, current sha: ${commitSha}`);
+        return {
+          branchExists: true,
+          updatesVerified,
+          result: 'pending',
+          commitSha,
+        };
+      }
+
+      // Try to automerge branch and finish if successful, but only if branch already existed before this run
+      // skip if we have a non-immediate pr and there is an existing PR,
+      // we want to update the PR and skip the Auto merge since status checks aren't done yet
+      if (
+        !config.artifactErrors?.length &&
+        (!commitSha || config.ignoreTests)
+      ) {
+        const mergeStatus = await tryBranchAutomerge(config);
+        logger.debug(`mergeStatus=${mergeStatus}`);
+        if (mergeStatus === 'automerged') {
+          if (GlobalConfig.get('dryRun')) {
+            logger.info(`DRY-RUN: Would delete branch${config.branchName}`);
+          } else {
+            await deleteBranchSilently(config.branchName);
+          }
+          logger.debug('Branch is automerged - returning');
+          return { branchExists: false, result: 'automerged' };
+        }
+        if (mergeStatus === 'off schedule') {
+          if (userRebaseRequested) {
+            config.forcePr = true;
+          } else {
+            logger.debug(
+              'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
+            );
+            return {
+              branchExists,
+              result: 'not-scheduled',
+              commitSha,
+            };
+          }
+        }
+        if (
+          mergeStatus === 'stale' &&
+          ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+          /* v8 ignore next -- needs test */
+          !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
+        ) {
+          logger.warn(
+            'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',
+          );
+          config.forcePr = true;
+          config.branchAutomergeFailureMessage = mergeStatus;
+        }
+        if (
+          mergeStatus === 'automerge aborted - PR exists' ||
+          mergeStatus === 'branch status error' ||
+          mergeStatus === 'failed'
+        ) {
+          logger.debug(
+            `Branch automerge not possible, mergeStatus:${mergeStatus}`,
+          );
+          config.forcePr = true;
+          config.branchAutomergeFailureMessage = mergeStatus;
+        }
       }
     }
   } catch (err) {
@@ -1017,52 +1029,61 @@ export async function processBranch(
       commitSha,
     };
   }
-  try {
-    logger.debug('Ensuring PR');
-    logger.debug(
-      `There are ${config.errors!.length} errors and ${
-        config.warnings!.length
-      } warnings`,
-    );
-    const ensurePrResult = await ensurePr(config);
-    if (ensurePrResult.type === 'without-pr') {
-      const { prBlockedBy } = ensurePrResult;
-      branchPr = null;
-      if (prBlockedBy === 'RateLimited' && !config.isVulnerabilityAlert) {
-        logger.debug('Reached PR limit - skipping PR creation');
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'pr-limit-reached',
-          commitSha,
-        };
-      }
-      // TODO: ensurePr should check for automerge itself (#9719)
-      if (prBlockedBy === 'NeedsApproval') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'needs-pr-approval',
-          commitSha,
-        };
-      }
-      if (prBlockedBy === 'AwaitingTests') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'pending',
-          commitSha,
-        };
-      }
-      if (prBlockedBy === 'BranchAutomerge') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'done',
-          commitSha,
-        };
-      }
-      if (prBlockedBy === 'Error') {
+  if (!scheduleResult) {
+    try {
+      logger.debug('Ensuring PR');
+      logger.debug(
+        `There are ${config.errors!.length} errors and ${
+          config.warnings!.length
+        } warnings`,
+      );
+      const ensurePrResult = await ensurePr(config);
+      if (ensurePrResult.type === 'without-pr') {
+        const { prBlockedBy } = ensurePrResult;
+        branchPr = null;
+        if (prBlockedBy === 'RateLimited' && !config.isVulnerabilityAlert) {
+          logger.debug('Reached PR limit - skipping PR creation');
+          return {
+            branchExists,
+            prBlockedBy,
+            result: 'pr-limit-reached',
+            commitSha,
+          };
+        }
+        // TODO: ensurePr should check for automerge itself (#9719)
+        if (prBlockedBy === 'NeedsApproval') {
+          return {
+            branchExists,
+            prBlockedBy,
+            result: 'needs-pr-approval',
+            commitSha,
+          };
+        }
+        if (prBlockedBy === 'AwaitingTests') {
+          return {
+            branchExists,
+            prBlockedBy,
+            result: 'pending',
+            commitSha,
+          };
+        }
+        if (prBlockedBy === 'BranchAutomerge') {
+          return {
+            branchExists,
+            prBlockedBy,
+            result: 'done',
+            commitSha,
+          };
+        }
+        if (prBlockedBy === 'Error') {
+          return {
+            branchExists,
+            prBlockedBy,
+            result: 'error',
+            commitSha,
+          };
+        }
+        logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
         return {
           branchExists,
           prBlockedBy,
@@ -1070,138 +1091,173 @@ export async function processBranch(
           commitSha,
         };
       }
-      logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
-      return {
-        branchExists,
-        prBlockedBy,
-        result: 'error',
-        commitSha,
-      };
-    }
-    // v8 ignore else -- TODO: add test #40625
-    if (ensurePrResult.type === 'with-pr') {
-      const { pr } = ensurePrResult;
-      branchPr = pr;
-      // Retry setting branch statuses after PR/MR creation so that
-      // platforms using MR pipelines (e.g. GitLab) have a pipeline to
-      // associate the status with. The earlier call may have been
-      // skipped if no pipeline existed yet.
-      await setBranchStatusChecks(config);
+      // v8 ignore else -- TODO: add test #40625
+      if (ensurePrResult.type === 'with-pr') {
+        const { pr } = ensurePrResult;
+        branchPr = pr;
+        // Retry setting branch statuses after PR/MR creation so that
+        // platforms using MR pipelines (e.g. GitLab) have a pipeline to
+        // associate the status with. The earlier call may have been
+        // skipped if no pipeline existed yet.
+        await setBranchStatusChecks(config);
 
-      // only update artifact status if branch was updated
-      if (commitSha) {
-        await setArtifactErrorStatus(config);
-      }
-      if (config.artifactErrors?.length) {
-        logger.warn(
-          { artifactErrors: config.artifactErrors },
-          'artifactErrors',
-        );
-        let content = `Renovate failed to update `;
-        content +=
-          config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
-        content += ' related to this branch. ';
-        content += template.compile(
-          config.userStrings!.artifactErrorWarning,
-          config,
-        );
-        content += emojify(
-          `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`,
-        );
-        content +=
-          ' - any of the package files in this branch needs updating, or \n';
-        content += ' - the branch becomes conflicted, or\n';
-        content +=
-          ' - you click the rebase/retry checkbox if found above, or\n';
-        content +=
-          ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
-        content += '\n\nThe artifact failure details are included below:\n\n';
-        // TODO: types (#22198)
-        config.artifactErrors.forEach((error) => {
-          content += `##### File name: ${error.fileName!}\n\n`;
-          content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
-        });
-        content = platform.massageMarkdown(content, config.rebaseLabel);
-        // v8 ignore else -- TODO: add test #40625
-        if (
-          !(
-            config.suppressNotifications!.includes('artifactErrors') ||
-            config.suppressNotifications!.includes('lockFileErrors')
-          )
-        ) {
-          if (GlobalConfig.get('dryRun')) {
-            logger.info(
-              `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`,
-            );
-          } else {
+        // only update artifact status if branch was updated
+        if (commitSha) {
+          await setArtifactErrorStatus(config);
+        }
+        if (config.artifactErrors?.length) {
+          logger.warn(
+            { artifactErrors: config.artifactErrors },
+            'artifactErrors',
+          );
+          let content = `Renovate failed to update `;
+          content +=
+            config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
+          content += ' related to this branch. ';
+          content += template.compile(
+            config.userStrings!.artifactErrorWarning,
+            config,
+          );
+          content += emojify(
+            `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`,
+          );
+          content +=
+            ' - any of the package files in this branch needs updating, or \n';
+          content += ' - the branch becomes conflicted, or\n';
+          content +=
+            ' - you click the rebase/retry checkbox if found above, or\n';
+          content +=
+            ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
+          content += '\n\nThe artifact failure details are included below:\n\n';
+          // TODO: types (#22198)
+          config.artifactErrors.forEach((error) => {
+            content += `##### File name: ${error.fileName!}\n\n`;
+            content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
+          });
+          content = platform.massageMarkdown(content, config.rebaseLabel);
+          // v8 ignore else -- TODO: add test #40625
+          if (
+            !(
+              config.suppressNotifications!.includes('artifactErrors') ||
+              config.suppressNotifications!.includes('lockFileErrors')
+            )
+          ) {
+            if (GlobalConfig.get('dryRun')) {
+              logger.info(
+                `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`,
+              );
+            } else {
+              await ensureComment({
+                number: pr.number,
+                topic: artifactErrorTopic,
+                content,
+              });
+            }
+          }
+        } else {
+          if (config.artifactNotices?.length) {
+            const contentLines: string[] = [];
+            for (const notice of config.artifactNotices) {
+              contentLines.push(`##### File name: ${notice.file}`);
+              contentLines.push(notice.message);
+            }
+            const content = contentLines.join('\n\n');
             await ensureComment({
               number: pr.number,
-              topic: artifactErrorTopic,
+              topic: artifactNoticeTopic,
               content,
             });
           }
         }
-      } else {
-        if (config.artifactNotices?.length) {
-          const contentLines: string[] = [];
-          for (const notice of config.artifactNotices) {
-            contentLines.push(`##### File name: ${notice.file}`);
-            contentLines.push(notice.message);
-          }
-          const content = contentLines.join('\n\n');
-          await ensureComment({
-            number: pr.number,
-            topic: artifactNoticeTopic,
-            content,
-          });
-        }
-
-        if (config.automerge) {
-          logger.debug('PR is configured for automerge');
-          // skip automerge if there is a new commit since status checks aren't done yet
-          // v8 ignore else -- TODO: add test #40625
-          if (config.ignoreTests === true || !commitSha) {
-            logger.debug('checking auto-merge');
-            const prAutomergeResult = await checkAutoMerge(pr, config);
-            if (prAutomergeResult?.automerged) {
-              return {
-                branchExists,
-                result: 'automerged',
-                commitSha,
-              };
-            }
-          }
-        } else {
-          logger.debug('PR is not configured for automerge');
-        }
       }
+    } catch (err) {
+      /* v8 ignore if -- needs test */
+      if (
+        err instanceof ExternalHostError ||
+        [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
+      ) {
+        logger.debug('Passing PR error up');
+        throw err;
+      }
+      // Otherwise don't throw here - we don't want to stop the other renovations
+      logger.error({ err }, `Error ensuring PR`);
     }
-  } catch (err) {
-    /* v8 ignore if -- needs test */
-    if (
-      err instanceof ExternalHostError ||
-      [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
-    ) {
-      logger.debug('Passing PR error up');
-      throw err;
-    }
-    // Otherwise don't throw here - we don't want to stop the other renovations
-    logger.error({ err }, `Error ensuring PR`);
   }
-  if (!branchExists) {
-    return {
-      branchExists: true,
-      updatesVerified,
-      prNo: branchPr?.number,
-      result: 'pr-created',
-      commitSha,
-    };
+  const fallbackResult =
+    scheduleResult ??
+    (branchExists
+      ? {
+          branchExists,
+          updatesVerified,
+          prNo: branchPr?.number,
+          result: 'done',
+          commitSha,
+        }
+      : {
+          branchExists: true,
+          updatesVerified,
+          prNo: branchPr?.number,
+          result: 'pr-created',
+          commitSha,
+        });
+
+  if (!config.automerge || !branchPr) {
+    return fallbackResult;
   }
+
   return {
+    type: 'automerge-candidate',
     branchExists,
-    updatesVerified,
-    prNo: branchPr?.number,
-    result: 'done',
     commitSha,
+    config,
+    fallbackResult,
+    pr: branchPr,
+    updateWasSkipped: !!scheduleResult,
   };
+}
+
+async function processPrAutomerge(
+  candidate: AutomergeCandidate,
+): Promise<ProcessBranchResult> {
+  const {
+    branchExists,
+    commitSha,
+    config,
+    fallbackResult,
+    pr,
+    updateWasSkipped,
+  } = candidate;
+
+  if (
+    config.artifactErrors?.length ||
+    (updateWasSkipped
+      ? !(
+          isScheduledNow(config, 'automergeSchedule') &&
+          !config.dependencyDashboardRebaseAllOpen &&
+          !config.dependencyDashboardAllPending &&
+          !config.dependencyDashboardAllRateLimited &&
+          !config.dependencyDashboardAllAwaitingSchedule &&
+          (!pr.targetBranch || pr.targetBranch === config.baseBranch) &&
+          config.cacheFingerprintMatch !== 'no-match'
+        )
+      : config.ignoreTests !== true && !!commitSha)
+  ) {
+    return fallbackResult;
+  }
+
+  return (
+    (await tryPrAutomerge(pr, config, branchExists, commitSha)) ??
+    fallbackResult
+  );
+}
+
+export async function processBranch(
+  branchConfig: BranchConfig,
+  forceRebase = false,
+): Promise<ProcessBranchResult> {
+  const updateResult = await processBranchUpdate(branchConfig, forceRebase);
+  if (!isAutomergeCandidate(updateResult)) {
+    return updateResult;
+  }
+  return processPrAutomerge(updateResult);
 }
