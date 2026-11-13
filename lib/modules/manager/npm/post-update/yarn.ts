@@ -28,6 +28,7 @@ import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
+import { isPackageManagerDepType } from '../dep-types.ts';
 import { hasPackageManager } from '../extract/common/package-file.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
@@ -101,10 +102,7 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  const isPackageManagerDepType =
-    upgrade.depType === 'packageManager' ||
-    upgrade.depType === 'devEngines.packageManager';
-  return isPackageManagerDepType && upgrade.depName === 'yarn';
+  return isPackageManagerDepType(upgrade.depType) && upgrade.depName === 'yarn';
 }
 
 export async function generateLockFile(

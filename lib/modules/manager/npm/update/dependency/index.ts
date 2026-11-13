@@ -4,7 +4,10 @@ import { logger } from '../../../../../logger/index.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../../util/string.ts';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
-import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
+import {
+  isDevEnginesDepType,
+  pnpmWorkspaceOverrides,
+} from '../../dep-types.ts';
 import type {
   DependenciesMeta,
   NpmPackage,
@@ -120,10 +123,8 @@ function updateDevEnginesDependency({
 }: Pick<UpdateDependencyConfig<NpmManagerData>, 'fileContent' | 'upgrade'>):
   string | null {
   const { depType, depName, newValue, managerData } = upgrade;
-  const isDevEnginesDepType =
-    depType === 'devEngines.runtime' || depType === 'devEngines.packageManager';
   /* v8 ignore if -- defensive: dispatcher already filtered */
-  if (!depName || !newValue || !isDevEnginesDepType) {
+  if (!depName || !newValue || !isDevEnginesDepType(depType)) {
     return null;
   }
   const subKey: 'runtime' | 'packageManager' =
@@ -233,10 +234,7 @@ export function updateDependency({
       upgrade,
     });
   }
-  if (
-    upgrade.depType === 'devEngines.runtime' ||
-    upgrade.depType === 'devEngines.packageManager'
-  ) {
+  if (isDevEnginesDepType(upgrade.depType)) {
     return updateDevEnginesDependency({ fileContent, upgrade });
   }
 
