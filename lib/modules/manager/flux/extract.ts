@@ -195,21 +195,22 @@ interface OCIRefLocator {
   name: string;
   /** `metadata.namespace` of the documents to search */
   namespace: string | undefined;
-  /** Path from the document root to the OCI `ref` map */
-  refPath: string[];
 }
 
-const ociRepositoryRefPath = ['spec', 'ref'];
-const helmReleaseChartRefPath = ['spec', 'chart', 'spec', 'ref'];
+const ociRefPaths: Record<OCIRefLocator['kind'], string[]> = {
+  OCIRepository: ['spec', 'ref'],
+  HelmRelease: ['spec', 'chart', 'spec', 'ref'],
+};
 
 /**
- * Returns all OCI `ref` map nodes of the documents matching `locator`.
+ * Returns all OCI `ref` map nodes of the documents matching `locator`, those in its namespace first.
  */
 function findOCIRefNodes(
   docs: Document.Parsed[],
   locator: OCIRefLocator,
 ): YAMLMap[] {
   const refNodes: YAMLMap[] = [];
+  const otherNamespaceRefNodes: YAMLMap[] = [];
   for (const doc of docs) {
     const docContents = doc.contents;
     if (!isMap(docContents)) {
@@ -223,18 +224,22 @@ function findOCIRefNodes(
     if (!isScalar(nameNode) || nameNode.value !== locator.name) {
       continue;
     }
-    const namespaceNode = docContents.getIn(['metadata', 'namespace'], true);
-    const namespace = isScalar(namespaceNode) ? namespaceNode.value : undefined;
-    if (namespace !== locator.namespace) {
+    const refNode = docContents.getIn(ociRefPaths[locator.kind]);
+    if (!isMap(refNode)) {
       continue;
     }
-    const refNode = docContents.getIn(locator.refPath);
-    if (isMap(refNode)) {
+    const namespaceNode = docContents.getIn(['metadata', 'namespace'], true);
+    const namespace = isScalar(namespaceNode) ? namespaceNode.value : undefined;
+    if (namespace === locator.namespace) {
       refNodes.push(refNode);
+    } else {
+      otherNamespaceRefNodes.push(refNode);
     }
   }
 
-  return refNodes;
+  // `locator.namespace` was parsed from template-stripped content, and templates,
+  // aliases or merge keys can make the raw namespace differ, so other namespaces stay as a fallback
+  return [...refNodes, ...otherNamespaceRefNodes];
 }
 
 function extractOCIRefTagAndDigestRange(
@@ -309,15 +314,25 @@ function extractOCIRefTagRange(
   return null;
 }
 
-function resolveOCIRef(
-  url: string,
-  ref: OCIRef | undefined,
-  depType: 'HelmChart' | undefined,
-  locator: OCIRefLocator,
-  manifest: ResourceFluxManifest,
-  registryAliases: Record<string, string> | undefined,
-  getDocs: () => Document.Parsed[],
-): PackageDependency<FluxManagerData> {
+interface ResolveOCIRefOptions {
+  url: string;
+  ref: OCIRef | undefined;
+  depType: 'HelmChart' | undefined;
+  locator: OCIRefLocator;
+  manifest: ResourceFluxManifest;
+  registryAliases: Record<string, string> | undefined;
+  getDocs: () => Document.Parsed[];
+}
+
+function resolveOCIRef({
+  url,
+  ref,
+  depType,
+  locator,
+  manifest,
+  registryAliases,
+  getDocs,
+}: ResolveOCIRefOptions): PackageDependency<FluxManagerData> {
   const container = removeOCIPrefix(url);
   const content = manifest.content;
   if (ref?.digest && ref?.tag) {
@@ -402,11 +417,10 @@ function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
-  content: string,
 ): PackageDependency<FluxManagerData>[] {
   let docs: Document.Parsed[] | undefined;
   function getDocs(): Document.Parsed[] {
-    return (docs ??= parseAllDocuments(content, { strict: false }));
+    return (docs ??= parseAllDocuments(manifest.content, { strict: false }));
   }
   const deps: PackageDependency<FluxManagerData>[] = [];
   for (const resource of manifest.resources) {
@@ -419,20 +433,19 @@ function resolveResourceManifest(
         } else if (resource.spec.chart?.kind === 'OCIRepository') {
           const chartSpec = resource.spec.chart.spec;
           deps.push(
-            resolveOCIRef(
-              chartSpec.url,
-              chartSpec.ref,
-              'HelmChart',
-              {
+            resolveOCIRef({
+              url: chartSpec.url,
+              ref: chartSpec.ref,
+              depType: 'HelmChart',
+              locator: {
                 kind: 'HelmRelease',
                 name: resource.metadata.name,
                 namespace: resource.metadata.namespace,
-                refPath: helmReleaseChartRefPath,
               },
               manifest,
               registryAliases,
               getDocs,
-            ),
+            }),
           );
         } else if (resource.spec.chart) {
           const chartSpec = resource.spec.chart.spec;
@@ -546,20 +559,19 @@ function resolveResourceManifest(
             ? 'HelmChart'
             : undefined;
         deps.push(
-          resolveOCIRef(
-            resource.spec.url,
-            resource.spec.ref,
+          resolveOCIRef({
+            url: resource.spec.url,
+            ref: resource.spec.ref,
             depType,
-            {
+            locator: {
               kind: 'OCIRepository',
               name: resource.metadata.name,
               namespace: resource.metadata.namespace,
-              refPath: ociRepositoryRefPath,
             },
             manifest,
             registryAliases,
             getDocs,
-          ),
+          }),
         );
         break;
       }
@@ -598,7 +610,6 @@ export function extractPackageFile(
         manifest,
         helmRepositories,
         config?.registryAliases,
-        content,
       );
       break;
     }
@@ -636,7 +647,6 @@ export async function extractAllPackageFiles(
           manifest,
           helmRepositories,
           config.registryAliases,
-          manifest.content,
         );
         break;
       }

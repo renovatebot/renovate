@@ -8,7 +8,8 @@ const OCIRef = z.object({
 export type OCIRef = z.infer<typeof OCIRef>;
 
 const HelmChartTemplate = z.object({
-  kind: z.literal('HelmChart').optional(),
+  // a templated `kind` is stripped to an empty string
+  kind: z.literal('HelmChart').optional().catch(undefined),
   spec: z.object({
     chart: z.string(),
     version: z.string().optional(),
@@ -34,7 +35,7 @@ export const HelmRelease = KubernetesResource.extend({
   apiVersion: z.string().startsWith('helm.toolkit.fluxcd.io/'),
   kind: z.literal('HelmRelease'),
   spec: z.object({
-    chart: HelmChartTemplate.or(OCIRepositoryTemplate).optional(),
+    chart: OCIRepositoryTemplate.or(HelmChartTemplate).optional(),
     chartRef: z
       .object({
         kind: z.string().optional(),
