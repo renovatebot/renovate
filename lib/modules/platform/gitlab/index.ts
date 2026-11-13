@@ -626,9 +626,15 @@ async function ignoreApprovals(pr: number): Promise<void> {
   }
 }
 
+/**
+ * Enables platform automerge for the merge request.
+ * With `sha`, waits until the merge request is at that commit, then enables
+ * auto-merge bound to it, also when auto-merge is already enabled.
+ */
 async function tryPrAutomerge(
   pr: number,
   platformPrOptions: PlatformPrOptions | undefined,
+  sha?: string,
 ): Promise<void> {
   try {
     if (platformPrOptions?.gitLabIgnoreApprovals) {
@@ -659,9 +665,14 @@ async function tryPrAutomerge(
         250,
       );
 
+      // SHA to bind auto-merge to, set once GitLab reports the pushed commit
+      let mergeSha: string | undefined;
+      let autoMergeEnabled = false;
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
+          sha?: string;
           merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
@@ -671,9 +682,20 @@ async function tryPrAutomerge(
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+        autoMergeEnabled = body.merge_when_pipeline_succeeds === true;
 
-        // Exit early if merge_when_pipeline_succeeds is already set
-        if (body.merge_when_pipeline_succeeds === true) {
+        if (sha) {
+          if (body.sha !== sha) {
+            logger.debug(
+              `MR !${pr} not yet at pushed commit ${sha}. Retrying ${attempt}`,
+            );
+            await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
+            continue;
+          }
+          // Enabling auto-merge again binds it to the pushed commit
+          mergeSha = sha;
+        } else if (autoMergeEnabled) {
+          // Exit early if merge_when_pipeline_succeeds is already set
           logger.debug(
             'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
           );
@@ -702,6 +724,16 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
+      if (sha && !mergeSha) {
+        logger.debug(`MR !${pr} did not reach pushed commit ${sha}`);
+        if (autoMergeEnabled) {
+          logger.debug(
+            'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+          );
+          return;
+        }
+      }
+
       // The merge_trains endpoint's auto_merge parameter requires GitLab
       // 17.11+. On older versions we fall back to the /merge endpoint so the
       // MR still automerges, just not on the train.
@@ -725,6 +757,7 @@ async function tryPrAutomerge(
               {
                 body: {
                   auto_merge: true,
+                  ...(mergeSha && { sha: mergeSha }),
                 },
               },
             );
@@ -735,6 +768,7 @@ async function tryPrAutomerge(
                 body: {
                   should_remove_source_branch: true,
                   merge_when_pipeline_succeeds: true,
+                  ...(mergeSha && { sha: mergeSha }),
                 },
               },
             );
@@ -888,8 +922,9 @@ export async function updatePr({
 export async function reattemptPlatformAutomerge({
   number: iid,
   platformPrOptions,
+  sha,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
-  await tryPrAutomerge(iid, platformPrOptions);
+  await tryPrAutomerge(iid, platformPrOptions, sha);
 
   logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }

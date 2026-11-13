@@ -4237,6 +4237,158 @@ describe('modules/platform/gitlab/index', () => {
         'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
       );
     });
+
+    describe('with pushed sha', () => {
+      const pushedSha = fakeSha('pushed');
+      const oldSha = fakeSha('old');
+      const shaPr = { ...pr, sha: pushedSha };
+
+      it('re-enables automerge for the pushed commit when already enabled', async () => {
+        await initPlatform('18.0.0');
+        httpMock
+          .scope(gitlabApiHost)
+          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .reply(200, {
+            sha: pushedSha,
+            detailed_merge_status: 'ci_still_running',
+            merge_when_pipeline_succeeds: true,
+            pipeline: {
+              status: 'running',
+            },
+          })
+          .put('/api/v4/projects/undefined/merge_requests/12345/merge', {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+            sha: pushedSha,
+          })
+          .reply(200);
+
+        await expect(gitlab.reattemptPlatformAutomerge?.(shaPr)).toResolve();
+
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+        );
+      });
+
+      it('adds the pushed commit to the merge train', async () => {
+        await initPlatform('18.0.0');
+        const scope = await initRepo(
+          { repository: 'some/repo' },
+          {
+            default_branch: 'master',
+            http_url_to_repo: `https://gitlab.com/some/repo.git`,
+            merge_trains_enabled: true,
+          },
+        );
+        scope
+          .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
+          .reply(200, {
+            sha: pushedSha,
+            detailed_merge_status: 'ci_still_running',
+            merge_when_pipeline_succeeds: true,
+            pipeline: {
+              status: 'running',
+            },
+          })
+          .post(
+            '/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345',
+            { auto_merge: true, sha: pushedSha },
+          )
+          .reply(201);
+
+        await expect(gitlab.reattemptPlatformAutomerge?.(shaPr)).toResolve();
+      });
+
+      it('waits until the merge request is at the pushed commit', async () => {
+        await initPlatform('18.0.0');
+        httpMock
+          .scope(gitlabApiHost)
+          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .reply(200, {
+            sha: oldSha,
+            detailed_merge_status: 'mergeable',
+            merge_when_pipeline_succeeds: true,
+            pipeline: {
+              status: 'failed',
+            },
+          })
+          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .reply(200, {
+            sha: pushedSha,
+            detailed_merge_status: 'ci_still_running',
+            merge_when_pipeline_succeeds: false,
+            pipeline: {
+              status: 'running',
+            },
+          })
+          .put('/api/v4/projects/undefined/merge_requests/12345/merge', {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+            sha: pushedSha,
+          })
+          .reply(200);
+
+        await expect(gitlab.reattemptPlatformAutomerge?.(shaPr)).toResolve();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          `MR !12345 not yet at pushed commit ${pushedSha}. Retrying 1`,
+        );
+        expect(timers.setTimeout.mock.calls).toMatchObject([[250]]);
+      });
+
+      it('skips when the merge request never reaches the pushed commit and automerge is enabled', async () => {
+        vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '2');
+        await initPlatform('18.0.0');
+        httpMock
+          .scope(gitlabApiHost)
+          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .times(2)
+          .reply(200, {
+            sha: oldSha,
+            detailed_merge_status: 'mergeable',
+            merge_when_pipeline_succeeds: true,
+            pipeline: {
+              status: 'failed',
+            },
+          });
+
+        await expect(gitlab.reattemptPlatformAutomerge?.(shaPr)).toResolve();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          `MR !12345 did not reach pushed commit ${pushedSha}`,
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+        );
+      });
+
+      it('enables automerge without sha when the merge request never reaches the pushed commit', async () => {
+        vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '1');
+        await initPlatform('18.0.0');
+        httpMock
+          .scope(gitlabApiHost)
+          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .reply(200, {
+            sha: oldSha,
+            detailed_merge_status: 'mergeable',
+            merge_when_pipeline_succeeds: false,
+            pipeline: {
+              status: 'running',
+            },
+          })
+          .put('/api/v4/projects/undefined/merge_requests/12345/merge', {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          })
+          .reply(200);
+
+        await expect(gitlab.reattemptPlatformAutomerge?.(shaPr)).toResolve();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          `MR !12345 did not reach pushed commit ${pushedSha}`,
+        );
+      });
+    });
   });
 
   describe('isPrInMergeQueue', () => {
