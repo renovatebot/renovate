@@ -309,24 +309,24 @@ class NugetVersioningApi implements VersioningApi {
       const res: NugetFloatingRange = { ...r };
 
       if (floating === 'major') {
-        res.major = coerceFloatingComponent(v.major);
+        res.major = coerceFloatingComponent(v.major, r.major);
         return tryBump(res, v, currentValue);
       }
       res.major = v.major;
 
       if (floating === 'minor') {
-        res.minor = coerceFloatingComponent(v.minor);
+        res.minor = coerceFloatingComponent(v.minor, r.minor);
         return tryBump(res, v, currentValue);
       }
       res.minor = v.minor ?? 0;
 
       if (floating === 'patch') {
-        res.patch = coerceFloatingComponent(v.patch);
+        res.patch = coerceFloatingComponent(v.patch, r.patch);
         return tryBump(res, v, currentValue);
       }
       res.patch = v.patch ?? 0;
 
-      res.revision = coerceFloatingComponent(v.revision);
+      res.revision = coerceFloatingComponent(v.revision, r.revision);
       return tryBump(res, v, currentValue);
     }
 
