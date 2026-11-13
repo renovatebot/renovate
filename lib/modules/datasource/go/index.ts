@@ -48,6 +48,9 @@ export class GoDatasource extends Datasource {
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    "The `%goMod` constraint is determined from the `go` directive in each release's `go.mod` file. This is only available when the module is fetched from a Go module proxy, and requires an additional request per release.";
 
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();

@@ -245,6 +245,8 @@ describe('modules/datasource/index', () => {
         'releaseTimestampNote',
         'sourceUrlSupport',
         'sourceUrlNote',
+        'constraintsFilteringSupport',
+        'constraintsFilteringNote',
         'caching',
       ];
 
@@ -270,6 +272,9 @@ describe('modules/datasource/index', () => {
           true,
         );
         expect(!ds.sourceUrlNote || ds.sourceUrlSupport !== 'none').toBe(true);
+        expect(
+          !ds.constraintsFilteringNote || ds.constraintsFilteringSupport,
+        ).toBe(true);
       }
     });
 
@@ -824,6 +829,7 @@ describe('modules/datasource/index', () => {
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
+        constraintsFilteringSupport: false,
         registryStrategy: 'first',
         getDefaultRegistryUrls: () => ['https://function-registry.com'],
         getReleases: ({ registryUrl }) =>
@@ -844,6 +850,7 @@ describe('modules/datasource/index', () => {
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
+        constraintsFilteringSupport: false,
         registryStrategy: 'first',
         getDefaultRegistryUrls: () => undefined,
         getReleases: vi.fn(),

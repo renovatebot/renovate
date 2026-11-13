@@ -28,6 +28,9 @@ export class DartDatasource extends Datasource {
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field of the latest release object in the results.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    "The `dart` and `flutter` constraints are determined from the `environment.sdk` and `environment.flutter` fields of each release's `pubspec` in the results.";
   override readonly defaultVersioning = npmId;
 
   async getReleases({

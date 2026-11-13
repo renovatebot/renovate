@@ -69,6 +69,9 @@ export class PackagistDatasource extends Datasource {
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from `source` field in the results.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    'The `php` constraint is determined from the `require.php` field in the results.';
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {

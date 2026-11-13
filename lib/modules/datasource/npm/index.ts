@@ -25,6 +25,9 @@ export class NpmDatasource extends Datasource {
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field in the results.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    'The `node` constraint is determined from the `engines.node` field in the results.';
 
   constructor() {
     super(NpmDatasource.id);

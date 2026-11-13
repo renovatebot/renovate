@@ -83,6 +83,9 @@ export class PypiDatasource extends Datasource {
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    'The `python` constraint is determined from the `requires_python` field of the files of a version. When using the Simple API, it is determined from the `data-requires-python` attribute.';
 
   async getReleases({
     packageName,

@@ -4,6 +4,7 @@ import { getConfigFileNames } from '../../lib/config/app-strings.ts';
 import { MigrationsService } from '../../lib/config/migrations/index.ts';
 import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
+import { getDatasources } from '../../lib/modules/datasource/index.ts';
 import {
   allManagersList,
   getManagers,
@@ -386,6 +387,17 @@ function generateAdditionalConstraints(): string {
   return output;
 }
 
+function generateConstraintsFilteringDatasources(): string {
+  let output = '';
+  for (const [datasource, definition] of getDatasources()) {
+    if (definition.constraintsFilteringSupport) {
+      output += `- [\`${datasource}\`](./modules/datasource/${datasource}/index.md)\n`;
+    }
+  }
+
+  return output;
+}
+
 function generateToolsForInstallTools(): string {
   let output = '';
   for (const tool of getSupportedToolNames()) {
@@ -517,6 +529,14 @@ export async function generateConfig(
       content,
       generateAdditionalConstraints(),
       '<!-- additional-constraints-begin -->',
+    );
+  }
+
+  if (!globalOnly) {
+    content = replaceContent(
+      content,
+      generateConstraintsFilteringDatasources(),
+      '<!-- constraints-filtering-datasources-begin -->',
     );
   }
 

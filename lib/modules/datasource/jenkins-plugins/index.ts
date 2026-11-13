@@ -37,6 +37,9 @@ export class JenkinsPluginsDatasource extends Datasource {
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` field in the results.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    'The `jenkins` constraint is determined from the `requiredCore` field in the results.';
 
   async getReleases({
     packageName,

@@ -997,14 +997,7 @@ Additionally, the "datasource" within Renovate must be capable of returning `con
 
 This feature is limited to the following datasources:
 
-- `crate`
-- `go`
-- `jenkins-plugins`
-- `npm`
-- `packagist`
-- `pub`
-- `pypi`
-- `rubygems`
+<!-- constraints-filtering-datasources-begin -->
 
 Sometimes when using private registries they may omit constraints information, which then is another reason such filtering may not work even if the datasource and corresponding default public registry supports it.
 
