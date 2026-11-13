@@ -76,7 +76,7 @@ If the repository has a `.github/workflows/actions.lock`, then Renovate regenera
 Renovate installs the [`gh-actions-lock`](https://github.com/github/gh-actions-lock) extension for the `gh` CLI, and runs `gh actions-lock` once per branch, from the repository root, after writing every updated workflow:
 
 ```sh
-gh extension install github/gh-actions-lock --pin <version> --force
+gh extension install https://github.com/github/gh-actions-lock --pin <version> --force
 gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings
 ```
 
@@ -150,7 +150,10 @@ You can also control the `gh` CLI version using `constraints.gh`.
 !!! note
   `gh actions-lock` resolves refs and repository IDs through the GitHub API, so it needs a token.
   Renovate takes the token from the `github` host rule matching your platform endpoint, and passes it as `GH_TOKEN`.
-  On GitHub Enterprise Server Renovate passes that token using `GH_ENTERPRISE_TOKEN` and `GH_HOST`, and additionally passes the token from your `github.com` host rule as `GH_TOKEN`, because public actions are still resolved against `github.com`.
+  On GitHub Enterprise Server Renovate passes that token using `GH_ENTERPRISE_TOKEN` and `GH_HOST`, and additionally passes the token from your `github.com` host rule as `GH_TOKEN` and `GH_ACTIONS_LOCK_GITHUB_COM_TOKEN`, because public actions are still resolved against `github.com`.
+  <br><br>
+  On GitHub Enterprise Cloud with data residency (`*.ghe.com`), `gh` reads the tenant's token from `GH_TOKEN`, so Renovate passes your platform token there, and the `github.com` token only as `GH_ACTIONS_LOCK_GITHUB_COM_TOKEN`.
+  The extension is then installed from `github.com` without a token.
 
 ### Non-semver refs (branches and feature tags)
 
