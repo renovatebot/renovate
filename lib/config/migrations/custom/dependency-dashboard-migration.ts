@@ -8,7 +8,7 @@ import { AbstractMigration } from '../base/abstract-migration.ts';
 /**
  * The flat Dependency Dashboard options which moved into `dependencyDashboard`, with the field they moved to and the type they had.
  */
-const flatDependencyDashboardOptions: Record<
+export const flatDependencyDashboardOptions: Record<
   string,
   { field: keyof DependencyDashboardConfig; type: RenovateOptions['type'] }
 > = {
