@@ -37,18 +37,26 @@ const hexRepoOrgUrlRegex = regEx(
 );
 
 // https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
-const defaultErlangVersion = '26';
+const defaultErlangVersion = '22';
 
-// highest erlang major with a precompiled elixir build, newest elixir first
+// highest supported erlang major per minimum elixir version, newest elixir first
 // TODO: replace once a datasource provides erlang constraints per elixir release
 const elixirErlangVersions = [
-  { elixir: '1.20', erlang: '29' },
-  { elixir: '1.19', erlang: '28' },
-  { elixir: '1.18', erlang: '27' },
-  { elixir: '1.17', erlang: '27' },
-  { elixir: '1.16', erlang: '26' },
-  { elixir: '1.15', erlang: '26' },
-  { elixir: '1.14', erlang: '25' },
+  { elixir: '1.20.0', erlang: '29' },
+  { elixir: '1.19.0', erlang: '28' },
+  { elixir: '1.18.0', erlang: '27' },
+  { elixir: '1.17.0', erlang: '27' },
+  { elixir: '1.16.0', erlang: '26' },
+  { elixir: '1.15.0', erlang: '26' },
+  { elixir: '1.14.0', erlang: '25' },
+  { elixir: '1.13.4', erlang: '25' },
+  { elixir: '1.13.0', erlang: '24' },
+  { elixir: '1.12.0', erlang: '24' },
+  { elixir: '1.11.4', erlang: '24' },
+  { elixir: '1.11.0', erlang: '23' },
+  { elixir: '1.10.3', erlang: '23' },
+  { elixir: '1.10.0', erlang: '22' },
+  { elixir: '1.7.0', erlang: '22' },
 ];
 
 export async function updateArtifacts({
@@ -249,7 +257,7 @@ async function getToolConstraints(
   });
   const erlangVersion =
     elixirErlangVersions.find(({ elixir }) =>
-      semver.satisfies(elixirVersion, `>=${elixir}.0`, {
+      semver.satisfies(elixirVersion, `>=${elixir}`, {
         includePrerelease: true,
       }),
     )?.erlang ?? defaultErlangVersion;

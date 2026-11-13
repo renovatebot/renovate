@@ -200,7 +200,6 @@ describe('modules/manager/mix/artifacts', () => {
         { version: '24.3.4.1' },
         { version: '24.3.4.2' },
         { version: '25.0.0.0' },
-        { version: '26.2.5.4' },
       ],
     });
 
@@ -227,7 +226,7 @@ describe('modules/manager/mix/artifacts', () => {
           '-e CI -e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          "bash -l -c 'install-tool erlang 26.2.5.4 && install-tool elixir v1.13.4 && mix deps.update plug'",
+          "bash -l -c 'install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix deps.update plug'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -328,7 +327,13 @@ describe('modules/manager/mix/artifacts', () => {
     ${'v1.19.4'} | ${'28.3.1.0'}
     ${'v1.17.3'} | ${'27.3.4.3'}
     ${'v1.14.5'} | ${'25.3.2.21'}
-    ${'v1.13.4'} | ${'26.2.5.4'}
+    ${'v1.13.4'} | ${'25.3.2.21'}
+    ${'v1.13.3'} | ${'24.3.4.17'}
+    ${'v1.11.4'} | ${'24.3.4.17'}
+    ${'v1.11.3'} | ${'23.3.4.20'}
+    ${'v1.10.3'} | ${'23.3.4.20'}
+    ${'v1.7.4'}  | ${'22.3.4.26'}
+    ${'v1.6.6'}  | ${'22.3.4.26'}
   `(
     'installs erlang $erlang for elixir $elixir',
     async ({ elixir, erlang }: { elixir: string; erlang: string }) => {
@@ -345,6 +350,9 @@ describe('modules/manager/mix/artifacts', () => {
       // erlang
       getPkgReleases.mockResolvedValueOnce({
         releases: [
+          { version: '22.3.4.26' },
+          { version: '23.3.4.20' },
+          { version: '24.3.4.17' },
           { version: '25.3.2.21' },
           { version: '26.2.5.4' },
           { version: '27.3.4.3' },
@@ -399,7 +407,6 @@ describe('modules/manager/mix/artifacts', () => {
         { version: '24.3.4.1' },
         { version: '24.3.4.2' },
         { version: '25.0.0.0' },
-        { version: '26.2.5.4' },
       ],
     });
 
@@ -434,7 +441,7 @@ describe('modules/manager/mix/artifacts', () => {
           '-e CI -e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          "bash -l -c 'install-tool erlang 26.2.5.4 && install-tool elixir v1.13.4 && " +
+          "bash -l -c 'install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && " +
           'mix hex.organization auth renovate_test --key valid_test_token && ' +
           "mix deps.update private_package other_package'",
         options: { cwd: '/tmp/github/some/repo' },
@@ -485,7 +492,6 @@ describe('modules/manager/mix/artifacts', () => {
         { version: '24.3.4.1' },
         { version: '24.3.4.2' },
         { version: '25.0.0.0' },
-        { version: '26.2.5.4' },
       ],
     });
 
@@ -502,7 +508,7 @@ describe('modules/manager/mix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool erlang 26.2.5.4' },
+      { cmd: 'install-tool erlang 25.0.0.0' },
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix hex.organization auth an_organization --key an_organization_token',
@@ -530,7 +536,7 @@ describe('modules/manager/mix/artifacts', () => {
     });
     // erlang
     getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '26.2.5.4' }],
+      releases: [{ version: '25.0.0.0' }],
     });
 
     await updateArtifacts({
@@ -548,7 +554,7 @@ describe('modules/manager/mix/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool erlang 26.2.5.4' },
+      { cmd: 'install-tool erlang 25.0.0.0' },
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: "mix hex.organization auth 'evil --key leaked_or_arbitrary' --key secret_token",
