@@ -3,7 +3,9 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
 import * as urlUtil from '../../../util/url.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
 import { getPkgReleases } from '../index.ts';
@@ -223,6 +225,7 @@ describe('modules/datasource/sbt-package/index', () => {
       });
       expect(res).toEqual({
         dependencyUrl: 'https://packages.confluent.io/maven/io/confluent',
+        isPrivate: true,
         registryUrl: 'https://packages.confluent.io/maven',
         releases: [{ version: '7.0.1' }],
       });
@@ -309,11 +312,13 @@ describe('modules/datasource/sbt-package/index', () => {
         .reply(404);
 
       const downloadSpy = vi
-        .spyOn(mavenUtil, 'downloadHttpContent')
+        .spyOn(mavenUtil, 'downloadHttpProtocol')
         .mockResolvedValueOnce(
-          `<a href="example/" title='example/'>example/</a>`,
+          Result.ok({
+            data: `<a href="example/" title='example/'>example/</a>`,
+          }),
         )
-        .mockResolvedValueOnce(null); // dot-separated group URL returns nothing
+        .mockResolvedValueOnce(Result.err({ type: 'not-found' })); // dot-separated group URL returns nothing
 
       const realParseUrl = urlUtil.parseUrl;
       const parseUrlSpy = vi
@@ -347,12 +352,16 @@ describe('modules/datasource/sbt-package/index', () => {
         .reply(404);
 
       const downloadSpy = vi
-        .spyOn(mavenUtil, 'downloadHttpContent')
+        .spyOn(mavenUtil, 'downloadHttpProtocol')
         .mockResolvedValueOnce(
-          `<a href="example/" title='example/'>example/</a>`,
+          Result.ok({
+            data: `<a href="example/" title='example/'>example/</a>`,
+          }),
         )
-        .mockResolvedValueOnce(null) // dot-separated group URL returns nothing
-        .mockResolvedValueOnce(`<a href='1.2.3/'>1.2.3/</a>`); // artifact subdir
+        .mockResolvedValueOnce(Result.err({ type: 'not-found' })) // dot-separated group URL returns nothing
+        .mockResolvedValueOnce(
+          Result.ok({ data: `<a href='1.2.3/'>1.2.3/</a>` }),
+        ); // artifact subdir
 
       const realParseUrl = urlUtil.parseUrl;
       const parseUrlSpy = vi
@@ -377,6 +386,91 @@ describe('modules/datasource/sbt-package/index', () => {
       parseUrlSpy.mockRestore();
       downloadSpy.mockRestore();
       expect(res).toBeNull();
+    });
+  });
+
+  describe('private results', () => {
+    function mockListing(base: string): void {
+      httpMock
+        .scope(base)
+        .get('/org/example/')
+        .reply(200, `<a href="example_2.12/">example_2.12/</a>`)
+        .get('/org/example/example_2.12/')
+        .reply(200, `<a href='1.2.3/'>1.2.3/</a>`)
+        .get('/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom')
+        .reply(404)
+        .get('/org/example/example_2.12/1.2.3/example-1.2.3.pom')
+        .reply(404);
+    }
+
+    function get(registryUrl: string) {
+      return getPkgReleases({
+        versioning: mavenVersioning.id,
+        datasource: SbtPackageDatasource.id,
+        packageName: 'org.example:example_2.12',
+        registryUrls: [registryUrl],
+      });
+    }
+
+    it('does not mark anonymous results from the default registry as private', async () => {
+      mockListing('https://repo.maven.apache.org/maven2');
+
+      const res = await get(MAVEN_REPO);
+
+      expect(res).not.toBeNull();
+      expect(res).not.toHaveProperty('isPrivate');
+    });
+
+    it('marks results from a custom registry as private', async () => {
+      mockListing('https://custom.registry.renovatebot.com');
+
+      const res = await get('https://custom.registry.renovatebot.com');
+
+      expect(res).toMatchObject({ isPrivate: true });
+    });
+
+    it('marks results from the default registry as private when fetched with credentials', async () => {
+      hostRules.add({
+        hostType: 'sbt',
+        matchHost: 'repo.maven.apache.org',
+        token: '123test',
+      });
+      mockListing('https://repo.maven.apache.org/maven2');
+
+      const res = await get(MAVEN_REPO);
+
+      expect(res).toMatchObject({ isPrivate: true });
+    });
+
+    it('marks results as private when only the POM was fetched with credentials', async () => {
+      const spy = vi
+        .spyOn(mavenUtil, 'downloadHttpProtocol')
+        .mockResolvedValueOnce(
+          Result.ok({
+            data: `<a href="example_2.12/">example_2.12/</a>`,
+            isCacheable: true,
+          }),
+        )
+        .mockResolvedValueOnce(
+          Result.ok({
+            data: `<a href='1.2.3/'>1.2.3/</a>`,
+            isCacheable: true,
+          }),
+        )
+        .mockResolvedValueOnce(
+          Result.ok({
+            data: '<project><url>https://example.org</url></project>',
+            isCacheable: false,
+          }),
+        );
+
+      const res = await get(MAVEN_REPO);
+
+      spy.mockRestore();
+      expect(res).toMatchObject({
+        homepage: 'https://example.org',
+        isPrivate: true,
+      });
     });
   });
 

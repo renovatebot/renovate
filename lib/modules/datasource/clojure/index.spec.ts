@@ -106,6 +106,19 @@ describe('modules/datasource/clojure/index', () => {
     });
   });
 
+  it('marks results from a default registry as private when fetched with credentials', async () => {
+    hostRules.add({
+      hostType: ClojureDatasource.id,
+      matchHost: 'clojars.org',
+      token: '123test',
+    });
+    mockGenericPackage();
+
+    const res = await get('org.example:package', baseUrl);
+
+    expect(res).toMatchObject({ isPrivate: true });
+  });
+
   it('collects releases from all registry urls', async () => {
     mockGenericPackage();
     mockGenericPackage({
