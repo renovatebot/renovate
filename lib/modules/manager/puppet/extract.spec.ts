@@ -11,6 +11,24 @@ describe('modules/manager/puppet/extract', () => {
       expect(extractPackageFile('')).toBeNull();
     });
 
+    it('extracts from a Puppetfile when the file name is given', () => {
+      const res = extractPackageFile(
+        "mod 'puppetlabs/stdlib', '8.0.0'",
+        'Puppetfile',
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            datasource: PuppetForgeDatasource.id,
+            depName: 'puppetlabs/stdlib',
+            packageName: 'puppetlabs/stdlib',
+            currentValue: '8.0.0',
+          },
+        ],
+      });
+    });
+
     it('extracts multiple modules from Puppetfile without a forge', () => {
       const res = extractPackageFile(
         [
