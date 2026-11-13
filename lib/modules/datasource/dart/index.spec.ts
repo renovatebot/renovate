@@ -147,6 +147,28 @@ describe('modules/datasource/dart/index', () => {
       });
     });
 
+    it('handles a latest release without a pubspec', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/no_pubspec')
+        .reply(200, {
+          versions: [
+            { version: '1.0.0', published: '2023-01-01T00:00:00.000Z' },
+          ],
+          latest: {},
+        });
+      const res = await getPkgReleases({
+        datasource: DartDatasource.id,
+        packageName: 'no_pubspec',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://pub.dartlang.org',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2023-01-01T00:00:00.000Z' },
+        ],
+      });
+    });
+
     it('includes constraints from pubspec environment', async () => {
       httpMock
         .scope(baseUrl)

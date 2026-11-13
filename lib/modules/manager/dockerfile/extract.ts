@@ -15,6 +15,9 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { extractApkDeps } from './apk.ts';
+import { extractDebDeps } from './deb.ts';
+import type { GetDepOptions } from './types.ts';
 
 const variableMarker = '$';
 
@@ -57,6 +60,10 @@ function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
   return template;
 }
 
+function lineIncludes(line: string, value: unknown): boolean {
+  return isString(value) && line.includes(value);
+}
+
 function processDepForAutoReplace(
   dep: PackageDependency,
   lineNumberRanges: number[][],
@@ -66,11 +73,10 @@ function processDepForAutoReplace(
   const lineNumberRangesToReplace: number[][] = [];
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
+      const line = lines[lineNumber];
       if (
-        (isString(dep.currentValue) &&
-          lines[lineNumber].includes(dep.currentValue)) ||
-        (isString(dep.currentDigest) &&
-          lines[lineNumber].includes(dep.currentDigest))
+        lineIncludes(line, dep.currentValue) ||
+        lineIncludes(line, dep.currentDigest)
       ) {
         lineNumberRangesToReplace.push(lineNumberRange);
       }
@@ -107,7 +113,7 @@ function processDepForAutoReplace(
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
 
-export function splitImageParts(currentFrom: string): PackageDependency {
+export function splitImageParts(currentFrom: string): PackageDependency<never> {
   let isVariable = false;
   let cleanedCurrentFrom = currentFrom;
 
@@ -141,7 +147,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<never> = {
     depName,
     packageName: depName,
     currentValue,
@@ -165,11 +171,31 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
-export function getDep(
+/**
+ * Extract a Docker dependency from an image reference.
+ */
+export function getDep<T = never>(
   currentFrom: string | null | undefined,
-  specifyReplaceString = true,
-  registryAliases?: Record<string, string>,
-): PackageDependency {
+  options: GetDepOptions = {},
+): PackageDependency<T> {
+  const dep = getDepFromImageRef(
+    currentFrom,
+    options.specifyReplaceString ?? true,
+    options.registryAliases,
+  );
+
+  if (options.depType) {
+    dep.depType = options.depType;
+  }
+
+  return dep;
+}
+
+function getDepFromImageRef(
+  currentFrom: string | null | undefined,
+  specifyReplaceString: boolean,
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency<never> {
   if (
     !isString(currentFrom) ||
     !isNonEmptyStringAndNotWhitespace(currentFrom)
@@ -195,7 +221,11 @@ export function getDep(
     );
     // An empty alias value means "no registry prefix", i.e. Docker Hub.
     const valueWithSlash = value ? ensureTrailingSlash(value) : '';
-    const dep = getDep(`${valueWithSlash}${depName}`, false);
+    const dep = getDepFromImageRef(
+      `${valueWithSlash}${depName}`,
+      false,
+      undefined,
+    );
     // TODO: when the inner getDep strips a `library/` prefix (or similar)
     // the depName no longer starts with `valueWithSlash` and the alias-rooted
     // depName is not restored.
@@ -239,10 +269,8 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (
-    (dep.depName === 'debian' || dep.depName?.endsWith('/debian')) &&
-    debianVersioning.api.isVersion(dep.currentValue)
-  ) {
+  const isDebian = dep.depName === 'debian' || dep.depName?.endsWith('/debian');
+  if (isDebian && debianVersioning.api.isVersion(dep.currentValue)) {
     dep.versioning = debianVersioning.id;
   }
 
@@ -305,7 +333,9 @@ export function extractPackageFile(
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
-        const dep = getDep(syntaxImage, true, config.registryAliases);
+        const dep = getDep(syntaxImage, {
+          registryAliases: config.registryAliases,
+        });
         dep.depType = 'syntax';
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
@@ -341,10 +371,11 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) ||
-        (argMatchValue.startsWith("'") && argMatchValue.endsWith("'"))
-      ) {
+      const isDoubleQuoted =
+        argMatchValue.startsWith('"') && argMatchValue.endsWith('"');
+      const isSingleQuoted =
+        argMatchValue.startsWith("'") && argMatchValue.endsWith("'");
+      if (isDoubleQuoted || isSingleQuoted) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 
@@ -382,7 +413,9 @@ export function extractPackageFile(
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
-        const dep = getDep(fromImage, true, config.registryAliases);
+        const dep = getDep(fromImage, {
+          registryAliases: config.registryAliases,
+        });
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -413,11 +446,9 @@ export function extractPackageFile(
           'Skipping index reference COPY --from',
         );
       } else {
-        const dep = getDep(
-          copyFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(copyFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
@@ -446,11 +477,9 @@ export function extractPackageFile(
           'Skipping alias RUN --mount=from',
         );
       } else {
-        const dep = getDep(
-          runMountFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(runMountFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
@@ -465,6 +494,21 @@ export function extractPackageFile(
         );
         deps.push(dep);
       }
+    }
+
+    for (const dep of [
+      ...extractApkDeps(instruction, escapeChar),
+      ...extractDebDeps(instruction, escapeChar),
+    ]) {
+      dep.depType = 'install';
+      if (!dep.skipReason) {
+        // Renovate cannot tell which distribution release the base image
+        // installs from, so any repository it looked the package up against
+        // would offer versions the image cannot install
+        dep.skipReason = 'unknown-registry';
+        dep.skipStage = 'extract';
+      }
+      deps.push(dep);
     }
 
     lineNumber += 1;

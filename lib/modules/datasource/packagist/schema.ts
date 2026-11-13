@@ -1,12 +1,12 @@
 import { isString, isUndefined } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { regEx } from '../../../util/regex.ts';
 import {
   LooseArray,
   LooseRecord,
   Nullish,
 } from '../../../util/schema-utils/index.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -106,7 +106,7 @@ export function extractReleaseResult(
 
   for (const composerReleasesArray of composerReleasesArrays) {
     for (const composerRelease of composerReleasesArray) {
-      const version = composerRelease.version.replace(regEx(/^v/), '');
+      const version = stripVersionPrefix(composerRelease.version);
       const gitRef = composerRelease.version;
 
       const dep: Release = { version, gitRef };

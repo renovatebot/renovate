@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -39,6 +40,14 @@ describe('modules/manager/jenkins/extract', () => {
         { currentValue: '4.2.0', depName: 'git', skipReason: 'ignored' },
         { currentValue: '3.3.1', depName: 'git-client', skipReason: 'ignored' },
       ]);
+    });
+
+    it('skips a yaml plugin entry with no artifactId', () => {
+      const content = codeBlock`
+        plugins:
+          - version: 1.0
+      `;
+      expect(extractPackageFile(content, 'path/file.yml')).toBeNull();
     });
 
     it('extracts multiple image lines in yaml format', () => {

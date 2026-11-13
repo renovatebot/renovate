@@ -100,7 +100,12 @@ export interface ParsedUsesLine {
  */
 export type ActionSchema = z.ZodType<PackageDependency[]>;
 
-export interface CommunityActionConfig {
+/**
+ * Where a Datasource defined on the `KnownActionConfig` isn't actually used.
+ */
+export const DATASOURCE_DETERMINED_DYNAMICALLY = 'unused';
+
+export interface KnownActionConfig {
   datasource: string;
   depName?: string;
   packageName: string;

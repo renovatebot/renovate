@@ -42,13 +42,11 @@ export async function getDependentPackageFiles(
       ? ''
       : upath.dirname(packageFileName);
 
+  const isSharedFile = isPropsFile || isGlobalJson;
   for (const f of packageFiles) {
     graph.addNode(f);
 
-    if (
-      (isPropsFile || isGlobalJson) &&
-      upath.dirname(f).startsWith(parentDir)
-    ) {
+    if (isSharedFile && upath.dirname(f).startsWith(parentDir)) {
       graph.addEdge(packageFileName, f);
     }
   }

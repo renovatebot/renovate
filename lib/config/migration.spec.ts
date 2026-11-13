@@ -174,7 +174,7 @@ describe('config/migration', () => {
         configMigration.migrateConfig(config);
       expect(migratedConfig).toEqual({
         additionalBranchPrefix: '{{parentDir}}-',
-        allowCustomCrateRegistries: true,
+        allowCustomCrateGitRegistries: true,
         allowScripts: true,
         autodiscover: true,
         automerge: false,
@@ -189,8 +189,10 @@ describe('config/migration', () => {
         constraints: {
           python: '3.7',
         },
-        dependencyDashboard: true,
-        dependencyDashboardTitle: 'foo',
+        dependencyDashboard: {
+          enabled: true,
+          title: 'foo',
+        },
         enabled: true,
         enabledManagers: ['npm'],
         exposeAllEnv: true,

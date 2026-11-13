@@ -538,6 +538,32 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
     });
 
+    it('prefers the derived Java version over the extracted constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+
+      await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: {
+          isLockFileMaintenance: true,
+          extractedConstraints: { java: '8.0.1' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool java 16.0.1' },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',
+        },
+        { cmd: 'install-tool java 16.0.1' },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+        },
+      ]);
+    });
+
     it('updates all included projects', async () => {
       const execSnapshots = mockExecSequence([
         {

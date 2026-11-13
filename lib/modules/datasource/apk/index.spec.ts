@@ -79,13 +79,13 @@ describe('modules/datasource/apk/index', () => {
   });
 
   it('should have default registry URLs', () => {
-    expect(apkDatasource.defaultRegistryUrls).toEqual([
+    expect(apkDatasource.getDefaultRegistryUrls('')).toEqual([
       'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
     ]);
   });
 
   it('should support custom registries', () => {
-    expect(apkDatasource.customRegistrySupport).toBe(true);
+    expect(apkDatasource.supportsCustomRegistry('')).toBe(true);
   });
 
   describe('getReleases', () => {

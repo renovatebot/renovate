@@ -24,6 +24,7 @@ describe('util/cache/package/impl/redis', () => {
 
   describe('PackageCacheRedis', () => {
     const clientMock = {
+      on: vi.fn(),
       connect: vi.fn(),
       set: vi.fn(),
       del: vi.fn(),
@@ -63,6 +64,27 @@ describe('util/cache/package/impl/redis', () => {
           .socket!.reconnectStrategy as (retries: number) => number;
         expect(reconnectStrategy(1)).toBe(100);
         expect(reconnectStrategy(100)).toBe(3000);
+      });
+
+      it('logs connection errors instead of throwing them', async () => {
+        await PackageCacheRedis.create('redis://host', undefined);
+
+        expect(clientMock.on).toHaveBeenCalledWith(
+          'error',
+          expect.any(Function),
+        );
+        const onError = clientMock.on.mock.calls[0][1] as (err: Error) => void;
+        const err = new Error('Socket closed unexpectedly');
+
+        expect(() => onError(err)).not.toThrow();
+        expect(logger.once.warn).toHaveBeenCalledWith(
+          { err },
+          'Redis cache connection error',
+        );
+        expect(logger.debug).toHaveBeenCalledWith(
+          { err },
+          'Redis cache connection error',
+        );
       });
 
       it('initializes single-node client with secure url', async () => {

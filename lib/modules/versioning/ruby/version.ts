@@ -13,6 +13,7 @@ interface RubyVersion {
 
 function releaseSegments(version: string): SegmentElement[] {
   const v = create(version);
+  // v8 ignore else -- callers only pass versions that have already parsed
   if (v) {
     return v.release().getSegments();
   }

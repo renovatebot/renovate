@@ -118,6 +118,24 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
   });
 
+  it('aborts if the lock file is gone after the restore', async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({ 'packages.lock.json': null });
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'foo' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).resolves.toBeNull();
+    expect(execSnapshots).toHaveLength(1);
+  });
+
   it('runs workload restore and updates lock file', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -445,6 +463,60 @@ describe('modules/manager/nuget/artifacts', () => {
             MSBUILDDISABLENODEREUSE: '1',
           },
         },
+      },
+    ]);
+  });
+
+  it('uses the extracted dotnet constraint when global.json has none', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    findGlobalJson.mockResolvedValueOnce(null);
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: { ...config, extractedConstraints: { dotnet: '8.0.100' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dotnet 8.0.100' },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
+  });
+
+  it('prefers the global.json version over the extracted dotnet constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    findGlobalJson.mockResolvedValueOnce({ sdk: { version: '7.0.100' } });
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: { ...config, extractedConstraints: { dotnet: '8.0.100' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dotnet 7.0.100' },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
       },
     ]);
   });

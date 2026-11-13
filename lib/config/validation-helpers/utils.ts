@@ -73,9 +73,7 @@ export function isFalseGlobal(
   // v8 ignore else -- TODO: add test #40625
   if (
     parentPath?.includes('hostRules') &&
-    (optionName === 'token' ||
-      optionName === 'username' ||
-      optionName === 'password')
+    ['token', 'username', 'password'].includes(optionName)
   ) {
     return true;
   }

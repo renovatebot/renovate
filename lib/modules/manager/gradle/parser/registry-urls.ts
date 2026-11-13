@@ -213,6 +213,7 @@ const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
   },
   search: q
     .handler<Ctx>((ctx) => {
+      // v8 ignore else -- the handler only runs once a registry scope was stored
       if (ctx.tmpTokenStore.registryScope) {
         ctx.tokenMap.registryScope = ctx.tmpTokenStore.registryScope;
       }

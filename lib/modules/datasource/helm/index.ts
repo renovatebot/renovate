@@ -6,8 +6,10 @@ import type {
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isForbidden } from '../../../util/http/status.ts';
 import type { S3UrlParts } from '../../../util/s3.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
@@ -25,7 +27,9 @@ export class HelmDatasource extends Datasource {
     super(HelmDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://charts.helm.sh/stable'];
+  }
 
   override readonly defaultConfig = {
     commitMessageTopic: 'Helm release {{depName}}',
@@ -66,7 +70,7 @@ export class HelmDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${HelmDatasource.id}`,
-        key: `repository-data:${helmRepository}`,
+        key: buildCacheKey('repository-data', helmRepository),
       },
       () => this._getRepositoryData(helmRepository),
     );
@@ -143,7 +147,7 @@ function classifyS3Error(
 
   if (
     err.name === 'CredentialsProviderError' ||
-    err.$metadata?.httpStatusCode === 403
+    isForbidden(err.$metadata?.httpStatusCode)
   ) {
     logger.debug(
       { indexUrl, err },

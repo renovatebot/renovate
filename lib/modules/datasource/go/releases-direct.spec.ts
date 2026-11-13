@@ -1,5 +1,7 @@
+import type { MockInstance } from 'vitest';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
@@ -54,6 +56,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v2.0.0', version: 'v2.0.0' },
         ],
+        effectiveDatasource: 'github-tags',
         sourceUrl: 'https://github.com/golang/text',
       });
     });
@@ -115,6 +118,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v0.2.1',
           },
         ],
+        effectiveDatasource: 'forgejo-tags',
         sourceUrl: 'https://code.forgejo.org/go-chi/cache',
       });
     });
@@ -137,6 +141,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'gitlab-tags',
         sourceUrl: 'https://gitlab.com/golang/text',
       });
     });
@@ -198,6 +203,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v0.2.1',
           },
         ],
+        effectiveDatasource: 'gitea-tags',
         sourceUrl: 'https://gitea.com/go-chi/cache',
       });
     });
@@ -227,6 +233,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v2.0.0',
           },
         ],
+        effectiveDatasource: 'git-tags',
         sourceUrl: null,
       });
     });
@@ -250,6 +257,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'gitlab-tags',
         sourceUrl: 'https://my.custom.domain/golang/myrepo',
       });
     });
@@ -273,6 +281,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'bitbucket-tags',
         sourceUrl: 'https://bitbucket.org/golang/text',
       });
     });
@@ -299,6 +308,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v2.0.0', version: 'v2.0.0' },
         ],
+        effectiveDatasource: 'github-tags',
         sourceUrl: 'https://git.enterprise.com/example/module',
       });
       expect(githubGetTags.mock.calls).toMatchObject([
@@ -355,6 +365,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
       expect(res).toMatchObject({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+        effectiveDatasource: 'gitlab-tags',
         sourceUrl: 'https://gitlab.com/group/subgroup/repo',
       });
     });
@@ -415,10 +426,18 @@ describe('modules/datasource/go/releases-direct', () => {
 
       await expect(
         datasource.getReleases({ packageName: 'github.com/x/text/a' }),
-      ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
+      ).resolves.toEqual({
+        releases,
+        sourceUrl: 'https://github.com/x/text',
+        effectiveDatasource: 'github-tags',
+      });
       await expect(
         datasource.getReleases({ packageName: 'github.com/x/text/b' }),
-      ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
+      ).resolves.toEqual({
+        releases,
+        sourceUrl: 'https://github.com/x/text',
+        effectiveDatasource: 'github-tags',
+      });
     });
 
     it('works for nested modules on github v2+ major upgrades', async () => {
@@ -444,6 +463,40 @@ describe('modules/datasource/go/releases-direct', () => {
         { version: 'v2.0.0', gitRef: 'b/v2.0.0' },
         { version: 'v3.0.0', gitRef: 'b/v3.0.0' },
       ]);
+    });
+
+    describe('package cache', () => {
+      let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+      beforeEach(() => {
+        setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+        getDatasourceSpy.mockResolvedValueOnce({
+          datasource: 'github-tags',
+          packageName: 'golang/text',
+          registryUrl: 'https://github.com',
+        });
+        githubGetTags.mockResolvedValueOnce({
+          releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
+        });
+      });
+
+      afterEach(() => {
+        setCache.mockRestore();
+      });
+
+      it('caches public modules', async () => {
+        await datasource.getReleases({ packageName: 'github.com/golang/text' });
+
+        expect(setCache).toHaveBeenCalledOnce();
+      });
+
+      it('does not cache modules matching GONOPROXY', async () => {
+        vi.stubEnv('GONOPROXY', 'github.com/golang/*');
+
+        await datasource.getReleases({ packageName: 'github.com/golang/text' });
+
+        expect(setCache).not.toHaveBeenCalled();
+      });
     });
   });
 });

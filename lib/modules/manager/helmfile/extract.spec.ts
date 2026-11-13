@@ -179,6 +179,23 @@ describe('modules/manager/helmfile/extract', () => {
       ]);
     });
 
+    it('skip chart with an empty name', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: ""
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result?.deps).toMatchObject([
+        { depName: '', skipReason: 'unsupported-chart-type' },
+      ]);
+    });
+
     it('skip chart that does not have specified version', async () => {
       const content = `
       repositories:
@@ -557,6 +574,22 @@ describe('modules/manager/helmfile/extract', () => {
         ],
         managerData: { needKustomize: true },
       });
+    });
+
+    it('detects kustomize from release keys without checking the chart directory', async () => {
+      const content = codeBlock`
+      releases:
+        - name: my-chart
+          chart: ./charts/my-chart
+          strategicMergePatches:
+            - patch.yaml
+      `;
+      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+      expect(result).toMatchObject({
+        deps: [{ depName: 'my-chart', skipReason: 'local-chart' }],
+        managerData: { needKustomize: true },
+      });
+      expect(fs.localPathExists).not.toHaveBeenCalled();
     });
 
     it('makes sure url joiner works correctly', async () => {

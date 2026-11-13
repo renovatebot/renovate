@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import {
+  Ini,
   Json,
   LooseRecord,
   Nullish,
@@ -130,6 +131,48 @@ export const PnpmWorkspaceFile = Yaml.pipe(
 );
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
+/** The minimum release age settings of a parsed `pnpm-workspace.yaml`, `minimumReleaseAge` is in minutes. */
+export const PnpmWorkspaceMinimumReleaseAgeSettings = z.object({
+  minimumReleaseAge: z.number().nonnegative().optional().catch(undefined),
+  minimumReleaseAgeStrict: z.boolean().optional().catch(undefined),
+  // pnpm accepts a lone string as well
+  minimumReleaseAgeExclude: z
+    .array(z.string())
+    .or(z.string().transform((entry) => [entry]))
+    .optional()
+    .catch(undefined),
+});
+
+/** The minimum release age settings of a `pnpm-workspace.yaml`, `minimumReleaseAge` is in minutes. */
+export const PnpmWorkspaceMinimumReleaseAge = Yaml.pipe(
+  PnpmWorkspaceMinimumReleaseAgeSettings,
+);
+export type PnpmWorkspaceMinimumReleaseAge = z.infer<
+  typeof PnpmWorkspaceMinimumReleaseAge
+>;
+
+/**
+ * The minimum release age settings of a `.yarnrc.yml`, with the ages as written in the file.
+ *
+ * Yarn splits a string of an array setting at commas.
+ */
+export const YarnrcMinimalAgeGate = Yaml.pipe(
+  z.object({
+    npmMinimalAgeGate: z.unknown().optional(),
+    npmPreapprovedPackages: z
+      .array(z.string())
+      .or(z.string().transform((entries) => entries.split(',')))
+      .optional()
+      .catch(undefined),
+    npmScopes: LooseRecord(
+      z.object({ npmMinimalAgeGate: z.unknown().optional() }).catch({}),
+    )
+      .optional()
+      .catch(undefined),
+  }),
+);
+export type YarnrcMinimalAgeGate = z.infer<typeof YarnrcMinimalAgeGate>;
+
 export const PackageManager = z
   .string()
   .transform((val) => val.split('@'))
@@ -144,6 +187,7 @@ const DevEngine = z.object({
   packageManager: DevEngineDependency.or(
     z.array(DevEngineDependency),
   ).optional(),
+  runtime: DevEngineDependency.or(z.array(DevEngineDependency)).optional(),
 });
 
 export const PackageJson = Json.pipe(
@@ -190,3 +234,12 @@ export const PackageLock = Json.pipe(
   }
   return { lockedVersions, lockfileVersion };
 });
+
+export const NpmrcCooldown = Ini.pipe(
+  z.object({
+    before: z.string().optional().catch(undefined),
+    'min-release-age': z.string().optional().catch(undefined),
+    // read by pnpm before v11, in minutes
+    'minimum-release-age': z.string().optional().catch(undefined),
+  }),
+);

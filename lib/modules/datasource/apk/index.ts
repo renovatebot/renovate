@@ -7,6 +7,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isRateLimitedOrServerError } from '../../../util/http/status.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as apkVersioning } from '../../versioning/apk/index.ts';
@@ -64,13 +65,17 @@ export class ApkDatasource extends Datasource {
    * - branch: latest-stable, v3.19, edge or any other Alpine branch
    * - components: comma separated list of components, e.g. main,community,testing
    */
-  override readonly defaultRegistryUrls = [
-    'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [
+      'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
+    ];
+  }
 
   override readonly defaultConfig = defaultConfig;
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'merge';
 
@@ -131,8 +136,7 @@ export class ApkDatasource extends Datasource {
       return groupPackagesByName(packages);
     } catch (err) {
       if (err instanceof HttpError) {
-        const statusCode = err.response?.statusCode;
-        if (statusCode === 429 || (statusCode && statusCode >= 500)) {
+        if (isRateLimitedOrServerError(err)) {
           throw new ExternalHostError(err);
         }
         // The caller logs the failure once for the component it was skipping
@@ -158,10 +162,12 @@ export class ApkDatasource extends Datasource {
         key: componentUrl,
         ttlMinutes: 60,
         fallback: true,
-        // Soft failures resolve to an empty index, which must not be cached as a valid one
-        shouldCacheResult: isNonEmptyObject,
       },
-      () => this._getPackages(componentUrl),
+      async (ctx) => {
+        const packages = await this._getPackages(componentUrl);
+        ctx.cacheable = isNonEmptyObject(packages);
+        return packages;
+      },
     );
   }
 

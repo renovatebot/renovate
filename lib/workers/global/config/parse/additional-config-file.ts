@@ -45,7 +45,9 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     } else if (err.message === 'Unsupported file type') {
       logger.fatal(err.message);
       process.exit(1);
-    } else if (env.RENOVATE_ADDITIONAL_CONFIG_FILE) {
+    } else {
+      // the function returns early unless `RENOVATE_ADDITIONAL_CONFIG_FILE` is
+      // set, so reaching here always means an explicitly requested file
       logger.debug({ err }, 'Parse error');
       logger.fatal('Error parsing additional config file');
       process.exit(1);

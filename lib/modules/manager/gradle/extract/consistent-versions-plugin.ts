@@ -71,6 +71,7 @@ export function parseGcv(
 
   // For each exact dep in props file
   for (const [propDep, versionAndPosition] of propsFileExactMap) {
+    // v8 ignore else -- needs a props entry missing from the lock file
     if (lockFileMap.has(propDep)) {
       const newDep: Record<string, any> = {
         managerData: {

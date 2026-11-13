@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { findLocalSiblingOrParent } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { MiseLockFile } from './schema.ts';
+import type { MiseLockFile, MiseLockTool } from './schema.ts';
 import type { MiseConfigType } from './types.ts';
 
 /**
@@ -55,6 +55,39 @@ export async function getLockFileName(configPath: string): Promise<string> {
 }
 
 /**
+ * Derives the directory where `mise lock` writes the native dependency
+ * sidecars (such as `uv.lock` or `aube-lock.yaml`) for a lock file.
+ * Matches mise's sidecar_root() logic from src/lockfile/graph.rs
+ *
+ * @see https://mise.jdx.dev/dev-tools/mise-lock.html#native-dependency-sidecars
+ */
+export function getSidecarDir(lockFileName: string): string {
+  const dirname = upath.dirname(lockFileName);
+  const basename = upath.basename(dirname);
+
+  let sidecarDir: string;
+  if (basename === '.mise') {
+    sidecarDir = upath.join(dirname, 'locks');
+  } else if (
+    basename === 'mise' &&
+    upath.basename(upath.dirname(dirname)) === '.config'
+  ) {
+    sidecarDir = upath.join(dirname, 'locks');
+  } else if (basename === '.config') {
+    sidecarDir = upath.join(dirname, 'mise', 'locks');
+  } else {
+    sidecarDir = upath.join(dirname, '.mise', 'locks');
+  }
+
+  // non-default lock files keep their sidecars in a subdirectory named after them
+  if (upath.basename(lockFileName) !== 'mise.lock') {
+    sidecarDir = upath.join(sidecarDir, upath.basename(lockFileName, '.lock'));
+  }
+
+  return sidecarDir;
+}
+
+/**
  * Get the locked version for a dependency from the parsed lock file.
  *
  * Mise lock files use different key formats depending on whether a tool is in
@@ -88,6 +121,27 @@ export function getLockedVersion(
   depName: string,
   currentValue?: string | null,
 ): string | undefined {
+  const lockedTools = getLockedTool(lockFileData, depName);
+
+  // Since format version 1, lock files record the original request in
+  // `specifiers`. A monorepo root lock file can hold several entries for one
+  // tool, so match on the specifier when the lock file has them.
+  if (currentValue && lockedTools?.some((tool) => tool.specifiers)) {
+    return lockedTools.find((tool) => tool.specifiers?.includes(currentValue))
+      ?.version;
+  }
+
+  return lockedTools?.[0]?.version;
+}
+
+/**
+ * Returns the lockfile entries for a dependency, using the same backend-name
+ * fallback as getLockedVersion().
+ */
+export function getLockedTool(
+  lockFileData: MiseLockFile,
+  depName: string,
+): MiseLockTool[] | undefined {
   // Try full name first (for non-registry tools like ubi:, aqua:)
   let lockedTools = lockFileData.tools[depName];
 
@@ -100,13 +154,5 @@ export function getLockedVersion(
     }
   }
 
-  // Version 1 lock files record the original request in `specifiers`. A
-  // monorepo root lock file can hold several entries for one tool, so match
-  // on the specifier when the lock file has them.
-  if (currentValue && lockedTools?.some((tool) => tool.specifiers)) {
-    return lockedTools.find((tool) => tool.specifiers?.includes(currentValue))
-      ?.version;
-  }
-
-  return lockedTools?.[0]?.version;
+  return lockedTools;
 }

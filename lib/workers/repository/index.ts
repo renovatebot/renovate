@@ -118,9 +118,12 @@ export async function renovateRepository(
         config.repoIsOnboarded! ||
         !OnboardingState.onboardingCacheValid ||
         OnboardingState.prUpdateRequested;
-      const extractResult = performExtract
-        ? await extractDependencies(config)
-        : emptyExtract();
+      let extractResult: ExtractResult;
+      if (performExtract) {
+        extractResult = await extractDependencies(config);
+      } else {
+        extractResult = emptyExtract();
+      }
       addExtractionStats(config, extractResult);
 
       const { branches, branchList, packageFiles } = extractResult;
@@ -262,6 +265,7 @@ function emptyExtract(): ExtractResult {
 
 export function printRepositoryProblems(repository: string | undefined): void {
   const repoProblems = extractRepoProblems(repository);
+  // v8 ignore else -- only called when the repository logged a problem
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },

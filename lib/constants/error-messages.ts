@@ -63,6 +63,7 @@ export const REPOSITORY_FORKED = 'fork';
 export const REPOSITORY_MIRRORED = 'mirror';
 export const REPOSITORY_NOT_FOUND = 'not-found';
 export const REPOSITORY_NO_PACKAGE_FILES = 'no-package-files';
+export const REPOSITORY_PENDING_DELETION = 'pending-deletion';
 export const REPOSITORY_RENAMED = 'renamed';
 export const REPOSITORY_UNINITIATED = 'uninitiated';
 
@@ -83,6 +84,7 @@ export const RepositoryErrors = [
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_PENDING_DELETION,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
 ] as const;

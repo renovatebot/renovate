@@ -7,6 +7,17 @@ When using the default rangeStrategy=auto:
 
 The `update-lockfile` default means that most upgrades will update `Cargo.lock` files without the need to change the value in `Cargo.toml`.
 
+### Rust version
+
+Renovate uses the Rust version pinned in the closest `rust-toolchain` or `rust-toolchain.toml` file as the `rust` constraint for the `cargo` commands.
+The [`rust-toolchain` manager](../rust-toolchain/index.md) finds these files, so it must be enabled.
+This only applies if the file pins a version like `1.100.0` or `1.100`.
+If the closest file has a channel like `stable` or `nightly`, or a `path`, Renovate uses no `rust` constraint, also if a file in a parent directory pins a version.
+If a branch also updates the version in that file, Renovate uses the new version.
+A `rust` constraint in your Renovate config takes precedence.
+If both files exist in one directory, Renovate uses the legacy `rust-toolchain` file, like `rustup` does.
+Renovate does not use `package.rust-version` from `Cargo.toml`, as it only sets the oldest Rust version which the crate supports.
+
 ### Private Modules Authentication
 
 Before running the `cargo` commands to update the `cargo.lock`, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
@@ -21,5 +32,13 @@ Next, all `hostRules` with both a token or username/password and `matchHost` wil
 Rules from this list are converted to environment variable directives if they match _any_ of these characteristics:
 
 - No `hostType` is defined, or
-- `hostType` is `cargo`, or
+- `hostType` is `cargo` or `crate`, or
 - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+
+### Git index registries
+
+When Renovate clones a git index registry over `http(s)` to look up versions, it exports the same `insteadOf` directives as for artifact updates, with `hostType=crate` in place of `hostType=cargo`.
+Because artifact updates accept `hostType=crate` rules too, a single `crate` rule covers both the lookup and the `Cargo.lock` update.
+Git uses the credentials of the directive whose URL matches the index URL.
+Cloning a git index registry other than the crates.io index (`https://index.crates.io/`) requires `allowCustomCrateGitRegistries`.
+Sparse registries (`sparse+https://`) are fetched over HTTP, and use `hostRules` like other datasources.

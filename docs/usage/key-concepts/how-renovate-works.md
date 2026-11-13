@@ -40,7 +40,7 @@ For example:
 
 # Workflow
 
-Here's an overview of the workflow:
+Here is an overview of the workflow:
 
 ```mermaid
 flowchart TB

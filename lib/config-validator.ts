@@ -8,11 +8,13 @@ import { Command, CommanderError } from 'commander';
 import { dequal } from 'dequal';
 import { diffLines } from 'diff';
 import fs from 'fs-extra';
+import upath from 'upath';
 import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
 import { massageConfig } from './config/massage.ts';
+import { stringifyMigratedConfig } from './config/migrated-content.ts';
 import { migrateConfig } from './config/migration.ts';
-import type { AllConfig, RenovateConfig } from './config/types.ts';
+import type { RenovateConfig } from './config/types.ts';
 import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
@@ -25,7 +27,7 @@ import { getParsedContent } from './workers/global/config/parse/util.ts';
 
 await init();
 
-const { pathExists, readFile } = fs;
+const { pathExists, readFile, writeFile } = fs;
 
 let returnVal = 0;
 
@@ -42,30 +44,68 @@ async function partiallyGlobalInitialize(): Promise<void> {
   GlobalConfig.set(globalConfig);
 
   if (globalConfig.hostRules) {
-    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so `addHostRule` drops them here too, with a WARN, rather than leave them to be silently discarded at request time
+    // this is the self-hosted admin's own config, so its `headers` are exempt from `allowedHeaders` altogether - see `hostRules.add()`
     for (const hostRule of globalConfig.hostRules) {
-      addHostRule(hostRule);
+      addHostRule(hostRule, { trusted: true });
     }
   }
+}
+
+interface ValidateOptions {
+  strict: boolean;
+  isPreset?: boolean;
+  /** the file to write any needed config migration to, when `--migrate` is set */
+  migrateFile?: string;
+}
+
+function isMigratableFile(file: string): boolean {
+  const basename = upath.basename(file);
+  if (basename === 'package.json') {
+    return false;
+  }
+  if (basename === '.renovaterc') {
+    return true;
+  }
+  return ['.json', '.jsonc', '.json5'].includes(upath.extname(file));
+}
+
+/**
+ * Writes `migratedConfig` to `file`, returning whether the migration was applied.
+ */
+async function writeMigratedConfig(
+  file: string,
+  migratedConfig: RenovateConfig,
+): Promise<boolean> {
+  if (!isMigratableFile(file)) {
+    logger.warn(
+      { file },
+      'Config migration cannot be applied automatically to this file type',
+    );
+    return false;
+  }
+
+  try {
+    const raw = await readFile(file, 'utf8');
+    const { content } = stringifyMigratedConfig(file, raw, migratedConfig);
+    await writeFile(file, content);
+  } catch (err) {
+    logger.warn({ file, err }, 'Config migration could not be written');
+    return false;
+  }
+  logger.info(`Applied config migration to ${file}`);
+  return true;
 }
 
 async function validate(
   configType: 'global' | 'repo',
   desc: string,
   config: RenovateConfig,
-  strict: boolean,
-  isPreset = false,
+  { strict, isPreset = false, migrateFile }: ValidateOptions,
 ): Promise<void> {
   if (config.hostRules) {
-    // `allowedHeaders` enforces the checks regardless of whether it's global self-hosted administrator config, or repo config
-    // a global config file being validated brings its own `allowedHeaders`, and should be validated against it, like a real run would after parsing it
-    const allowedHeaders =
-      configType === 'global'
-        ? ((config as AllConfig).allowedHeaders ??
-          GlobalConfig.get('allowedHeaders'))
-        : GlobalConfig.get('allowedHeaders');
+    // a `global` config is the self-hosted administrator's own, so its `headers` are exempt from `allowedHeaders` altogether - see `hostRules.add()`; a `repo` config's `hostRules` are still constrained by this instance's `allowedHeaders`
     for (const hostRule of config.hostRules) {
-      addHostRule(hostRule, { allowedHeaders });
+      addHostRule(hostRule, { trusted: configType === 'global' });
     }
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
@@ -104,7 +144,14 @@ async function validate(
       .join('\n');
     // oxlint-disable-next-line renovate/logger-static-message -- the multi-line, colorized diff must be interpolated to stay readable; as a metadata field it is JSON-escaped onto one line
     logger.warn(`Config migration diff:\n${msg}`);
-    if (strict) {
+    let isMigrationApplied = false;
+    if (migrateFile) {
+      isMigrationApplied = await writeMigratedConfig(
+        migrateFile,
+        migratedConfig,
+      );
+    }
+    if (strict && !isMigrationApplied) {
       returnVal = 1;
     }
   }
@@ -153,6 +200,7 @@ Examples:
   $ renovate-config-validator --strict
   $ renovate-config-validator first_config.json
   $ renovate-config-validator --strict config.js
+  $ renovate-config-validator --migrate
   $ renovate-config-validator --no-global renovate.json5
   $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator
 
@@ -171,6 +219,10 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
       'Fail command if any configuration warnings, errors, or a migration is needed',
     )
     .option(
+      '--migrate',
+      'Apply any necessary configuration migrations to the JSON, JSONC or JSON5 configuration file(s)',
+    )
+    .option(
       '--no-global',
       'When specifying [config-files], do not treat them as global self-hosted configuration file(s)',
       true,
@@ -180,6 +232,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   program.action(async (files, opts) => {
     const strict = opts.strict ?? false;
+    const migrate = opts.migrate ?? false;
     let filesValidated = 0;
 
     // without RE2, patterns are checked by RegExp, which accepts syntax RE2 rejects (e.g. lookahead)
@@ -210,7 +263,10 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           const parsedContent = await getParsedContent(file);
           try {
             logger.info(`Validating ${file} as ${configType} config`);
-            await validate(configType, file, parsedContent, strict);
+            await validate(configType, file, parsedContent, {
+              strict,
+              migrateFile: migrate ? file : undefined,
+            });
           } catch (err) {
             logger.warn({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
@@ -233,7 +289,10 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           const parsedContent = await getParsedContent(file);
           try {
             logger.info(`Validating ${file}`);
-            await validate('repo', file, parsedContent, strict);
+            await validate('repo', file, parsedContent, {
+              strict,
+              migrateFile: migrate ? file : undefined,
+            });
           } catch (err) {
             logger.warn({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
@@ -251,12 +310,10 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
         ) as PackageJson;
         if (pkgJson.renovate) {
           logger.info(`Validating package.json > renovate`);
-          await validate(
-            'repo',
-            'package.json > renovate',
-            pkgJson.renovate,
+          await validate('repo', 'package.json > renovate', pkgJson.renovate, {
             strict,
-          );
+            migrateFile: migrate ? 'package.json' : undefined,
+          });
 
           filesValidated++;
         }
@@ -269,8 +326,11 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
               'repo',
               'package.json > renovate-config',
               presetConfig,
-              strict,
-              true,
+              {
+                strict,
+                isPreset: true,
+                migrateFile: migrate ? 'package.json' : undefined,
+              },
             );
 
             filesValidated++;
@@ -286,7 +346,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           const file = env.RENOVATE_CONFIG_FILE ?? 'config.js';
           logger.info(`Validating ${file}`);
           try {
-            await validate('global', file, fileConfig, strict);
+            await validate('global', file, fileConfig, { strict });
           } catch (err) {
             logger.error({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
@@ -313,7 +373,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
   // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
   if (
     e instanceof CommanderError &&
-    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+    ['commander.helpDisplayed', 'commander.version'].includes(e.code)
   ) {
     return;
   }

@@ -19,10 +19,6 @@ const cocoapodsHost = 'https://cdn.cocoapods.org';
 
 describe('modules/datasource/pod/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('returns null for invalid inputs', async () => {
       // FIXME: why get request?
       httpMock
@@ -54,6 +50,22 @@ describe('modules/datasource/pod/index', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(404);
+      await expect(getPkgReleases(config)).resolves.toBeNull();
+    });
+
+    it('returns null for an empty CDN body', async () => {
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(200, '');
+      await expect(getPkgReleases(config)).resolves.toBeNull();
+    });
+
+    it('returns null when the CDN lists no matching pod', async () => {
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(200, 'bar/1.0.0/2.0.0');
       await expect(getPkgReleases(config)).resolves.toBeNull();
     });
 

@@ -9,6 +9,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../util/string.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -123,9 +124,11 @@ export async function confirmIfDepUpdated(
     }
   }
 
+  const isPinOrDigestUpdate =
+    upgrade.isPinDigest === true || upgrade.currentDigest;
   if (
     upgrade.newDigest &&
-    (upgrade.isPinDigest === true || upgrade.currentDigest) &&
+    isPinOrDigestUpdate &&
     upgrade.newDigest !== newUpgrade.currentDigest
   ) {
     logger.debug(
@@ -146,13 +149,7 @@ export async function confirmIfDepUpdated(
 
 function getDepsSignature(deps: PackageDependency[]): string {
   // TODO: types (#22198)
-  return deps
-    .map(
-      (dep) =>
-        `${(dep.depName ?? dep.packageName)!}${(dep.packageName ??
-          dep.depName)!}`,
-    )
-    .join(',');
+  return deps.map((dep) => `${dep.depName!}${dep.packageName!}`).join(',');
 }
 
 function firstIndexOf(
@@ -183,6 +180,10 @@ export async function checkBranchDepsMatchBaseDeps(
       upgrade,
     )!;
     const branchDeps = res!.deps;
+    // `baseDeps` were normalized during extraction, so the freshly extracted `branchDeps` need the same treatment before their signatures can be compared
+    for (const dep of branchDeps) {
+      normalizeDepNames(dep);
+    }
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch /* istanbul ignore next */ {
     logger.info(
@@ -215,6 +216,13 @@ async function checkExistingBranch(
   // TODO: fix types (#22198)
   logger.debug(`Branch dep ${depName!} in ${packageFile!} is already updated`);
   return existingContent;
+}
+
+function isMissingDepName(
+  replaceString: string | undefined,
+  depName: string | undefined,
+): boolean {
+  return isUndefined(replaceString) || !replaceString.includes(depName!);
 }
 
 export async function doAutoReplace(
@@ -254,8 +262,7 @@ export async function doAutoReplace(
   let replaceWithoutReplaceString =
     isString(newName) &&
     newName !== depName &&
-    (isUndefined(upgrade.replaceString) ||
-      !upgrade.replaceString?.includes(depName!));
+    isMissingDepName(upgrade.replaceString, depName);
   // fallback must contain the field being updated, else the replacement is
   // a no-op for managers where value and digest live in separate tokens
   let replaceString = upgrade.replaceString;
@@ -348,12 +355,18 @@ export async function doAutoReplace(
         );
       }
     }
-    if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Package file is already updated - no work to do',
+    if (!firstUpdate) {
+      const alreadyUpdated = await confirmIfDepUpdated(
+        upgrade,
+        existingContent,
       );
-      return existingContent;
+      if (alreadyUpdated) {
+        logger.debug(
+          { packageFile, depName },
+          'Package file is already updated - no work to do',
+        );
+        return existingContent;
+      }
     }
     logger.debug(
       { packageFile, depName },

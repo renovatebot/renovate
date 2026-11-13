@@ -177,7 +177,7 @@ describe('modules/manager/apm/artifacts', () => {
       expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
     });
 
-    it('deletes lock file on lockFileMaintenance', async () => {
+    it('runs apm install --update on lockFileMaintenance, keeping the lock file', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
@@ -201,8 +201,11 @@ describe('modules/manager/apm/artifacts', () => {
           },
         },
       ]);
-      expect(fs.deleteLocalFile).toHaveBeenCalledWith('apm.lock.yaml');
-      expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
+      // Deleting the lockfile discards the `deployments` ledger and the
+      // deployed-file integrity hashes, which `apm install` cannot rebuild
+      // while the deployed files are already on disk.
+      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+      expect(execSnapshots).toMatchObject([{ cmd: 'apm install --update' }]);
     });
 
     it('supports docker mode with tool constraint', async () => {
@@ -254,6 +257,32 @@ describe('modules/manager/apm/artifacts', () => {
       ]);
     });
 
+    it('falls back to the extracted apm constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+      git.getRepoStatus.mockResolvedValueOnce(
+        repoStatus({ modified: ['apm.lock.yaml'] }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.1.0' }, { version: '0.2.0' }],
+      });
+
+      await updateArtifacts({
+        packageFileName: 'apm.yml',
+        updatedDeps: [{ depName: 'owner/repo' }],
+        newPackageFileContent: 'new',
+        config: { ...config, extractedConstraints: { apm: '0.2.0' } },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool apm 0.2.0' },
+        { cmd: 'apm install' },
+      ]);
+    });
+
     it('rethrows TEMPORARY_ERROR', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
@@ -283,7 +312,7 @@ describe('modules/manager/apm/artifacts', () => {
         {
           artifactError: {
             fileName: 'apm.lock.yaml',
-            stderr: 'Error: write failed',
+            stderr: 'write failed',
           },
         },
       ]);

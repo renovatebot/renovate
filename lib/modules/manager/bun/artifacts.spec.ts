@@ -193,6 +193,28 @@ describe('modules/manager/bun/artifacts', () => {
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
       });
+
+      it('restores .npmrc when the install fails', async () => {
+        const execError = new ExecError('nope', {
+          cmd: '',
+          stdout: '',
+          stderr: '',
+          options: {},
+        });
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+        // npmrc
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
+        exec.mockRejectedValueOnce(execError);
+
+        await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
+        ]);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
+      });
     });
 
     describe('when using .lock lockfile format', () => {
@@ -311,6 +333,24 @@ describe('modules/manager/bun/artifacts', () => {
           { artifactError: { fileName: 'bun.lock', stderr: 'nope' } },
         ]);
       });
+    });
+
+    it('falls back to the extracted bun constraint', async () => {
+      updateArtifact.config = { extractedConstraints: { bun: '1.1.0' } };
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lock'] },
+      ];
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+
+      await updateArtifacts(updateArtifact);
+
+      expect(exec).toHaveBeenCalledWith(
+        'bun install --ignore-scripts',
+        expect.objectContaining({
+          toolConstraints: [{ toolName: 'bun', constraint: '1.1.0' }],
+        }),
+      );
     });
   });
 

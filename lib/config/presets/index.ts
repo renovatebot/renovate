@@ -13,6 +13,7 @@ import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../util/cache/package/key.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
 import * as template from '../../util/template/index.ts';
@@ -46,7 +47,7 @@ interface PresetSource {
   repoHosted: boolean;
 }
 
-const presetSources: Record<string, PresetSource> = {
+export const presetSources: Record<string, PresetSource> = {
   forgejo: { load: () => import('./forgejo/index.ts'), repoHosted: true },
   gitea: { load: () => import('./gitea/index.ts'), repoHosted: true },
   github: { load: () => import('./github/index.ts'), repoHosted: true },
@@ -141,12 +142,14 @@ export async function getPreset(
       tag,
     });
   } else {
-    const cacheKey = `preset:${preset}`;
+    const cacheKey = buildCacheKey('preset', preset);
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');
 
-    const packageCache = presetCachePersistence
-      ? await import('../../util/cache/package/index.ts')
-      : undefined;
+    let packageCache:
+      typeof import('../../util/cache/package/index.ts') | undefined;
+    if (presetCachePersistence) {
+      packageCache = await import('../../util/cache/package/index.ts');
+    }
 
     if (packageCache) {
       presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);

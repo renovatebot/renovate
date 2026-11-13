@@ -40,12 +40,11 @@ function getQuadletImage(
     const cleanedImage = image
       .replace(regEx(/^docker:\/\//), '')
       .replace(regEx(/^docker-daemon:/), '');
-    const dep = getDep(cleanedImage, true, config.registryAliases);
-    if (dep) {
-      dep.depType = 'image';
-
-      deps.push(dep);
-    }
+    const dep = getDep(cleanedImage, {
+      registryAliases: config.registryAliases,
+    });
+    dep.depType = 'image';
+    deps.push(dep);
   }
 }
 

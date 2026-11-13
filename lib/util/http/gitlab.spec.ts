@@ -28,10 +28,6 @@ describe('util/http/gitlab', () => {
     });
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('paginates', async () => {
     httpMock
       .scope(gitlabApiHost)

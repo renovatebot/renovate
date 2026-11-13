@@ -48,9 +48,10 @@ async function getBranch(
     ])
   ).trim();
 
-  return branchFromConfig === '.'
-    ? (await git.branch(['--list'])).current.trim()
-    : branchFromConfig || null;
+  if (branchFromConfig === '.') {
+    return (await git.branch(['--list'])).current.trim();
+  }
+  return branchFromConfig || null;
 }
 
 async function getModules(
@@ -60,13 +61,13 @@ async function getModules(
   const res: GitModule[] = [];
   try {
     const modules = (
-      (await git.raw([
+      await git.raw([
         'config',
         '--file',
         gitModulesPath,
         '--get-regexp',
         '\\.path',
-      ])) ?? /* istanbul ignore next: should never happen */ ''
+      ])
     )
       .trim()
       .split(regEx(/\n/))

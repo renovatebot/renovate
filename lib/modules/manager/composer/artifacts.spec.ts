@@ -50,7 +50,6 @@ describe('modules/manager/composer/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
-    hostRules.clear();
     GlobalConfig.set(adminConfig);
     fs.ensureCacheDir.mockResolvedValue('/tmp/renovate/cache/others/composer');
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -883,6 +882,71 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted php constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+
+    const execSnapshots = mockExecAll();
+
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
+
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+
+    await expect(
+      composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        // the updated `composer.json` requires no php version itself
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          extractedConstraints: { php: '7.3' },
+          constraints: { composer: '^1.10.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool php 7.3' },
+      { cmd: 'install-tool composer 1.10.17' },
+      { cmd: expect.stringContaining('composer update') },
+    ]);
+  });
+
+  it('prefers the php constraint of the updated package file over the extracted one', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+
+    const execSnapshots = mockExecAll();
+
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
+
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+
+    await expect(
+      composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{"require":{"php":"7.4"}}',
+        config: {
+          ...config,
+          extractedConstraints: { php: '7.3' },
+          constraints: { composer: '^1.10.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool php 7.4' },
+      { cmd: 'install-tool composer 1.10.17' },
+      { cmd: expect.stringContaining('composer update') },
+    ]);
+  });
+
   it('supports global mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -1216,6 +1280,27 @@ describe('modules/manager/composer/artifacts', () => {
       {
         cmd: 'composer update foo:1.1.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('quotes each dependency once in the update command', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    await expect(
+      composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo', newVersion: '^1.1 || ^2.0' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "composer update 'foo:^1.1 || ^2.0' --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
       },
     ]);
   });

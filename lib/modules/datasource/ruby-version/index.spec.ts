@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { getPkgReleases } from '../index.ts';
@@ -71,6 +72,39 @@ describe('modules/datasource/ruby-version/index', () => {
           },
         ],
       });
+    });
+
+    it('skips rows whose first column is not a version', async () => {
+      httpMock
+        .scope('https://www.ruby-lang.org')
+        .get('/en/downloads/releases/')
+        .reply(
+          200,
+          codeBlock`
+            <table class="release-list">
+              <tr><th>Release</th><th>Date</th><th>Notes</th></tr>
+              <tr>
+                <td>Ruby preview</td>
+                <td>2024-01-01</td>
+                <td><a href="/en/news/preview/">more...</a></td>
+              </tr>
+              <tr>
+                <td>Ruby 3.3.0</td>
+                <td>2023-12-25</td>
+                <td><a href="/en/news/2023/12/25/ruby-3-3-0-released/">more...</a></td>
+              </tr>
+            </table>
+          `,
+        );
+      const res = await getPkgReleases({ datasource, packageName: 'ruby' });
+      expect(res?.releases).toEqual([
+        {
+          version: '3.3.0',
+          changelogUrl:
+            'https://www.ruby-lang.org/en/news/2023/12/25/ruby-3-3-0-released/',
+          releaseTimestamp: '2023-12-25T00:00:00.000Z',
+        },
+      ]);
     });
 
     it('returns null for empty result', async () => {

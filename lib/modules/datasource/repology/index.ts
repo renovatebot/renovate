@@ -5,7 +5,13 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import {
+  isForbidden,
+  isMultipleChoices,
+  isNotFound,
+} from '../../../util/http/status.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -51,7 +57,9 @@ function findPackageInResponse(
 export class RepologyDatasource extends Datasource {
   static readonly id = 'repology';
 
-  override readonly defaultRegistryUrls = ['https://repology.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repology.org/'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -64,7 +72,7 @@ export class RepologyDatasource extends Datasource {
       const res = await this.http.getJson(url, RepologyPackages);
       return res.body;
     } catch (err) {
-      if (err.statusCode === 404) {
+      if (isNotFound(err)) {
         // Return an array here because the api does not return proper http codes
         // and instead of an 404 error an empty array with code 200 is returned
         // When querying the resolver 404 is thrown if package could not be resolved
@@ -133,6 +141,7 @@ export class RepologyDatasource extends Datasource {
           pkgType,
         );
 
+        // v8 ignore else -- the resolver either returns a body or throws
         if (response) {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,
@@ -144,7 +153,7 @@ export class RepologyDatasource extends Datasource {
         }
       }
     } catch (err) {
-      if (err.statusCode === 403) {
+      if (isForbidden(err)) {
         logger.debug(
           { repoName, pkgName },
           'Repology does not support tools/project-by lookups for repository. Will try direct API access now',
@@ -165,7 +174,7 @@ export class RepologyDatasource extends Datasource {
           // exit immediately if package found
           return pkg;
         }
-      } else if (err.statusCode === 300) {
+      } else if (isMultipleChoices(err)) {
         logger.warn(
           { repoName, pkgName },
           'Ambiguous redirection from package name to project name in Repology. Skipping this package',
@@ -193,7 +202,7 @@ export class RepologyDatasource extends Datasource {
       {
         ttlMinutes: 60,
         namespace: `datasource-${RepologyDatasource.id}`,
-        key: joinUrlParts(registryUrl, repoName, pkgName),
+        key: buildCacheKey(registryUrl, repoName, pkgName),
       },
       () => this._queryPackage(registryUrl, repoName, pkgName),
     );

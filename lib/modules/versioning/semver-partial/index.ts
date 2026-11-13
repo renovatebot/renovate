@@ -2,6 +2,7 @@ import { isUndefined } from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-partial';
@@ -17,7 +18,7 @@ function isLatest(input: string): boolean {
 }
 
 function massageValue(input: string): string {
-  return input.trim().replace(regEx(/^v/i), '');
+  return stripVersionPrefix(input.trim());
 }
 
 function parseVersion(input: string): SemVer | null {
@@ -42,6 +43,33 @@ function parseRange(input: string): Range | null {
   }
 
   return { major, minor };
+}
+
+/**
+ * Parses a whole major (`21`) or major.minor (`3.3`) version, optionally
+ * `v`-prefixed (`v2.5`). Full versions such as `3.3.6` are not partial.
+ */
+export function parsePartialVersion(
+  input: string,
+): { major: number; minor?: number } | null {
+  const groups = regEx(/^v?(?<major>\d+)(?:\.(?<minor>\d+))?$/).exec(
+    input,
+  )?.groups;
+  if (!groups) {
+    return null;
+  }
+  const major = parseInt(groups.major, 10);
+  return groups.minor === undefined
+    ? { major }
+    : { major, minor: parseInt(groups.minor, 10) };
+}
+
+/**
+ * Whether the value is a whole major (`21`) or major.minor (`3.3`) version,
+ * optionally `v`-prefixed (`v2.5`).
+ */
+export function isPartialVersion(input: string): boolean {
+  return parsePartialVersion(input) !== null;
 }
 
 function isValid(input: string): boolean {

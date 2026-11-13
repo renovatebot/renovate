@@ -6,26 +6,56 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotAcceptable } from '../../../util/http/status.ts';
 import type {
   HttpResponse,
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
+import { toBase64 } from '../../../util/string.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import { getGoogleAuthToken } from '../util.ts';
-import { isGitHubRepo, normalizePythonDepName } from './common.ts';
+import { isGoogleArtifactRegistry } from '../util.ts';
+import {
+  isGitHubRepo,
+  normalizePythonDepName,
+  pypiDatasourceId,
+} from './common.ts';
+import { findPypiIndexCredentials } from './host-rules.ts';
 import type { PypiRelease } from './schema.ts';
 import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
 
+function isSourceLabel(lower: string, projectUrl: string): boolean {
+  return (
+    lower.startsWith('repo') ||
+    lower === 'code' ||
+    lower === 'source' ||
+    isGitHubRepo(projectUrl)
+  );
+}
+
+function isChangelogLabel(lower: string): boolean {
+  return (
+    [
+      'changelog',
+      'change log',
+      'changes',
+      'release notes',
+      'news',
+      "what's new",
+    ].includes(lower) || !!changelogFilenameRegex.exec(lower)
+  );
+}
+
 export class PypiDatasource extends Datasource {
-  static readonly id = 'pypi';
+  static readonly id = pypiDatasourceId;
 
   constructor() {
     super(PypiDatasource.id);
@@ -33,11 +63,15 @@ export class PypiDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   static readonly defaultURL =
     getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
-  override readonly defaultRegistryUrls = [PypiDatasource.defaultURL];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [PypiDatasource.defaultURL];
+  }
 
   override readonly defaultVersioning = pep440.id;
 
@@ -110,19 +144,22 @@ export class PypiDatasource extends Datasource {
       logger.once.debug({ lookupUrl }, 'Failed to parse URL');
       return { headers: {}, lookupUrl };
     }
-    if (parsedUrl.hostname.endsWith('.pkg.dev')) {
-      const auth = await getGoogleAuthToken();
-      if (auth) {
-        const sanitizedLookupUrl = this.sanitizeLookupUrl(lookupUrl, parsedUrl);
-        return {
-          headers: { authorization: `Basic ${auth}` },
-          lookupUrl: sanitizedLookupUrl,
-        };
-      }
-      logger.once.debug({ lookupUrl }, 'Could not get Google access token');
+    // Only Google Artifact Registry needs a header of our own: for every other host `applyHostRule` already turns the matching host rule into request auth
+    if (!isGoogleArtifactRegistry(parsedUrl.hostname)) {
       return { headers: {}, lookupUrl };
     }
-    return { headers: {}, lookupUrl };
+
+    const { username, password } = await findPypiIndexCredentials(lookupUrl);
+    if (!username && !password) {
+      return { headers: {}, lookupUrl };
+    }
+
+    const auth = toBase64(`${username ?? ''}:${password ?? ''}`);
+    addSecretForSanitizing(auth);
+    return {
+      headers: { authorization: `Basic ${auth}` },
+      lookupUrl: this.sanitizeLookupUrl(lookupUrl, parsedUrl),
+    };
   }
 
   private async getDependency(
@@ -165,26 +202,12 @@ export class PypiDatasource extends Datasource {
         if (
           projectUrl &&
           !dependency.sourceUrl &&
-          (lower.startsWith('repo') ||
-            lower === 'code' ||
-            lower === 'source' ||
-            isGitHubRepo(projectUrl))
+          isSourceLabel(lower, projectUrl)
         ) {
           dependency.sourceUrl = projectUrl;
         }
 
-        if (
-          !dependency.changelogUrl &&
-          ([
-            'changelog',
-            'change log',
-            'changes',
-            'release notes',
-            'news',
-            "what's new",
-          ].includes(lower) ||
-            changelogFilenameRegex.exec(lower))
-        ) {
+        if (!dependency.changelogUrl && isChangelogLabel(lower)) {
           // from https://github.com/pypa/warehouse/blob/418c7511dc367fb410c71be139545d0134ccb0df/warehouse/templates/packaging/detail.html#L24
           dependency.changelogUrl = projectUrl;
         }
@@ -204,7 +227,10 @@ export class PypiDatasource extends Datasource {
     for (const { upload_time } of releases) {
       const timestamp = asTimestamp(upload_time);
       // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings compares the instants
-      if (timestamp && (!earliest || timestamp < earliest)) {
+      if (!timestamp) {
+        continue;
+      }
+      if (!earliest || timestamp < earliest) {
         earliest = timestamp;
       }
     }
@@ -348,8 +374,8 @@ export class PypiDatasource extends Datasource {
         httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
       // A registry which cannot serve any of the negotiated types may pick a content type of its own, answer `406`, or answer `300`; the spec mandates none of them, but `406` is the common choice.
       // https://packaging.python.org/en/latest/specifications/simple-repository-api/#version-format-selection
-      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behaviour of a plain request.
-      if (statusCode !== 406) {
+      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behavior of a plain request.
+      if (!isNotAcceptable(statusCode)) {
         throw err;
       }
 

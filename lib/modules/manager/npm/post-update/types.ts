@@ -1,9 +1,8 @@
-import type { DateTime } from 'luxon';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
-  PackageFile,
+  NpmrcPackageFile,
 } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { lazyLoadPackageJson } from './utils.ts';
@@ -15,7 +14,7 @@ export interface DetermineLockFileDirsResult {
 }
 
 export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile<NpmManagerData>>[];
+  npm?: Partial<NpmrcPackageFile<NpmManagerData>>[];
 }
 
 export interface WriteExistingFilesResult {
@@ -30,6 +29,8 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
+  /** Tells about the minimum release age which Renovate passed to the package manager for some updates of the branch */
+  minimumReleaseAgeNotice?: string;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions
@@ -59,11 +60,6 @@ export interface YarnRcYmlFile {
 export interface HostRulesResult {
   additionalNpmrcContent: string[];
   additionalYarnRcYml?: any;
-}
-
-export interface NpmrcCooldownResult {
-  date: DateTime<true>;
-  source: 'before' | 'min-release-age';
 }
 
 export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;

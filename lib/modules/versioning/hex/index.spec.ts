@@ -96,6 +96,7 @@ describe('modules/versioning/hex/index', () => {
     ${'~> 0.4'}                | ${'replace'}         | ${'0.4.2'}     | ${'0.6.0'} | ${'~> 0.6'}
     ${'~> 1.0'}                | ${'widen'}           | ${'1.0.0'}     | ${'2.0.0'} | ${'~> 1.0 or ~> 2.0'}
     ${'~> 1.0.0'}              | ${'widen'}           | ${'1.0.0'}     | ${'2.0.0'} | ${'~> 1.0.0 or ~> 2.0.0'}
+    ${'<= 1.0.0 and >= 0.5.0'} | ${'widen'}           | ${'0.5.0'}     | ${'2.0.0'} | ${null}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

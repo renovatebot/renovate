@@ -184,6 +184,38 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted jb constraint', async () => {
+    vi.stubEnv('CONTAINERBASE', 'true');
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['jsonnetfile.lock.json'],
+        isClean(): boolean {
+          return false;
+        },
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
+    await expect(
+      updateArtifacts({
+        packageFileName: 'jsonnetfile.json',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+          extractedConstraints: { jb: '0.5.1' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool jb 0.5.1' },
+      { cmd: 'jb update' },
+    ]);
+  });
+
   it('returns error when jb update fails', async () => {
     const execError = new Error();
     (execError as any).stderr = 'jb released the magic smoke';

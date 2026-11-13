@@ -77,6 +77,7 @@ export function updateAtPosition(
     // In contrast to maven dependencies, cloud native buildpacks are not contained in specific version tags.
     // Instead they are contained in the value of the buildpack tag and we have to update it differently.
     let replacedPart = version;
+    // v8 ignore else -- a buildpack upgrade always carries a current value
     if (currentValue) {
       replacedPart = version.replace(currentValue, newValue!);
     }
@@ -86,6 +87,7 @@ export function updateAtPosition(
         upgrade.newDigest,
       );
     }
+    // v8 ignore else -- the replacement above always changes the value here
     if (replacedPart !== version) {
       return leftPart + replacedPart + restPart;
     }
@@ -142,6 +144,7 @@ export function bumpPackageVersion(
       // It is already a SNAPSHOT version.
       // Therefore the same qualifier (prerelease) will be used as before.
       let releaseType = bumpVersion;
+      // v8 ignore else -- a snapshot bump is never already a pre-release type
       if (!bumpVersion.startsWith('pre')) {
         releaseType = `pre${bumpVersion}` as ReleaseType;
       }
@@ -153,7 +156,7 @@ export function bumpPackageVersion(
       );
     } else if (currentPrereleaseValue) {
       // Some qualifier which is not a SNAPSHOT is present.
-      // The expected behaviour in this case is unclear and the standard increase will be used.
+      // The expected behavior in this case is unclear and the standard increase will be used.
       newPomVersion = semver.inc(currentValue, bumpVersion);
     } else {
       // A release version without any qualifier is present.

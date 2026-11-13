@@ -20,22 +20,22 @@ You must set `platform=gitea` in your Renovate config file.
 
 The PAT should have these permissions:
 
-| Scope          | Permission       | Valid for Gitea versions       | Notes                         |
-| -------------- | ---------------- | ------------------------------ | ----------------------------- |
-| `repo`         | `Read and Write` | all                            |                               |
-| `user`         | `Read`           | all                            |                               |
-| `issue`        | `Read and Write` | `>= 1.20.0`                    |                               |
-| `organization` | `Read`           | `>= 1.20.0`                    | Required to read group labels |
-| `email`        | `Read`           | `<= 1.19.3`                    |                               |
-| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                               |
+| Scope          | Permission       | Valid for Gitea versions       | Notes                                 |
+| -------------- | ---------------- | ------------------------------ | ------------------------------------- |
+| `repo`         | `Read and Write` | all                            |                                       |
+| `user`         | `Read`           | all                            |                                       |
+| `issue`        | `Read and Write` | `>= 1.20.0`                    |                                       |
+| `organization` | `Read`           | `>= 1.20.0`                    | Required to read org labels and teams |
+| `email`        | `Read`           | `<= 1.19.3`                    |                                       |
+| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                                       |
 
 If you use Gitea packages, add the `read:packages` scope.
 
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 don't support required branch autodelete for automerge.
-- **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 do not support required branch autodelete for automerge.
+- **Git upload filters**: If you are using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation
 

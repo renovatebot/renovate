@@ -1,6 +1,5 @@
 import {
   isArray,
-  isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
 } from '@sindresorhus/is';
@@ -15,8 +14,8 @@ import { NpmDatasource } from '../../../datasource/npm/index.ts';
 
 import type {
   ExtractConfig,
-  PackageFile,
-  PackageFileContent,
+  NpmrcPackageFile,
+  NpmrcPackageFileContent,
 } from '../../types.ts';
 import { resolveNpmrc } from '../npmrc.ts';
 import { PnpmWorkspaceFile, type YarnConfig } from '../schema.ts';
@@ -24,6 +23,7 @@ import type { NpmLockFiles, NpmManagerData } from '../types.ts';
 import { getExtractedConstraints } from './common/dependency.ts';
 import {
   extractPackageJson,
+  hasDevEnginesPackageManager,
   hasPackageManager,
 } from './common/package-file.ts';
 import {
@@ -47,7 +47,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig,
-): Promise<PackageFileContent<NpmManagerData> | null> {
+): Promise<NpmrcPackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
   let packageJson: NpmPackage;
@@ -98,20 +98,25 @@ export async function extractPackageFile(
     );
   }
 
-  const { npmrc, npmrcFileName } = await resolveNpmrc(packageFile, config);
+  const { npmrc, npmrcFileName, repoNpmrc } = await resolveNpmrc(
+    packageFile,
+    config,
+  );
 
   const yarnrcYmlFileName = await findLocalSiblingOrParent(
     packageFile,
     '.yarnrc.yml',
   );
-  const yarnZeroInstall = yarnrcYmlFileName
-    ? await isZeroInstall(yarnrcYmlFileName)
-    : false;
+  let yarnZeroInstall = false;
+  if (yarnrcYmlFileName) {
+    yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+  }
 
   let yarnrcConfig: YarnConfig | null = null;
-  const repoYarnrcYml = yarnrcYmlFileName
-    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
-    : null;
+  let repoYarnrcYml: string | null = null;
+  if (yarnrcYmlFileName) {
+    repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  }
   if (isString(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnrcConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
@@ -120,9 +125,10 @@ export async function extractPackageFile(
     packageFile,
     '.yarnrc',
   );
-  const repoLegacyYarnrc = legacyYarnrcFileName
-    ? await readLocalFile(legacyYarnrcFileName, 'utf8')
-    : null;
+  let repoLegacyYarnrc: string | null = null;
+  if (legacyYarnrcFileName) {
+    repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  }
   if (isString(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnrcConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
@@ -133,9 +139,13 @@ export async function extractPackageFile(
     packageFile,
     'pnpm-workspace.yaml',
   );
-  const repoPnpmWorkspaceYaml = pnpmWorkspaceYamlFileName
-    ? await readLocalFile(pnpmWorkspaceYamlFileName, 'utf8')
-    : null;
+  let repoPnpmWorkspaceYaml: string | null = null;
+  if (pnpmWorkspaceYamlFileName) {
+    repoPnpmWorkspaceYaml = await readLocalFile(
+      pnpmWorkspaceYamlFileName,
+      'utf8',
+    );
+  }
   if (isNonEmptyStringAndNotWhitespace(repoPnpmWorkspaceYaml)) {
     const parsed = await PnpmWorkspaceFile.safeParseAsync(
       repoPnpmWorkspaceYaml,
@@ -170,7 +180,8 @@ export async function extractPackageFile(
         !!dep.currentValue?.startsWith('file:') ||
         !!dep.currentValue?.startsWith('npm:'),
     );
-    if ((hasFancyRefs && !!lockFiles.npmLock) || yarnZeroInstall) {
+    const hasFancyRefsWithNpmLock = hasFancyRefs && !!lockFiles.npmLock;
+    if (hasFancyRefsWithNpmLock || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
@@ -212,16 +223,17 @@ export async function extractPackageFile(
 
   return {
     ...res,
-    npmrc,
+    ...(isString(npmrc) && { npmrc }),
     managerData: {
       ...res.managerData,
       ...lockFiles,
       yarnZeroInstall,
       hasPackageManager:
         isNonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
-        isNonEmptyObject(packageJson.devEngines?.packageManager),
+        hasDevEnginesPackageManager(packageJson),
       workspacesPackages,
       npmrcFileName, // store npmrc file name so we can later tell if it came from the workspace or not
+      repoNpmrc, // stored instead of `npmrc` in the repository cache, from which `npmrc` is rebuilt
     },
     skipInstalls,
     extractedConstraints,
@@ -231,8 +243,8 @@ export async function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
-): Promise<PackageFile<NpmManagerData>[]> {
-  const npmFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<NpmrcPackageFile<NpmManagerData>[]> {
+  const npmFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
@@ -308,6 +320,6 @@ export async function extractAllPackageFiles(
     }
   }
 
-  await postExtract(npmFiles);
+  await postExtract(npmFiles, config);
   return npmFiles;
 }

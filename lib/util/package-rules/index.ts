@@ -1,4 +1,9 @@
-import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNullOrUndefined,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import _slugify from 'slugify';
 import type {
   PackageRule,
@@ -12,6 +17,13 @@ import { compile } from '../template/index.ts';
 import matchers from './matchers.ts';
 
 const slugify = _slugify;
+
+function hasRegistryUrls(config: PackageRuleInputConfig): boolean {
+  return (
+    isNonEmptyArray(config.registryUrls) ||
+    isNonEmptyArray(config.defaultRegistryUrls)
+  );
+}
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -61,12 +73,16 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         });
       }
 
+      // unless a force'd config option wins, record it even if the
+      // dependency is already disabled, so a user's rule can be told apart
+      // from a manager disabling it by default
+      const isDisabledWithoutForce =
+        toApply.enabled === false && config.force?.enabled !== true;
       if (
         // if it's got higher precedence, as it's a force'd config option
         // multiple force'd config options are "last defined wins"
         toApply.force?.enabled === false ||
-        // otherwise, if it has regular precedence, compare
-        (toApply.enabled === false && config.enabled !== false)
+        isDisabledWithoutForce
       ) {
         config.skipReason = 'package-rules';
         if (stageName) {
@@ -74,7 +90,14 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         }
       }
 
-      if (toApply.force?.enabled || toApply.enabled) {
+      const isEnabled = !!toApply.force?.enabled || !!toApply.enabled;
+      if (
+        isEnabled &&
+        // `unknown-registry` is not about whether the user wants the dependency
+        // updated, but about Renovate having nowhere to look it up, so a
+        // registry clears it rather than `enabled` - see below
+        config.skipReason !== 'unknown-registry'
+      ) {
         delete config.skipReason;
         delete config.skipStage;
       }
@@ -114,6 +137,15 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
       config = mergeChildConfig(config, toApply);
     }
   }
+  // A manager which could not work out where to look leaves `unknown-registry`
+  // behind. Config can still answer that, from a rule applied above or from the
+  // repository config the rules were applied to, so the dependency is no longer
+  // skipped once it has a registry to be looked up in.
+  if (config.skipReason === 'unknown-registry' && hasRegistryUrls(config)) {
+    delete config.skipReason;
+    delete config.skipStage;
+  }
+
   // Restore the rules. If any applied rule carried nested `packageRules`
   // (e.g. from a resolved preset), preserve the concat-merge semantics that
   // mergeChildConfig() would previously have applied.

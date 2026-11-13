@@ -22,6 +22,11 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  resolveToolConstraint,
+} from '../util.ts';
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
   DIRECTORY_BUILD_PROPS,
@@ -79,9 +84,11 @@ async function runDotnetRestore(
     updatedDeps,
   );
 
-  const dotnetVersion =
-    config.constraints?.dotnet ??
-    (await findGlobalJson(packageFileName))?.sdk?.version;
+  const dotnetVersion = await resolveToolConstraint(
+    config,
+    'dotnet',
+    async () => (await findGlobalJson(packageFileName))?.sdk?.version,
+  );
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
@@ -197,13 +204,9 @@ export async function updateArtifacts({
       ) {
         logger.trace(`Lock file ${lockFileName} is unchanged`);
       } else if (newLockFileContentMap[lockFileName]) {
-        retArray.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockFileContentMap[lockFileName],
-          },
-        });
+        retArray.push(
+          fileAddition(lockFileName, newLockFileContentMap[lockFileName]),
+        );
       }
       // TODO: else should we return an artifact error if new content is missing?
     }
@@ -214,14 +217,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to generate lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileNames.join(', '),
-          // error is written to stdout
-          stderr: err.stdout ?? err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileNames.join(', '), err);
   }
 }
