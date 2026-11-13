@@ -359,7 +359,7 @@ The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock 
 The minimum release age from the configuration of your package manager does not hold back lock file maintenance on its own, as your package manager applies it itself.
 
 Some managers resolve versions themselves during lock file maintenance, and apply `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to that resolution.
-The `renovate/stability-days` status check of their lock file maintenance branches passes straight away:
+With `minimumReleaseAgePackageManagerSync`, the `renovate/stability-days` status check of their lock file maintenance branches passes straight away:
 
 - [Terraform manager](../modules/manager/terraform/index.md): when updating `.terraform.lock.hcl`, Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check
 
