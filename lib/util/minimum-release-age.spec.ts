@@ -85,6 +85,46 @@ describe('util/minimum-release-age', () => {
       },
     );
 
+    describe('with an ISO 8601 date as minimumReleaseAgeExtracted', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it.each`
+        minimumReleaseAge | minimumReleaseAgeExtracted    | expected
+        ${'1 day'}        | ${'2026-06-12T12:00:00.000Z'} | ${'3 days'}
+        ${'5 days'}       | ${'2026-06-12T12:00:00.000Z'} | ${'5 days'}
+        ${undefined}      | ${'2026-06-12'}               | ${'3.5 days'}
+        ${'1 day'}        | ${'2026-06-20T00:00:00.000Z'} | ${'1 day'}
+        ${'1 day'}        | ${'2026-13-99T00:00:00.000Z'} | ${'1 day'}
+      `(
+        'uses the time elapsed since minimumReleaseAgeExtracted=$minimumReleaseAgeExtracted',
+        ({ minimumReleaseAge, minimumReleaseAgeExtracted, expected }) => {
+          expect(
+            calculateMinimumReleaseAgeMs({
+              minimumReleaseAge,
+              minimumReleaseAgeExtracted,
+            }),
+          ).toBe(toMs(expected));
+        },
+      );
+
+      it('grows the age of a date over time', () => {
+        const config = {
+          minimumReleaseAgeExtracted: '2026-06-12T12:00:00.000Z',
+        };
+
+        vi.setSystemTime(new Date('2026-06-22T12:00:00.000Z'));
+
+        expect(calculateMinimumReleaseAgeMs(config)).toBe(toMs('10 days'));
+      });
+    });
+
     it('extends minimumReleaseAgeExtracted by the minimumReleaseAgeBuffer duration', () => {
       expect(
         calculateMinimumReleaseAgeMs({
