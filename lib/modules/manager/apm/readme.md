@@ -27,6 +27,9 @@ On GitHub hosts this uses the `github-digest` datasource, as `github-actions` do
 Renovate then updates the SHA of a branch-pinned commit as the branch moves, and with `pinDigests` it pins a plain branch ref to its commit, keeping the branch as the comment.
 A branch whose name the default versioning reads as a version, such as `release/2024`, is still looked up as a tag.
 
+`apm install` copies a dependency's own `apm.yml` along with its other files, for example into `.claude/skills/<name>/`.
+Renovate skips an `apm.yml` that an `apm.lock.yaml` in a parent directory lists under `deployed_files`, because the next `apm install` would undo any change to it.
+
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).
 
