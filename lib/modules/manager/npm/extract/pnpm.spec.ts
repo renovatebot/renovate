@@ -11,6 +11,7 @@ import {
   extractPnpmFilters,
   extractPnpmWorkspaceFile,
   findPnpmWorkspace,
+  getConstraintFromLockFile,
   getPnpmLock,
   resolveRegistryUrl,
 } from './pnpm.ts';
@@ -796,6 +797,75 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
     it('returns null when nothing matches', () => {
       expect(resolveRegistryUrl('react', undefined, undefined)).toBeNull();
+    });
+  });
+
+  describe('.getConstraintFromLockFile()', () => {
+    it('returns null if no lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns null when error reading lock file', async () => {
+      fs.readLocalFile.mockRejectedValueOnce(new Error('foo'));
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns null if no lockfileVersion', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('foo: bar\n');
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns null if lockfileVersion is not a number or numeric string', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: foo\n');
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns default if lockfileVersion is 1', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 1\n');
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=3 <3.5.0');
+    });
+
+    it('maps supported versions', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n');
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=6 <7');
+    });
+
+    it('maps supported versions for v6', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("lockfileVersion: '6.0'\n");
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=7.24.2 <9');
+    });
+
+    it('maps supported versions for v9', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("lockfileVersion: '9.0'\n");
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=9');
+    });
+
+    it('uses the last document of a multi-document lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          ---
+          lockfileVersion: '6.0'
+          importers:
+            .:
+              configDependencies: {}
+          ---
+          lockfileVersion: '9.0'
+          importers:
+            .: {}
+        `,
+      );
+      const res = await getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=9');
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 });

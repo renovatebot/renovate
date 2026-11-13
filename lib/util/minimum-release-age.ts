@@ -4,6 +4,7 @@ import { coerceArray } from './array.ts';
 import { getElapsedMs } from './date.ts';
 import { coerceNumber } from './number.ts';
 import { toMs } from './pretty-time.ts';
+import { UtcDate } from './schema-utils/index.ts';
 import { uniqueStrings } from './string.ts';
 import type { Timestamp } from './timestamp.ts';
 
@@ -18,12 +19,28 @@ export interface MinimumReleaseAgeConfig {
   isVulnerabilityAlert?: boolean;
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
-  /** The minimum release age which a manager extracted from the package manager's own configuration. */
+  /**
+   * The minimum release age which a manager extracted from the package
+   * manager's own configuration, as a duration or an ISO 8601 date. A date
+   * counts as the time elapsed since that date.
+   */
   minimumReleaseAgeExtracted?: string | null;
 }
 
 function durationToMs(duration: string | null | undefined): number {
   return isNonEmptyString(duration) ? coerceNumber(toMs(duration), 0) : 0;
+}
+
+/**
+ * Converts a duration, or an ISO 8601 date as the time elapsed since that
+ * date, to milliseconds.
+ */
+function extractedAgeToMs(age: string | null | undefined): number {
+  const date = UtcDate.safeParse(age);
+  if (!date.success) {
+    return durationToMs(age);
+  }
+  return Math.max(Date.now() - date.data.toMillis(), 0);
 }
 
 /**
@@ -40,7 +57,7 @@ export function calculateMinimumReleaseAgeMs(
     durationToMs(config.minimumReleaseAge),
     config.isVulnerabilityAlert
       ? 0
-      : durationToMs(config.minimumReleaseAgeExtracted),
+      : extractedAgeToMs(config.minimumReleaseAgeExtracted),
   );
 
   if (!minimumReleaseAgeMs) {
@@ -57,6 +74,7 @@ export interface PackageManagerMinimumReleaseAgeConfig {
   isVulnerabilityAlert?: boolean;
   manager?: string | null;
   minimumReleaseAge?: string | null;
+  minimumReleaseAgePackageManager?: string | null;
   minimumReleaseAgePackageManagerSync?: boolean;
   minimumReleaseAgeRepository?: string | null;
   packageFile?: string | null;
@@ -84,8 +102,10 @@ function findManagerUpdate(
 
 /**
  * Returns the update of `manager`, preferring lock file maintenance, in
- * `upgrades`, then in the upgrades of the branch for `packageFile`, else
- * `config`.
+ * `upgrades`, which can hold updates of other managers of the same package
+ * file, then in the upgrades of the branch for `packageFile`, which lock file
+ * maintenance needs as it has no upgrades, else `config`, which can belong to
+ * another manager.
  */
 function findPackageManagerUpdate({
   config,
@@ -110,8 +130,9 @@ function findPackageManagerUpdate({
  * Calculates the minimum release age in milliseconds which Renovate passes to
  * a package manager when it updates the lock file of `packageFile`: `0` if any
  * update of the lock file is a security update, the own `minimumReleaseAge` for
- * lock file maintenance, else `minimumReleaseAgeRepository`. Returns `null` if
- * the update of `manager` does not enable `minimumReleaseAgePackageManagerSync`.
+ * lock file maintenance, else `minimumReleaseAgeRepository`, raised to
+ * `minimumReleaseAgePackageManager` if that is larger. Returns `null` if the
+ * update of `manager` does not enable `minimumReleaseAgePackageManagerSync`.
  */
 export function calculatePackageManagerMinimumReleaseAgeMs(
   options: PackageManagerMinimumReleaseAgeOptions,
@@ -127,11 +148,12 @@ export function calculatePackageManagerMinimumReleaseAgeMs(
   ) {
     return 0;
   }
-  return durationToMs(
+  const baseMs = durationToMs(
     update.isLockFileMaintenance
       ? update.minimumReleaseAge
       : update.minimumReleaseAgeRepository,
   );
+  return Math.max(baseMs, durationToMs(update.minimumReleaseAgePackageManager));
 }
 
 export interface MinimumReleaseAgeExemptionConfig
