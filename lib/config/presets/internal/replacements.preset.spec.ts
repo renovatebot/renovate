@@ -62,6 +62,13 @@ function mayOverlap(a: ReplacementRule, b: ReplacementRule): boolean {
   return semver.intersects(rangeA, rangeB);
 }
 
+// presets which deliberately replace a package with one that is itself replaced
+const chainedPresets = new Set([
+  'joi-to-scoped',
+  'joi-to-unscoped',
+  'tsconfig-bases-node',
+]);
+
 describe('config/presets/internal/replacements.preset', () => {
   const presetNames = Object.keys(presets).filter((name) => name !== 'all');
   const rules: PresetRule[] = presetNames.flatMap((presetName) =>
@@ -151,6 +158,40 @@ describe('config/presets/internal/replacements.preset', () => {
         replacementVersion,
       });
       expect(logger.logger.once.warn).not.toHaveBeenCalled();
+    },
+  );
+
+  const namedCases = rules
+    .filter(({ rule }) => !!rule.replacementName)
+    .map(({ presetName, rule }) => ({
+      presetName,
+      rule,
+      replacementName: rule.replacementName!,
+    }));
+
+  it.each(namedCases)(
+    'replacements:$presetName does not replace a package with itself ($replacementName)',
+    ({ rule, replacementName }) => {
+      expect(rule.matchPackageNames).not.toContain(replacementName);
+    },
+  );
+
+  it.each(
+    namedCases.filter(({ presetName }) => !chainedPresets.has(presetName)),
+  )(
+    'replacements:$presetName only replaces with a package that is itself replaced if intended ($replacementName)',
+    ({ rule, replacementName }) => {
+      const replacedAgain = rules.filter(
+        (other) =>
+          other.rule !== rule &&
+          hasName(other.rule) &&
+          other.rule.matchPackageNames?.includes(replacementName) &&
+          coerceArray(other.rule.matchDatasources).some((datasource) =>
+            coerceArray(rule.matchDatasources).includes(datasource),
+          ),
+      );
+
+      expect(replacedAgain).toBeEmptyArray();
     },
   );
 });
