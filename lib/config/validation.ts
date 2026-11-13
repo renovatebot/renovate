@@ -114,6 +114,7 @@ const ignoredNodes = [
 const tzRe = regEx(/^:timezone\((?<timezone>.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 const repoEntryRe = regEx(/^repositories\[\d+\]$/);
+const presetArgRe = regEx(/{{(?:args|arg\d+)}}/);
 
 function isRepoRootPath(parentPath: string | undefined): boolean {
   if (!parentPath) {
@@ -1433,6 +1434,16 @@ function isAllowedValue(
   return allowedValues.some((allowed) => predicate(allowed));
 }
 
+/**
+ * A templated value can't be checked until it's been rendered, and a preset argument (which can be used in any option) can't be checked until it's been replaced.
+ */
+function isTemplatedValue(option: RenovateOptions, val: string): boolean {
+  if (presetArgRe.test(val)) {
+    return true;
+  }
+  return option.supportsTemplating === true && val.includes('{{');
+}
+
 function validateAllowedValues(
   key: string,
   val: unknown,
@@ -1450,7 +1461,9 @@ function validateAllowedValues(
       // do nothing
     } else if (isArray(val, isString)) {
       const invalidOptions = val.filter(
-        (v) => !isAllowedValue(option, allowedValues, v),
+        (v) =>
+          !isAllowedValue(option, allowedValues, v) &&
+          !isTemplatedValue(option, v),
       );
       if (invalidOptions.length) {
         errors.push({
@@ -1468,8 +1481,7 @@ function validateAllowedValues(
         }
       } else if (
         !isAllowedValue(option, allowedValues, val) &&
-        // a templated value can't be checked until it's been rendered
-        !(option.supportsTemplating && val.includes('{{'))
+        !isTemplatedValue(option, val)
       ) {
         errors.push({
           topic: ConfigValidationTopic.Error,
