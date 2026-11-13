@@ -1032,6 +1032,35 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.getBranchStatus('renovate/dependency-1.x'),
       ).resolves.toBe('red');
     });
+
+    it('getBranchStatus() - change found with rejected but not blocking label => red', async () => {
+      const change = partial<GerritChange>({
+        submittable: false,
+        problems: [],
+        labels: {
+          Verified: { rejected: partial<GerritAccountInfo>({}) },
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      await expect(
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
+      ).resolves.toBe('red');
+    });
+
+    it('getBranchStatus() - change found with labels neither rejected nor blocking and not submittable => yellow', async () => {
+      const change = partial<GerritChange>({
+        submittable: false,
+        problems: [],
+        labels: {
+          'Code-Review': { approved: partial<GerritAccountInfo>({}) },
+          Verified: {},
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      await expect(
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
+      ).resolves.toBe('yellow');
+    });
   });
 
   describe('getBranchStatusCheck()', () => {
