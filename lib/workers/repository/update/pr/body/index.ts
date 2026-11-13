@@ -108,7 +108,7 @@ export function getPrBody(
     warnings += getDepWarningsPR(
       branchConfig.packageFiles,
       config,
-      branchConfig.dependencyDashboard,
+      branchConfig.dependencyDashboard?.enabled,
     );
   }
   const content = {

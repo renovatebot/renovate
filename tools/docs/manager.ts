@@ -53,6 +53,7 @@ export const CategoryNames: Record<Category, string> = {
   iac: 'Infrastructure as Code',
   java: 'Java',
   js: 'JavaScript',
+  julia: 'Julia',
   kubernetes: 'Kubernetes',
   node: 'Node.js',
   perl: 'Perl',

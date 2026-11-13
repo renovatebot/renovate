@@ -8,5 +8,5 @@ The version is an extension to SemVer, with an extra build number to accommodate
 **Channel**
 
 [Channel](https://cashapp.github.io/hermit/packaging/reference/#channels) could be Hermit-generated or user-defined.
-Channel is considered unstable version and normally won't upgrade.
+Channel is considered unstable version and normally will not upgrade.
 If you would like to get out of Channel, you could replace the Channel with a given version number and let Renovate manage it.

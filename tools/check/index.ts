@@ -227,7 +227,11 @@ async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
   }
   let fileCount = 0;
   for (const p of patterns) {
-    fileCount += extname(p) === '' ? await countSpecFiles(p) : 1;
+    if (extname(p) === '') {
+      fileCount += await countSpecFiles(p);
+    } else {
+      fileCount += 1;
+    }
   }
   if (fileCount === 0) {
     return [];
@@ -350,7 +354,10 @@ async function main(): Promise<void> {
   );
   const hasFailure = allResults.some((r) => !r.result.success);
 
-  const coverage = testChecks.length > 0 ? await collectCoverage(args) : [];
+  let coverage: CoverageInfo[] = [];
+  if (testChecks.length > 0) {
+    coverage = await collectCoverage(args);
+  }
 
   printCoverageReport(coverage);
   printFailedOutputs(progress.results);

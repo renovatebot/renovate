@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { MergeStrategy } from '../../../config/types.ts';
@@ -66,6 +71,7 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
+  CancelPlatformAutomergeConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -88,14 +94,20 @@ import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import { getRepoFile } from './files.ts';
 import {
+  disableAutoMergeMutation,
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
+  pinIssueMutation,
+  prAutoMergeStateQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
-import { massageMarkdownLinks } from './massage-markdown-links.ts';
+import {
+  massageCommitMessageLinks,
+  massageMarkdownLinks,
+} from './massage-markdown-links.ts';
 import {
   isPrInMergeQueue as checkPrInMergeQueue,
   getPrCache,
@@ -104,6 +116,7 @@ import {
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
+  GithubPullRequestAutoMergeState,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
@@ -249,13 +262,17 @@ export async function initPlatform({
   if (username) {
     renovateUsername = username;
   } else if (platformConfig.isGHApp) {
-    platformConfig.userDetails ??= await getAppDetails(token);
+    if (isNullOrUndefined(platformConfig.userDetails)) {
+      platformConfig.userDetails = await getAppDetails(token);
+    }
     renovateUsername = platformConfig.userDetails.username;
   } else {
-    platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.host.apiUrl.href,
-      token,
-    );
+    if (isNullOrUndefined(platformConfig.userDetails)) {
+      platformConfig.userDetails = await getUserDetails(
+        platformConfig.host.apiUrl.href,
+        token,
+      );
+    }
     renovateUsername = platformConfig.userDetails.username;
   }
 
@@ -271,18 +288,24 @@ export async function initPlatform({
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
-      platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: coverage error #40625
+      if (isNullOrUndefined(platformConfig.userDetails)) {
+        platformConfig.userDetails = await getAppDetails(token);
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
-      platformConfig.userDetails ??= await getUserDetails(
-        platformConfig.host.apiUrl.href,
-        token,
-      );
-      // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail =
-        platformConfig.userDetails.email ??
-        (await getUserEmail(platformConfig.host.apiUrl.href, token));
+      if (isNullOrUndefined(platformConfig.userDetails)) {
+        platformConfig.userDetails = await getUserDetails(
+          platformConfig.host.apiUrl.href,
+          token,
+        );
+      }
+      platformConfig.userEmail = platformConfig.userDetails.email;
+      if (isNullOrUndefined(platformConfig.userEmail)) {
+        platformConfig.userEmail = await getUserEmail(
+          platformConfig.host.apiUrl.href,
+          token,
+        );
+      }
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -987,12 +1010,12 @@ export async function getPr(
     return fetchPr(prNo);
   }
   const prList = await getPrList();
-  let pr = prList.find(({ number }) => number === prNo) ?? null;
+  const pr = prList.find(({ number }) => number === prNo) ?? null;
   if (pr) {
     logger.debug('Returning PR from cache');
+    return pr;
   }
-  pr ??= await fetchPr(prNo);
-  return pr;
+  return fetchPr(prNo);
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -1482,6 +1505,18 @@ async function closeIssue(issueNumber: number): Promise<void> {
   }
 }
 
+async function pinIssue(issueId: string): Promise<void> {
+  logger.debug(`pinIssue(${issueId})`);
+  const res = await githubApi.requestGraphql(pinIssueMutation, {
+    variables: { issueId },
+  });
+  if (res?.errors) {
+    logger.debug({ errors: res.errors }, 'Issue could not be pinned');
+    return;
+  }
+  logger.debug('Issue pinned');
+}
+
 export async function ensureIssue({
   title,
   reuseTitle,
@@ -1489,6 +1524,7 @@ export async function ensureIssue({
   labels,
   once = false,
   shouldReOpen = true,
+  shouldPin = false,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   /* v8 ignore next -- specs initialize repos with issues enabled */
@@ -1557,6 +1593,9 @@ export async function ensureIssue({
         );
         GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
+        if (shouldPin && updatedIssue.node_id) {
+          await pinIssue(updatedIssue.node_id);
+        }
         return 'updated';
       }
     }
@@ -1574,6 +1613,9 @@ export async function ensureIssue({
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
+    if (shouldPin && createdIssue.node_id) {
+      await pinIssue(createdIssue.node_id);
+    }
     return 'created';
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
@@ -2169,6 +2211,91 @@ export async function updatePr({
   }
 }
 
+export async function getPrAutoMergeState(
+  prNo: number,
+): Promise<GithubPullRequestAutoMergeState | null> {
+  const res = await githubApi.requestGraphql<{
+    repository: { pullRequest: unknown };
+  }>(prAutoMergeStateQuery, {
+    variables: {
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      number: prNo,
+    },
+    readOnly: true,
+    count: 1,
+  });
+  if (res?.errors) {
+    logger.debug(
+      { prNo, errors: res.errors },
+      'Failed to fetch PR auto-merge state',
+    );
+    return null;
+  }
+
+  const pr = GithubPullRequestAutoMergeState.safeParse(
+    res?.data?.repository?.pullRequest,
+  );
+  if (!pr.success) {
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge state');
+    return null;
+  }
+  return pr.data;
+}
+
+export async function cancelPlatformAutomerge({
+  number: prNo,
+  enabledBy,
+}: CancelPlatformAutomergeConfig): Promise<boolean> {
+  const pr = await getPrAutoMergeState(prNo);
+  if (!pr) {
+    return false;
+  }
+  if (pr.autoMergeRequest === null) {
+    return true;
+  }
+  const actor = pr.autoMergeRequest.enabledBy;
+  // GraphQL omits the REST login's [bot] suffix. Use actor type to avoid matching a user with the same name.
+  const login =
+    actor?.__typename === 'Bot' ? `${actor.login}[bot]` : actor?.login;
+  if (login?.toLowerCase() !== enabledBy.toLowerCase()) {
+    logger.debug(
+      { prNo },
+      'PR auto-merge actor does not match cancellation filter',
+    );
+    return false;
+  }
+
+  const cancellation = await githubApi.requestGraphql<{
+    disablePullRequestAutoMerge: { pullRequest: unknown };
+  }>(disableAutoMergeMutation, {
+    variables: { pullRequestId: pr.id },
+    count: 1,
+  });
+  if (cancellation?.errors) {
+    logger.debug(
+      { prNo, errors: cancellation.errors },
+      'Failed to cancel PR auto-merge',
+    );
+    // Another actor may have disabled auto-merge after the state query.
+    const current = await getPrAutoMergeState(prNo);
+    return current?.id === pr.id && current.autoMergeRequest === null;
+  }
+
+  const disabledPr = GithubPullRequestAutoMergeState.safeParse(
+    cancellation?.data?.disablePullRequestAutoMerge?.pullRequest,
+  );
+  if (
+    !disabledPr.success ||
+    disabledPr.data.id !== pr.id ||
+    disabledPr.data.autoMergeRequest !== null
+  ) {
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
+    return false;
+  }
+  return true;
+}
+
 export async function reattemptPlatformAutomerge({
   number,
   platformPrOptions,
@@ -2234,10 +2361,13 @@ export async function mergePr({
   if (await directMergePr(prNo, strategy)) {
     return true;
   }
-  if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
-    // The direct merge was refused - fall back to adding the PR to the merge
-    // queue, so it must not be cached as merged nor may its branch be deleted
-    return tryEnqueuePr(pr);
+  if (pr?.targetBranch) {
+    const mergeQueueEnabled = await isBranchMergeQueueEnabled(pr.targetBranch);
+    if (mergeQueueEnabled) {
+      // The direct merge was refused - fall back to adding the PR to the merge
+      // queue, so it must not be cached as merged nor may its branch be deleted
+      return tryEnqueuePr(pr);
+    }
   }
   return false;
 }
@@ -2370,6 +2500,16 @@ export function massageMarkdown(input: string): string {
     .replaceAll(warningAlertRegex, '> [!WARNING]\n')
     .replaceAll(cautionAlertRegex, '> [!CAUTION]\n')
     .replaceAll(importantAlertRegex, '> [!IMPORTANT]\n');
+}
+
+/**
+ * Replaces github.com links to discussions, issues and pull requests in a commit message with `redirect.github.com` links, so that the linked items do not show a reference to the commit.
+ */
+export function massageCommitMessage(message: string): string {
+  if (platformConfig.host.type !== 'github') {
+    return message;
+  }
+  return massageCommitMessageLinks(message);
 }
 
 export function maxBodyLength(): number {

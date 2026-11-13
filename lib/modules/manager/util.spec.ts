@@ -314,6 +314,49 @@ describe('modules/manager/util', () => {
 
       expect(constraint).toBeUndefined();
     });
+
+    it.each`
+      toolName  | shared       | derived      | extracted    | expected
+      ${'rust'} | ${'1.80.0'}  | ${undefined} | ${undefined} | ${'1.80.0'}
+      ${'node'} | ${'20.11.0'} | ${'>=18'}    | ${undefined} | ${'20.11.0'}
+      ${'node'} | ${'20'}      | ${'>=18'}    | ${undefined} | ${'20'}
+      ${'node'} | ${'22.1.0'}  | ${'^20'}     | ${undefined} | ${'^20'}
+      ${'node'} | ${'20'}      | ${'20.11.0'} | ${undefined} | ${'20.11.0'}
+      ${'node'} | ${'foo'}     | ${'>=18'}    | ${undefined} | ${'>=18'}
+      ${'node'} | ${'20.11.0'} | ${'foo'}     | ${undefined} | ${'foo'}
+      ${'pnpm'} | ${'9.12.0'}  | ${undefined} | ${'>=9'}     | ${'9.12.0'}
+      ${'pnpm'} | ${'9.12.0'}  | ${'9.15.0'}  | ${'>=9'}     | ${'9.15.0'}
+      ${'uv'}   | ${'0.5.3'}   | ${'>=0.4'}   | ${undefined} | ${'0.5.3'}
+      ${'uv'}   | ${'==0.5.*'} | ${'>=0.4'}   | ${undefined} | ${'>=0.4'}
+      ${'go'}   | ${'1.22.0'}  | ${'1.21'}    | ${undefined} | ${'1.21'}
+      ${'node'} | ${''}        | ${undefined} | ${'>=18'}    | ${'>=18'}
+    `(
+      'returns $expected for the shared $toolName $shared and the required $derived or $extracted',
+      async ({ toolName, shared, derived, extracted, expected }) => {
+        const constraint = await resolveToolConstraint(
+          {
+            extractedConstraints: { [toolName]: extracted },
+            sharedConstraints: { [toolName]: shared },
+          },
+          toolName,
+          () => derived,
+        );
+
+        expect(constraint).toBe(expected);
+      },
+    );
+
+    it('prefers the user configured constraint over the shared one', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { node: '>=18' },
+          sharedConstraints: { node: '20.11.0' },
+        },
+        'node',
+      );
+
+      expect(constraint).toBe('>=18');
+    });
   });
 
   it('builds an addition result', () => {

@@ -45,9 +45,10 @@ await new Command('pnpm update-static-data')
       }
 
       console.log(`Updating ${source.name} (${source.file})`);
-      const before = (await fs.pathExists(source.file))
-        ? await fs.readJson(source.file)
-        : undefined;
+      let before;
+      if (await fs.pathExists(source.file)) {
+        before = await fs.readJson(source.file);
+      }
       const data = source.generate(await source.fetch());
       const contents = await prettier.format(quickStringify(data, null, 2), {
         parser: 'json',

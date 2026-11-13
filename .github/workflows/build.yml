@@ -34,6 +34,8 @@ env:
   # are we on a release branch?
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
+  # an additional supported Node version, tested on Linux only
+  NODE_VERSION_ALTERNATE: 26
   DRY_RUN: true
   SPARSE_CHECKOUT: |-
     .github/actions/
@@ -296,6 +298,15 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
+      - name: Install Vale
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          # only install Vale; Node.js and pnpm come from the setup-node action
+          install_args: vale
+
+      - name: Lint prose
+        run: pnpm lint-prose
+
   lint-other:
     needs:
       - setup-build
@@ -366,7 +377,7 @@ jobs:
           sparse-checkout: .github/
 
       - name: Check workflow files
-        uses: jdx/jactionlint@baa8d685e2b27ff5821558c9eeabb2051c1da61b # v2.4.0
+        uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
         with:
           args: --color --profile correctness
 
@@ -483,6 +494,38 @@ jobs:
             ./coverage/lcov
             ./coverage/json
 
+  test-node-alternate:
+    needs: [setup]
+
+    if: |
+      !(github.event.pull_request.draft == true &&
+        needs.setup.outputs.test-matrix-empty == 'true')
+
+    name: test-node-alternate (${{ matrix.shard }})
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/4, 2/4, 3/4, 4/4]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: $/.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION_ALTERNATE }}
+          os: ${{ runner.os }}
+
+      - name: Unit tests
+        run: pnpm vitest --shard ${{ matrix.shard }} --coverage.enabled=false
+
   codecov:
     needs: [test]
     runs-on: ubuntu-latest
@@ -563,6 +606,7 @@ jobs:
     needs:
       - setup
       - test
+      - test-node-alternate
       - codecov
       - coverage-threshold
       - lint-actions
@@ -587,6 +631,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.test.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled tests on the alternate Node version
+        if: |
+          needs.test-node-alternate.result == 'failure' ||
+          needs.test-node-alternate.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped tests on the alternate Node version when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.test-node-alternate.result == 'skipped'
         run: exit 1
 
       - name: Fail for failed or cancelled codecov
@@ -770,7 +827,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: 0.13.7
+          version: 0.13.8
           enable-cache: true
           cache-python: true
 
@@ -884,6 +941,9 @@ jobs:
       pull-requests: write
       id-token: write
       packages: write
+      # attest the released images
+      attestations: write
+      artifact-metadata: write
 
     steps:
       # right at the start of the job, make sure we're not seeing another commit that's landed
@@ -938,7 +998,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: 0.13.7
+          version: 0.13.8
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -973,11 +1033,49 @@ jobs:
           fi
 
       - name: semantic-release
+        id: release
         run: |
           pnpm semantic-release --dry-run "$DRY_RUN"
         env:
           GITHUB_TOKEN: ${{ github.token }}
           LOG_LEVEL: debug
+
+      # a failed attestation shows as an error but doesn't fail the release
+      - name: Attest the slim GHCR image
+        if: steps.release.outputs.slim-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/renovatebot/renovate
+          subject-digest: ${{ steps.release.outputs.slim-digest }}
+          push-to-registry: true
+
+      - name: Attest the full GHCR image
+        if: steps.release.outputs.full-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/renovatebot/renovate
+          subject-digest: ${{ steps.release.outputs.full-digest }}
+          push-to-registry: true
+
+      - name: Attest the slim Docker Hub image
+        if: steps.release.outputs.slim-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: docker.io/renovate/renovate
+          subject-digest: ${{ steps.release.outputs.slim-digest }}
+          push-to-registry: true
+
+      - name: Attest the full Docker Hub image
+        if: steps.release.outputs.full-digest
+        continue-on-error: true
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: docker.io/renovate/renovate
+          subject-digest: ${{ steps.release.outputs.full-digest }}
+          push-to-registry: true
 
       - name: Get month
         if: github.ref_name == 'main'

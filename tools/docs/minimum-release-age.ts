@@ -28,7 +28,12 @@ function generateDatasourceTable(): string {
 
 function mark(value: MinimumReleaseAgeToolCapability | undefined): string {
   if (isNonEmptyString(value)) {
-    return `✅<br>\`${value}\``;
+    // a `|` would split the table cell
+    const ranges = value
+      .split('||')
+      .map((range) => `\`${range.trim()}\``)
+      .join(' or ');
+    return `✅<br>${ranges}`;
   }
   return value ? '✅' : '❌';
 }

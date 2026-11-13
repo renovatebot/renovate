@@ -86,15 +86,22 @@ export async function publish(
   });
 
   images = [];
-  for (const target of ['push-slim', 'push-full'] as const) {
-    const digest = meta[target]?.['containerimage.digest'];
+  for (const variant of ['slim', 'full'] as const) {
+    const digest = meta[`push-${variant}`]?.['containerimage.digest'];
     if (!digest) {
-      throw commandError(`Missing image digest for ${target}`);
+      throw commandError(`Missing image digest for push-${variant}`);
     }
     images.push(
       `ghcr.io/renovatebot/renovate@${digest}`,
       `renovate/renovate@${digest}`,
     );
+    // the release workflow attests the images by these digests
+    if (process.env.GITHUB_OUTPUT) {
+      await fs.appendFile(
+        process.env.GITHUB_OUTPUT,
+        `${variant}-digest=${digest}\n`,
+      );
+    }
   }
 }
 

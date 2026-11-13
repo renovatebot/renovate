@@ -78,6 +78,15 @@ describe('workers/repository/update/branch/check-existing', () => {
         'Found closed PR with branchPrefixOld',
       );
     });
+
+    it('returns null if the matching PR no longer exists', async () => {
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ number: 12 }));
+      platform.getPr.mockResolvedValueOnce(null);
+
+      await expect(prAlreadyExisted(config)).resolves.toBeNull();
+
+      expect(logger.debug).toHaveBeenCalledWith('PR #12 no longer exists');
+    });
   });
 
   describe('findClosedPrForModifiedBranch', () => {

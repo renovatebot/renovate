@@ -93,7 +93,7 @@ Also read the [`timezone` config option docs](../configuration-options.md#timezo
 
 ### Scheduling syntax
 
-After you've set your local timezone, you can set "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
+After you have set your local timezone, you can set "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
 
 #### Recommended cron syntax
 
@@ -108,7 +108,7 @@ We recommend you use the `cron` syntax in your Renovate schedules.
 | every 3 months on the first day of the month | `* * 1 */3 *`         |
 
 !!! note
-  For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
+  For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate does not support minute granularity.
   And the cron schedule must have five parts.
 
 #### Deprecated breejs/later syntax
@@ -137,7 +137,7 @@ The `@breejs/later` library also controls the interpretation of "days", time_bef
 ### In-repository schedule configuration
 
 Important: _when_ the Renovate process runs is usually controlled by the administrator, using tools such as `cron`.
-For the Mend Renovate App, the Mend maintainers control when the Renovate process runs, usually hourly.
+For the Mend Renovate app, the Mend maintainers control when the Renovate process runs, usually hourly.
 
 If you control the hardware that Renovate runs on, we recommend you:
 

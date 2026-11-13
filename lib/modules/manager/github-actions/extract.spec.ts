@@ -5643,7 +5643,7 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('actions.lock', () => {
     beforeEach(() => {
-      // the lock file is read through the memory cache, which production initialises per repository
+      // the lock file is read through the memory cache, which production initializes per repository
       memCache.init();
     });
 

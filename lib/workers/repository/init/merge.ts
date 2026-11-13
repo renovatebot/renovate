@@ -665,7 +665,7 @@ export async function mergeRenovateConfig(
   applyNpmrc(decryptedConfig, 'decrypted');
 
   // NOTE that this should not be used with any other configuration (`resolvedConfig`, etc) below, as they will include addditionally merged configuration
-  // Decrypted secrets are sanitised, so should be safe to log
+  // Decrypted secrets are sanitized, so should be safe to log
   await logShallowConfig(decryptedConfig, config);
 
   // Decrypt after resolving in case the preset contains npm authentication instead
@@ -683,7 +683,7 @@ export async function mergeRenovateConfig(
     resolvedConfig = migrationResult.migratedConfig;
   }
 
-  // Validate the fully-resolved repository config, enforcing validation is applied against all stages of the preset, and providing defence-in-depth for any sensitive config options
+  // Validate the fully-resolved repository config, enforcing validation is applied against all stages of the preset, and providing defense-in-depth for any sensitive config options
   // note that we do not need to re-run `migrateAndValidate` if we're already at the same configuration that we've previously resolved, decrypted and migrated, so we can avoid a costly re-validation
   if (!dequal(resolvedConfig, migratedConfig)) {
     await validateResolvedConfig(

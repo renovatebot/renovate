@@ -219,7 +219,7 @@ export async function downloadHttpProtocol(
 
   const { err } = fetchResult.unwrap();
   if (err?.type === 'maven-central-temporary-error') {
-    throw new ExternalHostError(err.err);
+    throw new ExternalHostError(err.err, undefined, true);
   }
 
   return fetchResult;
