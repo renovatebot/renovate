@@ -143,6 +143,35 @@ describe('util/github/graphql/datasource-fetcher', () => {
       ]);
     });
 
+    it('forwards refQuery to the GraphQL variables when set', async () => {
+      httpMock
+        .scope('https://api.github.com/')
+        .post('/graphql', {
+          query: adapter.query,
+          variables: {
+            owner: 'foo',
+            name: 'bar',
+            count: 100,
+            cursor: null,
+            query: 'service/s3/',
+          },
+        })
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
+
+      const res = await Datasource.query(
+        { packageName: 'foo/bar', refQuery: 'service/s3/' },
+        http,
+        adapter,
+      );
+
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
+    });
+
     it('performs query when persistence flag is set and cache is expired', async () => {
       packageCache.get.mockResolvedValueOnce(true);
       httpMock
