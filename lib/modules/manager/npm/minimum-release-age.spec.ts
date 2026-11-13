@@ -31,13 +31,11 @@ describe('modules/manager/npm/minimum-release-age', () => {
 
     it.each`
       managerData
-      ${{ yarnLock: 'some-dir/yarn.lock' }}
-      ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
       ${{ ...npmLockManagerData, yarnLock: 'some-dir/yarn.lock' }}
       ${{ ...npmLockManagerData, pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
       ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml', yarnLock: 'some-dir/yarn.lock' }}
     `(
-      'returns false without a single npm or pnpm lock file: $managerData',
+      'returns false with several lock files: $managerData',
       async ({ managerData }) => {
         await expect(
           enforcesMinimumReleaseAge({
@@ -354,6 +352,117 @@ describe('modules/manager/npm/minimum-release-age', () => {
           minimumReleaseAge: '1 day',
         }),
       ).resolves.toBeFalse();
+    });
+  });
+
+  describe('enforcesMinimumReleaseAge() for Yarn', () => {
+    const yarnLockManagerData: NpmManagerData = {
+      yarnLock: 'some-dir/yarn.lock',
+    };
+
+    it.each`
+      constraint    | expected
+      ${'4.10.0'}   | ${true}
+      ${'^4.12.0'}  | ${true}
+      ${'>=4.10.0'} | ${true}
+      ${'4.9.4'}    | ${false}
+      ${'^4.0.0'}   | ${false}
+      ${'^1.22.0'}  | ${false}
+      ${'bananas'}  | ${false}
+      ${undefined}  | ${false}
+    `(
+      'returns $expected for the Yarn constraint $constraint',
+      async ({ constraint, expected }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: yarnLockManagerData,
+            minimumReleaseAgePackageManagerSync: true,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '3 days',
+            constraints: { yarn: constraint },
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
+    it.each`
+      yarn         | minimumReleaseAge | settings                                              | expected
+      ${'4.12.0'}  | ${null}           | ${{ npmMinimalAgeGate: 1440 }}                        | ${true}
+      ${'4.12.0'}  | ${'0 days'}       | ${{ npmMinimalAgeGate: 1440 }}                        | ${true}
+      ${'4.12.0'}  | ${null}           | ${undefined}                                          | ${false}
+      ${'4.15.0'}  | ${null}           | ${undefined}                                          | ${true}
+      ${'^4.12.0'} | ${null}           | ${undefined}                                          | ${false}
+      ${'4.15.0'}  | ${null}           | ${{ npmMinimalAgeGate: 0 }}                           | ${false}
+      ${'4.12.0'}  | ${'3 days'}       | ${{ npmScopes: { myorg: 4320 } }}                     | ${true}
+      ${'4.12.0'}  | ${'3 days'}       | ${{ npmScopes: { myorg: 1440 } }}                     | ${false}
+      ${'4.12.0'}  | ${null}           | ${{ npmMinimalAgeGate: 60, npmScopes: { myorg: 0 } }} | ${false}
+      ${'4.12.0'}  | ${'3 days'}       | ${{ npmScopes: { myorg: null } }}                     | ${true}
+      ${'4.17.0'}  | ${'3 days'}       | ${{ npmScopes: { myorg: null } }}                     | ${false}
+      ${'4.17.0'}  | ${'1 day'}        | ${{ npmScopes: { myorg: null } }}                     | ${true}
+      ${'4.12.0'}  | ${'3 days'}       | ${{ hasNpmPreapprovedPackages: true }}                | ${false}
+    `(
+      'returns $expected for Yarn $yarn, minimumReleaseAge=$minimumReleaseAge and settings=$settings',
+      async ({ yarn, minimumReleaseAge, settings, expected }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: {
+              ...yarnLockManagerData,
+              yarnMinimalAgeGate: settings,
+            },
+            minimumReleaseAgePackageManagerSync: true,
+            isLockFileMaintenance: true,
+            minimumReleaseAge,
+            constraints: { yarn },
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
+    it('reads the Yarn constraint of the lock file for a package file without its own', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: {
+            ...yarnLockManagerData,
+            yarnMinimalAgeGate: { yarnConstraint: '4.12.0' },
+          },
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          packageFile: 'some-dir/.yarnrc.yml',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('prefers the configured Yarn constraint over the one of the lock file', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: {
+            ...yarnLockManagerData,
+            yarnMinimalAgeGate: { yarnConstraint: '4.12.0' },
+          },
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          constraints: { yarn: '4.9.4' },
+        }),
+      ).resolves.toBeFalse();
+    });
+
+    it('does not read the .yarnrc.yml in the working tree', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        'npmScopes:\n  myorg:\n    npmMinimalAgeGate: 0\n',
+      );
+
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: yarnLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          constraints: { yarn: '4.12.0' },
+        }),
+      ).resolves.toBeTrue();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
   });
 });
