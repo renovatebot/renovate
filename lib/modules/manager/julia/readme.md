@@ -47,3 +47,5 @@ For example, to group the updates of test dependencies:
 The default `rangeStrategy` is `widen`, which adds a specifier for the new release, as CompatHelper does: `"0.10, 0.11"` with 0.12.1 becomes `"0.10, 0.11, 0.12"`, and `"0.12"` with 1.9.24 becomes `"0.12, 1"`.
 
 The manager updates `Project.toml` only, not `Manifest.toml`.
+
+The locked versions come from the manifest that the project's `manifest` entry names, or else from `JuliaManifest.toml` or `Manifest.toml`, or else from the versioned manifest of the newest Julia, such as `Manifest-v1.12.toml`.
