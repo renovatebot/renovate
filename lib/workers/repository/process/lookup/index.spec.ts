@@ -6590,6 +6590,53 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - only produces a single replacement when name and version are set via both config and templates', async () => {
+      config.currentValue = '1.4.1';
+      config.packageName = 'q';
+      config.replacementName = 'r';
+      config.replacementNameTemplate = 'ignored-name';
+      config.replacementVersion = '2.0.0';
+      config.replacementVersionTemplate = 'ignored-version';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates.filter((u) => u.updateType === 'replacement')).toEqual([
+        {
+          updateType: 'replacement',
+          newName: 'r',
+          newValue: '2.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - merges fields from multiple matching packageRules into a single replacement', async () => {
+      config.currentValue = '1.4.1';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      config.packageRules = [
+        { matchPackageNames: ['q'], replacementName: 'r' },
+        { matchPackageNames: ['q'], replacementVersion: '2.0.0' },
+        { matchPackageNames: ['q'], replacementName: 'r-overridden' },
+      ];
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates.filter((u) => u.updateType === 'replacement')).toEqual([
+        {
+          updateType: 'replacement',
+          newName: 'r-overridden',
+          newValue: '2.0.0',
+        },
+      ]);
+    });
+
     it.each([
       {
         setting: 'replacementVersion',
