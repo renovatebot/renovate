@@ -88,6 +88,166 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
 
+    it('excludes a semver dependency resolved to an internal workspace', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { '@test/shared': '^1.0.0', prettier: '^3.0.0' },
+        }),
+        'packages/app/package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: {
+                'packages/app': { name: '@test/app' },
+                'packages/@test/shared': { name: '@test/shared' },
+              },
+              packages: {
+                '@test/shared': [
+                  '@test/shared@workspace:packages/@test/shared',
+                ],
+                prettier: ['prettier@3.10.1'],
+              },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'prettier', lockedVersion: '3.10.1' },
+      ]);
+    });
+
+    it.each([false, true])(
+      'handles optional peers (installed=%s)',
+      async (installed) => {
+        const result = await extractPackageFile(
+          JSON.stringify({
+            dependencies: { prettier: '^3.0.0' },
+            peerDependencies: { react: '^18.0.0' },
+            peerDependenciesMeta: { react: { optional: true } },
+          }),
+          'package.json',
+          {
+            lockFiles: ['bun.lock'],
+            fileContents: {
+              'bun.lock': JSON.stringify({
+                lockfileVersion: 1,
+                workspaces: { '': { optionalPeers: ['react'] } },
+                packages: {
+                  prettier: ['prettier@3.10.1'],
+                  ...(installed && { react: ['react@18.3.1'] }),
+                },
+              }),
+            },
+          },
+        );
+
+        expect(
+          result?.deps.map((dep) => [dep.depName, dep.lockedVersion]),
+        ).toEqual(
+          installed
+            ? [
+                ['prettier', '3.10.1'],
+                ['react', '18.3.1'],
+              ]
+            : [['prettier', '3.10.1']],
+        );
+      },
+    );
+
+    it('resolves the override identity instead of the shadowed declaration', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { 'is-number': '^6.0.0', prettier: '^3.0.0' },
+          overrides: { 'is-number': 'npm:is-odd@^3.0.0' },
+        }),
+        'package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { '': {} },
+              overrides: { 'is-number': 'npm:is-odd@^3.0.0' },
+              packages: {
+                'is-number': ['is-odd@3.0.1'],
+                prettier: ['prettier@3.10.1'],
+              },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'prettier', lockedVersion: '3.10.1' },
+        {
+          depName: 'is-number',
+          depType: 'overrides',
+          packageName: 'is-odd',
+          lockedVersion: '3.0.1',
+        },
+      ]);
+    });
+
+    it('retains overrides of transitive dependencies without a root lock entry', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { foo: '^1.2.0' },
+          overrides: { bar: '1.0.0' },
+        }),
+        'package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { '': {} },
+              overrides: { bar: '1.0.0' },
+              packages: { foo: ['foo@1.3.0'], 'foo/bar': ['bar@1.0.0'] },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'foo', lockedVersion: '1.3.0' },
+        { depName: 'bar', depType: 'overrides', currentValue: '1.0.0' },
+      ]);
+    });
+
+    it('does not read stale disk contents for a deleted text lock', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lock);
+
+      const result = await extractPackageFile(manifest, 'package.json', {
+        lockFiles: ['bun.lock'],
+        fileContents: { 'bun.lock': null },
+      });
+
+      expect(result).toBeNull();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('rejects a missing required peer dependency', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({ peerDependencies: { foo: '^1.0.0' } }),
+        'package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { '': {} },
+              packages: {},
+            }),
+          },
+        },
+      );
+
+      expect(result).toBeNull();
+    });
+
     it('retains tool versions from the manifest instead of looking them up in the lock', async () => {
       const result = await extractPackageFile(
         JSON.stringify({
@@ -152,6 +312,27 @@ describe('modules/manager/bun/extract', () => {
 
     it.each([
       { lockfileVersion: 3, workspaces: { '': {} }, packages: {} },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: ['foo'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: ['foo@workspace:missing'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {}, local: { name: 'other' } },
+        packages: { foo: ['foo@workspace:local'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        overrides: { foo: 'npm:baz@1.0.0' },
+        packages: { foo: ['bar@1.0.0'] },
+      },
       { lockfileVersion: 2, workspaces: {}, packages: {} },
       { lockfileVersion: 2, workspaces: { '': {} }, packages: { foo: null } },
       { lockfileVersion: 2, workspaces: { '': {} }, packages: {} },
