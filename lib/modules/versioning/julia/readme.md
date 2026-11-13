@@ -25,7 +25,7 @@ Tilde and caret semantics, including the leading-zero behavior, match npm's.
 
 - `bump` raises the last specifier to the new version: `"0.10, 0.11"` with 0.12.1 becomes `"0.12.1"`.
 - `replace` rewrites the entry only when the new version is outside it.
-- `widen` keeps the entry and adds a specifier for the new version, the usual Julia convention: `"0.10, 0.11"` with 0.12.1 becomes `"0.10, 0.11, 0.12"`. The new specifier is `major.minor` (`0.minor` or `0.0.patch` below 1.0), a bare major next to a bare major (`"1, 2"` with 3.1.0 becomes `"1, 2, 3"`), takes the last specifier's `~` or `^` (`"~1.2"` with 1.3.0 becomes `"~1.2, ~1.3"`), is an exact pin next to an exact pin (`"=1.2.3, =1.2.5"` with 1.3.0 becomes `"=1.2.3, =1.2.5, =1.3.0"`), and goes in ascending order.
+- `widen` keeps the entry and adds a specifier for the new version, the usual Julia convention: `"0.10, 0.11"` with 0.12.1 becomes `"0.10, 0.11, 0.12"`. The new specifier is the bare major from 1.0 on, as CompatHelper writes it (`"0.12"` with 1.9.24 becomes `"0.12, 1"`), and `0.minor` or `0.0.patch` below 1.0; it takes the last specifier's `~` or `^`, and a `~` keeps the minor unless it is next to a bare major (`"~1.2"` with 1.3.0 becomes `"~1.2, ~1.3"`), is an exact pin next to an exact pin (`"=1.2.3, =1.2.5"` with 1.3.0 becomes `"=1.2.3, =1.2.5, =1.3.0"`), and goes in ascending order.
 - `pin` writes an exact version: `"=1.2.3"`.
 
 Under every strategy, an exact pin such as `"=6.1.0"` stays exact (`"=6.1.1"`), and a hyphen range is left unchanged.

@@ -1,9 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
-import detectIndent from 'detect-indent';
-import JSON5 from 'json5';
-import { weave } from 'jsonc-weaver';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
+import { stringifyMigratedConfig } from '../../../../config/migrated-content.ts';
 import { migrateConfig } from '../../../../config/migration.ts';
 import { prettier } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -147,32 +145,13 @@ export class MigratedDataFactory {
       delete migratedConfig.warnings;
 
       // TODO #22198
-      const raw = await platform.getRawFile(configFileName!);
-      const indent = detectIndent(raw ?? '');
-      // indent defaults to 2 spaces
-      const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
-      let content: string;
-
-      if (filename.endsWith('.json5')) {
-        content = JSON5.stringify(migratedConfig, undefined, indentSpace);
-      } else if (raw) {
-        try {
-          content = weave(raw, migratedConfig);
-        } catch (err) {
-          logger.warn(
-            { err },
-            'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
-          );
-          content = JSON.stringify(migratedConfig, undefined, indentSpace);
-        }
-      } else {
-        content = JSON.stringify(migratedConfig, undefined, indentSpace);
-      }
-
-      if (!content.endsWith('\n')) {
-        content += '\n';
-      }
+      const raw = await platform.getRawFile(filename);
+      const { content, indent } = stringifyMigratedConfig(
+        filename,
+        raw,
+        migratedConfig,
+      );
 
       res = { content, filename, indent };
     } catch (err) {

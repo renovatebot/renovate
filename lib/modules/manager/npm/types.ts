@@ -1,4 +1,8 @@
-import type { NpmPackage } from './extract/types.ts';
+import type {
+  NpmPackage,
+  PnpmManagerDataMinimumReleaseAge,
+  YarnManagerDataMinimalAgeGate,
+} from './extract/types.ts';
 
 interface LockFilePackage {
   name?: string;
@@ -96,6 +100,10 @@ export interface NpmManagerData extends NpmLockFiles {
   repoNpmrc?: SanitizedRepoNpmrc;
   /** the file name of the repository `.npmrc`, set instead of `repoNpmrc` when it carries credentials, so that it is read from disk again when the cached package file is used */
   uncachedNpmrcFileName?: string;
+  /** the minimum release age settings of `pnpmLockFile`, kept from the extraction for every package file of the lock file, as the status checks run before the base branch is checked out */
+  pnpmMinimumReleaseAge?: PnpmManagerDataMinimumReleaseAge;
+  /** the minimum release age settings of `yarnLock`, kept from the extraction for every package file of the lock file, as the status checks run before the base branch is checked out */
+  yarnMinimalAgeGate?: YarnManagerDataMinimalAgeGate;
 }
 
 /** the repository `.npmrc` after sanitizing, from which `npmrc` can be rebuilt together with the configured one */

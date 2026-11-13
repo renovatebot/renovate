@@ -1554,6 +1554,7 @@ It is pointless to edit the labels, as Renovate restores the labels on each run.
 !!! note
   Before the `dependencyDashboard` object was introduced, these settings were separate options, such as `dependencyDashboardTitle`, `dependencyDashboardLabels` and `customizeDashboard`.
   Renovate migrates them into the `dependencyDashboard` object.
+  Their environment variables and CLI flags, such as `RENOVATE_DEPENDENCY_DASHBOARD_FOOTER` and `--dependency-dashboard-footer`, are also migrated into `RENOVATE_DEPENDENCY_DASHBOARD` and `--dependency-dashboard`, but fields set in those take precedence.
   `dependencyDashboardApproval` and `dependencyDashboardCategory` remain separate options, as they apply to updates rather than to the Dependency Dashboard issue.
 
 ### `dependencyDashboard.autoclose`
@@ -3106,6 +3107,52 @@ For example, with the following configuration Renovate waits 3 days plus 1 hour 
 ```
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
+## `minimumReleaseAgePackageManager`
+
+Use this option to set a lower bound for the minimum release age which Renovate passes to package managers.
+Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimumReleaseAge`](#minimumreleaseage) of the repository or manager config.
+For lock file maintenance, Renovate compares it with the `minimumReleaseAge` of [`lockFileMaintenance`](#lockfilemaintenance) instead.
+This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minimumreleaseagepackagemanagersync) is `true`.
+
+Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
+
+This option does not change when Renovate raises an update.
+You can only set it at the top level of a config or in a manager's config, not in `packageRules`, because the package manager applies one value to the whole lock file.
+Security updates pass no minimum release age to the package manager.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "poetry": {
+    "minimumReleaseAgePackageManager": "7 days"
+  }
+}
+```
+
+A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch, but not over the minimum release age configured in the package manager itself.
+
+## `minimumReleaseAgePackageManagerSync`
+
+This is a feature flag to opt early into the new `minimumReleaseAge` behavior, which aligns the minimum release age of Renovate with the minimum release age of your package managers.
+The behavior is experimental and may change while the integration with each package manager is completed.
+You can set it at the top level of a config or in a manager's config, not in `packageRules`.
+
+With `minimumReleaseAgePackageManagerSync=true`, Renovate:
+
+- applies the minimum release age which a manager reads from the configuration of your package manager, if it is larger than [`minimumReleaseAge`](#minimumreleaseage)
+- does not hold back lock file maintenance if the package manager enforces the minimum release age itself
+- applies [`minimumReleaseAgePackageManager`](#minimumreleaseagepackagemanager)
+
+Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
+
+The [table of package managers](./key-concepts/minimum-release-age.md#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both) lists which managers integrate with the minimum release age of their package manager, and what they read and pass with this option.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true
+}
+```
 
 ## `minor`
 
