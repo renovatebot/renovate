@@ -1815,6 +1815,43 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('allows minimumReleaseAgePackageManager only at the top level and in a manager config', async () => {
+      const config: RenovateConfig = {
+        minimumReleaseAgePackageManager: '1 day',
+        // @ts-expect-error: -- TODO: managers, datasources and versionings are not defined on RenovateConfig
+        npm: { minimumReleaseAgePackageManager: '3 days' },
+        lockFileMaintenance: { minimumReleaseAgePackageManager: '3 days' },
+        packageRules: [
+          {
+            matchDatasources: ['npm'],
+            minimumReleaseAgePackageManager: '3 days',
+          },
+        ],
+        vulnerabilityAlerts: { minimumReleaseAgePackageManager: '3 days' },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      const message = `as it can only be used at the top level of a config or in a manager's config.`;
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'lockFileMaintenance.minimumReleaseAgePackageManager',
+          message: `"minimumReleaseAgePackageManager" can't be used in "lockFileMaintenance", ${message}`,
+        },
+        {
+          topic: 'packageRules[0].minimumReleaseAgePackageManager',
+          message: `"minimumReleaseAgePackageManager" can't be used in "packageRules[0]", ${message}`,
+        },
+        {
+          topic: 'vulnerabilityAlerts.minimumReleaseAgePackageManager',
+          message: `"minimumReleaseAgePackageManager" can't be used in "vulnerabilityAlerts", ${message}`,
+        },
+      ]);
+    });
+
     it('allows manager options in a custom manager config', async () => {
       const config: RenovateConfig &
         Partial<Record<CustomManagerName, RenovateConfig>> = {

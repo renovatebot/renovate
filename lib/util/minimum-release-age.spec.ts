@@ -160,6 +160,15 @@ describe('util/minimum-release-age', () => {
           ]),
         ).toBeNull();
       });
+
+      it('returns null with minimumReleaseAgePackageManager', () => {
+        expect(
+          calculate(
+            [{ ...offUpdate, minimumReleaseAgePackageManager: '4 weeks' }],
+            { minimumReleaseAge: '1 week' },
+          ),
+        ).toBeNull();
+      });
     });
 
     it('returns minimumReleaseAgeRepository of the config without upgrades', () => {
@@ -184,11 +193,11 @@ describe('util/minimum-release-age', () => {
               packageFile,
               minimumReleaseAgeRepository: '1 week',
             },
-            update,
+            { ...update, minimumReleaseAgePackageManager: '5 days' },
           ],
           { minimumReleaseAgeRepository: '2 weeks' },
         ),
-      ).toBe(toMs('3 days'));
+      ).toBe(toMs('5 days'));
     });
 
     it('reads the upgrade of the manager and package file from the branch config without upgrades', () => {
@@ -197,12 +206,14 @@ describe('util/minimum-release-age', () => {
           isLockFileMaintenance: true,
           manager: 'npm',
           minimumReleaseAge: '1 day',
+          minimumReleaseAgePackageManager: '1 week',
           upgrades: [
             {
               isLockFileMaintenance: true,
               manager: 'npm',
               packageFile: 'package.json',
               minimumReleaseAge: '1 day',
+              minimumReleaseAgePackageManager: '1 week',
             },
             {
               ...update,
@@ -270,6 +281,67 @@ describe('util/minimum-release-age', () => {
 
     it('returns 0 if the branch config is a security update', () => {
       expect(calculate([], { ...update, isVulnerabilityAlert: true })).toBe(0);
+    });
+
+    it.each`
+      minimumReleaseAgePackageManager | expected
+      ${'1 week'}                     | ${'1 week'}
+      ${'1 day'}                      | ${'3 days'}
+      ${null}                         | ${'3 days'}
+      ${'bananas'}                    | ${'3 days'}
+    `(
+      'returns the larger of minimumReleaseAgeRepository and minimumReleaseAgePackageManager=$minimumReleaseAgePackageManager',
+      ({ minimumReleaseAgePackageManager, expected }) => {
+        expect(
+          calculate([{ ...update, minimumReleaseAgePackageManager }]),
+        ).toBe(toMs(expected));
+      },
+    );
+
+    it('returns minimumReleaseAgePackageManager without minimumReleaseAgeRepository', () => {
+      expect(
+        calculate([], {
+          minimumReleaseAgePackageManager: '5 days',
+          minimumReleaseAgePackageManagerSync: true,
+        }),
+      ).toBe(toMs('5 days'));
+    });
+
+    it('raises minimumReleaseAge of lock file maintenance to minimumReleaseAgePackageManager', () => {
+      expect(
+        calculate([
+          update,
+          {
+            manager,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgePackageManager: '4 days',
+            minimumReleaseAgePackageManagerSync: true,
+          },
+        ]),
+      ).toBe(toMs('4 days'));
+    });
+
+    it('keeps a larger minimumReleaseAge of lock file maintenance', () => {
+      expect(
+        calculate([], {
+          ...update,
+          isLockFileMaintenance: true,
+          minimumReleaseAgePackageManager: '4 days',
+        }),
+      ).toBe(toMs('2 weeks'));
+    });
+
+    it('returns 0 for a security update with minimumReleaseAgePackageManager', () => {
+      expect(
+        calculate([
+          {
+            ...update,
+            isVulnerabilityAlert: true,
+            minimumReleaseAgePackageManager: '1 week',
+          },
+        ]),
+      ).toBe(0);
     });
   });
 
