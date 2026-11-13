@@ -1554,7 +1554,7 @@ It is pointless to edit the labels, as Renovate restores the labels on each run.
 !!! note
   Before the `dependencyDashboard` object was introduced, these settings were separate options, such as `dependencyDashboardTitle`, `dependencyDashboardLabels` and `customizeDashboard`.
   Renovate migrates them into the `dependencyDashboard` object.
-  Their environment variables, such as `RENOVATE_DEPENDENCY_DASHBOARD_FOOTER`, are also migrated into `RENOVATE_DEPENDENCY_DASHBOARD`, but fields set in `RENOVATE_DEPENDENCY_DASHBOARD` take precedence.
+  Their environment variables and CLI flags, such as `RENOVATE_DEPENDENCY_DASHBOARD_FOOTER` and `--dependency-dashboard-footer`, are also migrated into `RENOVATE_DEPENDENCY_DASHBOARD` and `--dependency-dashboard`, but fields set in those take precedence.
   `dependencyDashboardApproval` and `dependencyDashboardCategory` remain separate options, as they apply to updates rather than to the Dependency Dashboard issue.
 
 ### `dependencyDashboard.autoclose`
