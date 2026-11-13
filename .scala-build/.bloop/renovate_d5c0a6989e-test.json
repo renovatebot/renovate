@@ -1,0 +1,120 @@
+{
+  "version": "1.4.0",
+  "project": {
+    "name": "renovate_d5c0a6989e-test",
+    "directory": "/home/simon/repos/renovate/.scala-build",
+    "workspaceDir": "/home/simon/repos/renovate",
+    "sources": [],
+    "dependencies": ["renovate_d5c0a6989e"],
+    "classpath": [
+      "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.8.3/scala3-library_3-3.8.3.jar",
+      "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/3.8.3/scala-library-3.8.3.jar",
+      "/home/simon/repos/renovate/.scala-build/renovate_d5c0a6989e/classes/main",
+      "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/com/sourcegraph/semanticdb-javac/0.10.0/semanticdb-javac-0.10.0.jar"
+    ],
+    "out": "/home/simon/repos/renovate/.scala-build/.bloop/renovate_d5c0a6989e-test",
+    "classesDir": "/home/simon/repos/renovate/.scala-build/renovate_d5c0a6989e/classes/test",
+    "scala": {
+      "organization": "org.scala-lang",
+      "name": "scala-compiler",
+      "version": "3.8.3",
+      "options": ["-Xsemanticdb", "-sourceroot", "/home/simon/repos/renovate"],
+      "jars": [
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/3.8.3/scala3-compiler_3-3.8.3.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-interfaces/3.8.3/scala3-interfaces-3.8.3.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/tasty-core_3/3.8.3/tasty-core_3-3.8.3.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.8.3/scala3-library_3-3.8.3.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-asm/9.9.0-scala-1/scala-asm-9.9.0-scala-1.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-sbt/compiler-interface/1.10.7/compiler-interface-1.10.7.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/3.8.3/scala-library-3.8.3.jar",
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-sbt/util-interface/1.10.7/util-interface-1.10.7.jar"
+      ],
+      "bridgeJars": [
+        "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-sbt-bridge/3.8.3/scala3-sbt-bridge-3.8.3.jar"
+      ]
+    },
+    "java": {
+      "options": [
+        "-Xplugin:semanticdb -sourceroot:/home/simon/repos/renovate -targetroot:javac-classes-directory",
+        "-J--add-exports",
+        "-Jjdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "-J--add-exports",
+        "-Jjdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+        "-J--add-exports",
+        "-Jjdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+        "-J--add-exports",
+        "-Jjdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "-J--add-exports",
+        "-Jjdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+      ]
+    },
+    "test": {
+      "frameworks": [
+        { "names": ["com.novocode.junit.JUnitFramework"] },
+        {
+          "names": [
+            "org.scalatest.tools.Framework",
+            "org.scalatest.tools.ScalaTestFramework"
+          ]
+        },
+        { "names": ["org.scalacheck.ScalaCheckFramework"] },
+        {
+          "names": [
+            "org.specs.runner.SpecsFramework",
+            "org.specs2.runner.Specs2Framework",
+            "org.specs2.runner.SpecsFramework"
+          ]
+        },
+        { "names": ["utest.runner.Framework"] },
+        { "names": ["munit.Framework"] },
+        { "names": ["mill.testng.TestNGFramework"] }
+      ],
+      "options": { "excludes": [], "arguments": [] }
+    },
+    "platform": {
+      "name": "jvm",
+      "config": {
+        "home": "/home/simon/.sdkman/candidates/java/current",
+        "options": []
+      },
+      "mainClass": []
+    },
+    "resolution": {
+      "modules": [
+        {
+          "organization": "org.scala-lang",
+          "name": "scala3-library_3",
+          "version": "3.8.3",
+          "artifacts": [
+            {
+              "name": "scala3-library_3",
+              "path": "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.8.3/scala3-library_3-3.8.3.jar"
+            },
+            {
+              "name": "scala3-library_3",
+              "classifier": "sources",
+              "path": "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.8.3/scala3-library_3-3.8.3-sources.jar"
+            }
+          ]
+        },
+        {
+          "organization": "org.scala-lang",
+          "name": "scala-library",
+          "version": "3.8.3",
+          "artifacts": [
+            {
+              "name": "scala-library",
+              "path": "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/3.8.3/scala-library-3.8.3.jar"
+            },
+            {
+              "name": "scala-library",
+              "classifier": "sources",
+              "path": "/home/simon/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/3.8.3/scala-library-3.8.3-sources.jar"
+            }
+          ]
+        }
+      ]
+    },
+    "tags": ["test"]
+  }
+}
