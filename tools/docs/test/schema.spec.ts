@@ -316,6 +316,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
           cacheTtlOverride: {
             'datasource-docker-hub-tags': 90,
             'datasource-maven:metadata-not-found': 60,
+            'datasource-releases-npm': 5,
             'datasource-*': 60,
             'datasource-{crate,go}': 90,
             '/^changelog-/': 45,

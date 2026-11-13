@@ -1,4 +1,6 @@
 // v8 ignore file -- constant namespace list, no executable logic to cover
+import { AllDatasourcesListLiteral } from '../../../datasource-list.generated.ts';
+
 /* IMPORTANT:
  * These namespaces below are used as part of the cacheTtlOverride feature
  * It's OK to add to them (e.g. for new datasources) but we should avoid
@@ -114,6 +116,14 @@ export const packageCacheNamespaces = [
   'terraform-provider-hash',
   'url-sha256',
 ] as const;
+
+/**
+ * Every namespace which `cacheTtlOverride` can override, including the one each datasource caches its releases in.
+ */
+export const cacheTtlOverrideNamespaces: string[] = [
+  ...packageCacheNamespaces,
+  ...AllDatasourcesListLiteral.map((id) => `datasource-releases-${id}`),
+];
 
 export type PackageCacheNamespace =
   (typeof packageCacheNamespaces)[number] | `datasource-releases-${string}`;

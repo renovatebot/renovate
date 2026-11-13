@@ -4410,6 +4410,30 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
 
+      it('allows the namespace a datasource caches its releases in', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-releases-npm': 5,
+            'datasource-releases-*': 10,
+            'datasource-releases-not-a-datasource': 15,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'cacheTtlOverride: namespace `datasource-releases-not-a-datasource` does not exist',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
       it('allows wildcards', async () => {
         const config: AllConfig = {
           cacheTtlOverride: {
