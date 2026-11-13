@@ -17,7 +17,7 @@ void (async (): Promise<void> => {
   });
   await logger.init();
 
-  (await import('./proxy.ts')).bootstrap();
+  await (await import('./proxy.ts')).bootstrap();
 
   // prints and exits the process if --version or --help is passed
   const { parseEarlyFlags } =

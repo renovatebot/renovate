@@ -98,6 +98,11 @@ If set to `true` value, Renovate will skip setting a branch status check on GitL
 This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
 If the merge request has a merged results pipeline, Renovate sets the status check on that pipeline instead of skipping it.
 
+## `RENOVATE_X_GLOBAL_AGENT`
+
+If set to `true` value, Renovate will use the `global-agent` package instead of the built-in proxy support of Node.js to apply HTTP proxy settings globally for all outgoing requests.
+By default, Renovate uses the built-in proxy support of Node.js where it is available (Node.js v24.14.0 and newer), and falls back to `global-agent` on older Node.js versions.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.

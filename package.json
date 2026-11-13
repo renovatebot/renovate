@@ -217,7 +217,6 @@
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
     "glob": "13.0.6",
-    "global-agent": "3.0.0",
     "google-auth-library": "11.3.3",
     "got": "16.2.0",
     "graph-data-structure": "4.5.0",
@@ -270,6 +269,7 @@
     "zod": "4.6.7"
   },
   "optionalDependencies": {
+    "global-agent": "3.0.0",
     "openpgp": "6.3.2",
     "re2": "1.27.0"
   },
