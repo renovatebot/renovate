@@ -1,3 +1,4 @@
+import * as timers from 'node:timers/promises';
 import { codeBlock } from 'common-tags';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
@@ -6149,6 +6150,240 @@ describe('modules/platform/github/index', () => {
         ).rejects.toBeInstanceOf(ExternalHostError);
       },
     );
+
+    describe('with the new commit message', () => {
+      const platformPrOptions = {
+        usePlatformAutomerge: true,
+        automergeCommitMessage: 'Update dependency foo to v1.0.5\n\nSome body',
+      };
+      const headline = 'Update dependency foo to v1.0.5 (#123)';
+      const unchanged = { cancelled: false, reason: 'unchanged' };
+
+      function stateReply(
+        scope: httpMock.Scope,
+        autoMergeRequest: Record<string, unknown>,
+      ): void {
+        scope.post('/graphql', autoMergeQueryBody).reply(200, {
+          data: {
+            repository: { pullRequest: { id: 'abcd', autoMergeRequest } },
+          },
+        });
+      }
+
+      function cancellationReply(scope: httpMock.Scope): void {
+        scope.post('/graphql', cancellationBody).reply(200, {
+          data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
+        });
+      }
+
+      it.each`
+        commitHeadline                              | commitBody
+        ${'Update dependency foo to v1.0.4 (#123)'} | ${'Some body'}
+        ${headline}                                 | ${'Other body'}
+      `(
+        'cancels Renovate automerge with another message ($commitHeadline, $commitBody)',
+        async ({ commitHeadline, commitBody }) => {
+          const scope = await mockScope();
+          stateReply(scope, {
+            commitHeadline,
+            commitBody,
+            enabledBy: { __typename: 'Bot', login: 'renovate' },
+          });
+          cancellationReply(scope);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual(cancelled);
+        },
+      );
+
+      it('keeps Renovate automerge with the same message', async () => {
+        const scope = await mockScope();
+        stateReply(scope, {
+          commitHeadline: headline,
+          commitBody: 'Some body',
+          enabledBy: { __typename: 'Bot', login: 'renovate' },
+        });
+
+        await expect(
+          github.cancelPlatformAutomerge({
+            ...cancellationConfig,
+            platformPrOptions,
+          }),
+        ).resolves.toEqual(unchanged);
+      });
+
+      it.each`
+        automergeCommitMessage                   | storedBody
+        ${'Update dependency foo to v1.0.5'}     | ${'GitHub default body'}
+        ${'Update dependency foo to v1.0.5\n\n'} | ${null}
+        ${'Update dependency foo to v1.0.5\n\n'} | ${''}
+      `(
+        'keeps Renovate automerge when the body is not compared or empty: $storedBody',
+        async ({ automergeCommitMessage, storedBody }) => {
+          const scope = await mockScope();
+          stateReply(scope, {
+            commitHeadline: headline,
+            commitBody: storedBody,
+            enabledBy: { __typename: 'Bot', login: 'renovate' },
+          });
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions: {
+                usePlatformAutomerge: true,
+                automergeCommitMessage,
+              },
+            }),
+          ).resolves.toEqual(unchanged);
+        },
+      );
+
+      it('keeps automerge of another actor with the same headline', async () => {
+        const scope = await mockScope();
+        stateReply(scope, {
+          commitHeadline: headline,
+          commitBody: 'GitHub default body',
+          enabledBy: { __typename: 'User', login: 'maintainer' },
+        });
+
+        await expect(
+          github.cancelPlatformAutomerge({
+            ...cancellationConfig,
+            platformPrOptions,
+          }),
+        ).resolves.toEqual(unchanged);
+      });
+
+      it('refuses automerge of another actor with another headline', async () => {
+        const scope = await mockScope();
+        stateReply(scope, {
+          commitHeadline: 'Custom title',
+          commitBody: 'GitHub default body',
+          enabledBy: { __typename: 'User', login: 'maintainer' },
+        });
+
+        await expect(
+          github.cancelPlatformAutomerge({
+            ...cancellationConfig,
+            platformPrOptions,
+          }),
+        ).resolves.toEqual(enabledByOther);
+      });
+
+      it.each`
+        description         | options
+        ${'a rebase merge'} | ${{ ...platformPrOptions, automergeStrategy: 'rebase' }}
+        ${'no message'}     | ${{ usePlatformAutomerge: true }}
+      `(
+        'keeps automerge without a request for $description',
+        async ({ options }) => {
+          // no HTTP mocks: the auto-merge state must not be queried
+          await mockScope();
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions: options,
+            }),
+          ).resolves.toEqual(unchanged);
+        },
+      );
+
+      describe('re-enabling', () => {
+        const enabledResp = {
+          data: {
+            enablePullRequestAutoMerge: { pullRequest: { number: 123 } },
+          },
+        };
+        const failedResp = { errors: [{ message: 'Something went wrong' }] };
+
+        async function cancelAutomerge(): Promise<httpMock.Scope> {
+          const scope = await mockScope();
+          stateReply(scope, {
+            commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
+            commitBody: 'Some body',
+            enabledBy: { __typename: 'Bot', login: 'renovate' },
+          });
+          cancellationReply(scope);
+          await github.cancelPlatformAutomerge({
+            ...cancellationConfig,
+            platformPrOptions,
+          });
+          return scope;
+        }
+
+        function prMocks(scope: httpMock.Scope): httpMock.Scope {
+          return scope
+            .get(
+              '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+            )
+            .reply(200, [])
+            .get('/repos/some/repo/pulls/123')
+            .reply(200, {
+              number: 123,
+              node_id: 'abcd',
+              head: { repo: { full_name: 'some/repo' } },
+            });
+        }
+
+        it('retries once after cancelling', async () => {
+          const scope = prMocks(await cancelAutomerge());
+          scope
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql')
+            .reply(200, enabledResp);
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(5000);
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            'GitHub-native automerge: success...PrNo: 123',
+          );
+          expect(logger.logger.warn).not.toHaveBeenCalled();
+        });
+
+        it('warns when re-enabling fails twice', async () => {
+          const scope = prMocks(await cancelAutomerge());
+          scope
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql')
+            .replyWithError('unknown error');
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(logger.logger.warn).toHaveBeenCalledWith(
+            { prNumber: 123 },
+            'GitHub-native automerge: could not re-enable after updating the commit message',
+          );
+        });
+
+        it('forgets cancelled PRs on initRepo', async () => {
+          await cancelAutomerge();
+          const scope = prMocks(await mockScope());
+          scope.post('/graphql').reply(200, failedResp);
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).not.toHaveBeenCalled();
+        });
+      });
+    });
   });
 
   describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
