@@ -5275,6 +5275,12 @@ Defaults to `jvmMaxMemory`.
 !!! note
   This does not apply to _every_ Node process created by Renovate, only the managers noted above.
 
+## `updateAppVersionLabel`
+
+Set to `true` to update the standard `app.kubernetes.io/version` label together with the image it belongs to.
+Renovate only updates a label when its value matches the tag of an image in the same manifest.
+This is disabled by default.
+
 ## `updateInternalDeps`
 
 Renovate defaults to skipping any internal package dependencies within monorepos.

@@ -31,4 +31,14 @@ Or if it is only a single file then something like this:
 }
 ```
 
+The manager can update the standard `app.kubernetes.io/version` label when its value matches an image tag. This behavior is disabled by default; enable it with:
+
+```json
+{
+  "kubernetes": {
+    "updateAppVersionLabel": true
+  }
+}
+```
+
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.

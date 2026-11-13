@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { withDebugMessage } from '../../../util/schema-utils/index.ts';
@@ -13,11 +14,12 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { type KubernetesManifest, KubernetesManifests } from './schema.ts';
+import type { KubernetesExtractConfig } from './types.ts';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: KubernetesExtractConfig,
 ): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
 
@@ -32,13 +34,62 @@ export function extractPackageFile(
     withDebugMessage([], `${packageFile} does not match Kubernetes schema`),
   ).parse(content);
 
+  const imageDeps = extractImages(content, config);
+  // Version label dependencies are re-extracted while their branch is updated,
+  // even when the manager option is not part of the upgrade config.
+  const isVersionLabelReExtract = config.digestManagedExternally === true;
+  const isVersionLabelUpdate =
+    config.updateAppVersionLabel === true || isVersionLabelReExtract;
   const deps: PackageDependency[] = [
-    ...extractImages(content, config),
+    ...imageDeps,
     ...extractImageVolumes(manifests, config),
+    ...(isVersionLabelUpdate
+      ? extractVersionLabels(manifests, imageDeps, config)
+      : []),
     ...extractApis(manifests),
   ];
 
   return deps.length ? { deps } : null;
+}
+
+function extractVersionLabels(
+  manifests: KubernetesManifest[],
+  imageDeps: PackageDependency[],
+  config: KubernetesExtractConfig,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  const { depName, currentValue, newValue } = config;
+
+  for (const manifest of manifests) {
+    // Only images of the same workload may own its version label
+    const manifestImageDeps = imageDeps.filter(
+      (dep) =>
+        isString(dep.replaceString) &&
+        manifest.containerImages.includes(dep.replaceString),
+    );
+
+    for (const versionLabel of manifest.versionLabels) {
+      const isUpdatedValue =
+        versionLabel === currentValue || versionLabel === newValue;
+      const imageDep =
+        manifestImageDeps.find((dep) => dep.currentValue === versionLabel) ??
+        (isUpdatedValue
+          ? manifestImageDeps.find((dep) => dep.depName === depName)
+          : undefined);
+      if (imageDep) {
+        deps.push({
+          ...imageDep,
+          currentValue: versionLabel,
+          pinDigests: false,
+          digestManagedExternally: true,
+          autoReplaceStringTemplate: '{{newValue}}',
+          replaceString: versionLabel,
+        });
+      }
+    }
+  }
+
+  return deps;
 }
 
 // Comes from https://github.com/distribution/reference/blob/v0.6.0/regexp.go
