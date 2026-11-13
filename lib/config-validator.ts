@@ -70,7 +70,7 @@ function isMigratableFile(file: string): boolean {
 }
 
 /**
- * Writes `migratedConfig` to `file`, returning whether the file type supports it.
+ * Writes `migratedConfig` to `file`, returning whether the migration was applied.
  */
 async function writeMigratedConfig(
   file: string,
@@ -84,9 +84,14 @@ async function writeMigratedConfig(
     return false;
   }
 
-  const raw = await readFile(file, 'utf8');
-  const { content } = stringifyMigratedConfig(file, raw, migratedConfig);
-  await writeFile(file, content);
+  try {
+    const raw = await readFile(file, 'utf8');
+    const { content } = stringifyMigratedConfig(file, raw, migratedConfig);
+    await writeFile(file, content);
+  } catch (err) {
+    logger.warn({ file, err }, 'Config migration could not be written');
+    return false;
+  }
   logger.info(`Applied config migration to ${file}`);
   return true;
 }

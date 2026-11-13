@@ -233,6 +233,27 @@ describe.concurrent('config-validator', () => {
       });
     });
 
+    it('reports a migration that could not be written with --migrate, without calling the config invalid', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.json');
+        const content = '{"extends":["config:base"]}';
+        await fs.writeFile(file, content);
+        await fs.chmod(file, 0o444);
+
+        const { exitCode, all } = await runValidator([
+          '--no-global',
+          '--strict',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(1);
+        expect(all).toContain('Config migration could not be written');
+        expect(all).not.toContain('File is not valid Renovate config');
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(content);
+      });
+    });
+
     it('treats file as global config by default', async () => {
       await withTmpDir(async (dirPath) => {
         const file = await writeGlobalConfig(dirPath, 'config.json', {
