@@ -1,4 +1,4 @@
----
+approve requests---
 title: Pull requests
 description: Learn about Renovate pull requests
 ---
