@@ -1,5 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
-import { JuliaGeneralMetadataDatasource } from '../../datasource/julia-general-metadata/index.ts';
+import { JuliaDatasource } from '../../datasource/julia/index.ts';
 
 export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
@@ -13,4 +13,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)(Julia)?Project\\.toml$/'],
 };
 
-export const supportedDatasources = [JuliaGeneralMetadataDatasource.id];
+export const supportedDatasources = [JuliaDatasource.id];
