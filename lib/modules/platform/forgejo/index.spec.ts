@@ -377,7 +377,9 @@ describe('modules/platform/forgejo/index', () => {
           uid: 1,
           archived: false,
         })
-        .replyWithError(httpMock.error('searchRepos()'));
+        .replyWithError(httpMock.error('searchRepos()'))
+        .get('/user/orgs')
+        .reply(200, []);
       await initFakePlatform(scope);
 
       await expect(forgejo.getRepos()).rejects.toThrow('searchRepos()');
@@ -394,11 +396,40 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, {
           ok: true,
           data: mockRepos,
-        });
+        })
+        .get('/user/orgs')
+        .reply(200, []);
       await initFakePlatform(scope);
 
       const repos = await forgejo.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
+    });
+
+    it('should discover repos of the organizations the bot is a member of', async () => {
+      const scope = httpMock.scope('https://code.forgejo.org/api/v1');
+
+      scope
+        .get('/repos/search')
+        .query({
+          uid: 1,
+          archived: false,
+        })
+        .reply(200, {
+          ok: true,
+          data: mockRepos,
+        })
+        .get('/user/orgs')
+        .reply(200, [{ username: 'org1' }])
+        .get('/orgs/org1/repos')
+        .reply(200, [
+          mockedRepo({ full_name: 'a/b' }),
+          mockedRepo({ full_name: 'org1/public' }),
+        ]);
+
+      await initFakePlatform(scope);
+
+      const repos = await forgejo.getRepos();
+      expect(repos).toEqual(['a/b', 'c/d', 'org1/public']);
     });
 
     it('should return an filtered array of repos', async () => {
@@ -465,7 +496,9 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, {
           ok: true,
           data: mockRepos,
-        });
+        })
+        .get('/user/orgs')
+        .reply(200, []);
       await initFakePlatform(scope);
 
       const repos = await forgejo.getRepos({
