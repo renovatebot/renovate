@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { HttpCacheStats } from '../../stats.ts';
+import { isNotModified, isOk } from '../status.ts';
 import type { GotOptions, HttpResponse } from '../types.ts';
 import { copyResponse } from '../util.ts';
 import { persistedResponseHeaders, pickHeaders } from './persisted-headers.ts';
@@ -87,7 +88,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (!resp.cached && resp.statusCode === 200) {
+    if (!resp.cached && isOk(resp)) {
       const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
@@ -117,7 +118,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return resp;
     }
 
-    if (resp.statusCode === 304) {
+    if (isNotModified(resp)) {
       const httpCache = await this.get(method, url);
       if (!httpCache) {
         return resp;

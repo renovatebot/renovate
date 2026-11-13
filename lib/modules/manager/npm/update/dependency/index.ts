@@ -120,13 +120,10 @@ function updateDevEnginesDependency({
 }: Pick<UpdateDependencyConfig<NpmManagerData>, 'fileContent' | 'upgrade'>):
   string | null {
   const { depType, depName, newValue, managerData } = upgrade;
+  const isDevEnginesDepType =
+    depType === 'devEngines.runtime' || depType === 'devEngines.packageManager';
   /* v8 ignore if -- defensive: dispatcher already filtered */
-  if (
-    !depName ||
-    !newValue ||
-    (depType !== 'devEngines.runtime' &&
-      depType !== 'devEngines.packageManager')
-  ) {
+  if (!depName || !newValue || !isDevEnginesDepType) {
     return null;
   }
   const subKey: 'runtime' | 'packageManager' =
@@ -280,10 +277,8 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    if (
-      oldVersion === newValue &&
-      (!upgrade.newName || upgrade.newName === depName)
-    ) {
+    const isNameUnchanged = !upgrade.newName || upgrade.newName === depName;
+    if (oldVersion === newValue && isNameUnchanged) {
       logger.trace('Version is already updated');
       return fileContent;
     }

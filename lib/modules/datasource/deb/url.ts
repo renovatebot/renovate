@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import type { Http, HttpOptions } from '../../../util/http/index.ts';
+import { isNotModified } from '../../../util/http/status.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 
 /**
@@ -119,7 +120,7 @@ export async function checkIfModified(
 
   try {
     const response = await http.head(packageUrl, options);
-    return response.statusCode !== 304;
+    return !isNotModified(response);
   } catch (error) {
     logger.warn(
       { packageUrl, lastDownloadTimestamp, errorMessage: error.message },

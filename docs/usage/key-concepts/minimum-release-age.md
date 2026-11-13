@@ -21,6 +21,26 @@ Renovate does not wait until the package has seen no releases for x time-duratio
 When the time passed since the release is _less_ than the set `minimumReleaseAge`: Renovate adds a "pending" status check to that update's branch.
 After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
+## How long does Renovate wait?
+
+This flowchart shows how Renovate decides how long to wait before it raises an update:
+
+```mermaid
+flowchart TD
+    A["Renovate finds a new release"] --> B{"Security update?"}
+    B -- Yes --> C["Wait the minimumReleaseAge of vulnerabilityAlerts, null by default"]
+    B -- No --> D["Age = the larger of minimumReleaseAge after packageRules and the age configured in the package manager ¹, plus minimumReleaseAgeBuffer"]
+    D --> E{"Lock file maintenance, and the package manager enforces the age itself ¹?"}
+    E -- Yes --> F["No wait"]
+    E -- No --> G{"Does the release have a timestamp?"}
+    G -- Yes --> H["Raise the update once the release is older than the age"]
+    G -- No --> I{"minimumReleaseAgeBehaviour"}
+    I -- timestamp-required --> J["Hold the update"]
+    I -- timestamp-optional --> K["Raise the update with a warning"]
+```
+
+¹ Only with [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), for the managers in the [table of package managers](#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both).
+
 ## Configuration options
 
 The following configuration options can be used to enable and tune the functionality of Minimum Release Age:
@@ -68,17 +88,30 @@ As long as the registry/datasource provides the release timestamp, Renovate will
 We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
 
 Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
-A manager may read the minimum release age from the configuration of your package manager.
+If you opt into the new, experimental behavior with the [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync) feature flag, a manager may read the minimum release age from the configuration of your package manager.
 If it does, Renovate uses the larger of that value and `minimumReleaseAge`.
+Renovate applies that value per dependency, like a `packageRules` entry, so it does not hold back packages which your package manager excludes, or dependencies of other datasources.
+Such an exclusion never lowers `minimumReleaseAge`.
 Setting `minimumReleaseAge` to `null` does not turn off the value from the configuration of your package manager.
+Without `minimumReleaseAgePackageManagerSync`, Renovate does not read the minimum release age from the configuration of your package manager.
 
 When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.
 In some cases, this can lead to a transitive dependency being introduced, [which Renovate is not aware of](#what-happens-to-transitive-dependencies), and so could lead to a dependency being introduced without Renovate's `minimumReleaseAge` check being followed.
 
-To protect against this, it's recommended to ensure that your package manager configuration includes the relevant minimum release age checks, too.
+To protect against this, it is recommended to ensure that your package manager configuration includes the relevant minimum release age checks, too.
 
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
+
+With `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of your repository or manager config, but not a larger `minimumReleaseAge` from `packageRules`.
+A package manager applies the minimum release age to every package of the lock file, so a larger value for some updates, such as major updates, would fail on packages which other updates locked.
+A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an update.
+Renovate never passes [`minimumReleaseAgeBuffer`](../configuration-options.md#minimumreleaseagebuffer) to the package manager.
+An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value for its branch.
+How Renovate does this depends on the package manager, for example Poetry excludes an updated package from its check only if its constraint pins a single version.
+It never wins over the minimum release age which your repository configures in the package manager itself.
+The package manager still applies that age, like for security updates, and refuses a younger release.
+Without `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of the update, including a value from `packageRules`.
 
 The table below lists the managers with a known integration, per package manager.
 Managers that are not listed do not integrate with the minimum release age of their package manager.
@@ -101,19 +134,60 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 #### Poetry
 
-When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
+Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
-Poetry added this setting in v2.4.0, and older versions ignore it.
+Poetry added this setting and `solver.min-release-age-exclude` in v2.4.0, and older versions ignore them.
+Renovate rounds the value up to whole days.
 
-The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
+##### Default Poetry behavior
+
+Renovate sets the variable when the update has a `minimumReleaseAge`, including a value from `packageRules`, and does not read `poetry.toml`.
+
+For example, with `minimumReleaseAge` set to `3 days` in the `poetry` config and to `null` for `boto3` in `packageRules`, the `boto3` update sets no variable, and all other updates set `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
+
+##### Poetry with `minimumReleaseAgePackageManagerSync`
+
+Renovate sets the variable when the repository or manager config sets `minimumReleaseAge`.
+Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
+Renovate reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`.
+For its own wait before it raises an update, Renovate rounds a `solver.min-release-age` which is not a whole number up to whole days.
+It only passes its own value if it is larger than `solver.min-release-age`, and otherwise sets no variable, so Poetry applies its own config.
+If an updated PyPI package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate adds it to `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, as it already applied its own `minimumReleaseAge` to it.
+The variable replaces `solver.min-release-age-exclude`, so Renovate passes those entries first.
+Poetry still checks the passed value for all other packages, including new transitive dependencies.
+Renovate only excludes a package whose constraint pins a single version, as Poetry excludes all versions of a package and could otherwise lock a newer version which Renovate did not check.
+For a range, Renovate keeps the passed value, and Poetry refuses a release younger than it.
+If the `poetry.toml` sets `solver.min-release-age`, Renovate only excludes a release which has a timestamp and is at least that old, as the exclusion also skips that age.
+
+For example, with this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "poetry": {
+    "minimumReleaseAge": "3 days"
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": ["boto3"],
+      "minimumReleaseAge": null
+    }
+  ]
+}
+```
+
+- Without a `poetry.toml`, Renovate runs `poetry update --lock` with `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
+- With `boto3 = "1.35.50"` in the `pyproject.toml`, an update of `boto3` to a release which is 1 day old runs Poetry with `POETRY_SOLVER_MIN_RELEASE_AGE=3` and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE=boto3`.
+- With `boto3 = "^1.35.50"`, Renovate sets no `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, and Poetry refuses a release younger than 3 days.
+- With `solver.min-release-age = 5` in the `poetry.toml`, Renovate waits 5 days before it raises an update, also for `boto3`, and sets no variable, as Poetry applies its own 5 days.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 !!! warning
-  Renovate 42 changed the behaviour detailed below.
+  Renovate 42 changed the behavior detailed below.
   In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
   Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
-  If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
+  If using Renovate prior you can opt into the more secure behavior (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
 
 Consider that:
 
@@ -159,7 +233,7 @@ If no branch is created, Renovate will not raise a PR, regardless of [`prCreatio
 
 #### Recommended settings
 
-The recommendation is to set `internalChecksFilter=strict` when using `minimumReleaseAge`, so Renovate will create neither branches (nor PRs) on updates that haven't yet met minimum release age checks.
+The recommendation is to set `internalChecksFilter=strict` when using `minimumReleaseAge`, so Renovate will create neither branches (nor PRs) on updates that have not yet met minimum release age checks.
 
 ### Which update types take `minimumReleaseAge` into account?
 
@@ -189,7 +263,7 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `bump`                | ❌                            |                                                                                                           |
 | `replacement`         | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/39400)                                 |
 
-You can validate which update types may have release timestamps by following something similar to how [verify if the registry you're using](#which-registries-support-release-timestamps).
+You can validate which update types may have release timestamps by following something similar to how [verify if the registry you are using](#which-registries-support-release-timestamps).
 
 #### `digest` updates
 
@@ -231,13 +305,13 @@ For instance:
 +    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 ```
 
-Unlike a `digest` update, `pinDigest` doesn't repoint the reference to a different value - it freezes whatever the current value already resolves to.
+Unlike a `digest` update, `pinDigest` does not repoint the reference to a different value - it freezes whatever the current value already resolves to.
 The reference itself (e.g. the `v7` major tag above) is floating though, so what it resolves to right now may not be what `currentVersion` would resolve to under your configured `rangeStrategy` (for example, `rangeStrategy=bump` resolves `currentVersion` to the _oldest_ matching release).
 So, like `digest`, a `pinDigest` update is aged against the release timestamp of the newest version matching the current value, not whatever `currentVersion` resolves to.
 
 Unlike `digest` updates, an _unversioned_ current value (such as `latest`) is exempt from `minimumReleaseAge` entirely, rather than being held indefinitely: pinning a reference which already floats to the latest content is strictly safer than leaving it unpinned, so holding it back would only prolong the less-safe, unpinned state.
 
-If the current value _does_ resolve to a version, but that version's datasource doesn't expose a release timestamp (for example GHCR, Quay or ECR), the same caveats as [`digest` updates](#digest-updates) apply: the update is held indefinitely under the default `minimumReleaseAgeBehaviour=timestamp-required`, and needs `minimumReleaseAgeBehaviour=timestamp-optional` configured to raise it without an age check.
+If the current value _does_ resolve to a version, but that version's datasource does not expose a release timestamp (for example GHCR, Quay or ECR), the same caveats as [`digest` updates](#digest-updates) apply: the update is held indefinitely under the default `minimumReleaseAgeBehaviour=timestamp-required`, and needs `minimumReleaseAgeBehaviour=timestamp-optional` configured to raise it without an age check.
 
 ##### Avoiding `pinDigest` updates not being raised due to frequently-releasing packages
 
@@ -277,11 +351,12 @@ These are functionally identical options.
 Lock file maintenance delegates to the package manager to update package(s), so the updated packages have no release timestamp for Renovate to check.
 
 A manager can tell Renovate that its package manager enforces the minimum release age itself while it regenerates the lock file.
-In that case, Renovate does not wait for a release timestamp, and the `renovate/stability-days` status check of the lock file maintenance branch passes straight away.
+If you enable `minimumReleaseAgePackageManagerSync`, and the manager does so, then Renovate does not wait for a release timestamp, and the `renovate/stability-days` status check of the lock file maintenance branch passes straight away.
 
-For all other managers, lock file maintenance is treated like any other update without a release timestamp.
+Otherwise, lock file maintenance is treated like any other update without a release timestamp.
 With the default `minimumReleaseAgeBehaviour=timestamp-required`, the `renovate/stability-days` status check stays pending while `minimumReleaseAge` is set.
 The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
+The minimum release age from the configuration of your package manager does not hold back lock file maintenance on its own, as your package manager applies it itself.
 
 Some managers resolve versions themselves during lock file maintenance, and apply `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to that resolution.
 The `renovate/stability-days` status check of their lock file maintenance branches passes straight away:
@@ -291,6 +366,12 @@ The `renovate/stability-days` status check of their lock file maintenance branch
 ### What happens to security updates?
 
 Security updates bypass any `minimumReleaseAge` checks, and so will be raised as soon as Renovate detects them.
+This includes the minimum release age from the configuration of your package manager.
+
+Your package manager still applies its own minimum release age when Renovate updates the lock file.
+If the fixed version is younger than that, the lock file update fails, and the PR shows an artifact error.
+This keeps a fix which your package manager would reject visible, instead of holding it back without a PR.
+Set the minimum release age of your package manager to the smallest age which you want security updates to wait for.
 
 ### What happens if a package has multiple updates available?
 

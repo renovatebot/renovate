@@ -27,7 +27,7 @@ For example, `npm` uses `1.0.0-beta.1` while `pip` uses `1.0.0b1`.
 ## Why you might need to manually configure versioning
 
 Renovate interprets versions correctly out-of-the-box most of the time.
-But Renovate can't automatically detect **all** versioning schemes.
+But Renovate cannot automatically detect **all** versioning schemes.
 So sometimes you need to tell Renovate what versioning scheme it should use.
 
 For some ecosystems, automatic version selection works nearly every time (e.g. for npm-compliant managers, use `npm` versioning).
@@ -38,10 +38,10 @@ If the automatic version selection does _not_ work for a dependency update: set 
 
 ## General concepts behind overriding versioning
 
-- Although you can reconfigure versioning per-manager or per-datasource, you probably don't need such a broad change
+- Although you can reconfigure versioning per-manager or per-datasource, you probably do not need such a broad change
 - More commonly you would need to configure `versioning` for individual packages or potentially package patterns
 - The best way to do this is with `packageRules`, with a combination of `matchManagers`, `matchDatasources`, and `matchPackageNames`.
-  Avoid configuring `versioning` in a rule that also uses `matchUpdateTypes`, as the update types aren't known at the time the `versioning` is applied
+  Avoid configuring `versioning` in a rule that also uses `matchUpdateTypes`, as the update types are not known at the time the `versioning` is applied
 
 ## Examples of versioning overrides
 
@@ -83,11 +83,11 @@ But other updates may have breaking changes too, for example:
 - Updates from pre-release versions like `1.0.0-pre.1` to other versions (including stable versions like `1.0.0`) can be breaking
 - Python makes breaking changes in minor updates, e.g. from `3.12` to `3.13`
 
-It can be tempting to propose ideas like "let's treat minor updates of Python as major updates" but that is swapping one problem for a worse problem.
+It can be tempting to propose ideas like "treat minor updates of Python as major updates" but that is swapping one problem for a worse problem.
 The definitions of major and minor should not be redefined and broken in order to shoehorn in the related concept of "breaking change".
 Instead, Renovate has the concept of `isBreaking`, which can be decided independently of `updateType`.
 
-Here's an example of grouping all non-breaking updates together:
+Here is an example of grouping all non-breaking updates together:
 
 ```json
 {

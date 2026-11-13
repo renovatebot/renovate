@@ -191,13 +191,11 @@ export async function readDashboardBody(
   if (config.mode === 'silent') {
     logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
   } else if (
-    config.dependencyDashboard === true ||
+    config.dependencyDashboard?.enabled === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
-    config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle ?? `Dependency Dashboard`;
-    const issue = await platform.findIssue(config.dependencyDashboardTitle);
+    const issue = await platform.findIssue(getDashboardTitle(config));
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
       dashboardChecks = parseDashboardIssue(issue.body ?? '');
@@ -221,6 +219,17 @@ export async function readDashboardBody(
   }
 
   Object.assign(config, dashboardChecks);
+}
+
+function needsDashboardApproval(branch: BranchConfig): boolean {
+  return (
+    !!branch.dependencyDashboardApproval ||
+    !!branch.dependencyDashboardPrApproval
+  );
+}
+
+function getDashboardTitle(config: RenovateConfig): string {
+  return config.dependencyDashboard?.title ?? 'Dependency Dashboard';
 }
 
 function formatAsMarkdownLink(name: string, url?: string | null): string {
@@ -335,7 +344,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   if (repoProblems.size) {
     newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
-      config.customizeDashboard?.repoProblemsHeader ??
+      config.dependencyDashboard?.customize?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
     newIssueBody += `${template.compile(repoProblemsHeader, config)}\n\n`;
 
@@ -368,24 +377,20 @@ export async function ensureDependencyDashboard(
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
   if (!(
-    config.dependencyDashboard === true ||
+    config.dependencyDashboard?.enabled === true ||
     config.dependencyDashboardApproval === true ||
     config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
       true ||
-    branches.some(
-      (branch) =>
-        !!branch.dependencyDashboardApproval ||
-        !!branch.dependencyDashboardPrApproval,
-    )
+    branches.some(needsDashboardApproval)
   )) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { title: config.dependencyDashboardTitle },
+        { title: getDashboardTitle(config) },
         'DRY-RUN: Would close Dependency Dashboard',
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(getDashboardTitle(config));
       delete config.dependencyDashboardIssue;
     }
     return;
@@ -426,7 +431,9 @@ export async function ensureDependencyDashboard(
                 replacementUpdate.newName,
               )
             );
-          if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
+          const deprecationOrReplacement =
+            dep.deprecationMessage ?? hasAnyReplacement;
+          if (name && deprecationOrReplacement) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {
@@ -441,26 +448,26 @@ export async function ensureDependencyDashboard(
 
   const hasBranches = isNonEmptyArray(branches);
   if (
-    config.dependencyDashboardAutoclose &&
+    config.dependencyDashboard?.autoclose &&
     !hasBranches &&
     !hasDeprecationsOrReplacements
   ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { title: config.dependencyDashboardTitle },
+        { title: getDashboardTitle(config) },
         'DRY-RUN: Would close Dependency Dashboard',
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(getDashboardTitle(config));
       delete config.dependencyDashboardIssue;
     }
     return;
   }
   let issueBody = '';
 
-  if (config.dependencyDashboardHeader?.length) {
-    issueBody += `${template.compile(config.dependencyDashboardHeader, config)}\n\n`;
+  if (config.dependencyDashboard?.header?.length) {
+    issueBody += `${template.compile(config.dependencyDashboard.header, config)}\n\n`;
   }
 
   if (configMigrationRes.result === 'pr-exists') {
@@ -496,7 +503,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  if (config.dependencyDashboardReportAbandonment) {
+  if (config.dependencyDashboard?.reportAbandonment) {
     issueBody += getAbandonedPackagesMd(config, packageFiles);
   }
 
@@ -680,21 +687,24 @@ export async function ensureDependencyDashboard(
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(
-      { title: config.dependencyDashboardTitle },
+      { title: getDashboardTitle(config) },
       'DRY-RUN: Would ensure Dependency Dashboard',
     );
   } else {
     const result = await platform.ensureIssue({
-      title: config.dependencyDashboardTitle!,
+      title: getDashboardTitle(config),
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
-      labels: config.dependencyDashboardLabels,
+      labels: config.dependencyDashboard?.labels?.map((label) =>
+        template.compile(label, config),
+      ),
       confidential: config.confidential,
+      shouldPin: config.dependencyDashboard?.pinned,
     });
     // ensureIssue doesn't return the issue, so a newly created (or renamed)
     // dashboard needs a lookup to record its number
     if (result && !config.dependencyDashboardIssue) {
-      const issue = await platform.findIssue(config.dependencyDashboardTitle!);
+      const issue = await platform.findIssue(getDashboardTitle(config));
       config.dependencyDashboardIssue = issue?.number;
     }
   }
@@ -768,8 +778,8 @@ export function getAbandonedPackagesMd(
 
 function getFooter(config: RenovateConfig): string {
   let footer = '';
-  if (config.dependencyDashboardFooter?.length) {
-    footer += `---\n${template.compile(config.dependencyDashboardFooter, config)}\n`;
+  if (config.dependencyDashboard?.footer?.length) {
+    footer += `---\n${template.compile(config.dependencyDashboard.footer, config)}\n`;
   }
 
   return footer;
@@ -782,8 +792,8 @@ export async function getDashboardMarkdownVulnerabilities(
   let result = '';
 
   if (
-    isNullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
-    config.dependencyDashboardOSVVulnerabilitySummary === 'none'
+    isNullOrUndefined(config.dependencyDashboard?.osvVulnerabilitySummary) ||
+    config.dependencyDashboard.osvVulnerabilitySummary === 'none'
   ) {
     return result;
   }
@@ -825,7 +835,7 @@ export async function getDashboardMarkdownVulnerabilities(
   }
 
   let renderedVulnerabilities: Vulnerability[];
-  switch (config.dependencyDashboardOSVVulnerabilitySummary) {
+  switch (config.dependencyDashboard?.osvVulnerabilitySummary) {
     // filter vulnerabilities to display based on configuration
     case 'unresolved':
       renderedVulnerabilities = unresolvedVulnerabilities;

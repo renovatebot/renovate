@@ -45,7 +45,7 @@ You may use any of these items:
 - `depType`, _or_ use the `depTypeTemplate` template field
 - `versioning`, _or_ the use `versioningTemplate` template field. If neither are present, Renovate defaults to `semver-coerced`
 - `extractVersion`, _or_ use the `extractVersionTemplate` template field
-- `registryUrl`, _or_ use the `registryUrlTemplate` template field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
+- `registryUrl`, _or_ use the `registryUrlTemplate` template field. If it is a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - `indentation`. Must be empty, _or_ whitespace. Else Renovate restes only `indentation` to an empty string
 
 ### Usage
@@ -89,7 +89,7 @@ We recommend you follow these steps:
 
 1. Read the official JSONata query language docs
 2. Check our example queries below
-3. You're ready to make your own config
+3. You are ready to make your own config
 
 Alternatively, you can use "trial and error" to a working config by adjusting our examples.
 

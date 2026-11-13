@@ -22,17 +22,17 @@ We have multiple kinds of `group:` presets, with different rules.
 
 ##### Rules for `group:recommended` presets
 
-1. The `group:recommended` preset is for related dependencies which aren't from a monorepo but which usually need to be updated together (as separate PRs may each break)
+1. The `group:recommended` preset is for related dependencies which are not from a monorepo but which usually need to be updated together (as separate PRs may each break)
 
 ##### Rules for `group:*` presets
 
 1. Finally, any other `group:*` presets can be added if they are beneficial to a wide number of users
-1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one-by-one and _not_ get them automatically from `config:recommended`, which includes `group:monorepos` and `group:recommended`
+1. They do not need to be added to `group:recommended`, meaning that users will "opt in" to them one-by-one and _not_ get them automatically from `config:recommended`, which includes `group:monorepos` and `group:recommended`
 
 #### Rules for replacement presets
 
 1. Replacement PRs should ideally propose a replacement only once the user is on a compatible version, by specifying a compatible `matchCurrentVersion` constraint
-1. If no compatible replacement upgrade is possible, it's acceptable to propose an incompatible one (e.g. a major version upgrade)
+1. If no compatible replacement upgrade is possible, it is acceptable to propose an incompatible one (e.g. a major version upgrade)
 1. Replacements should update the user to the first recommended version of the new dependency and not include any new changes - whether breaking or not - if they can be avoided, in short: pin the new version
 
 If possible, replacement presets should give the user a replacement version that is _functionally identical_ to the _last version_ under the _old_ name.

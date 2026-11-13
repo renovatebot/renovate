@@ -233,6 +233,27 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
+  it('skips dependency info when no suitable version is found', async () => {
+    mockGenericPackage({
+      meta: codeBlock`
+        <metadata>
+          <groupId>org.example</groupId>
+          <artifactId>package</artifactId>
+          <versioning>
+            <versions>
+              <version></version>
+            </versions>
+          </versioning>
+        </metadata>
+      `,
+      pom: null,
+    });
+
+    const res = await get();
+
+    expect(res).toMatchObject({ releases: [] });
+  });
+
   it('keeps respectLatest when metadata has no latest tag', async () => {
     mockGenericPackage({
       meta: codeBlock`

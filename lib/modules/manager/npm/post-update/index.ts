@@ -1,5 +1,9 @@
 // TODO: types (#22198)
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
+  isString,
+} from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -151,11 +155,10 @@ export async function writeExistingFiles(
     const npmrcFilename = upath.join(basedir, '.npmrc');
     // Write out the file unless the npmrc came from the workspace
     // npmrcFilename will be set whenever the file was read from disk during extract
-    if (
-      isString(npmrc) &&
-      (npmrcFilename === packageFile.managerData.npmrcFileName ||
-        !packageFile.managerData.npmrcFileName)
-    ) {
+    const isNpmrcOwnFile =
+      npmrcFilename === packageFile.managerData.npmrcFileName ||
+      !packageFile.managerData.npmrcFileName;
+    if (isString(npmrc) && isNpmrcOwnFile) {
       try {
         if (!originalNpmrcFiles.has(npmrcFilename)) {
           const originalNpmrc = await readLocalFile(npmrcFilename, 'utf8');
@@ -396,7 +399,9 @@ export async function updateYarnBinary(
   let yarnrcYml = existingYarnrcYmlContent;
   try {
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
-    yarnrcYml ??= (await getFile(yarnrcYmlFilename)) ?? undefined;
+    if (isNullOrUndefined(yarnrcYml)) {
+      yarnrcYml = (await getFile(yarnrcYmlFilename)) ?? undefined;
+    }
     const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
     if (!isString(yarnrcYml) || !isString(newYarnrcYml)) {
       return existingYarnrcYmlContent;
@@ -457,13 +462,12 @@ async function getAdditionalFilesInner(
     return { artifactErrors, artifactNotices, updatedArtifacts };
   }
   logger.debug('Getting updated lock files');
-  if (
-    config.isLockFileMaintenance &&
-    config.reuseExistingBranch &&
-    (await scm.branchExists(config.branchName))
-  ) {
-    logger.debug('Skipping lockFileMaintenance update');
-    return { artifactErrors, artifactNotices, updatedArtifacts };
+  if (config.isLockFileMaintenance && config.reuseExistingBranch) {
+    const branchExists = await scm.branchExists(config.branchName);
+    if (branchExists) {
+      logger.debug('Skipping lockFileMaintenance update');
+      return { artifactErrors, artifactNotices, updatedArtifacts };
+    }
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');

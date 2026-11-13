@@ -422,6 +422,8 @@ describe('config/presets/index', () => {
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
+          'rumdl',
           'standard',
         ],
       });
@@ -433,7 +435,7 @@ describe('config/presets/index', () => {
       expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(25);
+      expect(rule.matchPackageNames).toHaveLength(27);
     });
 
     it('migrates automerge in presets', async () => {
@@ -1575,6 +1577,8 @@ describe('config/presets/index', () => {
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
+          'rumdl',
           'standard',
         ],
       });

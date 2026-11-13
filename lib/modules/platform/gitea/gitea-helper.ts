@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea.ts';
+import { isNotFound, isOk } from '../../../util/http/status.ts';
 import { getQueryString } from '../../../util/url.ts';
 import {
   Branch,
@@ -81,10 +82,10 @@ export async function isOrg(
   try {
     const url = `${API_PATH}/orgs/${organization}`;
     const res = await http.getJsonUnchecked(url);
-    platformCache.orgs[organization] = res.statusCode === 200;
-    return res.statusCode === 200;
+    platformCache.orgs[organization] = isOk(res);
+    return isOk(res);
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       return false;
     }
     // throw other errors
@@ -234,7 +235,7 @@ export async function getPRByBranch(
     return res.body;
   } catch (err) {
     logger.trace({ err }, 'Error while fetching PR');
-    if (err.statusCode !== 404) {
+    if (!isNotFound(err)) {
       logger.debug({ err }, 'Error while fetching PR');
     }
     return null;

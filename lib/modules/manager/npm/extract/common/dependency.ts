@@ -255,12 +255,14 @@ export function getExtractedConstraints(
     'vscode',
   ];
   for (const dep of deps) {
+    const isConstraintDepType =
+      dep.depType === 'engines' ||
+      dep.depType === 'packageManager' ||
+      dep.depType === 'devEngines.runtime' ||
+      dep.depType === 'devEngines.packageManager';
     if (
       !dep.skipReason &&
-      (dep.depType === 'engines' ||
-        dep.depType === 'packageManager' ||
-        dep.depType === 'devEngines.runtime' ||
-        dep.depType === 'devEngines.packageManager') &&
+      isConstraintDepType &&
       dep.depName &&
       isConstraintName(dep.depName) &&
       constraints.includes(dep.depName) &&

@@ -1111,6 +1111,24 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it('lockfile maintenance branch does not exist', async () => {
+      scm.branchExists.mockResolvedValueOnce(false);
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      await getAdditionalFiles(
+        {
+          ...updateConfig,
+          reuseExistingBranch: true,
+          isLockFileMaintenance: true,
+        },
+        additionalFiles,
+      );
+      expect(scm.branchExists).toHaveBeenCalledOnce();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        'Skipping lockFileMaintenance update',
+      );
+      expect(spyNpm).toHaveBeenCalled();
+    });
+
     it('fails for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: true, stderr: 'some-error' });
       await expect(
