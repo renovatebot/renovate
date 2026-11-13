@@ -408,6 +408,12 @@ export async function getUpdatedPackageFiles(
     contents: updatedFileContents[name],
   }));
   const updatedArtifacts: FileChange[] = [];
+  const pendingVersionChecks: {
+    manager: string;
+    packageFileName: string;
+    packageFileContent: string;
+    updatedDeps: BranchUpgradeConfig[];
+  }[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
   if (isNonEmptyArray(updatedPackageFiles)) {
@@ -463,14 +469,12 @@ export async function getUpdatedPackageFiles(
           artifactNotices,
         );
         if (isNonEmptyArray(results)) {
-          await checkForPendingVersions(
+          pendingVersionChecks.push({
             manager,
-            packageFile.path,
-            packageFile.contents!.toString(),
+            packageFileName: packageFile.path,
+            packageFileContent: packageFile.contents!.toString(),
             updatedDeps,
-            artifactErrors,
-            config,
-          );
+          });
         }
       }
     }
@@ -519,14 +523,12 @@ export async function getUpdatedPackageFiles(
         );
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
-          await checkForPendingVersions(
+          pendingVersionChecks.push({
             manager,
-            packageFile.path,
-            packageFile.contents!.toString(),
+            packageFileName: packageFile.path,
+            packageFileContent: packageFile.contents!.toString(),
             updatedDeps,
-            artifactErrors,
-            config,
-          );
+          });
         }
       }
     }
@@ -574,6 +576,19 @@ export async function getUpdatedPackageFiles(
         }
       }
     }
+  }
+  // A later workspace update can rewrite a lockfile produced by an earlier one.
+  // Validate against the final artifact contents that will be committed.
+  for (const check of pendingVersionChecks) {
+    await checkForPendingVersions(
+      check.manager,
+      check.packageFileName,
+      check.packageFileContent,
+      check.updatedDeps,
+      artifactErrors,
+      updatedArtifacts,
+      config,
+    );
   }
   return {
     reuseExistingBranch, // Need to overwrite original config
@@ -669,6 +684,7 @@ async function checkForPendingVersions(
   packageFileContent: string,
   updatedDeps: BranchUpgradeConfig[],
   artifactErrors: ArtifactError[],
+  updatedArtifacts: FileChange[],
   config: BranchConfig,
 ): Promise<void> {
   const depNameToUpgradeInfo = new Map<
@@ -694,7 +710,15 @@ async function checkForPendingVersions(
     manager,
     packageFileContent,
     packageFileName,
-    config,
+    {
+      ...patchConfigForArtifactsUpdate(config, manager, packageFileName),
+      fileContents: Object.fromEntries(
+        updatedArtifacts.map((file) => [
+          file.path,
+          file.type === 'addition' ? file.contents : null,
+        ]),
+      ),
+    },
   );
   if (!extracted) {
     logger.warn(

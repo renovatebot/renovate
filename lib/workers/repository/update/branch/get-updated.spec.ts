@@ -3,6 +3,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
+import * as _bun from '../../../../modules/manager/bun/index.ts';
 import * as _bundler from '../../../../modules/manager/bundler/index.ts';
 import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
@@ -1614,6 +1615,132 @@ describe('workers/repository/update/branch/get-updated', () => {
         minimumReleaseAgeBehaviour: 'timestamp-required',
       } satisfies BranchConfig;
       git.getFile.mockResolvedValueOnce('existing content');
+    });
+
+    it.each([
+      { resolvedVersion: '1.2.3', lockfileOnly: false, expectedErrors: [] },
+      { resolvedVersion: '1.2.3', lockfileOnly: true, expectedErrors: [] },
+      {
+        resolvedVersion: '1.3.0',
+        lockfileOnly: false,
+        expectedErrors: [
+          {
+            fileName: 'package.json',
+            stderr: expect.stringContaining('resolved to version 1.3.0'),
+          },
+        ],
+      },
+    ])(
+      'checks the regenerated Bun lock version $resolvedVersion (lockfileOnly=$lockfileOnly) with the real extractor',
+      async ({ resolvedVersion, lockfileOnly, expectedErrors }) => {
+        const manifest = JSON.stringify({ dependencies: { foo: '^1.2.3' } });
+        const lock = JSON.stringify({
+          lockfileVersion: 2,
+          workspaces: { '': { name: 'app' } },
+          packages: { foo: [`foo@${resolvedVersion}`, '', {}, 'integrity'] },
+        });
+        config.packageFiles = {
+          bun: [
+            { packageFile: 'package.json', lockFiles: ['bun.lock'], deps: [] },
+          ],
+        };
+        config.upgrades.push({
+          packageFile: 'package.json',
+          manager: 'bun',
+          branchName: '',
+          isLockfileUpdate: lockfileOnly,
+          depName: 'foo',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        });
+        git.getFile
+          .mockReset()
+          .mockResolvedValue(lockfileOnly ? manifest : 'existing content');
+        vi.spyOn(_bun, 'updateDependency').mockResolvedValueOnce(manifest);
+        vi.spyOn(_bun, 'updateArtifacts').mockResolvedValueOnce([
+          { file: { type: 'deletion', path: 'bun.lockb' } },
+          { file: { type: 'addition', path: 'bun.lock', contents: lock } },
+        ]);
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(result.artifactErrors).toEqual(expectedErrors);
+        expect(logger.logger.warn).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Could not re-extract the packageFile after updating it',
+        );
+      },
+    );
+
+    it('checks earlier workspace updates against the final shared Bun lock', async () => {
+      const rootManifest = JSON.stringify({ dependencies: { foo: '^1.2.3' } });
+      const childManifest = JSON.stringify({ dependencies: { bar: '^1.2.3' } });
+      function lock(fooVersion: string): string {
+        return JSON.stringify({
+          lockfileVersion: 2,
+          workspaces: { '': {}, 'packages/app': { name: 'app' } },
+          packages: { foo: [`foo@${fooVersion}`], bar: ['bar@1.2.3'] },
+        });
+      }
+      config.packageFiles = {
+        bun: ['package.json', 'packages/app/package.json'].map(
+          (packageFile) => ({
+            packageFile,
+            lockFiles: ['bun.lock'],
+            deps: [],
+          }),
+        ),
+      };
+      config.upgrades.push(
+        {
+          packageFile: 'package.json',
+          manager: 'bun',
+          branchName: '',
+          depName: 'foo',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        },
+        {
+          packageFile: 'packages/app/package.json',
+          manager: 'bun',
+          branchName: '',
+          depName: 'bar',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.4.0'],
+        },
+      );
+      git.getFile.mockReset().mockResolvedValue('existing content');
+      vi.spyOn(_bun, 'updateDependency')
+        .mockResolvedValueOnce(rootManifest)
+        .mockResolvedValueOnce(childManifest);
+      vi.spyOn(_bun, 'updateArtifacts')
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'bun.lock',
+              contents: lock('1.2.3'),
+            },
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'bun.lock',
+              contents: lock('1.3.0'),
+            },
+          },
+        ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.artifactErrors).toEqual([
+        {
+          fileName: 'package.json',
+          stderr: expect.stringContaining('resolved to version 1.3.0'),
+        },
+      ]);
     });
 
     describe('when artifact update introduces a pending version', () => {
