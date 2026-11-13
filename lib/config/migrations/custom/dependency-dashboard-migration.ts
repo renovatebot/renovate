@@ -1,19 +1,31 @@
 import { isBoolean, isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
-import type { DependencyDashboardConfig } from '../../types.ts';
+import type {
+  DependencyDashboardConfig,
+  RenovateOptions,
+} from '../../types.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
-const dependencyDashboardFields: Record<
+/**
+ * The flat Dependency Dashboard options which moved into `dependencyDashboard`, with the field they moved to and the type they had.
+ */
+const flatDependencyDashboardOptions: Record<
   string,
-  keyof DependencyDashboardConfig
+  { field: keyof DependencyDashboardConfig; type: RenovateOptions['type'] }
 > = {
-  customizeDashboard: 'customize',
-  dependencyDashboardAutoclose: 'autoclose',
-  dependencyDashboardFooter: 'footer',
-  dependencyDashboardHeader: 'header',
-  dependencyDashboardLabels: 'labels',
-  dependencyDashboardOSVVulnerabilitySummary: 'osvVulnerabilitySummary',
-  dependencyDashboardReportAbandonment: 'reportAbandonment',
-  dependencyDashboardTitle: 'title',
+  customizeDashboard: { field: 'customize', type: 'object' },
+  dependencyDashboardAutoclose: { field: 'autoclose', type: 'boolean' },
+  dependencyDashboardFooter: { field: 'footer', type: 'string' },
+  dependencyDashboardHeader: { field: 'header', type: 'string' },
+  dependencyDashboardLabels: { field: 'labels', type: 'array' },
+  dependencyDashboardOSVVulnerabilitySummary: {
+    field: 'osvVulnerabilitySummary',
+    type: 'string',
+  },
+  dependencyDashboardReportAbandonment: {
+    field: 'reportAbandonment',
+    type: 'boolean',
+  },
+  dependencyDashboardTitle: { field: 'title', type: 'string' },
 };
 
 /**
@@ -46,7 +58,7 @@ export class DependencyDashboardMigration extends AbstractMigration {
     }
 
     if (key !== 'dependencyDashboard') {
-      dependencyDashboard[dependencyDashboardFields[key]] ??= value;
+      dependencyDashboard[flatDependencyDashboardOptions[key].field] ??= value;
       this.delete(key);
     }
     this.setHard('dependencyDashboard', dependencyDashboard);
