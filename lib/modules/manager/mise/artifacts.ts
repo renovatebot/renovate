@@ -30,6 +30,8 @@ import {
   updateLockFile,
 } from '../util.ts';
 import { getConfigType, getLockFileName, getSidecarDir } from './lockfile.ts';
+import { MiseLockFile } from './schema.ts';
+import { getOrderedMiseRegistryBackends } from './upgradeable-tooling.ts';
 
 /**
  * First mise release that supports the features this manager relies on:
@@ -82,13 +84,48 @@ function versionSupportsSafeFeatures(version: string | null): boolean {
   );
 }
 
+function isPythonTool(toolName: string): boolean {
+  return toolName.startsWith('pipx:') || toolName.startsWith('pypi:');
+}
+
+function needsPythonTools(
+  updatedDeps: UpdateArtifact['updatedDeps'],
+  lockFileContent: string,
+): boolean {
+  const parsed = MiseLockFile.safeParse(lockFileContent);
+  const lockedTools = parsed.success ? parsed.data.tools : {};
+
+  for (const [toolName, entries] of Object.entries(lockedTools)) {
+    const hasPythonBackend = entries.some(
+      ({ backend }) => backend && isPythonTool(backend),
+    );
+    if (isPythonTool(toolName) || hasPythonBackend) {
+      return true;
+    }
+  }
+
+  return updatedDeps.some(({ depName }) => {
+    if (!isNonEmptyStringAndNotWhitespace(depName)) {
+      return false;
+    }
+    if (isPythonTool(depName)) {
+      return true;
+    }
+    if (depName.includes(':') || depName in lockedTools) {
+      return false;
+    }
+    const backends = getOrderedMiseRegistryBackends(depName);
+    return 'pipx' in backends || 'pypi' in backends;
+  });
+}
+
 /**
  * Resolver tools that mise may invoke while running `mise lock`, for instance to convert an inexact version like `1` against the npm registry.
  *
  * NOTE: this will install all relevant tools, regardless of what the given mise configuration uses.
  *
  * In safe mode, mise resolves versions without node, npm, Go, or Ruby.
- * Both modes include Python and uv for Python dependency locking.
+ * Both modes include Python and uv when pipx or pypi tools are detected.
  *
  * @see https://mise.jdx.dev/dev-tools/backends/npm.html
  * @see https://mise.jdx.dev/dev-tools/backends/go.html
@@ -98,22 +135,28 @@ function versionSupportsSafeFeatures(version: string | null): boolean {
 async function getMiseLockToolConstraints(
   config: ToolConstraintsConfig,
   miseConstraint: string | undefined,
+  needsPython: boolean,
   safeMode = false,
 ): Promise<ToolConstraint[]> {
   const miseToolConstraint: ToolConstraint = {
     toolName: 'mise',
     constraint: miseConstraint,
   };
-  const pythonToolConstraint: ToolConstraint = {
-    toolName: 'python',
-    constraint: await resolveToolConstraint(config, 'python'),
-  };
-  const uvToolConstraint: ToolConstraint = {
-    toolName: 'uv',
-    constraint: await resolveToolConstraint(config, 'uv'),
-  };
+  const pythonToolConstraints: ToolConstraint[] = [];
+  if (needsPython) {
+    pythonToolConstraints.push(
+      {
+        toolName: 'python',
+        constraint: await resolveToolConstraint(config, 'python'),
+      },
+      {
+        toolName: 'uv',
+        constraint: await resolveToolConstraint(config, 'uv'),
+      },
+    );
+  }
   if (safeMode) {
-    return [miseToolConstraint, pythonToolConstraint, uvToolConstraint];
+    return [miseToolConstraint, ...pythonToolConstraints];
   }
   return [
     miseToolConstraint,
@@ -134,8 +177,7 @@ async function getMiseLockToolConstraints(
       toolName: 'ruby',
       constraint: await resolveToolConstraint(config, 'ruby'),
     },
-    pythonToolConstraint,
-    uvToolConstraint,
+    ...pythonToolConstraints,
   ];
 }
 
@@ -251,6 +293,7 @@ export async function updateArtifacts({
     toolConstraints: await getMiseLockToolConstraints(
       config,
       miseConstraint,
+      needsPythonTools(updatedDeps, currentLockFileContent),
       safeMode,
     ),
     docker: {},
