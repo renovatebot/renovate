@@ -203,7 +203,6 @@ export async function flattenUpdates(
             applyManagerScopedOptions(updateConfig, managerConfig);
             applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
-            updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
 
             // make sure that we use the dependency's current state of attestation, rather than using the new update's value
