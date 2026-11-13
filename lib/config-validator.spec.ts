@@ -148,6 +148,91 @@ describe.concurrent('config-validator', () => {
       });
     });
 
+    it('applies the migration with --migrate, keeping comments, so --strict passes', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.jsonc');
+        await fs.writeFile(
+          file,
+          codeBlock`
+            {
+              // keep this comment
+              "extends": ["config:base"],
+              "packageRules": [
+                {
+                  "packagePatterns": ["foo"],
+                  "automerge": true
+                }
+              ]
+            }
+          `,
+        );
+
+        const { exitCode, all } = await runValidator([
+          '--no-global',
+          '--strict',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(0);
+        expect(all).toContain('Applied config migration');
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(
+          `${codeBlock`
+            {
+              // keep this comment
+              "extends": ["config:recommended"],
+              "packageRules": [
+                {
+                  "automerge": true,
+                  "matchPackageNames": [
+                    "/foo/"
+                  ]
+                }
+              ]
+            }
+          `}\n`,
+        );
+      });
+    });
+
+    it('does not rewrite a file that needs no migration with --migrate', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.json');
+        const content = '{"extends":   ["config:recommended"]}';
+        await fs.writeFile(file, content);
+
+        const { exitCode } = await runValidator([
+          '--no-global',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(0);
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(content);
+      });
+    });
+
+    it('does not apply the migration to an unsupported file type with --migrate', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.yaml');
+        const content = 'extends:\n  - config:base\n';
+        await fs.writeFile(file, content);
+
+        const { exitCode, all } = await runValidator([
+          '--no-global',
+          '--strict',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(1);
+        expect(all).toContain(
+          'Config migration cannot be applied automatically to this file type',
+        );
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(content);
+      });
+    });
+
     it('treats file as global config by default', async () => {
       await withTmpDir(async (dirPath) => {
         const file = await writeGlobalConfig(dirPath, 'config.json', {
@@ -322,6 +407,24 @@ describe.concurrent('config-validator', () => {
 
         expect(exitCode).toBe(0);
         expect(all).toContain('Validating package.json > renovate');
+      });
+    });
+
+    it('does not overwrite package.json with its renovate config with --migrate', async () => {
+      await withTmpDir(async (dirPath) => {
+        const pkgJson = path.join(dirPath, 'package.json');
+        const content = JSON.stringify({
+          name: 'test',
+          renovate: { extends: ['config:base'] },
+        });
+        await fs.writeFile(pkgJson, content);
+
+        const { all } = await runValidator(['--migrate'], { cwd: dirPath });
+
+        expect(all).toContain(
+          'Config migration cannot be applied automatically to this file type',
+        );
+        await expect(fs.readFile(pkgJson, 'utf8')).resolves.toBe(content);
       });
     });
   });
