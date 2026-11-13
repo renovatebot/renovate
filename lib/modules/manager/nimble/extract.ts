@@ -1,7 +1,8 @@
+import type { SkipReason } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import { resolvePackageUrl } from './registry.ts';
+import { expandForgeAlias, resolvePackageUrl } from './registry.ts';
 
 export function parseRequiresItems(rawLine: string): string[] {
   const items: string[] = [];
@@ -30,19 +31,25 @@ export function parseDependencyItem(item: string): {
   // Strip feature flags like [gui]
   const noFlags = trimmed.replace(regEx('\\[[^\\]]*\\]'), '').trim();
 
+  // For file:// URLs, Nimble treats the entire string as the name (version.nim:378)
+  if (noFlags.toLowerCase().startsWith('file://')) {
+    return { depName: noFlags, currentValue: '' };
+  }
+
+  // In Nimble (version.nim:381), if there is whitespace, the first space
+  // separates the package name from the version specification.
+  const firstSpace = noFlags.search(regEx('\\s'));
+  if (firstSpace !== -1) {
+    const depName = noFlags.slice(0, firstSpace).trim();
+    const currentValue = noFlags.slice(firstSpace + 1).trim();
+    return { depName, currentValue };
+  }
+
   // Check for VCS ref: e.g. pkg#head, pkg#branch, pkg#commit
   const hashIdx = noFlags.indexOf('#');
   if (hashIdx !== -1) {
     const depName = noFlags.slice(0, hashIdx).trim();
-    const vcsRef = noFlags.slice(hashIdx).trim();
-    return { depName, currentValue: vcsRef };
-  }
-
-  // Check for operator constraints: >=, <=, ==, !=, ^=, ~=, >, <, &
-  const opMatch = regEx('(?<op>[><=!~^&]+.*)$').exec(noFlags);
-  if (opMatch?.index && opMatch.index > 0) {
-    const depName = noFlags.slice(0, opMatch.index).trim();
-    const currentValue = opMatch[0].trim();
+    const currentValue = noFlags.slice(hashIdx).trim();
     return { depName, currentValue };
   }
 
@@ -85,16 +92,32 @@ async function createPackageDependency(
     return null;
   }
 
-  const isCompiler = depName.toLowerCase() === 'nim';
+  const lowerName = depName.toLowerCase();
+
+  if (lowerName.startsWith('file://')) {
+    return {
+      depName,
+      datasource: GitTagsDatasource.id,
+      depType,
+      skipReason: 'file-dependency',
+    };
+  }
+
+  const isCompiler =
+    lowerName === 'nim' || lowerName === 'nimrod' || lowerName === 'compiler';
   let cleanName = depName;
 
-  if (
-    depName.startsWith('https://') ||
+  const targetUrl =
+    expandForgeAlias(depName) ??
+    (depName.startsWith('https://') ||
     depName.startsWith('http://') ||
     depName.startsWith('git@')
-  ) {
-    const urlParts = depName.split('/');
-    const lastPart = urlParts.at(-1)?.replace(regEx('\\.git$'), '');
+      ? depName
+      : undefined);
+
+  if (targetUrl) {
+    const urlParts = targetUrl.replace(regEx('\\.git$'), '').split('/');
+    const lastPart = urlParts.at(-1);
     if (lastPart) {
       cleanName = lastPart;
     }
@@ -109,6 +132,13 @@ async function createPackageDependency(
 
   const packageName = await resolvePackageUrl(depName, packageFile);
 
+  let skipReason: SkipReason | undefined;
+  if (!currentValue || currentValue === 'any' || currentValue === '*') {
+    skipReason = 'unspecified-version';
+  } else if (currentValue.startsWith('#')) {
+    skipReason = 'not-a-version';
+  }
+
   return {
     depName: cleanName,
     packageName,
@@ -116,6 +146,7 @@ async function createPackageDependency(
     datasource: GitTagsDatasource.id,
     depType: finalDepType,
     replaceString: item,
+    ...(skipReason ? { skipReason } : {}),
   };
 }
 
@@ -131,7 +162,9 @@ export async function extractPackageFile(
   const lines = content.split(regEx('\\r?\\n'));
   let inTaskBlock = false;
   let inRequiresContinuation = false;
+  let inRequiresParen = false;
   let inTaskRequiresContinuation = false;
+  let inTaskRequiresParen = false;
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -141,12 +174,30 @@ export async function extractPackageFile(
       continue;
     }
 
-    const isTaskRequires = regEx('^taskRequires\\s+').test(trimmed);
-    if (isTaskRequires || inTaskRequiresContinuation) {
+    const codeWithoutComment = trimmed.replace(regEx('#.*$'), '').trim();
+
+    const isTaskRequiresStart = regEx('^taskRequires(?:\\s+|\\s*\\()').test(
+      trimmed,
+    );
+    if (
+      isTaskRequiresStart ||
+      inTaskRequiresParen ||
+      inTaskRequiresContinuation
+    ) {
       let items: string[] = [];
-      if (isTaskRequires) {
+      if (isTaskRequiresStart) {
+        const hasOpenParen = regEx('^taskRequires\\s*\\(').test(trimmed);
+        const hasCloseParen = trimmed.includes(')');
+        if (hasOpenParen && !hasCloseParen) {
+          inTaskRequiresParen = true;
+          inTaskRequiresContinuation = false;
+        } else {
+          inTaskRequiresParen = false;
+          inTaskRequiresContinuation = codeWithoutComment.endsWith(',');
+        }
+
         const taskReqMatch = regEx(
-          '^taskRequires\\s+(?:["\'](?<taskNameQuoted>[^"\']+)["\']|(?<taskNameBare>[a-zA-Z0-9_]+))\\s*(?:,\\s*(?<deps>.*))?$',
+          '^taskRequires(?:\\s*\\(|\\s+)(?:["\'](?<taskNameQuoted>[^"\']+)["\']|(?<taskNameBare>[a-zA-Z0-9_]+))\\s*(?:,\\s*(?<deps>.*))?$',
         ).exec(trimmed);
         const depsStr = taskReqMatch?.groups?.deps;
         if (depsStr) {
@@ -154,6 +205,13 @@ export async function extractPackageFile(
         }
       } else {
         items = parseRequiresItems(line);
+        if (inTaskRequiresParen) {
+          if (trimmed.includes(')')) {
+            inTaskRequiresParen = false;
+          }
+        } else {
+          inTaskRequiresContinuation = codeWithoutComment.endsWith(',');
+        }
       }
 
       for (const item of items) {
@@ -166,7 +224,6 @@ export async function extractPackageFile(
           deps.push(dep);
         }
       }
-      inTaskRequiresContinuation = trimmed.endsWith(',');
       continue;
     }
 
@@ -174,6 +231,7 @@ export async function extractPackageFile(
     if (regEx('^task\\s+[a-zA-Z0-9_]+').test(trimmed)) {
       inTaskBlock = true;
       inRequiresContinuation = false;
+      inRequiresParen = false;
       continue;
     }
 
@@ -186,8 +244,26 @@ export async function extractPackageFile(
       continue;
     }
 
-    const isRequires = regEx('^requires\\s+').test(trimmed);
-    if (isRequires || inRequiresContinuation) {
+    const isRequiresStart = regEx('^requires(?:\\s+|\\s*\\()').test(trimmed);
+    if (isRequiresStart || inRequiresParen || inRequiresContinuation) {
+      if (isRequiresStart) {
+        const hasOpenParen = regEx('^requires\\s*\\(').test(trimmed);
+        const hasCloseParen = trimmed.includes(')');
+        if (hasOpenParen && !hasCloseParen) {
+          inRequiresParen = true;
+          inRequiresContinuation = false;
+        } else {
+          inRequiresParen = false;
+          inRequiresContinuation = codeWithoutComment.endsWith(',');
+        }
+      } else if (inRequiresParen) {
+        if (trimmed.includes(')')) {
+          inRequiresParen = false;
+        }
+      } else {
+        inRequiresContinuation = codeWithoutComment.endsWith(',');
+      }
+
       const items = parseRequiresItems(line);
       for (const item of items) {
         const dep = await createPackageDependency(
@@ -199,7 +275,6 @@ export async function extractPackageFile(
           deps.push(dep);
         }
       }
-      inRequiresContinuation = trimmed.endsWith(',');
     }
   }
 
@@ -209,6 +284,5 @@ export async function extractPackageFile(
 
   return {
     deps,
-    lockFiles: ['nimble.lock', 'atlas.lock'],
   };
 }

@@ -1,192 +1,250 @@
-import { fs, partial } from '~test/util.ts';
-import type { FileAddition } from '../../../util/git/types.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
-import { updateArtifacts } from './artifacts.ts';
+import { exec, mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
+const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+  binarySource: 'global',
+};
+
 describe('modules/manager/nimble/artifacts', () => {
-  beforeEach(() => {
-    fs.getSiblingFileName.mockImplementation(
-      (_file: string, sibling: string) => sibling,
-    );
-  });
+  describe('updateArtifacts()', () => {
+    let updateArtifact: UpdateArtifact;
 
-  it('returns null if updatedDeps is undefined or empty', async () => {
-    await expect(
-      updateArtifacts({
-        packageFileName: 'project.nimble',
+    beforeEach(() => {
+      GlobalConfig.set(globalConfig);
+      updateArtifact = {
+        config: {},
+        newPackageFileContent: 'requires "typestates >= 0.14.1"',
+        packageFileName: '/fake/test/pkg/dir/lockfreequeues.nimble',
         updatedDeps: [],
-        newPackageFileContent: '',
-        config: partial<UpdateArtifactsConfig>({}),
-      }),
-    ).resolves.toBeNull();
-
-    await expect(
-      updateArtifacts({
-        packageFileName: 'project.nimble',
-        updatedDeps: undefined as never,
-        newPackageFileContent: '',
-        config: partial<UpdateArtifactsConfig>({}),
-      }),
-    ).resolves.toBeNull();
-  });
-
-  it('updates nimble.lock when dependency changes without digest', async () => {
-    const mockLock = JSON.stringify({
-      version: 1,
-      packages: {
-        chronos: {
-          version: '3.0.0',
-          vcsRevision: 'abc1234',
-        },
-      },
+      };
+      fs.getSiblingFileName.mockImplementation(
+        (_pkg: string, sibling: string) => sibling,
+      );
     });
 
-    fs.readLocalFile.mockImplementation((file: string) => {
-      if (file === 'nimble.lock') {
-        return Promise.resolve(mockLock);
-      }
-      return Promise.resolve(null);
+    it('skips if no updatedDeps and no lockFileMaintenance', async () => {
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
-    const res = await updateArtifacts({
-      packageFileName: 'project.nimble',
-      updatedDeps: [
+    it('skips if neither nimble.lock nor atlas.lock is found', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
+    });
+
+    it('updates nimble.lock via mise exec nimble lock -y', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce('old-nimble-lock') // nimble.lock check
+        .mockResolvedValueOnce(null) // atlas.lock check
+        .mockResolvedValueOnce('new-nimble-lock'); // read updated nimble.lock
+      const execSnapshots = mockExecAll();
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
-          depName: 'chronos',
-          newValue: '>= 4.0.0',
+          file: {
+            path: 'nimble.lock',
+            type: 'addition',
+            contents: 'new-nimble-lock',
+          },
         },
-      ],
-      newPackageFileContent: '',
-      config: partial<UpdateArtifactsConfig>({}),
+      ]);
+      expect(execSnapshots).toBeArrayOfSize(1);
+      expect(execSnapshots[0].cmd).toEqual(
+        'mise exec --yes nim@latest -- nimble lock -y',
+      );
     });
 
-    expect(res).toHaveLength(1);
-    expect(res![0].file?.path).toBe('nimble.lock');
-    const file = res![0].file as FileAddition;
-    const updated = JSON.parse(file.contents as string);
-    expect(updated.packages.chronos.version).toBe('4.0.0');
-    expect(updated.packages.chronos.vcsRevision).toBe('abc1234');
-  });
+    it('returns null when nimble.lock content is unchanged', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce('same-nimble-lock')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('same-nimble-lock');
+      const execSnapshots = mockExecAll();
 
-  it('updates nimble.lock and atlas.lock with newDigest and newVersion fallback', async () => {
-    const mockNimbleLock = JSON.stringify({
-      version: 1,
-      packages: {
-        chronos: {
-          version: '3.0.0',
-          vcsRevision: 'oldsha',
-        },
-      },
-    });
-    const mockAtlasLock = JSON.stringify({
-      packages: {
-        chronos: {
-          version: '3.0.0',
-          commit: 'oldsha',
-        },
-      },
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
+      expect(execSnapshots).toBeArrayOfSize(1);
     });
 
-    fs.readLocalFile.mockImplementation((file: string) => {
-      if (file === 'nimble.lock') {
-        return Promise.resolve(mockNimbleLock);
-      }
-      if (file === 'atlas.lock') {
-        return Promise.resolve(mockAtlasLock);
-      }
-      return Promise.resolve(null);
-    });
+    it('updates atlas.lock via mise exec atlas install && atlas pin', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce(null) // nimble.lock check
+        .mockResolvedValueOnce('old-atlas-lock') // atlas.lock check
+        .mockResolvedValueOnce('new-atlas-lock'); // read updated atlas.lock
+      const execSnapshots = mockExecAll();
 
-    const res = await updateArtifacts({
-      packageFileName: 'project.nimble',
-      updatedDeps: [
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
-          depName: 'chronos',
-          newVersion: 'v4.0.0',
-          newDigest: 'newsha123',
+          file: {
+            path: 'atlas.lock',
+            type: 'addition',
+            contents: 'new-atlas-lock',
+          },
         },
-      ],
-      newPackageFileContent: '',
-      config: partial<UpdateArtifactsConfig>({}),
+      ]);
+      expect(execSnapshots).toBeArrayOfSize(2);
+      expect(execSnapshots[0].cmd).toEqual(
+        'mise exec --yes nim@latest -- atlas install',
+      );
+      expect(execSnapshots[1].cmd).toEqual(
+        'mise exec --yes nim@latest -- atlas pin',
+      );
     });
 
-    expect(res).toHaveLength(2);
-    const nimbleFile = res![0].file as FileAddition;
-    const nimbleUpdated = JSON.parse(nimbleFile.contents as string);
-    expect(nimbleUpdated.packages.chronos.version).toBe('4.0.0');
-    expect(nimbleUpdated.packages.chronos.vcsRevision).toBe('newsha123');
+    it('returns null when atlas.lock content is unchanged', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('same-atlas-lock')
+        .mockResolvedValueOnce('same-atlas-lock');
+      const execSnapshots = mockExecAll();
 
-    const atlasFile = res![1].file as FileAddition;
-    const atlasUpdated = JSON.parse(atlasFile.contents as string);
-    expect(atlasUpdated.packages.chronos.version).toBe('4.0.0');
-    expect(atlasUpdated.packages.chronos.commit).toBe('newsha123');
-  });
-
-  it('handles invalid json or non-object packages gracefully', async () => {
-    fs.readLocalFile.mockImplementation((file: string) => {
-      if (file === 'nimble.lock') {
-        return Promise.resolve('not-json');
-      }
-      if (file === 'atlas.lock') {
-        return Promise.resolve('{"version": 1}');
-      }
-      return Promise.resolve(null);
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
+      expect(execSnapshots).toBeArrayOfSize(2);
     });
 
-    const res = await updateArtifacts({
-      packageFileName: 'project.nimble',
-      updatedDeps: [
+    it('supports lockFileMaintenance for both nimble.lock and atlas.lock', async () => {
+      updateArtifact.config.isLockFileMaintenance = true;
+      fs.readLocalFile
+        .mockResolvedValueOnce('old-nimble-lock')
+        .mockResolvedValueOnce('old-atlas-lock')
+        .mockResolvedValueOnce('new-nimble-lock')
+        .mockResolvedValueOnce('new-atlas-lock');
+      const execSnapshots = mockExecAll();
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
-          depName: 'chronos',
-          newValue: '4.0.0',
-        },
-      ],
-      newPackageFileContent: '',
-      config: partial<UpdateArtifactsConfig>({}),
-    });
-
-    expect(res).toBeNull();
-  });
-
-  it('skips lockfile update if depName or version is missing or dep is not in lockfile', async () => {
-    const mockNimbleLock = JSON.stringify({
-      version: 1,
-      packages: {
-        otherpkg: {
-          version: '1.0.0',
-        },
-      },
-    });
-
-    fs.readLocalFile.mockImplementation((file: string) => {
-      if (file === 'nimble.lock') {
-        return Promise.resolve(mockNimbleLock);
-      }
-      return Promise.resolve(null);
-    });
-
-    const res = await updateArtifacts({
-      packageFileName: 'project.nimble',
-      updatedDeps: [
-        {
-          depName: '',
-          newValue: '4.0.0',
+          file: {
+            path: 'nimble.lock',
+            type: 'addition',
+            contents: 'new-nimble-lock',
+          },
         },
         {
-          depName: 'chronos',
-          newValue: '',
+          file: {
+            path: 'atlas.lock',
+            type: 'addition',
+            contents: 'new-atlas-lock',
+          },
         },
-        {
-          depName: 'missingpkg',
-          newValue: '1.0.0',
-        },
-      ],
-      newPackageFileContent: '',
-      config: partial<UpdateArtifactsConfig>({}),
+      ]);
+      expect(execSnapshots).toBeArrayOfSize(3);
     });
 
-    expect(res).toBeNull();
+    it('rethrows TEMPORARY_ERROR when updating nimble.lock', async () => {
+      const execError = new ExecError(TEMPORARY_ERROR, {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: {},
+      });
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce('old-nimble-lock')
+        .mockResolvedValueOnce(null);
+      exec.mockRejectedValueOnce(execError);
+
+      await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
+        TEMPORARY_ERROR,
+      );
+    });
+
+    it('returns artifactError when nimble.lock update fails', async () => {
+      const execError = new ExecError('nimble_lock_failed', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: {},
+      });
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce('old-nimble-lock')
+        .mockResolvedValueOnce(null);
+      exec.mockRejectedValueOnce(execError);
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+        {
+          artifactError: {
+            fileName: 'nimble.lock',
+            stderr: 'nimble_lock_failed',
+          },
+        },
+      ]);
+    });
+
+    it('rethrows TEMPORARY_ERROR when updating atlas.lock', async () => {
+      const execError = new ExecError(TEMPORARY_ERROR, {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: {},
+      });
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('old-atlas-lock');
+      exec.mockRejectedValueOnce(execError);
+
+      await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
+        TEMPORARY_ERROR,
+      );
+    });
+
+    it('returns artifactError when atlas.lock update fails', async () => {
+      const execError = new ExecError('atlas_pin_failed', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: {},
+      });
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('old-atlas-lock');
+      exec.mockRejectedValueOnce(execError);
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+        {
+          artifactError: {
+            fileName: 'atlas.lock',
+            stderr: 'atlas_pin_failed',
+          },
+        },
+      ]);
+    });
+
+    it('installs mise via containerbase when binarySource=install', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+      updateArtifact.updatedDeps = [{ manager: 'nimble' }];
+      updateArtifact.config.extractedConstraints = { mise: '2026.1.0' };
+      fs.readLocalFile
+        .mockResolvedValueOnce('old-nimble-lock')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('new-nimble-lock');
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts(updateArtifact);
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool mise 2026.1.0' },
+        { cmd: 'mise exec --yes nim@latest -- nimble lock -y' },
+      ]);
+    });
   });
 });

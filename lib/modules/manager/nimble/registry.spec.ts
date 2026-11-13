@@ -4,22 +4,164 @@ import * as packageCache from '../../../util/cache/package/index.ts';
 import {
   CACHE_KEY,
   CACHE_NAMESPACE,
+  expandForgeAlias,
+  extractLockfileUrls,
+  getLockfileRegistry,
   getNimbleRegistry,
   parseNimbleRegistry,
   resolvePackageUrl,
 } from './registry.ts';
 
-vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/cache/package/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/nimble/registry', () => {
   const baseUrl = 'https://raw.githubusercontent.com';
   const path = '/nim-lang/packages/master/packages.json';
 
-  beforeEach(() => {
-    fs.getSiblingFileName.mockImplementation(
-      (_file: string, sibling: string) => sibling,
-    );
+  describe('expandForgeAlias', () => {
+    it('expands github / gh aliases', () => {
+      expect(expandForgeAlias('github:nim-lang/cmark')).toBe(
+        'https://github.com/nim-lang/cmark',
+      );
+      expect(expandForgeAlias('gh:nim-lang/cmark.git')).toBe(
+        'https://github.com/nim-lang/cmark',
+      );
+    });
+
+    it('expands gitlab / gl aliases', () => {
+      expect(expandForgeAlias('gitlab:user/repo')).toBe(
+        'https://gitlab.com/user/repo',
+      );
+      expect(expandForgeAlias('gl:user/repo')).toBe(
+        'https://gitlab.com/user/repo',
+      );
+    });
+
+    it('expands codeberg / cb / cberg and sourcehut / srht / shart aliases', () => {
+      expect(expandForgeAlias('codeberg:user/repo')).toBe(
+        'https://codeberg.org/user/repo',
+      );
+      expect(expandForgeAlias('cb:user/repo')).toBe(
+        'https://codeberg.org/user/repo',
+      );
+      expect(expandForgeAlias('cberg:user/repo')).toBe(
+        'https://codeberg.org/user/repo',
+      );
+      expect(expandForgeAlias('sourcehut:user/repo')).toBe(
+        'https://git.sr.ht/~user/repo',
+      );
+      expect(expandForgeAlias('srht:~user/repo')).toBe(
+        'https://git.sr.ht/~user/repo',
+      );
+      expect(expandForgeAlias('shart:user/repo')).toBe(
+        'https://git.sr.ht/~user/repo',
+      );
+    });
+
+    it('returns undefined for non-aliases or invalid formats', () => {
+      expect(expandForgeAlias('https://github.com/foo/bar')).toBeUndefined();
+      expect(expandForgeAlias('plain-name')).toBeUndefined();
+      expect(expandForgeAlias('unknownforge:user/repo')).toBeUndefined();
+      expect(expandForgeAlias('gh:')).toBeUndefined();
+      expect(expandForgeAlias('gh:onlyuser')).toBeUndefined();
+      expect(expandForgeAlias('gh:/repo')).toBeUndefined();
+      expect(expandForgeAlias('gh:user/')).toBeUndefined();
+    });
+  });
+
+  describe('extractLockfileUrls', () => {
+    it('extracts URLs from nimble.lock v2 (packages and tasks) and atlas.lock (items)', () => {
+      const nimbleLock = JSON.stringify({
+        version: 2,
+        packages: {
+          typestates: {
+            version: '0.14.0',
+            vcsRevision: '086c236a77e759bf9186d32f3f375b8818833f11',
+            url: 'https://github.com/elijahr/nim-typestates',
+            downloadMethod: 'git',
+            dependencies: [],
+            checksums: { sha1: '1970b216cd995276d09951f23c31cdcb7bd2e7ae' },
+          },
+          invalidPkg: 'not-an-object',
+          emptyUrlPkg: { url: '' },
+        },
+        tasks: {
+          test: {
+            unittest2: {
+              version: '0.2.4',
+              url: 'https://github.com/status-im/nim-unittest2',
+            },
+          },
+          invalidTask: 'not-an-object',
+        },
+      });
+
+      const res = extractLockfileUrls(nimbleLock);
+      expect(res.get('typestates')).toBe(
+        'https://github.com/elijahr/nim-typestates',
+      );
+      expect(res.get('unittest2')).toBe(
+        'https://github.com/status-im/nim-unittest2',
+      );
+
+      const atlasLock = JSON.stringify({
+        items: {
+          jester: {
+            dir: '$deps/jester',
+            url: 'https://github.com/dom96/jester',
+            commit: '2dfac077170c62cd6ffc73e3dcfa29c641dcf',
+            version: '',
+          },
+        },
+      });
+      const atlasRes = extractLockfileUrls(atlasLock);
+      expect(atlasRes.get('jester')).toBe('https://github.com/dom96/jester');
+    });
+
+    it('handles invalid JSON or non-object JSON gracefully', () => {
+      expect(extractLockfileUrls('invalid-json').size).toBe(0);
+      expect(extractLockfileUrls('null').size).toBe(0);
+    });
+  });
+
+  describe('getLockfileRegistry', () => {
+    it('returns empty map when packageFile is undefined', async () => {
+      const res = await getLockfileRegistry(undefined);
+      expect(res.size).toBe(0);
+    });
+
+    it('reads nimble.lock and atlas.lock from root or nested directories', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            version: 2,
+            packages: {
+              typestates: { url: 'https://github.com/elijahr/nim-typestates' },
+            },
+          }),
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            items: {
+              typestates: { url: 'https://github.com/other/typestates' },
+              jester: { url: 'https://github.com/dom96/jester' },
+            },
+          }),
+        );
+
+      const res = await getLockfileRegistry('sub/pkg.nimble');
+      expect(res.get('typestates')).toBe(
+        'https://github.com/elijahr/nim-typestates',
+      );
+      expect(res.get('jester')).toBe('https://github.com/dom96/jester');
+    });
+
+    it('handles read errors gracefully', async () => {
+      fs.readLocalFile.mockRejectedValue(new Error('disk error'));
+      const res = await getLockfileRegistry('pkg.nimble');
+      expect(res.size).toBe(0);
+    });
   });
 
   describe('parseNimbleRegistry', () => {
@@ -135,11 +277,17 @@ describe('modules/manager/nimble/registry', () => {
       await expect(resolvePackageUrl('   ')).resolves.toBeUndefined();
     });
 
-    it('returns canonical URL for nim compiler', async () => {
+    it('returns canonical URL for nim compiler and compiler aliases', async () => {
       await expect(resolvePackageUrl('nim')).resolves.toBe(
         'https://github.com/nim-lang/Nim',
       );
       await expect(resolvePackageUrl('Nim')).resolves.toBe(
+        'https://github.com/nim-lang/Nim',
+      );
+      await expect(resolvePackageUrl('nimrod')).resolves.toBe(
+        'https://github.com/nim-lang/Nim',
+      );
+      await expect(resolvePackageUrl('compiler')).resolves.toBe(
         'https://github.com/nim-lang/Nim',
       );
     });
@@ -156,96 +304,47 @@ describe('modules/manager/nimble/registry', () => {
       ).resolves.toBe('git@github.com:status-im/nim-chronos.git');
     });
 
-    it('resolves from companion nimble.lock (Tier 1)', async () => {
-      fs.readLocalFile.mockImplementation((file: string) => {
-        if (file === 'nimble.lock') {
-          return Promise.resolve(
-            JSON.stringify({
-              packages: {
-                chronos: {
-                  url: 'https://github.com/status-im/nim-chronos',
-                },
-              },
-            }),
-          );
-        }
-        return Promise.resolve(null);
-      });
-
-      const res = await resolvePackageUrl('chronos', 'project.nimble');
-      expect(res).toBe('https://github.com/status-im/nim-chronos');
+    it('expands forge aliases to full HTTPS URLs', async () => {
+      await expect(resolvePackageUrl('github:nim-lang/cmark')).resolves.toBe(
+        'https://github.com/nim-lang/cmark',
+      );
+      await expect(resolvePackageUrl('gh:nim-lang/cmark')).resolves.toBe(
+        'https://github.com/nim-lang/cmark',
+      );
+      await expect(resolvePackageUrl('gitlab:user/repo')).resolves.toBe(
+        'https://gitlab.com/user/repo',
+      );
     });
 
-    it('resolves from companion atlas.lock (Tier 1)', async () => {
-      fs.readLocalFile.mockImplementation((file: string) => {
-        if (file === 'atlas.lock') {
-          return Promise.resolve(
-            JSON.stringify({
-              packages: {
-                zippy: {
-                  url: 'https://github.com/guzba/zippy',
-                },
-              },
-            }),
-          );
-        }
-        return Promise.resolve(null);
-      });
+    it('resolves from companion lockfile (Tier 1) before querying registry', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          version: 2,
+          packages: {
+            typestates: { url: 'https://github.com/elijahr/nim-typestates' },
+          },
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(null);
 
-      const res = await resolvePackageUrl('zippy', 'project.nimble');
-      expect(res).toBe('https://github.com/guzba/zippy');
+      const res = await resolvePackageUrl(
+        'typestates',
+        'lockfreequeues.nimble',
+      );
+      expect(res).toBe('https://github.com/elijahr/nim-typestates');
     });
 
-    it('ignores package entries in lockfile with no url or non-matching dep', async () => {
-      fs.readLocalFile.mockImplementation((file: string) => {
-        if (file === 'nimble.lock') {
-          return Promise.resolve(
-            JSON.stringify({
-              packages: {
-                other: { url: 'https://github.com/other/other' },
-                chronos: {},
-              },
-            }),
-          );
-        }
-        return Promise.resolve(null);
-      });
-
-      vi.mocked(packageCache.get).mockResolvedValueOnce({
-        chronos: 'https://github.com/status-im/nim-chronos',
-      });
-
-      const res = await resolvePackageUrl('chronos', 'project.nimble');
-      expect(res).toBe('https://github.com/status-im/nim-chronos');
-    });
-
-    it('ignores corrupted lockfile JSON gracefully and falls back to Tier 2', async () => {
-      fs.readLocalFile.mockImplementation((file: string) => {
-        if (file === 'nimble.lock') {
-          return Promise.resolve('corrupted json {{{');
-        }
-        return Promise.resolve(null);
-      });
-
-      vi.mocked(packageCache.get).mockResolvedValueOnce({
-        chronos: 'https://github.com/status-im/nim-chronos',
-      });
-
-      const res = await resolvePackageUrl('chronos', 'project.nimble');
-      expect(res).toBe('https://github.com/status-im/nim-chronos');
-    });
-
-    it('resolves from upstream registry when lockfile is absent (Tier 2)', async () => {
+    it('resolves from upstream registry (Tier 2) when package is listed', async () => {
       fs.readLocalFile.mockResolvedValue(null);
       vi.mocked(packageCache.get).mockResolvedValueOnce({
         chronos: 'https://github.com/status-im/nim-chronos',
       });
 
-      const res = await resolvePackageUrl('chronos');
+      const res = await resolvePackageUrl('chronos', 'pkg.nimble');
       expect(res).toBe('https://github.com/status-im/nim-chronos');
     });
 
-    it('returns undefined if not found anywhere (Tier 3)', async () => {
+    it('returns undefined if not found anywhere', async () => {
       fs.readLocalFile.mockResolvedValue(null);
       vi.mocked(packageCache.get).mockResolvedValueOnce({});
 

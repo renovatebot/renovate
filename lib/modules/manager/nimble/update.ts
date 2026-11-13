@@ -11,15 +11,19 @@ export function updateDependency({
   }
 
   const cleanVersion = newValue
-    .replace(regEx('^([><=!~^&]+\\s*)v([0-9])', 'i'), '$1$2')
+    .replace(regEx('([><=!~^&]+\\s*)v([0-9])', 'gi'), '$1$2')
     .replace(regEx('^v([0-9])', 'i'), '$1');
 
   if (replaceString && fileContent.includes(replaceString)) {
     let updatedItem: string;
     if (currentValue && replaceString.includes(currentValue)) {
-      // Preserve comparison operator if newValue doesn't specify one
+      // Preserve comparison operator if newValue is a bare version without operators
       const opMatch = regEx('^(?<op>[><=!~^&]+\\s*)').exec(currentValue);
-      if (opMatch?.groups?.op && !regEx('^[><=!~^&]').test(cleanVersion)) {
+      if (
+        opMatch?.groups?.op &&
+        !currentValue.includes('&') &&
+        !regEx('[><=!~^&]').test(cleanVersion)
+      ) {
         updatedItem = replaceString.replace(
           currentValue,
           `${opMatch.groups.op}${cleanVersion}`,
@@ -53,14 +57,18 @@ export function updateDependency({
     return fileContent.replace(replaceString, updatedItem);
   }
 
+  const formattedValue = regEx('^[><=!~^]').test(cleanVersion)
+    ? cleanVersion
+    : `>= ${cleanVersion}`;
+
   // Fallback: replacement matching double or single quoted package declaration
   return fileContent
     .replace(
       regEx(`"${depName}(?:\\s+[^"]*)?"`, 'g'),
-      `"${depName} >= ${cleanVersion}"`,
+      `"${depName} ${formattedValue}"`,
     )
     .replace(
       regEx(`'${depName}(?:\\s+[^']*)?'`, 'g'),
-      `'${depName} >= ${cleanVersion}'`,
+      `'${depName} ${formattedValue}'`,
     );
 }

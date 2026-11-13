@@ -46,6 +46,25 @@ requires "checksums >= 0.1.0"
     expect(res).toBe('requires "zippy >= 0.11.0", "checksums >= 0.1.0"');
   });
 
+  it('updates parenthesized requires declarations cleanly', () => {
+    const fileContent = 'requires("zippy >= 0.10.4")';
+
+    const upgrade: Upgrade = {
+      depName: 'zippy',
+      currentValue: '>= 0.10.4',
+      newValue: '0.11.0',
+      replaceString: 'zippy >= 0.10.4',
+    };
+
+    const res = updateDependency({
+      fileContent,
+      packageFile: 'sample.nimble',
+      upgrade,
+    });
+
+    expect(res).toBe('requires("zippy >= 0.11.0")');
+  });
+
   it('preserves single quotes when updating', () => {
     const fileContent = "requires 'yaml ^= 2.1.0'";
 
@@ -63,6 +82,25 @@ requires "checksums >= 0.1.0"
     });
 
     expect(res).toBe("requires 'yaml ^= 2.2.0'");
+  });
+
+  it('updates bare version requirements without comparison operator', () => {
+    const fileContent = 'requires "jester 0.5.0"';
+
+    const upgrade: Upgrade = {
+      depName: 'jester',
+      currentValue: '0.5.0',
+      newValue: '0.6.0',
+      replaceString: 'jester 0.5.0',
+    };
+
+    const res = updateDependency({
+      fileContent,
+      packageFile: 'sample.nimble',
+      upgrade,
+    });
+
+    expect(res).toBe('requires "jester 0.6.0"');
   });
 
   it('does not mutate commented lines matching replaceString', () => {
@@ -228,5 +266,59 @@ requires "checksums >= 0.1.0"
     });
 
     expect(res).toBe('taskRequires "test", "chronos >= 4.3.0"');
+  });
+
+  it('updates parenthesized taskRequires declarations', () => {
+    const fileContent = 'taskRequires("test", "testament >= 0.1.0")';
+    const upgrade: Upgrade = {
+      depName: 'testament',
+      currentValue: '>= 0.1.0',
+      newValue: '0.2.0',
+      replaceString: 'testament >= 0.1.0',
+    };
+
+    const res = updateDependency({
+      fileContent,
+      packageFile: 'sample.nimble',
+      upgrade,
+    });
+
+    expect(res).toBe('taskRequires("test", "testament >= 0.2.0")');
+  });
+
+  it('preserves compound range bounds when newValue contains &', () => {
+    const fileContent = 'requires "typestates >= 0.14.0 & < 0.15.0"';
+    const upgrade: Upgrade = {
+      depName: 'typestates',
+      currentValue: '>= 0.14.0 & < 0.15.0',
+      newValue: '>= 0.14.1 & < 0.15.0',
+      replaceString: 'typestates >= 0.14.0 & < 0.15.0',
+    };
+
+    const res = updateDependency({
+      fileContent,
+      packageFile: 'sample.nimble',
+      upgrade,
+    });
+
+    expect(res).toBe('requires "typestates >= 0.14.1 & < 0.15.0"');
+  });
+
+  it('falls back to regex replacement when newValue already has an operator', () => {
+    const fileContent = 'requires "typestates >= 0.14.0 & < 0.15.0"';
+    const upgrade: Upgrade = {
+      depName: 'typestates',
+      currentValue: '>= 0.14.0 & < 0.15.0',
+      newValue: '>= 0.14.1 & < 0.15.0',
+      replaceString: 'nonexistent',
+    };
+
+    const res = updateDependency({
+      fileContent,
+      packageFile: 'sample.nimble',
+      upgrade,
+    });
+
+    expect(res).toBe('requires "typestates >= 0.14.1 & < 0.15.0"');
   });
 });

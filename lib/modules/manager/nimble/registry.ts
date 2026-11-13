@@ -1,9 +1,11 @@
-import { isObject } from '@sindresorhus/is';
+import { isNonEmptyString, isPlainObject } from '@sindresorhus/is';
+import upath from 'upath';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { NimblePackageEntry } from './types.ts';
 
 export const NIMBLE_PACKAGES_URL =
@@ -25,8 +27,125 @@ export const NimblePackages = z.array(NimblePackage);
 
 const http = new Http('nimble');
 
-interface LockfileFormat {
-  packages?: Record<string, { url?: string }>;
+/**
+ * Expands Nimble forge aliases according to `nimblepkg/forge_aliases.nim`:
+ * - `github:user/repo`, `gh:user/repo` -> `https://github.com/user/repo`
+ * - `gitlab:user/repo`, `gl:user/repo` -> `https://gitlab.com/user/repo`
+ * - `sourcehut:user/repo`, `srht:user/repo`, `shart:user/repo` -> `https://git.sr.ht/~user/repo`
+ * - `codeberg:user/repo`, `cb:user/repo`, `cberg:user/repo` -> `https://codeberg.org/user/repo`
+ */
+export function expandForgeAlias(name: string): string | undefined {
+  const parts = name.split(':');
+  if (parts.length !== 2 || name.includes('://')) {
+    return undefined;
+  }
+
+  const forge = parts[0].toLowerCase();
+  const repoPart = parts[1].replace(regEx('\\.git$'), '');
+  const subParts = repoPart.split('/');
+  if (subParts.length < 2) {
+    return undefined;
+  }
+
+  let username = subParts[0];
+  const repository = subParts.slice(1).join('/');
+  if (!username || !repository) {
+    return undefined;
+  }
+
+  switch (forge) {
+    case 'github':
+    case 'gh':
+      return `https://github.com/${username}/${repository}`;
+    case 'gitlab':
+    case 'gl':
+      return `https://gitlab.com/${username}/${repository}`;
+    case 'codeberg':
+    case 'cb':
+    case 'cberg':
+      return `https://codeberg.org/${username}/${repository}`;
+    case 'sourcehut':
+    case 'srht':
+    case 'shart': {
+      if (!username.startsWith('~')) {
+        username = `~${username}`;
+      }
+      return `https://git.sr.ht/${username}/${repository}`;
+    }
+    default:
+      return undefined;
+  }
+}
+
+export function extractLockfileUrls(content: string): Map<string, string> {
+  const map = new Map<string, string>();
+  try {
+    const parsed: unknown = JSON.parse(content);
+    if (!isPlainObject(parsed)) {
+      return map;
+    }
+
+    function addEntries(obj: Record<string, unknown>): void {
+      for (const [key, val] of Object.entries(obj)) {
+        if (isPlainObject(val) && isNonEmptyString(val.url)) {
+          map.set(key.toLowerCase(), val.url);
+        }
+      }
+    }
+
+    // nimble.lock v1/v2 top-level packages
+    if (isPlainObject(parsed.packages)) {
+      addEntries(parsed.packages);
+    }
+
+    // nimble.lock v2 task-specific packages
+    if (isPlainObject(parsed.tasks)) {
+      for (const taskDeps of Object.values(parsed.tasks)) {
+        if (isPlainObject(taskDeps)) {
+          addEntries(taskDeps);
+        }
+      }
+    }
+
+    // atlas.lock items
+    if (isPlainObject(parsed.items)) {
+      addEntries(parsed.items);
+    }
+  } catch (err) {
+    logger.trace({ err }, 'Failed to parse nimble/atlas lockfile');
+  }
+  return map;
+}
+
+export async function getLockfileRegistry(
+  packageFile?: string,
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  if (!packageFile) {
+    return map;
+  }
+
+  const dir = upath.dirname(packageFile);
+  const lockFiles = ['nimble.lock', 'atlas.lock'];
+
+  for (const lockName of lockFiles) {
+    const lockPath = dir === '.' ? lockName : upath.join(dir, lockName);
+    try {
+      const content = await readLocalFile(lockPath, 'utf8');
+      if (content) {
+        const extracted = extractLockfileUrls(content);
+        for (const [k, v] of extracted.entries()) {
+          if (!map.has(k)) {
+            map.set(k, v);
+          }
+        }
+      }
+    } catch (err) {
+      logger.trace({ err, lockPath }, 'Failed to read companion lockfile');
+    }
+  }
+
+  return map;
 }
 
 export function parseNimbleRegistry(
@@ -117,8 +236,12 @@ export async function resolvePackageUrl(
 
   const lowerName = trimmed.toLowerCase();
 
-  // Special-case Nim compiler
-  if (lowerName === 'nim') {
+  // Special-case Nim compiler and aliases
+  if (
+    lowerName === 'nim' ||
+    lowerName === 'nimrod' ||
+    lowerName === 'compiler'
+  ) {
     return 'https://github.com/nim-lang/Nim';
   }
 
@@ -131,42 +254,25 @@ export async function resolvePackageUrl(
     return trimmed;
   }
 
-  // Tier 1: Companion lockfiles (nimble.lock, atlas.lock)
-  if (packageFile) {
-    for (const lockFileName of ['nimble.lock', 'atlas.lock']) {
-      try {
-        const lockPath = getSiblingFileName(packageFile, lockFileName);
-        const content = await readLocalFile(lockPath, 'utf8');
-        if (content) {
-          const parsed = JSON.parse(content) as unknown;
-          if (
-            isObject(parsed) &&
-            isObject((parsed as LockfileFormat).packages)
-          ) {
-            const packages = (parsed as LockfileFormat).packages!;
-            for (const [pkgKey, pkgVal] of Object.entries(packages)) {
-              if (pkgKey.toLowerCase() === lowerName && pkgVal?.url) {
-                return pkgVal.url;
-              }
-            }
-          }
-        }
-      } catch (err) {
-        logger.trace(
-          { err, lockFileName },
-          'Error checking companion lockfile for package url',
-        );
-      }
-    }
+  // Forge alias (github:owner/repo, gh:owner/repo, gitlab:owner/repo, etc.)
+  const expandedForge = expandForgeAlias(trimmed);
+  if (expandedForge) {
+    return expandedForge;
   }
 
-  // Tier 2: Upstream registry
+  // Tier 1: Companion lockfile (nimble.lock or atlas.lock)
+  const lockMap = await getLockfileRegistry(packageFile);
+  const lockUrl = lockMap.get(lowerName);
+  if (lockUrl) {
+    return lockUrl;
+  }
+
+  // Tier 2: Official Nimble packages.json registry
   const registry = await getNimbleRegistry();
   const url = registry.get(lowerName);
   if (url) {
     return url;
   }
 
-  // Tier 3: Unknown / fallback
   return undefined;
 }

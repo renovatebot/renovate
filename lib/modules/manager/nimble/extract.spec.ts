@@ -7,7 +7,13 @@ import {
 } from './extract.ts';
 import * as registry from './registry.ts';
 
-vi.mock('./registry.ts');
+vi.mock('./registry.ts', async (importOriginal) => {
+  const actual = await importOriginal<typeof registry>();
+  return {
+    ...actual,
+    resolvePackageUrl: vi.fn(),
+  };
+});
 
 describe('modules/manager/nimble/extract', () => {
   describe('parseRequiresItems', () => {
@@ -41,6 +47,25 @@ describe('modules/manager/nimble/extract', () => {
         depName: 'yaml',
         currentValue: '^= 2.1.0',
       });
+      expect(parseDependencyItem('chronos ~= 3.0.0')).toEqual({
+        depName: 'chronos',
+        currentValue: '~= 3.0.0',
+      });
+      expect(parseDependencyItem('jester == 0.5.0')).toEqual({
+        depName: 'jester',
+        currentValue: '== 0.5.0',
+      });
+      expect(parseDependencyItem('pkg >= 1.0.0 & < 2.0.0')).toEqual({
+        depName: 'pkg',
+        currentValue: '>= 1.0.0 & < 2.0.0',
+      });
+    });
+
+    it('handles bare versions without operator', () => {
+      expect(parseDependencyItem('jester 0.5.0')).toEqual({
+        depName: 'jester',
+        currentValue: '0.5.0',
+      });
     });
 
     it('handles VCS ref pins', () => {
@@ -52,11 +77,19 @@ describe('modules/manager/nimble/extract', () => {
         depName: 'pkg',
         currentValue: '#main',
       });
+      expect(parseDependencyItem('pkg #feature-branch')).toEqual({
+        depName: 'pkg',
+        currentValue: '#feature-branch',
+      });
     });
 
-    it('handles bare packages without version', () => {
+    it('handles bare packages without version and file:// URLs', () => {
       expect(parseDependencyItem('posix_utils')).toEqual({
         depName: 'posix_utils',
+        currentValue: '',
+      });
+      expect(parseDependencyItem('file:///local/path >= 1.0')).toEqual({
+        depName: 'file:///local/path >= 1.0',
         currentValue: '',
       });
     });
@@ -65,6 +98,10 @@ describe('modules/manager/nimble/extract', () => {
       expect(parseDependencyItem('cligen [cli] >= 1.0.0')).toEqual({
         depName: 'cligen',
         currentValue: '>= 1.0.0',
+      });
+      expect(parseDependencyItem('pkg[gui] 1.0.0')).toEqual({
+        depName: 'pkg',
+        currentValue: '1.0.0',
       });
     });
 
@@ -111,7 +148,7 @@ license     = "MIT"
       await expect(extractPackageFile(content)).resolves.toBeNull();
     });
 
-    it('extracts dependencies from real-world nimble manifest including bare packages', async () => {
+    it('extracts dependencies from real-world nimble manifest including bare packages and bare versions', async () => {
       vi.mocked(registry.resolvePackageUrl).mockImplementation(
         (depName: string) => {
           if (depName === 'nim') {
@@ -122,6 +159,9 @@ license     = "MIT"
           }
           if (depName === 'checksums') {
             return Promise.resolve('https://github.com/nim-lang/checksums');
+          }
+          if (depName === 'jester') {
+            return Promise.resolve('https://github.com/dom96/jester');
           }
           return Promise.resolve(undefined);
         },
@@ -137,6 +177,7 @@ license       = "MIT"
 # Dependencies
 requires "nim >= 2.0.0"
 requires "zippy >= 0.10.4", "checksums >= 0.1.0"
+requires "jester 0.5.0"
 requires "ws#head"
 requires "posix_utils"
 
@@ -145,40 +186,210 @@ task test, "Run tests":
       `;
 
       const res = await extractPackageFile(content);
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'nim',
+            packageName: 'https://github.com/nim-lang/Nim',
+            currentValue: '>= 2.0.0',
+            datasource: 'git-tags',
+            depType: 'compiler',
+            replaceString: 'nim >= 2.0.0',
+          },
+          {
+            depName: 'zippy',
+            packageName: 'https://github.com/guzba/zippy',
+            currentValue: '>= 0.10.4',
+            datasource: 'git-tags',
+            depType: 'dependencies',
+            replaceString: 'zippy >= 0.10.4',
+          },
+          {
+            depName: 'checksums',
+            packageName: 'https://github.com/nim-lang/checksums',
+            currentValue: '>= 0.1.0',
+            datasource: 'git-tags',
+            depType: 'dependencies',
+            replaceString: 'checksums >= 0.1.0',
+          },
+          {
+            depName: 'jester',
+            packageName: 'https://github.com/dom96/jester',
+            currentValue: '0.5.0',
+            datasource: 'git-tags',
+            depType: 'dependencies',
+            replaceString: 'jester 0.5.0',
+          },
+          {
+            depName: 'ws',
+            packageName: undefined,
+            currentValue: '#head',
+            datasource: 'git-tags',
+            depType: 'dependencies',
+            replaceString: 'ws#head',
+            skipReason: 'not-a-version',
+          },
+          {
+            depName: 'posix_utils',
+            packageName: undefined,
+            currentValue: undefined,
+            datasource: 'git-tags',
+            depType: 'dependencies',
+            replaceString: 'posix_utils',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('extracts parenthesized requires declarations (single-line and multiline)', async () => {
+      vi.mocked(registry.resolvePackageUrl).mockImplementation(
+        (depName: string) => {
+          if (depName === 'nim') {
+            return Promise.resolve('https://github.com/nim-lang/Nim');
+          }
+          if (depName === 'zippy') {
+            return Promise.resolve('https://github.com/guzba/zippy');
+          }
+          if (depName === 'chronos') {
+            return Promise.resolve('https://github.com/status-im/nim-chronos');
+          }
+          return Promise.resolve(undefined);
+        },
+      );
+
+      const content = `
+requires("nim >= 2.0.0")
+requires ("zippy >= 0.10.4", "chronos >= 4.0.0")
+requires(
+  "chronos >= 4.0.0",
+  "zippy >= 0.10.0"
+)
+      `;
+
+      const res = await extractPackageFile(content);
       expect(res).not.toBeNull();
       expect(res?.deps).toHaveLength(5);
-
       expect(res?.deps[0]).toMatchObject({
         depName: 'nim',
-        packageName: 'https://github.com/nim-lang/Nim',
         currentValue: '>= 2.0.0',
         depType: 'compiler',
       });
-
       expect(res?.deps[1]).toMatchObject({
         depName: 'zippy',
-        packageName: 'https://github.com/guzba/zippy',
         currentValue: '>= 0.10.4',
         depType: 'dependencies',
       });
-
       expect(res?.deps[2]).toMatchObject({
-        depName: 'checksums',
-        packageName: 'https://github.com/nim-lang/checksums',
-        currentValue: '>= 0.1.0',
+        depName: 'chronos',
+        currentValue: '>= 4.0.0',
         depType: 'dependencies',
       });
-
       expect(res?.deps[3]).toMatchObject({
-        depName: 'ws',
-        currentValue: '#head',
+        depName: 'chronos',
+        currentValue: '>= 4.0.0',
         depType: 'dependencies',
       });
-
       expect(res?.deps[4]).toMatchObject({
-        depName: 'posix_utils',
-        currentValue: undefined,
+        depName: 'zippy',
+        currentValue: '>= 0.10.0',
         depType: 'dependencies',
+      });
+    });
+
+    it('handles parenthesized taskRequires declarations (single-line and multiline)', async () => {
+      vi.mocked(registry.resolvePackageUrl).mockImplementation(
+        (depName: string) => {
+          if (depName === 'testament') {
+            return Promise.resolve('https://github.com/nim-lang/testament');
+          }
+          if (depName === 'criterion') {
+            return Promise.resolve('https://github.com/cblp/nim-criterion');
+          }
+          return Promise.resolve(undefined);
+        },
+      );
+
+      const content = `
+taskRequires("test", "testament >= 0.1.0")
+taskRequires(bench, "criterion >= 0.2.0")
+taskRequires("multi",
+  "testament >= 0.2.0",
+  "criterion >= 0.3.0"
+)
+      `;
+
+      const res = await extractPackageFile(content);
+      expect(res).not.toBeNull();
+      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'testament',
+        currentValue: '>= 0.1.0',
+        depType: 'taskRequires',
+      });
+      expect(res?.deps[1]).toMatchObject({
+        depName: 'criterion',
+        currentValue: '>= 0.2.0',
+        depType: 'taskRequires',
+      });
+      expect(res?.deps[2]).toMatchObject({
+        depName: 'testament',
+        currentValue: '>= 0.2.0',
+        depType: 'taskRequires',
+      });
+      expect(res?.deps[3]).toMatchObject({
+        depName: 'criterion',
+        currentValue: '>= 0.3.0',
+        depType: 'taskRequires',
+      });
+    });
+
+    it('resolves forge aliases and extracts clean repo name', async () => {
+      vi.mocked(registry.resolvePackageUrl).mockImplementation(
+        (depName: string) => {
+          if (depName === 'github:nim-lang/cmark') {
+            return Promise.resolve('https://github.com/nim-lang/cmark');
+          }
+          return Promise.resolve(undefined);
+        },
+      );
+
+      const content = 'requires "github:nim-lang/cmark >= 0.10.0"';
+      const res = await extractPackageFile(content);
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'cmark',
+            packageName: 'https://github.com/nim-lang/cmark',
+            currentValue: '>= 0.10.0',
+            datasource: 'git-tags',
+            depType: 'dependencies',
+            replaceString: 'github:nim-lang/cmark >= 0.10.0',
+          },
+        ],
+      });
+    });
+
+    it('classifies nimrod and compiler as compiler depType', async () => {
+      vi.mocked(registry.resolvePackageUrl).mockResolvedValue(
+        'https://github.com/nim-lang/Nim',
+      );
+
+      const content = `
+requires "nimrod >= 0.19.0"
+requires "compiler >= 1.6.0"
+      `;
+      const res = await extractPackageFile(content);
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'nimrod',
+        depType: 'compiler',
+        packageName: 'https://github.com/nim-lang/Nim',
+      });
+      expect(res?.deps[1]).toMatchObject({
+        depName: 'compiler',
+        depType: 'compiler',
+        packageName: 'https://github.com/nim-lang/Nim',
       });
     });
 
@@ -206,10 +417,17 @@ requires "zippy >= 0.10.4"
     it('skips empty or whitespace-only items in requires declarations', async () => {
       vi.mocked(registry.resolvePackageUrl).mockResolvedValue(undefined);
 
-      const content = 'requires "", "   ", "[cli]", "zippy >= 0.10.4"';
+      const content =
+        'requires "", "   ", "[cli]", "zippy >= 0.10.4", "file:///local/pkg"';
       const res = await extractPackageFile(content);
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(2);
       expect(res?.deps[0].depName).toBe('zippy');
+      expect(res?.deps[1]).toEqual({
+        depName: 'file:///local/pkg',
+        datasource: 'git-tags',
+        depType: 'dependencies',
+        skipReason: 'file-dependency',
+      });
     });
 
     it('ignores manifests inside nimbledeps, deps, _deps, .atlas, .nimble, and nimblecache', async () => {

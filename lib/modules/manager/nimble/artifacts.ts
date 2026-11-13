@@ -1,74 +1,119 @@
-import { isObject } from '@sindresorhus/is';
+import { isEmptyArray } from '@sindresorhus/is';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
-import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 
-interface LockfileFormat {
-  packages?: Record<
-    string,
-    { version?: string; vcsRevision?: string; commit?: string }
-  >;
-}
+const NIMBLE_LOCK = 'nimble.lock';
+const ATLAS_LOCK = 'atlas.lock';
 
-interface LockfileConfig {
-  filename: string;
-  commitField: 'vcsRevision' | 'commit';
-}
-
-const SUPPORTED_LOCKFILES: LockfileConfig[] = [
-  { filename: 'nimble.lock', commitField: 'vcsRevision' },
-  { filename: 'atlas.lock', commitField: 'commit' },
-];
-
-export async function updateArtifacts({
-  packageFileName,
-  updatedDeps,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact,
+): Promise<UpdateArtifactsResult[] | null> {
+  const { packageFileName, updatedDeps, newPackageFileContent, config } =
+    updateArtifact;
   logger.debug(`nimble.updateArtifacts(${packageFileName})`);
+  const { isLockFileMaintenance } = config;
 
-  if (!updatedDeps || updatedDeps.length === 0) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
+    logger.debug('No updated nimble deps - returning null');
     return null;
   }
 
+  const nimbleLockFileName = getSiblingFileName(packageFileName, NIMBLE_LOCK);
+  const atlasLockFileName = getSiblingFileName(packageFileName, ATLAS_LOCK);
+
+  const [oldNimbleLockContent, oldAtlasLockContent] = await Promise.all([
+    readLocalFile(nimbleLockFileName, 'utf8'),
+    readLocalFile(atlasLockFileName, 'utf8'),
+  ]);
+
+  if (!oldNimbleLockContent && !oldAtlasLockContent) {
+    logger.debug(
+      `No ${nimbleLockFileName} or ${atlasLockFileName} found - returning null`,
+    );
+    return null;
+  }
+
+  const execOptions: ExecOptions = {
+    cwdFile: packageFileName,
+    docker: {},
+    toolConstraints: [
+      {
+        toolName: 'mise',
+        constraint: await resolveToolConstraint(config, 'mise'),
+      },
+    ],
+  };
+
   const results: UpdateArtifactsResult[] = [];
-  const versionPrefixRegex = regEx('^[><=!~^&]*v?\\s*');
 
-  for (const { filename, commitField } of SUPPORTED_LOCKFILES) {
-    const lockPath = getSiblingFileName(packageFileName, filename);
-    const lockContent = await readLocalFile(lockPath, 'utf8');
-
-    if (lockContent) {
-      try {
-        const parsed = JSON.parse(lockContent) as unknown;
-        if (isObject(parsed) && isObject((parsed as LockfileFormat).packages)) {
-          const lock = parsed as LockfileFormat;
-          let changed = false;
-          for (const dep of updatedDeps) {
-            const depName = dep.depName;
-            const newVersion = dep.newValue ?? dep.newVersion;
-            if (depName && newVersion && lock.packages?.[depName]) {
-              const pkgEntry = lock.packages[depName];
-              pkgEntry.version = newVersion.replace(versionPrefixRegex, '');
-              if (dep.newDigest) {
-                pkgEntry[commitField] = dep.newDigest;
-              }
-              changed = true;
-            }
-          }
-          if (changed) {
-            results.push({
-              file: {
-                type: 'addition',
-                path: lockPath,
-                contents: `${JSON.stringify(lock, null, 2)}\n`,
-              },
-            });
-          }
-        }
-      } catch (err) {
-        logger.warn({ err, filename }, 'Failed to parse or update lockfile');
+  if (oldNimbleLockContent) {
+    try {
+      const updated = await updateLockFile({
+        lockFileName: nimbleLockFileName,
+        existingLockFileContent: oldNimbleLockContent,
+        packageFile: {
+          path: packageFileName,
+          contents: newPackageFileContent,
+        },
+        deleteLockFile: Boolean(isLockFileMaintenance),
+        run: () =>
+          exec('mise exec --yes nim@latest -- nimble lock -y', execOptions),
+      });
+      if (updated) {
+        results.push(...updated);
       }
+    } catch (err) {
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.warn(
+        { lockfile: nimbleLockFileName, err },
+        'Failed to update nimble.lock',
+      );
+      results.push(...artifactErrorResult(nimbleLockFileName, err));
+    }
+  }
+
+  if (oldAtlasLockContent) {
+    try {
+      const updated = await updateLockFile({
+        lockFileName: atlasLockFileName,
+        existingLockFileContent: oldAtlasLockContent,
+        packageFile: {
+          path: packageFileName,
+          contents: newPackageFileContent,
+        },
+        deleteLockFile: Boolean(isLockFileMaintenance),
+        run: () =>
+          exec(
+            [
+              'mise exec --yes nim@latest -- atlas install',
+              'mise exec --yes nim@latest -- atlas pin',
+            ],
+            execOptions,
+          ),
+      });
+      if (updated) {
+        results.push(...updated);
+      }
+    } catch (err) {
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.warn(
+        { lockfile: atlasLockFileName, err },
+        'Failed to update atlas.lock',
+      );
+      results.push(...artifactErrorResult(atlasLockFileName, err));
     }
   }
 

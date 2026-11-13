@@ -2,6 +2,7 @@ import {
   categories,
   defaultConfig,
   displayName,
+  knownDepTypes,
   lockFileMaintenanceIsDelegatedToPackageManager,
   lockFileNames,
   supportedDatasources,
@@ -14,12 +15,14 @@ describe('modules/manager/nimble/index', () => {
     expect(displayName).toBe('nimble');
     expect(url).toBe('https://github.com/nim-lang/nimble');
     expect(categories).toEqual(['nim']);
+    expect(defaultConfig).toEqual({
+      managerFilePatterns: ['/(^|/)[^/]+\\.nimble$/'],
+      versioning: 'nimble',
+    });
     expect(supportsLockFileMaintenance).toBeTrue();
-    expect(lockFileMaintenanceIsDelegatedToPackageManager).toBeFalse();
     expect(lockFileNames).toEqual(['nimble.lock', 'atlas.lock']);
-    expect(defaultConfig.managerFilePatterns).toEqual([
-      '/(^|/)[^/]+\\.nimble$/',
-    ]);
+    expect(lockFileMaintenanceIsDelegatedToPackageManager).toBeTrue();
     expect(supportedDatasources).toEqual(['git-tags']);
+    expect(knownDepTypes).toHaveLength(3);
   });
 });
