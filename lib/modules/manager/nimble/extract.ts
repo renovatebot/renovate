@@ -107,13 +107,12 @@ async function createPackageDependency(
     lowerName === 'nim' || lowerName === 'nimrod' || lowerName === 'compiler';
   let cleanName = depName;
 
-  const targetUrl =
-    expandForgeAlias(depName) ??
-    (depName.startsWith('https://') ||
+  const isDirectUrl =
+    depName.startsWith('https://') ||
     depName.startsWith('http://') ||
-    depName.startsWith('git@')
-      ? depName
-      : undefined);
+    depName.startsWith('git@');
+  const directUrl = isDirectUrl ? depName : undefined;
+  const targetUrl = expandForgeAlias(depName) ?? directUrl;
 
   if (targetUrl) {
     const urlParts = targetUrl.replace(regEx('\\.git$'), '').split('/');
