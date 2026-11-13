@@ -70,9 +70,15 @@ describe('modules/manager/index', () => {
             support.readsConfiguredAge,
             support.enforcedInLockFile,
           ].filter(isString);
-          expect(ranges.filter((range) => !versioning.isValid(range))).toEqual(
-            [],
-          );
+          // a versioning like rust-release-channel accepts a range only as the super range of `subset()`, which returns `undefined` for one it cannot read
+          function isValidRange(range: string): boolean {
+            return (
+              versioning.isValid(range) ||
+              versioning.subset?.(range, range) !== undefined
+            );
+          }
+
+          expect(ranges.filter((range) => !isValidRange(range))).toEqual([]);
         });
       }
     }

@@ -19,11 +19,11 @@ workflows:
         - 'astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2'
         - 'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5'
         - 'docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1'
-        - 'jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d'
-        - 'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b'
+        - 'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
+        - 'jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785'
         - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
-        - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
+        - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
         - 'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532'
         - 'slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
         - 'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd'
@@ -34,7 +34,7 @@ workflows:
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
-        - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
+        - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
     '.github/workflows/check-npm-packument-size.yml':
         - 'slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
     '.github/workflows/close-answered-discussions.yml':
@@ -75,8 +75,8 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/update-data.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b'
-        - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
+        - 'jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785'
+        - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
     '.github/workflows/ws_scan.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
 dependencies:
@@ -194,16 +194,16 @@ dependencies:
         commit: 'sha1-5bee595fdb9765d4a0bd35724b6302fa15569158'
         owner_id: 6157540
         repo_id: 306380934
-    'jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d':
-        ref: 'v2.5.0'
-        commit: 'sha1-9e87e8f34edfc00b849a27807e26eff9d00b936d'
+    'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e':
+        ref: 'v2.6.0'
+        commit: 'sha1-72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
         owner_id: 216188
         repo_id: 1404951382
         uses:
             - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-    'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b':
-        ref: 'v5.2.7'
-        commit: 'sha1-b44d12e7d0d8ee7461bb893e1b1993500433185b'
+    'jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785':
+        ref: 'v5.2.8'
+        commit: 'sha1-d5574b52816a478f9d4e6529a3f6ff17a8a36785'
         owner_id: 216188
         repo_id: 738284564
     'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6':
@@ -226,9 +226,9 @@ dependencies:
         commit: 'sha1-133ec2d94c3dfeb83959ffc3c73640633044bd89'
         owner_id: 9793101
         repo_id: 667073869
-    'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e':
-        ref: 'v3.1.2'
-        commit: 'sha1-fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
+    'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1':
+        ref: 'v3.2.0'
+        commit: 'sha1-731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
         owner_id: 21320719
         repo_id: 1235693694
     'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532':

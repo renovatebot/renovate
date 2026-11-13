@@ -1,4 +1,3 @@
-import { coerceArray } from '../../../util/array.ts';
 import type { PackageRule } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
@@ -46,14 +45,18 @@ export function addPresets(
   presets: Record<string, Preset>,
   ...templates: PresetTemplate[]
 ): void {
-  const ext = coerceArray(presets.all?.extends);
   for (const template of templates) {
     const { title, description, packageRules } = template;
     presets[title] = {
       description,
       packageRules: generatePackageRules(packageRules),
     };
-    ext.push(`replacements:${title}`);
   }
-  ext.sort();
+  presets.all = {
+    ...presets.all,
+    extends: Object.keys(presets)
+      .filter((name) => name !== 'all')
+      .sort()
+      .map((name) => `replacements:${name}`),
+  };
 }

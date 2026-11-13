@@ -39,7 +39,6 @@ const RuleSet = z.object({
 });
 
 const All = z.object({
-  extends: z.array(z.string()),
   overrideDescription: z.string(),
 });
 

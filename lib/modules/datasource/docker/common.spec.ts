@@ -1,7 +1,8 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
@@ -333,6 +334,37 @@ describe('modules/datasource/docker/common', () => {
           "authorization": "Bearer abc",
         }
       `);
+    });
+
+    it.each([429, 503])(
+      'throws ExternalHostError when the auth probe returns %i',
+      async (status) => {
+        httpMock
+          .scope('https://my.local.registry')
+          .get('/v2/')
+          .reply(status, '')
+          .persist();
+
+        await expect(
+          getAuthHeaders(http, 'https://my.local.registry', 'repo'),
+        ).rejects.toThrow(ExternalHostError);
+      },
+    );
+
+    it('returns undefined and logs the status code when the auth probe response is invalid', async () => {
+      httpMock.scope('https://my.local.registry').get('/v2/').reply(403, '');
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+      );
+
+      expect(headers).toBeUndefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 403 }),
+        'Invalid registry response',
+      );
     });
   });
 
