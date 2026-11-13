@@ -7,7 +7,7 @@ describe('config/migrations/custom/trust-level-migration', () => {
         trustLevel: 'high',
       },
       {
-        allowCustomCrateRegistries: true,
+        allowCustomCrateGitRegistries: true,
         allowScripts: true,
         exposeAllEnv: true,
       },
@@ -17,13 +17,13 @@ describe('config/migrations/custom/trust-level-migration', () => {
   it('should not rewrite provided properties', async () => {
     await expect(TrustLevelMigration).toMigrate(
       {
-        allowCustomCrateRegistries: false,
+        allowCustomCrateGitRegistries: false,
         allowScripts: false,
         exposeAllEnv: false,
         trustLevel: 'high',
       },
       {
-        allowCustomCrateRegistries: false,
+        allowCustomCrateGitRegistries: false,
         allowScripts: false,
         exposeAllEnv: false,
       },

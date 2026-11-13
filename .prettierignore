@@ -47,3 +47,9 @@ pdm.lock
 # Git worktrees
 /.worktrees
 /.claude/worktrees
+
+# Claude Code sandbox mounts these as unreadable files
+/.claude/launch.json
+/.claude/loop.md
+/.claude/scheduled_tasks.json
+/.mcp.json

@@ -4,7 +4,7 @@
 
 ### Personal Access Token (PAT)
 
-First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the bot account.
+First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the Renovate account.
 Let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
@@ -117,13 +117,41 @@ steps:
 
   - bash: |
       git config --global user.email 'bot@renovateapp.com'
-      git config --global user.name 'Renovate Bot'
+      git config --global user.name 'Renovate'
       npx --userconfig .npmrc renovate
     env:
       RENOVATE_PLATFORM: azure
       RENOVATE_ENDPOINT: $(System.CollectionUri)
       RENOVATE_CONFIG_FILE: $(Build.SourcesDirectory)/renovate_bot_config.json
       RENOVATE_TOKEN: $(System.AccessToken)
+      LOG_LEVEL: debug
+```
+
+Alternatively, if you use an Azure DevOps service connection with Microsoft Entra workload identity, you can obtain an Azure DevOps bearer token with `AzureCLI@3` instead of using `$(System.AccessToken)`:
+
+```yaml
+steps:
+  - task: AzureCLI@3
+    displayName: 'Run Renovate with Microsoft Entra ID'
+    inputs:
+      connectionType: azureDevOps
+      azureDevOpsServiceConnection: 'my-azure-devops-service-connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      allowNoSubscriptions: true
+      inlineScript: |
+        export RENOVATE_TOKEN="$(
+          az account get-access-token \
+            --resource 499b84ac-1321-427f-aa17-267ca6975798 \
+            --query accessToken \
+            --output tsv
+        )"
+
+        npx --yes --userconfig .npmrc renovate@44.171.7
+    env:
+      RENOVATE_PLATFORM: azure
+      RENOVATE_ENDPOINT: $(System.CollectionUri)
+      RENOVATE_CONFIG_FILE: $(Build.SourcesDirectory)/renovate_bot_config.json
       LOG_LEVEL: debug
 ```
 
@@ -254,7 +282,7 @@ Make sure the user has the following permissions on the work item's _area path_:
 - Edit work items in this node
 - View work items in this node
 
-If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
+If the user does not have these permissions, Renovate still creates a PR but it will not have a link to the work item.
 
 ### Dependency Dashboard work item state
 

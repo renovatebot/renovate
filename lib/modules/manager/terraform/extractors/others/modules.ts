@@ -10,23 +10,24 @@ import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
+import type { TerraformManagerData } from '../../types.ts';
 import { applyOciDependency } from '../../util.ts';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
+  /github\.com(?:[/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(?:depth=\d+&)?ref=(?<tag>.*?)(?:&depth=\d+)?$/i,
 );
 export const bitbucketRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*)\.git\/?(?<subfolder>.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*)\.git\/?(?<subfolder>.*)))\?(?:depth=\d+&)?ref=(?<tag>.*?)(?:&depth=\d+)?$/,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>[^:/]+[:/](?<project>[^/]+(?:\/[^/]+)*))(?:\.git)?)((\/\/)?(?<subfolder>[^?]*))?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>[^:/]+[:/](?<project>[^/]+(?:\/[^/]+)*))(?:\.git)?)(?:(?:\/\/)?(?<subfolder>[^?]*))?\?(?:depth=\d+&)?ref=(?<tag>.*?)(?:&depth=\d+)?$/,
 );
 export const azureDevOpsSshRefMatchRegex = regEx(
-  /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+  /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(?:depth=\d+&)?ref=(?<tag>.*?)(?:&depth=\d+)?$/,
 );
 
 export const hostnameMatchRegex = regEx(
-  /^(?<hostname>[a-zA-Z\d]([a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
+  /^(?<hostname>[a-zA-Z\d](?:[a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
 );
 
 export class ModuleExtractor extends DependencyExtractor {
@@ -69,11 +70,11 @@ export class ModuleExtractor extends DependencyExtractor {
   }
 
   private analyseTerraformModule(
-    dep: PackageDependency,
+    dep: PackageDependency<TerraformManagerData>,
     config: ExtractConfig,
   ): PackageDependency {
     // TODO #22198
-    const source = dep.managerData!.source as string;
+    const source = dep.managerData!.source!;
 
     if (isOCIRegistry(source)) {
       applyOciDependency(dep, source, config.registryAliases);

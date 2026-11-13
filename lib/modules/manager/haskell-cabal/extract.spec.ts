@@ -8,16 +8,6 @@ import {
   splitSingleDependency,
 } from './extract.ts';
 
-const commentCabalFile = codeBlock`
-  build-depends:
-    -- leading
-   base,
-  -- middle
-   other,
-   -- trailing
-   other2
-`;
-
 describe('modules/manager/haskell-cabal/extract', () => {
   describe('countPackageNameLength', () => {
     it.each`
@@ -108,6 +98,15 @@ describe('modules/manager/haskell-cabal/extract', () => {
 
   describe('findDepends()', () => {
     it('strips comments', () => {
+      const commentCabalFile = codeBlock`
+        build-depends:
+          -- leading
+         base,
+        -- middle
+         other,
+         -- trailing
+         other2
+      `;
       const res = findDepends(`${commentCabalFile}\na: b`);
       expect(res).toEqual({
         buildDependsContent: '\n base,\n other,\n other2',

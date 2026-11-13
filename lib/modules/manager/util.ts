@@ -1,11 +1,28 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../logger/index.ts';
+import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
+import { getToolConfig } from '../../util/exec/containerbase.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
+import { type ConstraintName, isToolName } from '../../util/exec/types.ts';
+import {
+  deleteLocalFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs/index.ts';
+import type { FileChange } from '../../util/git/types.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency } from './types.ts';
+import { get as getVersioning } from '../versioning/index.ts';
+import type {
+  PackageDependency,
+  ToolConstraintsConfig,
+  UpdateArtifactsResult,
+  UpdateLockFileConfig,
+} from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -65,4 +82,176 @@ export function artifactErrorMessageFromExecError(
   }
 
   return message;
+}
+
+/**
+ * Wraps {@link FileChange}s, e.g. the result of `collectFileChanges()`, into the
+ * result shape returned by `updateArtifacts()`.
+ */
+export function fileChangesToArtifactResults(
+  changes: FileChange[],
+): UpdateArtifactsResult[] {
+  return changes.map((file) => ({ file }));
+}
+
+/**
+ * Resolve the constraint for a tool that `updateArtifacts()` has to run.
+ *
+ * The precedence is:
+ *
+ * 1. `constraints`, because the user asked for it explicitly
+ * 2. `derive`, because it reads the package files as the branch changed them,
+ *    so it can be newer than what extraction saw
+ * 3. `extractedConstraints`, as collected while extracting the base branch
+ * 4. `sharedConstraints`, the version which a version manager like `mise`
+ *    installs for the directory, which also wins over the constraint of step 2
+ *    or 3 if it is within it, like `20.11.0` within `>=18`
+ *
+ * Managers that have no way to derive the constraint at artifact time can omit
+ * `derive`. An empty string counts as "not set" at every step, so it never
+ * shadows a value further down the list.
+ *
+ * This is the only place that reads `constraints`, `extractedConstraints` and
+ * `sharedConstraints` from the config; the
+ * `renovate/prefer-resolve-tool-constraint` lint rule keeps managers from
+ * reading them directly.
+ */
+export async function resolveToolConstraint(
+  config: ToolConstraintsConfig,
+  toolName: ConstraintName,
+  derive?: () => MaybePromise<string | null | undefined>,
+): Promise<string | undefined> {
+  const configured = config.constraints?.[toolName];
+  if (isNonEmptyString(configured)) {
+    return configured;
+  }
+  const required = [
+    await derive?.(),
+    config.extractedConstraints?.[toolName],
+  ].find(isNonEmptyString);
+  const shared = config.sharedConstraints?.[toolName];
+  if (!isNonEmptyString(shared)) {
+    return required;
+  }
+  return !required || isWithin(toolName, shared, required) ? shared : required;
+}
+
+/**
+ * Whether the tool `constraint` is a version within `range`, or a range which is a subset of it.
+ */
+function isWithin(
+  toolName: ConstraintName,
+  constraint: string,
+  range: string,
+): boolean {
+  if (!isToolName(toolName)) {
+    return false;
+  }
+  const versioning = getVersioning(getToolConfig(toolName)?.versioning);
+  if (!versioning.isValid(constraint) || !versioning.isValid(range)) {
+    return false;
+  }
+  return versioning.isSingleVersion(constraint)
+    ? versioning.matches(constraint, range)
+    : versioning.subset?.(constraint, range) === true;
+}
+
+/**
+ * The result which reports `path` as created or updated.
+ */
+export function fileAddition(
+  path: string,
+  contents: string | Buffer | null,
+): UpdateArtifactsResult {
+  return { file: { type: 'addition', path, contents } };
+}
+
+/**
+ * The result which reports a failed artifact update to the user.
+ */
+export function artifactError(
+  fileName: string | undefined,
+  stderr: string,
+): UpdateArtifactsResult {
+  return { artifactError: { fileName, stderr } };
+}
+
+/**
+ * The result for an artifact update which threw, using the most informative
+ * output the error carries. Callers are expected to have rethrown
+ * `TEMPORARY_ERROR` and logged the error before calling this.
+ */
+export function artifactErrorResult(
+  fileName: string | undefined,
+  err: Error & Partial<ExecError>,
+): UpdateArtifactsResult[] {
+  return [
+    artifactError(
+      fileName,
+      artifactErrorMessageFromExecError(err, err.message),
+    ),
+  ];
+}
+
+/**
+ * The skeleton shared by the managers which regenerate a single lock file:
+ * rewrite the package file, optionally drop the lock file, run the package
+ * manager and return the lock file when its content changed.
+ *
+ * Errors from `run()` are not handled here - callers keep their own logging and
+ * pass the error to {@link artifactErrorResult}.
+ */
+export async function updateLockFile({
+  lockFileName,
+  existingLockFileContent,
+  packageFile,
+  deleteLockFile,
+  run,
+}: UpdateLockFileConfig): Promise<UpdateArtifactsResult[] | null> {
+  if (packageFile) {
+    await writeLocalFile(packageFile.path, packageFile.contents);
+  }
+
+  if (deleteLockFile) {
+    await deleteLocalFile(lockFileName);
+  }
+
+  await run();
+
+  // A Buffer as the existing content means the lock file may be binary, so the
+  // new content is read and compared as bytes as well.
+  const newLockFileContent = await readLockFile(
+    lockFileName,
+    Buffer.isBuffer(existingLockFileContent),
+  );
+  if (!newLockFileContent) {
+    logger.debug(`No ${lockFileName} found`);
+    return null;
+  }
+
+  if (isSameContent(existingLockFileContent, newLockFileContent)) {
+    logger.debug(`${lockFileName} is unchanged`);
+    return null;
+  }
+
+  return [fileAddition(lockFileName, newLockFileContent)];
+}
+
+function readLockFile(
+  lockFileName: string,
+  asBuffer: boolean,
+): Promise<string | Buffer | null> {
+  return asBuffer
+    ? readLocalFile(lockFileName)
+    : readLocalFile(lockFileName, 'utf8');
+}
+
+function isSameContent(
+  before: string | Buffer | null,
+  after: string | Buffer,
+): boolean {
+  if (Buffer.isBuffer(before) && Buffer.isBuffer(after)) {
+    return before.equals(after);
+  }
+  return before === after;
 }

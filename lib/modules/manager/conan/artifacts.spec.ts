@@ -32,14 +32,14 @@ describe('modules/manager/conan/artifacts', () => {
   });
 
   it('returns null if updatedDeps are empty and lockFileMaintenance is turned off', async () => {
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(logger.trace).toHaveBeenCalledWith(
       'No conan.lock dependencies to update',
@@ -53,14 +53,14 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(logger.trace).toHaveBeenCalledWith('No conan.lock found');
   });
@@ -74,14 +74,14 @@ describe('modules/manager/conan/artifacts', () => {
 
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(logger.debug).toHaveBeenCalledWith(
       'conan.lock read operation failed',
@@ -104,19 +104,17 @@ describe('modules/manager/conan/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     const execSnapshots = mockExecAll();
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      'New conan.lock read operation failed',
-    );
+    expect(logger.debug).toHaveBeenCalledWith('No conan.lock found');
   });
 
   it('returns null if original and updated conan.lock files are the same', async () => {
@@ -136,17 +134,21 @@ describe('modules/manager/conan/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-
-    expect(logger.trace).toHaveBeenCalledWith('conan.lock is unchanged');
+    // both are read as text, so equal content compares equal
+    expect(fs.readLocalFile.mock.calls).toEqual([
+      ['conan.lock', 'utf8'],
+      ['conan.lock', 'utf8'],
+    ]);
+    expect(logger.debug).toHaveBeenCalledWith('conan.lock is unchanged');
   });
 
   it('returns updated conan.lock for conanfile.txt', async () => {
@@ -166,14 +168,14 @@ describe('modules/manager/conan/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.txt',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'Updated conan.lock',
@@ -198,8 +200,8 @@ describe('modules/manager/conan/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
@@ -208,7 +210,7 @@ describe('modules/manager/conan/artifacts', () => {
           constraints: { conan: '2.0.5', python: '3.11.9' },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'Updated conan.lock',
@@ -233,6 +235,37 @@ describe('modules/manager/conan/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const updatedDeps = [
+      {
+        depName: 'dep',
+      },
+    ];
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
+
+    await conan.updateArtifacts({
+      packageFileName: 'conanfile.py',
+      updatedDeps,
+      newPackageFileContent: '',
+      config: {
+        ...config,
+        constraints: {},
+        extractedConstraints: { conan: '2.0.5', python: '3.11.9' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.11.9' },
+      { cmd: 'install-tool conan 2.0.5' },
+      { cmd: 'conan lock create conanfile.py' },
+    ]);
+  });
+
   it('returns updated conan.lock when updateType are not empty', async () => {
     const updatedDeps = [
       {
@@ -250,14 +283,14 @@ describe('modules/manager/conan/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'Updated conan.lock',
@@ -281,14 +314,14 @@ describe('modules/manager/conan/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps: [],
         newPackageFileContent: '',
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'Updated conan.lock',
@@ -333,14 +366,14 @@ describe('modules/manager/conan/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     mockExecAll(new Error(errorMessage));
 
-    expect(
-      await conan.updateArtifacts({
+    await expect(
+      conan.updateArtifacts({
         packageFileName: 'conanfile.py',
         updatedDeps,
         newPackageFileContent: '',
         config: { ...config, updateType: 'lockFileMaintenance' },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'conan.lock', stderr: errorMessage } },
     ]);
   });

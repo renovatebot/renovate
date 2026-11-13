@@ -3,13 +3,16 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import * as _googleAuth from 'google-auth-library';
+import { dir as tmpDir } from 'tmp-promise';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
+import { DOCKER_HUB } from './common.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
 
@@ -362,12 +365,12 @@ describe('modules/datasource/docker/index', () => {
         .head('/cache-poison/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
 
-      expect(
-        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
-      ).toBeNull();
-      expect(
-        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
-      ).toBe('sha256:some-digest');
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBeNull();
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBe('sha256:some-digest');
     });
 
     it.each(amazonHosts)(
@@ -388,19 +391,19 @@ describe('modules/datasource/docker/index', () => {
           authorizationData: [{ authorizationToken: 'test_token' }],
         });
 
-        expect(
-          await getDigest(
+        await expect(
+          getDigest(
             {
               datasource: 'docker',
               packageName: `${host}/node`,
             },
             'some-tag',
           ),
-        ).toBe('some-digest');
+        ).resolves.toBe('some-digest');
 
         const ecr = ecrMock.call(0).thisValue as ECRClient;
-        expect(await ecr.config.region()).toBe(region);
-        expect(await ecr.config.credentials()).toEqual({
+        await expect(ecr.config.region()).resolves.toBe(region);
+        await expect(ecr.config.credentials()).resolves.toEqual({
           $source: {
             CREDENTIALS_CODE: 'e',
           },
@@ -435,19 +438,19 @@ describe('modules/datasource/docker/index', () => {
           authorizationData: [{ authorizationToken: 'test_token' }],
         });
 
-        expect(
-          await getDigest(
+        await expect(
+          getDigest(
             {
               datasource: 'docker',
               packageName: `${host}/node`,
             },
             'some-tag',
           ),
-        ).toBe('some-digest');
+        ).resolves.toBe('some-digest');
 
         const ecr = ecrMock.call(0).thisValue as ECRClient;
-        expect(await ecr.config.region()).toBe(region);
-        expect(await ecr.config.credentials()).toEqual({
+        await expect(ecr.config.region()).resolves.toBe(region);
+        await expect(ecr.config.credentials()).resolves.toEqual({
           $source: {
             CREDENTIALS_CODE: 'e',
           },
@@ -1043,6 +1046,77 @@ describe('modules/datasource/docker/index', () => {
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
       expect(res).toBe('some-new-digest');
+    });
+
+    it('returns null when a non-list manifest carries no digest header', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull',
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+            size: 2917,
+            digest:
+              'sha256:4591c431eb2fcf90ebb32476db6cfe342617fc3d3ca9653b9e0c47859cac1cf9',
+          },
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value',
+      );
+
+      // no header to read, so the digest falls back to the manifest hash
+      expect(res).toBe(
+        'sha256:4dfd2fd0672c541746a28371af8d2e31e83dede2fa716c4d4344358dc181ebca',
+      );
     });
 
     it('handles missing architecture-specific digest', async () => {
@@ -1717,20 +1791,20 @@ describe('modules/datasource/docker/index', () => {
           architecture: 'amd64',
         });
 
-      expect(
-        await datasource.getImageArchitecture(
+      await expect(
+        datasource.getImageArchitecture(
           registryHost,
           dockerRepository,
           currentDigest,
         ),
-      ).toBeNull();
-      expect(
-        await datasource.getImageArchitecture(
+      ).resolves.toBeNull();
+      await expect(
+        datasource.getImageArchitecture(
           registryHost,
           dockerRepository,
           currentDigest,
         ),
-      ).toBe('amd64');
+      ).resolves.toBe('amd64');
     });
   });
 
@@ -1898,6 +1972,49 @@ describe('modules/datasource/docker/index', () => {
       };
       const res = await getPkgReleases(config);
       expect(res?.releases).toHaveLength(2);
+    });
+
+    it('fetches all pages for Red Hat registry', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      const rhUrl = 'https://registry.access.redhat.com/v2';
+      httpMock
+        .scope(rhUrl)
+        .get('/hi/go-builder/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/hi/go-builder/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['0.1.0'] },
+          {
+            link: `<${rhUrl}/hi/go-builder/tags/list?n=100&last=0.1.0>; rel="next", `,
+          },
+        )
+        .get('/hi/go-builder/tags/list?n=100&last=0.1.0')
+        .reply(
+          200,
+          { tags: ['0.2.0'] },
+          {
+            link: `<${rhUrl}/hi/go-builder/tags/list?n=100&last=0.2.0>; rel="next", `,
+          },
+        )
+        .get('/hi/go-builder/tags/list?n=100&last=0.2.0')
+        .reply(200, { tags: ['9.9.9'] }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/hi/go-builder/manifests/9.9.9')
+        .reply(200, '', {});
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'hi/go-builder',
+        registryUrls: ['https://registry.access.redhat.com'],
+      });
+
+      expect(res?.releases?.map((release) => release.version)).toEqual([
+        '0.1.0',
+        '0.2.0',
+        '9.9.9',
+      ]);
     });
 
     it('uses custom registry in packageName', async () => {
@@ -2086,12 +2203,12 @@ describe('modules/datasource/docker/index', () => {
           .reply(200, '', {})
           .get('/node/manifests/some')
           .reply(200);
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: `${host}/node`,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'node',
           registryUrl: `https://${host}`,
           releases: [],
@@ -2140,12 +2257,12 @@ describe('modules/datasource/docker/index', () => {
           .get('/v2/amazonlinux/amazonlinux/manifests/some')
           .reply(200);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: `${host}/amazonlinux/amazonlinux`,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'amazonlinux/amazonlinux',
           registryUrl: `https://${host}`,
           releases: [],
@@ -2200,12 +2317,12 @@ describe('modules/datasource/docker/index', () => {
               },
             },
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'node',
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
@@ -2266,12 +2383,12 @@ describe('modules/datasource/docker/index', () => {
               },
             },
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'node',
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
@@ -2302,12 +2419,12 @@ describe('modules/datasource/docker/index', () => {
           .reply(405, maxResultsErrorBody, {
             'Docker-Distribution-Api-Version': 'registry/2.0',
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the response code is not 405', async () => {
@@ -2333,12 +2450,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when no response headers are present', async () => {
@@ -2356,12 +2473,12 @@ describe('modules/datasource/docker/index', () => {
               },
             ],
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the expected docker header is missing', async () => {
@@ -2385,12 +2502,12 @@ describe('modules/datasource/docker/index', () => {
               'Irrelevant-Header': 'irrelevant-value',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the response body does not contain an errors object', async () => {
@@ -2406,12 +2523,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the response body does not contain errors', async () => {
@@ -2429,12 +2546,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the the response errors does not have a message property', async () => {
@@ -2456,12 +2573,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the the error message does not have the expected max results error', async () => {
@@ -2484,12 +2601,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
     });
 
@@ -3417,14 +3534,14 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/renovatebot/renovate',
-          'org.opencontainers.image.revision':
-            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'node', '2-alpine'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+      });
     });
 
     it('uses annotations for oci helm', async () => {
@@ -3448,14 +3565,14 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/renovatebot/renovate',
-          'org.opencontainers.image.revision':
-            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'node', '2-alpine'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+      });
     });
 
     it('uses sources for oci helm', async () => {
@@ -3480,12 +3597,12 @@ describe('modules/datasource/docker/index', () => {
           home: 'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'harbor', '16.7.2')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'harbor', '16.7.2'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+      });
     });
 
     it('uses descriptor annotations for docker hub library images', async () => {
@@ -3527,13 +3644,9 @@ describe('modules/datasource/docker/index', () => {
           ],
         });
 
-      expect(
-        await ds.getLabels(
-          'https://index.docker.io',
-          'library/convertigo',
-          '8.4.3',
-        ),
-      ).toEqual({
+      await expect(
+        ds.getLabels('https://index.docker.io', 'library/convertigo', '8.4.3'),
+      ).resolves.toEqual({
         'org.opencontainers.image.source':
           'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
         'org.opencontainers.image.revision':
@@ -3564,13 +3677,13 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(
-        await ds.getLabels(
+      await expect(
+        ds.getLabels(
           'https://index.docker.io',
           'renovate/renovate',
           '37.405.1-full',
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         'org.opencontainers.image.source':
           'https://github.com/renovatebot/renovate',
         'org.opencontainers.image.revision':
@@ -3583,13 +3696,13 @@ describe('modules/datasource/docker/index', () => {
 
       httpMock.scope('https://index.docker.io/v2');
 
-      expect(
-        await ds.getLabels(
+      await expect(
+        ds.getLabels(
           'https://index.docker.io',
           'renovate/renovate',
           '37.405.1-full',
         ),
-      ).toEqual({});
+      ).resolves.toEqual({});
     });
 
     it('does not skip non docker hub registry labels', async () => {
@@ -3615,14 +3728,99 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/renovatebot/renovate',
-          'org.opencontainers.image.revision':
-            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'node', '2-alpine'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+      });
+    });
+  });
+  describe('getTags caching', () => {
+    let dirResult: Awaited<ReturnType<typeof tmpDir>>;
+
+    beforeEach(async () => {
+      dirResult = await tmpDir({ unsafeCleanup: true });
+      // Unlike in with-cache.spec.ts, here we explicitly _don't_ configure
+      // `memCache` because it memoizes GET responses. This would stop subsequent
+      // lookups from actually exercising the package cache.
+      await packageCache.init({ cacheDir: dirResult.path });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+      await dirResult.cleanup();
+    });
+
+    it('caches tags for Docker Hub', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {});
+
+      const ds = new DockerDatasource();
+
+      await expect(ds.getTags(DOCKER_HUB, 'library/node')).resolves.toEqual([
+        '1.0.0',
+      ]);
+
+      // Second call pulls from the cache which was hydrated by the first call,
+      // resulting in no additional requests to the HTTP mock.
+      await expect(ds.getTags(DOCKER_HUB, 'library/node')).resolves.toEqual([
+        '1.0.0',
+      ]);
+    });
+
+    it('does not cache tags for a private registry', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {})
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0', '2.0.0'] }, {});
+
+      const ds = new DockerDatasource();
+
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toEqual(['1.0.0']);
+
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toEqual(['1.0.0', '2.0.0']);
+    });
+
+    it('does not cache failed lookups when cachePrivatePackages is enabled', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(403) // Failed auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {});
+
+      const ds = new DockerDatasource();
+
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toBeUndefined();
+
+      // The previous auth error (`undefined`) didn't get cached, so the second
+      // lookup hits the mock as expected.
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toEqual(['1.0.0']);
     });
   });
 });

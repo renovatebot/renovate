@@ -96,10 +96,9 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const majorNum = Number.parseInt(major, 10);
-  if (!Number.isNaN(majorNum)) {
-    res = { ...res, major: majorNum };
-  }
+  // the regex demands a major component: either a floating one, returned
+  // above, or a run of digits
+  res = { ...res, major: Number.parseInt(major, 10) };
 
   if (floating_minor) {
     return {

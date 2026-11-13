@@ -18,8 +18,10 @@ import {
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { hashStream } from '../../../util/hash.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import mavenVersioning from '../../versioning/maven/index.ts';
 import type {
   PackageDependency,
@@ -27,6 +29,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
@@ -126,7 +129,7 @@ async function updateChecksums(
           // Add checksum after distributionUrl
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            regEx(/^(distributionUrl\s*=\s*.+)$/m),
+            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
             'distributionSha256Sum',
             checksum,
           );
@@ -139,7 +142,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            regEx(/^(distributionUrl\s*=\s*.+)$/m),
+            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
             'distributionSha256Sum',
             fallbackChecksum,
           );
@@ -184,7 +187,7 @@ async function updateChecksums(
           // Add checksum after wrapperUrl or wrapperVersion
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            regEx(/^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
+            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
             'wrapperSha256Sum',
             checksum,
           );
@@ -197,7 +200,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            regEx(/^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
+            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
             'wrapperSha256Sum',
             fallbackChecksum,
           );
@@ -250,6 +253,7 @@ export async function updateArtifacts({
     );
     const hadWrapperChecksum =
       newPackageFileContent.includes('wrapperSha256Sum=');
+    const hadAnyChecksum = hadWrapperChecksum || hadDistributionChecksum;
     const originalDistributionType = getDistributionType(newPackageFileContent);
 
     // Skip if no relevant updates
@@ -276,7 +280,7 @@ export async function updateArtifacts({
 
     // Delete old maven-wrapper.jar if checksums exist and wrapper:wrapper will run
     // This prevents checksum validation failure when wrapper:wrapper runs
-    if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
+    if (hasWrapperUpdate && hadAnyChecksum) {
       const jarPath = packageFileName.replace(
         'maven-wrapper.properties',
         'maven-wrapper.jar',
@@ -294,7 +298,7 @@ export async function updateArtifacts({
     // Strip checksum lines before running wrapper:wrapper to avoid validation failure
     // (mvnw would try to validate NEW jar against OLD checksum)
     let contentToWrite = newPackageFileContent;
-    if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
+    if (hasWrapperUpdate && hadAnyChecksum) {
       contentToWrite = contentToWrite
         .replace(regEx(/^distributionSha256Sum=.*\n?/m), '')
         .replace(regEx(/^wrapperSha256Sum=.*\n?/m), '');
@@ -409,8 +413,9 @@ async function executeWrapperCommand(
     toolConstraints: [
       {
         toolName: 'java',
-        constraint:
-          config.constraints?.java ?? getJavaConstraint(config.currentValue),
+        constraint: await resolveToolConstraint(config, 'java', () =>
+          getJavaConstraint(config.currentValue),
+        ),
       },
     ],
   };
@@ -424,11 +429,28 @@ async function executeWrapperCommand(
 }
 
 function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
+  const extraEnv: ExtraEnv = {};
+
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
-    return { MVNW_REPOURL: customMavenWrapperUrl };
+    extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
+
+    const { username, password } = hostRules.find({
+      hostType: MavenDatasource.id,
+      url: customMavenWrapperUrl,
+    });
+
+    if (username && password) {
+      extraEnv.MVNW_USERNAME = username;
+      extraEnv.MVNW_PASSWORD = password;
+      logger.trace(
+        { customMavenWrapperUrl },
+        'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
+      );
+    }
   }
-  return {};
+
+  return extraEnv;
 }
 
 function getCustomMavenWrapperRepoUrl(
@@ -442,7 +464,7 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+  const match = regEx(/^(?<repoUrl>.*?)\/org\/apache\/maven\/wrapper\//).exec(
     replaceString,
   );
 
@@ -450,7 +472,9 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
+  return match.groups!.repoUrl === DEFAULT_MAVEN_REPO_URL
+    ? null
+    : match.groups!.repoUrl;
 }
 
 async function createWrapperCommand(

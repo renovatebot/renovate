@@ -1,12 +1,12 @@
 import { isUndefined } from '@sindresorhus/is';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
-import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -14,7 +14,7 @@ import { detectSemanticCommits } from '../../../util/git/semantic.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
-import { parseUrl } from '../../../util/url.ts';
+import { parseUrl, withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
@@ -24,7 +24,9 @@ function upper(str: string): string {
 }
 
 export function sanitizeDepName(depName: string): string {
-  return depName
+  return withoutUrlCredentials(depName)
+    .replace(regEx(/\$\{[^}]+\}\/?/g), '')
+    .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
@@ -75,6 +77,44 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   return updateConfig;
 }
 
+// packageRules can set `isVulnerabilityAlert` without forcing `vulnerabilityAlerts`,
+// so the security concurrency limits are applied here
+function applyVulnerabilityConcurrentLimits(
+  updateConfig: BranchUpgradeConfig,
+): void {
+  if (!updateConfig.isVulnerabilityAlert) {
+    return;
+  }
+  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
+  // `branchConcurrentLimit`, even though both are valid nested options
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+  const vulnerabilityAlerts = updateConfig.vulnerabilityAlerts as
+    RenovateConfig | undefined;
+  if (!isUndefined(vulnerabilityAlerts?.prConcurrentLimit)) {
+    updateConfig.prConcurrentLimit = vulnerabilityAlerts.prConcurrentLimit;
+  }
+  if (!isUndefined(vulnerabilityAlerts?.branchConcurrentLimit)) {
+    updateConfig.branchConcurrentLimit =
+      vulnerabilityAlerts.branchConcurrentLimit;
+  }
+}
+
+/**
+ * Re-assigns the options with the scopes `repo` and `manager` which apply to
+ * the whole lock file from `managerConfig`, after all rules are applied to
+ * `updateConfig`, so Renovate ignores their values from `packageRules`,
+ * `lockFileMaintenance`, the update types and `vulnerabilityAlerts`.
+ */
+function applyManagerScopedOptions(
+  updateConfig: RenovateConfig,
+  managerConfig: RenovateConfig,
+): void {
+  updateConfig.minimumReleaseAgePackageManager =
+    managerConfig.minimumReleaseAgePackageManager;
+  updateConfig.minimumReleaseAgePackageManagerSync =
+    managerConfig.minimumReleaseAgePackageManagerSync;
+}
+
 export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
@@ -96,10 +136,12 @@ export async function flattenUpdates(
         managerConfig,
         packageFile,
       ) as never;
+      packageFileConfig.minimumReleaseAgeRepository =
+        managerConfig.minimumReleaseAge;
       const packagePath = packageFile.packageFile?.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
+      // `split` always yields at least one element, so there is always a file
+      // name to drop here
+      packagePath.splice(-1, 1);
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
@@ -138,11 +180,7 @@ export async function flattenUpdates(
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
-            // apply config from datasource
-            const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource!,
-            );
-            updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
+            updateConfig = await applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,
               'datasource-merge',
@@ -162,6 +200,8 @@ export async function flattenUpdates(
               updateConfig,
               'update-type-merge',
             );
+            applyManagerScopedOptions(updateConfig, managerConfig);
+            applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
@@ -198,6 +238,7 @@ export async function flattenUpdates(
           lockFileConfig,
           'lock-file-maintenance-merge-2',
         );
+        applyManagerScopedOptions(lockFileConfig, managerConfig);
         // Remove unnecessary objects
         for (const updateType of updateTypes) {
           // @ts-expect-error -- not easily typed
@@ -227,6 +268,7 @@ export async function flattenUpdates(
                 config.vulnerabilityAlerts,
               );
               delete updateConfig.vulnerabilityAlerts;
+              applyManagerScopedOptions(updateConfig, managerConfig);
               updateConfig.isVulnerabilityAlert = true;
               updateConfig.isRemediation = true;
               updateConfig.lockFile = lockFile;

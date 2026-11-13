@@ -84,6 +84,8 @@ export const OciImageManifest = ManifestObject.extend({
       'application/vnd.devcontainers',
       'application/vnd.oci.empty.v1+json',
       'application/vnd.cncf.flux.config.v1+json',
+      'application/vnd.zarf.config.v1+json',
+      'application/vnd.zarf.component.config.v1+json',
     ]),
   }),
   annotations: Nullish(z.record(z.string(), z.string())),
@@ -194,7 +196,7 @@ export const DockerHubTagsPage = z.object({
     /* v8 ignore next -- TODO: add test */
     onError: ({ error }) => {
       logger.debug(
-        { error },
+        { err: error },
         'Docker: Failed to parse some tags from Docker Hub',
       );
     },

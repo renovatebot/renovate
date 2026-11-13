@@ -11,8 +11,10 @@ import { hashMap } from '../../../modules/manager/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BranchCache } from '../../../util/cache/repository/types.ts';
+import { isToolName } from '../../../util/exec/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { incCountValue, setCount } from '../../global/limits.ts';
 import type {
   BranchConfig,
@@ -38,6 +40,20 @@ export function generateCommitFingerprintConfig(
     for (const field of upgradeFingerprintFields) {
       // TS cannot narrow the type here
       filteredUpgrade[field] = upgrade[field]!;
+    }
+    // only tools' constraints, as others (i.e. the default `ghActionsLock`) are set for every upgrade
+    const toolConstraints = Object.entries(
+      coerceObject(upgrade.constraints),
+    ).filter(([name]) => isToolName(name));
+    if (toolConstraints.length) {
+      filteredUpgrade.constraints = Object.fromEntries(toolConstraints);
+    }
+    if (upgrade.postUpgradeTasks) {
+      filteredUpgrade.postUpgradeTasks = {
+        commands: upgrade.postUpgradeTasks.commands,
+        fileFilters: upgrade.postUpgradeTasks.fileFilters,
+        installTools: upgrade.postUpgradeTasks.installTools,
+      };
     }
     return filteredUpgrade;
   });
@@ -144,11 +160,21 @@ export async function writeUpdates(
       .join(', ')}`,
   );
 
-  const concurrentPrsCount = await getConcurrentPrsCount(config, branches);
-  setCount('ConcurrentPRs', concurrentPrsCount);
+  // vulnerability alerts are counted separately so that they get their own limit budget
+  const vulnerabilityBranches = branches.filter((b) => b.isVulnerabilityAlert);
+  const otherBranches = branches.filter((b) => !b.isVulnerabilityAlert);
 
-  const concurrentBranchesCount = await getConcurrentBranchesCount(branches);
-  setCount('Branches', concurrentBranchesCount);
+  setCount('ConcurrentPRs', await getConcurrentPrsCount(config, otherBranches));
+  setCount(
+    'VulnerabilityConcurrentPRs',
+    await getConcurrentPrsCount(config, vulnerabilityBranches),
+  );
+
+  setCount('Branches', await getConcurrentBranchesCount(otherBranches));
+  setCount(
+    'VulnerabilityBranches',
+    await getConcurrentBranchesCount(vulnerabilityBranches),
+  );
 
   const prsThisHourCount = await getPrHourlyCount(config);
   setCount('HourlyPRs', prsThisHourCount);
@@ -156,7 +182,18 @@ export async function writeUpdates(
   const commitsThisHourCount = await getCommitsHourlyCount(branches);
   setCount('HourlyCommits', commitsThisHourCount);
 
-  for (const branch of branches) {
+  const branchesToProcess = branches.filter((branch) => {
+    if (branch.skippedForLookupFailure) {
+      logger.debug(
+        { branchName: branch.branchName },
+        'A dependency lookup failed in this run - leaving the group branch unchanged',
+      );
+      branch.result = 'error';
+    }
+    return !branch.skippedForLookupFailure;
+  });
+
+  for (const branch of branchesToProcess) {
     const { baseBranch, branchName } = branch;
     const res = await instrument(
       branchName,
@@ -200,13 +237,21 @@ export async function writeUpdates(
         }
         if (
           branch.result === 'automerged' &&
-          branch.automergeType !== 'pr-comment'
+          branch.automergeType !== 'pr-comment' &&
+          branch.automergeType !== 'label'
         ) {
           // Stop processing other branches because base branch has been changed
           return 'automerged';
         }
-        if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-          incCountValue('Branches');
+        if (!branchExisted) {
+          const nowExists = await scm.branchExists(branch.branchName);
+          if (nowExists) {
+            incCountValue(
+              branch.isVulnerabilityAlert
+                ? 'VulnerabilityBranches'
+                : 'Branches',
+            );
+          }
         }
       },
       {

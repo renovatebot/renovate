@@ -17,7 +17,7 @@ Renovate can upgrade dependencies in PHP's `composer.json` and `composer.lock` f
 
 ## Enabling
 
-Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+Either install the [Mend Renovate app](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Private packages
 
@@ -41,8 +41,8 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 }
 ```
 
-This host rule is best added to the bot's `config.js` config so that it is not visible to users of the repository.
-If you are using the Mend Renovate App then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+This host rule is best added to the self-hosted `config.js` config so that it is not visible to users of the repository.
+If you are using the Mend Renovate app then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
 Go to [https://app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt), paste in the secret string you wish to encrypt, select _Encrypt_, then copy the encrypted result.
 You may encrypt your `password` only, but you can encrypt your `username` as well.

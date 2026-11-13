@@ -55,7 +55,7 @@ ruleTester.run('prefer-stub-env', rule, {
       errors: [{ messageId: 'preferStubEnv' }],
       output: `describe('suite', () => { beforeEach(() => { vi.stubEnv('FOO', 'bar'); }); });`,
     },
-    // `it.only` / `it.each(...)` are recognised as test contexts
+    // `it.only` / `it.each(...)` are recognized as test contexts
     {
       code: `it.only('works', () => { process.env.FOO = 'bar'; });`,
       errors: [{ messageId: 'preferStubEnv' }],

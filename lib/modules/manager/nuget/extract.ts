@@ -45,8 +45,9 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     const { name, attr } = child;
 
     if (name === 'ContainerBaseImage') {
-      const { depName, ...dep } = getDep(child.val, true);
+      const { depName, ...dep } = getDep(child.val);
 
+      // v8 ignore else -- needs a ContainerBaseImage element with a blank value
       if (isNonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
@@ -78,7 +79,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       currentValue = currentValue
         ?.trim()
-        ?.replace(regEx(/^\$\((\w+)\)$/), (match, key) => {
+        ?.replace(regEx(/^\$\((?<key>\w+)\)$/), (match, key) => {
           sharedVariableName = key;
           const val = vars.get(key);
           if (val) {
@@ -189,6 +190,7 @@ export async function extractPackageFile(
         currentValue,
         datasource: NugetDatasource.id,
       };
+      // v8 ignore else -- needs a package reference pinned to a non-semver value
       if (isString(currentValue) && semver.isVersion(currentValue)) {
         // This is to avoid nuget versioning pinning to [1.2.3]
         dep.versioning = 'semver';

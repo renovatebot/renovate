@@ -1,3 +1,9 @@
+import type {
+  NpmPackage,
+  PnpmManagerDataMinimumReleaseAge,
+  YarnManagerDataMinimalAgeGate,
+} from './extract/types.ts';
+
 interface LockFilePackage {
   name?: string;
   version?: string;
@@ -15,6 +21,7 @@ interface LockFilePackage {
   engines?: Record<string, string>;
   dependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
 }
 
 interface LockFileDependency {
@@ -75,19 +82,77 @@ export interface NpmLockFiles {
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
+  pnpmLockFile?: string;
   npmLock?: string;
 }
 
-export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
+export interface NpmManagerData extends NpmLockFiles {
   hasPackageManager?: boolean;
+  key?: string;
+  packageKey?: string;
   packageJsonName?: string;
   parents?: string[];
   yarnZeroInstall?: boolean;
+  workspaces?: NpmPackage['workspaces'];
   workspacesPackages?: string[] | string;
+  devEnginesIndex?: number;
+  npmrcFileName?: string | null;
+  repoNpmrc?: SanitizedRepoNpmrc;
+  /** the file name of the repository `.npmrc`, set instead of `repoNpmrc` when it carries credentials, so that it is read from disk again when the cached package file is used */
+  uncachedNpmrcFileName?: string;
+  /** the minimum release age settings of `pnpmLockFile`, kept from the extraction for every package file of the lock file, as the status checks run before the base branch is checked out */
+  pnpmMinimumReleaseAge?: PnpmManagerDataMinimumReleaseAge;
+  /** the minimum release age settings of `yarnLock`, kept from the extraction for every package file of the lock file, as the status checks run before the base branch is checked out */
+  yarnMinimalAgeGate?: YarnManagerDataMinimalAgeGate;
+}
+
+/** the repository `.npmrc` after sanitizing, from which `npmrc` can be rebuilt together with the configured one */
+export interface SanitizedRepoNpmrc {
+  fileName: string;
+  content: string;
+  detectedLineEnding: DetectedNpmrcLineEnding | null;
 }
 
 export interface NpmrcResult {
   npmrc: string | undefined;
   npmrcFileName: string | null;
+  repoNpmrc?: SanitizedRepoNpmrc;
+}
+
+export interface NpmrcConfig {
+  npmrc?: string;
+  npmrcMerge?: boolean;
+}
+
+export type NpmrcLineEnding = '\n' | '\r\n' | '\r' | '';
+export type DetectedNpmrcLineEnding = Exclude<NpmrcLineEnding, ''>;
+
+interface NpmrcBaseLine {
+  raw: string;
+  lineEnding: NpmrcLineEnding;
+}
+
+export interface NpmrcSettingLine extends NpmrcBaseLine {
+  type: 'setting';
+  section: string | null;
+  key: string;
+  isArray: boolean;
+  value: unknown;
+}
+
+export interface NpmrcSectionLine extends NpmrcBaseLine {
+  type: 'section';
+  name: string;
+}
+
+export interface NpmrcOtherLine extends NpmrcBaseLine {
+  type: 'other';
+}
+
+export type NpmrcLine = NpmrcSettingLine | NpmrcSectionLine | NpmrcOtherLine;
+
+export interface NpmrcDocument {
+  lines: NpmrcLine[];
+  detectedLineEnding: DetectedNpmrcLineEnding | null;
+  trailingLineEnding: NpmrcLineEnding;
 }

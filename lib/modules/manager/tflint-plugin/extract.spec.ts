@@ -138,6 +138,29 @@ describe('modules/manager/tflint-plugin/extract', () => {
       });
     });
 
+    it('ignores quoted attributes other than version and source', () => {
+      const extraAttribute = codeBlock`
+        plugin "aws" {
+          enabled = true
+          signing_key = "0xDEADBEEF"
+          version = "0.4.0"
+          source  = "github.com/terraform-linters/tflint-ruleset-aws"
+        }
+      `;
+
+      const res = extractPackageFile(extraAttribute, 'tflint-extra.hcl', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '0.4.0',
+            datasource: 'github-releases',
+            depName: 'terraform-linters/tflint-ruleset-aws',
+            depType: 'plugin',
+          },
+        ],
+      });
+    });
+
     it('extracts nothing if not from github', () => {
       const notGithub = codeBlock`
         plugin "aws" {

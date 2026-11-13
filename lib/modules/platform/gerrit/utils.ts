@@ -1,3 +1,5 @@
+import { isUndefined } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
@@ -7,7 +9,7 @@ import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
-import type { GitUrlOption, Pr } from '../types.ts';
+import type { FindPRConfig, GitUrlOption, Pr } from '../types.ts';
 import type { GerritChange, GerritLabelTypeInfo } from './schema.ts';
 import type { GerritChangeStatus, GerritRequestDetail } from './types.ts';
 
@@ -70,11 +72,7 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
 
   url.username = opts.username;
   url.password = opts.password;
-  url.pathname = joinUrlParts(
-    url.pathname,
-    'a',
-    encodeURIComponent(repository),
-  );
+  url.pathname = joinUrlParts(url.pathname, 'a', repository);
   return url.toString();
 }
 
@@ -92,6 +90,19 @@ export function mapPrStateToGerritFilter(state?: PrState): string | null {
     default:
       return null;
   }
+}
+
+export function prStateMatchesFilter(
+  prState: Pr['state'],
+  findState: FindPRConfig['state'],
+): boolean {
+  if (isUndefined(findState) || findState === 'all') {
+    return true;
+  }
+  if (findState === '!open') {
+    return prState !== 'open';
+  }
+  return prState === findState;
 }
 
 export function mapGerritChangeToPr(
@@ -113,6 +124,7 @@ export function mapGerritChangeToPr(
     targetBranch: change.branch,
     title: change.subject,
     createdAt: convertGerritDateToISO(change.created),
+    updatedAt: convertGerritDateToISO(change.updated),
     labels: change.hashtags,
     reviewers: coerceArray(
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!),
@@ -141,12 +153,12 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
   let sourceBranch: string | undefined = undefined;
 
   if (change.current_revision) {
-    const re = regEx(/^Renovate-Branch: (.+)$/m);
+    const re = regEx(/^Renovate-Branch: (?<branch>.+)$/m);
     const currentRevision = change.revisions![change.current_revision];
     const message = currentRevision.commit_with_footers;
     // v8 ignore else -- TODO: add test #40625
     if (message) {
-      sourceBranch = re.exec(message)?.[1];
+      sourceBranch = re.exec(message)?.groups?.branch;
     }
   }
 
@@ -183,4 +195,11 @@ export function mapBranchStatusToLabel(
 // Convert Gerrit date format to ISO format
 export function convertGerritDateToISO(date: string): string {
   return date.replace(' ', 'T');
+}
+
+/**
+ * Current time formatted like a Gerrit timestamp
+ */
+export function currentGerritTimestamp(): string {
+  return DateTime.utc().toFormat('yyyy-MM-dd HH:mm:ss.SSS000000');
 }

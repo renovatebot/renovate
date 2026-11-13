@@ -35,7 +35,7 @@ extra:
 # Set the main title for the project.
 # Required setting.
 # https://www.mkdocs.org/user-guide/configuration/#site_name
-site_name: Renovate Docs
+site_name: Mend Renovate CLI Docs
 
 # Set the canonical URL of the site.
 # https://www.mkdocs.org/user-guide/configuration/#site_url
@@ -88,16 +88,16 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
-      primary: 'indigo'
-      accent: 'indigo'
+      primary: 'custom'
+      accent: 'custom'
 
     - media: '(prefers-color-scheme: dark)'
       scheme: slate
       toggle:
         icon: material/weather-sunny
         name: Switch to system preference
-      primary: 'indigo'
-      accent: 'indigo'
+      primary: 'custom'
+      accent: 'custom'
 
   features:
     # Navigation pruning (not compatible with navigation.expand)

@@ -57,6 +57,15 @@ export class PackageCacheFile extends PackageCacheBase {
     if (errorCount > 0) {
       logger.debug(`Error count cleaning up cache: ${errorCount}`);
     }
+
+    // Garbage collect content blobs orphaned by put() overwrites.
+    // rm.content only handles expiry; when put() writes new data for an existing
+    // key, the previous content blob is left on disk unreferenced.
+    const gcStats = await cacache.verify(this.cacheFileName);
+    logger.debug(
+      `Cache GC: kept ${gcStats.verifiedContent} content entries (${gcStats.keptSize} bytes), removed ${gcStats.reclaimedCount} orphaned (${gcStats.reclaimedSize} bytes) in ${gcStats.runTime.total}ms`,
+    );
+
     const durationMs = Date.now() - startTime;
     logger.debug(
       `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,

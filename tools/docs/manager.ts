@@ -53,6 +53,7 @@ export const CategoryNames: Record<Category, string> = {
   iac: 'Infrastructure as Code',
   java: 'Java',
   js: 'JavaScript',
+  julia: 'Julia',
   kubernetes: 'Kubernetes',
   node: 'Node.js',
   perl: 'Perl',
@@ -112,7 +113,7 @@ export async function generateManagers(
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
         md += '## Enabling\n\n';
-        md += `${displayName} functionality is currently in beta testing, so you must opt-in to test it. To enable it, add a configuration like this to either your bot config or your \`renovate.json\`:\n\n`;
+        md += `${displayName} functionality is currently in beta testing, so you must opt-in to test it. To enable it, add a configuration like this to either your self-hosted config or your \`renovate.json\`:\n\n`;
         md += '```\n';
         md += `{\n  "${manager}": {\n    "enabled": true\n  }\n}`;
         md += '\n```\n\n';
@@ -175,8 +176,10 @@ export async function generateManagers(
       if (definition.supportsDynamicDepTypesNote) {
         md += `${definition.supportsDynamicDepTypesNote}\n\n`;
       }
+      const hasNoKnownDepTypes =
+        !definition.knownDepTypes || definition.knownDepTypes.length === 0;
       if (
-        (!definition.knownDepTypes || definition.knownDepTypes.length === 0) &&
+        hasNoKnownDepTypes &&
         definition.supportsDynamicDepTypesNote === undefined
       ) {
         md += 'This manager has no documented `depType` values.\n';

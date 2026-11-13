@@ -1,6 +1,6 @@
 # Private package support
 
-It's a very common requirement to be able to support private module/dependency lookups.
+It is a very common requirement to be able to support private module/dependency lookups.
 This page describes Renovate's approach to authentication.
 
 First, a quick note on terminology:
@@ -13,7 +13,7 @@ First, a quick note on terminology:
 By default, the only credentials Renovate has are those for the "platform", i.e. GitHub, GitLab, etc.
 If the token used has sufficient permissions, this will enable Renovate to lookup dependencies located in alternative repositories on the same host or any hosted on any embedded package registry on the same host.
 
-It's also quite common to need to look up packages on other protected hosts, including npmjs, Docker Hub, or private registries like Nexus or Artifactory.
+It is also quite common to need to look up packages on other protected hosts, including npmjs, Docker Hub, or private registries like Nexus or Artifactory.
 Any time you need Renovate to access such registries with credentials then you will need to provision them as part of your config.
 
 There are four times in Renovate's behavior when it may need credentials:
@@ -24,21 +24,21 @@ There are four times in Renovate's behavior when it may need credentials:
 - Passing to package managers when updating lock files or checksums
 
 !!! note
-  If you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
+  If you self-host Renovate, and have a self-hosted registry which _does not_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
 
 ## Private Config Presets
 
 Renovate supports config presets, including those which are private.
 
 Although npm presets were the first type supported, they are now deprecated and it is recommend that all users migrate to git-hosted "local" presets instead.
-However if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your bot global config.
+However if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your global self-hosted config.
 It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
 The recommended way of using local presets is to configure them using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
 
-It's not recommended that you use a private repository to host your config while then extending it from a public repository.
-If your preset doesn't have secrets then you should make it public, while if it does have secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
+It is not recommended that you use a private repository to host your config while then extending it from a public repository.
+If your preset does not have secrets then you should make it public, while if it does have secrets then it is better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
 
 In summary, the recommended approach to private presets is:
 
@@ -108,13 +108,15 @@ Renovate will use those credentials for all requests to `org/repo`.
 
 #### Example for gomod
 
-Here's an example for `gomod` with private `github.com` repos.
+Here is an example for `gomod` with private `github.com` repos.
 Assume this config is used on the `github.com/some-other-org` repo:
 
 ```json {configType=global}
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "hostRules": [
     {
       "matchHost": "https://gitlab.com",
@@ -141,13 +143,15 @@ Assume this config is used on the `github.com/some-other-org` repo:
 }
 ```
 
+If you use private Go modules hosted on GitLab, read [private Go modules hosted on GitLab](../golang.md#private-go-modules-hosted-on-gitlab) to learn how to authenticate the module resolution requests.
+
 ## Looking up changelogs
 
 When Renovate creates Pull Requests, its default behavior is to locate and embed release notes/changelogs of packages.
 These release notes are fetched from the source repository of packages and not from the registries themselves, so if they are private then they will require different credentials.
 
 When it comes to open source, most packages host their source on `github.com` in public repositories.
-GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
+GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or your deployment will get rate limited quickly.
 It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it changelogs for most open source packages will be blocked.
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
@@ -205,11 +209,14 @@ For example:
 
 <!-- prettier-ignore -->
 If a `github.com` token is found in `hostRules`, then it is written out to local [GIT_CONFIG_](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
-The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
+The environment variables used are: `GIT_CONFIG_KEY_0=url.https://x-access-token:${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
+
+For git hosts that Renovate does not recognize, a token-only host rule is sent as the username without a password.
+Some git and curl versions do not send such credentials again after a redirect, so configure `username` and `password` instead.
 
 ### helm
 
-Maybe you're running your own ChartMuseum server to host your private Helm Charts.
+Maybe you are running your own ChartMuseum server to host your private Helm Charts.
 This is how you connect to a private Helm repository:
 
 ```js title="Connecting to a private Helm repository"
@@ -231,13 +238,13 @@ If you need to configure per-repository credentials then you can also configure 
 
 The recommended approaches in order of preference are:
 
-1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
-1. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
-1. **The Mend Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
+1. **Self-hosted hostRules**: Configure a hostRules entry in your self-hosted `config.js` with the `hostType`, `matchHost` and `token` specified
+1. **The Mend Renovate app with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
+1. **The Mend Renovate app with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 
-#### Add hostRule to bots config
+#### Add hostRule to self-hosted config
 
 Define `hostRules` like this:
 
@@ -297,7 +304,7 @@ If you are using the main npmjs registry then you can configure only the `npmTok
 
 #### Add an encrypted npm token to Renovate config
 
-If you don't want all users of the repository to see the plaintext token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+If you do not want all users of the repository to see the plaintext token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
 Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, select "Encrypt", then copy the encrypted result.
 
@@ -327,7 +334,7 @@ Renovate will then use the following logic:
 
 1. If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
 1. If an `npmrc` string is present and has a `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
-1. If an `npmrc` string is present but doesn't have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+1. If an `npmrc` string is present but does not have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
 
 #### Encrypted entire .npmrc file into config
 
@@ -363,7 +370,7 @@ The end-result looks like this:
 
 #### Yarn 2+
 
-Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
+Renovate does not support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
 Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
 For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` minus the protocol (`http:` or `https:`) plus the trailing slash.
 
@@ -550,7 +557,7 @@ module.exports = {
 };
 ```
 
-If you're self-hosting Renovate via the [GitLab Runner](../getting-started/running.md#gitlab-runner) and want to access packages from private GitLab registries, you can use the GitLab CI job token for authentication:
+If you are self-hosting Renovate via the [GitLab Runner](../getting-started/running.md#gitlab-runner) and want to access packages from private GitLab registries, you can use the GitLab CI job token for authentication:
 
 ```js
 module.exports = {
@@ -587,14 +594,14 @@ For example:
 }
 ```
 
-## Encryption and the Mend Renovate App
+## Encryption and the Mend Renovate app
 
-Many users use [the Mend Renovate App](https://github.com/apps/renovate), which is hosted by Mend.
+Many users use [the Mend Renovate app](https://github.com/apps/renovate), which is hosted by Mend.
 If you are a user of this app, and have private modules, then the following is applicable.
 
 ### Private presets with public repositories
 
-If you have a preset in a private repo but reference ("extend") it from a public repository then it won't work.
+If you have a preset in a private repo but reference ("extend") it from a public repository then it will not work.
 This is because public repositories are provided with a token scoped to only that particular repository, and not for all repositories within the organization.
 This is a security measure so that if a the token is accidentally leaked publicly, the damage is limited to the public repository it leaked to and not to every repository within the organization.
 
@@ -603,7 +610,7 @@ The solution to this is that you should break your presets into public and priva
 ### Encrypting secrets
 
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
-The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
+The preferred approach to secrets is that the administrator configures them as `hostRules` which are then applied to all repositories which Renovate accesses.
 
 !!! warning "Store secrets for your Mend-hosted app via the web UI"
   Mend no longer supports putting encrypted secrets in the Renovate config file on your repository.
@@ -611,9 +618,9 @@ The preferred approach to secrets is that the bot administrator configures them 
   If you have encrypted secrets in your Renovate config, you must migrate them to the web UI.
   Read [Migrating Secrets from Repo Config to App Settings](../mend-hosted/migrating-secrets.md) to learn how.
 
-If you need to provide credentials to the Mend Renovate App, please do this:
+If you need to provide credentials to the Mend Renovate app, please do this:
 
-1. Add each secret string in the Credentials section of Organisation or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
+1. Add each secret string in the Credentials section of Organization or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
    ![Organization and repository secrets on the credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
 
@@ -634,20 +641,20 @@ For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/creden
 
 ### Access to GitHub Actions Secrets
 
-The Mend Renovate App does not run using GitHub Actions, but such secrets would be a bad fit for the app anyway for the following reasons:
+The Mend Renovate app does not run using GitHub Actions, but such secrets would be a bad fit for the app anyway for the following reasons:
 
 - The app would be granted access to _all_ the repository/org secrets, not just the ones you want
 - If Renovate wants access to such secrets, it would need to ask for them from every user, not just the ones who want to use this approach (GitHub does not support the concept of optional permissions for Apps, so people do not have the option to decline)
 
-## Admin/Bot config vs User/Repository config for Self-hosted users
+## Admin config vs User/Repository config for Self-hosted users
 
-"Admin/Bot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
+"Admin config" refers to the config which the Renovate administrator provides at startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
 User/Repository config refers to the in-repository config file which defaults to `renovate.json` but has a large number of alternative filenames supported.
 
 If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
 
 If per-repository config must be done within the repository, it is still recommended against committing secrets directly (including e.g. `.npmrc` files with tokens) and instead encrypting them with a custom public key first.
-For instructions on this, see the above section on encrypting secrets for the Mend Renovate App but instead:
+For instructions on this, see the above section on encrypting secrets for the Mend Renovate app but instead:
 
 - Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
 - Generate a public/private key pair for the app using the instructions in [privateKey](../self-hosted-configuration.md#privatekey)
@@ -656,7 +663,7 @@ For instructions on this, see the above section on encrypting secrets for the Me
 - Configure the app to run with `privateKey` set to the private key you generated above
 
 !!! note
-  Encrypted values can't be used in the "Admin/Bot config".
+  Encrypted values cannot be used in the "Admin config".
 
 ### hostRules configuration using environment variables
 

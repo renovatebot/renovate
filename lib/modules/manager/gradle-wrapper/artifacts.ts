@@ -27,6 +27,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import {
   extraEnv,
   getJavaConstraint,
@@ -192,9 +193,9 @@ export async function updateArtifacts({
       toolConstraints: [
         {
           toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(config.currentValue, gradlewFile)),
+          constraint: await resolveToolConstraint(config, 'java', () =>
+            getJavaConstraint(config.currentValue, gradlewFile),
+          ),
         },
       ],
     };

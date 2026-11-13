@@ -80,17 +80,15 @@ const CargoDep = z.union([
         return dep;
       },
     ),
-  z.string().transform(
-    (version): PackageDependency<CargoManagerData> => ({
-      currentValue: version,
-      managerData: { nestedVersion: false },
-      datasource: CrateDatasource.id,
-    }),
-  ),
+  z.string().transform((version): PackageDependency<CargoManagerData> => ({
+    currentValue: version,
+    managerData: { nestedVersion: false },
+    datasource: CrateDatasource.id,
+  })),
 ]);
 
 const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<CargoManagerData>[] = [];
 
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;
@@ -135,6 +133,7 @@ export const CargoManifest = Toml.pipe(
 
 const CargoConfigRegistry = z.object({
   index: z.string().optional(),
+  'min-publish-age': z.string().optional().catch(undefined),
 });
 
 const CargoConfigSource = z.object({
@@ -144,7 +143,19 @@ const CargoConfigSource = z.object({
 
 export const CargoConfig = Toml.pipe(
   z.object({
+    registry: z
+      .object({
+        'global-min-publish-age': z.string().optional().catch(undefined),
+      })
+      .optional()
+      .catch(undefined),
     registries: z.record(z.string(), CargoConfigRegistry).optional(),
+    resolver: z
+      .object({
+        'incompatible-publish-age': z.string().optional().catch(undefined),
+      })
+      .optional()
+      .catch(undefined),
     source: z.record(z.string(), CargoConfigSource).optional(),
   }),
 );

@@ -18,35 +18,39 @@ If the administrator has configured a fixed list of repositories then the only w
 
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
-- Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
-- If using a GitHub App (including the Mend Renovate App) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
+- Most commonly, you run Renovate as a dedicated account with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it is been granted access to
+- If using a GitHub App (including the Mend Renovate app) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
 
 ### Hosted GitHub.com App
 
-Follow these steps to install and enable the Mend Renovate App:
+Follow these steps to install and enable the Mend Renovate app:
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
-![The Mend Renovate App install button](../assets/images/github-app-install.png){ loading=lazy }
+![The Mend Renovate app install button](../assets/images/github-app-install.png){ loading=lazy }
 
 The only choice you need to make is whether to run Renovate on all repositories or on selected repositories:
 
 ![Repository select screen for the Mend Renovate app](../assets/images/github-app-choose-repos.png){ loading=lazy }
 
-Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
+Renovate will ignore any repositories that do not have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
-Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
+Unfortunately GitHub does not offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
-Once you're done selecting repositories for Renovate to run on, select the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+Once you are done selecting repositories for Renovate to run on, select the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
 !!! note
-  If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
-  If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+  If you are using the Mend Renovate app then it has a custom behavior for forked repositories.
+  If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they are a fork.
 
 ### Hosted GitLab.com App
 
-Unfortunately Mend's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
-For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
+Mend relaunched the Mend Renovate app for GitLab.com in July 2026, using a more secure architecture than the original version.
+
+You can set it up [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
+
+We currently only support installing the app on a Group on GitLab.com.
+We do have plans to support User installations, but we do not have any planned timelines.
 
 ### Self-hosting on Windows
 
@@ -57,7 +61,7 @@ You can do this by running this Git command:
 git config --global core.autocrlf input
 ```
 
-This prevents the carriage return `\r\n` which may confuse Renovate bot.
+This prevents the carriage return `\r\n` which may confuse Renovate.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
 
 ## Repository onboarding
@@ -72,9 +76,9 @@ Once you have enabled Renovate on a repository, you will get a "Configure Renova
 ### No risk onboarding
 
 Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _merge_ the onboarding Pull Request.
-If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](../index.md) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you're satisfied with the result.
+If there is anything about the Pull Request that you do not like or understand, take your time to read the [documentation](../index.md) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you are satisfied with the result.
 
-You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you're satisfied with the results.
+You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you are satisfied with the results.
 
 If you wish to opt-out of having Renovate run for your repo, simply close the onboarding Pull Request without merging it.
 This action is reversible - you can re-request an onboarding PR by renaming the (closed) onboarding PR, or you can commit a Renovate configuration file to your default branch to manually onboard.
@@ -87,7 +91,7 @@ Warnings and errors should be fixed on the base branch (e.g. `main`) so that Ren
 ### Configuration location
 
 The "Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
-If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
+If you do not want a `renovate.json` file in your repository you can use one of the following files instead:
 
 - `renovate.json5`
 - `.github/renovate.json`
@@ -100,7 +104,7 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `package.json` (deprecated)
 
 Or in a custom file present within the [`configFileNames`](../self-hosted-configuration.md#configfilenames).
-The bot first checks all the files in the `configFileNames` array before checking from the above file list.
+Renovate first checks all the files in the `configFileNames` array before checking from the above file list.
 
 #### package.json
 
@@ -109,7 +113,7 @@ The bot first checks all the files in the `configFileNames` array before checkin
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
 The `package.json` file must be located at the root of your repository.
-This is handy if you are already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
+This is handy if you are already using a `package.json` file anyway, e.g. when you are working on a JavaScript project.
 The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
 
 ### Customized defaults
@@ -125,7 +129,7 @@ Sometimes Renovate detects that an override to these defaults is needed, and wil
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:recommended"` preset overrides it to `"auto"`. Some prefer `"bump"`.
+- **rangeStrategy**: By default (with zero config) it is `"replace"` but the `"config:recommended"` preset overrides it to `"auto"`. Some prefer `"bump"`.
 - **labels**: Labels to assign to Pull Requests
 - **assignees**: GitHub user(s) to assign the Pull Requests to
 
@@ -133,7 +137,7 @@ Renovate will update your PR description each time it finds changes.
 
 ### Merge
 
-Once you're done checking and configuring in your Configure Renovate PR, it's time to merge it to enable the real Pull Requests to begin.
+Once you are done checking and configuring in your Configure Renovate PR, it is time to merge it to enable the real Pull Requests to begin.
 
 ## Repository re-configuration
 
@@ -152,18 +156,23 @@ If you want to make config edits directly, follow these steps:
 1. Create a pull request from the `renovate/reconfigure` branch
 1. Run renovate on your repository(if self-hosted), or wait for the hosted app to process the changes
 1. Renovate will comment on your PR, outlining the expected changes from your modified configuration
-1. You can continue to edit the configuration file in the same PR, and the bot will update its comment accordingly
+1. You can continue to edit the configuration file in the same PR, and Renovate will update its comment accordingly
 1. If you only want to validate your configuration changes, check out: [Validate your config](../config-validation.md)
+
+!!! note
+  The reconfigure branch is only meant for changes to your Renovate configuration.
+  Renovate reads the config from the reconfigure branch, but extracts dependencies from your default branch.
+  Any other file changes in the reconfigure branch, like new package files or dependency versions, are not extracted and do not show in the comment.
 
 ### Nuke config and re-onboard
 
 Perhaps you really liked the interactive onboarding PR and want to use it again.
 You can follow the steps below to nuke the config and get a new PR.
-Any existing Renovate PRs will be closed after you've completed these steps.
+Any existing Renovate PRs will be closed after you have completed these steps.
 
 1. Find your original `Configure Renovate` PR
 1. Rename the original PR to something else, e.g. `Configure Renovate - old`
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you are using the Mend Renovate app and you do not get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

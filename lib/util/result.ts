@@ -627,8 +627,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   // oxlint-disable-next-line unicorn/no-thenable -- required to implement PromiseLike
   then<TResult1 = Result<T, E>>(
     onfulfilled?:
-      | ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>)
-      | null,
+      ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>) | null,
   ): PromiseLike<TResult1> {
     return this.asyncResult.then(onfulfilled);
   }

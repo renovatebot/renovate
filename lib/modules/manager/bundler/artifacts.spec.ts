@@ -13,6 +13,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -61,17 +62,18 @@ describe('modules/manager/bundler/artifacts', () => {
 
     afterEach(() => {
       GlobalConfig.reset();
+      memCache.reset();
     });
 
     it('returns null by default', async () => {
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: '',
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: '',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if Gemfile.lock was not changed', async () => {
@@ -84,14 +86,14 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
       ]);
@@ -107,14 +109,14 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'teamA/Gemfile',
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toMatchObject([
         { options: { cwd: '/tmp/github/some/repo' } },
       ]);
@@ -133,14 +135,14 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         }),
-      ).toEqual([updatedGemfileLock]);
+      ).resolves.toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
       ]);
@@ -160,14 +162,14 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         }),
-      ).toEqual([updatedGemfileLock]);
+      ).resolves.toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
       ]);
@@ -186,8 +188,8 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [
             { depName: 'foo', updateType: 'minor' },
@@ -203,7 +205,7 @@ describe('modules/manager/bundler/artifacts', () => {
             ],
           },
         }),
-      ).toEqual([updatedGemfileLock]);
+      ).resolves.toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         expect.objectContaining({
           cmd: 'bundler lock --patch --conservative --update bar',
@@ -232,14 +234,14 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
         }),
-      ).toEqual([updatedGemfileLock]);
+      ).resolves.toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool ruby 1.2.0' },
         { cmd: 'install-tool bundler 2.3.5' },
@@ -270,14 +272,14 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: 'Gemfile',
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
             config,
           }),
-        ).toEqual([updatedGemfileLock]);
+        ).resolves.toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -324,8 +326,8 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: 'Gemfile',
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
@@ -337,7 +339,7 @@ describe('modules/manager/bundler/artifacts', () => {
               },
             },
           }),
-        ).toEqual([updatedGemfileLock]);
+        ).resolves.toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -386,8 +388,8 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: 'Gemfile',
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
@@ -399,7 +401,7 @@ describe('modules/manager/bundler/artifacts', () => {
               },
             },
           }),
-        ).toEqual([updatedGemfileLock]);
+        ).resolves.toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -447,14 +449,14 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: 'Gemfile',
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
             config,
           }),
-        ).toEqual([updatedGemfileLock]);
+        ).resolves.toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -498,8 +500,8 @@ describe('modules/manager/bundler/artifacts', () => {
           modified: ['Gemfile.lock'],
         }),
       );
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [],
           newPackageFileContent: '{}',
@@ -508,7 +510,9 @@ describe('modules/manager/bundler/artifacts', () => {
             isLockFileMaintenance: true,
           },
         }),
-      ).toMatchObject([{ artifactError: { fileName: 'Gemfile.lock' } }]);
+      ).resolves.toMatchObject([
+        { artifactError: { fileName: 'Gemfile.lock' } },
+      ]);
       expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
     });
 
@@ -522,8 +526,8 @@ describe('modules/manager/bundler/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'Gemfile',
           updatedDeps: [],
           newPackageFileContent: '{}',
@@ -533,7 +537,7 @@ describe('modules/manager/bundler/artifacts', () => {
             updateType: 'patch', // This will have no effect together with isLockFileMaintenance
           },
         }),
-      ).not.toBeNull();
+      ).resolves.not.toBeNull();
       expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
     });
 
@@ -552,8 +556,8 @@ describe('modules/manager/bundler/artifacts', () => {
             modified: ['Gemfile.lock'],
           }),
         );
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: 'Gemfile',
             updatedDeps: [],
             newPackageFileContent: '{}',
@@ -562,7 +566,7 @@ describe('modules/manager/bundler/artifacts', () => {
               isLockFileMaintenance: true,
             },
           }),
-        ).toMatchObject([
+        ).resolves.toMatchObject([
           {
             artifactError: {
               fileName: 'Gemfile.lock',
@@ -603,8 +607,8 @@ describe('modules/manager/bundler/artifacts', () => {
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: 'Gemfile',
             updatedDeps: [],
             newPackageFileContent: '{}',
@@ -613,7 +617,9 @@ describe('modules/manager/bundler/artifacts', () => {
               isLockFileMaintenance: true,
             },
           }),
-        ).toMatchObject([{ artifactError: { fileName: 'Gemfile.lock' } }]);
+        ).resolves.toMatchObject([
+          { artifactError: { fileName: 'Gemfile.lock' } },
+        ]);
       });
 
       it('throws on authentication errors', async () => {
@@ -636,6 +642,23 @@ describe('modules/manager/bundler/artifacts', () => {
             },
           }),
         ).rejects.toThrow(BUNDLER_INVALID_CREDENTIALS);
+      });
+
+      it('aborts without running Bundler after a cached authentication error', async () => {
+        memCache.init();
+        memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
+        const execSnapshots = mockExecAll();
+
+        const res = updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        await expect(res).rejects.toThrow(BUNDLER_INVALID_CREDENTIALS);
+        expect(execSnapshots).toBeEmptyArray();
+        expect(fs.readLocalFile).not.toHaveBeenCalled();
       });
 
       it('handles recursive resolved dependencies', async () => {

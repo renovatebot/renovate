@@ -28,11 +28,48 @@ query($owner: String!, $name: String!, $user: String) {
       first: 5
     ) {
       nodes {
+        id
         number
         state
         title
         body
         updatedAt
+      }
+    }
+  }
+}
+`;
+
+export const prAutoMergeStateQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
+export const disableAutoMergeMutation = `
+mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId }) {
+    pullRequest {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
       }
     }
   }
@@ -59,6 +96,7 @@ query(
         hasNextPage
       }
       nodes {
+        id
         number
         state
         title
@@ -90,6 +128,23 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
+export const enqueuePullRequestMutation = `
+mutation EnqueuePullRequest(
+  $pullRequestId: ID!,
+) {
+  enqueuePullRequest(
+    input: {
+      pullRequestId: $pullRequestId,
+    }
+  ) {
+    mergeQueueEntry {
+      id
+      position
+    }
+  }
+}
+`;
+
 export const enableAutoMergeMutation = `
 mutation EnablePullRequestAutoMerge(
   $pullRequestId: ID!,
@@ -106,6 +161,38 @@ mutation EnablePullRequestAutoMerge(
     }
   ) {
     pullRequest {
+      number
+    }
+  }
+}
+`;
+
+export const pinIssueMutation = `
+mutation PinIssue(
+  $issueId: ID!,
+) {
+  pinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
+      number
+    }
+  }
+}
+`;
+
+export const unpinIssueMutation = `
+mutation UnpinIssue(
+  $issueId: ID!,
+) {
+  unpinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
       number
     }
   }

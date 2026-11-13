@@ -36,7 +36,6 @@ describe('modules/manager/cargo/extract', () => {
       vi.stubEnv('CARGO_REGISTRIES_PRIVATE_CRATES_INDEX', undefined);
       vi.stubEnv('CARGO_REGISTRIES_MCORBIN_INDEX', undefined);
 
-      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'git.example.com',
@@ -44,60 +43,276 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('returns null for invalid toml', async () => {
-      expect(
-        await extractPackageFile('invalid toml', 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('invalid toml', 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty dependencies', async () => {
       const cargotoml = '[dependencies]\n';
-      expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(cargotoml, 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty dev-dependencies', async () => {
       const cargotoml = '[dev-dependencies]\n';
-      expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(cargotoml, 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty custom target', async () => {
       const cargotoml = '[target."foo".dependencies]\n';
-      expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(cargotoml, 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(20);
+      expect(res?.deps).toMatchObject([
+        { depName: 'libc', currentValue: '=0.2.43' },
+        { depName: 'bitflags', currentValue: '1.0.4' },
+        {
+          depName: 'pcap-sys',
+          currentValue: '=0.1',
+          skipReason: 'path-dependency',
+        },
+        { depName: 'pnet', currentValue: '0.21.0' },
+        {
+          depName: 'git_dep_with_version',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'git_dep',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          skipReason: 'unspecified-version',
+        },
+        { depName: 'path_dep_without_version', skipReason: 'path-dependency' },
+        {
+          depName: 'git_dep_with_tag',
+          datasource: 'github-tags',
+          currentValue: '1.10.3',
+          packageName: 'foo/bar',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          depName: 'git_dep_with_rev',
+          datasource: 'git-refs',
+          currentDigest: 'abc1234',
+          packageName: 'https://github.com/foo/bar',
+        },
+        {
+          depName: 'git_dep_with_branch',
+          datasource: 'git-refs',
+          currentValue: 'next',
+          packageName: 'https://github.com/foo/bar',
+          skipReason: 'git-dependency',
+        },
+        {
+          depName: 'git_dep_with_custom_hostname',
+          datasource: 'github-tags',
+          currentValue: '1.0.0',
+          packageName: 'a/b',
+          registryUrls: ['https://git.example.com'],
+        },
+        { depName: 'same_version_1__', currentValue: '0.0.0' },
+        { depName: 'same_version_1_', currentValue: '0.0.0' },
+        { depName: 'same_version_1', currentValue: '0.0.0' },
+        { depName: 'dep1', currentValue: '0.4.2' },
+        { depName: 'winapi', currentValue: '=0.3.6' },
+        { depName: 'wasm-bindgen', currentValue: '0.2.37' },
+        { depName: 'js-sys', currentValue: '0.3.14' },
+        { depName: 'js_relative_import', skipReason: 'path-dependency' },
+        { depName: 'web-sys', currentValue: '0.3.14' },
+      ]);
     });
 
     it('extracts multiple dependencies advanced', async () => {
       const res = await extractPackageFile(cargo2toml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(18 + 6 + 1);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'amethyst_animation',
+          currentValue: '0.2.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_assets',
+          currentValue: '0.3.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_audio',
+          currentValue: '0.2.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_config',
+          currentValue: '0.6.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_core',
+          currentValue: '0.2.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_controls',
+          currentValue: '0.1.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_locale',
+          currentValue: '0.1.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_renderer',
+          currentValue: '0.7',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_input',
+          currentValue: '0.3',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_ui',
+          currentValue: '0.2',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_utils',
+          currentValue: '0.2',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        { depName: 'derivative', currentValue: '1.0', depType: 'dependencies' },
+        { depName: 'fern', currentValue: '0.5', depType: 'dependencies' },
+        { depName: 'log', currentValue: '0.4', depType: 'dependencies' },
+        { depName: 'rayon', currentValue: '1.0.1', depType: 'dependencies' },
+        {
+          depName: 'rustc_version_runtime',
+          currentValue: '0.1',
+          depType: 'dependencies',
+        },
+        { depName: 'winit', currentValue: '0.15', depType: 'dependencies' },
+        {
+          depName: 'thread_profiler',
+          currentValue: '0.1',
+          depType: 'dependencies',
+        },
+        {
+          depName: 'amethyst_gltf',
+          currentValue: '0.2',
+          depType: 'dev-dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'env_logger',
+          currentValue: '0.5.10',
+          depType: 'dev-dependencies',
+        },
+        {
+          depName: 'genmesh',
+          currentValue: '0.6',
+          depType: 'dev-dependencies',
+        },
+        { depName: 'ron', currentValue: '0.2', depType: 'dev-dependencies' },
+        { depName: 'serde', currentValue: '1.0', depType: 'dev-dependencies' },
+        {
+          depName: 'serde_derive',
+          currentValue: '1.0',
+          depType: 'dev-dependencies',
+        },
+        {
+          depName: 'vergen',
+          currentValue: '0.1',
+          depType: 'build-dependencies',
+        },
+      ]);
     });
 
     it('handles inline tables', async () => {
       const res = await extractPackageFile(cargo3toml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(8);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'pcap-sys',
+          currentValue: '0.1',
+          skipReason: 'path-dependency',
+        },
+        { depName: 'pnet', currentValue: '0.21.0' },
+        { depName: 'dep1', currentValue: '1.2', skipReason: 'path-dependency' },
+        { depName: 'dep2', currentValue: '3.4', skipReason: 'path-dependency' },
+        {
+          depName: 'dep3',
+          currentValue: '~12.3.1',
+          skipReason: 'path-dependency',
+        },
+        { depName: 'dep4', currentValue: 'INVALID 3.3.1 VERSION' },
+        { depName: 'dep5', currentValue: '3.2.1' },
+        { depName: 'dep6', skipReason: 'invalid-dependency-specification' },
+      ]);
     });
 
     it('handles standard tables', async () => {
       const res = await extractPackageFile(cargo4toml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps).toMatchObject([
+        { depName: 'dep1', currentValue: '1.2', skipReason: 'path-dependency' },
+        { depName: 'dep2', currentValue: '3.4', skipReason: 'path-dependency' },
+        {
+          depName: 'dep3',
+          currentValue: '~12.3.1',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'dep4',
+          currentValue: 'INVALID 1.3.1 VERSION',
+          skipReason: 'path-dependency',
+        },
+        { depName: 'dep5', skipReason: 'path-dependency' },
+        { depName: 'dep7', skipReason: 'invalid-dependency-specification' },
+      ]);
     });
 
     it('extracts platform specific dependencies', async () => {
       const res = await extractPackageFile(cargo5toml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'wasm-bindgen',
+          currentValue: '0.2.37',
+          target: 'cfg(target_arch = "wasm32")',
+        },
+        {
+          depName: 'js-sys',
+          currentValue: '0.3.14',
+          target: 'cfg(target_arch = "wasm32")',
+        },
+        {
+          depName: 'js_relative_import',
+          target: 'cfg(target_arch = "wasm32")',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'web-sys',
+          currentValue: '0.3.14',
+          target: 'cfg(target_arch = "wasm32")',
+        },
+      ]);
     });
 
     it('extracts registry urls from .cargo/config.toml', async () => {
@@ -105,17 +320,69 @@ describe('modules/manager/cargo/extract', () => {
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'proprietary-crate',
+          currentValue: '0.1.0',
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          depName: 'mcorbin-test',
+          currentValue: '3.0.0',
+          registryUrls: ['https://github.com/mcorbin/testregistry'],
+        },
+        { depName: 'tokio', currentValue: '0.2' },
+      ]);
     });
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
-      mockReadLocalFile({ '.cargo/config.toml': cargo6configtoml });
+      mockReadLocalFile({ '.cargo/config': cargo6configtoml });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'proprietary-crate',
+          currentValue: '0.1.0',
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          depName: 'mcorbin-test',
+          currentValue: '3.0.0',
+          registryUrls: ['https://github.com/mcorbin/testregistry'],
+        },
+        { depName: 'tokio', currentValue: '0.2' },
+      ]);
+    });
+
+    it('reads .cargo/config if .cargo/config.toml exists as well, like cargo', async () => {
+      mockReadLocalFile({
+        '.cargo/config': codeBlock`
+          [registries.mine]
+          index = "https://legacy.example.com/index"
+        `,
+        '.cargo/config.toml': codeBlock`
+          [registries.mine]
+          index = "https://toml.example.com/index"
+        `,
+      });
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [dependencies]
+          foo = { version = "1.0.0", registry = "mine" }
+        `,
+        'Cargo.toml',
+        config,
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depName: 'foo', registryUrls: ['https://legacy.example.com/index'] },
+      ]);
     });
 
     it('extracts overridden registry indexes from .cargo/config.toml', async () => {
@@ -412,8 +679,13 @@ tokio = { version = "1.21.1" }`;
       const cargotoml =
         '[dependencies]\nfoobar = { version = "0.1.0", registry = "not-listed" }';
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'foobar',
+          currentValue: '0.1.0',
+          skipReason: 'unknown-registry',
+        },
+      ]);
     });
 
     it('fails to parse cargo config with invalid TOML', async () => {
@@ -421,8 +693,19 @@ tokio = { version = "1.21.1" }`;
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'proprietary-crate',
+          currentValue: '0.1.0',
+          skipReason: 'unknown-registry',
+        },
+        {
+          depName: 'mcorbin-test',
+          currentValue: '3.0.0',
+          skipReason: 'unknown-registry',
+        },
+        { depName: 'tokio', currentValue: '0.2' },
+      ]);
     });
 
     it('ignore cargo config registries with missing index', async () => {
@@ -430,8 +713,19 @@ tokio = { version = "1.21.1" }`;
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'proprietary-crate',
+          currentValue: '0.1.0',
+          skipReason: 'unknown-registry',
+        },
+        {
+          depName: 'mcorbin-test',
+          currentValue: '3.0.0',
+          skipReason: 'unknown-registry',
+        },
+        { depName: 'tokio', currentValue: '0.2' },
+      ]);
     });
 
     it('ignore cargo config source replaced registries with missing index', async () => {
@@ -545,9 +839,13 @@ replace-with = "mcorbin"
         '[dependencies]\nboolector-solver = { package = "boolector", version = "0.4.0" }';
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
 
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0].packageName).toBe('boolector');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'boolector-solver',
+          currentValue: '0.4.0',
+          packageName: 'boolector',
+        },
+      ]);
     });
 
     it('keeps the git source as packageName for renamed git dependencies', async () => {
@@ -632,6 +930,7 @@ replace-with = "mcorbin"
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.deps[0].lockedVersion).toBeUndefined();
+      expect(res?.managerData).toEqual({ lockFileHasGitSources: true });
     });
 
     it('extracts locked versions for renamed packages', async () => {
@@ -699,6 +998,204 @@ replace-with = "mcorbin"
       ]);
     });
 
+    describe('minimum release age', () => {
+      const cargotoml = codeBlock`
+        [dependencies]
+        syn = "2.0"
+      `;
+
+      it('extracts global-min-publish-age from .cargo/config.toml', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = "3 days"
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res?.packageRules).toEqual([
+          { matchDatasources: ['crate'], minimumReleaseAgeExtracted: '3 days' },
+        ]);
+        expect(res).not.toHaveProperty('managerData');
+      });
+
+      it('extracts the min-publish-age of each registry', async () => {
+        vi.stubEnv(
+          'CARGO_REGISTRIES_ENV_REG_INDEX',
+          'sparse+https://env-reg.example.com/index/',
+        );
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = "7 days"
+
+            [registries.crates-io]
+            min-publish-age = "1 day"
+
+            [registries.my-reg]
+            index = "sparse+https://my-reg.example.com/index/"
+            min-publish-age = "0"
+
+            [registries.other-reg]
+            index = "https://other-reg.example.com/index"
+
+            [registries.unused-reg]
+            index = "https://unused-reg.example.com/index"
+
+            [registries.no-index]
+            min-publish-age = "2 days"
+          `,
+        });
+
+        const res = await extractPackageFile(
+          codeBlock`
+            [dependencies]
+            syn = "2.0"
+            mine = { version = "1.0", registry = "my-reg" }
+            other = { version = "1.0", registry = "other-reg" }
+            from-env = { version = "1.0", registry = "env-reg" }
+            explicit = { version = "1.0", registry = "crates-io" }
+          `,
+          'Cargo.toml',
+          config,
+        );
+
+        expect(res?.deps).toMatchObject([
+          { depName: 'syn' },
+          {
+            depName: 'mine',
+            registryUrls: ['sparse+https://my-reg.example.com/index/'],
+          },
+          {
+            depName: 'other',
+            registryUrls: ['https://other-reg.example.com/index'],
+          },
+          {
+            depName: 'from-env',
+            registryUrls: ['sparse+https://env-reg.example.com/index/'],
+          },
+          { depName: 'explicit' },
+        ]);
+        expect(res?.packageRules).toEqual([
+          { matchDatasources: ['crate'], minimumReleaseAgeExtracted: '1 day' },
+          {
+            matchDatasources: ['crate'],
+            matchRegistryUrls: ['sparse+https://my-reg.example.com/index/'],
+            minimumReleaseAgeExtracted: null,
+          },
+          {
+            matchDatasources: ['crate'],
+            matchRegistryUrls: ['https://other-reg.example.com/index'],
+            minimumReleaseAgeExtracted: '7 days',
+          },
+          {
+            matchDatasources: ['crate'],
+            matchRegistryUrls: ['sparse+https://env-reg.example.com/index/'],
+            minimumReleaseAgeExtracted: '7 days',
+          },
+        ]);
+        expect(res?.managerData).toEqual({
+          registryMinPublishAges: {
+            'crates-io': '1 day',
+            'my-reg': '0',
+            'no-index': '2 days',
+          },
+        });
+      });
+
+      it('extracts the min-publish-age of a registry without a global one', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registries.private]
+            index = "https://private.example.com/index"
+            min-publish-age = "1 day"
+
+            [registries.invalid]
+            index = "https://invalid.example.com/index"
+            min-publish-age = 3
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res?.packageRules).toEqual([
+          {
+            matchDatasources: ['crate'],
+            matchRegistryUrls: ['https://private.example.com/index'],
+            minimumReleaseAgeExtracted: '1 day',
+          },
+        ]);
+        expect(res?.managerData).toEqual({
+          registryMinPublishAges: { private: '1 day' },
+        });
+      });
+
+      it.each`
+        age
+        ${'0'}
+        ${'invalid'}
+      `(
+        'ignores a global-min-publish-age of $age',
+        async ({ age }: { age: string }) => {
+          mockReadLocalFile({
+            '.cargo/config.toml': `[registry]\nglobal-min-publish-age = "${age}"\n`,
+          });
+
+          const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+          expect(res).not.toHaveProperty('packageRules');
+        },
+      );
+
+      it('keeps the age of crates.io for its crates from a registry which replaces it', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = "7 days"
+
+            [source.crates-io]
+            replace-with = "mirror"
+
+            [registries.mirror]
+            index = "sparse+https://mirror.example.com/index/"
+            min-publish-age = "1 day"
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res?.deps).toMatchObject([
+          { registryUrls: ['sparse+https://mirror.example.com/index/'] },
+        ]);
+        expect(res?.packageRules).toEqual([
+          { matchDatasources: ['crate'], minimumReleaseAgeExtracted: '7 days' },
+        ]);
+      });
+
+      it('keeps the registries of a config with an invalid global-min-publish-age', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = 3
+
+            [source.crates-io]
+            replace-with = "mirror"
+
+            [source.mirror]
+            registry = "https://mirror.example.com/index"
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res).not.toHaveProperty('packageRules');
+        expect(res?.deps).toMatchObject([
+          { registryUrls: ['https://mirror.example.com/index'] },
+        ]);
+      });
+    });
+
     it('should extract project version', async () => {
       const cargotoml = codeBlock`
         [package]
@@ -711,6 +1208,19 @@ replace-with = "mcorbin"
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.packageFileVersion).toBe('0.1.0');
+    });
+
+    it('should leave the project version unset when the package has none', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBeUndefined();
     });
 
     it('should extract project version from workspace', async () => {

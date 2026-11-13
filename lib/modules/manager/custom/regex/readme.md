@@ -36,7 +36,7 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 
 You must:
 
-- Capture the `currentValue` of the dependency in a named capture group
+- Capture the `currentValue` or `currentDigest` of the dependency in a named capture group
 - Set a `depName` or `packageName` capture group. Or use a template field: `depNameTemplate` and `packageNameTemplate`
 - Set a `datasource` capture group, or a `datasourceTemplate` config field
 
@@ -47,8 +47,7 @@ You may use any of these items:
 - A `depType` capture group, or a `depTypeTemplate` config field
 - A `versioning` capture group, or a `versioningTemplate` config field. If neither are present, Renovate defaults to `semver-coerced`
 - An `extractVersion` capture group, or an `extractVersionTemplate` config field
-- A `currentDigest` capture group
-- A `registryUrl` capture group, or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
+- A `registryUrl` capture group, or a `registryUrlTemplate` config field. If it is a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - An `indentation` capture group. It must be either empty, or whitespace only (otherwise `indentation` will be reset to an empty string)
 
 ### Regular Expression Capture Groups
@@ -91,7 +90,7 @@ something:4.7.2    something-else:4.7.2
 
 #### Online regex testing tool tips
 
-If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
+If you are looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 You must select the `ECMAScript (JavaScript)` flavor of regex.
 Backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` → `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
@@ -106,7 +105,7 @@ If you need to match line boundaries you can use `(?:^|\r\n|\r|\n|$)`.
 
 ### Configuration templates
 
-In many cases, named capture groups alone aren't enough and you'll need to give Renovate more information so it can look up a dependency.
+In many cases, named capture groups alone are not enough and you will need to give Renovate more information so it can look up a dependency.
 Continuing the above example with Yarn, here is the full Renovate config:
 
 ```json
@@ -126,7 +125,7 @@ Continuing the above example with Yarn, here is the full Renovate config:
 ### Advanced Capture
 
 Say your `Dockerfile` has many `ENV` variables that you want to keep up-to-date.
-But you don't want to write a regex custom manager rule for _each_ variable.
+But you do not want to write a regex custom manager rule for _each_ variable.
 Instead you enhance your `Dockerfile` like this:
 
 ```Dockerfile

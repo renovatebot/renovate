@@ -11,7 +11,7 @@ If github.com credentials are not provided, Renovate will continue to run, but w
 
 ### github.com (Cloud) users
 
-If your repositories are hosted on github.com (Cloud) and you are using the Renovate App on GitHub, you do not need to provide a token for github.com because the Renovate App already has access to GitHub.
+If your repositories are hosted on github.com (Cloud) and you are using the Mend Renovate app on GitHub, you do not need to provide a token for github.com because the Mend Renovate app already has access to GitHub.
 
 ### Bitbucket and Azure DevOps users
 

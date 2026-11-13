@@ -68,6 +68,32 @@ describe('modules/manager/pep723/utils', () => {
       });
     });
 
+    it('should extract dependencies without a python constraint', () => {
+      const res = extractPep723(
+        codeBlock`
+          # /// script
+          # dependencies = [
+          #   "requests==2.32.3",
+          # ]
+          # ///
+        `,
+        'foo.py',
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==2.32.3',
+            currentVersion: '2.32.3',
+            datasource: 'pypi',
+            depName: 'requests',
+            depType: 'project.dependencies',
+            packageName: 'requests',
+          },
+        ],
+      });
+    });
+
     it('should return null on missing dependencies', () => {
       const res = extractPep723(
         codeBlock`

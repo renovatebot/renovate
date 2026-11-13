@@ -63,13 +63,13 @@ describe('modules/manager/pub/artifacts', () => {
   });
 
   it('returns null if no pubspec.lock found', async () => {
-    expect(await pub.updateArtifacts(updateArtifact)).toBeNull();
+    await expect(pub.updateArtifacts(updateArtifact)).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await pub.updateArtifacts({ ...updateArtifact, updatedDeps: [] }),
-    ).toBeNull();
+    await expect(
+      pub.updateArtifacts({ ...updateArtifact, updatedDeps: [] }),
+    ).resolves.toBeNull();
   });
 
   it(`runs flutter pub get if only dart and flutter sdks are updated`, async () => {
@@ -77,8 +77,8 @@ describe('modules/manager/pub/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce(lockFile);
     fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
     fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-    expect(
-      await pub.updateArtifacts({
+    await expect(
+      pub.updateArtifacts({
         ...updateArtifact,
         newPackageFileContent: codeBlock`
           environment:
@@ -87,7 +87,7 @@ describe('modules/manager/pub/artifacts', () => {
         `,
         updatedDeps: [{ depName: 'dart' }, { depName: 'flutter' }],
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -111,12 +111,12 @@ describe('modules/manager/pub/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toMatchObject([
         {
           cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
@@ -129,12 +129,12 @@ describe('modules/manager/pub/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -155,13 +155,13 @@ describe('modules/manager/pub/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
           updatedDeps: [{ depName: params.sdk }],
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -182,13 +182,13 @@ describe('modules/manager/pub/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
           config: { ...config, isLockFileMaintenance: true },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -214,12 +214,12 @@ describe('modules/manager/pub/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -259,13 +259,13 @@ describe('modules/manager/pub/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
           config: { ...config, constraints: { dart: '3.3.9' } },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -288,12 +288,12 @@ describe('modules/manager/pub/artifacts', () => {
       fs.writeLocalFile.mockImplementationOnce(() => {
         throw new Error(stderr);
       });
-      expect(
-        await pub.updateArtifacts({
+      await expect(
+        pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
         }),
-      ).toEqual([{ artifactError: { fileName: lockFile, stderr } }]);
+      ).resolves.toEqual([{ artifactError: { fileName: lockFile, stderr } }]);
     });
   });
 
@@ -312,12 +312,12 @@ describe('modules/manager/pub/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce(lockFile);
     fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
     fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-    expect(
-      await pub.updateArtifacts({
+    await expect(
+      pub.updateArtifacts({
         ...updateArtifact,
         newPackageFileContent,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -343,12 +343,12 @@ describe('modules/manager/pub/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce(lockFile);
     fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
     fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-    expect(
-      await pub.updateArtifacts({
+    await expect(
+      pub.updateArtifacts({
         ...updateArtifact,
         newPackageFileContent,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -359,6 +359,50 @@ describe('modules/manager/pub/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: `install-tool dart ${dartVersion}` },
+      { cmd: `dart pub upgrade ${depNamesWithSpace}` },
+    ]);
+  });
+
+  it('falls back to the extracted dart constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+
+    await pub.updateArtifacts({
+      ...updateArtifact,
+      newPackageFileContent: codeBlock`
+        dependencies:
+          dep1: ^1.0.0
+      `,
+      config: { ...config, extractedConstraints: { dart: '3.3.0' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dart 3.3.0' },
+      { cmd: `dart pub upgrade ${depNamesWithSpace}` },
+    ]);
+  });
+
+  it('prefers the pubspec constraint over the extracted one', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+
+    await pub.updateArtifacts({
+      ...updateArtifact,
+      newPackageFileContent: codeBlock`
+        environment:
+          sdk: 3.3.0
+      `,
+      config: { ...config, extractedConstraints: { dart: '2.0.0' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dart 3.3.0' },
       { cmd: `dart pub upgrade ${depNamesWithSpace}` },
     ]);
   });

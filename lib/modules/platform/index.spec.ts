@@ -66,7 +66,7 @@ describe('modules/platform/index', () => {
       username: 'abc',
       password: '123',
     };
-    expect(await platform.initPlatform(config)).toEqual({
+    await expect(platform.initPlatform(config)).resolves.toEqual({
       endpoint: 'https://api.bitbucket.org/',
       gitAuthor: 'user@domain.com',
       hostRules: [
@@ -105,7 +105,7 @@ describe('modules/platform/index', () => {
       ],
     };
 
-    expect(await platform.initPlatform(config)).toEqual({
+    await expect(platform.initPlatform(config)).resolves.toEqual({
       endpoint: 'https://ghe.renovatebot.com/',
       gitAuthor: 'some <user@domain.com>',
       hostRules: [
@@ -144,7 +144,7 @@ describe('modules/platform/index', () => {
         ],
       };
 
-      expect(await platform.initPlatform(config)).toEqual({
+      await expect(platform.initPlatform(config)).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
         hostRules: [
@@ -204,7 +204,7 @@ describe('modules/platform/index', () => {
         token: '123',
       };
 
-      expect(await platform.initPlatform(config)).toEqual({
+      await expect(platform.initPlatform(config)).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
         hostRules: [

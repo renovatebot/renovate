@@ -10,6 +10,7 @@ import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { isSingleOperator, isValidOperator } from './operator.ts';
 import { ltr, parse as parseRange } from './range.ts';
@@ -32,7 +33,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 function vtrim<T = unknown>(version: T): string | T {
   if (isString(version)) {
-    return version.replace(regEx(/^v/), '').replace(regEx(/('|")/g), '');
+    return stripVersionPrefix(version).replace(regEx(/(?:'|")/g), '');
   }
   return version;
 }
@@ -158,7 +159,7 @@ function getNewValue({
         logger.warn({ rangeStrategy }, 'Unsupported range strategy');
     }
   }
-  if (newValue && regEx(/^('|")/).exec(currentValue)) {
+  if (newValue && regEx(/^(?:'|")/).exec(currentValue)) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')

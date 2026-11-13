@@ -1,7 +1,7 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -153,6 +153,10 @@ export async function postUpgradeCommandsExecutor(
             { rawCmd: cmd, compiledCmd },
             'Post-upgrade command has been compiled',
           );
+        }
+        if (compiledCmd === '') {
+          logger.trace({ rawCmd: cmd }, 'Skipping empty post-upgrade task');
+          continue;
         }
         if (
           allowedCommands.some((pattern) => regEx(pattern).test(compiledCmd))
@@ -372,9 +376,8 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (isArray(config.updatedPackageFiles) &&
-      config.updatedPackageFiles.length > 0) ||
-    (isArray(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    isNonEmptyArray(config.updatedPackageFiles) ||
+    isNonEmptyArray(config.updatedArtifacts);
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */
@@ -387,6 +390,7 @@ export default async function executePostUpgradeCommands(
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
+      constraints: config.constraints,
       postUpgradeTasks:
         config.postUpgradeTasks!.executionMode === 'branch'
           ? config.postUpgradeTasks

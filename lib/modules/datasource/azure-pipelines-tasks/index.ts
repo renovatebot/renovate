@@ -26,7 +26,9 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     super(AzurePipelinesTasksDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly defaultVersioning = versioning;
 
@@ -82,17 +84,20 @@ export class AzurePipelinesTasksDatasource extends Datasource {
 
       return result;
     }
-    const versions =
-      (
-        await this.getTasks(BUILT_IN_TASKS_URL, {}, AzurePipelinesFallbackTasks)
-      )[packageName.toLowerCase()] ??
-      (
-        await this.getTasks(
-          MARKETPLACE_TASKS_URL,
-          {},
-          AzurePipelinesFallbackTasks,
-        )
-      )[packageName.toLowerCase()];
+    const builtInTasks = await this.getTasks(
+      BUILT_IN_TASKS_URL,
+      {},
+      AzurePipelinesFallbackTasks,
+    );
+    let versions = builtInTasks[packageName.toLowerCase()];
+    if (!versions) {
+      const marketplaceTasks = await this.getTasks(
+        MARKETPLACE_TASKS_URL,
+        {},
+        AzurePipelinesFallbackTasks,
+      );
+      versions = marketplaceTasks[packageName.toLowerCase()];
+    }
 
     if (versions) {
       const releases = versions.map((version) => ({ version }));

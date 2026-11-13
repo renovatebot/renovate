@@ -14,14 +14,14 @@ To learn how to create and host them, read the [Shareable Config Presets](../con
 
 Use presets to:
 
-- Set up the bot with good default settings
+- Set up Renovate with good default settings
 - Avoid duplicating your configuration
 - Share your configuration with others
 - Use somebody else's configuration as-is, or extend it with your own rules
 
 ## How to use presets
 
-Say you're using the `config:recommended` preset, and want to pin your GitHub Action digests.
+Say you are using the `config:recommended` preset, and want to pin your GitHub Action digests.
 Instead of writing your own Renovate config, you search the docs, and find the `helpers:pinGitHubActionDigests` preset.
 Then you add the preset to the `"extends"` array in your Renovate configuration file:
 

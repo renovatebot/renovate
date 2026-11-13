@@ -10,6 +10,7 @@ import type {
 } from '../types.ts';
 import type { HelmDockerImageDependency } from './types.ts';
 import {
+  getHelmValuesSiblingVersion,
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
 } from './util.ts';
@@ -19,8 +20,11 @@ function getHelmDep(
   repository: string,
   tag: string,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency {
-  const dep = getDep(`${registry}${repository}:${tag}`, false, registryAliases);
+): PackageDependency<never> {
+  const dep = getDep(`${registry}${repository}:${tag}`, {
+    specifyReplaceString: false,
+    registryAliases,
+  });
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
@@ -33,17 +37,17 @@ function getHelmDep(
  *
  * @param parsedContent
  */
-export function findDependencies(
+export function findDependencies<T = never>(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency[] {
-  return findDependenciesInternal(parsedContent, [], registryAliases);
+): PackageDependency<T>[] {
+  return findDependenciesInternal<T>(parsedContent, [], registryAliases);
 }
-export function findDependenciesInternal(
+export function findDependenciesInternal<T = never>(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
-  packageDependencies: PackageDependency[],
+  packageDependencies: PackageDependency<T>[],
   registryAliases: Record<string, string> | undefined,
-): PackageDependency[] {
+): PackageDependency<T>[] {
   if (!isObject(parsedContent)) {
     return packageDependencies;
   }
@@ -60,7 +64,21 @@ export function findDependenciesInternal(
         getHelmDep(registry, repository, tag, registryAliases),
       );
     } else if (matchesHelmValuesInlineImage(key, value)) {
-      packageDependencies.push(getDep(value, true, registryAliases));
+      const dep = getDep(value, { registryAliases });
+      // An inline reference without an embedded version can be completed by a
+      // sibling `tag`/`version` key: `cli: { image: ..., tag: v1.0.0 }`
+      if (!dep.currentValue && !dep.currentDigest) {
+        const siblingVersion = getHelmValuesSiblingVersion(parsedContent);
+        if (siblingVersion) {
+          packageDependencies.push(
+            getHelmDep('', value, siblingVersion, registryAliases),
+          );
+        } else {
+          packageDependencies.push(dep);
+        }
+      } else {
+        packageDependencies.push(dep);
+      }
     } else {
       findDependenciesInternal(
         value as Record<string, unknown>,

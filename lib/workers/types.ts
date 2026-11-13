@@ -2,6 +2,7 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  PostUpgradeTasks,
   RenovateConfig,
   RenovateSharedConfig,
   UpdateType,
@@ -20,7 +21,7 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
-import type { ConstraintName } from '../util/exec/types.ts';
+import type { ConstraintName, ToolName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -103,6 +104,14 @@ export interface BranchUpgradeConfig
   remediationNotPossible?: boolean;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
+  minimumReleaseAgeExtracted?: string | null;
+  /**
+   * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
+   *
+   * Package managers apply a minimum release age to every package they resolve, so Renovate passes them this value instead of a `minimumReleaseAge` from `packageRules`.
+   */
+  minimumReleaseAgeRepository?: string | null;
   sourceDirectory?: string;
   sourceRepoSlug?: string;
 
@@ -127,6 +136,8 @@ export interface BranchUpgradeConfig
   sourceRepoName?: string;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /** The constraints which other managers share for the directory of the package file, see `ToolConstraintsConfig` */
+  sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -157,13 +168,12 @@ export type BranchResult =
   | 'minimum-group-size-not-met';
 
 export type CacheFingerprintMatchResult =
-  | 'matched'
-  | 'no-match'
-  | 'no-fingerprint';
+  'matched' | 'no-match' | 'no-fingerprint';
 
 export interface BranchConfig
   extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
   automergeComment?: string;
+  automergeLabel?: string;
   automergedPreviously?: boolean;
   baseBranch: string;
   branchAutomergeFailureMessage?: string;
@@ -181,6 +191,8 @@ export interface BranchConfig
 
   errors?: ValidationMessage[];
   forcePr?: boolean;
+  /** True for a group branch in a run where a dependency lookup failed, so the branch must not be updated. */
+  skippedForLookupFailure?: boolean;
   hasTypes?: boolean;
   isModified?: boolean;
   isScheduledNow?: boolean;
@@ -293,6 +305,12 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+  constraints?: Partial<Record<ToolName, string>>;
+  postUpgradeTasks?: {
+    commands?: string[];
+    fileFilters?: string[];
+    installTools?: PostUpgradeTasks['installTools'];
+  };
 }
 
 export interface ExtractResult {

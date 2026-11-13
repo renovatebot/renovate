@@ -1,24 +1,27 @@
-import { isDate, isTruthy, isUndefined } from '@sindresorhus/is';
+import {
+  isDate,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isTruthy,
+  isUndefined,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
+import { extractVersionFromGroups } from '../../../../../modules/datasource/common.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
 import * as memCache from '../../../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { detectPlatform } from '../../../../../util/common.ts';
+import { isNotFound } from '../../../../../util/http/status.ts';
 import { linkify } from '../../../../../util/markdown.ts';
 import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
 import { isHttpUrl } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
-import * as bitbucket from './bitbucket/index.ts';
-import * as bitbucketServer from './bitbucket-server/index.ts';
-import * as forgejo from './forgejo/index.ts';
-import * as gitea from './gitea/index.ts';
-import * as github from './github/index.ts';
-import * as gitlab from './gitlab/index.ts';
 import type { ChangeLogSource } from './source.ts';
 import type {
   ChangeLogFile,
@@ -36,35 +39,23 @@ const repositoriesToSkipMdFetching = [
   'react/react-native',
 ];
 
+// Per the OCI distribution reference grammar a leading path segment is a host
+// when it contains a `.` or a `:`. Go module paths are qualified the same way.
+const hostQualifiedNameRegex = regEx(
+  /^(?:localhost(?::\d+)?|[^/]+[.:][^/]*)\/(?<unqualifiedName>.+)$/,
+);
+
 export async function getReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
-    switch (type) {
-      case 'bitbucket':
-        return bitbucket.getReleaseList(project, release);
-      case 'bitbucket-server':
-        logger.trace(
-          'Unsupported Bitbucket Server feature. Skipping release fetching.',
-        );
-        return [];
-      case 'forgejo':
-        return await forgejo.getReleaseList(project, release);
-      case 'gitea':
-        return await gitea.getReleaseList(project, release);
-      case 'github':
-        return await github.getReleaseList(project, release);
-      case 'gitlab':
-        return await gitlab.getReleaseList(project, release);
-      default:
-        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-        return [];
-    }
+    return await source.getReleaseList(project, release);
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
     } else {
       logger.debug(
@@ -79,16 +70,16 @@ export async function getReleaseList(
 export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes[]> {
   const { repository, apiBaseUrl } = project;
-  // TODO: types (#22198)
-  const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
+  const cacheKey = buildCacheKey('getReleaseList', apiBaseUrl, repository);
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseList(project, release);
+  const promisedRes = getReleaseList(project, release, source);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -117,7 +108,7 @@ export function massageBody(
   );
   // Reduce headings size
   body = body
-    .split(regEx(/(```[\s\S]*?```)/g))
+    .split(regEx(/(?<codeBlock>```[\s\S]*?```)/g))
     .map((part) =>
       part.startsWith('```') // do not modify # inside of codeblocks
         ? part
@@ -153,6 +144,7 @@ export async function getReleaseNotes(
   project: ChangeLogProject,
   release: ChangeLogRelease,
   config: BranchUpgradeConfig,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes | null> {
   return await instrument('getReleaseNotes', async () => {
     const { packageName, depName, repository } = project;
@@ -161,13 +153,13 @@ export async function getReleaseNotes(
     logger.trace(
       `getReleaseNotes(${repository}, ${version}, ${packageName!}, ${depName!})`,
     );
-    const releases = await getCachedReleaseList(project, release);
+    const releases = await getCachedReleaseList(project, release, source);
     logger.trace({ releases }, 'Release list from getReleaseList');
     let releaseNotes: ChangeLogNotes | null = null;
 
     let matchedRelease = getExactReleaseMatch(
-      packageName!,
-      depName!,
+      packageName,
+      depName,
       version,
       releases,
     );
@@ -184,8 +176,10 @@ export async function getReleaseNotes(
     if (isUndefined(matchedRelease) && config.extractVersion) {
       const extractVersionRegEx = regEx(config.extractVersion);
       matchedRelease = releases.find((r) => {
-        const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
-          ?.version;
+        const extractedVersionGroups = extractVersionRegEx.exec(r.tag!)?.groups;
+        const extractedVersion = extractVersionFromGroups(
+          extractedVersionGroups,
+        );
         return version === extractedVersion;
       });
     }
@@ -196,19 +190,58 @@ export async function getReleaseNotes(
 }
 
 function getExactReleaseMatch(
-  packageName: string,
-  depName: string,
+  packageName: string | undefined,
+  depName: string | undefined,
   version: string,
   releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
+  const namePatterns = getNamePatterns(packageName, depName);
+  if (!namePatterns.length) {
+    return undefined;
+  }
+
   const exactReleaseReg = regEx(
-    `(?:^|/)(?:${packageName}|${depName})[@_/-]v?${version}`,
+    `(?:^|/)(?:${namePatterns.join('|')})[@_/-]v?${RegExp.escape(version)}`,
   );
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
     exactReleaseReg.test(r.tag!),
   );
   return matchedRelease;
+}
+
+/**
+ * A registry host never appears in a Git tag, so a host-qualified name such as
+ * an OCI chart `<registry>/<org>/<repo>/<chart>` can never match the tag that
+ * publishes it, which is scoped by the chart name alone: `<chart>-<version>`.
+ * For those names, also match against the name with its host stripped, and
+ * against the trailing path segment alone. Names that are not host-qualified,
+ * such as scoped npm packages, keep matching in full only, so their tag
+ * prefixes stay as specific as they are today.
+ */
+function getNamePatterns(
+  packageName: string | undefined,
+  depName: string | undefined,
+): string[] {
+  const names = new Set<string>();
+  for (const name of [packageName, depName]) {
+    if (!isNonEmptyString(name)) {
+      continue;
+    }
+    names.add(name);
+
+    const unqualifiedName =
+      hostQualifiedNameRegex.exec(name)?.groups?.unqualifiedName;
+    if (isNonEmptyString(unqualifiedName)) {
+      names.add(unqualifiedName);
+
+      const trailingName = unqualifiedName.split('/').pop();
+      if (isNonEmptyString(trailingName)) {
+        names.add(trailingName);
+      }
+    }
+  }
+  return [...names].map((name) => RegExp.escape(name));
 }
 
 async function releaseNotesResult(
@@ -223,6 +256,7 @@ async function releaseNotesResult(
   if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
+    // v8 ignore next -- a matched release always carries its own url
     releaseNotes.url = releaseMatch.url
       ? releaseMatch.url
       : /* istanbul ignore next */
@@ -251,7 +285,7 @@ async function releaseNotesResult(
 function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split(newlineRegex);
-  const tokens = markdown.parse(text, undefined);
+  const tokens = markdown.parse(text, {});
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substring(1);
@@ -274,54 +308,17 @@ function sectionize(text: string, level: number): string[] {
 
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject,
+  source: ChangeLogSource,
 ): Promise<ChangeLogFile | null> {
-  const { repository, type } = project;
-  const apiBaseUrl = project.apiBaseUrl;
-  const sourceDirectory = project.sourceDirectory!;
+  const { repository, type, apiBaseUrl, sourceDirectory } = project;
   try {
-    switch (type) {
-      case 'bitbucket':
-        return await bitbucket.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'bitbucket-server':
-        return await bitbucketServer.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'forgejo':
-        return await forgejo.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'gitea':
-        return await gitea.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'github':
-        return await github.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'gitlab':
-        return await gitlab.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      default:
-        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-        return null;
-    }
+    return await source.getReleaseNotesMd(
+      repository,
+      apiBaseUrl,
+      sourceDirectory,
+    );
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug(
         { repository, type, apiBaseUrl },
         'Error 404 getting changelog md',
@@ -338,18 +335,21 @@ export async function getReleaseNotesMdFileInner(
 
 export function getReleaseNotesMdFile(
   project: ChangeLogProject,
+  source: ChangeLogSource,
 ): Promise<ChangeLogFile | null> {
   const { sourceDirectory, repository, apiBaseUrl } = project;
-  // TODO: types (#22198)
-  const cacheKey = sourceDirectory
-    ? `getReleaseNotesMdFile@v2-${repository}-${sourceDirectory}-${apiBaseUrl}`
-    : `getReleaseNotesMdFile@v2-${repository}-${apiBaseUrl}`;
+  const cacheKey = buildCacheKey(
+    'getReleaseNotesMdFile@v2',
+    repository,
+    sourceDirectory,
+    apiBaseUrl,
+  );
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseNotesMdFileInner(project);
+  const promisedRes = getReleaseNotesMdFileInner(project, source);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -367,7 +367,7 @@ export async function getReleaseNotesMd(
     return null;
   }
 
-  const changelog = await getReleaseNotesMdFile(project);
+  const changelog = await getReleaseNotesMdFile(project, source);
   if (!changelog) {
     return null;
   }
@@ -392,7 +392,7 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(isTruthy);
-          const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const body = section.replace(regEx(/.*?\n(?:-{3,}\n)?/), '').trim();
           const notesSourceUrl = source.getNotesSourceUrl(
             baseUrl,
             repository,
@@ -414,22 +414,20 @@ export async function getReleaseNotesMd(
             }
           }
           // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
-          const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+          const releasesRegex = regEx(/(?:[0-9]{4}-[0-9]{2}-[0-9]{2})/);
           if (packageName && heading.search(releasesRegex) !== -1) {
             // Now check if any line contains both the package name and the version
             // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)
             // which Keep-a-Changelog files list at the bottom and would otherwise match every version.
             const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
-            const bodyLines = body.split('\n');
-            if (
-              bodyLines.some(
-                (line) =>
-                  line.includes(packageName) &&
-                  line.includes(version) &&
-                  !isHttpUrl(line) &&
-                  !linkRefDefRegex.test(line),
-              )
-            ) {
+            const hasMatchingReleaseLine = body
+              .split('\n')
+              .filter((line) => !isHttpUrl(line) && !linkRefDefRegex.test(line))
+              .map((line) => line.replace(regEx(/https?:\/\/\S+/g), ''))
+              .some(
+                (line) => line.includes(packageName) && line.includes(version),
+              );
+            if (hasMatchingReleaseLine) {
               logger.trace({ body }, `Found release notes for v${version}`);
               return {
                 body: await linkifyBody(project, body),
@@ -495,9 +493,6 @@ export async function addReleaseNotes(
 
     const { repository, sourceDirectory, type: projectType } = input.project;
     const cacheNamespace: PackageCacheNamespace = `changelog-${projectType}-notes@v2`;
-    const cacheKeyPrefix = sourceDirectory
-      ? `${repository}:${sourceDirectory}`
-      : `${repository}`;
 
     const shouldTruncateToPlatformLimit = config.fetchChangeLogs === 'pr';
     const maxBodyLength = shouldTruncateToPlatformLimit
@@ -512,24 +507,38 @@ export async function addReleaseNotes(
         !shouldTruncateToPlatformLimit ||
         fetchedNotesLength < maxBodyLength
       ) {
-        const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
-        const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
-        releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-        releaseNotes ??= await getReleaseNotesMd(input.project, v, source);
-        releaseNotes ??= await getReleaseNotes(input.project, v, config);
-
-        // If there is no release notes, at least try to show the compare URL
-        if (!releaseNotes && v.compare.url) {
-          releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
-        }
-
-        const cacheMinutes = releaseNotesCacheMinutes(v.date);
-        await packageCache.set(
-          cacheNamespace,
-          cacheKey,
-          releaseNotes,
-          cacheMinutes,
+        const cacheKey = buildCacheKey(
+          repository,
+          sourceDirectory,
+          v.version,
+          v.gitRef,
         );
+        releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
+        if (!releaseNotes) {
+          releaseNotes = await getReleaseNotesMd(input.project, v, source);
+          if (isNullOrUndefined(releaseNotes)) {
+            releaseNotes = await getReleaseNotes(
+              input.project,
+              v,
+              config,
+              source,
+            );
+          }
+
+          // If there is no release notes, at least try to show the compare URL
+          if (!releaseNotes && v.compare.url) {
+            releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
+          }
+
+          // only write on a miss: writing a hit back would refresh its TTL, so a cached compare-only fallback would never be retried
+          const cacheMinutes = releaseNotesCacheMinutes(v.date);
+          await packageCache.set(
+            cacheNamespace,
+            cacheKey,
+            releaseNotes,
+            cacheMinutes,
+          );
+        }
 
         // when we have received enough changelog content to exceed the platform's limit, we should stop trying to look up more changelog entries, as we fetch newest releases first, so the most recent changelog entries will be visible in the PR
         if (shouldTruncateToPlatformLimit) {

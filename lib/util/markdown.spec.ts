@@ -100,6 +100,36 @@ describe('util/markdown', () => {
       expect(sanitizeMarkdown(input)).toEqual(input);
     });
 
+    it('should not add zero-width space to @ inside quadruple-backtick code blocks', () => {
+      const input = codeBlock`
+        \`\`\`\`md
+        \`\`\`js
+        import foo from '@atlaskit/tokens';
+        \`\`\`
+        \`\`\`\`
+      `;
+
+      expect(sanitizeMarkdown(input)).toEqual(input);
+    });
+
+    it('should add zero-width space to @ after a quadruple-backtick code block', () => {
+      const input = codeBlock`
+        \`\`\`\`
+        x
+        \`\`\`\`
+
+        Thanks @user!
+      `;
+
+      expect(sanitizeMarkdown(input)).toEqual(codeBlock`
+        \`\`\`\`
+        x
+        \`\`\`\`
+
+        Thanks @&#8203;user!
+      `);
+    });
+
     it('should not add zero-width space to @ inside inline code spans', () => {
       const input = 'Use `@atlaskit/tokens` here';
       expect(sanitizeMarkdown(input)).toEqual(input);
@@ -108,6 +138,16 @@ describe('util/markdown', () => {
     it('should add zero-width space to @ in regular text', () => {
       expect(sanitizeMarkdown('mention @user here')).toEqual(
         'mention @&#8203;user here',
+      );
+    });
+
+    it('should not add zero-width space to @ inside URLs', async () => {
+      const input =
+        'Read more at https://medium.com/@fastifyjs/fastify-v4-ga-59f2103b5f0e by @user';
+      const linkified = await linkify(input, { repository: 'some/repo' });
+
+      expect(sanitizeMarkdown(linkified)).toEqual(
+        'Read more at <https://medium.com/@fastifyjs/fastify-v4-ga-59f2103b5f0e> by [@&#8203;user](https://github.com/user)\n',
       );
     });
   });

@@ -101,4 +101,26 @@ describe('util/package-rules/jsonata', () => {
       expect(result).toBeFalse();
     });
   });
+
+  describe('$matchRegexOrGlob', () => {
+    const matchJsonata = [
+      '$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://example.com/**"])',
+    ];
+
+    it.each`
+      packageName          | registryUrls                                    | expected
+      ${'@myorg/foo'}      | ${undefined}                                    | ${true}
+      ${'lodash'}          | ${['https://npm.org', 'https://example.com/x']} | ${true}
+      ${'@myorg-labs/foo'} | ${['https://registry.npmjs.org']}               | ${false}
+    `(
+      'returns $expected for $packageName with $registryUrls',
+      async ({ packageName, registryUrls, expected }) => {
+        const result = await matcher.matches(
+          { packageName, registryUrls },
+          { matchJsonata },
+        );
+        expect(result).toBe(expected);
+      },
+    );
+  });
 });

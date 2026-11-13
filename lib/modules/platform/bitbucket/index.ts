@@ -13,6 +13,11 @@ import {
   aggressiveRepoCacheProvider,
   repoCacheProvider,
 } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import {
+  isBadRequest,
+  isForbidden,
+  isNotFound,
+} from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as promises from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -40,6 +45,7 @@ import type {
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as comments from './comments.ts';
+import { getRepoFile } from './files.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
   RepoInfo,
@@ -113,7 +119,7 @@ export async function initPlatform({
     renovateUserUuid = uuid;
   } catch (err) {
     if (
-      err.statusCode === 403 &&
+      isForbidden(err) &&
       err.body?.error?.detail?.required?.includes('account')
     ) {
       logger.warn(`Bitbucket: missing 'account' scope for password`);
@@ -198,9 +204,7 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
   const repo = repoName ?? config.repository;
-  const path = fileName;
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
@@ -208,11 +212,9 @@ export async function getRawFile(
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
-  const url = `/2.0/repositories/${repo}/src/${finalBranchOrTag ?? `HEAD`}/${path}`;
-  const res = await bitbucketHttp.getText(url, {
+  return await getRepoFile(bitbucketHttp, repo, fileName, finalBranchOrTag, {
     cacheProvider: repoCacheProvider,
   });
-  return res.body;
 }
 
 export async function getJsonFile(
@@ -252,15 +254,20 @@ export async function initRepo({
     mainBranch = info.mainbranch;
 
     if (getInheritedOrGlobal('bbUseDevelopmentBranch')) {
-      // Fetch Bitbucket development branch
+      logger.debug(
+        "bbUseDevelopmentBranch is true - Checking BitBucket's development branch",
+      );
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
-          `/2.0/repositories/${repository}/branching-model`,
+          `/2.0/repositories/${repository}/effective-branching-model`,
         )
-      ).body.development?.branch?.name;
+      ).body.development?.name;
 
       if (developmentBranch) {
         mainBranch = developmentBranch;
+        logger.debug(
+          `${developmentBranch} is BitBucket's development branch - using it as default branch`,
+        );
       }
     }
 
@@ -275,7 +282,7 @@ export async function initRepo({
 
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* v8 ignore next -- initRepo error mapping (404 to not-found) is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
@@ -293,7 +300,8 @@ export async function initRepo({
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
   // TODO #22198
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)?.[1];
+  const hostnameWithoutApiPrefix =
+    regEx(/api[.|-](?<host>.+)/).exec(hostname)?.groups?.host;
 
   let auth = '';
   if (opts.token) {
@@ -371,12 +379,12 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
-  );
+  const pr = prList.find((p) => {
+    if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+      return false;
+    }
+    return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+  });
 
   if (!pr) {
     return null;
@@ -520,10 +528,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    statuses.every(
-      (status) =>
-        status.state === 'SUCCESSFUL' && status.key?.startsWith('renovate/'),
-    )
+    statuses.every((status) => {
+      const isInternal = status.key?.startsWith('renovate/');
+      return status.state === 'SUCCESSFUL' && isInternal;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -599,9 +607,9 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /<details>\n(<summary>View abandoned dependencies.*<\/summary>\n\n)([\s\S]*?)<\/details>/,
+        /<details>\n(?:<summary>View abandoned dependencies.*<\/summary>\n\n)(?<body>[\s\S]*?)<\/details>/,
       ),
-      '$2',
+      '$<body>',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/issues\//g), '](../../issues/')
@@ -677,8 +685,8 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
 
       if (partDepth > 1) {
         t = t.replace(
-          regEx(/^([ \t]*- [`[])/gm),
-          `${nestedListItemIndentation}$1`,
+          regEx(/^(?<prefix>[ \t]*- [`[])/gm),
+          `${nestedListItemIndentation}$<prefix>`,
         );
       }
 
@@ -691,7 +699,7 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
       return result;
     })
     .join('')
-    .replace(regEx(/<\/?(summary|details|blockquote)>/g), '');
+    .replace(regEx(/<\/?(?:summary|details|blockquote)>/g), '');
 }
 
 export function maxBodyLength(): number {
@@ -799,7 +807,7 @@ async function sanitizeReviewers(
   reviewers: Account[],
   err: any,
 ): Promise<Account[] | undefined> {
-  if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
+  if (isBadRequest(err) && err.body?.error?.fields?.reviewers) {
     const sanitizedReviewers: Account[] = [];
 
     const MSG_AUTHOR_AND_REVIEWER =
@@ -826,11 +834,14 @@ async function sanitizeReviewers(
           ).body;
 
           // There are cases where an active user may still not be a member of a workspace
-          if (
-            reviewerUser.account_status === 'active' &&
-            (await isAccountMemberOfWorkspace(reviewer, config.repository))
-          ) {
-            sanitizedReviewers.push(reviewer);
+          if (reviewerUser.account_status === 'active') {
+            const isMember = await isAccountMemberOfWorkspace(
+              reviewer,
+              config.repository,
+            );
+            if (isMember) {
+              sanitizedReviewers.push(reviewer);
+            }
           }
         }
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
@@ -883,7 +894,7 @@ async function isAccountMemberOfWorkspace(
     return true;
   } catch (err) {
     // HTTP 404: User cannot be found, or the user is not a member of this workspace.
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug(
         { err },
         `User ${reviewer.display_name} is not a member of the workspace ${workspace}. Will be removed from the PR`,
