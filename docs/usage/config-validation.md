@@ -58,7 +58,7 @@ $ npx --yes --package renovate -- renovate-config-validator --migrate
 ```
 
 The validator can only migrate JSON, JSONC and JSON5 config files, including `.renovaterc`.
-It keeps comments in JSON and JSONC files, but loses comments in JSON5 files.
+It keeps the comments and formatting of the file where it can.
 It does not change JavaScript, TypeScript or YAML config files, or the `renovate` config in a `package.json`.
 
 If you pass both `--strict` and `--migrate`, then a migration that the validator applies does not make the command fail.

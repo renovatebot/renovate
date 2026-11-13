@@ -10,6 +10,7 @@
     'group:monorepos',
     'helpers:oddIsUnstablePackages'
   ],
+  // a comment that is kept
   onboarding: false,
   pinVersions: false,
   semanticCommits: true,
