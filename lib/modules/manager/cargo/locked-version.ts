@@ -2,25 +2,33 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { CargoLock } from './schema.ts';
+import type { CargoLockFileVersions } from './types.ts';
 
 export async function extractLockFileVersions(
   lockFilePath: string,
-): Promise<Map<string, string[]> | null> {
+): Promise<CargoLockFileVersions | null> {
   const content = await readLocalFile(lockFilePath, 'utf8');
-  if (content) {
-    return extractLockFileContentVersions(content);
+  const lock = content ? parseLockFile(content) : null;
+  if (!lock) {
+    return null;
   }
-  return null;
+  return {
+    versionsByPackage: getLockedVersions(lock),
+    hasGitSources: coerceArray(lock.package).some((pkg) =>
+      pkg.source?.startsWith('git+'),
+    ),
+  };
 }
 
 export function extractLockFileContentVersions(
   content: string,
 ): Map<string, string[]> | null {
-  const versionsByPackage = new Map<string, string[]>();
   const lock = parseLockFile(content);
-  if (!lock) {
-    return null;
-  }
+  return lock ? getLockedVersions(lock) : null;
+}
+
+function getLockedVersions(lock: CargoLock): Map<string, string[]> {
+  const versionsByPackage = new Map<string, string[]>();
   for (const pkg of coerceArray(lock.package)) {
     const versions = coerceArray(versionsByPackage.get(pkg.name));
     versions.push(pkg.version);

@@ -102,8 +102,10 @@ function findManagerUpdate(
 
 /**
  * Returns the update of `manager`, preferring lock file maintenance, in
- * `upgrades`, then in the upgrades of the branch for `packageFile`, else
- * `config`.
+ * `upgrades`, which can hold updates of other managers of the same package
+ * file, then in the upgrades of the branch for `packageFile`, which lock file
+ * maintenance needs as it has no upgrades, else `config`, which can belong to
+ * another manager.
  */
 function findPackageManagerUpdate({
   config,

@@ -2,10 +2,7 @@ import { isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import {
-  findLocalSiblingOrParent,
-  readLocalFile,
-} from '../../../util/fs/index.ts';
+import { findLocalSiblingOrParent } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { api as versioning } from '../../versioning/cargo/index.ts';
 import type {
@@ -14,19 +11,34 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractLockFileVersions } from './locked-version.ts';
-import { CargoConfig, CargoManifest } from './schema.ts';
+import {
+  getMinPublishAgeRules,
+  getRegistryMinPublishAges,
+} from './minimum-release-age.ts';
+import type { CargoConfig } from './schema.ts';
+import { CargoManifest } from './schema.ts';
 import type {
   CargoManagerData,
   CargoRegistries,
   CargoRegistryUrl,
 } from './types.ts';
-import { DEFAULT_REGISTRY_URL } from './utils.ts';
-
-const DEFAULT_REGISTRY_ID = 'crates-io';
+import {
+  DEFAULT_REGISTRY_ID,
+  DEFAULT_REGISTRY_URL,
+  readCargoConfig,
+} from './utils.ts';
 
 function getCargoIndexEnv(registryName: string): string | null {
   const registry = registryName.toUpperCase().replaceAll('-', '_');
   return getEnv()[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
+}
+
+/** Returns the index of a registry, from the environment or the cargo config. */
+function getRegistryUrl(
+  registryName: string,
+  cargoRegistries: CargoRegistries,
+): CargoRegistryUrl | undefined {
+  return getCargoIndexEnv(registryName) ?? cargoRegistries[registryName];
 }
 
 function extractFromSection(
@@ -44,9 +56,10 @@ function extractFromSection(
     let registryUrls: string[] | undefined;
 
     if (dep.managerData?.registryName) {
-      const registryUrl =
-        getCargoIndexEnv(dep.managerData.registryName) ??
-        cargoRegistries[dep.managerData?.registryName];
+      const registryUrl = getRegistryUrl(
+        dep.managerData.registryName,
+        cargoRegistries,
+      );
       if (registryUrl) {
         if (registryUrl !== DEFAULT_REGISTRY_URL) {
           registryUrls = [registryUrl];
@@ -78,27 +91,6 @@ function extractFromSection(
   }
 
   return deps;
-}
-
-/** Reads `.cargo/config`, or, if not found, `.cargo/config.toml`, as cargo uses `.cargo/config` if both exist */
-async function readCargoConfig(): Promise<CargoConfig | null> {
-  for (const configName of ['config', 'config.toml']) {
-    const path = `.cargo/${configName}`;
-    const payload = await readLocalFile(path, 'utf8');
-    if (payload) {
-      const parsedCargoConfig = CargoConfig.safeParse(payload);
-      if (parsedCargoConfig.success) {
-        return parsedCargoConfig.data;
-      }
-      logger.debug(
-        { err: parsedCargoConfig.error, path },
-        `Error parsing cargo config`,
-      );
-    }
-  }
-
-  logger.debug('Neither .cargo/config nor .cargo/config.toml found');
-  return null;
 }
 
 /** Extracts a map of cargo registries from a CargoConfig */
@@ -162,6 +154,30 @@ function resolveRegistryIndex(
   }
   logger.debug(`${registryName} cargo registry is missing index`);
   return null;
+}
+
+/**
+ * Returns the URL by name of each registry other than crates.io which has a `min-publish-age` in the cargo config, or crates in `deps`, as the crates of that registry have it in `registryUrls`.
+ */
+function getAlternateRegistryUrls(
+  registryMinPublishAges: Record<string, string> | undefined,
+  cargoRegistries: CargoRegistries,
+  deps: PackageDependency<CargoManagerData>[],
+): Record<string, string> {
+  const registryNames = new Set([
+    ...Object.keys(coerceObject(registryMinPublishAges)),
+    ...deps.map((dep) => dep.managerData?.registryName).filter(isString),
+  ]);
+  registryNames.delete(DEFAULT_REGISTRY_ID);
+  const registryUrls: Record<string, string> = {};
+  for (const registryName of registryNames) {
+    const registryUrl = getRegistryUrl(registryName, cargoRegistries);
+    // crates of a registry without a URL are skipped, and those of crates.io have the age of crates.io
+    if (isString(registryUrl)) {
+      registryUrls[registryName] = registryUrl;
+    }
+  }
+  return registryUrls;
 }
 
 export async function extractPackageFile(
@@ -266,13 +282,35 @@ export async function extractPackageFile(
     deps,
     packageFileVersion: version,
   };
+
+  const registryMinPublishAges = getRegistryMinPublishAges(cargoConfig);
+  // a string if the cargo config replaces crates.io
+  const cratesIoUrl = cargoRegistries[DEFAULT_REGISTRY_ID];
+  const packageRules = getMinPublishAgeRules(
+    cargoConfig,
+    getAlternateRegistryUrls(registryMinPublishAges, cargoRegistries, deps),
+    isString(cratesIoUrl) ? cratesIoUrl : undefined,
+  );
+  if (packageRules.length) {
+    logger.debug(
+      `Found min-publish-age in the cargo config for ${packageFile}: ${JSON.stringify(packageRules)}`,
+    );
+    res.packageRules = packageRules;
+  }
+  if (registryMinPublishAges) {
+    logger.debug(
+      `Found min-publish-age of registries ${Object.keys(registryMinPublishAges).join(', ')} in the cargo config for ${packageFile}`,
+    );
+    res.managerData = { registryMinPublishAges };
+  }
+
   if (lockFileName) {
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`,
     );
 
-    const versionsByPackage = await extractLockFileVersions(lockFileName);
-    if (!versionsByPackage) {
+    const lockFileVersions = await extractLockFileVersions(lockFileName);
+    if (!lockFileVersions) {
       logger.debug(
         `Could not extract lock file versions from ${lockFileName}.`,
       );
@@ -280,6 +318,11 @@ export async function extractPackageFile(
     }
 
     res.lockFiles = [lockFileName];
+    const { versionsByPackage, hasGitSources } = lockFileVersions;
+    // cargo does not check the age of git sources, which lock file maintenance updates
+    if (hasGitSources) {
+      res.managerData = { ...res.managerData, lockFileHasGitSources: true };
+    }
 
     for (const dep of deps) {
       const packageName = dep.packageName ?? dep.depName!;
