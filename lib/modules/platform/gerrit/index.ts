@@ -498,10 +498,10 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
-    const hasBlockingLabels = Object.values(coerceObject(change.labels)).some(
-      (label) => label.blocking,
-    );
-    if (hasBlockingLabels) {
+    const hasRejectedOrBlockingLabels = Object.values(
+      coerceObject(change.labels),
+    ).some((label) => label.rejected !== undefined || label.blocking === true);
+    if (hasRejectedOrBlockingLabels) {
       return 'red';
     }
     // v8 ignore else -- TODO: add test #40625
