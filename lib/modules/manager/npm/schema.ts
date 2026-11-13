@@ -131,6 +131,26 @@ export const PnpmWorkspaceFile = Yaml.pipe(
 );
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
+/** The minimum release age settings of a parsed `pnpm-workspace.yaml`, `minimumReleaseAge` is in minutes. */
+export const PnpmWorkspaceMinimumReleaseAgeSettings = z.object({
+  minimumReleaseAge: z.number().nonnegative().optional().catch(undefined),
+  minimumReleaseAgeStrict: z.boolean().optional().catch(undefined),
+  // pnpm accepts a lone string as well
+  minimumReleaseAgeExclude: z
+    .array(z.string())
+    .or(z.string().transform((entry) => [entry]))
+    .optional()
+    .catch(undefined),
+});
+
+/** The minimum release age settings of a `pnpm-workspace.yaml`, `minimumReleaseAge` is in minutes. */
+export const PnpmWorkspaceMinimumReleaseAge = Yaml.pipe(
+  PnpmWorkspaceMinimumReleaseAgeSettings,
+);
+export type PnpmWorkspaceMinimumReleaseAge = z.infer<
+  typeof PnpmWorkspaceMinimumReleaseAge
+>;
+
 export const PackageManager = z
   .string()
   .transform((val) => val.split('@'))
@@ -197,5 +217,7 @@ export const NpmrcCooldown = Ini.pipe(
   z.object({
     before: z.string().optional().catch(undefined),
     'min-release-age': z.string().optional().catch(undefined),
+    // read by pnpm before v11, in minutes
+    'minimum-release-age': z.string().optional().catch(undefined),
   }),
 );
