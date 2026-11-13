@@ -4297,6 +4297,7 @@ On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
+Renovate also does not enable platform-native automerge for a branch whose artifact updates failed, so the failed `renovate/artifacts` check holds that PR even when the check is not required.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
