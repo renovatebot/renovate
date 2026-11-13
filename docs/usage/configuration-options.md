@@ -65,6 +65,9 @@ This ensures abandonment detection is based on normal package release patterns.
 
 If a package's most recent release date plus the `abandonmentThreshold` duration is in the past, the package is marked as abandoned (`isAbandoned: true`).
 
+For an abandoned package whose source is on github.com, or on the GitHub Enterprise host Renovate runs on, Renovate also checks whether that public repository is archived, and marks archived ones in the Dependency Dashboard (`isSourceArchived: true`).
+This check needs a GitHub token for the repository, and is skipped without one.
+
 This option accepts time duration strings like `1 year`, `6 months`, `90 days`, etc.
 
 Example usage:

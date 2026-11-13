@@ -1,3 +1,4 @@
+import { parseGitUrl } from '../git/url.ts';
 import { ensureTrailingSlash } from '../url.ts';
 
 const defaultSourceUrlBase = 'https://github.com/';
@@ -31,4 +32,21 @@ export function getSourceUrl(
 ): string {
   const sourceUrlBase = getSourceUrlBase(registryUrl);
   return `${sourceUrlBase}${packageName}`;
+}
+
+/**
+ * The `registryUrl` and `packageName` (`owner/repo`) of a GitHub source URL:
+ * the inverse of {@link getSourceUrl}.
+ */
+export function parseSourceUrl(
+  sourceUrl: string,
+): { registryUrl: string; packageName: string } | null {
+  try {
+    const { resource, owner, name } = parseGitUrl(sourceUrl);
+    return owner && name
+      ? { registryUrl: `https://${resource}/`, packageName: `${owner}/${name}` }
+      : null;
+  } catch {
+    return null;
+  }
 }

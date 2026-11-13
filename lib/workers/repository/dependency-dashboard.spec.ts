@@ -2598,6 +2598,32 @@ None detected
       expect(result).toContain('abandonmentThreshold');
     });
 
+    it('marks abandoned packages whose source repository is archived', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'archived-pkg',
+                isAbandoned: true,
+                isSourceArchived: true,
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
+
+      expect(result).toContain(
+        '| npm | `archived-pkg` (repository archived) |',
+      );
+    });
+
     it('handles multiple abandoned packages across different managers', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [

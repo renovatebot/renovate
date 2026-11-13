@@ -1,4 +1,4 @@
-import { getApiBaseUrl, getSourceUrlBase } from './url.ts';
+import { getApiBaseUrl, getSourceUrlBase, parseSourceUrl } from './url.ts';
 
 describe('util/github/url', () => {
   describe('getSourceUrlBase', () => {
@@ -26,6 +26,18 @@ describe('util/github/url', () => {
       expect(getApiBaseUrl('https://gh.my-company.com/api/v3/')).toBe(
         'https://gh.my-company.com/api/v3/',
       );
+    });
+  });
+
+  describe('parseSourceUrl', () => {
+    it.each`
+      sourceUrl                                   | expected
+      ${'https://github.com/owner/repo'}          | ${{ registryUrl: 'https://github.com/', packageName: 'owner/repo' }}
+      ${'https://github.example.com/owner/repo/'} | ${{ registryUrl: 'https://github.example.com/', packageName: 'owner/repo' }}
+      ${'https://github.com/owner'}               | ${null}
+      ${'not a url'}                              | ${null}
+    `('parses $sourceUrl', ({ sourceUrl, expected }) => {
+      expect(parseSourceUrl(sourceUrl)).toEqual(expected);
     });
   });
 });

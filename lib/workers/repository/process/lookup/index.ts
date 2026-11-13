@@ -29,7 +29,7 @@ import { Result } from '../../../../util/result.ts';
 import { safeStringify } from '../../../../util/stringify.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import { withoutUrlCredentials } from '../../../../util/url.ts';
-import { calculateAbandonment } from './abandonment.ts';
+import { calculateAbandonment, checkArchivedSource } from './abandonment.ts';
 import { groupReleasesIntoBuckets } from './bucket.ts';
 import { getNewestMatchingVersion, resolveCurrentVersion } from './current.ts';
 import type { DigestLikeUpdate } from './digest.ts';
@@ -211,6 +211,7 @@ export async function lookupUpdates(
         'isAbandoned',
         'respectLatest',
       ]);
+      await checkArchivedSource(res);
 
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
