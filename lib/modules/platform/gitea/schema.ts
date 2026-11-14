@@ -47,6 +47,13 @@ export const User = DeepNullish(
 );
 export type User = z.infer<typeof User>;
 
+export const Org = DeepNullish(
+  z.object({
+    username: z.string(),
+  }),
+);
+export type Org = z.infer<typeof Org>;
+
 export const RepoPermission = z.object({
   admin: z.boolean(),
   pull: z.boolean(),

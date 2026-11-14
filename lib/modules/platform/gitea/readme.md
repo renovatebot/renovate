@@ -20,14 +20,14 @@ You must set `platform=gitea` in your Renovate config file.
 
 The PAT should have these permissions:
 
-| Scope          | Permission       | Valid for Gitea versions       | Notes                                 |
-| -------------- | ---------------- | ------------------------------ | ------------------------------------- |
-| `repo`         | `Read and Write` | all                            |                                       |
-| `user`         | `Read`           | all                            |                                       |
-| `issue`        | `Read and Write` | `>= 1.20.0`                    |                                       |
-| `organization` | `Read`           | `>= 1.20.0`                    | Required to read org labels and teams |
-| `email`        | `Read`           | `<= 1.19.3`                    |                                       |
-| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                                       |
+| Scope          | Permission       | Valid for Gitea versions       | Notes                                                                                |
+| -------------- | ---------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+| `repo`         | `Read and Write` | all                            |                                                                                      |
+| `user`         | `Read`           | all                            |                                                                                      |
+| `issue`        | `Read and Write` | `>= 1.20.0`                    |                                                                                      |
+| `organization` | `Read`           | `>= 1.20.0`                    | Required to read org labels and teams, and to autodiscover organization repositories |
+| `email`        | `Read`           | `<= 1.19.3`                    |                                                                                      |
+| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                                                                                      |
 
 If you use Gitea packages, add the `read:packages` scope.
 
@@ -47,8 +47,18 @@ Renovate can discover repositories on Gitea using the `autodiscover` feature.
 Repositories are ignored when one of the following conditions is met:
 
 - The repository is a `mirror`
+- The repository is archived
 - We do not have push or pull permissions to that repository
 - Pull requests are disabled for that repository
+
+Renovate combines two sources:
+
+- the repository search for the Renovate user
+- the repositories of every organization the Renovate user is a member of
+
+The second source is needed because the repository search only returns repositories that the user owns or has an explicit access entry for.
+Public organization repositories often have no such entry, so they would otherwise be missed.
+Listing the organizations requires the `organization` `Read` scope; without it Renovate logs a warning and falls back to the repository search alone.
 
 You can change the default server-side sort method and order for autodiscover API.
 Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).

@@ -13,6 +13,7 @@ import {
   type CommitStatusType,
   Issue,
   Label,
+  Org,
   PR,
   Repo,
   RepoSearchResults,
@@ -91,6 +92,23 @@ export async function isOrg(
     // throw other errors
     throw err;
   }
+}
+
+export async function getCurrentUserOrgs(
+  http: GiteaHttp,
+  options?: GiteaHttpOptions,
+): Promise<Org[]> {
+  const url = `${API_PATH}/user/orgs`;
+  const res = await http.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(Org),
+  );
+
+  return res.body;
 }
 
 export async function searchRepos(
