@@ -5,6 +5,7 @@ import {
 import { logger } from '../../logger/index.ts';
 import {
   type ConstraintName,
+  getAdditionalConstraintVersioning,
   isAdditionalConstraintName,
 } from '../../util/exec/types.ts';
 import { filterMap } from '../../util/filter-map.ts';
@@ -269,11 +270,11 @@ export function applyConstraintsFiltering<
     for (const [name, configConstraint] of Object.entries(
       configConstraints,
     ) as [ConstraintName, string][]) {
-      let constraintVersioningName = versioningName;
-      if (
-        isAdditionalConstraintName(name) &&
-        config.constraintsVersioning?.[name]
-      ) {
+      const isAdditional = isAdditionalConstraintName(name);
+      let constraintVersioningName =
+        (isAdditional ? getAdditionalConstraintVersioning(name) : undefined) ??
+        versioningName;
+      if (isAdditional && config.constraintsVersioning?.[name]) {
         const val = config.constraintsVersioning[name];
         logger.once.debug(
           { packageName: config.packageName, release },
