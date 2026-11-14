@@ -200,6 +200,8 @@ type TextExecaOptions = Extract<
 export interface RawExecOptions extends TextExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
+  /** Omit output from executor logs; callers must protect returned output and errors. */
+  redactOutput?: boolean;
   outputListeners?: OutputListeners;
   outputWriters?: OutputWriters;
 }
@@ -227,8 +229,12 @@ export interface ExecOptions {
   toolConstraints?: Opt<ToolConstraint[]>;
   preCommands?: Opt<string[]>;
   ignoreStdout?: boolean;
+  /** Omit output from executor logs; callers must protect returned output and errors. */
+  redactOutput?: boolean;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
+  /** Input for the final command, never for tool installation or setup. */
+  input?: string | Buffer | undefined;
   timeout?: number | undefined;
   shell?: boolean | string | undefined;
 }
