@@ -10,6 +10,17 @@ export interface MigratedContent {
   indent: Indent;
 }
 
+function stringifyConfig(
+  filename: string,
+  config: RenovateConfig,
+  indentSpace: string,
+): string {
+  if (filename.endsWith('.json5')) {
+    return JSON5.stringify(config, undefined, indentSpace);
+  }
+  return JSON.stringify(config, undefined, indentSpace);
+}
+
 /**
  * Serializes a migrated config for `filename`, preserving the comments and indentation of its `raw` content where possible.
  */
@@ -23,20 +34,18 @@ export function stringifyMigratedConfig(
   const indentSpace = indent.indent ?? '  ';
   let content: string;
 
-  if (filename.endsWith('.json5')) {
-    content = JSON5.stringify(migratedConfig, undefined, indentSpace);
-  } else if (raw) {
+  if (raw) {
     try {
       content = weave(raw, migratedConfig);
     } catch (err) {
       logger.warn(
         { err },
-        'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
+        'Error weaving config to preserve comments, falling back to rewriting the whole file',
       );
-      content = JSON.stringify(migratedConfig, undefined, indentSpace);
+      content = stringifyConfig(filename, migratedConfig, indentSpace);
     }
   } else {
-    content = JSON.stringify(migratedConfig, undefined, indentSpace);
+    content = stringifyConfig(filename, migratedConfig, indentSpace);
   }
 
   if (!content.endsWith('\n')) {
