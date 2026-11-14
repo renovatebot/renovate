@@ -177,5 +177,144 @@ describe('modules/datasource/github-tags/index', () => {
         sourceUrl: 'https://github.com/some/dep2',
       });
     });
+
+    it('returns tags from the default registry without a registry URL', async () => {
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01' as Timestamp,
+          hash: '123',
+        },
+      ]);
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+
+      const res = await github.getReleases({ packageName });
+
+      expect(res).toEqual({
+        registryUrl: 'https://github.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-01-01',
+            newDigest: '123',
+          },
+        ],
+        sourceUrl: 'https://github.com/some/dep2',
+      });
+    });
+
+    describe('releaseTimestamp takes precedence from GitHub Release', () => {
+      const packageName = 'some/dep3';
+
+      it('if it is newer than tag timestamp', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2021-01-01' as Timestamp,
+            hash: '123',
+          },
+        ]);
+        vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+          {
+            id: 1,
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-06-15' as Timestamp,
+            url: 'https://example.com',
+            name: 'v1.0.0',
+          },
+        ]);
+
+        const res = await getPkgReleases({
+          datasource: github.id,
+          packageName,
+        });
+
+        expect(res?.releases[0].releaseTimestamp).toBe(
+          '2021-06-15T00:00:00.000Z',
+        );
+      });
+
+      it('keeps tag timestamp when release timestamp is older', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2021-06-15' as Timestamp,
+            hash: '123',
+          },
+        ]);
+        vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+          {
+            id: 1,
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-01-01' as Timestamp,
+            url: 'https://example.com',
+            name: 'v1.0.0',
+          },
+        ]);
+
+        const res = await getPkgReleases({
+          datasource: github.id,
+          packageName,
+        });
+
+        expect(res?.releases[0].releaseTimestamp).toBe(
+          '2021-06-15T00:00:00.000Z',
+        );
+      });
+
+      it('keeps tag timestamp when release timestamp is equal', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2021-01-01' as Timestamp,
+            hash: '123',
+          },
+        ]);
+        vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+          {
+            id: 1,
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-01-01' as Timestamp,
+            url: 'https://example.com',
+            name: 'v1.0.0',
+          },
+        ]);
+
+        const res = await getPkgReleases({
+          datasource: github.id,
+          packageName,
+        });
+
+        expect(res?.releases[0].releaseTimestamp).toBe(
+          '2021-01-01T00:00:00.000Z',
+        );
+      });
+
+      it('keeps tag timestamp when no corresponding release exists', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2021-01-01' as Timestamp,
+            hash: '123',
+          },
+        ]);
+        vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+
+        const res = await getPkgReleases({
+          datasource: github.id,
+          packageName,
+        });
+
+        expect(res?.releases[0].releaseTimestamp).toBe(
+          '2021-01-01T00:00:00.000Z',
+        );
+      });
+    });
   });
 });

@@ -1,10 +1,11 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getQueryString, isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { TerraformDatasource } from './base.ts';
 import {
+  OpenTofuModuleDocsResponse,
   ProtocolModuleResponse,
   TerraformModuleResponse,
   TerraformModuleV2Response,
@@ -24,17 +25,18 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  override readonly defaultRegistryUrls =
-    TerraformModuleDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return TerraformModuleDatasource.defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'For `registry.terraform.io`, release timestamps are determined from the `published-at` field of the v2 API response. For `app.terraform.io`, only the latest version is annotated, using the `published_at` field from the extended module endpoint.';
+    'For `registry.terraform.io` and `registry.opentofu.org` (via `api.opentofu.org`), release timestamps are available for all versions. For `app.terraform.io`, only the latest version is annotated, using the `published_at` field from the extended module endpoint.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source URL is determined from the the `source` field in the results.';
+    'For `registry.terraform.io` and `app.terraform.io`, the source URL is taken from the `source` field of the registry response. For `registry.opentofu.org`, it is derived from the package name following the OpenTofu registry policy of `github.com/NAMESPACE/terraform-TARGETSYSTEM-NAME`.';
 
   /**
    * Resolves a module release list for the configured registry.
@@ -43,11 +45,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    * registry-specific module endpoint, while other registries use the generic
    * Module Registry Protocol versions endpoint.
    */
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -65,6 +67,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       if (registry === TerraformModuleDatasource.terraformRegistryUrl) {
         return await this.queryTerraformRegistryV2(registry, repository);
       }
+      if (
+        registry === TerraformModuleDatasource.openTofuRegistryUrl ||
+        registry === TerraformModuleDatasource.openTofuApiUrl
+      ) {
+        return await this.queryOpenTofuRegistry(repository);
+      }
       if (registry === TerraformModuleDatasource.terraformCloudUrl) {
         return await this.queryTerraformRegistry(registry, repository);
       }
@@ -77,13 +85,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformModuleDatasource.id}`,
         key: TerraformModuleDatasource.getCacheKey(config),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
@@ -107,6 +114,38 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       TerraformModuleV2Response,
     );
     res.homepage = `${registryUrl}/modules/${repository}`;
+    return res;
+  }
+
+  /**
+   * Query the OpenTofu registry docs API.
+   * https://api.opentofu.org/
+   *
+   * Used when the registry URL is `registry.opentofu.org`.
+   * Queries `api.opentofu.org` for module versions with release timestamps.
+   */
+  private async queryOpenTofuRegistry(
+    repository: string,
+  ): Promise<ReleaseResult> {
+    const docsUrl = joinUrlParts(
+      TerraformModuleDatasource.openTofuApiUrl,
+      'registry/docs/modules',
+      repository,
+      'index.json',
+    );
+    const { body: res } = await this.http.getJson(
+      docsUrl,
+      OpenTofuModuleDocsResponse,
+    );
+    res.homepage = `https://search.opentofu.org/module/${repository}`;
+
+    // The OpenTofu registry only indexes modules hosted on GitHub under the
+    // `NAMESPACE/terraform-TARGETSYSTEM-NAME` repository naming convention, so
+    // the source URL can be derived deterministically from the package name.
+    // https://github.com/opentofu/registry/blob/main/PROCEDURES.md
+    const [namespace, name, target] = repository.split('/');
+    res.sourceUrl = `https://github.com/${namespace}/terraform-${target}-${name}`;
+
     return res;
   }
 
@@ -180,6 +219,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       packageName,
       registryUrl,
     );
-    return `${registry}/${repository}`;
+    return buildCacheKey(registry, repository);
   }
 }

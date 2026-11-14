@@ -1,19 +1,29 @@
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'loose';
 export const displayName = 'Loose';
 export const urls = [];
 export const supportsRanges = false;
 
-const versionPattern = regEx(/^[vV]?(\d+(?:\.\d+)*)(.*)$/);
+const versionPattern = regEx(/^[vV]?(?<prefix>\d+(?:\.\d+)*)(?<suffix>.*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 
-class LooseVersioningApi extends GenericVersioningApi {
-  protected _parse(version: string): GenericVersion | null {
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
+
+interface LooseVersion extends GenericVersion {
+  /** Full-precision release parts, used for comparison to avoid float rounding */
+  releaseBig: bigint[];
+}
+
+class LooseVersioningApi extends GenericVersioningApi<LooseVersion> {
+  protected _parse(version: string): LooseVersion | null {
     if (commitHashPattern.test(version) && !numericPattern.test(version)) {
       return null;
     }
@@ -21,12 +31,14 @@ class LooseVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, prefix, suffix] = matches;
-    const release = prefix.split('.').map(Number);
-    if (release.length > 6) {
+    const { prefix, suffix } = matches.groups!;
+    const parts = prefix.split('.');
+    if (parts.length > 6) {
       return null;
     }
-    return { release, suffix: suffix || '' };
+    const releaseBig = parts.map((part) => BigInt(part));
+    const release = releaseBig.map(Number);
+    return { release, releaseBig, suffix: suffix || '' };
   }
 
   protected override _compare(version: string, other: string): number {
@@ -36,10 +48,13 @@ class LooseVersioningApi extends GenericVersioningApi {
     if (!(parsed1 && parsed2)) {
       return 1;
     }
-    const length = Math.max(parsed1.release.length, parsed2.release.length);
+    const length = Math.max(
+      parsed1.releaseBig.length,
+      parsed2.releaseBig.length,
+    );
     for (let i = 0; i < length; i += 1) {
-      const part1 = parsed1.release[i];
-      const part2 = parsed2.release[i];
+      const part1 = parsed1.releaseBig[i];
+      const part2 = parsed2.releaseBig[i];
       // shorter is smaller 2.1 < 2.1.0
       if (part1 === undefined) {
         return -1;
@@ -48,7 +63,7 @@ class LooseVersioningApi extends GenericVersioningApi {
         return 1;
       }
       if (part1 !== part2) {
-        return part1 - part2;
+        return part1 < part2 ? -1 : 1;
       }
     }
 
@@ -68,6 +83,25 @@ class LooseVersioningApi extends GenericVersioningApi {
 
     // istanbul ignore next
     return 0;
+  }
+
+  override isSame(
+    type: keyof typeof sectionIndexes,
+    a: string,
+    b: string,
+  ): boolean {
+    const parsedA = this._parse(a);
+    const parsedB = this._parse(b);
+    if (!(parsedA && parsedB)) {
+      return false;
+    }
+
+    const sectionIndex = sectionIndexes[type];
+    return (
+      // a missing section counts as zero, so `1` and `1.0` share a minor
+      (parsedA.releaseBig[sectionIndex] ?? 0n) ===
+      (parsedB.releaseBig[sectionIndex] ?? 0n)
+    );
   }
 }
 

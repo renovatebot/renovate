@@ -15,8 +15,10 @@ export const redactedFields = [
   'gitPrivateKey',
   'forkToken',
   'password',
+  /* not actually sensitive, but redacted nonetheless */
   'httpsCertificate',
   'httpsPrivateKey',
+  /* not actually sensitive, but redacted nonetheless */
   'httpsCertificateAuthority',
 ];
 

@@ -3,7 +3,14 @@ import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import {
+  CompositePropagator,
+  W3CBaggagePropagator,
+  W3CTraceContextPropagator,
+} from '@opentelemetry/core';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
@@ -16,10 +23,11 @@ import {
 import {
   BatchSpanProcessor,
   ConsoleSpanExporter,
+  TracerProvider as SdkTracerProvider,
   SimpleSpanProcessor,
+  type SpanExporter,
   type SpanProcessor,
-} from '@opentelemetry/sdk-trace-base';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+} from '@opentelemetry/sdk-trace';
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
@@ -28,9 +36,14 @@ import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
 import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { isNotFound, isUnauthorized } from '../util/http/status.ts';
 import { getResourceDetectors } from './detectors.ts';
+import { FileSpanExporter } from './file-exporter.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
+  getFileExporterPath,
+  getOtlpProtocol,
+  isFileExporterEnabled,
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
@@ -39,6 +52,32 @@ import {
 
 let instrumentations: Instrumentation[] = [];
 
+function createOtlpExporter(): SpanExporter {
+  const protocol = getOtlpProtocol();
+  if (protocol === 'grpc') {
+    return new OTLPTraceExporterGrpc();
+  }
+  if (protocol === 'http/protobuf') {
+    return new OTLPTraceExporterProto();
+  }
+  return new OTLPTraceExporterHttp();
+}
+
+function registerProvider(provider: SdkTracerProvider): void {
+  const contextManager = new AsyncLocalStorageContextManager();
+  contextManager.enable();
+  api.context.setGlobalContextManager(contextManager);
+  api.propagation.setGlobalPropagator(
+    new CompositePropagator({
+      propagators: [
+        new W3CTraceContextPropagator(),
+        new W3CBaggagePropagator(),
+      ],
+    }),
+  );
+  api.trace.setGlobalTracerProvider(provider);
+}
+
 export function init(): void {
   const spanProcessors: SpanProcessor[] = [
     new GitOperationSpanProcessor(),
@@ -46,10 +85,7 @@ export function init(): void {
   ];
 
   if (!isTracingEnabled()) {
-    const traceProvider = new NodeTracerProvider({ spanProcessors });
-    traceProvider.register({
-      contextManager: new AsyncLocalStorageContextManager(),
-    });
+    registerProvider(new SdkTracerProvider({ spanProcessors }));
     return;
   }
 
@@ -65,13 +101,24 @@ export function init(): void {
 
   // add processors
   if (isTraceDebuggingEnabled()) {
-    spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+    spanProcessors.push(
+      new SimpleSpanProcessor({ exporter: new ConsoleSpanExporter() }),
+    );
   }
 
   // OTEL specification environment variable
   if (isTraceSendingEnabled()) {
-    const exporter = new OTLPTraceExporter();
-    spanProcessors.push(new BatchSpanProcessor(exporter));
+    spanProcessors.push(
+      new BatchSpanProcessor({ exporter: createOtlpExporter() }),
+    );
+  }
+
+  if (isFileExporterEnabled()) {
+    spanProcessors.push(
+      new BatchSpanProcessor({
+        exporter: new FileSpanExporter(getFileExporterPath()),
+      }),
+    );
   }
 
   const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
@@ -88,15 +135,12 @@ export function init(): void {
     detectors: getResourceDetectors(env),
   });
 
-  const traceProvider = new NodeTracerProvider({
-    resource: baseResource.merge(detectedResource),
-    spanProcessors,
-  });
-
-  const contextManager = new AsyncLocalStorageContextManager();
-  traceProvider.register({
-    contextManager,
-  });
+  registerProvider(
+    new SdkTracerProvider({
+      resource: baseResource.merge(detectedResource),
+      spanProcessors,
+    }),
+  );
 
   instrumentations = [
     new HttpInstrumentation({
@@ -107,7 +151,7 @@ export function init(): void {
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
           request.path.endsWith(`/protection`) &&
-          response.statusCode === 404
+          isNotFound(response)
         ) {
           span.setStatus({ code: SpanStatusCode.OK });
         } else if (
@@ -118,7 +162,7 @@ export function init(): void {
           response instanceof ServerResponse &&
           response.getHeader('www-authenticate') &&
           response.getHeader('docker-distribution-api-version') &&
-          response.statusCode === 401
+          isUnauthorized(response)
         ) {
           // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
           span.setStatus({ code: SpanStatusCode.OK });
@@ -138,11 +182,11 @@ export function init(): void {
 /* v8 ignore next -- not easily testable */
 export async function shutdown(): Promise<void> {
   const traceProvider = getTracerProvider();
-  if (traceProvider instanceof NodeTracerProvider) {
+  if (traceProvider instanceof SdkTracerProvider) {
     await traceProvider.shutdown();
   } else if (traceProvider instanceof ProxyTracerProvider) {
     const delegateProvider = traceProvider.getDelegate();
-    if (delegateProvider instanceof NodeTracerProvider) {
+    if (delegateProvider instanceof SdkTracerProvider) {
       await delegateProvider.shutdown();
     }
   }

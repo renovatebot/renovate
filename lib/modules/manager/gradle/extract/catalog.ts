@@ -1,8 +1,8 @@
 import { isPlainObject, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types/index.ts';
-import { hasKey } from '../../../../util/object.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { coerceObject, hasKey } from '../../../../util/object.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { massage, parse as parseToml } from '../../../../util/toml.ts';
 import type { PackageDependency } from '../../types.ts';
 import type {
@@ -22,12 +22,13 @@ function findVersionIndex(
   depName: string,
   version: string,
 ): number {
-  const eDn = escapeRegExp(depName);
-  const eVer = escapeRegExp(version);
+  const eDn = RegExp.escape(depName);
+  const eVer = RegExp.escape(version);
   const re = regEx(
     `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`,
   );
   const match = re.exec(content);
+  // v8 ignore else -- the fallback below is already marked unreachable
   if (match) {
     return match.index + content.slice(match.index).indexOf(version);
   }
@@ -106,14 +107,13 @@ function extractVersion({
       depSubContent: versionSubContent,
       sectionKey: originalAlias,
     });
-  } else {
-    return extractLiteralVersion({
-      version,
-      depStartIndex,
-      depSubContent,
-      sectionKey: depName,
-    });
   }
+  return extractLiteralVersion({
+    version,
+    depStartIndex,
+    depSubContent,
+    sectionKey: depName,
+  });
 }
 
 function extractLiteralVersion({
@@ -129,11 +129,14 @@ function extractLiteralVersion({
 }): VersionExtract {
   if (!version) {
     return { skipReason: 'unspecified-version' };
-  } else if (isString(version)) {
+  }
+  if (isString(version)) {
     const fileReplacePosition =
       depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
-  } else if (isPlainObject(version)) {
+  }
+  // v8 ignore else -- a version is either a string, handled above, or a table
+  if (isPlainObject(version)) {
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html
     // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
@@ -179,9 +182,7 @@ function extractDependency({
   versionSubContent,
 }: {
   descriptor:
-    | string
-    | GradleCatalogModuleDescriptor
-    | GradleCatalogArtifactDescriptor;
+    string | GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor;
   versions: Record<string, GradleVersionPointerTarget>;
   depStartIndex: number;
   depSubContent: string;
@@ -249,8 +250,8 @@ export function parseCatalog(
   content: string,
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   const tomlContent = parseToml(massage(content)) as GradleCatalog;
-  const versions = tomlContent.versions ?? {};
-  const libs = tomlContent.libraries ?? {};
+  const versions = coerceObject(tomlContent.versions);
+  const libs = coerceObject(tomlContent.libraries);
   const libStartIndex = content.indexOf('libraries');
   const libSubContent = content.slice(libStartIndex);
   const versionStartIndex = content.indexOf('versions');
@@ -289,7 +290,7 @@ export function parseCatalog(
     extractedDeps.push(dependency);
   }
 
-  const plugins = tomlContent.plugins ?? {};
+  const plugins = coerceObject(tomlContent.plugins);
   const pluginsStartIndex = content.indexOf('[plugins]');
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {

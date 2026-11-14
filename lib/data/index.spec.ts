@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isPlainObject } from '@sindresorhus/is';
+import { coerceArray } from '../util/array.ts';
 
 interface FileConfig {
   /** Top-level keys that must appear first, in the given order. */
@@ -24,13 +25,12 @@ function checkKeysSorted(
   firstKeys?: string[],
 ): void {
   let keys = Object.keys(obj);
-  if (depth === 0 && firstKeys?.length) {
-    expect(
-      keys.slice(0, firstKeys.length),
-      `${path} should start with [${firstKeys.join(', ')}]`,
-    ).toStrictEqual(firstKeys);
-    keys = keys.slice(firstKeys.length);
-  }
+  const expectedFirst = depth === 0 ? coerceArray(firstKeys) : [];
+  expect(
+    keys.slice(0, expectedFirst.length),
+    `${path} should start with [${expectedFirst.join(', ')}]`,
+  ).toStrictEqual(expectedFirst);
+  keys = keys.slice(expectedFirst.length);
   expect(keys, `${path} keys should be sorted alphabetically`).toStrictEqual(
     [...keys].sort(),
   );

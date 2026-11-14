@@ -9,7 +9,7 @@ describe('modules/manager/cpanfile/extract', () => {
     });
 
     describe('parse perl', () => {
-      test.each`
+      it.each`
         version         | expected
         ${'5.012005'}   | ${'5.012005'}
         ${`'5.008001'`} | ${'5.008001'}
@@ -161,7 +161,7 @@ describe('modules/manager/cpanfile/extract', () => {
     });
 
     describe('parse modules with phases', () => {
-      test('configure phase', () => {
+      it('configure phase', () => {
         expect(
           extractPackageFile(
             codeBlock`
@@ -183,7 +183,7 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('build phase', () => {
+      it('build phase', () => {
         expect(
           extractPackageFile(
             codeBlock`
@@ -205,7 +205,7 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('phase', () => {
+      it('phase', () => {
         expect(
           extractPackageFile(
             codeBlock`
@@ -234,7 +234,7 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('runtime phase', () => {
+      it('runtime phase', () => {
         expect(
           extractPackageFile(
             codeBlock`
@@ -263,7 +263,7 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('develop phase', () => {
+      it('develop phase', () => {
         expect(
           extractPackageFile(
             codeBlock`
@@ -294,7 +294,7 @@ describe('modules/manager/cpanfile/extract', () => {
     });
 
     describe('parse modules with phase shortcuts', () => {
-      test.each`
+      it.each`
         shortcut                | phase
         ${'configure_requires'} | ${'configure'}
         ${'build_requires'}     | ${'build'}

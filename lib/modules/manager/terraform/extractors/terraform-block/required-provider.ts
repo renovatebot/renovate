@@ -1,11 +1,12 @@
 import { isNullOrUndefined, isString } from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { TerraformProviderExtractor } from '../../base.ts';
 import type {
   TerraformDefinitionFile,
   TerraformRequiredProvider,
 } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
+import type { TerraformManagerData } from '../../types.ts';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
   getCheckList(): string[] {
@@ -15,6 +16,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
   extract(
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
+    config: ExtractConfig,
   ): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
     if (isNullOrUndefined(terraformBlocks)) {
@@ -32,7 +34,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
         requiredProviders.flatMap(Object.entries);
       for (const [requiredProviderName, value] of entries) {
         // name = version declaration method
-        let dep: PackageDependency;
+        let dep: PackageDependency<TerraformManagerData>;
         if (isString(value)) {
           dep = {
             currentValue: value,
@@ -51,7 +53,12 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
           };
         }
         dependencies.push(
-          this.analyzeTerraformProvider(dep, locks, 'required_provider'),
+          this.analyzeTerraformProvider(
+            dep,
+            locks,
+            'required_provider',
+            config,
+          ),
         );
       }
     }

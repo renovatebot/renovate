@@ -5,8 +5,12 @@ import { logger } from '../../../../logger/index.ts';
 import * as template from '../../../../util/template/index.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
-import type { ValidMatchFields } from '../utils.ts';
-import { checkIsValidDependency, validMatchFields } from '../utils.ts';
+import type { ValidMatchFields } from '../types.ts';
+import {
+  checkIsValidDependency,
+  substituteRegistryAliases,
+  validMatchFields,
+} from '../utils.ts';
 import { QueryResultZod } from './schema.ts';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
 
@@ -20,8 +24,17 @@ export async function handleMatching(
   for (const query of jsonataQueries) {
     // won't fail as this is verified during config validation
     const jsonataExpression = jsonata(query);
-    // this does not throw error, just returns undefined if no matches
-    const queryResult = await jsonataExpression.evaluate(json);
+    let queryResult: unknown;
+    try {
+      // this now throws for unknown reasons
+      queryResult = await jsonataExpression.evaluate(json);
+    } catch (err) {
+      logger.warn(
+        { err, jsonataQuery: query, packageFile },
+        'Error executing jsonata query. Please check your query.',
+      );
+      continue;
+    }
 
     // allows empty dep object cause templates can be used to configure the required fields
     // if some issues arise then the isValidDependency call will catch them later on
@@ -80,6 +93,7 @@ export function createDependency(
       updateDependency(field, queryResult[field], dependency);
     }
   }
+  substituteRegistryAliases(dependency, config.registryAliases);
   return dependency;
 }
 
@@ -105,6 +119,5 @@ function updateDependency(
       dependency[field] = value;
       break;
   }
-
   return dependency;
 }

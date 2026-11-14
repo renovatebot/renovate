@@ -66,12 +66,11 @@ The Renovate documentation site tracks the current release version of Renovate.
 
 If you are using the current major version of Renovate, but not the most up-to-date version of Renovate, you may find that the JSON Schema describes a configuration option you do not yet have access to.
 
-If you're using a previous major version of Renovate, there will likely be many differences between what you have available in your version of Renovate.
+If you are using a previous major version of Renovate, there will likely be many differences between what you have available in your version of Renovate.
 
 With this in mind, when Renovate releases a major version, we store an archive of the JSON Schema for the previous major version [in Schema Store](https://www.schemastore.org/).
 
-<!-- prettier-ignore -->
 !!! note
-    Previous major versions are only available since Renovate 39 (2025-04-29).
+  Previous major versions are only available since Renovate 39 (2025-04-29).
 
 For instance, if you are running Renovate 41, you will be able to use i.e. [`www.schemastore.org/renovate-41.json`](https://www.schemastore.org/renovate-41.json) for your JSON Schema.

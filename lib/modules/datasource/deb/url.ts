@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import type { Http, HttpOptions } from '../../../util/http/index.ts';
-import { joinUrlParts } from '../../../util/url.ts';
+import { isNotModified } from '../../../util/http/status.ts';
+import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 
 /**
  * Extracts the base suite URL from a package URL by removing the last two path segments.
@@ -29,7 +30,10 @@ export function constructComponentUrls(registryUrl: string): string[] {
   const OPTIONAL_PARAMS = ['suite', 'release'];
 
   try {
-    const url = new URL(registryUrl);
+    const url = parseUrl(registryUrl);
+    if (!url) {
+      return [];
+    }
     validateUrlAndParams(url, REQUIRED_PARAMS);
 
     const suite = getReleaseParam(url, OPTIONAL_PARAMS);
@@ -116,7 +120,7 @@ export async function checkIfModified(
 
   try {
     const response = await http.head(packageUrl, options);
-    return response.statusCode !== 304;
+    return !isNotModified(response);
   } catch (error) {
     logger.warn(
       { packageUrl, lastDownloadTimestamp, errorMessage: error.message },

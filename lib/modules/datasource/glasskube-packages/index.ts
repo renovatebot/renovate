@@ -1,3 +1,5 @@
+import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
@@ -12,12 +14,14 @@ export class GlasskubePackagesDatasource extends Datasource {
   static readonly id = 'glasskube-packages';
   static readonly defaultRegistryUrl =
     'https://packages.dl.glasskube.dev/packages';
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
   override defaultVersioning = glasskubeVersioning.id;
 
-  override defaultRegistryUrls = [
-    GlasskubePackagesDatasource.defaultRegistryUrl,
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [GlasskubePackagesDatasource.defaultRegistryUrl];
+  }
 
   constructor() {
     super(GlasskubePackagesDatasource.id);
@@ -61,7 +65,7 @@ export class GlasskubePackagesDatasource extends Datasource {
       this.handleGenericErrors(latestManifestErr);
     }
 
-    for (const ref of latestManifest?.references ?? []) {
+    for (const ref of coerceArray(latestManifest?.references)) {
       if (ref.label.toLowerCase() === 'github') {
         result.sourceUrl = ref.url;
       } else if (ref.label.toLowerCase() === 'website') {
@@ -78,7 +82,7 @@ export class GlasskubePackagesDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GlasskubePackagesDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

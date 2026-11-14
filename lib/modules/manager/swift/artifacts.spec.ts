@@ -3,6 +3,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as datasource from '../../datasource/index.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -197,6 +198,86 @@ describe('modules/manager/swift/artifacts', () => {
     expect(contents).toContain(
       '"revision": "c8ed701b513cf5177118a175d85c4c06d8f9f97c"',
     );
+  });
+
+  it('parses lockfile with mixed source-control and registry pins', async () => {
+    // Regression test: SwiftPM Package Registry (SE-0292)
+    const v2MixedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'alamofire',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/Alamofire/Alamofire',
+            state: {
+              revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+              version: '5.9.1',
+            },
+          },
+          {
+            identity: 'example.registry-package',
+            kind: 'registry',
+            location: '',
+            state: {
+              version: '1.2.3',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2MixedFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Alamofire/Alamofire',
+            datasource: GithubTagsDatasource.id,
+            newVersion: 'v5.10.0',
+            newValue: '5.10.0',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: JSON.stringify(
+            {
+              pins: [
+                {
+                  identity: 'alamofire',
+                  kind: 'remoteSourceControl',
+                  location: 'https://github.com/Alamofire/Alamofire',
+                  state: {
+                    revision: 'newrevisionsha123',
+                    version: '5.10.0',
+                  },
+                },
+                {
+                  identity: 'example.registry-package',
+                  kind: 'registry',
+                  location: '',
+                  state: { version: '1.2.3' },
+                },
+              ],
+              version: 2,
+            },
+            null,
+            2,
+          ),
+        },
+      },
+    ]);
   });
 
   it('does not write `from:` range to Package.resolved', async () => {
@@ -432,6 +513,127 @@ describe('modules/manager/swift/artifacts', () => {
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
     expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin when Package.resolved uses SSH URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"git@github.com:Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin with git-tags datasource using SSH URL as depName', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'git@github.com:Alamofire/Alamofire.git',
+          datasource: GitTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin when Package.resolved uses ssh:// URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"ssh://git@github.com/Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('falls back to basic normalization for host-only URLs', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const hostOnlyFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'my-lib',
+            kind: 'remoteSourceControl',
+            location: 'https://custom-registry.example.com',
+            state: {
+              revision: 'oldsha',
+              version: '1.0.0',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    fs.readLocalFile.mockResolvedValue(hostOnlyFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    // No match expected since host-only URL won't match any dep
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'org/my-lib',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v2.0.0',
+          newValue: '2.0.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toBeNull();
   });
 
   it('handles gitlab-tags with custom registryUrls', async () => {
@@ -751,5 +953,366 @@ describe('modules/manager/swift/artifacts', () => {
       expect.objectContaining({ datasource: GithubTagsDatasource.id }),
       'v5.10.0',
     );
+  });
+
+  it('skips a pin in an unrelated package whose version does not match the from-version (exact spec)', async () => {
+    // Package that depends on Yams directly and pins it at the from-version.
+    const directFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '0e75dd8ccd5e3f27e4def2a7f0dd0ef5e3af5e2e',
+              version: '6.2.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    // Unrelated package: Yams is only a transitive pin (via XcodeGen, which
+    // requires `from: "5.0.0"`, i.e. < 6.0.0), so 6.x must not be written here.
+    const transitiveFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '01835dc202670b5bb90d07f3eae41867e9ed29f6',
+              version: '5.0.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+
+    scm.getFileList.mockResolvedValue([
+      'Package.resolved',
+      'tools/Package.resolved',
+    ]);
+    fs.readLocalFile
+      .mockResolvedValueOnce(directFixture)
+      .mockResolvedValueOnce(transitiveFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue(
+      'a27b21e0c81c5bf42049b897a62aaf387e80f279',
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'jpsim/Yams',
+          datasource: GithubTagsDatasource.id,
+          currentValue: '6.2.1',
+          currentVersion: '6.2.1',
+          newVersion: '6.2.2',
+          newValue: '6.2.2',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    // Only the direct dependent (pinned at the from-version 6.2.1) is updated;
+    // the unrelated package's transitive pin (5.0.1) is left untouched.
+    expect(result).toHaveLength(1);
+    expect(result![0].file!.path).toBe('Package.resolved');
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "6.2.2"');
+    expect(contents).toContain(
+      '"revision": "a27b21e0c81c5bf42049b897a62aaf387e80f279"',
+    );
+  });
+
+  it('updates a pin whose version matches the from-version (exact spec)', async () => {
+    const fixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '0e75dd8ccd5e3f27e4def2a7f0dd0ef5e3af5e2e',
+              version: '6.2.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue(
+      'a27b21e0c81c5bf42049b897a62aaf387e80f279',
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'jpsim/Yams',
+          datasource: GithubTagsDatasource.id,
+          currentValue: '6.2.1',
+          newVersion: '6.2.2',
+          newValue: '6.2.2',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "6.2.2"');
+  });
+
+  it('updates a pin for a range spec regardless of its current version (guard applies only to exact specs)', async () => {
+    const fixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '01835dc202670b5bb90d07f3eae41867e9ed29f6',
+              version: '5.0.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue(
+      '11b8e57b8cc07be48e5d1e35c9e2f7abdfd3c81b',
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'jpsim/Yams',
+          datasource: GithubTagsDatasource.id,
+          currentValue: 'from: "5.0.0"',
+          newVersion: '5.1.0',
+          newValue: 'from: "5.0.0"',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.1.0"');
+  });
+
+  describe('SE-0292 registry pins', () => {
+    const registryFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'acme.somelib',
+            kind: 'registry',
+            location: '',
+            state: { version: '1.0.0' },
+          },
+          {
+            identity: 'acme.other',
+            kind: 'registry',
+            location: '',
+            state: { version: '2.0.0' },
+          },
+        ],
+        version: 3,
+      },
+      null,
+      2,
+    );
+
+    const bridgedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'acme.somelib',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/acme/somelib.git',
+            state: {
+              revision: 'oldrev',
+              version: '1.0.0',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+
+    it('updates a kind: "registry" pin by identity, leaving revision absent', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+      expect(contents).not.toContain('"revision"');
+      // Unrelated pin untouched
+      expect(contents).toContain('"version": "2.0.0"');
+    });
+
+    it('updates a bridged "remoteSourceControl" pin when the dep is registry-form', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(bridgedFixture);
+      // No digest available from the SPR datasource — revision stays unchanged.
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+      // Revision preserved when no digest is resolvable.
+      expect(contents).toContain('"revision": "oldrev"');
+    });
+
+    it('returns null when no pin matches the registry-form dep identity', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.notpinned',
+            packageName: 'acme.notpinned',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when a registry-form dep has neither packageName nor depName', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('falls back to depName when packageName is absent on the dep', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+    });
+
+    it('matches a pin when the dep identity differs in case', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      // SwiftPM lowercases identities in Package.resolved, so a dep that keeps
+      // the original casing must still match the lowercased pin.
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Acme.SomeLib',
+            packageName: 'Acme.SomeLib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+    });
   });
 });

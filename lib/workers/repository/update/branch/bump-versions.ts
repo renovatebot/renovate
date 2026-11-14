@@ -2,11 +2,13 @@ import { type ReleaseType, inc } from 'semver';
 import type { BumpVersionConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
+import { parsePartialVersion } from '../../../../modules/versioning/semver-partial/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
+import { safeStringify } from '../../../../util/stringify.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { getFilteredFileList } from '../../extract/file-match.ts';
@@ -17,8 +19,8 @@ type ParseFileChangesResult =
   | { state: 'unmodified' };
 
 export async function bumpVersions(config: BranchConfig): Promise<void> {
-  const bumpVersions = config.bumpVersions;
-  if (!bumpVersions?.length) {
+  const bumpVersions = getBumpVersions(config);
+  if (!bumpVersions.length) {
     return;
   }
 
@@ -46,6 +48,33 @@ export async function bumpVersions(config: BranchConfig): Promise<void> {
   // update the config with the new files
   config.updatedPackageFiles = Object.values(packageFileChanges).flat();
   config.updatedArtifacts = Object.values(artifactFileChanges).flat();
+}
+
+/**
+ * `config.bumpVersions` is derived from `upgrades[0]` only (see `generateBranchConfig()`), so
+ * relying on it alone would silently drop `bumpVersions` config attached (e.g. via a `packageRule`)
+ * to any upgrade other than the first one in the branch. Collect `bumpVersions` from every
+ * upgrade instead, de-duplicating identical entries, and fall back to the top-level value for
+ * back-compat (e.g. when `config.upgrades` is empty).
+ */
+function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
+  const seen = new Set<string>();
+  const bumpVersions: BumpVersionConfig[] = [];
+  for (const upgrade of coerceArray(config.upgrades)) {
+    for (const bumpVersionConfig of coerceArray(upgrade.bumpVersions)) {
+      const key = safeStringify(bumpVersionConfig);
+      if (!seen.has(key)) {
+        seen.add(key);
+        bumpVersions.push(bumpVersionConfig);
+      }
+    }
+  }
+
+  if (!bumpVersions.length) {
+    bumpVersions.push(...coerceArray(config.bumpVersions));
+  }
+
+  return bumpVersions;
 }
 
 async function bumpVersion(
@@ -165,15 +194,14 @@ async function bumpVersion(
           }
         } else {
           // Existing logic for major/minor/patch
-          const parts = regEx('^(?<major>\\d+)(?:\\.(?<minor>\\d+))?$').exec(
-            version,
-          );
-          if (parts?.groups) {
-            const { major, minor } = parts.groups;
+          const partial = parsePartialVersion(version);
+          if (partial) {
+            const { major, minor } = partial;
+            const prefix = version.startsWith('v') ? 'v' : '';
             if (bumpType === 'major') {
-              newVersion = `${parseInt(major, 10) + 1}${minor ? `.0` : ''}`;
-            } else if (bumpType === 'minor') {
-              newVersion = `${major}.${parseInt(minor, 10) + 1}`;
+              newVersion = `${prefix}${major + 1}${minor === undefined ? '' : '.0'}`;
+            } else if (bumpType === 'minor' && minor !== undefined) {
+              newVersion = `${prefix}${major}.${minor + 1}`;
             } else {
               throw new Error(
                 `Unsupported bump type for {major}.{minor} version: ${bumpType}`,
@@ -323,8 +351,8 @@ async function getFileContent(
     return await readLocalFile(filePath, 'utf8');
   } catch (e) {
     logger.warn(
-      { file: filePath },
-      `${bumpVersionsDescr}: Could not read file: ${e.message}`,
+      { file: filePath, bumpVersionsDescr, err: e },
+      'bumpVersions: Could not read file',
     );
     return null;
   }
@@ -341,7 +369,7 @@ function parseFileChanges(
     return { state: 'unmodified' };
   }
 
-  const lastChange = changes[changes.length - 1];
+  const lastChange = changes.at(-1)!;
   if (lastChange.type === 'deletion') {
     return { state: 'deleted' };
   }

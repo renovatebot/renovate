@@ -56,11 +56,16 @@ export function updatePnpmWorkspaceDependency({
   const usesImplicitDefaultCatalog = parsedContents.catalog !== undefined;
   const isCatalogUpdate = catalogName && depType !== pnpmWorkspaceOverrides;
 
-  const oldVersion = isCatalogUpdate
-    ? catalogName === 'default' && usesImplicitDefaultCatalog
-      ? parsedContents.catalog?.[depName!]
-      : parsedContents.catalogs?.[catalogName]?.[depName!]
-    : parsedContents.overrides?.[depName!];
+  let oldVersion: string | undefined;
+  if (isCatalogUpdate) {
+    if (catalogName === 'default' && usesImplicitDefaultCatalog) {
+      oldVersion = parsedContents.catalog?.[depName!];
+    } else {
+      oldVersion = parsedContents.catalogs?.[catalogName]?.[depName!];
+    }
+  } else {
+    oldVersion = parsedContents.overrides?.[depName!];
+  }
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');
@@ -76,6 +81,19 @@ export function updatePnpmWorkspaceDependency({
       })
     : ['overrides', depName!];
 
+  /* v8 ignore if -- this should not happen in practice, but we must satisfy the types */
+  if (!document.contents?.srcToken) {
+    return null;
+  }
+
+  // The root map token excludes comments before the first key and after the
+  // last entry, so keep those bytes verbatim.
+  const mapToken = document.contents.srcToken;
+  const head = fileContent.slice(0, mapToken.offset);
+  const tail = fileContent.slice(
+    mapToken.offset + CST.stringify(mapToken).length,
+  );
+
   const modifiedDocument = changeDependencyIn(document, path, {
     newValue,
     newName: upgrade.newName,
@@ -87,12 +105,7 @@ export function updatePnpmWorkspaceDependency({
     return null;
   }
 
-  /* v8 ignore if -- this should not happen in practice, but we must satisfy the types */
-  if (!modifiedDocument.contents?.srcToken) {
-    return null;
-  }
-
-  return CST.stringify(modifiedDocument.contents.srcToken);
+  return head + CST.stringify(mapToken) + tail;
 }
 
 /**
@@ -157,7 +170,6 @@ function getDepPath({
 }): string[] {
   if (catalogName === 'default' && usesImplicitDefaultCatalog) {
     return ['catalog', depName];
-  } else {
-    return ['catalogs', catalogName, depName];
   }
+  return ['catalogs', catalogName, depName];
 }

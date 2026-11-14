@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -31,8 +32,8 @@ export function extractTFLintPlugin(
     if (isString(line)) {
       // `{` will be counted with +1 and `}` with -1.
       // Therefore if we reach braceCounter == 0 then we found the end of the tflint configuration block.
-      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
+      const openBrackets = coerceArray(line.match(regEx(/\{/g))).length;
+      const closedBrackets = coerceArray(line.match(regEx(/\}/g))).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block

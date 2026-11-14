@@ -1,16 +1,15 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types.ts';
-import {
-  CONFIG_GIT_URL_UNAVAILABLE,
-  REPOSITORY_BLOCKED,
-} from '../../../constants/error-messages.ts';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type { PR, PRMergeMethod, Repo } from './types.ts';
+import type { PR, PRMergeMethod, Repo } from './schema.ts';
+import type { AllowedMergeMethods, GiteaPlatformKey } from './types.ts';
 
 export function smartLinks(body: string): string {
   return body
@@ -22,10 +21,19 @@ export function trimTrailingApiPath(url: string): string {
   return url?.replace(regEx(/api\/v1\/?$/g), '');
 }
 
+function setTokenAuth(url: URL, token: string | undefined): void {
+  if (token) {
+    url.username = token;
+    // a non-empty password makes curl resend the credentials on follow-up requests
+    url.password = 'x-oauth-basic';
+  }
+}
+
 export function getRepoUrl(
   repo: Repo,
   gitUrl: GitUrlOption | undefined,
   endpoint: string,
+  hostType: string,
 ): string {
   if (gitUrl === 'ssh') {
     if (!repo.ssh_url) {
@@ -37,7 +45,7 @@ export function getRepoUrl(
 
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
-    hostType: 'gitea',
+    hostType,
     url: endpoint,
   });
 
@@ -46,7 +54,7 @@ export function getRepoUrl(
     if (!url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    url.username = opts.token ?? '';
+    setTokenAuth(url, opts.token);
     url.pathname = `${url.pathname}${repo.full_name}.git`;
     logger.debug(
       { url: url.toString() },
@@ -64,16 +72,23 @@ export function getRepoUrl(
   if (!repoUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  repoUrl.username = opts.token ?? '';
+  setTokenAuth(repoUrl, opts.token);
   return repoUrl.toString();
 }
 
 export function getMergeMethod(
   strategy: MergeStrategy | undefined,
+  allowedMergeMethods: AllowedMergeMethods,
 ): PRMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':
-      return 'rebase';
+      // Renovate only automerges branches that are already up to date with
+      // their target branch, so a strict "fast-forward only" merge is safe
+      // and is preferred over "rebase" (rebase-then-fast-forward) when the
+      // repository allows it.
+      return allowedMergeMethods?.has('fast-forward-only')
+        ? 'fast-forward-only'
+        : 'rebase';
     case 'merge-commit':
       return 'merge';
     case 'rebase':
@@ -88,14 +103,16 @@ export function getMergeMethod(
 
 export const API_PATH = '/api/v1';
 
+/** Human readable name of each platform, used in log messages. */
+export const platformDisplayName = {
+  gitea: 'Gitea',
+  forgejo: 'Forgejo',
+} as const satisfies Record<GiteaPlatformKey, string>;
+
 export const DRAFT_PREFIX = 'WIP: ';
-const reconfigurePrRegex = regEx(/reconfigure$/g);
+const reconfigurePrRegex = regEx(/reconfigure$/);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
-  if (!data) {
-    return null;
-  }
-
   if (
     !data.base?.ref ||
     !data.head?.label ||
@@ -108,7 +125,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     return null;
   }
 
-  const createdBy = data.user?.username;
+  const createdBy = data.user?.login;
   if (
     createdBy &&
     author &&
@@ -124,7 +141,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
-  const labels = (data?.labels ?? []).map((l) => l.name);
+  const labels = coerceArray(data.labels).map((l) => l.name);
 
   return {
     labels,
@@ -188,6 +205,4 @@ export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
     case 'fast-forward-only':
       return repo.allow_fast_forward_only_merge;
   }
-  logger.debug('Repo has unknown merge style - aborting renovation');
-  throw new Error(REPOSITORY_BLOCKED);
 }

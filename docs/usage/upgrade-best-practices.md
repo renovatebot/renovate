@@ -8,7 +8,7 @@ In general, you should:
 
 - Run Renovate on _every_ repository
 - Use the `config:best-practices` preset, instead of the `config:recommended` preset
-- Use the Dependency Dashboard issue (it's on by default)
+- Use the Dependency Dashboard issue (it is on by default)
 - Update your dependencies often
 - Read the changelogs for the updates
 - Update to new `major` versions in good time
@@ -29,14 +29,14 @@ You should extend from the `config:best-practices` preset:
 }
 ```
 
-If you're using `config:recommended` now, replace it with `config:best-practices`:
+If you are using `config:recommended` now, replace it with `config:best-practices`:
 
 ```diff
 - "extends": ["config:recommended"]
 + "extends": ["config:best-practices"]
 ```
 
-### What's in the `config:best-practices` preset?
+### What is in the `config:best-practices` preset?
 
 The [`config:best-practices` preset](./presets-config.md#configbest-practices) has this configuration:
 
@@ -62,12 +62,12 @@ The next sections explain what each part of the preset does.
 Renovate creates a config migration PR to replace old config option names with their new replacements.
 This way your configuration file and the Renovate docs always use the same terms.
 
-You'll get config migration PRs no matter _how_ you run Renovate: self-hosting or the Mend Renovate app.
+You will get config migration PRs no matter _how_ you run Renovate: self-hosting or the Mend Renovate app.
 
 #### Extends `config:recommended`
 
 The `config:recommended` preset is a good base to start from.
-That's why we extend from it.
+That is why we extend from it.
 
 #### Extends `docker:pinDigests`
 
@@ -78,7 +78,7 @@ The [Renovate docs, Docker Digest pinning](./docker.md#digest-pinning) section e
 The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions) recommend that you pin third-party GitHub Actions to a full-length commit SHA.
 
 We recommend pinning _all_ Actions.
-That's why the `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
+That is why the `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
 
 For an in-depth explanation why you should pin your Github Actions, read the [Palo Alto Networks blog post about the GitHub Actions worm](https://www.paloaltonetworks.com/blog/prisma-cloud/github-actions-worm-dependencies/).
 
@@ -95,35 +95,35 @@ But updating regularly actually _saves_ you time, because:
 
 - Regular updates tend to be small
 - Applying `major` updates is easier
-- You'll be ready for CVE patches
-- You'll look for ways to automate the updates
+- You will be ready for CVE patches
+- You will look for ways to automate the updates
 
 ### Regular updates tend to be small
 
 Firstly, when you update regularly updates tend to be small.
 The update's changelogs are small, quick to read, and easy to understand.
 You probably only need to make changes in a few places (if at all) to merge the PR and get going again.
-Because you're reading the changelogs regularly, you'll get a feel for the direction of the upstream project.
+Because you are reading the changelogs regularly, you will get a feel for the direction of the upstream project.
 
 ### Applying `major` updates is easier
 
-Secondly, when you're current with upstream, `major` updates are easier.
+Secondly, when you are current with upstream, `major` updates are easier.
 This is because you already:
 
 - follow the latest best practices of upstream
 - use the latest names for features/variables
 - read the previous changelogs
 
-### You'll be ready for CVE patches
+### You will be ready for CVE patches
 
-Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
-If you're current, you can review and merge Renovate's PR quickly.
+Thirdly, you will be ready when a upstream package releases a patch for a critical CVE.
+If you are current, you can review and merge Renovate's PR quickly.
 
-When you're behind on updates, you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
+When you are behind on updates, you will have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
-### You'll look for ways to automate the updates
+### You will look for ways to automate the updates
 
-Finally, when you're updating often, you'll start looking for ways to automate the updates.
+Finally, when you are updating often, you will start looking for ways to automate the updates.
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
 Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](./presets-default.md#automergepatch) preset.
 
@@ -136,20 +136,20 @@ If you want a third-party dependency update _now_, instead of waiting two weeks,
 #### Use GitHub Pull Request Merge Queues
 
 You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md#github-merge-queue) to speed up the merge process.
-Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
+On GitLab projects with merge trains enabled, Renovate adds automerged MRs to the merge train automatically (requires GitLab 17.11 or later).
 
 ## Starting from a new project
 
-Let's assume you're starting a new project.
+Assume you are starting a new project.
 You created a new Git repository, installed the latest frameworks, libraries and development tools.
 After pushing the initial commit, you should enable and onboard Renovate.
 
-Now you'll have to stay on the "update often" train.
+Now you will have to stay on the "update often" train.
 
 ## Project with one year old dependencies
 
-If you have a project that's a year behind on dependencies, you'll need to do some work.
-Let's assume that most dependencies need a `patch` or `minor` update, and at _least_ one dependency needs a `major` update.
+If you have a project that is a year behind on dependencies, you will need to do some work.
+Assume that most dependencies need a `patch` or `minor` update, and at _least_ one dependency needs a `major` update.
 
 Start small, and get the `patch` and `minor` updates first.
 Read the changelogs for your updates.
@@ -160,15 +160,15 @@ Start with `major` version updates for tools like Prettier or ESLint.
 
 Then work on `major` updates for your framework or library.
 Take your time, read the changelogs, and make the necessary changes.
-Let multiple team members review your work before merging, it's easy to miss something.
+Let multiple team members review your work before merging, it is easy to miss something.
 
 Finally, update your development tools.
 
-Now you're up to date, you should think how to make updating a regular habit.
+Now you are up to date, you should think how to make updating a regular habit.
 
 ## Project with five year old dependencies
 
-Let's assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
+Assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
 If your project is this badly behind on updates, you have two problems:
 
 - Updating your dependencies
@@ -179,14 +179,14 @@ If your project is this badly behind on updates, you have two problems:
 Fix the easier problem first: getting back up to date.
 Update any dependencies that have critical updates for CVEs or other security related improvements.
 
-If you're on the GitHub platform: follow the steps listed in the [`vulnerabilityAlerts`](./configuration-options.md#vulnerabilityalerts) docs to make sure Renovate is reading GitHub's Vulnerability Alerts.
+If you are on the GitHub platform: follow the steps listed in the [`vulnerabilityAlerts`](./configuration-options.md#vulnerabilityalerts) docs to make sure Renovate is reading GitHub's Vulnerability Alerts.
 
 You may want to enable the experimental `osvVulnerabilityAlerts` config option, to get OSV-based vulnerability alerts for _direct_ dependencies.
 Read the [`osvVulnerabilityAlerts` config option docs](./configuration-options.md#osvvulnerabilityalerts) to learn more.
 
 ### Fix blocking updates
 
-Next, update any dependency that's blocking another update.
+Next, update any dependency that is blocking another update.
 You may need to update dependency `A` before you can update dependency `B` or `C`.
 In that case, update dependency `A` first.
 
@@ -197,9 +197,9 @@ Then update all dependencies to their latest `minor` or `patch` version, to prep
 ### Take `major` updates in sequence
 
 Take `major` updates in sequence.
-This way you'll read the changelogs for each `major` version, and learn _why_ upstream made certain breaking changes.
+This way you will read the changelogs for each `major` version, and learn _why_ upstream made certain breaking changes.
 
-Say you're on version `1` of a dependency, and the latest `major` version is at `4`.
+Say you are on version `1` of a dependency, and the latest `major` version is at `4`.
 You should update to `2`, then `3` and finally `4`.
 Avoid updating from `1` directly to `4`.
 
@@ -211,7 +211,7 @@ Finally update development tools like Prettier, ESLint, TSLint, Cypress, and so 
 
 ### Improve the human side
 
-You're done with the _technical_ side.
+You are done with the _technical_ side.
 Now comes the harder part, fixing the _human_ side.
 There are probably a number of reasons why the project got this badly out of date.
 
@@ -220,7 +220,7 @@ Avoid blaming developers for not updating often.
 
 ## Why developers avoid updating
 
-Let's assume most developers _want_ a project that's up to date.
+Assume most developers _want_ a project that is up to date.
 So why are your developers avoiding updates?
 Some common reasons:
 
@@ -229,7 +229,7 @@ Some common reasons:
 - The test suite is slow
 - Releasing a new version of the project must be done by hand
 - Updating must be done by hand
-- The company doesn't allow developer time for updates
+- The company does not allow developer time for updates
 - The company has complex rules about updates
 
 If updating is painful, or takes a lot of time, developers tend to avoid it.
@@ -249,7 +249,7 @@ Respect your developer's time and brains:
 - Building the project _must_ be as fast as possible
 - Have automated tests for the critical path of your project
 - Run the automated tests on _every_ pull request
-- If you're on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
+- If you are on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
 - Follow SemVer versioning
 - Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
 - Refactor existing code to make future changes easier
@@ -277,7 +277,7 @@ Read the [Swissquote user story](./user-stories/swissquote.md) to see how they u
 
 ## Recommended reading
 
-There's a lot of good information out there, so we can only highlight a few resources.
+There is a lot of good information out there, so we can only highlight a few resources.
 
 Martin Fowler has two great resources:
 

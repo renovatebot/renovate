@@ -9,7 +9,9 @@ import { getQueryString } from '../../../util/url.ts';
 import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types.ts';
 import { prInfo } from './utils.ts';
 
-/* v8 ignore next */
+const syncedCacheKey = 'bitbucket-server:pr-cache-synced';
+
+/* v8 ignore next -- one-off cache-schema migration shim, only runs against real legacy repo caches */
 function migrateBitbucketServerCache(platform: unknown): void {
   if (!isPlainObject(platform)) {
     return;
@@ -70,12 +72,12 @@ export class BbsPrCache {
     author: string | null,
   ): Promise<BbsPrCache> {
     const res = new BbsPrCache(projectKey, repo, ignorePrAuthor, author);
-    const isSynced = memCache.get<true | undefined>('bbs-pr-cache-synced');
+    const isSynced = memCache.get<true | undefined>(syncedCacheKey);
 
     // v8 ignore next -- TODO: add test #40625
     if (!isSynced) {
       await res.sync(http);
-      memCache.set('bbs-pr-cache-synced', true);
+      memCache.set(syncedCacheKey, true);
     }
 
     return res;
@@ -123,6 +125,22 @@ export class BbsPrCache {
       author,
     );
     prCache.setPr(item);
+  }
+
+  private deletePr(prNo: number): void {
+    delete this.cache.items[prNo];
+    this.updateItems();
+  }
+
+  static deletePr(
+    projectKey: string,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string,
+    prNo: number,
+  ): void {
+    // no sync needed to drop an entry
+    new BbsPrCache(projectKey, repo, ignorePrAuthor, author).deletePr(prNo);
   }
 
   private reconcile(rawItems: BbsRestPr[]): boolean {

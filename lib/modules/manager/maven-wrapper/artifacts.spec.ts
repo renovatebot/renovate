@@ -10,6 +10,10 @@ import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import {
+  add as addHostRule,
+  clear as clearHostRules,
+} from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -32,7 +36,10 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
     osPlatformSpy.mockImplementation(() => 'linux');
-    GlobalConfig.set({ localDir: upath.join('/tmp/github/some/repo') });
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'global',
+    });
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
         isFile: () => true,
@@ -41,6 +48,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     );
 
     resetPrefetchedImages();
+    clearHostRules();
 
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -125,6 +133,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -144,6 +153,23 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
+  it('quotes a distributionType containing shell metacharacters', async () => {
+    mockMavenFileChangedInGit();
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    await updateArtifacts({
+      packageFileName: 'maven',
+      // distributionType as it would be parsed from an attacker-controlled
+      // maven-wrapper.properties
+      newPackageFileContent: 'distributionType=script;touch pwned',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: { currentValue: '3.3.1', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots[0]).toMatchObject({
+      cmd: "./mvnw wrapper:wrapper -Dtype='script;touch pwned'",
+    });
+  });
+
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
     mockMavenFileChangedInGit('not-maven-wrapper.properties');
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
@@ -160,6 +186,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -212,13 +239,14 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "./":"./" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool java 17.0.0 ' +
           '&& ' +
-          './mvnw wrapper:wrapper -Dtype=script"',
+          "./mvnw wrapper:wrapper -Dtype=script'",
         options: {
           cwd: '../..',
           env: {
@@ -324,6 +352,31 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
     expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('prefers the derived Java version over the extracted constraint', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
+
+    await updateArtifacts({
+      packageFileName: 'maven',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: {
+        currentValue: '3.0.0',
+        newValue: '3.3.1',
+        extractedConstraints: { java: '8.0.1' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 17.0.0' },
+      { cmd: './mvnw wrapper:wrapper -Dtype=script' },
+    ]);
   });
 
   it('updates with binarySource install after detecting wrapper version from mvnw script', async () => {
@@ -988,5 +1041,45 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         'wrapperSha256Sum=oldwrapperhash456',
       );
     });
+  });
+
+  it('should set MVNW_USERNAME and MVNW_PASSWORD when hostRules are configured', async () => {
+    addHostRule({
+      hostType: 'maven',
+      matchHost: 'private-registry.example.com',
+      username: 'test-user',
+      password: 'test-password',
+    });
+
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+
+    await updateArtifacts({
+      packageFileName: 'maven-wrapper',
+      newPackageFileContent: '',
+      updatedDeps: [
+        {
+          depName: 'maven-wrapper',
+          replaceString:
+            'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+        },
+      ],
+      config: {
+        currentValue: '3.0.0',
+        newValue: '3.3.1',
+      },
+    });
+
+    // Verify environment variables are set
+    expect(execSnapshots[0].options!.env).toMatchObject({
+      MVNW_USERNAME: 'test-user',
+      MVNW_PASSWORD: 'test-password',
+      MVNW_REPOURL: 'https://private-registry.example.com/maven2',
+    });
+
+    // Verify command is still just wrapper:wrapper
+    expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper -Dtype=script');
+
+    clearHostRules();
   });
 });

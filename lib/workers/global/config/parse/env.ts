@@ -1,10 +1,12 @@
-import { isArray, isNonEmptyString } from '@sindresorhus/is';
+import { isArray, isPlainObject } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { flatDependencyDashboardOptions } from '../../../../config/migrations/custom/dependency-dashboard-migration.ts';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
-import type { AllConfig } from '../../../../config/types.ts';
+import type { AllConfig, RenovateOptions } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import { coersions } from './coersions.ts';
 import { migrateAndValidateConfig } from './util.ts';
 
@@ -61,34 +63,131 @@ const migratedKeysWithValues = [
     from: 'false',
     to: 'auto',
   },
+  {
+    oldName: 'dependencyDashboard',
+    newName: 'dependencyDashboard',
+    from: 'true',
+    to: '{"enabled":true}',
+  },
+  {
+    oldName: 'dependencyDashboard',
+    newName: 'dependencyDashboard',
+    from: 'false',
+    to: '{"enabled":false}',
+  },
 ];
 
 function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const result = { ...env };
   for (const { oldName, newName, from, to } of migratedKeysWithValues) {
     const key = getEnvName({ name: oldName });
-    if (env[key] !== undefined) {
-      if (result[key] === from) {
-        delete result[key];
-        result[getEnvName({ name: newName })] = to;
-      }
+    if (env[key] !== undefined && result[key] === from) {
+      delete result[key];
+      result[getEnvName({ name: newName })] = to;
     }
   }
   return result;
 }
 
-// these experimental env vars have been converted into self-hosted config options
-const convertedExperimentalEnvVars = [
-  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
-  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
-  'RENOVATE_X_DOCKER_MAX_PAGES',
-  'RENOVATE_X_DELETE_CONFIG_FILE',
-  'RENOVATE_X_S3_ENDPOINT',
-  'RENOVATE_X_S3_PATH_STYLE',
-  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
-  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
-  'RENOVATE_X_REPO_CACHE_FORCE_LOCAL',
-];
+/**
+ * Moves the env vars of the flat Dependency Dashboard options into `RENOVATE_DEPENDENCY_DASHBOARD`, where fields it already sets take precedence.
+ *
+ * e.g. RENOVATE_DEPENDENCY_DASHBOARD_FOOTER -> RENOVATE_DEPENDENCY_DASHBOARD='{"footer":...}'
+ */
+function massageDependencyDashboardEnv(
+  env: NodeJS.ProcessEnv,
+  inputEnv: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  const migrated: Record<string, unknown> = {};
+  const oldKeys: string[] = [];
+  // report the name the user set, which may have their `ENV_PREFIX`
+  const prefix = inputEnv.ENV_PREFIX;
+  for (const [oldName, { field, type }] of Object.entries(
+    flatDependencyDashboardOptions,
+  )) {
+    const oldKey = getEnvName({ name: oldName });
+    const val = env[oldKey];
+    if (!val) {
+      continue;
+    }
+    const prefixedKey = prefix && oldKey.replace('RENOVATE_', prefix);
+    const inputKey =
+      prefixedKey && inputEnv[prefixedKey] !== undefined ? prefixedKey : oldKey;
+    try {
+      migrated[field] = coersions[type](val);
+    } catch (e) {
+      throw new Error(`${inputKey} was invalid: ${e}`);
+    }
+    delete result[oldKey];
+    oldKeys.push(inputKey);
+  }
+  if (!oldKeys.length) {
+    return result;
+  }
+
+  const key = getEnvName({ name: 'dependencyDashboard' });
+  let existing: unknown = {};
+  if (env[key]) {
+    try {
+      existing = coersions.object(env[key]);
+    } catch (e) {
+      throw new Error(`${key} was invalid: ${e}`);
+    }
+  }
+  if (!isPlainObject(existing)) {
+    logger.warn(
+      { oldKeys },
+      'Could not migrate env config into dependencyDashboard, as it is not an object',
+    );
+    return result;
+  }
+  result[key] = quickStringify({ ...migrated, ...existing });
+  logger.warn(
+    { oldKeys },
+    'env config has been migrated into dependencyDashboard',
+  );
+  return result;
+}
+
+interface ConvertedExperimentalEnvVar {
+  optionName: string;
+  // Normalize the raw env var value before passing it through, if needed.
+  normalizeValue?: (value: string) => string;
+}
+
+// Maps RENOVATE_X_ env vars that have been promoted to regular config options
+// to the option name they now correspond to.
+export const convertedExperimentalEnvVars: ReadonlyMap<
+  string,
+  ConvertedExperimentalEnvVar
+> = new Map([
+  ['RENOVATE_X_AUTODISCOVER_REPO_SORT', { optionName: 'autodiscoverRepoSort' }],
+  [
+    'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+    { optionName: 'autodiscoverRepoOrder' },
+  ],
+  ['RENOVATE_X_DOCKER_MAX_PAGES', { optionName: 'dockerMaxPages' }],
+  ['RENOVATE_X_DELETE_CONFIG_FILE', { optionName: 'deleteConfigFile' }],
+  ['RENOVATE_X_S3_ENDPOINT', { optionName: 's3Endpoint' }],
+  ['RENOVATE_X_S3_PATH_STYLE', { optionName: 's3PathStyle' }],
+  [
+    'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+    { optionName: 'mergeConfidenceEndpoint' },
+  ],
+  [
+    'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+    { optionName: 'mergeConfidenceDatasources' },
+  ],
+  [
+    'RENOVATE_X_REPO_CACHE_FORCE_LOCAL',
+    {
+      optionName: 'repositoryCacheForceLocal',
+      // The old env var was treated as a flag: any non-empty value meant true.
+      normalizeValue: (v: string) => (v ? 'true' : v),
+    },
+  ],
+]);
 
 /**
  * Massages the experimental env vars which have been converted to config options
@@ -99,23 +198,38 @@ function massageConvertedExperimentalVars(
   env: NodeJS.ProcessEnv,
 ): NodeJS.ProcessEnv {
   const result = { ...env };
-  for (const key of convertedExperimentalEnvVars) {
-    if (env[key] !== undefined) {
-      let newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
-
-      // special case to use a more consistent prefix with other `repositoryCache` options
-      if (key === 'RENOVATE_X_REPO_CACHE_FORCE_LOCAL') {
-        newKey = 'RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL';
-        if (isNonEmptyString(env[key])) {
-          env[key] = 'true';
-        }
-      }
-
-      result[newKey] = env[key];
-      delete result[key];
+  for (const [
+    oldKey,
+    { optionName, normalizeValue },
+  ] of convertedExperimentalEnvVars) {
+    if (env[oldKey] !== undefined) {
+      const newKey = getEnvName({ name: optionName });
+      result[newKey] = normalizeValue
+        ? normalizeValue(env[oldKey])
+        : env[oldKey];
+      delete result[oldKey];
     }
   }
   return result;
+}
+
+/**
+ * Combines an env value with the value from `RENOVATE_CONFIG`: mergeable lists are appended, mergeable objects are shallow-merged, anything else is replaced.
+ */
+function mergeEnvValue(
+  option: Readonly<RenovateOptions>,
+  existing: unknown,
+  value: unknown,
+): unknown {
+  if (option.mergeable) {
+    if (isArray(existing) && isArray(value)) {
+      return [...existing, ...value];
+    }
+    if (isPlainObject(existing) && isPlainObject(value)) {
+      return { ...existing, ...value };
+    }
+  }
+  return value;
 }
 
 export async function getConfig(
@@ -144,7 +258,11 @@ export async function getConfig(
         const parsed = JSON5.parse(envVal);
         if (isArray(parsed)) {
           // @ts-expect-error -- type can't be narrowed
-          config[option.name] = parsed;
+          config[option.name] = mergeEnvValue(
+            option,
+            config[option.name as keyof AllConfig],
+            parsed,
+          );
         } else {
           logger.debug(
             { val: envVal, envName },
@@ -161,7 +279,11 @@ export async function getConfig(
       const coerce = coersions[option.type];
       try {
         // @ts-expect-error -- type can't be narrowed
-        config[option.name] = coerce(envVal);
+        config[option.name] = mergeEnvValue(
+          option,
+          config[option.name as keyof AllConfig],
+          coerce(envVal),
+        );
       } catch (e) {
         throw new Error(`${envName} was invalid: ${e}`);
       }
@@ -243,7 +365,8 @@ export function prepareEnv(inputEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   env = massageConvertedExperimentalVars(env);
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
-  return massageEnvKeyValues(env);
+  env = massageEnvKeyValues(env);
+  return massageDependencyDashboardEnv(env, inputEnv);
 }
 
 export async function parseAndValidateOrExit(
@@ -263,7 +386,10 @@ export async function parseAndValidateOrExit(
 
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
   } catch (err) {
-    logger.fatal({ err }, `Could not parse ${configEnvKey}`);
+    logger.fatal(
+      { err, configEnvKey },
+      'Could not parse config environment variable',
+    );
     process.exit(1);
   }
 }

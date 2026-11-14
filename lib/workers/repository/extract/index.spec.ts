@@ -22,7 +22,7 @@ describe('workers/repository/extract/index', () => {
 
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
-        partial<PackageFile<Record<string, any>>>({}),
+        partial<PackageFile>({}),
       ]);
       delete config.customManagers; // for coverage
       const res = await extractAllDependencies(config);
@@ -32,7 +32,7 @@ describe('workers/repository/extract/index', () => {
     it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([
-        partial<PackageFile<Record<string, any>>>({}),
+        partial<PackageFile>({}),
       ]);
       const res = await extractAllDependencies(config);
       expect(res).toMatchObject({
@@ -59,7 +59,7 @@ describe('workers/repository/extract/index', () => {
 
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
-        partial<PackageFile<Record<string, any>>>({}),
+        partial<PackageFile>({}),
       ]);
       config.customManagers = [
         {

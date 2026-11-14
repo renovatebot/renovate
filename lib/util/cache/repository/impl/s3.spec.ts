@@ -25,7 +25,7 @@ function createGetObjectCommandInput(
   url: string,
   folder = '',
 ): GetObjectCommandInput {
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   return {
     Bucket: parseS3Url(url)?.Bucket,
     Key: `${folder}${platform}/${repository}/cache.json`,
@@ -115,7 +115,7 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock
       .on(
         GetObjectCommand,
-        createGetObjectCommandInput(repository, url, pathname + '/'),
+        createGetObjectCommandInput(repository, url, `${pathname}/`),
       )
       .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);

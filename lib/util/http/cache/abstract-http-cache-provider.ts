@@ -1,18 +1,42 @@
-import { isPlainObject } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { HttpCacheStats } from '../../stats.ts';
+import { isNotModified, isOk } from '../status.ts';
 import type { GotOptions, HttpResponse } from '../types.ts';
 import { copyResponse } from '../util.ts';
-import { HttpCache } from './schema.ts';
+import { persistedResponseHeaders, pickHeaders } from './persisted-headers.ts';
+import { HttpCache, type HttpCacheResponse } from './schema.ts';
 import type { HttpCacheProvider } from './types.ts';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
+  /** the response headers kept in a persisted entry, or `null` to keep all */
+  protected readonly persistedHeaders: readonly string[] | null =
+    persistedResponseHeaders;
+
   protected abstract load(method: string, url: string): Promise<unknown>;
   protected abstract persist(
     method: string,
     url: string,
     data: HttpCache,
   ): Promise<void>;
+
+  /**
+   * Reduces the headers of a persisted or loaded response to `persistedHeaders`.
+   *
+   * @returns whether any header was dropped
+   */
+  private pickPersistedHeaders(
+    response: Pick<HttpCacheResponse, 'headers'>,
+  ): boolean {
+    if (!this.persistedHeaders) {
+      return false;
+    }
+    const headers = pickHeaders(response.headers, this.persistedHeaders);
+    const dropped =
+      Object.keys(headers).length < Object.keys(response.headers).length;
+    response.headers = headers;
+    return dropped;
+  }
 
   async get(method: string, url: string): Promise<HttpCache | null> {
     const cache = await this.load(method, url);
@@ -21,11 +45,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    // v8 ignore else -- TODO: add test #40625
-    if (isPlainObject(httpCache.httpResponse)) {
-      httpCache.httpResponse.cached = true;
+    httpCache.httpResponse.cached = true;
+    // ensure that a previous cache entry, which may not have filtered all headers, has had the header filtering applied
+    if (this.pickPersistedHeaders(httpCache.httpResponse)) {
+      await this.persist(method, url, httpCache);
     }
-
     return httpCache;
   }
 
@@ -64,14 +88,15 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (!resp.cached && resp.statusCode === 200) {
+    if (!resp.cached && isOk(resp)) {
       const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
       HttpCacheStats.incRemoteMisses(url);
 
       const httpResponse = copyResponse(resp, true);
-      const timestamp = new Date().toISOString();
+      this.pickPersistedHeaders(httpResponse);
+      const timestamp = DateTime.utc().toISO();
 
       const newHttpCache = HttpCache.parse({
         etag,
@@ -89,11 +114,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
       );
-      await this.persist(method, url, newHttpCache as HttpCache);
+      await this.persist(method, url, newHttpCache);
       return resp;
     }
 
-    if (resp.statusCode === 304) {
+    if (isNotModified(resp)) {
       const httpCache = await this.get(method, url);
       if (!httpCache) {
         return resp;
@@ -103,7 +128,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
-      httpCache.timestamp = new Date().toISOString();
+      httpCache.timestamp = DateTime.utc().toISO();
       await this.persist(method, url, httpCache);
 
       HttpCacheStats.incRemoteHits(url);

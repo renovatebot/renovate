@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 const Entry = z.object({
   gomod: z.string(),

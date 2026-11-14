@@ -2,12 +2,32 @@ import type { RenovateConfig } from '~test/util.ts';
 import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
+import * as _managers from '../../../../modules/manager/index.ts';
+import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import type { ConfidenceConfig, StabilityConfig } from './status-checks.ts';
 import {
+  computeInternalChecksStatus,
   resolveBranchStatus,
   setConfidence,
   setStability,
 } from './status-checks.ts';
+
+vi.mock('../../../../modules/manager/index.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _managers>()),
+  enforcesMinimumReleaseAge: vi.fn(),
+}));
+vi.mock(
+  '../../../../util/merge-confidence/index.ts',
+  async (importOriginal) => ({
+    ...(await importOriginal<typeof _mergeConfidence>()),
+    getMergeConfidenceLevel: vi.fn(),
+  }),
+);
+
+const managers = vi.mocked(_managers);
+const mergeConfidence = vi.mocked(_mergeConfidence);
 
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
@@ -40,6 +60,29 @@ describe('workers/repository/update/branch/status-checks', () => {
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the productLinks documentation from GlobalConfig for the status url', async () => {
+      config.stabilityStatus = 'green';
+      await setStability(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://docs.renovatebot.com/key-concepts/minimum-release-age/',
+        }),
+      );
+    });
+
+    it('honors a custom productLinks documentation url', async () => {
+      config.stabilityStatus = 'green';
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://example.com/docs/' },
+      });
+      await setStability(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://example.com/docs/key-concepts/minimum-release-age/',
+        }),
+      );
     });
 
     it('skips status if already set', async () => {
@@ -84,7 +127,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.stabilityStatus = 'green';
       await setStability({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -102,6 +145,53 @@ describe('workers/repository/update/branch/status-checks', () => {
         'DRY-RUN: Would update renovate/stability-days status check state to green',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    describe('statusCheckWhen.minimumReleaseAge', () => {
+      it('skips status entirely when mode is "never"', async () => {
+        config.stabilityStatus = 'green';
+        config.statusCheckWhen = { minimumReleaseAge: 'never' };
+        await setStability(config);
+        expect(logger.debug).toHaveBeenCalledWith(
+          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('does not log when mode is "never" and no stability status is set', async () => {
+        config.statusCheckWhen = { minimumReleaseAge: 'never' };
+        await setStability(config);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('skips green status when mode is "failed"', async () => {
+        config.stabilityStatus = 'green';
+        config.statusCheckWhen = { minimumReleaseAge: 'failed' };
+        await setStability(config);
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('sets yellow status when mode is "failed"', async () => {
+        config.stabilityStatus = 'yellow';
+        config.statusCheckWhen = { minimumReleaseAge: 'failed' };
+        await setStability(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
+
+      it('sets green status when mode is "always" (default)', async () => {
+        config.stabilityStatus = 'green';
+        config.statusCheckWhen = { minimumReleaseAge: 'always' };
+        await setStability(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -123,6 +213,13 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
 
+    it('returns if the minimum confidence is not active', async () => {
+      config.minimumConfidence = 'low';
+      config.confidenceStatus = 'green';
+      await setConfidence(config);
+      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
+    });
+
     it('sets status yellow', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = 'yellow';
@@ -137,6 +234,17 @@ describe('workers/repository/update/branch/status-checks', () => {
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the productLinks documentation from GlobalConfig for the status url', async () => {
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'green';
+      await setConfidence(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://docs.renovatebot.com/merge-confidence',
+        }),
+      );
     });
 
     it('skips status if already set', async () => {
@@ -185,7 +293,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.confidenceStatus = 'green';
       await setConfidence({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -205,11 +313,273 @@ describe('workers/repository/update/branch/status-checks', () => {
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
+
+    describe('statusCheckWhen.mergeConfidence', () => {
+      it('skips status entirely when mode is "never"', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'yellow';
+        config.statusCheckWhen = { mergeConfidence: 'never' };
+        await setConfidence(config);
+        expect(logger.debug).toHaveBeenCalledWith(
+          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('does not log when mode is "never" and no confidence status is set', async () => {
+        config.minimumConfidence = 'high';
+        config.statusCheckWhen = { mergeConfidence: 'never' };
+        await setConfidence(config);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('skips green status when mode is "failed"', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'green';
+        config.statusCheckWhen = { mergeConfidence: 'failed' };
+        await setConfidence(config);
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('sets yellow status when mode is "failed"', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'yellow';
+        config.statusCheckWhen = { mergeConfidence: 'failed' };
+        await setConfidence(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
+
+      it('sets green status when mode is "always" (default)', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'green';
+        config.statusCheckWhen = { mergeConfidence: 'always' };
+        await setConfidence(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('getBranchStatus', () => {
     it('should return green if ignoreTests=true', async () => {
-      expect(await resolveBranchStatus('somebranch', true, true)).toBe('green');
+      await expect(resolveBranchStatus('somebranch', true, true)).resolves.toBe(
+        'green',
+      );
+    });
+  });
+
+  describe('computeInternalChecksStatus', () => {
+    function branchConfig(upgrades: Partial<BranchUpgradeConfig>[]) {
+      return partial<BranchConfig>({
+        branchName: 'renovate/some-branch',
+        upgrades: partial<BranchUpgradeConfig>(upgrades),
+      });
+    }
+
+    it('returns null if no internal check is configured', async () => {
+      const config = branchConfig([{ depName: 'some-dep' }]);
+      await expect(computeInternalChecksStatus(config)).resolves.toBeNull();
+    });
+
+    it('returns green if the minimum release age is met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAge: '1 day',
+          releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+      });
+    });
+
+    it('returns yellow if the minimum release age is not met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAge: '100 days',
+          releaseTimestamp: new Date().toISOString() as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+    });
+
+    it('returns yellow if the extracted minimum release age is not met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAgeExtracted: '100 days',
+          releaseTimestamp: new Date().toISOString() as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+    });
+
+    describe('lock file maintenance', () => {
+      const upgrade: Partial<BranchUpgradeConfig> = {
+        manager: 'some-manager',
+        packageFile: 'package.json',
+        isLockFileMaintenance: true,
+        updateType: 'lockFileMaintenance',
+        minimumReleaseAge: '1 day',
+        minimumReleaseAgePackageManagerSync: true,
+        releaseTimestamp: undefined,
+      };
+
+      it('returns green if the package manager enforces the minimum release age', async () => {
+        managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(true);
+        const config = branchConfig([upgrade]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'green',
+        });
+        expect(managers.enforcesMinimumReleaseAge).toHaveBeenCalledWith(
+          'some-manager',
+          config.upgrades[0],
+        );
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Lock file maintenance of package.json: the package manager enforces the minimum release age',
+        );
+      });
+
+      it('returns yellow if the package manager does not enforce the minimum release age', async () => {
+        managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(false);
+        const config = branchConfig([upgrade]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'yellow',
+        });
+      });
+
+      it('returns yellow without asking the package manager without minimumReleaseAgePackageManagerSync', async () => {
+        const config = branchConfig([
+          { ...upgrade, minimumReleaseAgePackageManagerSync: false },
+        ]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'yellow',
+        });
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
+      });
+    });
+
+    it('returns null for a security update with only an extracted minimum release age', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          isVulnerabilityAlert: true,
+          minimumReleaseAgeExtracted: '3 days',
+          releaseTimestamp: undefined,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toBeNull();
+    });
+
+    it('returns yellow if the minimum release age plus its buffer is not met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeBuffer: '2 days',
+          releaseTimestamp: new Date(
+            Date.now() - 2 * 24 * 60 * 60 * 1000,
+          ).toISOString() as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+    });
+
+    it('returns yellow if a release timestamp is required but missing', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          updateType: 'major',
+          minimumReleaseAge: '1 day',
+          releaseTimestamp: undefined,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+      expect(logger.once.debug).toHaveBeenCalledWith(
+        { updates: [{ depName: 'some-dep', updateType: 'major' }] },
+        `Marking 1 release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
+      );
+    });
+
+    it('returns green if a release timestamp is optional and missing', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          updateType: 'major',
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeBehaviour: 'timestamp-optional',
+          releaseTimestamp: undefined,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+      });
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+    });
+
+    it('returns green if the minimum confidence is met', async () => {
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('high');
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          datasource: 'npm',
+          packageName: 'some-dep',
+          currentVersion: '1.0.0',
+          newVersion: '2.0.0',
+          updateType: 'major',
+          minimumConfidence: 'high',
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+        confidenceStatus: 'green',
+      });
+    });
+
+    it('returns yellow if the minimum confidence is not met', async () => {
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce(undefined);
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          datasource: 'npm',
+          packageName: 'some-dep',
+          currentVersion: '1.0.0',
+          newVersion: '2.0.0',
+          updateType: 'major',
+          minimumConfidence: 'high',
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+        confidenceStatus: 'yellow',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          depName: 'some-dep',
+          confidence: 'neutral',
+          minimumConfidence: 'high',
+        },
+        'Update does not meet minimum confidence scores',
+      );
     });
   });
 });

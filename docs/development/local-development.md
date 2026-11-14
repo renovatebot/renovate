@@ -11,16 +11,21 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^24.11.0`
+- Node.js `^24.11.0 || ^26.13.0`
 - pnpm `^10.0.0`
 - C++ compiler
-
-We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Mise](https://mise.jdx.dev/) to manage your tool versions.
 
 For building the documentation, you also need:
 
 - Python `>=3.11`
 - PDM `>=2.26.0`
+
+#### Recommended: Mise
+
+We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
+After installing Mise, run `mise install` from the repository root.
+This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
+This includes [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
 
 #### Linux
 
@@ -42,12 +47,12 @@ To enter a development shell with the necessary packages, run `nix-shell --packa
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a part, skip the corresponding step.
 
-- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+- Install [Git](https://git-scm.com/downloads). Make sure you have [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install --global npm` and then `npm --debug install --global windows-build-tools`
 - Install pnpm with: `npm install --global pnpm`
 
-  You can see what versions you're using like this:
+  You can see what versions you are using like this:
 
   ```powershell
   PS C:\Windows\system32> git --version
@@ -73,7 +78,7 @@ pnpm build
 
 #### Local Docker
 
-If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
+If, for some reason, you cannot run the relevant versions on your local machine, you can run everything from a Docker image.
 To build the correct Docker image:
 
 ```
@@ -100,6 +105,9 @@ The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package manag
 
 To ensure everything is working properly on your end, you must:
 
+!!! tip "Mise users"
+  If you ran `mise install`, the `postinstall` hook already executed `pnpm install`.
+
 1. Install all dependencies with `pnpm install`
 1. Make a build with `pnpm build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
@@ -116,12 +124,12 @@ Before you submit a pull request you should:
 
 ## Platform Account Setup
 
-Although it's possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
-It's possible to do this against GitHub, GitLab or Bitbucket public servers.
+Although it is possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
+It is possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 ### Register new account (optional)
 
-If you're going to be doing a lot of Renovate development then we recommend that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
+If you are going to be doing a lot of Renovate development then we recommend that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
@@ -161,6 +169,7 @@ pnpm check
 pnpm check lib/util/http        # scope to a directory
 pnpm check lib/util/hash.ts     # scope to a file
 pnpm check --fix lib/util/http  # auto-fix only
+pnpm check --coverage-dir tmp/coverage lib/util/http  # write the coverage report to another directory (default: coverage)
 ```
 
 ### Vitest
@@ -173,7 +182,7 @@ e.g. `pnpm vitest composer -u` would update the saved snapshots for _all_ tests 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests would not really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -185,9 +194,13 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
-You usually don't need to fix any Prettier errors by hand.
+You usually do not need to fix any Prettier errors by hand.
 
-If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
+We use [knip](https://knip.dev) to detect unused, unlisted or unresolved dependencies.
+Run `pnpm knip` to check, and remove packages from `package.json` that nothing uses anymore.
+If a package is used in a way knip cannot see, add it to `ignoreDependencies` in `knip.jsonc` with a comment explaining why.
+
+If you are only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
 ### IDE extensions
 
@@ -206,7 +219,7 @@ To get real-time oxlint diagnostics, install the extension for your editor:
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
-To install the required dependency, use `pdm install`.
+To install the required dependency, use `uv sync`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
@@ -230,7 +243,7 @@ To do this, see these GitHub guides:
 
 Usually the `debug` log level is good enough to troubleshoot most problems or verify functionality.
 
-It's usually easier to have the logs in a file that you can open with a text editor.
+It is usually easier to have the logs in a file that you can open with a text editor.
 You can use a command like this to put the log messages in a file:
 
 ```sh
@@ -248,12 +261,54 @@ So most new functionality should be controllable via configuration options.
 Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `docs/usage/configuration-options.md` file.
 
+### `Error: Cannot find module './build/Release/re2.node'`
+
+If you are seeing errors related to `re2`, such as:
+
+```
+> renovate@0.0.0-semantic-release prepare:deps ...
+> node tools/prepare-deps.mjs
+
+Checking re2 ...
+Error: Cannot find module './build/Release/re2.node'
+Require stack:
+- .../renovate/node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js
+- .../renovate/[eval]
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1475:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+    at Module._load (node:internal/modules/cjs/loader:1261:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1575:12)
+    at require (node:internal/modules/helpers:191:16)
+    at Object.<anonymous> (.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js:3:13)
+    at Module._compile (node:internal/modules/cjs/loader:1829:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js',
+    '.../[eval]'
+  ]
+}
+Failed.
+```
+
+This is likely due to the version of `re2` being out-of-sync with your Node version.
+
+You can rebuild it with:
+
+```sh
+pnpm rebuild re2
+```
+
+This will rebuild it for the current Node version in use.
+
 ## Debugging
 
 ### Chrome's inspect tool
 
 You can debug Renovate with Chrome's inspect tool.
-Here's an example:
+Here is an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
@@ -263,7 +318,7 @@ Here's an example:
 ### VS Code
 
 You can also debug Renovate with VS Code.
-Here's an example:
+Here is an example:
 
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:

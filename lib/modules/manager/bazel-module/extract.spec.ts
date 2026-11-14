@@ -2,7 +2,10 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -11,7 +14,7 @@ import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { extractPackageFile } from './index.ts';
 import * as parser from './parser/index.ts';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.resolve('lib/modules/manager/bazel-module/__fixtures__'),
 };
 

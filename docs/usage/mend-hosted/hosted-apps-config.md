@@ -5,9 +5,8 @@ This page:
 - covers all non-default Renovate behavior of these Mend-hosted apps
 - is a supplement to the CLI documentation
 
-<!-- prettier-ignore -->
 !!! note
-    For general configuration of the Renovate CLI, read the main [Configuration/Overview](../config-overview.md) section.
+  For general configuration of the Renovate CLI, read the main [Configuration/Overview](../config-overview.md) section.
 
 ## Finding the logs
 
@@ -18,8 +17,8 @@ Reading the logs can help you understand the configuration that Renovate used.
 ## Renovate Version
 
 The Renovate version used by the Mend-hosted apps is updated manually by the maintainers of the app.
-The maintainers don't follow any release schedule or release cadence, but try to update at least once a week.
-This means the Mend Renovate App can lag a few hours to a week behind the open source version.
+The maintainers do not follow any release schedule or release cadence, but try to update at least once a week.
+This means the Mend Renovate app can lag a few hours to a week behind the open source version.
 
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
@@ -35,15 +34,19 @@ Follow these steps to see which version the Mend Renovate app used for a specifi
 1. You should see something like this:
 
    ```
+   INFO: Renovate started
+   {
+     "renovateVersion": "44.133.0"
+   }
+   ...
    INFO: Repository started
    {
-     "renovateVersion": "39.11.5"
+     "renovateVersion": "44.133.0"
    }
    ```
 
-<!-- prettier-ignore -->
 !!! tip
-    The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
+  The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
 
 ## Onboarding behavior
 
@@ -57,8 +60,8 @@ We chose this behavior because:
 
 #### Why we call this silent mode
 
-- It's not just no PRs, it's also no Issues
-- It's a common term across other Mend capabilities, such as OSS security and SAST security, where status checks also use silent/non-silent
+- It is not just no PRs, it is also no Issues
+- It is a common term across other Mend capabilities, such as OSS security and SAST security, where status checks also use silent/non-silent
 
 ### Get onboarding PRs from Renovate by getting out of silent mode
 
@@ -86,7 +89,8 @@ The Mend Renovate app automatically applies inherited config to all installed re
 1. A repository called `renovate-config` exists in the same organization, and the organization has installed the Mend Renovate app. The repository does not need to be onboarded
 1. Renovate finds a file called `org-inherited-config.json` in the `renovate-config` repository
 
-If you use a Mend-hosted app, you can _not_ change the values for the `inheritConfigFileName` and the `inheritConfigRepoName` config options.
+!!! tip
+  If you are an Enterprise customer on Mend-hosted apps, you [can change these settings through their respective environment variables](./environment-variables.md#enterprise-and-mend-appsec-users-environment-variables).
 
 To avoid wasted API calls, Mend apps will enable `inheritConfig` in an org only when Renovate detects a commit for the `inheritConfig` file.
 This means the `inheritConfig` file will not be detected if the Mend Renovate app is not installed on the `renovate-config` repository at the time of adding or changing the file.
@@ -110,19 +114,17 @@ You can find the allowed `postUpgradeTasks` commands in Renovate's log output, w
 
 As noted in [Validation of Renovate config change PRs](../config-validation.md#validation-of-renovate-config-change-prs), Renovate will automagically validate your configuration changes when pushing to the "reconfigure" branch.
 
-<!-- prettier-ignore -->
 !!! tip
-    When using a Mend-hosted app, the "reconfigure" branch defaults to `renovate/reconfigure`.
+  When using a Mend-hosted app, the "reconfigure" branch defaults to `renovate/reconfigure`.
 
 When pushing to this specific branch name, Renovate will run its validation and report a status check to the Platform whether this passes/fails validation.
 
-<!-- prettier-ignore -->
 !!! note
-    The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
+  The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
 
 If you have a Pull Request open from this branch (including draft PRs), Renovate will comment on the PR to note:
 
-- If there are any failures, and if so, what's wrong
+- If there are any failures, and if so, what is wrong
 - If the configuration passed validation, and if so, what the new configuration will do
 
 [For example](https://github.com/JamieTanna-Mend-testing/mend-reconfigure/pull/2), when failing validation:
@@ -131,4 +133,4 @@ If you have a Pull Request open from this branch (including draft PRs), Renovate
 
 And when the PR then passes validation:
 
-![A similar view of the same Pull Request, but with a new commit reverting the 'broken' changes. We can see a green tick status check showing that Renovate's config validation passed the commit, and below there is a lengthy comment from Renovate summarising the configuration presets (as it would do when performing an onboarding PR - in this case, taking the description of all presets used. Additionally, there is a 'what to expect' section which notes that the repo is up-to-date so no new PRs would be raised by Renovate](../assets/images/mend-hosted-reconfigure-passed.png){ loading=lazy }
+![A similar view of the same Pull Request, but with a new commit reverting the 'broken' changes. We can see a green tick status check showing that Renovate's config validation passed the commit, and below there is a lengthy comment from Renovate summarizing the configuration presets (as it would do when performing an onboarding PR - in this case, taking the description of all presets used. Additionally, there is a 'what to expect' section which notes that the repo is up-to-date so no new PRs would be raised by Renovate](../assets/images/mend-hosted-reconfigure-passed.png){ loading=lazy }

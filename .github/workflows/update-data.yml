@@ -1,7 +1,7 @@
 name: 'Update static data'
 on:
   schedule:
-    - cron: '0 0 * * 0' # Every Sunday at midnight
+    - cron: '0 6 * * 1' # Every Monday at 06:00 UTC
   workflow_dispatch:
 
 env:
@@ -17,44 +17,73 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         with:
-          standalone: true
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+          install: false
+          runtime: node@${{ env.NODE_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Install mise
-        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
           # don't run `mise install`, but do install a version of `mise` itself
           install: false
-          # explicitly always use the latest tool version
-          version: latest
+
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
       - name: Update static data
-        run: pnpm run update-static-data
+        id: update
+        # the pre-commit hook refuses commits on `main`, so commit onto a working branch
+        run: |
+          git checkout -b chore/static-data-update
+          pnpm run update-static-data --commit
 
-      - name: Run Prettier
-        run: pnpm prettier-fix
+      - name: Create stacked pull requests
+        if: steps.update.outputs.branches != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCHES: ${{ steps.update.outputs.branches }}
+        run: |
+          gh extension install github/gh-stack --pin v0.3.0
+          gh auth setup-git
 
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        with:
-          author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
-          branch: 'chore/update-static-data'
-          commit-message: 'feat(data): automatic update of static data'
-          committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
-          title: 'feat(data): automatic update of static data'
-          assignees: viceice,secustor,jamietanna
+          # any unmerged PRs from a previous run are superseded by this run
+          gh pr list --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("chore/static-data/")) | "\(.number) \(.headRefName)"' |
+            while read -r pr branch; do
+              gh pr close "$pr" --comment 'Superseded by a newer static data update.'
+              # not via `--delete-branch`, as that would also delete the new local branch
+              git push origin --delete "$branch"
+            done
+
+          read -ra branches <<< "$BRANCHES"
+          git push --force origin "${branches[@]}"
+
+          # each branch holds a single commit on top of the previous one, which provides the PR title and body
+          base=main
+          for branch in "${branches[@]}"; do
+            gh pr create --head "$branch" --base "$base" \
+              --title "$(git log -1 --format=%s "$branch")" \
+              --body "$(git log -1 --format=%b "$branch")"
+            base=$branch
+          done
+
+          # a stack needs at least two PRs
+          if [ "${#branches[@]}" -gt 1 ]; then
+            gh stack link "${branches[@]}"
+          fi
+
+          for branch in "${branches[@]}"; do
+            gh pr edit "$branch" --add-assignee viceice,secustor,jamietanna
+          done

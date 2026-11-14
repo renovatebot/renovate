@@ -1,4 +1,4 @@
-[Tekton](https://tekton.dev/) is an open-source cloud-native Continuous Integration and Continuous Delivery/Deployment solution.
+[Tekton](https://tekton.dev/) is an Open Source cloud-native Continuous Integration and Continuous Delivery/Deployment solution.
 
 Tekton uses Tasks to capture specific commands to be executed, and Pipelines to combine different Tasks, to achieve a goal, like building a container image.
 Tasks and Pipelines are defined as Kubernetes custom resources.
@@ -60,13 +60,14 @@ You can define Tekton Tasks within these Tekton resources:
 1. TaskRun
 1. Pipeline
 1. PipelineRun
+1. StepAction
 
 Renovate's Tekton manager supports all the image attributes for the Tekton resources mentioned above.
 
 ### Set your own `managerFilePatterns` pattern
 
 The `tekton` manager does not have a default `managerFilePatterns` pattern.
-This means it won't match any files until you set a `managerFilePatterns` pattern.
+This means it will not match any files until you set a `managerFilePatterns` pattern.
 This is to avoid problems with unrelated YAML files since there is no well-established file name pattern for [Tekton](https://tekton.dev/) resources.
 As an example, the following config matches all the YAML files in a repository:
 

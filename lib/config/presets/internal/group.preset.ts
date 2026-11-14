@@ -3,6 +3,18 @@ import * as monorepos from './monorepos.preset.ts';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
+const nodeJsMatchers = {
+  matchDatasources: ['docker', 'node-version'],
+  matchPackageNames: [
+    '/(?:^|/)node$/', // node or ends with "/node, except those below"
+    '!calico/node',
+    '!docker.io/calico/node',
+    '!ghcr.io/devcontainers/features/node',
+    '!kindest/node',
+    '!docker.io/kindest/node',
+  ],
+};
+
 const staticGroups = {
   all: {
     description: 'Group all updates together.',
@@ -75,6 +87,16 @@ const staticGroups = {
       {
         extends: ['packages:atlaskit'],
         groupName: 'Atlassian Atlaskit packages',
+      },
+    ],
+  },
+  boto: {
+    description: 'Group all Boto packages together.',
+    packageRules: [
+      {
+        groupName: 'boto',
+        matchDatasources: ['pypi'],
+        matchPackageNames: ['boto3', 'botocore', 's3transfer'],
       },
     ],
   },
@@ -254,6 +276,16 @@ const staticGroups = {
       },
     ],
   },
+  java: {
+    description: 'Group Java runtime versions together.',
+    packageRules: [
+      {
+        groupName: 'Java',
+        matchDatasources: ['java-version'],
+        matchPackageNames: ['java', 'java-jdk', 'java-jre'],
+      },
+    ],
+  },
   jekyllEcosystem: {
     description: 'Group Jekyll and related Ruby packages together.',
     packageRules: [
@@ -360,14 +392,22 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        matchDatasources: ['docker', 'node-version'],
-        matchPackageNames: [
-          '/(?:^|/)node$/', // node or ends with "/node, except those below"
-          '!calico/node',
-          '!docker.io/calico/node',
-          '!ghcr.io/devcontainers/features/node',
-          '!kindest/node',
-        ],
+        ...nodeJsMatchers,
+      },
+    ],
+  },
+  nodeJsWithTypes: {
+    description: 'Group Node.js runtime updates together with `@types/node`.',
+    extends: ['group:nodeJs'],
+    packageRules: [
+      {
+        groupName: 'Node.js',
+        ...nodeJsMatchers,
+      },
+      {
+        groupName: 'Node.js',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@types/node'],
       },
     ],
   },
@@ -386,6 +426,16 @@ const staticGroups = {
       },
     ],
   },
+  pnpm: {
+    description: 'Group pnpm packages together.',
+    packageRules: [
+      {
+        groupName: 'pnpm packages',
+        matchDatasources: ['docker', 'npm'],
+        matchPackageNames: ['pnpm', 'ghcr.io/pnpm/pnpm'],
+      },
+    ],
+  },
   polymer: {
     description: 'Group all `@polymer` packages together.',
     packageRules: [
@@ -401,6 +451,16 @@ const staticGroups = {
       {
         extends: ['packages:postcss'],
         groupName: 'postcss packages',
+      },
+    ],
+  },
+  primer: {
+    description: 'Group all `@primer` packages together.',
+    packageRules: [
+      {
+        groupName: 'Primer packages',
+        groupSlug: 'primer',
+        matchPackageNames: ['@primer/**'],
       },
     ],
   },
@@ -468,12 +528,11 @@ const staticGroups = {
     ],
   },
   recommended: {
-    description:
-      'Use curated list of recommended non-monorepo package groupings.',
     extends: [
       'group:nodeJs',
       'group:allApollographql',
       'group:apiPlatform',
+      'group:boto',
       'group:codemirror',
       'group:flyway',
       'group:fortawesome',
@@ -487,6 +546,7 @@ const staticGroups = {
       'group:hibernateOgm',
       'group:hibernateCommons',
       'group:illuminate',
+      'group:java',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
@@ -526,7 +586,8 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [], // Hack to improve onboarding PR description
+    overrideDescription:
+      'Use curated list of recommended non-monorepo package groupings.',
   },
   remark: {
     description: 'Group remark packages together.',
@@ -801,6 +862,17 @@ const staticGroups = {
       },
     ],
   },
+  stylelint: {
+    description: 'Group stylelint packages together.',
+    packageRules: [
+      {
+        extends: ['packages:stylelint'],
+        groupName: 'stylelint packages',
+        groupSlug: 'stylelint',
+        separateMajorMinor: false,
+      },
+    ],
+  },
   symfony: {
     description: 'Group PHP Symfony packages together.',
     packageRules: [
@@ -875,6 +947,15 @@ const staticGroups = {
       },
     ],
   },
+  vitePlus: {
+    description: 'Group all Vite+ related packages together.',
+    packageRules: [
+      {
+        extends: ['packages:vitePlus'],
+        groupName: 'Vite+ packages',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
@@ -895,9 +976,8 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [], // Hack to improve onboarding PR description
+  overrideDescription: 'Group known monorepo packages together.',
 };
 
 export const presets: Record<string, Preset> = config;

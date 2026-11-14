@@ -2,7 +2,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
-import { logger } from '../../../logger/index.ts';
 import type { CombinedHostRule } from '../../../types/index.ts';
 import type {
   ConstraintName,
@@ -38,7 +37,7 @@ export function getComposerArguments(
       }
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
-        args += ' --ignore-platform-req ' + quote(req);
+        args += ` --ignore-platform-req ${quote(req)}`;
       });
     }
   }
@@ -71,19 +70,6 @@ export function getComposerUpdateArguments(
   }
 
   return args;
-}
-
-export function getPhpConstraint(
-  constraints: Partial<Record<ConstraintName, string>>,
-): string | null {
-  const { php } = constraints;
-
-  if (php) {
-    logger.debug('Using php constraint from config');
-    return php;
-  }
-
-  return null;
 }
 
 export function requireComposerDependencyInstallation({

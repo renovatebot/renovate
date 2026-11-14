@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import { isServiceUnavailable } from '../../../util/http/status.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import { ServiceDiscoveryResponse } from './schema.ts';
@@ -12,6 +13,8 @@ export abstract class TerraformDatasource extends Datasource {
   static id = terraformId;
 
   static readonly terraformRegistryUrl = 'https://registry.terraform.io';
+  static readonly openTofuApiUrl = 'https://api.opentofu.org';
+  static readonly openTofuRegistryUrl = 'https://registry.opentofu.org';
 
   private async _getTerraformServiceDiscoveryResult(
     registryUrl: string,
@@ -46,7 +49,7 @@ export abstract class TerraformDatasource extends Datasource {
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
-    if (err.response?.statusCode === 503) {
+    if (isServiceUnavailable(err)) {
       throw new ExternalHostError(err);
     }
   }

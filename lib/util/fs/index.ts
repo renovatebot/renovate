@@ -34,9 +34,12 @@ export async function readLocalFile(
 ): Promise<string | Buffer | null> {
   const localFileName = ensureLocalPath(fileName);
   try {
-    const fileContent = encoding
-      ? await fs.readFile(localFileName, encoding)
-      : await fs.readFile(localFileName);
+    let fileContent: string | Buffer;
+    if (encoding) {
+      fileContent = await fs.readFile(localFileName, encoding);
+    } else {
+      fileContent = await fs.readFile(localFileName);
+    }
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
 
@@ -89,6 +92,15 @@ export async function renameLocalFile(
   await fs.move(fromPath, toPath);
 }
 
+export async function renameCacheFile(
+  fromFile: string,
+  toFile: string,
+): Promise<void> {
+  const fromPath = ensureCachePath(fromFile);
+  const toPath = ensureCachePath(toFile);
+  await fs.rename(fromPath, toPath);
+}
+
 export async function ensureDir(dirName: string): Promise<void> {
   // v8 ignore else -- TODO: add test #40625
   if (isNonEmptyString(dirName)) {
@@ -114,6 +126,7 @@ export async function ensureCacheDir(name: string): Promise<string> {
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
+  // TODO: types (#22198)
   const cacheDir = GlobalConfig.get('cacheDir');
   return upath.join(cacheDir, '__renovate-private-cache');
 }
@@ -216,6 +229,7 @@ export async function findUpLocal(
   fileName: string | string[],
   cwd: string,
 ): Promise<string | null> {
+  // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir');
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
@@ -284,7 +298,8 @@ export function listCacheDir(
 
 export async function rmCache(path: string): Promise<void> {
   const fullPath = ensureCachePath(path);
-  await fs.rm(fullPath, { recursive: true });
+  // force: a missing path is a no-op, callers use this for cleanup
+  await fs.rm(fullPath, { recursive: true, force: true });
 }
 
 export async function cachePathExists(pathName: string): Promise<boolean> {

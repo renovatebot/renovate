@@ -37,6 +37,10 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
       headPipelineStatus: mr.head_pipeline?.status,
     }),
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
+    ...(mr.head_pipeline?.id && { headPipelineId: mr.head_pipeline?.id }),
+    ...(mr.head_pipeline?.source && {
+      headPipelineSource: mr.head_pipeline?.source,
+    }),
 
     ...(isNonEmptyArray(mr.reviewers) && {
       reviewers: mr.reviewers?.map(({ username }) => username),
@@ -90,8 +94,11 @@ export function getRepoUrl(
       );
     }
 
-    // TODO: null check (#22198)
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
+    const parsedEndpoint = parseUrl(defaults.endpoint);
+    if (!parsedEndpoint) {
+      throw new Error(`Invalid GitLab endpoint: ${defaults.endpoint}`);
+    }
+    const { protocol, host, pathname } = parsedEndpoint;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const uri = url.format({
       /* v8 ignore start: should never happen (#40625) */

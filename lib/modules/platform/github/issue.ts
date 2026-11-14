@@ -1,34 +1,8 @@
 import { DateTime } from 'luxon';
-import { z } from 'zod/v3';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-
-const GithubIssueBase = z.object({
-  number: z.number(),
-  state: z.string().transform((val) => val.toLowerCase()),
-  title: z.string(),
-  body: z.string(),
-});
-
-const GithubGraphqlIssue = GithubIssueBase.extend({
-  updatedAt: z.string(),
-}).transform((issue) => {
-  const lastModified = issue.updatedAt;
-  const { number, state, title, body } = issue;
-  return { number, state, title, body, lastModified };
-});
-
-const GithubRestIssue = GithubIssueBase.extend({
-  updated_at: z.string(),
-}).transform((issue) => {
-  const lastModified = issue.updated_at;
-  const { number, state, title, body } = issue;
-  return { number, state, title, body, lastModified };
-});
-
-export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
-export type GithubIssue = z.infer<typeof GithubIssue>;
+import type { GithubIssue } from './schema.ts';
 
 type CacheData = Record<number, GithubIssue>;
 

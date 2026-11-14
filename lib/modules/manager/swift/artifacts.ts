@@ -1,9 +1,14 @@
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { scm } from '../../platform/scm.ts';
+import { api as swiftVersioning } from '../../versioning/swift/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -19,6 +24,19 @@ async function findPackageResolvedFiles(): Promise<string[]> {
 }
 
 function normalizeUrl(url: string): string {
+  try {
+    const parsed = parseGitUrl(url);
+    // Only use parsed result when both resource and full_name are present,
+    // otherwise fall through to basic normalization
+    if (parsed.resource && parsed.full_name) {
+      // Normalize to host/full_name form to allow cross-protocol matching
+      // e.g. https://github.com/owner/repo, git@github.com:owner/repo.git
+      //   -> github.com/owner/repo
+      return `${parsed.resource}/${trimTrailingSlash(parsed.full_name)}`.toLowerCase();
+    }
+  } catch {
+    // Fall through to basic normalization
+  }
   return url
     .replace(regEx(/\.git$/), '')
     .replace(regEx(/\/$/), '')
@@ -29,9 +47,25 @@ function matchPinForDep(
   dep: PackageDependency,
   pins: PackageResolvedPin[],
 ): PackageResolvedPin | null {
+  // SE-0292 registry-form deps: match by identity (== scope.name).
+  // This also catches bridged setups where a registry-form dep maps to a
+  // legacy `kind: "remoteSourceControl"` pin written by older SwiftPM.
+  if (dep.datasource === SwiftPackageRegistryDatasource.id) {
+    const identity = dep.packageName ?? dep.depName;
+    if (!identity) {
+      return null;
+    }
+    // SwiftPM lowercases identities in Package.resolved, so compare case-insensitively.
+    const lowerIdentity = identity.toLowerCase();
+    return (
+      pins.find((pin) => pin.identity.toLowerCase() === lowerIdentity) ?? null
+    );
+  }
+
   let depUrl: string;
 
   if (dep.datasource === GitTagsDatasource.id) {
+    /* v8 ignore next -- extract always sets depName for a git-tags dep */
     depUrl = dep.depName ?? '';
   } else {
     const registryUrl = dep.registryUrls?.[0] ?? 'https://github.com';
@@ -88,7 +122,7 @@ function updatePinInJson(
 
   // Find the pin block by its unique identity value
   const identityPattern = regEx(
-    `"identity"\\s*:\\s*"${escapeRegExp(pin.identity)}"`,
+    `"identity"\\s*:\\s*"${RegExp.escape(pin.identity)}"`,
   );
   const identityMatch = identityPattern.exec(updated);
   /* istanbul ignore if: identity always exists after JSON parse + matchPinForDep */
@@ -126,13 +160,13 @@ function updatePinInJson(
   let pinBlock = updated.slice(blockStart, blockEnd);
 
   // Replace version within the pin block
-  const versionPattern = regEx(/("version"\s*:\s*)"[^"]*"/);
-  pinBlock = pinBlock.replace(versionPattern, `$1"${newVersion}"`);
+  const versionPattern = regEx(/(?<prefix>"version"\s*:\s*)"[^"]*"/);
+  pinBlock = pinBlock.replace(versionPattern, `$<prefix>"${newVersion}"`);
 
   // Replace revision within the pin block if we have a new one
   if (newRevision) {
-    const revisionPattern = regEx(/("revision"\s*:\s*)"[^"]*"/);
-    pinBlock = pinBlock.replace(revisionPattern, `$1"${newRevision}"`);
+    const revisionPattern = regEx(/(?<prefix>"revision"\s*:\s*)"[^"]*"/);
+    pinBlock = pinBlock.replace(revisionPattern, `$<prefix>"${newRevision}"`);
   }
 
   updated = updated.slice(0, blockStart) + pinBlock + updated.slice(blockEnd);
@@ -171,7 +205,7 @@ export async function updateArtifacts({
     const parseResult = PackageResolvedJson.safeParse(content);
     if (!parseResult.success) {
       logger.debug(
-        { resolvedFile, error: parseResult.error },
+        { resolvedFile, err: parseResult.error },
         'swift: could not parse Package.resolved',
       );
       continue;
@@ -208,7 +242,34 @@ export async function updateArtifacts({
         continue;
       }
 
-      const resolvedVersion = dep.newVersion.replace(regEx(/^v/), '');
+      // Only rewrite a pin we can confidently attribute to the dependency being
+      // upgraded. For exact (single-version) specs the pin to update is the one
+      // currently at the from-version; a pin at any other version belongs to a
+      // different constraint — e.g. a transitive dependency in an unrelated
+      // package — and must be left untouched, otherwise we may write a version
+      // that package does not allow.
+      // https://github.com/renovatebot/renovate/issues/44312
+      if (
+        dep.currentValue &&
+        swiftVersioning.isSingleVersion(dep.currentValue)
+      ) {
+        const fromVersion = stripVersionPrefix(
+          dep.currentVersion ?? dep.currentValue,
+        );
+        if (pin.state.version !== fromVersion) {
+          logger.debug(
+            {
+              depName: dep.depName,
+              pinVersion: pin.state.version,
+              currentValue: dep.currentValue,
+            },
+            'swift: pin does not match the upgraded-from version; skipping to avoid touching an unrelated pin',
+          );
+          continue;
+        }
+      }
+
+      const resolvedVersion = stripVersionPrefix(dep.newVersion);
 
       // Skip if already up-to-date
       if (pin.state.version === resolvedVersion) {

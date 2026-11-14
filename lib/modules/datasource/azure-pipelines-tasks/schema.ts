@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 export const AzurePipelinesTaskVersion = z.object({
   major: z.number(),
@@ -20,4 +20,7 @@ export const AzurePipelinesJSON = z.object({
   value: AzurePipelinesTask.array(),
 });
 
-export const AzurePipelinesFallbackTasks = z.record(z.string().array());
+export const AzurePipelinesFallbackTasks = z.record(
+  z.string(),
+  z.string().array(),
+);

@@ -1,13 +1,19 @@
-import { isTruthy, isUndefined } from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { clone } from '../../../util/clone.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { isConflict, isNotFound } from '../../../util/http/status.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -27,19 +33,26 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
-
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
+import { GerritPrCache } from './pr-cache.ts';
+import type {
+  GerritChange,
+  GerritLabels,
+  GerritProjectInfo,
+} from './schema.ts';
 import { configureScm, pushForReview } from './scm.ts';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
+  convertGerritDateToISO,
+  extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
+  prStateMatchesFilter,
 } from './utils.ts';
 
 export const id = 'gerrit';
@@ -53,7 +66,7 @@ let config: {
   repository?: string;
   head?: string;
   config?: GerritProjectInfo;
-  labels: Record<string, GerritLabelTypeInfo>;
+  labels: GerritLabels;
   gerritUsername?: string;
 } = {
   labels: {},
@@ -101,7 +114,7 @@ export async function initPlatform({
     throw new Error('Init: Authentication failure');
   }
 
-  logger.debug('Gerrit version is: ' + gerritVersion);
+  logger.debug(`Gerrit version is: ${gerritVersion}`);
   // Example: 3.13.0-rc3-148-gb478dbbb57
   const parsed = semver.parse(gerritVersion);
   if (!parsed) {
@@ -143,15 +156,12 @@ export async function initRepo({
     repository,
     head: branchInfo.revision,
     config: projectInfo,
-    labels: projectInfo.labels ?? {},
+    labels: coerceObject(projectInfo.labels),
   };
-  const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl, gitUrl);
-  configureScm(repository, config.gerritUsername!);
-  await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
-  //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await client.findChanges(config.repository!, {
+  // Abandon all changes voted with Code-Review -2
+  // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
+  const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -165,6 +175,47 @@ export async function initRepo({
       `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
+
+  // Collect open Gerrit changes to initialize as virtual branches.
+  // This allows DefaultGitScm to treat them as regular Git branches.
+  const openChanges = await client.findChanges(repository, {
+    branchName: '',
+    state: 'open',
+    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+  });
+  const virtualBranches: Record<string, VirtualBranch> = {};
+  for (const change of openChanges) {
+    const branchName = extractSourceBranch(change);
+    if (!branchName) {
+      continue;
+    }
+    const sha = toLongCommitSha(change.current_revision);
+    const ref = change.revisions![sha].ref;
+    virtualBranches[branchName] = { ref, sha };
+  }
+
+  const virtualBranchCount = Object.keys(virtualBranches).length;
+  if (virtualBranchCount > 0) {
+    logger.debug(
+      `Will fetch ${virtualBranchCount} Gerrit changes as virtual branches`,
+    );
+  }
+
+  const baseUrl = defaults.endpoint!;
+  const url = getGerritRepoUrl(
+    repository,
+    baseUrl,
+    gitUrl,
+    config.gerritUsername!,
+  );
+  configureScm(repository, config.labels);
+  await git.initRepo({
+    url,
+    cloneSubmodules,
+    cloneSubmodulesFilter,
+    virtualBranches,
+  });
+
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
@@ -174,51 +225,121 @@ export async function initRepo({
 }
 
 export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
-  const change = (
-    await client.findChanges(config.repository!, {
-      ...findPRConfig,
-      singleChange: true,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
-  return change
-    ? mapGerritChangeToPr(change, {
-        sourceBranch: findPRConfig.branchName,
-      })
-    : null;
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  // Find matching PR from cache
+  const cached = prs.find((pr) => {
+    if (
+      findPRConfig.branchName &&
+      pr.sourceBranch !== findPRConfig.branchName
+    ) {
+      return false;
+    }
+    if (
+      findPRConfig.targetBranch &&
+      pr.targetBranch !== findPRConfig.targetBranch
+    ) {
+      return false;
+    }
+    if (findPRConfig.prTitle && pr.title !== findPRConfig.prTitle) {
+      return false;
+    }
+    if (!prStateMatchesFilter(pr.state, findPRConfig.state)) {
+      return false;
+    }
+    return true;
+  });
+  logger.trace(
+    `findPr: using cached gerrit change ${cached?.number} for ${findPRConfig.branchName}`,
+  );
+  return cached ?? null;
 }
 
 export async function getPr(number: number): Promise<Pr | null> {
-  try {
-    const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
-    return mapGerritChangeToPr(change);
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return null;
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  let pr = prs.find((p) => p.number === number) ?? null;
+  if (pr) {
+    logger.trace(
+      `getPr: using cached gerrit change ${pr.sourceBranch} for ${number}`,
+    );
+  } else {
+    logger.debug(
+      { number },
+      'PR not found in cached PRs - trying to fetch directly',
+    );
+    try {
+      const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
+      pr = mapGerritChangeToPr(change);
+
+      // Add to cache for further queries
+      if (pr) {
+        await GerritPrCache.setPr(config.repository!, pr);
+      }
+    } catch (err) {
+      if (isNotFound(err)) {
+        logger.debug({ number }, 'Change not found in Gerrit');
+        return null;
+      }
+      throw err;
     }
-    throw err;
   }
+
+  return pr;
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  // prConfig.prBody will only be set if the body has changed
-  if (prConfig.prBody) {
-    await client.addMessage(
+  const cached = await getPr(prConfig.number);
+  if (!cached) {
+    logger.warn(
+      { number: prConfig.number },
+      'updatePr: change not found in cache or Gerrit',
+    );
+    return;
+  }
+
+  const pr = clone(cached);
+  let updated = false;
+
+  // Only add message if the body has really changed
+  const newBodyHash = prConfig.prBody ? hashBody(prConfig.prBody) : undefined;
+  if (newBodyHash && newBodyHash !== pr.bodyStruct?.hash) {
+    const updatedDate = await client.addMessage(
       prConfig.number,
-      prConfig.prBody,
+      prConfig.prBody!,
       TAG_PULL_REQUEST_BODY,
     );
+    pr.bodyStruct = {
+      hash: newBodyHash,
+    };
+    pr.updatedAt = convertGerritDateToISO(updatedDate);
+    updated = true;
   }
   await client.setHashtags(prConfig.number, {
     add: prConfig.addLabels,
     remove: prConfig.removeLabels,
   });
   if (prConfig.targetBranch) {
-    await client.moveChange(prConfig.number, prConfig.targetBranch);
+    const change = await client.moveChange(
+      prConfig.number,
+      prConfig.targetBranch,
+    );
+    pr.targetBranch = change.branch;
+    pr.updatedAt = convertGerritDateToISO(change.updated);
+    updated = true;
   }
-  if (prConfig.state && prConfig.state === 'closed') {
-    await client.abandonChange(prConfig.number);
+  // TODO: support restoring change if prConfig.state === 'open'
+  if (prConfig.state === 'closed') {
+    const change = await client.abandonChange(prConfig.number);
+    pr.state = 'closed';
+    pr.updatedAt = convertGerritDateToISO(change.updated);
+    updated = true;
+  }
+
+  if (updated) {
+    logger.debug(
+      `updatePr: updating gerrit change ${prConfig.number} in cache`,
+    );
+    await GerritPrCache.setPr(config.repository!, pr);
   }
 }
 
@@ -260,52 +381,76 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
-  await client.addMessage(
+
+  // Register the virtual branch now that the change exists and we have the ref.
+  const sha = toLongCommitSha(change.current_revision);
+  const ref = change.revisions![sha].ref;
+  await git.setVirtualBranch(prConfig.sourceBranch, ref, sha);
+
+  const updatedDate = await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  return mapGerritChangeToPr(change, {
+
+  const pr = mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
     prBody: prConfig.prBody,
-  });
+  })!;
+  pr.updatedAt = convertGerritDateToISO(updatedDate);
+  logger.debug(`createPr: saving gerrit change ${pr.number} to cache`);
+  await GerritPrCache.setPr(config.repository!, pr);
+
+  return pr;
 }
 
 export async function getBranchPr(
   branchName: string,
   targetBranch?: string,
 ): Promise<Pr | null> {
-  const change = await client.getBranchChange(config.repository!, {
-    branchName,
-    state: 'open',
-    targetBranch,
-    requestDetails: REQUEST_DETAILS_FOR_PRS,
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  const cachedPrs = prs.filter((pr) => {
+    if (pr.sourceBranch !== branchName) {
+      return false;
+    }
+    if (pr.state !== 'open') {
+      return false;
+    }
+    return true;
   });
-
-  return change
-    ? mapGerritChangeToPr(change, {
-        sourceBranch: branchName,
-      })
-    : null;
+  let result: Pr | undefined;
+  if (targetBranch) {
+    const found = cachedPrs.find((pr) => pr.targetBranch === targetBranch);
+    if (found) {
+      result = found;
+    }
+  }
+  result ??= cachedPrs[0];
+  logger.trace(
+    `getBranchPr: using cached gerrit change ${result?.number} for ${branchName}`,
+  );
+  return result ?? null;
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  const changes = await client.findChanges(config.repository!, {
-    branchName: '',
-    requestDetails: REQUEST_DETAILS_FOR_PRS,
-  });
-  return changes.map((change) => mapGerritChangeToPr(change)).filter(isTruthy);
+  const cached = await GerritPrCache.getPrs(config.repository!);
+  logger.debug(`getPrList: using ${cached.length} cached changes`);
+  return cached;
 }
 
-export async function mergePr(config: MergePRConfig): Promise<boolean> {
+export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
   logger.debug(
-    `mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
+    `mergePr(${mergeConfig.id}, ${mergeConfig.branchName!}, ${mergeConfig.strategy!})`,
   );
+
+  let change: GerritChange;
   try {
-    const change = await client.submitChange(config.id);
-    return change.status === 'MERGED';
+    change = await client.submitChange(mergeConfig.id);
+    if (change.status !== 'MERGED') {
+      return false;
+    }
   } catch (err) {
-    if (err.statusCode === 409) {
+    if (isConflict(err)) {
       logger.warn(
         { err },
         "Can't submit the change, because the submit rule doesn't allow it.",
@@ -314,6 +459,22 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
     }
     throw err;
   }
+
+  const cached = await getPr(mergeConfig.id);
+  if (cached) {
+    const pr = clone(cached);
+    pr.state = 'merged';
+    pr.updatedAt = convertGerritDateToISO(change.updated);
+    logger.debug(`mergePr: updating gerrit change ${mergeConfig.id} in cache`);
+    await GerritPrCache.setPr(config.repository!, pr);
+  } else {
+    logger.warn(
+      { number: mergeConfig.id },
+      'mergePr: merged change but could not update PR cache',
+    );
+  }
+
+  return true;
 }
 
 /**
@@ -337,7 +498,7 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
-    const hasBlockingLabels = Object.values(change.labels ?? {}).some(
+    const hasBlockingLabels = Object.values(coerceObject(change.labels)).some(
       (label) => label.blocking,
     );
     if (hasBlockingLabels) {
@@ -431,9 +592,11 @@ export async function getRawFile(
     return null;
   }
   // v8 ignore next -- TODO: add test #40625
-  const branch =
-    branchOrTag ??
-    (repo === config.repository ? (config.head ?? 'HEAD') : 'HEAD');
+  let branch = branchOrTag;
+  if (repo === config.repository) {
+    branch ??= config.head;
+  }
+  branch ??= 'HEAD';
   const result = await client.getFile(repo, branch, fileName);
   return result;
 }
@@ -512,7 +675,7 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
       .replace(regEx(/\b(?:Pull Request|PR)/g), 'change')
       // Remove HTML tags not supported in Gerrit markdown
       .replace(regEx(/<\/?summary>/g), '**')
-      .replace(regEx(/<\/?(details|blockquote)>/g), '')
+      .replace(regEx(/<\/?(?:details|blockquote)>/g), '')
       .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
       .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
       // Remove zero-width-space not supported in Gerrit markdown
@@ -533,8 +696,7 @@ export async function deleteLabel(
 
 export function ensureCommentRemoval(
   _ensureCommentRemoval:
-    | EnsureCommentRemovalConfigByTopic
-    | EnsureCommentRemovalConfigByContent,
+    EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   return Promise.resolve();
 }

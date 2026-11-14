@@ -17,25 +17,28 @@ function mockReadLocalFile(files: Record<string, string | null>) {
 describe('modules/manager/cargo/locked-version', () => {
   describe('extractLockFileVersions()', () => {
     it('returns null for missing lock file', async () => {
-      expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toBeNull();
     });
 
     it('returns null for invalid lock file', async () => {
       mockReadLocalFile({ 'Cargo.lock': 'foo' });
-      expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toBeNull();
     });
 
     it('returns empty map for lock file without packages', async () => {
       mockReadLocalFile({ 'Cargo.lock': '[metadata]' });
-      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual({
+        versionsByPackage: new Map(),
+        hasGitSources: false,
+      });
     });
 
     it('returns a map of package versions', async () => {
       mockReadLocalFile({
         'Cargo.lock': Fixtures.get('lockfile-update/Cargo.1.lock'),
       });
-      expect(await extractLockFileVersions('Cargo.lock')).toEqual(
-        new Map([
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual({
+        versionsByPackage: new Map([
           ['proc-macro2', ['1.0.66']],
           ['quote', ['1.0.33']],
           ['syn', ['1.0.1', '2.0.1']],
@@ -43,7 +46,18 @@ describe('modules/manager/cargo/locked-version', () => {
           ['unicode-ident', ['1.0.11']],
           ['unicode-xid', ['0.2.4']],
         ]),
-      );
+        hasGitSources: false,
+      });
+    });
+
+    it('detects packages from git repositories', async () => {
+      mockReadLocalFile({
+        'Cargo.lock': Fixtures.get('lockfile-update/Cargo.3.lock'),
+      });
+
+      const res = await extractLockFileVersions('Cargo.lock');
+
+      expect(res?.hasGitSources).toBeTrue();
     });
   });
 

@@ -11,7 +11,9 @@ export const categories: Category[] = ['js'];
 
 export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
+export const supportsNpmrc = true;
 export const lockFileNames = ['bun.lockb', 'bun.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)bun\\.lockb?$/', '/(^|/)package\\.json$/'],
@@ -23,7 +25,7 @@ export const defaultConfig = {
   },
   prBodyDefinitions: {
     Change:
-      "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+      "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if packageName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
   },
 };
 

@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import { pipeline } from 'stream/promises';
+import crypto from 'node:crypto';
+import { pipeline } from 'node:stream/promises';
 import type { LiteralUnion } from 'type-fest';
 
 export type AlgorithmName = LiteralUnion<

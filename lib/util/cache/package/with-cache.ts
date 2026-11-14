@@ -4,10 +4,27 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { acquireLock } from '../../mutex.ts';
 import * as packageCache from './index.ts';
+import { buildCacheKey } from './key.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
-interface CachedOptions {
+export interface CacheContext {
+  /**
+   * Whether the result may be shared through the package cache.
+   * `cachePrivatePackages` allows storage when this is `false`.
+   * @default true
+   */
+  public: boolean;
+
+  /**
+   * Whether the result should be stored in the cache.
+   * `false` prevents storage even when `cachePrivatePackages` is enabled.
+   * @default true
+   */
+  cacheable: boolean;
+}
+
+export interface CachedOptions {
   /**
    * The cache namespace.
    */
@@ -25,11 +42,10 @@ interface CachedOptions {
   ttlMinutes?: number;
 
   /**
-   * Whether caching is enabled for this call.
-   * When false, the function is called directly without caching.
+   * Whether the result may be shared through the package cache.
    * @default true
    */
-  cacheable?: boolean;
+  public?: boolean;
 
   /**
    * Enable extended hard TTL for graceful degradation.
@@ -40,36 +56,41 @@ interface CachedOptions {
 }
 
 /**
- * Caches the result of an async function.
+ * Caches the result of a function.
  *
  * @param options - Cache options
- * @param fn - The async function to cache
+ * @param fn - The function to cache
  * @returns The cached or fresh result
  */
 export async function withCache<T>(
   options: CachedOptions,
-  fn: () => T | Promise<T>,
-): Promise<T> {
-  const {
-    namespace,
-    key,
-    ttlMinutes = 30,
-    cacheable = true,
-    fallback = false,
-  } = options;
+  fn: (ctx: CacheContext) => T | PromiseLike<T>,
+): Promise<Awaited<T>> {
+  const { namespace, key, ttlMinutes = 30, fallback = false } = options;
 
-  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages', false);
-  const isCacheable = cachePrivatePackages || cacheable;
-  if (!isCacheable) {
-    return fn();
+  const ctx: CacheContext = {
+    public: options.public ?? true,
+    cacheable: true,
+  };
+  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
+
+  function canUseCache(): boolean {
+    if (!ctx.cacheable) {
+      return false;
+    }
+    return ctx.public || cachePrivatePackages;
+  }
+
+  if (!canUseCache()) {
+    return await fn(ctx);
   }
 
   // istanbul ignore if -- TODO: add test #40625
   if (!namespace || !key) {
-    return fn();
+    return await fn(ctx);
   }
 
-  const cacheKey = `cache-decorator:${key}`;
+  const cacheKey = buildCacheKey('cache-decorator', key);
 
   // prevent concurrent processing and cache writes
   const releaseLock = await acquireLock(cacheKey, namespace);
@@ -101,7 +122,7 @@ export async function withCache<T>(
 
       const softDeadline = cachedAt.plus({ minutes: softTtlMinutes });
       if (now < softDeadline) {
-        return cachedRecord.value as T;
+        return cachedRecord.value as Awaited<T>;
       }
 
       const hardDeadline = cachedAt.plus({ minutes: hardTtlMinutes });
@@ -110,21 +131,21 @@ export async function withCache<T>(
       }
     }
 
-    let newValue: T;
+    let newValue: Awaited<T>;
     try {
-      newValue = await fn();
+      newValue = await fn(ctx);
     } catch (err) {
       if (!isUndefined(fallbackValue)) {
         logger.debug(
           { err },
           'Package cache: callback error, returning stale data',
         );
-        return fallbackValue as T;
+        return fallbackValue as Awaited<T>;
       }
       throw err;
     }
 
-    if (!isUndefined(newValue)) {
+    if (!isUndefined(newValue) && canUseCache()) {
       const newRecord: CachedRecord = {
         cachedAt: DateTime.local().toISO(),
         value: newValue,

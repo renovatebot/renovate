@@ -21,23 +21,27 @@ But if you group PRs and use titles like "All non-major updates", then multiple 
 ## Normal PRs
 
 As explained above, Renovate PRs normally have some "uniqueness" in their title relating to the version in the upgrade.
-When you close a "unique" PR, Renovate assumes you don't want to see that PR again in future, for example:
+When you close a "unique" PR, Renovate assumes you do not want to see that PR again in future, for example:
 
 1. You ignored `lodash@4.17.21` by closing Renovate's PR
-1. Renovate assumes you don't want any updates to `4.17.21` of `lodash`
+1. Renovate assumes you do not want any updates to `4.17.21` of `lodash`
 1. Renovate creates a new PR when the branch + title "uniqueness" exists again, like when `lodash@4.17.22` releases
 
 Renovate behaves similarly for `major` updates, for example:
 
 1. You ignored a `major` update for Lodash (pr title: "Update lodash to v4") by closing Renovate's PR
-1. Renovate assumes you don't want any updates to `v4` of `lodash`
-1. Renovate won't create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
+1. Renovate assumes you do not want any updates to `v4` of `lodash`
+1. Renovate will not create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
 
 ## Immortal PRs
 
 Some Renovate pull requests have a section like this:
 
+<!-- vale Renovate.Contractions = NO -->
+
 > 👻 **Immortal:** This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/renovate/discussions) if that's undesired.
+
+<!-- vale Renovate.Contractions = YES -->
 
 An **immortal** PR keeps popping up again after you close it.
 
@@ -45,8 +49,8 @@ This document explains why we have immortal PRs, and how you can fix them.
 
 ### Why we have immortal PRs
 
-First off, we don't have immortal PRs for some philosophical reason like: "don't ignore this update, it's good for you!".
-We have no good way to ignore some PRs after they're closed.
+First off, we do not have immortal PRs for some philosophical reason like: "do not ignore this update, it is good for you!".
+We have no good way to ignore some PRs after they are closed.
 
 #### Branch name and PR title are cache keys
 
@@ -55,7 +59,7 @@ If the same key exists _and_ the PR was closed, then we ignore the PR.
 
 ##### Cache keys can cause problems
 
-Let's say you have an "All non-major updates" PR.
+Say you have an "All non-major updates" PR.
 If you close the PR, and Renovate ignores it based on the PR title, then you would never get a non-major update again.
 
 #### Only unique version PRs can be ignored
@@ -70,8 +74,8 @@ Then the update becomes "Update react (major)", which is not safely ignorable, i
 ### Future plans for immortal PRs
 
 In the future we may embed metadata in each PR identifying the exact files and packages + versions that PR contains.
-Then we could allow such PRs to be closed/ignored but then as soon as there's any chance to files/packages/versions being updated then we'd be cache busted and create a new PR.
-If you regularly wish to close immortal PRs, it's an indication that you may be grouping too widely.
+Then we could allow such PRs to be closed/ignored but then as soon as there is any chance to files/packages/versions being updated then we'd be cache busted and create a new PR.
+If you regularly wish to close immortal PRs, it is an indication that you may be grouping too widely.
 
 ### How to fix immortal PRs
 
@@ -83,12 +87,35 @@ If you have immortal PRs which you want to keep closed, then set `"recreateWhen"
 Avoid grouping major upgrades together unless they are related dependencies.
 Instead, set `"dependencyDashboardApproval": true` for major updates so that you have control about when they are created.
 
+## Abandoned PRs
+
+Renovate normally cleans up its own branches and PRs once it decides they are no longer needed, for example after you merge or close a PR.
+Depending on the state of the branch, Renovate either autocloses the PR and deletes the branch, or, if the branch has been modified, flags the PR as abandoned.
+
+If someone other than Renovate modified the branch, Renovate will not destroy that work by autoclosing the PR and deleting the branch.
+
+Instead, Renovate flags the PR as abandoned by:
+
+- Appending `- abandoned` to the PR title
+- Adding a comment to the PR explaining that autoclosing was skipped
+
+This tells you that Renovate no longer considers the branch or PR its own, and will not autoclose or delete it.
+
+### Recommended actions for abandoned PRs
+
+Renovate will not rebase, update, or close an abandoned PR again, so you need to deal with it manually:
+
+- If the changes are still wanted, review and merge the PR yourself
+- If the changes are no longer wanted, close the PR and delete the branch yourself
+- If you want Renovate to manage the update again, delete the branch so Renovate can recreate it on its next run, if still needed
+
+Related config option: [`pruneStaleBranches`](../configuration-options.md#prunestalebranches).
+
 ## Ignoring PRs
 
 Close a Renovate PR to ignore it.
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate re-creates any PRs that are marked "immortal".
-    This means that any immortal PR you close, pops up again the next time Renovate runs.
-    To ignore immortal PRs, follow the advice in the [How to fix immortal PRs](#how-to-fix-immortal-prs) section.
+  Renovate re-creates any PRs that are marked "immortal".
+  This means that any immortal PR you close, pops up again the next time Renovate runs.
+  To ignore immortal PRs, follow the advice in the [How to fix immortal PRs](#how-to-fix-immortal-prs) section.

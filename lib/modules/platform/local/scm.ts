@@ -1,11 +1,10 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { glob } from 'glob';
 import type { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { rawExec } from '../../../util/exec/common.ts';
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-} from '../../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { PlatformScm } from '../types.ts';
 
 let fileList: string[] | undefined;
@@ -31,6 +30,9 @@ export class LocalFs implements PlatformScm {
   getBranchUpdateDate(_branchName: string): Promise<DateTime | null> {
     return Promise.resolve(null);
   }
+  getAllBranchUpdateDates(): Promise<Record<string, DateTime>> {
+    return Promise.resolve({});
+  }
   deleteBranch(_branchName: string): Promise<void> {
     return Promise.resolve();
   }
@@ -49,18 +51,19 @@ export class LocalFs implements PlatformScm {
       fileList = stdout.split('\n');
     } catch {
       logger.debug('Could not get file list using git, using glob instead');
-      fileList ??= await glob('**', {
-        dot: true,
-        nodir: true,
-      });
+      if (isNullOrUndefined(fileList)) {
+        fileList = await glob('**', {
+          dot: true,
+          nodir: true,
+        });
+      }
     }
 
     return fileList;
   }
 
-  checkoutBranch(_branchName: string): Promise<LongCommitSha> {
-    // We don't care about the commit sha in local mode
-    return Promise.resolve('' as LongCommitSha);
+  checkoutBranch(_branchName: string): Promise<LongCommitSha | null> {
+    return Promise.resolve(null);
   }
 
   mergeAndPush(_branchName: string): Promise<void> {

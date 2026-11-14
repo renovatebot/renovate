@@ -1,18 +1,35 @@
 import { isNonEmptyString, isObject } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
+import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { parse } from './parse.ts';
+import type { ToolchainObject } from './types.ts';
 import { sortParsed } from './util.ts';
 
 export const id = 'rust-release-channel';
 export const displayName = 'Rust Release Channel';
 export const urls = [
-  'https://rust-lang.github.io/rustup/concepts/toolchains.html',
+  '[Rustup - Toolchains](https://rust-lang.github.io/rustup/concepts/toolchains.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
 /** Rust 1.0.0 release date for major version calculation */
-const rust1Date = new Date('2015-05-15');
+const rust1Date = DateTime.utc(2015, 5, 15);
+
+const lowerBoundRegex = regEx(/^>=\s*(?<version>.+)$/);
+
+/**
+ * Parses a lower bound like `>=1.100.0`, which only `subset()` accepts, as rustup does not support it, into its versioned channel.
+ */
+function parseLowerBound(input: string): ToolchainObject | null {
+  const version = lowerBoundRegex.exec(input)?.groups?.version;
+  if (!version) {
+    return null;
+  }
+  const parsed = parse(version);
+  return parsed && isObject(parsed.channel) ? parsed : null;
+}
 
 class RustReleaseChannelVersioning implements VersioningApi {
   isValid(input: string): boolean {
@@ -114,7 +131,7 @@ class RustReleaseChannelVersioning implements VersioningApi {
 
     // Nightly with date
     if (channel === 'nightly' && date) {
-      const versionDate = new Date(date.year, date.month - 1, date.day);
+      const versionDate = DateTime.utc(date.year, date.month, date.day);
       return versionDate >= rust1Date ? 1 : 0;
     }
 
@@ -193,7 +210,7 @@ class RustReleaseChannelVersioning implements VersioningApi {
 
     // Sort and return the highest (last in sorted array)
     matching.sort((a, b) => this.sortVersions(a, b));
-    return matching.slice(-1)[0];
+    return matching.at(-1)!;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
@@ -325,6 +342,26 @@ class RustReleaseChannelVersioning implements VersioningApi {
     }
 
     return false;
+  }
+
+  /**
+   * Whether every version of `subRange` is at least `superRange`, which has to be a lower bound like `>=1.100.0`.
+   */
+  subset(subRange: string, superRange: string): boolean | undefined {
+    const superBound = parseLowerBound(superRange);
+    if (!superBound) {
+      return undefined;
+    }
+
+    const subBound = parse(subRange);
+    // channel names like `stable` and nightlies have no lowest version
+    if (!subBound || !isObject(subBound.channel)) {
+      return false;
+    }
+
+    // The lowest version of a range like `1.100` is `1.100.0`, and of
+    // `1.100.0-beta` it is the first beta
+    return sortParsed(subBound, superBound) >= 0;
   }
 }
 

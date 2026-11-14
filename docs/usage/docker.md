@@ -25,7 +25,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 By default, Renovate preserves the precision level specified in the Docker images.
 For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
 This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to work on one day.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it is a feature we'd like to work on one day.
 
 ## Version compatibility
 
@@ -65,7 +65,7 @@ Another example is the official `python` image, which follows `pep440` versionin
 }
 ```
 
-If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
+If traditional versioning does not work, try Renovate's built-in `loose` `versioning`.
 Renovate will perform a best-effort sort of the versions, regardless of whether they have letters or digits.
 
 If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
@@ -82,9 +82,9 @@ For example, if you set a version like `2.0.1`, you and your colleagues always g
 
 Docker's tags are not immutable versions, even if tags _look_ like a version.
 You probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
-Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
+Although it probably _should not_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-By replacing Docker tags with Docker digests as the image's primary identifier you'll get immutable builds.
+By replacing Docker tags with Docker digests as the image's primary identifier you will get immutable builds.
 Working with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e` is hard.
 Luckily Renovate can update the digests for you.
 
@@ -110,8 +110,8 @@ We recommend you use the `major.minor.patch` tagging scheme, so change `myimage:
 This way you can see the changes in Renovate PRs.
 You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2` and a PR that changes the contents of the version you already use (`1.1.1`).
 
-By default, Renovate will upgrade `minor` and `patch` versions, so from `1.2.0` to `1.2.1`, but _not_ upgrade `major` versions.
-If you wish to enable `major` versions: add the preset `docker:enableMajor` to the `extends` array in your `renovate.json` file.
+By default, Renovate will upgrade `major`, `minor` and `patch` versions.
+If you do _not_ want `major` updates: add the preset `docker:disableMajor` to the `extends` array in your `renovate.json` file.
 
 Renovate has some Docker-specific intelligence when it comes to versions.
 For example:
@@ -189,30 +189,29 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 }
 ```
 
-### Enable Docker major updates
+### Disable Docker major updates
 
-Add `"docker:enableMajor"` to your `extends` array.
+Add `"docker:disableMajor"` to your `extends` array.
 
 ### Disable digest pinning
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
 <!-- markdownlint-disable MD046 -->
-<!-- prettier-ignore -->
 !!! note
-    This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
-    If you have configured package rules that set `pinDigests` to `true`, those will still apply.
-    This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
+  This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
+  If you have configured package rules that set `pinDigests` to `true`, those will still apply.
+  This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
 
-    If you want to disable the `docker:pinDigests` preset (e.g. if you want to use `config:best-practices` but not have digest pinning enabled),
-    ignore the preset like this:
+If you want to disable the `docker:pinDigests` preset (e.g. if you want to use `config:best-practices` but not have digest pinning enabled),
+ignore the preset like this:
 
-    ```json
-    {
-      "extends": ["config:best-practices"],
-      "ignorePresets": ["docker:pinDigests"]
-    }
-    ```
+```json
+{
+  "extends": ["config:best-practices"],
+  "ignorePresets": ["docker:pinDigests"]
+}
+```
 
 <!-- markdownlint-enable MD046 -->
 
@@ -337,7 +336,7 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v46.1.11
+  uses: renovatebot/github-action@v46.3.10
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -506,7 +505,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:43.99.1
+FROM renovate/renovate:44.133.0
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
@@ -515,7 +514,7 @@ RUN ...
 ###### Accessing the Google Container Registry (GCR)
 
 Renovate needs the current Google Access Token to access the Google Container Registry (GCR).
-Here's an example of how to set that up:
+Here is an example of how to set that up:
 
 ```js
 hostRules: [

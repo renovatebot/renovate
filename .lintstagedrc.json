@@ -4,5 +4,5 @@
     "biome check --write",
     "prettier --write"
   ],
-  "(*.{md,yml})": "prettier --ignore-unknown --write"
+  "(*.{md,yml,json})": "prettier --ignore-unknown --write"
 }

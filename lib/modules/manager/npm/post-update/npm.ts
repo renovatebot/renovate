@@ -1,5 +1,10 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isString,
+} from '@sindresorhus/is';
+import { DateTime, Duration } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -22,10 +27,21 @@ import {
   renameLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
+import {
+  calculatePackageManagerMinimumReleaseAgeMs,
+  getMinimumReleaseAgeExemption,
+} from '../../../../util/minimum-release-age.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
+import { parseNpmrcCooldown } from '../extract/npmrc.ts';
+import type { NpmrcCooldown } from '../extract/types.ts';
 import { PackageLock } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
@@ -61,12 +77,130 @@ async function getNpmConstraintFromPackageLock(
   return null;
 }
 
+function toHuman(durationMs: number): string {
+  return Duration.fromMillis(durationMs).rescale().toHuman();
+}
+
+interface BeforeFlag {
+  flag: string;
+  notice?: string;
+}
+
+/**
+ * Whether the `before` date of the `.npmrc` is older than a minimum release age of `ageMs`, where `0` means none.
+ */
+function isNpmrcBeforeOlder(
+  npmrcDate: DateTime | undefined,
+  ageMs: number,
+): npmrcDate is DateTime {
+  if (!npmrcDate) {
+    return false;
+  }
+  return !ageMs || npmrcDate < DateTime.now().minus(ageMs);
+}
+
+/**
+ * Describes the minimum release age which npm checks with a lowered age of `ageMs` and the `before` date of the `.npmrc`.
+ */
+function getCheckedMinimumReleaseAge(
+  npmrcDate: DateTime | undefined,
+  ageMs: number,
+): string {
+  if (isNpmrcBeforeOlder(npmrcDate, ageMs)) {
+    return `the \`before\` date ${npmrcDate.toISO()} of the \`.npmrc\``;
+  }
+  return ageMs
+    ? `a minimum release age of ${toHuman(ageMs)}`
+    : 'no minimum release age';
+}
+
+/**
+ * Returns the `--before` flag for `minimumReleaseAgeMs` and the `.npmrc`, lowered to the smaller `minimumReleaseAge` of exempted updates in `upgrades`, and the notice for such a lowering.
+ */
+function getBeforeFlag(
+  minimumReleaseAgeMs: number,
+  npmrcCooldown: NpmrcCooldown | null,
+  upgrades: Upgrade<NpmManagerData>[],
+): BeforeFlag {
+  // npm rejects --before when min-release-age is set in .npmrc,
+  // so let the .npmrc handle cooldown natively in that case
+  if (npmrcCooldown?.source === 'min-release-age') {
+    logger.debug(
+      `Skipping --before flag because .npmrc already contains min-release-age=${npmrcCooldown.days}`,
+    );
+    return { flag: '' };
+  }
+
+  const exemption = getMinimumReleaseAgeExemption(
+    upgrades,
+    'npm',
+    NpmDatasource.id,
+    minimumReleaseAgeMs,
+  );
+  const npmrcDate = npmrcCooldown?.date;
+  let notice: string | undefined;
+  let ageMs = minimumReleaseAgeMs;
+  // npm applies an older `before` of the `.npmrc` anyway, so lowering would change nothing
+  if (exemption && !isNpmrcBeforeOlder(npmrcDate, minimumReleaseAgeMs)) {
+    ageMs = exemption.ageMs;
+    const checked = getCheckedMinimumReleaseAge(npmrcDate, ageMs);
+    logger.debug(
+      `npm checks ${checked} instead of ${toHuman(minimumReleaseAgeMs)}, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
+    );
+    const packages = exemption.depNames.map((name) => `\`${name}\``).join(', ');
+    notice = `npm checked ${checked} instead of ${toHuman(minimumReleaseAgeMs)} for this update, because the \`minimumReleaseAge\` of ${packages} is smaller. npm has no per-package exclude for \`--before\`.`;
+    if (!ageMs) {
+      return { flag: '', notice };
+    }
+  }
+
+  let beforeDate = DateTime.now().minus(ageMs).toUTC();
+
+  if (npmrcDate && npmrcDate < beforeDate) {
+    logger.debug(
+      {
+        npmrcDate: npmrcDate.toISO(),
+        beforeDate: beforeDate.toISO(),
+      },
+      'Using stricter .npmrc cooldown date over minimumReleaseAge date',
+    );
+    beforeDate = npmrcDate;
+  }
+
+  const beforeISO = beforeDate.toISO();
+  logger.debug(`Setting npm --before=${beforeISO} based on minimumReleaseAge`);
+  return { flag: ` --before=${beforeISO}`, notice };
+}
+
+/**
+ * Returns the minimum release age for `--before`, or `null` for none: `syncAgeMs` with `minimumReleaseAgePackageManagerSync`, else the `minimumReleaseAge` of `config`.
+ */
+function getBeforeAgeMs(
+  config: Partial<PostUpdateConfig>,
+  syncAgeMs: number | null,
+): number | null {
+  if (syncAgeMs !== null) {
+    return syncAgeMs || null;
+  }
+  if (!config.minimumReleaseAge) {
+    return null;
+  }
+  const ms = toMs(config.minimumReleaseAge);
+  if (ms === null) {
+    logger.debug(
+      `Invalid minimumReleaseAge ${config.minimumReleaseAge}, skipping --before for npm install`,
+    );
+  }
+  return ms;
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   filename: string,
-  config: Partial<PostUpdateConfig> = {},
-  upgrades: Upgrade[] = [],
+  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
+  upgrades: Upgrade<NpmManagerData>[] = [],
+  npmrcContent: string | null = null,
 ): Promise<GenerateLockFileResult> {
   // TODO: don't assume package-lock.json is in the same directory
   const lockFileName = upath.join(lockFileDir, filename);
@@ -75,26 +209,36 @@ export async function generateLockFile(
   const { skipInstalls, postUpdateOptions } = config;
 
   let lockFile: string | null = null;
+  let beforeFallback = false;
+  let minimumReleaseAgeNotice: string | undefined;
   try {
     const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint:
-        config.constraints?.npm ??
-        getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
-        (await getNpmConstraintFromPackageLock(lockFileDir, filename)) ??
-        null,
+        (await resolveToolConstraint(config, 'npm', async () => {
+          let npmVersion = getPackageManagerVersion(
+            'npm',
+            await lazyPkgJson.getValue(),
+          );
+          if (isNullOrUndefined(npmVersion)) {
+            npmVersion = await getNpmConstraintFromPackageLock(
+              lockFileDir,
+              filename,
+            );
+          }
+          return npmVersion;
+        })) ?? null,
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
       semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     let commands: string[] = [];
     let cmdOptions = '';
-    if (
-      (postUpdateOptions?.includes('npmDedupe') === true &&
-        !supportsPreferDedupeFlag) ||
-      skipInstalls === false
-    ) {
+    const needsDedupeWithoutFlag =
+      postUpdateOptions?.includes('npmDedupe') === true &&
+      !supportsPreferDedupeFlag;
+    if (needsDedupeWithoutFlag || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
@@ -110,6 +254,30 @@ export async function generateLockFile(
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       cmdOptions += ' --ignore-scripts';
     }
+
+    const minimumReleaseAgeOptions = {
+      config,
+      manager: 'npm',
+      packageFile: upath.join(lockFileDir, 'package.json'),
+      upgrades,
+    };
+    const syncAgeMs = calculatePackageManagerMinimumReleaseAgeMs(
+      minimumReleaseAgeOptions,
+    );
+    const isSyncEnabled = syncAgeMs !== null;
+    const beforeAgeMs = getBeforeAgeMs(config, syncAgeMs);
+    // without minimumReleaseAgePackageManagerSync, the .npmrc is parsed
+    // leniently and no update lowers --before, as before the flag existed
+    const before =
+      beforeAgeMs === null
+        ? { flag: '' }
+        : getBeforeFlag(
+            beforeAgeMs,
+            parseNpmrcCooldown(npmrcContent, !isSyncEnabled),
+            isSyncEnabled ? upgrades : [],
+          );
+    const beforeFlag = before.flag;
+    minimumReleaseAgeNotice = before.notice;
 
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
@@ -132,7 +300,7 @@ export async function generateLockFile(
       ],
       docker: {},
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -140,7 +308,7 @@ export async function generateLockFile(
 
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
       // This command updates the lock file based on package.json
-      commands.push(`npm install ${cmdOptions}`.trim());
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 
     // rangeStrategy = update-lockfile
@@ -156,11 +324,12 @@ export async function generateLockFile(
         const currentWorkspaceUpdates = lockWorkspacesUpdates
           .filter((update) => update.workspace === workspace)
           .map((update) => update.managerData?.packageKey)
+          .filter(isString)
           .filter((packageKey) => !rootDeps.has(packageKey));
 
         // v8 ignore else -- TODO: add test #40625
         if (currentWorkspaceUpdates.length) {
-          const updateCmd = `npm install ${cmdOptions} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
+          const updateCmd = `npm install ${cmdOptions}${beforeFlag} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
             .map(quote)
             .join(' ')}`;
           commands.push(updateCmd);
@@ -170,8 +339,9 @@ export async function generateLockFile(
 
     if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
-      const updateCmd = `npm install ${cmdOptions} ${lockRootUpdates
+      const updateCmd = `npm install ${cmdOptions}${beforeFlag} ${lockRootUpdates
         .map((update) => update.managerData?.packageKey)
+        .filter(isString)
         .map(quote)
         .join(' ')}`;
       commands.push(updateCmd);
@@ -179,7 +349,19 @@ export async function generateLockFile(
 
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
       // We need to run twice to get the correct lock file
-      commands.push(`npm install ${cmdOptions}`.trim());
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
+    }
+
+    // Lock file maintenance recreates the lock file from scratch, and a single
+    // `npm install` can generate a lock file which is out of sync with
+    // package.json, so we need to run the install a second time (#37531).
+    // Skipped if `npmInstallTwice` is configured, as that doubles all install
+    // commands already.
+    if (
+      upgrades.some((upgrade) => upgrade.isLockFileMaintenance) &&
+      !postUpdateOptions?.includes('npmInstallTwice')
+    ) {
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 
     // postUpdateOptions
@@ -220,18 +402,39 @@ export async function generateLockFile(
       }
     }
 
-    // Run the commands
-    await exec(commands, execOptions);
+    // Run the commands, retrying without --before on ETARGET if needed.
+    // With minimumReleaseAgePackageManagerSync, lock file maintenance does not
+    // retry, as it relies on --before to enforce the minimum release age.
+    const skipsBeforeRetry =
+      isSyncEnabled &&
+      upgrades.some((upgrade) => upgrade.isLockFileMaintenance);
+    await exec(commands, execOptions).catch(async (err) => {
+      if (
+        beforeFlag &&
+        !skipsBeforeRetry &&
+        err.stderr?.includes('with a date before')
+      ) {
+        logger.debug('npm --before caused ETARGET, retrying without --before');
+        const commandsWithoutBefore = commands.map((cmd) =>
+          cmd.replace(beforeFlag, ''),
+        );
+        beforeFallback = true;
+        return exec(commandsWithoutBefore, execOptions);
+      }
+      throw err;
+    });
 
     // massage to shrinkwrap if necessary
-    if (
-      filename === 'npm-shrinkwrap.json' &&
-      (await localPathExists(upath.join(lockFileDir, 'package-lock.json')))
-    ) {
-      await renameLocalFile(
+    if (filename === 'npm-shrinkwrap.json') {
+      const lockExists = await localPathExists(
         upath.join(lockFileDir, 'package-lock.json'),
-        upath.join(lockFileDir, 'npm-shrinkwrap.json'),
       );
+      if (lockExists) {
+        await renameLocalFile(
+          upath.join(lockFileDir, 'package-lock.json'),
+          upath.join(lockFileDir, 'npm-shrinkwrap.json'),
+        );
+      }
     }
 
     // Read the result
@@ -251,8 +454,7 @@ export async function generateLockFile(
       ) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
-            | 'dependencies'
-            | 'optionalDependencies';
+            'dependencies' | 'optionalDependencies';
 
           // TODO #22198
           // v8 ignore else -- TODO: add test #40625
@@ -284,20 +486,25 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { error: !lockFile, lockFile };
+  return {
+    error: !lockFile,
+    lockFile,
+    beforeFallback,
+    minimumReleaseAgeNotice,
+  };
 }
 
 export function divideWorkspaceAndRootDeps(
   lockFileDir: string,
-  lockUpdates: Upgrade[],
+  lockUpdates: Upgrade<NpmManagerData>[],
 ): {
-  lockRootUpdates: Upgrade[];
-  lockWorkspacesUpdates: Upgrade[];
+  lockRootUpdates: Upgrade<NpmManagerData>[];
+  lockWorkspacesUpdates: Upgrade<NpmManagerData>[];
   workspaces: Set<string>;
   rootDeps: Set<string>;
 } {
-  const lockRootUpdates: Upgrade[] = []; // stores all upgrades which are present in root package.json
-  const lockWorkspacesUpdates: Upgrade[] = []; // stores all upgrades which are present in workspaces package.json
+  const lockRootUpdates: Upgrade<NpmManagerData>[] = []; // stores all upgrades which are present in root package.json
+  const lockWorkspacesUpdates: Upgrade<NpmManagerData>[] = []; // stores all upgrades which are present in workspaces package.json
   const workspaces = new Set<string>(); // name of all workspaces
   const rootDeps = new Set<string>(); // packageName of all upgrades in root package.json (makes it check duplicate deps in root)
 
@@ -330,10 +537,7 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
-          const massagedPattern = (workspacePattern as string).replace(
-            /^\.\//,
-            '',
-          );
+          const massagedPattern = workspacePattern.replace(regEx(/^\.\//), '');
           if (minimatch(massagedPattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;

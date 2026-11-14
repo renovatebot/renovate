@@ -1,15 +1,13 @@
 # Self-Hosting Examples
 
-<!-- prettier-ignore -->
 !!! warning
-    All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
+  All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
 
-<!-- prettier-ignore -->
 !!! warning
-    Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
-    GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
-    &nbsp;
-    Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
+  Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
+  GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or your deployment will get rate limited quickly.
+  &nbsp;
+  Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 
 ## Installing Renovate OSS CLI
 
@@ -35,15 +33,14 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:43
-docker run --rm renovate/renovate:43.99
-docker run --rm renovate/renovate:43.99.1
+docker run --rm renovate/renovate:44
+docker run --rm renovate/renovate:44.133
+docker run --rm renovate/renovate:44.133.0
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    Do not use the example tags listed above, as they will be out-of-date.
-    Go to [the `renovate/renovate` tags on DockerHub](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
+  Do not use the example tags listed above, as they will be out-of-date.
+  Go to [the `renovate/renovate` tags on DockerHub](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
 If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
@@ -73,7 +70,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:43.99.1
+              image: renovate/renovate:44.133.0
               args:
                 - user/repo
               # Environment Variables
@@ -99,7 +96,7 @@ stringData:
   # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
@@ -132,7 +129,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:43.99.1
+            - image: renovate/renovate:44.133.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -163,11 +160,10 @@ spec:
 
 ### CircleCI
 
-<!-- prettier-ignore -->
 !!! warning
-    The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
-    Do you know how to get `daniel-shuy/renovate` version `3` working?
-    Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
+  The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
+  Do you know how to get `daniel-shuy/renovate` version `3` working?
+  Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
 
 If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
@@ -227,7 +223,7 @@ Renovate's cache, and the caches(s) for npm, Yarn, Composer, and so on, are stor
 
 ### Overriding the default directory
 
-If you don't want to use the default `tmp/renovate` directory you can:
+If you do not want to use the default `tmp/renovate` directory you can:
 
 - Set a value for `baseDir` in `config.js`
 - Use an environment variable `RENOVATE_BASE_DIR`
@@ -241,7 +237,7 @@ If you want to override the cache directory then set your own value for `cacheDi
 
 The following example uses the Renovate CLI tool, which you can install by running `npm i -g renovate`.
 
-If running your own Renovate bot then you will need a user account that Renovate will run as.
+If running your own Renovate deployment, then you will need a user account that Renovate will run as.
 We recommend you create and use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
 Create and save a PAT for this account.
 
@@ -262,7 +258,7 @@ module.exports = {
 Here change the `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
-If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
+If you are running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
@@ -283,10 +279,9 @@ renovate
 Save the script file, and run the script manually.
 Only add the script to `cron` after you checked it works.
 
-<!-- prettier-ignore -->
 !!! note
-    The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
-    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
+  The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
+  You do not need to add it if you are already running Renovate against github.com, but you do need to add it if you are using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
 
@@ -345,7 +340,7 @@ stringData:
   RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ---
@@ -378,7 +373,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:43.99.1
+              image: renovate/renovate:44.133.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -394,7 +389,7 @@ spec:
 
 ## Logging
 
-If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
+If you are ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
 Debug logging is usually needed for any debugging, while JSON format will mean that the output is parsable.
 
 ### About the log level numbers
@@ -434,7 +429,7 @@ On Ubuntu/Debian and many Linux-based systems, this can be done by:
 
 ### Renovate Docker image
 
-If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
+If you are using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
 
 ```dockerfile title="Example of a Dockerfile that uses a self-signed certificate"
 FROM renovate/renovate

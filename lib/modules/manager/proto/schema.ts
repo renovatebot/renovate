@@ -1,4 +1,5 @@
-import { z } from 'zod/v3';
+import { isString } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
 /**
@@ -16,10 +17,10 @@ export const nonVersionKeys = new Set([
 ]);
 
 export const ProtoToolsFile = Toml.pipe(
-  z.record(z.unknown()).transform((data) => {
+  z.record(z.string(), z.unknown()).transform((data) => {
     const versions: Record<string, string> = {};
     for (const [key, value] of Object.entries(data)) {
-      if (typeof value === 'string' && !nonVersionKeys.has(key)) {
+      if (isString(value) && !nonVersionKeys.has(key)) {
         versions[key] = value;
       }
     }

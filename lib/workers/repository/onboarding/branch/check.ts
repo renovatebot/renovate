@@ -25,9 +25,12 @@ async function findFile(fileName: string): Promise<boolean> {
 
 async function configFileExists(): Promise<boolean> {
   for (const fileName of getConfigFileNames()) {
-    if (fileName !== 'package.json' && (await findFile(fileName))) {
-      logger.debug(`Config file exists, fileName: ${fileName}`);
-      return true;
+    if (fileName !== 'package.json') {
+      const found = await findFile(fileName);
+      if (found) {
+        logger.debug(`Config file exists, fileName: ${fileName}`);
+        return true;
+      }
     }
   }
   return false;
@@ -47,20 +50,21 @@ async function packageJsonConfigExists(): Promise<boolean> {
 }
 
 async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
-  return (
-    (await platform.findPr({
-      branchName: getInheritedOrGlobal('onboardingBranch')!,
-      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
-      state: '!open',
-      targetBranch: config.baseBranch,
-    })) ??
-    (await platform.findPr({
-      branchName: getInheritedOrGlobal('onboardingBranch')!,
-      prTitle: getSemanticCommitPrTitle(config),
-      state: '!open',
-      targetBranch: config.baseBranch,
-    }))
-  );
+  const closedPr = await platform.findPr({
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    prTitle: getInheritedOrGlobal('onboardingPrTitle'),
+    state: '!open',
+    targetBranch: config.baseBranch,
+  });
+  if (closedPr) {
+    return closedPr;
+  }
+  return await platform.findPr({
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    prTitle: getSemanticCommitPrTitle(config),
+    state: '!open',
+    targetBranch: config.baseBranch,
+  });
 }
 
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
@@ -107,7 +111,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
 
-  // when bot is ran is fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
+  // when Renovate is running in fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
   // prevents https://github.com/renovatebot/renovate/discussions/37328
   if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
@@ -115,18 +119,15 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       const configFileContent = await platform.getJsonFile(
         cache.configFileName,
       );
-      if (configFileContent) {
-        if (
-          cache.configFileName !== 'package.json' ||
-          configFileContent.renovate
-        ) {
-          logger.debug('Existing config file confirmed');
-          logger.debug(
-            { fileName: cache.configFileName, config: configFileContent },
-            'Repository config',
-          );
-          return true;
-        }
+      const hasRenovateConfig =
+        cache.configFileName !== 'package.json' || configFileContent?.renovate;
+      if (configFileContent && hasRenovateConfig) {
+        logger.debug('Existing config file confirmed');
+        logger.debug(
+          { fileName: cache.configFileName, config: configFileContent },
+          'Repository config',
+        );
+        return true;
       }
     } catch {
       // probably file doesn't exist

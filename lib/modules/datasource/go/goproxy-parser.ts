@@ -1,8 +1,9 @@
-import { isString } from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory/index.ts';
-import { getEnv } from '../../../util/env.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { regEx } from '../../../util/regex.ts';
+import { getGoEnv } from './env.ts';
 import type { GoproxyItem } from './types.ts';
 
 /**
@@ -19,22 +20,25 @@ import type { GoproxyItem } from './types.ts';
  * @see https://golang.org/ref/mod#goproxy-protocol
  */
 export function parseGoproxy(
-  input: string | undefined = getEnv().GOPROXY,
+  input: string | undefined = getGoEnv().GOPROXY,
 ): GoproxyItem[] {
   if (!isString(input)) {
     return [];
   }
 
-  const cacheKey = `goproxy::${input}`;
+  const cacheKey = buildCacheKey('goproxy', input);
   const cachedResult = memCache.get<GoproxyItem[]>(cacheKey);
   if (cachedResult) {
     return cachedResult;
   }
 
   const result: GoproxyItem[] = input
-    .split(regEx(/([^,|]*(?:,|\|))/))
-    .filter(Boolean)
-    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
+    .split(regEx(/(?<segment>[^,|]*(?:,|\|))/))
+    .filter(isTruthy)
+    .map((s) => s.split(regEx(/(?<separator>,|\|)/)))
+    // Empty segments (`a||b`, `,a`) carry no url to query, and keeping them
+    // would apply their separator as the fallback strategy for a bogus request
+    .filter(([url]) => isTruthy(url))
     .map(([url, separator]) => ({
       url,
       fallback: separator === ',' ? ',' : '|',
@@ -45,6 +49,7 @@ export function parseGoproxy(
 }
 
 // https://golang.org/pkg/path/#Match
+/* oxlint-disable renovate/require-regex-util -- moo lexer patterns must be native RegExp: moo recompiles their source with the native engine and rejects RE2 instances (TODO #12870) */
 const noproxyLexer = moo.states({
   main: {
     separator: {
@@ -89,10 +94,11 @@ const noproxyLexer = moo.states({
     },
   },
 });
+/* oxlint-enable renovate/require-regex-util */
 
 export function parseNoproxy(
   input: unknown = (() => {
-    const env = getEnv();
+    const env = getGoEnv();
     return env.GONOPROXY ?? env.GOPRIVATE;
   })(),
 ): RegExp | null {
@@ -100,7 +106,7 @@ export function parseNoproxy(
     return null;
   }
 
-  const cacheKey = `noproxy::${input}`;
+  const cacheKey = buildCacheKey('noproxy', input);
   const cachedResult = memCache.get<RegExp | null>(cacheKey);
   if (cachedResult !== undefined) {
     return cachedResult;

@@ -2,7 +2,9 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as semanticVersioning from '../../versioning/semver/index.ts';
@@ -17,13 +19,15 @@ import {
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
 
-  override readonly customRegistrySupport = true;
-
-  override readonly registryStrategy = 'first';
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly defaultVersioning = semanticVersioning.id;
 
-  override readonly defaultRegistryUrls = ['https://apiland.deno.dev'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://apiland.deno.dev'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -43,7 +47,7 @@ export class DenoDatasource extends Datasource {
     const massagedRegistryUrl = registryUrl!;
 
     const extractResult = regEx(
-      /^(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/,
+      /^(?:https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/,
     ).exec(packageName);
     const rawPackageName = extractResult?.groups?.rawPackageName;
     if (isNullOrUndefined(rawPackageName)) {
@@ -70,8 +74,11 @@ export class DenoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -81,12 +88,13 @@ export class DenoDatasource extends Datasource {
   private async _getReleaseResult(
     moduleAPIURL: string,
   ): Promise<ReleaseResult> {
-    const detailsCacheKey = `details:${moduleAPIURL}`;
-    const releasesCache: Record<string, Release> =
-      (await packageCache.get(
+    const detailsCacheKey = buildCacheKey('details', moduleAPIURL);
+    const releasesCache: Record<string, Release> = coerceObject(
+      await packageCache.get(
         `datasource-${DenoDatasource.id}`,
         detailsCacheKey,
-      )) ?? {};
+      ),
+    );
     let cacheModified = false;
 
     const {
@@ -98,7 +106,7 @@ export class DenoDatasource extends Datasource {
       versions,
       async (version) => {
         const cacheRelease = releasesCache[version];
-        /* v8 ignore next 3: hard to test */
+        /* v8 ignore next: hard to test */
         if (cacheRelease) {
           return cacheRelease;
         }
@@ -124,6 +132,7 @@ export class DenoDatasource extends Datasource {
       { concurrency: 5 },
     );
 
+    // v8 ignore else -- needs every release already present in the cache
     if (cacheModified) {
       // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
       await packageCache.set(
@@ -141,7 +150,7 @@ export class DenoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        key: `getReleaseResult:${moduleAPIURL}`,
+        key: buildCacheKey('getReleaseResult', moduleAPIURL),
       },
       () => this._getReleaseResult(moduleAPIURL),
     );

@@ -1,8 +1,11 @@
-import { Command } from 'commander';
+import { isPlainObject } from '@sindresorhus/is';
+import { Command, Option } from 'commander';
+import { flatDependencyDashboardOptions } from '../../../../config/migrations/custom/dependency-dashboard-migration.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { pkg } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { coersions } from './coersions.ts';
 import type { ParseConfigOptions } from './types.ts';
@@ -11,7 +14,10 @@ export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
+  const nameWithHyphens = option.name.replace(
+    regEx(/(?<upper>[A-Z])/g),
+    '-$<upper>',
+  );
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
@@ -31,6 +37,18 @@ function createProgram(): Command<[string[]]> {
       );
     }
   });
+
+  // still accept the flags of the flat Dependency Dashboard options, which `getConfig` migrates
+  for (const [name, { type }] of Object.entries(
+    flatDependencyDashboardOptions,
+  )) {
+    const param = `<${type}>`.replace('<boolean>', '[boolean]');
+    program = program.addOption(
+      new Option(`${getCliName({ name })} ${param}`)
+        .hideHelp()
+        .argParser(coersions[type]),
+    );
+  }
 
   /* oxlint-disable no-console -- intentional: CLI help output */
   /* istanbul ignore next */
@@ -77,14 +95,22 @@ function migrateArgs(input: string[]): string[] {
         .replace('"host":"', '"matchHost":"')
         .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
         .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
-        .replace(/^--dry-run$/, '--dry-run=true')
-        .replace(/^--require-config$/, '--require-config=true')
+        .replace(regEx(/^--dry-run$/), '--dry-run=true')
+        .replace(regEx(/^--require-config$/), '--require-config=true')
         .replace('--aliases', '--registry-aliases')
         .replace('--include-forks=true', '--fork-processing=enabled')
         .replace('--include-forks', '--fork-processing=enabled')
         .replace('--recreate-closed=false', '--recreate-when=auto')
         .replace('--recreate-closed=true', '--recreate-when=always')
-        .replace('--recreate-closed', '--recreate-when=always'),
+        .replace('--recreate-closed', '--recreate-when=always')
+        .replace(
+          regEx(/^--dependency-dashboard(?:=true)?$/),
+          '--dependency-dashboard={"enabled":true}',
+        )
+        .replace(
+          '--dependency-dashboard=false',
+          '--dependency-dashboard={"enabled":false}',
+        ),
     )
     .filter((a) => !a.startsWith('--git-fs'));
 }
@@ -109,42 +135,80 @@ export function getConfig(input: string[]): AllConfig {
       }
 
       for (const option of options) {
-        if (option.cli !== false) {
-          if (opts[option.name] !== undefined) {
-            config[option.name] = opts[option.name];
-            if (option.name === 'dryRun') {
-              if (config[option.name] === 'true') {
-                logger.warn(
-                  'cli config dryRun property has been changed to full',
-                );
-                config[option.name] = 'full';
-              } else if (config[option.name] === 'false') {
-                logger.warn(
-                  'cli config dryRun property has been changed to null',
-                );
-                config[option.name] = null;
-              } else if (config[option.name] === 'null') {
-                config[option.name] = null;
-              }
+        if (option.cli !== false && opts[option.name] !== undefined) {
+          config[option.name] = opts[option.name];
+          if (option.name === 'dryRun') {
+            if (config[option.name] === 'true') {
+              logger.warn(
+                'cli config dryRun property has been changed to full',
+              );
+              config[option.name] = 'full';
+            } else if (config[option.name] === 'false') {
+              logger.warn(
+                'cli config dryRun property has been changed to null',
+              );
+              config[option.name] = null;
+            } else if (config[option.name] === 'null') {
+              config[option.name] = null;
             }
-            if (option.name === 'requireConfig') {
-              if (config[option.name] === 'true') {
-                logger.warn(
-                  'cli config requireConfig property has been changed to required',
-                );
-                config[option.name] = 'required';
-              } else if (config[option.name] === 'false') {
-                logger.warn(
-                  'cli config requireConfig property has been changed to optional',
-                );
-                config[option.name] = 'optional';
-              }
+          }
+          if (option.name === 'requireConfig') {
+            if (config[option.name] === 'true') {
+              logger.warn(
+                'cli config requireConfig property has been changed to required',
+              );
+              config[option.name] = 'required';
+            } else if (config[option.name] === 'false') {
+              logger.warn(
+                'cli config requireConfig property has been changed to optional',
+              );
+              config[option.name] = 'optional';
             }
           }
         }
       }
+
+      migrateDependencyDashboardFlags(opts, config);
     })
     .parse(argv);
 
   return config;
+}
+
+/**
+ * Moves the flags of the flat Dependency Dashboard options into `dependencyDashboard`, where fields it already sets take precedence.
+ *
+ * e.g. --dependency-dashboard-footer=... -> --dependency-dashboard='{"footer":...}'
+ */
+function migrateDependencyDashboardFlags(
+  opts: Record<string, unknown>,
+  config: Record<string, unknown>,
+): void {
+  const migrated: Record<string, unknown> = {};
+  const oldFlags: string[] = [];
+  for (const [name, { field }] of Object.entries(
+    flatDependencyDashboardOptions,
+  )) {
+    if (opts[name] !== undefined) {
+      migrated[field] = opts[name];
+      oldFlags.push(getCliName({ name }));
+    }
+  }
+  if (!oldFlags.length) {
+    return;
+  }
+
+  const existing = coerceObject(config.dependencyDashboard);
+  if (!isPlainObject(existing)) {
+    logger.warn(
+      { oldFlags },
+      'Could not migrate cli config into --dependency-dashboard, as it is not an object',
+    );
+    return;
+  }
+  config.dependencyDashboard = { ...migrated, ...existing };
+  logger.warn(
+    { oldFlags },
+    'cli config has been migrated into --dependency-dashboard',
+  );
 }

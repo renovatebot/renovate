@@ -1,8 +1,10 @@
-import { mockDeep } from 'vitest-mock-extended';
-import { hostRules } from '~test/util.ts';
-import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url.ts';
-
-vi.mock('../host-rules.ts', () => mockDeep());
+import { hostRules } from '~test/host-rules.ts';
+import {
+  getHttpUrl,
+  getRemoteUrlWithToken,
+  getTokenCredentials,
+  parseGitUrl,
+} from './url.ts';
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {
@@ -34,6 +36,24 @@ describe('util/git/url', () => {
         user: '',
       });
     });
+  });
+
+  describe('getTokenCredentials()', () => {
+    it.each`
+      platform              | token          | expected
+      ${'azure'}            | ${'token'}     | ${'x-access-token:token'}
+      ${'bitbucket'}        | ${'token'}     | ${'x-token-auth:token'}
+      ${'bitbucket-server'} | ${'token'}     | ${'x-token-auth:token'}
+      ${'scm-manager'}      | ${'token'}     | ${'x-access-token:token'}
+      ${'scm-manager'}      | ${'user:pass'} | ${'user:pass'}
+      ${'gerrit'}           | ${'token'}     | ${'token'}
+      ${null}               | ${'token'}     | ${'token'}
+    `(
+      'returns $expected for $platform and $token',
+      ({ platform, token, expected }) => {
+        expect(getTokenCredentials(platform, token)).toBe(expected);
+      },
+    );
   });
 
   describe('getHttpUrl()', () => {
@@ -87,11 +107,72 @@ describe('util/git/url', () => {
       );
     });
 
+    it('returns gitea url with token', () => {
+      expect(getHttpUrl('https://gitea.com/some/repo', 'token')).toBe(
+        'https://token:x-oauth-basic@gitea.com/some/repo',
+      );
+      expect(getHttpUrl('git@gitea.com:some/repo', 'token')).toBe(
+        'https://token:x-oauth-basic@gitea.com/some/repo',
+      );
+      expect(getHttpUrl('https://gitea.com/some/repo', 'user:pass')).toBe(
+        'https://user:pass@gitea.com/some/repo',
+      );
+    });
+
+    it('returns forgejo url with token', () => {
+      expect(getHttpUrl('https://codeberg.org/some/repo', 'token')).toBe(
+        'https://token:x-oauth-basic@codeberg.org/some/repo',
+      );
+      expect(getHttpUrl('https://codeberg.org/some/repo', 'user:pass')).toBe(
+        'https://user:pass@codeberg.org/some/repo',
+      );
+    });
+
+    it('returns azure url with token', () => {
+      expect(
+        getHttpUrl('https://dev.azure.com/org/proj/_git/repo', 'token'),
+      ).toBe('https://x-access-token:token@dev.azure.com/org/proj/_git/repo');
+      expect(
+        getHttpUrl('https://dev.azure.com/org/proj/_git/repo', 'user:pass'),
+      ).toBe('https://user:pass@dev.azure.com/org/proj/_git/repo');
+    });
+
+    it('returns bitbucket cloud url with a single x-token-auth username', () => {
+      expect(getHttpUrl('https://bitbucket.org/some/repo', 'token')).toBe(
+        'https://x-token-auth:token@bitbucket.org/some/repo',
+      );
+      expect(getHttpUrl('git@bitbucket.org:some/repo', 'token')).toBe(
+        'https://x-token-auth:token@bitbucket.org/some/repo',
+      );
+      expect(getHttpUrl('https://bitbucket.com/some/repo', 'token')).toBe(
+        'https://x-token-auth:token@bitbucket.com/some/repo',
+      );
+      expect(getHttpUrl('https://bitbucket.org/some/repo', 'user:pass')).toBe(
+        'https://user:pass@bitbucket.org/some/repo',
+      );
+    });
+
+    it('returns bitbucket-server url with token', () => {
+      hostRules.add({
+        matchHost: 'git.mycompany.com',
+        hostType: 'bitbucket-server',
+      });
+      expect(
+        getHttpUrl('https://git.mycompany.com/scm/proj/repo.git', 'token'),
+      ).toBe('https://x-token-auth:token@git.mycompany.com/scm/proj/repo.git');
+      expect(
+        getHttpUrl('https://git.mycompany.com/scm/proj/repo.git', 'user:pass'),
+      ).toBe('https://user:pass@git.mycompany.com/scm/proj/repo.git');
+    });
+
     it('returns bitbucket-server url', () => {
       expect(getHttpUrl('http://git.mycompany.com/scm/proj/repo.git')).toBe(
         'http://git.mycompany.com/scm/proj/repo.git',
       );
-      hostRules.hostType.mockReturnValueOnce('bitbucket-server');
+      hostRules.add({
+        matchHost: 'git.mycompany.com',
+        hostType: 'bitbucket-server',
+      });
       expect(getHttpUrl('ssh://git@git.mycompany.com:7999/proj/repo.git')).toBe(
         'https://git.mycompany.com/scm/proj/repo.git',
       );
@@ -121,53 +202,50 @@ describe('util/git/url', () => {
     });
 
     it('transforms an ssh git url to https for the purpose of finding hostRules', () => {
-      getRemoteUrlWithToken('git@foo.bar:some/repo');
-      expect(hostRules.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          url: 'https://foo.bar/some/repo',
-        }),
+      // this rule can only match after the ssh url is transformed to https
+      hostRules.add({
+        matchHost: 'https://foo.bar/some/repo',
+        token: 'token',
+      });
+      expect(getRemoteUrlWithToken('git@foo.bar:some/repo')).toBe(
+        'https://token@foo.bar/some/repo',
       );
     });
 
     it('does not transform urls that are not parseable as git urls', () => {
-      getRemoteUrlWithToken('abcdefg');
-      expect(hostRules.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          url: 'abcdefg',
-        }),
-      );
+      expect(getRemoteUrlWithToken('abcdefg')).toBe('abcdefg');
     });
 
     it('returns http url with token', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('http://foo.bar/')).toBe(
         'http://token@foo.bar/',
       );
     });
 
     it('returns https url with token', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
         'https://token@foo.bar/',
       );
     });
 
     it('returns https url with token for non-http protocols', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://foo.bar/')).toBe(
         'https://token@foo.bar/',
       );
     });
 
     it('returns https url with encoded token', () => {
-      hostRules.find.mockReturnValueOnce({ token: 't#ken' });
+      hostRules.add({ token: 't#ken' });
       expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
         'https://t%23ken@foo.bar/',
       );
     });
 
     it('returns http url with username and password', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'user',
         password: 'pass',
       });
@@ -177,7 +255,7 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with username and password', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'user',
         password: 'pass',
       });
@@ -187,7 +265,7 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with username and password for non-http protocols', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'user',
         password: 'pass',
       });
@@ -197,7 +275,7 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with encoded username and password', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'u$er',
         password: 'p@ss',
       });
@@ -207,18 +285,21 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with encoded gitlab token', () => {
-      hostRules.find.mockReturnValueOnce({
-        token: 'token',
-      });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://gitlab.com/some/repo.git')).toBe(
         'https://gitlab-ci-token:token@gitlab.com/some/repo.git',
       );
     });
 
+    it('returns https url with x-oauth-basic password for gitea token', () => {
+      hostRules.add({ token: 'token' });
+      expect(getRemoteUrlWithToken('git@gitea.com:some/repo.git')).toBe(
+        'https://token:x-oauth-basic@gitea.com/some/repo.git',
+      );
+    });
+
     it('returns https url for ssh url with encoded github token', () => {
-      hostRules.find.mockReturnValueOnce({
-        token: 'token',
-      });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://github.com/some/repo.git')).toBe(
         'https://x-access-token:token@github.com/some/repo.git',
       );

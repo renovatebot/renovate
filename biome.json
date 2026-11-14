@@ -3,7 +3,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "correctness": {
         "noUndeclaredDependencies": "error"
       },
@@ -33,6 +33,7 @@
       "!**/node_modules",
       "!.pnpm-store",
       "!.worktrees/**/*",
+      "!.claude/worktrees/**/*",
       "!**/dist",
       "!**/tmp",
       "!**/coverage",
