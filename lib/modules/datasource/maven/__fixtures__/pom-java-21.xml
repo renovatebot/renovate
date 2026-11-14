@@ -1,0 +1,10 @@
+<project>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <name>Package for Java cache upgrade coverage</name>
+  <description>This package description is omitted from the cached POM to keep persistent cache bodies small.</description>
+  <properties>
+    <java.version>21</java.version>
+    <unused.property>unused property omitted from the cache</unused.property>
+  </properties>
+</project>

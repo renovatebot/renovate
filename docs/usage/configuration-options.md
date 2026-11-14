@@ -1000,6 +1000,7 @@ This feature is limited to the following datasources:
 - `crate`
 - `go`
 - `jenkins-plugins`
+- `maven`
 - `npm`
 - `packagist`
 - `pub`
