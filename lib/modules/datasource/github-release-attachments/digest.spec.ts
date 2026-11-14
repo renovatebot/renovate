@@ -175,6 +175,32 @@ describe('modules/datasource/github-release-attachments/digest', () => {
         expect(digest).toEqual(contentDigest);
       });
 
+      it.each`
+        currentTag         | newTag             | currentFile                  | newFile
+        ${'v1.0.0'}        | ${'v1.0.1'}        | ${'asset-1.0.0.zip'}         | ${'asset-1.0.1.zip'}
+        ${'1.0.0'}         | ${'1.0.1'}         | ${'asset-1.0.0.zip'}         | ${'asset-1.0.1.zip'}
+        ${'v.0.9.8.1'}     | ${'v.0.9.9.0'}     | ${'USBip-0.9.8.1-x64.exe'}   | ${'USBip-0.9.9.0-x64.exe'}
+        ${'release-1.0.0'} | ${'release-1.1.0'} | ${'tool-1.0.0-linux.tar.gz'} | ${'tool-1.1.0-linux.tar.gz'}
+      `(
+        'maps $currentFile in $currentTag to $newFile in $newTag',
+        async ({ currentTag, newTag, currentFile, newFile }) => {
+          const updatedContent = 'new content';
+          const release = releaseMock.withAssets(newTag, {
+            [newFile]: updatedContent,
+          });
+
+          const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
+            {
+              assetName: currentFile,
+              currentVersion: currentTag,
+              currentDigest: '0'.repeat(64),
+            },
+            release,
+          );
+          expect(digest).toEqual(toSha256(updatedContent));
+        },
+      );
+
       it('returns null when not found', async () => {
         const release = releaseMock.release('v1.0.1');
         const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
