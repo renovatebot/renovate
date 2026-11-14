@@ -184,6 +184,14 @@ describe('modules/manager/mix/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
+    });
     // erlang
     getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -192,14 +200,6 @@ describe('modules/manager/mix/artifacts', () => {
         { version: '24.3.4.1' },
         { version: '24.3.4.2' },
         { version: '25.0.0.0' },
-      ],
-    });
-    // elixir
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
       ],
     });
 
@@ -290,6 +290,92 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
   });
 
+  it('keeps the project erlang constraint for a newer elixir', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '27.3.4.3' }, { version: '29.1.2.0' }],
+    });
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.19.4' }, { version: 'v1.20.5' }],
+    });
+
+    await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [{ depName: 'plug' }],
+      newPackageFileContent: '{}',
+      config: { ...config, constraints: { erlang: '27' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 27.3.4.3' },
+      { cmd: 'install-tool elixir v1.20.5' },
+      { cmd: 'mix deps.update plug' },
+    ]);
+  });
+
+  it.each`
+    elixir       | erlang
+    ${'v1.20.5'} | ${'29.1.2.0'}
+    ${'v1.21.0'} | ${'29.1.2.0'}
+    ${'v1.19.4'} | ${'28.3.1.0'}
+    ${'v1.17.3'} | ${'27.3.4.3'}
+    ${'v1.14.5'} | ${'25.3.2.21'}
+    ${'v1.13.4'} | ${'25.3.2.21'}
+    ${'v1.13.3'} | ${'24.3.4.17'}
+    ${'v1.11.4'} | ${'24.3.4.17'}
+    ${'v1.11.3'} | ${'23.3.4.20'}
+    ${'v1.10.3'} | ${'23.3.4.20'}
+    ${'v1.7.4'}  | ${'22.3.4.26'}
+    ${'v1.6.6'}  | ${'22.3.4.26'}
+  `(
+    'installs erlang $erlang for elixir $elixir',
+    async ({ elixir, erlang }: { elixir: string; erlang: string }) => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+
+      // elixir
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v1.8.2' }, { version: elixir }],
+      });
+      // erlang
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '22.3.4.26' },
+          { version: '23.3.4.20' },
+          { version: '24.3.4.17' },
+          { version: '25.3.2.21' },
+          { version: '26.2.5.4' },
+          { version: '27.3.4.3' },
+          { version: '28.3.1.0' },
+          { version: '29.1.2.0' },
+        ],
+      });
+
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: `install-tool erlang ${erlang}` },
+        { cmd: `install-tool elixir ${elixir}` },
+        { cmd: 'mix deps.update plug' },
+      ]);
+    },
+  );
+
   it('authenticates to private repositories in updated dependencies', async () => {
     GlobalConfig.set({
       ...adminConfig,
@@ -305,6 +391,14 @@ describe('modules/manager/mix/artifacts', () => {
       token: 'valid_test_token',
     });
 
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
+    });
     // erlang
     getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -313,14 +407,6 @@ describe('modules/manager/mix/artifacts', () => {
         { version: '24.3.4.1' },
         { version: '24.3.4.2' },
         { version: '25.0.0.0' },
-      ],
-    });
-    // elixir
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
       ],
     });
 
@@ -390,6 +476,14 @@ describe('modules/manager/mix/artifacts', () => {
     });
     hostRules.add({ matchHost: 'hex.pm' });
 
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
+    });
     // erlang
     getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -398,14 +492,6 @@ describe('modules/manager/mix/artifacts', () => {
         { version: '24.3.4.1' },
         { version: '24.3.4.2' },
         { version: '25.0.0.0' },
-      ],
-    });
-    // elixir
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
       ],
     });
 
@@ -444,13 +530,13 @@ describe('modules/manager/mix/artifacts', () => {
     // a specific organization's repo URL
     hostRules.add({ matchHost: 'hex.pm', token: 'secret_token' });
 
-    // erlang
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
-    });
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: 'v1.13.4' }],
+    });
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
     });
 
     await updateArtifacts({

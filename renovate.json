@@ -164,14 +164,6 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["lib/modules/manager/mix/artifacts.ts"],
-      "matchStrings": ["const erlangVersion = '(?<currentValue>[\\^0-9]*)'"],
-      "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "containerbase/erlang-prebuild",
-      "versioningTemplate": "loose"
-    },
-    {
-      "customType": "regex",
       "managerFilePatterns": [
         "lib/config/options/index.ts",
         "lib/modules/manager/github-actions/readme.md"

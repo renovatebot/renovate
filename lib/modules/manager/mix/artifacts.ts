@@ -1,10 +1,12 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
+import semver from 'semver';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { resolveConstraint } from '../../../util/exec/containerbase.ts';
 import { exec } from '../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../util/exec/types.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -17,7 +19,11 @@ import {
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types.ts';
 import {
   artifactError,
   artifactErrorResult,
@@ -29,6 +35,29 @@ const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
   `^https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
 );
+
+// https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
+const defaultErlangVersion = '22';
+
+// highest supported erlang major per minimum elixir version, newest elixir first
+// TODO: replace once a datasource provides erlang constraints per elixir release
+const elixirErlangVersions = [
+  { elixir: '1.20.0', erlang: '29' },
+  { elixir: '1.19.0', erlang: '28' },
+  { elixir: '1.18.0', erlang: '27' },
+  { elixir: '1.17.0', erlang: '27' },
+  { elixir: '1.16.0', erlang: '26' },
+  { elixir: '1.15.0', erlang: '26' },
+  { elixir: '1.14.0', erlang: '25' },
+  { elixir: '1.13.4', erlang: '25' },
+  { elixir: '1.13.0', erlang: '24' },
+  { elixir: '1.12.0', erlang: '24' },
+  { elixir: '1.11.4', erlang: '24' },
+  { elixir: '1.11.0', erlang: '23' },
+  { elixir: '1.10.3', erlang: '23' },
+  { elixir: '1.10.0', erlang: '22' },
+  { elixir: '1.7.0', erlang: '22' },
+];
 
 export async function updateArtifacts({
   packageFileName,
@@ -150,9 +179,6 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
-  // renovate: will update this
-  const erlangVersion = '26';
-
   const execOptions: ExecOptions = {
     extraEnv: {
       // https://hexdocs.pm/mix/1.15.0/Mix.Tasks.Archive.html
@@ -161,18 +187,7 @@ export async function updateArtifacts({
     },
     cwdFile: lockFileName,
     docker: {},
-    toolConstraints: [
-      {
-        toolName: 'erlang',
-        // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint:
-          (await resolveToolConstraint(config, 'erlang')) ?? erlangVersion,
-      },
-      {
-        toolName: 'elixir',
-        constraint: await resolveToolConstraint(config, 'elixir'),
-      },
-    ],
+    toolConstraints: await getToolConstraints(config),
     preCommands,
   };
 
@@ -213,6 +228,47 @@ export async function updateArtifacts({
   }
   logger.debug('Returning updated mix.lock');
   return [fileAddition(lockFileName, newMixLockContent)];
+}
+
+/**
+ * Returns the erlang and elixir tool constraints, picking the erlang version from the resolved elixir version unless erlang is constrained.
+ */
+async function getToolConstraints(
+  config: UpdateArtifactsConfig,
+): Promise<ToolConstraint[]> {
+  const erlangConstraint = await resolveToolConstraint(config, 'erlang');
+  const elixirConstraint = await resolveToolConstraint(config, 'elixir');
+  const binarySource = GlobalConfig.get('binarySource');
+  const installsTools = binarySource === 'docker' || binarySource === 'install';
+
+  if (erlangConstraint || !installsTools) {
+    return [
+      {
+        toolName: 'erlang',
+        constraint: erlangConstraint ?? defaultErlangVersion,
+      },
+      { toolName: 'elixir', constraint: elixirConstraint },
+    ];
+  }
+
+  const elixirVersion = await resolveConstraint({
+    toolName: 'elixir',
+    constraint: elixirConstraint,
+  });
+  const erlangVersion =
+    elixirErlangVersions.find(({ elixir }) =>
+      semver.satisfies(elixirVersion, `>=${elixir}`, {
+        includePrerelease: true,
+      }),
+    )?.erlang ?? defaultErlangVersion;
+  logger.debug(
+    `Using erlang ${erlangVersion} for elixir ${elixirVersion} in mix artifacts`,
+  );
+
+  return [
+    { toolName: 'erlang', constraint: erlangVersion },
+    { toolName: 'elixir', constraint: elixirVersion },
+  ];
 }
 
 async function checkLockFileReadError(
