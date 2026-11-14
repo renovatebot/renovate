@@ -2583,6 +2583,7 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 
 If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
 Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+If more than one token matches for a read-only request, Renovate prefers the `readOnly` token and uses other matching rules as a fallback.
 
 This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
 
@@ -2598,7 +2599,27 @@ This option could be used to avoid rate limits for certain platforms like GitHub
 }
 ```
 
-If more than one token matches for a read-only request then the `readOnly` token will be given preference.
+This option is also useful to allow for differently scoped write and read tokens.
+This is particularly relevant for GitHub, which cannot issue a token with write access to some repositories and read access to others.
+You can scope `RENOVATE_TOKEN` to a single repository where Renovate opens pull requests, and then specify a read-only token with wider access for the purposes of dependency updates.
+Some managers use `github.com` and others `api.github.com`, so you will want to specify a host rule for both:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    },
+    {
+      "matchHost": "github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
 
 ### `hostRules.timeout`
 

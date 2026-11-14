@@ -693,8 +693,11 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
 }
 
 function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
-  const isScoped = !!hostType || !!readOnly;
-  if (isScoped && matchHost) {
+  if (readOnly && matchHost) {
+    return 4;
+  }
+
+  if (hostType && matchHost) {
     return 3;
   }
 
