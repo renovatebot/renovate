@@ -7,7 +7,7 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
-import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
+import { cacheTtlOverrideNamespaces } from '../../lib/util/cache/package/namespaces.ts';
 import {
   getSupportedToolNames,
   getToolConfig,
@@ -281,7 +281,9 @@ function createSingleConfig(
     temp.propertyNames = {
       anyOf: [
         {
-          enum: packageCacheNamespaces.filter((ns) => ns !== '_test-namespace'),
+          enum: cacheTtlOverrideNamespaces.filter(
+            (ns) => ns !== '_test-namespace',
+          ),
         },
         { type: 'string', pattern: patternMatchRegex },
       ],
