@@ -163,6 +163,7 @@ export class DebDatasource extends Datasource {
 
     const componentUrls = constructComponentUrls(registryUrl);
     let aggregatedRelease: ReleaseResult | null = null;
+    let componentError: Error | undefined;
 
     for (const componentUrl of componentUrls) {
       try {
@@ -185,11 +186,19 @@ export class DebDatasource extends Datasource {
           }
         }
       } catch (error) {
+        componentError = error;
         logger.debug(
           { componentUrl, err: error },
           'Skipping component due to an error',
         );
       }
+    }
+
+    // A component that could not be read may hold the package, so its absence
+    // is not a result. Throwing keeps `null` out of the package cache and lets
+    // `getReleases` fall back to the last good result.
+    if (aggregatedRelease === null && componentError) {
+      throw componentError;
     }
 
     return aggregatedRelease;

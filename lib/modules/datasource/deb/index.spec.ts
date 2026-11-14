@@ -248,6 +248,47 @@ describe('modules/datasource/deb/index', () => {
       });
     });
 
+    describe('when a component cannot be read', () => {
+      const registryUrl = getRegistryUrl(
+        debBaseUrl,
+        'stable',
+        ['non-free', 'non-free-second'],
+        'amd64',
+      );
+
+      beforeEach(() => {
+        mockHttpCalls(
+          'stable',
+          'non-free',
+          'amd64',
+          false,
+          fixturePackagesArchivePath,
+          fixturePackagesArchiveHash,
+        );
+        httpMock
+          .scope(debBaseUrl)
+          .get(getPackageUrl('', 'stable', 'non-free-second', 'amd64'))
+          .replyWithError('ECONNRESET');
+      });
+
+      it('throws instead of reporting a missing package', async () => {
+        await expect(
+          debDatasource.getReleases({
+            registryUrl,
+            packageName: 'you-will-never-find-me',
+          }),
+        ).rejects.toThrow('ECONNRESET');
+      });
+
+      it('returns the releases found in the components that could be read', async () => {
+        const res = await debDatasource.getReleases({
+          registryUrl,
+          packageName: 'album',
+        });
+        expect(res?.releases).toEqual([{ version: '4.15-1' }]);
+      });
+    });
+
     it('supports specifying a custom binary arch', async () => {
       httpMock
         .scope(debBaseUrl)
