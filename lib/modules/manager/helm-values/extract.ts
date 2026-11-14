@@ -21,7 +21,8 @@ function getHelmDep(
   tag: string,
   registryAliases: Record<string, string> | undefined,
 ): PackageDependency<never> {
-  const dep = getDep(`${registry}${repository}:${tag}`, {
+  const image = `${registry}${repository}:${tag}`;
+  const dep = getDep(image, {
     specifyReplaceString: false,
     registryAliases,
   });
@@ -29,6 +30,9 @@ function getHelmDep(
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
     '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+  if (image.includes('{{')) {
+    dep.skipReason = 'contains-variable';
+  }
   return dep;
 }
 
@@ -65,6 +69,11 @@ export function findDependenciesInternal<T = never>(
       );
     } else if (matchesHelmValuesInlineImage(key, value)) {
       const dep = getDep(value, { registryAliases });
+      // Helm template expressions, e.g. `{{ .Values.image.tag }}`, cannot be
+      // resolved from the values file alone
+      if (value.includes('{{')) {
+        dep.skipReason = 'contains-variable';
+      }
       // An inline reference without an embedded version can be completed by a
       // sibling `tag`/`version` key: `cli: { image: ..., tag: v1.0.0 }`
       if (!dep.currentValue && !dep.currentDigest) {
