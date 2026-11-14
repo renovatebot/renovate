@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { compile } from '../../../util/template/index.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -1054,6 +1055,91 @@ describe('modules/manager/github-actions/extract', () => {
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
       ).toHaveLength(3);
+    });
+
+    it('extracts Blacksmith ubuntu action runners', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: blacksmith-2vcpu-ubuntu-2204
+        test2:
+          runs-on: blacksmith-4vcpu-ubuntu-2404-arm
+        test3:
+          runs-on: blacksmith-8vcpu-ubuntu-2604
+      `;
+      const res = await extractPackageFile(
+        runnerTestWorkflowUbuntu,
+        'workflow.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04',
+          replaceString: 'blacksmith-2vcpu-ubuntu-2204',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            'blacksmith-2vcpu-ubuntu-{{replace "[.]" "" newValue}}',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '24.04-arm',
+          replaceString: 'blacksmith-4vcpu-ubuntu-2404-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            'blacksmith-4vcpu-ubuntu-{{replace "[.]" "" newValue}}',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '26.04',
+          replaceString: 'blacksmith-8vcpu-ubuntu-2604',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            'blacksmith-8vcpu-ubuntu-{{replace "[.]" "" newValue}}',
+        },
+      ]);
+    });
+
+    it.each`
+      runner                                | newValue       | expected
+      ${'blacksmith-2vcpu-ubuntu-2204'}     | ${'26.04'}     | ${'blacksmith-2vcpu-ubuntu-2604'}
+      ${'blacksmith-4vcpu-ubuntu-2404-arm'} | ${'26.04-arm'} | ${'blacksmith-4vcpu-ubuntu-2604-arm'}
+    `(
+      'renders the replacement for $runner',
+      async ({ runner, newValue, expected }) => {
+        const res = await extractPackageFile(
+          codeBlock`
+          jobs:
+            test:
+              runs-on: ${runner}
+        `,
+          'workflow.yml',
+        );
+        const dependency = res!.deps[0];
+
+        const replacement = compile(dependency.autoReplaceStringTemplate!, {
+          ...dependency,
+          newValue,
+        });
+
+        expect(replacement).toBe(expected);
+      },
+    );
+
+    it('ignores Blacksmith runners with unknown Ubuntu versions', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            test:
+              runs-on: blacksmith-2vcpu-ubuntu-9999
+        `,
+        'workflow.yml',
+      );
+
+      expect(res).toBeNull();
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
