@@ -663,6 +663,32 @@ describe('workers/repository/update/branch/get-updated', () => {
       );
     });
 
+    it('uses updated contents for lockFileMaintenance of an updated package file', async () => {
+      config.upgrades.push(
+        {
+          manager: 'npm',
+          packageFile: 'package.json',
+          branchName: '',
+        },
+        {
+          manager: 'npm',
+          updateType: 'lockFileMaintenance',
+          packageFile: 'package.json',
+          branchName: '',
+        } satisfies BranchUpgradeConfig,
+      );
+      npm.updateDependency.mockReturnValue('updated content');
+      npm.updateArtifacts.mockResolvedValue(null);
+      await getUpdatedPackageFiles(config);
+      expect(npm.updateArtifacts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          packageFileName: 'package.json',
+          newPackageFileContent: 'updated content',
+        }),
+      );
+      expect(git.getFile).toHaveBeenCalledTimes(1);
+    });
+
     it('for lockFileMaintenance passes proper lockFiles', async () => {
       config.upgrades.push({
         manager: 'composer',

@@ -54,6 +54,10 @@ ruleTester.run('prefer-resolve-tool-constraint', rule, {
       errors: [{ messageId: 'preferResolveToolConstraint' }],
     },
     {
+      code: `const node = config.sharedConstraints?.node;`,
+      errors: [{ messageId: 'preferResolveToolConstraint' }],
+    },
+    {
       code: `const bun = updateArtifact.config.constraints?.bun;`,
       errors: [{ messageId: 'preferResolveToolConstraint' }],
     },

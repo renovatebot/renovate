@@ -123,9 +123,10 @@ function extractRepositoryAction(
   // Extend replaceString to include relevant comment portions:
   // - Pinned version or ref: include only up to the matched token (truncate trailing text)
   // - Ratchet exclude: include the full comment to preserve the marker
-  const pinComment =
-    commentData.pinnedVersion ??
-    (isSha(ref) || isShortSha(ref) ? commentData.ref : undefined);
+  let pinComment = commentData.pinnedVersion;
+  if (isSha(ref) || isShortSha(ref)) {
+    pinComment ??= commentData.ref;
+  }
   if (
     pinComment &&
     !is.undefined(commentData.index) &&

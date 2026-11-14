@@ -6,6 +6,7 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotAcceptable } from '../../../util/http/status.ts';
 import type {
   HttpResponse,
   OutgoingHttpHeaders,
@@ -30,6 +31,28 @@ import { findPypiIndexCredentials } from './host-rules.ts';
 import type { PypiRelease } from './schema.ts';
 import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
+
+function isSourceLabel(lower: string, projectUrl: string): boolean {
+  return (
+    lower.startsWith('repo') ||
+    lower === 'code' ||
+    lower === 'source' ||
+    isGitHubRepo(projectUrl)
+  );
+}
+
+function isChangelogLabel(lower: string): boolean {
+  return (
+    [
+      'changelog',
+      'change log',
+      'changes',
+      'release notes',
+      'news',
+      "what's new",
+    ].includes(lower) || !!changelogFilenameRegex.exec(lower)
+  );
+}
 
 export class PypiDatasource extends Datasource {
   static readonly id = pypiDatasourceId;
@@ -179,26 +202,12 @@ export class PypiDatasource extends Datasource {
         if (
           projectUrl &&
           !dependency.sourceUrl &&
-          (lower.startsWith('repo') ||
-            lower === 'code' ||
-            lower === 'source' ||
-            isGitHubRepo(projectUrl))
+          isSourceLabel(lower, projectUrl)
         ) {
           dependency.sourceUrl = projectUrl;
         }
 
-        if (
-          !dependency.changelogUrl &&
-          ([
-            'changelog',
-            'change log',
-            'changes',
-            'release notes',
-            'news',
-            "what's new",
-          ].includes(lower) ||
-            changelogFilenameRegex.exec(lower))
-        ) {
+        if (!dependency.changelogUrl && isChangelogLabel(lower)) {
           // from https://github.com/pypa/warehouse/blob/418c7511dc367fb410c71be139545d0134ccb0df/warehouse/templates/packaging/detail.html#L24
           dependency.changelogUrl = projectUrl;
         }
@@ -218,7 +227,10 @@ export class PypiDatasource extends Datasource {
     for (const { upload_time } of releases) {
       const timestamp = asTimestamp(upload_time);
       // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings compares the instants
-      if (timestamp && (!earliest || timestamp < earliest)) {
+      if (!timestamp) {
+        continue;
+      }
+      if (!earliest || timestamp < earliest) {
         earliest = timestamp;
       }
     }
@@ -362,8 +374,8 @@ export class PypiDatasource extends Datasource {
         httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
       // A registry which cannot serve any of the negotiated types may pick a content type of its own, answer `406`, or answer `300`; the spec mandates none of them, but `406` is the common choice.
       // https://packaging.python.org/en/latest/specifications/simple-repository-api/#version-format-selection
-      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behaviour of a plain request.
-      if (statusCode !== 406) {
+      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behavior of a plain request.
+      if (!isNotAcceptable(statusCode)) {
         throw err;
       }
 

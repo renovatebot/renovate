@@ -8,6 +8,13 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import {
+  isBadRequest,
+  isNotFound,
+  isRateLimited,
+  isServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { hasKey } from '../../../util/object.ts';
 import { type AsyncResult, Result } from '../../../util/result.ts';
@@ -145,7 +152,7 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 401) {
+      if (isUnauthorized(err)) {
         logger.debug(
           { registryHost, dockerRepository },
           'Unauthorized docker lookup',
@@ -153,7 +160,7 @@ export class DockerDatasource extends Datasource {
         logger.debug({ err });
         return null;
       }
-      if (err.statusCode === 404) {
+      if (isNotFound(err)) {
         logger.debug(
           {
             err,
@@ -165,10 +172,10 @@ export class DockerDatasource extends Datasource {
         );
         return null;
       }
-      if (err.statusCode === 429 && isDockerHost(registryHost)) {
+      if (isRateLimited(err) && isDockerHost(registryHost)) {
         throw new ExternalHostError(err);
       }
-      if (err.statusCode >= 500 && err.statusCode < 600) {
+      if (isServerError(err)) {
         throw new ExternalHostError(err);
       }
       if (err.code === 'ETIMEDOUT') {
@@ -416,11 +423,7 @@ export class DockerDatasource extends Datasource {
             : /* istanbul ignore next: can never happen */ _err;
 
         // v8 ignore else -- needs a non-5xx failure from the manifest request
-        if (
-          typeof err.statusCode === 'number' &&
-          err.statusCode >= 500 &&
-          err.statusCode < 600
-        ) {
+        if (isServerError(err)) {
           // querying the digest manifest for a non existent image leads to a 500 statusCode
           return null;
         }
@@ -457,8 +460,7 @@ export class DockerDatasource extends Datasource {
       // v8 ignore else -- needs a config blob with neither key
       if (
         configResponse &&
-        ('config' in configResponse.body ||
-          'architecture' in configResponse.body)
+        ['config', 'architecture'].some((key) => key in configResponse.body)
       ) {
         const architecture = configResponse.body.architecture ?? null;
         logger.debug(
@@ -470,7 +472,7 @@ export class DockerDatasource extends Datasource {
         return architecture;
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.statusCode !== 404 || err.message === PAGE_NOT_FOUND_ERROR) {
+      if (!isNotFound(err) || err.message === PAGE_NOT_FOUND_ERROR) {
         throw err;
       }
       logger.debug(
@@ -649,12 +651,12 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 400 || err.statusCode === 401) {
+      if (isBadRequest(err) || isUnauthorized(err)) {
         logger.debug(
           { registryHost, dockerRepository, err },
           'Unauthorized docker lookup',
         );
-      } else if (err.statusCode === 404) {
+      } else if (isNotFound(err)) {
         logger.warn(
           {
             err,
@@ -664,9 +666,9 @@ export class DockerDatasource extends Datasource {
           },
           'Config Manifest is unknown',
         );
-      } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
+      } else if (isRateLimited(err) && isDockerHost(registryHost)) {
         logger.warn({ err }, 'docker registry failure: too many requests');
-      } else if (err.statusCode >= 500 && err.statusCode < 600) {
+      } else if (isServerError(err)) {
         logger.debug(
           {
             err,
@@ -855,7 +857,7 @@ export class DockerDatasource extends Datasource {
           tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
         } catch (err) {
           // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
-          if (err.statusCode === 401) {
+          if (isUnauthorized(err)) {
             logger.debug(
               { registryHost, dockerRepository },
               'Quay v1 API unauthorized, falling back to Docker v2 API',
@@ -872,10 +874,9 @@ export class DockerDatasource extends Datasource {
     } catch (_err) /* istanbul ignore next */ {
       const err = _err instanceof ExternalHostError ? _err.err : _err;
 
-      if (
-        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        !dockerRepository.includes('/')
-      ) {
+      const notFound = isNotFound(err) || err.message === PAGE_NOT_FOUND_ERROR;
+
+      if (notFound && !dockerRepository.includes('/')) {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
@@ -884,7 +885,7 @@ export class DockerDatasource extends Datasource {
       // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
-        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        notFound &&
         isArtifactoryServer(err.response) &&
         dockerRepository.split('/').length === 2
       ) {
@@ -901,14 +902,14 @@ export class DockerDatasource extends Datasource {
           `${jfrogRepository}/library/${dockerImage}`,
         );
       }
-      if (err.statusCode === 429 && isDockerHost(registryHost)) {
+      if (isRateLimited(err) && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: too many requests',
         );
         throw new ExternalHostError(err);
       }
-      if (err.statusCode >= 500 && err.statusCode < 600) {
+      if (isServerError(err)) {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: internal error',
@@ -1014,11 +1015,10 @@ export class DockerDatasource extends Datasource {
         }
       }
 
-      if (
-        isNonEmptyString(architecture) ||
-        (manifestResponse &&
-          !hasKey('docker-content-digest', manifestResponse.headers))
-      ) {
+      const lacksContentDigest =
+        manifestResponse &&
+        !hasKey('docker-content-digest', manifestResponse.headers);
+      if (isNonEmptyString(architecture) || lacksContentDigest) {
         // Reuse the per-arch digest cached from the Docker Hub tag API
         if (isNonEmptyString(architecture) && registryHost === DOCKER_HUB) {
           const cache = await DockerHubCache.init(dockerRepository);

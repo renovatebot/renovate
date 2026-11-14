@@ -10,6 +10,7 @@ import type {
 import { withCache } from '../../util/cache/package/with-cache.ts';
 import type { HttpBase } from '../../util/http/http.ts';
 import { Http, HttpError } from '../../util/http/index.ts';
+import { isRateLimitedOrServerError } from '../../util/http/status.ts';
 import type { HttpOptions } from '../../util/http/types.ts';
 import { coerceObject } from '../../util/object.ts';
 import type {
@@ -27,7 +28,7 @@ import type {
 /**
  * The options accepted by the JSON methods of the http client `H`:
  * `HttpOptions` for the plain client, and the client's own options type for a
- * specialised one such as `GithubHttp`.
+ * specialized one such as `GithubHttp`.
  */
 type JsonOptions<H extends Http> =
   H extends HttpBase<infer Opts, any> ? Opts : HttpOptions;
@@ -45,7 +46,7 @@ export abstract class Datasource<
   protected readonly cacheNamespace: PackageCacheNamespace;
 
   /**
-   * A subclass that narrows `H` to a specialised client (`GithubHttp`,
+   * A subclass that narrows `H` to a specialized client (`GithubHttp`,
    * `GitlabHttp`, ...) must construct that client itself and pass it as
    * `http`, since this constructor can only build the plain `Http` default.
    */
@@ -177,11 +178,7 @@ export abstract class Datasource<
     if (err instanceof HttpError) {
       this.handleHttpErrors(err);
 
-      const statusCode = err.response?.statusCode;
-      if (
-        statusCode &&
-        (statusCode === 429 || (statusCode >= 500 && statusCode < 600))
-      ) {
+      if (isRateLimitedOrServerError(err)) {
         throw new ExternalHostError(err);
       }
     }

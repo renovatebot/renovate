@@ -36,7 +36,10 @@ async function pathExists(path: string): Promise<boolean> {
 
 // Only provision a checkout that isn't installed yet (e.g. a fresh worktree).
 // No-op in the already-installed main checkout and on ordinary cd.
-if (!root || (await pathExists(join(root, 'node_modules')))) {
+if (!root) {
+  process.exit(0);
+}
+if (await pathExists(join(root, 'node_modules'))) {
   process.exit(0);
 }
 

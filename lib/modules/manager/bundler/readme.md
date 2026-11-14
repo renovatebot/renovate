@@ -39,4 +39,4 @@ Important notes:
 To avoid committing raw secrets to your repository, either:
 
 - If self-hosting: add the `hostRules` to your self-hosted config file, instead of the repository configuration file, or
-- If using the Mend Renovate App: use the [`encrypted`](../../../configuration-options.md#encrypted) config option
+- If using the Mend Renovate app: use the [`encrypted`](../../../configuration-options.md#encrypted) config option

@@ -27,17 +27,18 @@ describe('modules/manager/cargo/locked-version', () => {
 
     it('returns empty map for lock file without packages', async () => {
       mockReadLocalFile({ 'Cargo.lock': '[metadata]' });
-      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual(
-        new Map(),
-      );
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual({
+        versionsByPackage: new Map(),
+        hasGitSources: false,
+      });
     });
 
     it('returns a map of package versions', async () => {
       mockReadLocalFile({
         'Cargo.lock': Fixtures.get('lockfile-update/Cargo.1.lock'),
       });
-      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual(
-        new Map([
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual({
+        versionsByPackage: new Map([
           ['proc-macro2', ['1.0.66']],
           ['quote', ['1.0.33']],
           ['syn', ['1.0.1', '2.0.1']],
@@ -45,7 +46,18 @@ describe('modules/manager/cargo/locked-version', () => {
           ['unicode-ident', ['1.0.11']],
           ['unicode-xid', ['0.2.4']],
         ]),
-      );
+        hasGitSources: false,
+      });
+    });
+
+    it('detects packages from git repositories', async () => {
+      mockReadLocalFile({
+        'Cargo.lock': Fixtures.get('lockfile-update/Cargo.3.lock'),
+      });
+
+      const res = await extractLockFileVersions('Cargo.lock');
+
+      expect(res?.hasGitSources).toBeTrue();
     });
   });
 

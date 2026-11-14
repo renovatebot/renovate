@@ -75,7 +75,10 @@ export async function withCache<T>(
   const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
 
   function canUseCache(): boolean {
-    return ctx.cacheable && (ctx.public || cachePrivatePackages);
+    if (!ctx.cacheable) {
+      return false;
+    }
+    return ctx.public || cachePrivatePackages;
   }
 
   if (!canUseCache()) {

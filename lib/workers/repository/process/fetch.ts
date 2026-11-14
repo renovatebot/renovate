@@ -172,9 +172,12 @@ async function lookup(
         );
       })
       .catch((err): Result<UpdateResult> => {
+        if (!(err instanceof ExternalHostError)) {
+          return Result.err(err);
+        }
         if (
-          packageFileConfig.repoIsOnboarded === true ||
-          !(err instanceof ExternalHostError)
+          packageFileConfig.repoIsOnboarded === true &&
+          !err.onlyThisDependencyAffected
         ) {
           return Result.err(err);
         }
@@ -182,6 +185,7 @@ async function lookup(
         const cause = err.err;
         return Result.ok({
           updates: [],
+          ...(err.onlyThisDependencyAffected && { lookupFailed: true }),
           warnings: [
             {
               topic: 'Lookup Error',

@@ -2,6 +2,7 @@ import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../../logger/index.ts';
 import { Lazy } from '../../../../util/lazy.ts';
+import type { Upgrade } from '../../types.ts';
 import type { PackageJson } from '../schema.ts';
 import { loadPackageJson } from '../utils.ts';
 
@@ -57,4 +58,13 @@ export function getPackageManagerVersion(
 
 export function getNodeOptions(nodeMaxMemory: number): string {
   return `--max-old-space-size=${nodeMaxMemory}`;
+}
+
+/**
+ * Returns the name of the npm package whose `newVersion` the package manager installs for `upgrade`.
+ */
+export function getInstalledPackageName(upgrade: Upgrade): string | undefined {
+  // a replacement installs `newName`, and the packageName of an alias or of
+  // an override with a selector is the installed package
+  return upgrade.newName ?? upgrade.packageName ?? upgrade.depName;
 }

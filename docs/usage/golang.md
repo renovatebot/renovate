@@ -7,7 +7,7 @@ description: Go modules support in Renovate
 
 Renovate supports upgrading dependencies in `go.mod` files and associated `go.sum` checksums.
 
-If you're self-hosting Renovate, you may use these environment variables:
+If you are self-hosting Renovate, you may use these environment variables:
 
 - `GOPROXY`
 - `GONOPROXY`
@@ -32,7 +32,7 @@ To learn what these variables do, read the [Go Modules Reference about the`GOPRO
 ## Enabling Go Modules Updating
 
 Renovate updates Go Modules by default.
-To install Renovate itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+To install Renovate itself, either enable the [Mend Renovate app](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
 
@@ -189,12 +189,12 @@ module.exports = {
 
 ### Deriving Go environment variables from host rules
 
-If you're self-hosting Renovate, you can set [`goEnvFromHostRules`](./self-hosted-configuration.md#goenvfromhostrules) to `true` to have Renovate derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from your host rules.
-Renovate uses the derived values to look up modules and to run `go`, so you don't have to configure the same hosts twice.
+If you are self-hosting Renovate, you can set [`goEnvFromHostRules`](./self-hosted-configuration.md#goenvfromhostrules) to `true` to have Renovate derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from your host rules.
+Renovate uses the derived values to look up modules and to run `go`, so you do not have to configure the same hosts twice.
 
 - `GOPROXY`: one URL for each host rule with `hostType` set to `go-proxy`, followed by `https://proxy.golang.org,direct`.
   When Renovate runs `go`, the rule's `username` and `password` are added to the URL.
-  Rules with only a `token` are skipped, because `go` can't send a token from a `GOPROXY` URL. Use `username` and `password` instead.
+  Rules with only a `token` are skipped, because `go` cannot send a token from a `GOPROXY` URL. Use `username` and `password` instead.
   For a Buf Schema Registry, set `username` to your BSR username and `password` to your BSR token.
 - `GONOPROXY`: each host rule with `hostType` set to `go` whose `matchHost` includes a path, for example `https://github.com/my-org` becomes `github.com/my-org`.
   Rules for a host without a path are skipped, so public modules on that host still use the proxy.

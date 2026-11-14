@@ -29,10 +29,9 @@ function toUrl(matchHost: string | undefined): URL | null {
  * `go` only sends basic auth from a `GOPROXY` URL, and fails without falling back on a 401/403, so a token-only rule can't be used.
  */
 function canAuthenticateGo(rule: HostRule): boolean {
-  if (
-    !isNonEmptyString(rule.token) ||
-    (isNonEmptyString(rule.username) && isNonEmptyString(rule.password))
-  ) {
+  const hasBasicAuth =
+    isNonEmptyString(rule.username) && isNonEmptyString(rule.password);
+  if (!isNonEmptyString(rule.token) || hasBasicAuth) {
     return true;
   }
   logger.once.warn(
@@ -119,9 +118,9 @@ export function getGoEnv(withCredentials = false): GoEnv {
 
   if (GOPRIVATE !== undefined) {
     // `GONOSUMDB` replaces `GOPRIVATE` for the checksum database, so it has to keep the `GOPRIVATE` patterns
-    env.GONOSUMDB ??= proxyHosts.some(isNonEmptyString)
-      ? joinNonEmpty([GOPRIVATE, ...proxyHosts])
-      : undefined;
+    if (proxyHosts.some(isNonEmptyString)) {
+      env.GONOSUMDB ??= joinNonEmpty([GOPRIVATE, ...proxyHosts]);
+    }
     return env;
   }
 

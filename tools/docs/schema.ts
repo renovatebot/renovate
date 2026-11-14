@@ -87,6 +87,11 @@ export function getOptionDocsUrl(
 }
 
 /**
+ * A negation, regex or glob, as accepted by `patternMatch` options.
+ */
+const patternMatchRegex = String.raw`^!|^/.*/i?$|[*?[\]{}()]`;
+
+/**
  * Suggests values in an editor, while still accepting anything else matching `items`.
  */
 function suggestValues(
@@ -118,7 +123,13 @@ function createSingleConfig(
         temp.items.format = option.format;
       }
       if (option.allowedValues) {
-        if (option.allowString) {
+        if (option.patternMatch) {
+          /* anything other than an allowed value needs to be a pattern, which may match one */
+          temp.items.anyOf = [
+            { enum: option.allowedValues },
+            { type: 'string', pattern: patternMatchRegex },
+          ];
+        } else if (option.allowString) {
           temp.items.anyOf = [
             { enum: option.allowedValues },
             { type: 'string' },
@@ -182,8 +193,9 @@ function createSingleConfig(
   if (option.default === null || option.nullable) {
     temp.type = [option.type, 'null'];
   }
+  const isObjectType = temp.type === 'object' || temp.type?.includes('object');
   if (
-    (temp.type === 'object' || temp.type?.includes('object')) &&
+    isObjectType &&
     !option.freeChoice &&
     /* an option which describes the shape of its own values, like a map of strings, doesn't nest a Renovate config */
     temp.additionalProperties === undefined
@@ -241,7 +253,7 @@ function createSingleConfig(
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritize contraint definitions, as they're more useful than the generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -257,7 +269,7 @@ function createSingleConfig(
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritize contraint definitions, as they're more useful than the generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -310,7 +322,8 @@ function getChildrenSchema(
   definition: Record<string, any>,
 ): Record<string, any> {
   const type: JsonSchemaType | undefined = definition.type;
-  if (type === 'array' || (Array.isArray(type) && type.includes('array'))) {
+  const isArrayInUnion = Array.isArray(type) && type.includes('array');
+  if (type === 'array' || isArrayInUnion) {
     definition.items ??= {};
     return definition.items;
   }

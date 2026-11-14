@@ -55,6 +55,10 @@ const INLINE_SNAPSHOT_MATCHERS = new Set([
  * CallExpression.callee and MemberExpression.object chains, so that
  * `it.each(cases)(title, fn)` resolves to `it`.
  */
+function isTitleFunction(callee: ESTree.Expression): boolean {
+  return TITLE_FUNCTIONS.has(getLeftmostIdentifier(callee) ?? '');
+}
+
 function getLeftmostIdentifier(node: ESTree.Expression): string | null {
   if (node.type === 'Identifier') {
     return node.name;
@@ -103,10 +107,7 @@ export default defineRule({
         }
         if (parent.type === 'CallExpression') {
           // describe/it/test titles
-          if (
-            parent.arguments[0] === node &&
-            TITLE_FUNCTIONS.has(getLeftmostIdentifier(parent.callee) ?? '')
-          ) {
+          if (parent.arguments[0] === node && isTitleFunction(parent.callee)) {
             return;
           }
           // inline snapshots are managed by vitest

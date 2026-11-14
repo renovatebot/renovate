@@ -44,10 +44,29 @@ $ npx --yes --package renovate -- renovate-config-validator --strict
        },
 ```
 
+### Apply config migrations
+
+You can pass the `--migrate` flag to make the validator write any needed [config migration](./config-migration.md) back to the config file(s):
+
+```console title="Apply config migrations"
+$ npx --yes --package renovate -- renovate-config-validator --migrate
+ INFO: Validating renovate.json
+ WARN: Config migration necessary
+ ...
+ INFO: Applied config migration to renovate.json
+ INFO: Config validated successfully against 1 file(s)
+```
+
+The validator can only migrate JSON, JSONC and JSON5 config files, including `.renovaterc`.
+It keeps comments in JSON and JSONC files, but loses comments in JSON5 files.
+It does not change JavaScript, TypeScript or YAML config files, or the `renovate` config in a `package.json`.
+
+If you pass both `--strict` and `--migrate`, then a migration that the validator applies does not make the command fail.
+
 ### Pass file to check as CLI arguments
 
 You can pass the file you want to check to the `renovate-config-validator` program with a CLI argument.
-This can be handy to check a config file with a non-default name, like when you're using preset repositories.
+This can be handy to check a config file with a non-default name, like when you are using preset repositories.
 For example:
 
 ```console
@@ -58,7 +77,7 @@ $ npx --yes --package renovate -- renovate-config-validator first_config.json
 
 !!! note
   If you specify the filename, `renovate-config-validator` treats the file(s) as global self-hosted configuration instead of repo-level configuration.
-  If this isn't intentional - for instance if you're validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
+  If this is not intentional - for instance if you are validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
 
 ### Providing global configuration
 
@@ -94,13 +113,13 @@ Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovat
 ### Validation of Renovate config change PRs
 
 !!! tip
-  Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback (via status check), and if there's a PR, Renovate will add comments to it!
+  Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback (via status check), and if there is a PR, Renovate will add comments to it!
 
 Renovate can validate configuration changes in Pull Requests when you use a special branch name.
 
 Follow these steps to validate your configuration:
 
-1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern. For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`.
+1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern. For example, if you are using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`.
 1. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
 
 The next time Renovate runs on that repo it will:
@@ -108,7 +127,7 @@ The next time Renovate runs on that repo it will:
 1. Search for a branch that matches the special reconfigure pattern.
 1. Check for a config file in the reconfigure branch. Renovate can even find a renamed configuration file (compared to the config file in the default branch).
 1. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
-1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
+1. If there is an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
 1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
 
 !!! note

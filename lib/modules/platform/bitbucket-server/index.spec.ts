@@ -2202,6 +2202,42 @@ describe('modules/platform/bitbucket-server/index', () => {
         await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr);
       });
 
+      it('returns null and drops a deleted PR from the cache', async () => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [prMock(url, 'SOME', 'repo')],
+          })
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(404)
+          // deleted PRs no longer appear in the PR list
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
+          )
+          .reply(200, { isLastPage: true, values: [] });
+
+        await expect(bitbucket.getPrList()).resolves.toHaveLength(1);
+        await expect(bitbucket.getPr(5, true)).resolves.toBeNull();
+        await expect(bitbucket.getPrList()).resolves.toBeEmptyArray();
+      });
+
+      it('throws on non-404 errors', async () => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(500);
+
+        await expect(bitbucket.getPr(5)).rejects.toThrow('status code 500');
+      });
+
       it('gets a closed PR', async () => {
         const scope = await initRepo();
         scope

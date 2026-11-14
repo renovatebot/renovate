@@ -13,6 +13,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -61,6 +62,7 @@ describe('modules/manager/bundler/artifacts', () => {
 
     afterEach(() => {
       GlobalConfig.reset();
+      memCache.reset();
     });
 
     it('returns null by default', async () => {
@@ -736,6 +738,23 @@ describe('modules/manager/bundler/artifacts', () => {
             },
           }),
         ).rejects.toThrow(BUNDLER_INVALID_CREDENTIALS);
+      });
+
+      it('aborts without running Bundler after a cached authentication error', async () => {
+        memCache.init();
+        memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
+        const execSnapshots = mockExecAll();
+
+        const res = updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        await expect(res).rejects.toThrow(BUNDLER_INVALID_CREDENTIALS);
+        expect(execSnapshots).toBeEmptyArray();
+        expect(fs.readLocalFile).not.toHaveBeenCalled();
       });
 
       it('handles recursive resolved dependencies', async () => {

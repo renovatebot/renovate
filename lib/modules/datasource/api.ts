@@ -56,6 +56,7 @@ import { HexpmBobDatasource } from './hexpm-bob/index.ts';
 import { JavaVersionDatasource } from './java-version/index.ts';
 import { JenkinsPluginsDatasource } from './jenkins-plugins/index.ts';
 import { JsrDatasource } from './jsr/index.ts';
+import { JuliaGeneralMetadataDatasource } from './julia-general-metadata/index.ts';
 import { KubernetesApiDatasource } from './kubernetes-api/index.ts';
 import { MavenDatasource } from './maven/index.ts';
 import { NextcloudDatasource } from './nextcloud/index.ts';
@@ -75,6 +76,7 @@ import { RubygemsDatasource } from './rubygems/index.ts';
 import { RustVersionDatasource } from './rust-version/index.ts';
 import { SbtPackageDatasource } from './sbt-package/index.ts';
 import { SbtPluginDatasource } from './sbt-plugin/index.ts';
+import { SwiftPackageRegistryDatasource } from './swift-package-registry/index.ts';
 import { TerraformModuleDatasource } from './terraform-module/index.ts';
 import { TerraformProviderDatasource } from './terraform-provider/index.ts';
 import type { DatasourceApi } from './types.ts';
@@ -146,6 +148,10 @@ api.set(HexpmBobDatasource.id, new HexpmBobDatasource());
 api.set(JavaVersionDatasource.id, new JavaVersionDatasource());
 api.set(JenkinsPluginsDatasource.id, new JenkinsPluginsDatasource());
 api.set(JsrDatasource.id, new JsrDatasource());
+api.set(
+  JuliaGeneralMetadataDatasource.id,
+  new JuliaGeneralMetadataDatasource(),
+);
 api.set(KubernetesApiDatasource.id, new KubernetesApiDatasource());
 api.set(MavenDatasource.id, new MavenDatasource());
 api.set(NextcloudDatasource.id, new NextcloudDatasource());
@@ -165,6 +171,10 @@ api.set(RubygemsDatasource.id, new RubygemsDatasource());
 api.set(RustVersionDatasource.id, new RustVersionDatasource());
 api.set(SbtPackageDatasource.id, new SbtPackageDatasource());
 api.set(SbtPluginDatasource.id, new SbtPluginDatasource());
+api.set(
+  SwiftPackageRegistryDatasource.id,
+  new SwiftPackageRegistryDatasource(),
+);
 api.set(TerraformModuleDatasource.id, new TerraformModuleDatasource());
 api.set(TerraformProviderDatasource.id, new TerraformProviderDatasource());
 api.set(TypstDatasource.id, new TypstDatasource());

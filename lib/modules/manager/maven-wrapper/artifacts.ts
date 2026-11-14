@@ -253,6 +253,7 @@ export async function updateArtifacts({
     );
     const hadWrapperChecksum =
       newPackageFileContent.includes('wrapperSha256Sum=');
+    const hadAnyChecksum = hadWrapperChecksum || hadDistributionChecksum;
     const originalDistributionType = getDistributionType(newPackageFileContent);
 
     // Skip if no relevant updates
@@ -279,7 +280,7 @@ export async function updateArtifacts({
 
     // Delete old maven-wrapper.jar if checksums exist and wrapper:wrapper will run
     // This prevents checksum validation failure when wrapper:wrapper runs
-    if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
+    if (hasWrapperUpdate && hadAnyChecksum) {
       const jarPath = packageFileName.replace(
         'maven-wrapper.properties',
         'maven-wrapper.jar',
@@ -297,7 +298,7 @@ export async function updateArtifacts({
     // Strip checksum lines before running wrapper:wrapper to avoid validation failure
     // (mvnw would try to validate NEW jar against OLD checksum)
     let contentToWrite = newPackageFileContent;
-    if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
+    if (hasWrapperUpdate && hadAnyChecksum) {
       contentToWrite = contentToWrite
         .replace(regEx(/^distributionSha256Sum=.*\n?/m), '')
         .replace(regEx(/^wrapperSha256Sum=.*\n?/m), '');

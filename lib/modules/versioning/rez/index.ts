@@ -114,11 +114,13 @@ function minSatisfyingVersion(
 }
 
 function isSingleVersion(constraint: string): boolean {
-  return (
-    (constraint.trim().startsWith('==') &&
-      isVersion(constraint.trim().substring(2).trim())) ||
-    isVersion(constraint.trim())
-  );
+  if (
+    constraint.trim().startsWith('==') &&
+    isVersion(constraint.trim().substring(2).trim())
+  ) {
+    return true;
+  }
+  return isVersion(constraint.trim());
 }
 
 function sortVersions(a: string, b: string): number {
@@ -141,7 +143,12 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
+  isReplacement,
 }: NewValueConfig): string | null {
+  if (isReplacement) {
+    return newVersion;
+  }
+
   const precisionMatchedVersion = matchVersionPrecision(
     currentValue,
     newVersion,

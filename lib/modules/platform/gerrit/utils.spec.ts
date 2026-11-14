@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { hostRules } from '~test/host-rules.ts';
 import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
@@ -173,6 +174,25 @@ describe('modules/platform/gerrit/utils', () => {
     );
   });
 
+  describe('prStateMatchesFilter()', () => {
+    it.each([
+      ['open', undefined, true],
+      ['open', 'all', true],
+      ['closed', 'all', true],
+      ['closed', '!open', true],
+      ['merged', '!open', true],
+      ['open', '!open', false],
+      ['open', 'open', true],
+      ['closed', 'open', false],
+      ['open', 'closed', false],
+    ])(
+      'prStateMatchesFilter(%p, %p) -> %p',
+      (prState: string, findState: any, expected: boolean) => {
+        expect(utils.prStateMatchesFilter(prState, findState)).toBe(expected);
+      },
+    );
+  });
+
   describe('mapGerritChangeStateToPrState()', () => {
     it.each([
       ['NEW', 'open'],
@@ -194,6 +214,7 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
         hashtags: ['hashtag1', 'hashtag2'],
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
@@ -228,6 +249,7 @@ describe('modules/platform/gerrit/utils', () => {
         state: 'open',
         title: 'Fix for',
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         labels: ['hashtag1', 'hashtag2'],
@@ -254,6 +276,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:35:00.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
@@ -266,6 +289,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody(''),
         },
+        updatedAt: '2025-04-14T16:35:00.000000000',
         createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
@@ -302,6 +326,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -319,6 +344,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody(''),
         },
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
       });
     });
 
@@ -336,6 +362,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -353,6 +380,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody('PR Body'),
         },
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
       });
     });
   });
@@ -476,6 +504,24 @@ describe('modules/platform/gerrit/utils', () => {
       expect(
         utils.convertGerritDateToISO('2023-05-20 14:25:30.123456789'),
       ).toBe('2023-05-20T14:25:30.123456789');
+    });
+  });
+
+  describe('currentGerritTimestamp()', () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+      const t0 = DateTime.fromISO('2025-06-15T09:30:45.123Z', { zone: 'utc' });
+      vi.setSystemTime(t0.toMillis());
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('formats the current time like a Gerrit timestamp', () => {
+      expect(utils.currentGerritTimestamp()).toBe(
+        '2025-06-15 09:30:45.123000000',
+      );
     });
   });
 });
