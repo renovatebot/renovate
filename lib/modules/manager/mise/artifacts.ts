@@ -126,6 +126,14 @@ async function getMiseLockToolConstraints(
       toolName: 'ruby',
       constraint: await resolveToolConstraint(config, 'ruby'),
     },
+    {
+      toolName: 'python',
+      constraint: await resolveToolConstraint(config, 'python'),
+    },
+    {
+      toolName: 'uv',
+      constraint: await resolveToolConstraint(config, 'uv'),
+    },
   ];
 }
 
