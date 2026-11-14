@@ -265,4 +265,68 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       createdAt: isoTs('2022-10-30 12:00'),
     });
   });
+
+  it('merges items without removing unseen ones', async () => {
+    const items = {
+      '1': { version: '1', releaseTimestamp: isoTs('2022-10-01 10:00') },
+      '2': { version: '2', releaseTimestamp: isoTs('2022-10-02 10:00') },
+    };
+    const cacheRecord: CacheRecord = {
+      items,
+      createdAt: isoTs('2022-10-30 12:00'),
+    };
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
+
+    const now = '2022-10-31 15:30';
+    mockTime(now);
+
+    const newItem = {
+      version: '3',
+      releaseTimestamp: isoTs('2022-10-31 15:00'),
+    };
+
+    const strategy = new GithubGraphqlMemoryCacheStrategy(
+      '_test-namespace',
+      'bar',
+    );
+    await strategy.merge([newItem, items['2']]);
+    const res = await strategy.finalizeAndReturn();
+
+    expect(res).toEqual([items['1'], items['2'], newItem]);
+    expect(memCache.get('github-graphql-cache:_test-namespace:bar')).toEqual({
+      items: { ...items, '3': newItem },
+      createdAt: isoTs('2022-10-30 12:00'),
+    });
+  });
+
+  it('does not store merged items without changes', async () => {
+    const items = {
+      '1': { version: '1', releaseTimestamp: isoTs('2022-10-01 10:00') },
+    };
+    const cacheRecord: CacheRecord = {
+      items,
+      createdAt: isoTs('2022-10-30 12:00'),
+    };
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
+    const setSpy = vi.spyOn(memCache, 'set');
+
+    const now = '2022-10-31 15:30';
+    mockTime(now);
+
+    const strategy = new GithubGraphqlMemoryCacheStrategy(
+      '_test-namespace',
+      'bar',
+    );
+    await strategy.merge([items['1']]);
+    const res = await strategy.finalizeAndReturn();
+
+    expect(res).toEqual([items['1']]);
+    expect(setSpy).not.toHaveBeenCalled();
+  });
 });

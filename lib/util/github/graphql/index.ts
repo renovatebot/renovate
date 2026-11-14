@@ -5,6 +5,7 @@ import { adapter as releasesAdapter } from './query-adapters/releases-query-adap
 import { adapter as tagsAdapter } from './query-adapters/tags-query-adapter.ts';
 import type {
   GithubBranchItem,
+  GithubGraphqlQueryOptions,
   GithubPackageConfig,
   GithubReleaseItem,
   GithubTagItem,
@@ -13,11 +14,13 @@ import type {
 export async function queryTags(
   config: GithubPackageConfig,
   http: GithubHttp,
+  options?: GithubGraphqlQueryOptions,
 ): Promise<GithubTagItem[]> {
   const res = await GithubGraphqlDatasourceFetcher.query(
     config,
     http,
     tagsAdapter,
+    options,
   );
   return res;
 }
@@ -25,11 +28,13 @@ export async function queryTags(
 export async function queryReleases(
   config: GithubPackageConfig,
   http: GithubHttp,
+  options?: GithubGraphqlQueryOptions,
 ): Promise<GithubReleaseItem[]> {
   const res = await GithubGraphqlDatasourceFetcher.query(
     config,
     http,
     releasesAdapter,
+    options,
   );
   return res;
 }

@@ -1,7 +1,30 @@
+import { isDate } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import _slugify from 'slugify';
 import { regEx } from '../../../../../util/regex.ts';
 
 const slugify = _slugify;
+
+/**
+ * Age in hours below which a release counts as fresh.
+ */
+const freshReleaseHours = 1;
+
+/**
+ * Whether the release was published less than `freshReleaseHours` ago.
+ */
+export function isFreshRelease(releaseDate?: string | Date | null): boolean {
+  if (!releaseDate) {
+    return false;
+  }
+  const dt = isDate(releaseDate)
+    ? DateTime.fromJSDate(releaseDate)
+    : DateTime.fromISO(releaseDate);
+  if (!dt.isValid) {
+    return false;
+  }
+  return DateTime.now().diff(dt, 'hours').hours < freshReleaseHours;
+}
 
 export function slugifyUrl(url: string): string {
   const r = regEx(/[:/.]+/g);
