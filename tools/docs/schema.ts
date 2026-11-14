@@ -7,6 +7,7 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
 import {
   getSupportedToolNames,
   getToolConfig,
@@ -273,6 +274,18 @@ function createSingleConfig(
         description: description ?? `A constraint for \`${name}\``,
       };
     }
+  }
+
+  if (option.name === 'cacheTtlOverride') {
+    /* mirrors the namespace validation, so an editor flags a namespace which no longer exists */
+    temp.propertyNames = {
+      anyOf: [
+        {
+          enum: packageCacheNamespaces.filter((ns) => ns !== '_test-namespace'),
+        },
+        { type: 'string', pattern: patternMatchRegex },
+      ],
+    };
   }
 
   if (option.name === 'installTools') {
