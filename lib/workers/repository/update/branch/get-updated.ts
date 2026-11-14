@@ -6,6 +6,7 @@ import { extractPackageFile, get } from '../../../../modules/manager/index.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
+  ExtractConfig,
   PackageFile,
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -408,6 +409,13 @@ export async function getUpdatedPackageFiles(
     contents: updatedFileContents[name],
   }));
   const updatedArtifacts: FileChange[] = [];
+  const pendingVersionChecks: {
+    manager: string;
+    packageFileName: string;
+    packageFileContent: string;
+    updatedDeps: BranchUpgradeConfig[];
+    hadArtifactResults: boolean;
+  }[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
   if (isNonEmptyArray(updatedPackageFiles)) {
@@ -462,16 +470,13 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (isNonEmptyArray(results)) {
-          await checkForPendingVersions(
-            manager,
-            packageFile.path,
-            packageFile.contents!.toString(),
-            updatedDeps,
-            artifactErrors,
-            config,
-          );
-        }
+        pendingVersionChecks.push({
+          manager,
+          packageFileName: packageFile.path,
+          packageFileContent: packageFile.contents!.toString(),
+          updatedDeps,
+          hadArtifactResults: isNonEmptyArray(results),
+        });
       }
     }
   }
@@ -519,15 +524,14 @@ export async function getUpdatedPackageFiles(
         );
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
-          await checkForPendingVersions(
-            manager,
-            packageFile.path,
-            packageFile.contents!.toString(),
-            updatedDeps,
-            artifactErrors,
-            config,
-          );
         }
+        pendingVersionChecks.push({
+          manager,
+          packageFileName: packageFile.path,
+          packageFileContent: packageFile.contents!.toString(),
+          updatedDeps,
+          hadArtifactResults: isNonEmptyArray(results),
+        });
       }
     }
   }
@@ -574,6 +578,26 @@ export async function getUpdatedPackageFiles(
         }
       }
     }
+  }
+  // A later workspace update can rewrite a lockfile produced by an earlier one.
+  // Validate against the final artifact contents that will be committed.
+  const fileContents = Object.fromEntries(
+    updatedArtifacts.map((file) => [
+      file.path,
+      file.type === 'addition' ? file.contents : null,
+    ]),
+  );
+  for (const check of pendingVersionChecks) {
+    await checkForPendingVersions(
+      check.manager,
+      check.packageFileName,
+      check.packageFileContent,
+      check.updatedDeps,
+      artifactErrors,
+      fileContents,
+      check.hadArtifactResults,
+      config,
+    );
   }
   return {
     reuseExistingBranch, // Need to overwrite original config
@@ -669,9 +693,11 @@ async function checkForPendingVersions(
   packageFileContent: string,
   updatedDeps: BranchUpgradeConfig[],
   artifactErrors: ArtifactError[],
+  fileContents: NonNullable<ExtractConfig['fileContents']>,
+  hadArtifactResults: boolean,
   config: BranchConfig,
 ): Promise<void> {
-  const depNameToUpgradeInfo = new Map<
+  const dependencyToUpgradeInfo = new Map<
     string,
     {
       pendingVersions: Set<string>;
@@ -680,21 +706,35 @@ async function checkForPendingVersions(
   >();
   for (const dep of updatedDeps) {
     if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
-      depNameToUpgradeInfo.set(dep.depName, {
-        pendingVersions: new Set(dep.pendingVersions),
-        newVersion: dep.newVersion,
-      });
+      dependencyToUpgradeInfo.set(
+        JSON.stringify([dep.depName, dep.packageName ?? dep.depName]),
+        {
+          pendingVersions: new Set(dep.pendingVersions),
+          newVersion: dep.newVersion,
+        },
+      );
     }
   }
-  if (!depNameToUpgradeInfo.size) {
+  if (!dependencyToUpgradeInfo.size) {
     return;
   }
 
+  const packageFileConfig = patchConfigForArtifactsUpdate(
+    config,
+    manager,
+    packageFileName,
+  );
+  const hasUpdatedLockFile = packageFileConfig.lockFiles?.some((path) =>
+    Object.hasOwn(fileContents, path),
+  );
+  if (!hadArtifactResults && !hasUpdatedLockFile) {
+    return;
+  }
   const extracted = await extractPackageFile(
     manager,
     packageFileContent,
     packageFileName,
-    config,
+    { ...packageFileConfig, fileContents },
   );
   if (!extracted) {
     logger.warn(
@@ -722,7 +762,9 @@ async function checkForPendingVersions(
       throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
 
-    const upgradeInfo = depNameToUpgradeInfo.get(depName);
+    const upgradeInfo = dependencyToUpgradeInfo.get(
+      JSON.stringify([depName, dep.packageName]),
+    );
     if (!upgradeInfo) {
       continue;
     }

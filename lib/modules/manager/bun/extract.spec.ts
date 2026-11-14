@@ -1,11 +1,379 @@
+import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { stripNpmrc } from '../npm/npmrc.ts';
-import { extractAllPackageFiles } from './extract.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/bun/extract', () => {
+  describe('extractPackageFile()', () => {
+    const manifest = JSON.stringify({ dependencies: { foo: '^1.2.0' } });
+    const lock = codeBlock`{
+      "lockfileVersion": 2,
+      "workspaces": { "": { "name": "app" } },
+      "packages": {
+        "foo": ["foo@1.3.0", "", {}, "integrity"],
+        "app/foo": ["foo@9.0.0", "", {}, "integrity"],
+      },
+    }`;
+
+    it.each([lock, Buffer.from(lock)])(
+      'reads the generated lock rather than the manifest range or local file',
+      async (contents) => {
+        fs.readLocalFile.mockResolvedValue('stale content');
+
+        const result = await extractPackageFile(manifest, 'package.json', {
+          lockFiles: ['bun.lock'],
+          fileContents: { 'bun.lock': contents },
+        });
+
+        expect(result?.deps).toMatchObject([
+          { depName: 'foo', currentValue: '^1.2.0', lockedVersion: '1.3.0' },
+        ]);
+        expect(fs.readLocalFile).not.toHaveBeenCalled();
+      },
+    );
+
+    it('reads a configured lockfile when no generated content was supplied', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lock);
+
+      const result = await extractPackageFile(manifest, 'app/package.json', {
+        lockFiles: ['app/bun.lock'],
+      });
+
+      expect(result?.deps[0].lockedVersion).toBe('1.3.0');
+      expect(fs.readLocalFile).toHaveBeenCalledWith('app/bun.lock', 'utf8');
+    });
+
+    it('resolves workspace-specific scoped aliases and hoisted dependencies', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { alias: 'npm:@scope/real@^2.0.0', foo: '^1.2.0' },
+        }),
+        'project/packages/web/package.json',
+        {
+          lockFiles: ['project/bun.lock'],
+          fileContents: {
+            'unrelated/bun.lock': lock,
+            'project/bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { 'packages/web': { name: '@scope/web' } },
+              packages: {
+                alias: ['@scope/real@1.0.0'],
+                '@scope/web/alias': ['@scope/real@2.1.0'],
+                foo: ['foo@1.3.0'],
+              },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'alias', lockedVersion: '2.1.0' },
+        { depName: 'foo', lockedVersion: '1.3.0' },
+      ]);
+    });
+
+    it('does not interpret non-registry dependencies as npm versions', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({ dependencies: { foo: 'file:../foo' } }),
+        'package.json',
+        { lockFiles: ['bun.lock'], fileContents: { 'bun.lock': lock } },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'foo', skipReason: 'file' },
+      ]);
+    });
+
+    it('excludes a semver dependency resolved to an internal workspace', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { '@test/shared': '^1.0.0', prettier: '^3.0.0' },
+        }),
+        'packages/app/package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: {
+                'packages/app': { name: '@test/app' },
+                'packages/@test/shared': { name: '@test/shared' },
+              },
+              packages: {
+                '@test/shared': [
+                  '@test/shared@workspace:packages/@test/shared',
+                ],
+                prettier: ['prettier@3.10.1'],
+              },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'prettier', lockedVersion: '3.10.1' },
+      ]);
+    });
+
+    it.each([false, true])(
+      'handles optional peers (installed=%s)',
+      async (installed) => {
+        const result = await extractPackageFile(
+          JSON.stringify({
+            dependencies: { prettier: '^3.0.0' },
+            peerDependencies: { react: '^18.0.0' },
+            peerDependenciesMeta: { react: { optional: true } },
+          }),
+          'package.json',
+          {
+            lockFiles: ['bun.lock'],
+            fileContents: {
+              'bun.lock': JSON.stringify({
+                lockfileVersion: 1,
+                workspaces: { '': { optionalPeers: ['react'] } },
+                packages: {
+                  prettier: ['prettier@3.10.1'],
+                  ...(installed && { react: ['react@18.3.1'] }),
+                },
+              }),
+            },
+          },
+        );
+
+        expect(
+          result?.deps.map((dep) => [dep.depName, dep.lockedVersion]),
+        ).toEqual(
+          installed
+            ? [
+                ['prettier', '3.10.1'],
+                ['react', '18.3.1'],
+              ]
+            : [['prettier', '3.10.1']],
+        );
+      },
+    );
+
+    it('resolves the override identity instead of the shadowed declaration', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { 'is-number': '^6.0.0', prettier: '^3.0.0' },
+          overrides: { 'is-number': 'npm:is-odd@^3.0.0' },
+        }),
+        'package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { '': {} },
+              overrides: { 'is-number': 'npm:is-odd@^3.0.0' },
+              packages: {
+                'is-number': ['is-odd@3.0.1'],
+                prettier: ['prettier@3.10.1'],
+              },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'prettier', lockedVersion: '3.10.1' },
+        {
+          depName: 'is-number',
+          depType: 'overrides',
+          packageName: 'is-odd',
+          lockedVersion: '3.0.1',
+        },
+      ]);
+    });
+
+    it('retains overrides of transitive dependencies without a root lock entry', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { foo: '^1.2.0' },
+          overrides: { bar: '1.0.0' },
+        }),
+        'package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { '': {} },
+              overrides: { bar: '1.0.0' },
+              packages: { foo: ['foo@1.3.0'], 'foo/bar': ['bar@1.0.0'] },
+            }),
+          },
+        },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'foo', lockedVersion: '1.3.0' },
+        { depName: 'bar', depType: 'overrides', currentValue: '1.0.0' },
+      ]);
+    });
+
+    it('does not read stale disk contents for a deleted text lock', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lock);
+
+      const result = await extractPackageFile(manifest, 'package.json', {
+        lockFiles: ['bun.lock'],
+        fileContents: { 'bun.lock': null },
+      });
+
+      expect(result).toBeNull();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('rejects a missing required peer dependency', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({ peerDependencies: { foo: '^1.0.0' } }),
+        'package.json',
+        {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 1,
+              workspaces: { '': {} },
+              packages: {},
+            }),
+          },
+        },
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('retains tool versions from the manifest instead of looking them up in the lock', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          dependencies: { foo: '^1.2.0', empty: '' },
+          engines: { node: '^24.0.0', bun: '^1.3.0' },
+          packageManager: 'bun@1.3.0',
+        }),
+        'package.json',
+        { lockFiles: ['bun.lock'], fileContents: { 'bun.lock': lock } },
+      );
+
+      expect(result?.deps).toMatchObject([
+        { depName: 'foo', lockedVersion: '1.3.0' },
+        { depName: 'empty', skipReason: 'empty' },
+        { depName: 'node', currentValue: '^24.0.0' },
+        { depName: 'bun', currentValue: '^1.3.0' },
+        { depName: 'bun', currentValue: '1.3.0' },
+      ]);
+      expect(result?.deps.slice(2).map((dep) => dep.lockedVersion)).toEqual([
+        undefined,
+        undefined,
+        undefined,
+      ]);
+    });
+
+    it.each(['invalid', '{', 'null'])(
+      'returns null for an invalid manifest: %s',
+      async (content) => {
+        await expect(
+          extractPackageFile(content, 'package.json'),
+        ).resolves.toBeNull();
+      },
+    );
+
+    it('returns null for a non-manifest JSON object', async () => {
+      await expect(
+        extractPackageFile(
+          JSON.stringify({ _id: 1, _args: 1, _from: 1 }),
+          'package.json',
+        ),
+      ).resolves.toBeNull();
+    });
+
+    it.each<ExtractConfig>([
+      {},
+      {
+        lockFiles: ['bun.lockb'],
+        fileContents: { 'bun.lockb': Buffer.from('binary') },
+      },
+      { lockFiles: ['bun.lock'] },
+      { lockFiles: ['bun.lock'], fileContents: { 'bun.lock': null } },
+      { lockFiles: ['bun.lock'], fileContents: { 'bun.lock': 'invalid' } },
+      { lockFiles: ['bun.lock'], fileContents: { 'bun.lock': '{}' } },
+    ])(
+      'returns null when the text lockfile is unavailable or invalid: %j',
+      async (config) => {
+        await expect(
+          extractPackageFile(manifest, 'package.json', config),
+        ).resolves.toBeNull();
+      },
+    );
+
+    it.each([
+      { lockfileVersion: 3, workspaces: { '': {} }, packages: {} },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: ['foo'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: ['foo@workspace:missing'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {}, local: { name: 'other' } },
+        packages: { foo: ['foo@workspace:local'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        overrides: { foo: 'npm:baz@1.0.0' },
+        packages: { foo: ['bar@1.0.0'] },
+      },
+      { lockfileVersion: 2, workspaces: {}, packages: {} },
+      { lockfileVersion: 2, workspaces: { '': {} }, packages: { foo: null } },
+      { lockfileVersion: 2, workspaces: { '': {} }, packages: {} },
+      {
+        lockfileVersion: 2,
+        workspaces: { '': {} },
+        packages: { foo: ['bar@1.3.0'] },
+      },
+      {
+        lockfileVersion: 2,
+        workspaces: { '': {} },
+        packages: { foo: ['foo@github:owner/repo'] },
+      },
+    ])(
+      'returns null when the lock cannot establish a resolved npm version: %j',
+      async (value) => {
+        await expect(
+          extractPackageFile(manifest, 'package.json', {
+            lockFiles: ['bun.lock'],
+            fileContents: { 'bun.lock': JSON.stringify(value) },
+          }),
+        ).resolves.toBeNull();
+      },
+    );
+
+    it('returns null for a workspace without a name', async () => {
+      await expect(
+        extractPackageFile(manifest, 'packages/web/package.json', {
+          lockFiles: ['bun.lock'],
+          fileContents: {
+            'bun.lock': JSON.stringify({
+              lockfileVersion: 2,
+              workspaces: { 'packages/web': {} },
+              packages: { foo: ['foo@1.3.0'] },
+            }),
+          },
+        }),
+      ).resolves.toBeNull();
+    });
+  });
+
   describe('extractAllPackageFiles()', () => {
     it('ignores non-bun files', async () => {
       await expect(
