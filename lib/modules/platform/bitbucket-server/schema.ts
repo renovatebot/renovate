@@ -21,6 +21,7 @@ export type Comment = z.infer<typeof Comment>;
 
 export const PullRequestMerge = z.object({
   autoMerge: z.boolean().optional(),
+  strategyId: z.string().optional(),
 });
 
 export type PullRequestMerge = z.infer<typeof PullRequestMerge>;
