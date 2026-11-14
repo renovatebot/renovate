@@ -138,6 +138,36 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFiles!.pop()).toHaveProperty('lockFiles', lockFiles);
     });
 
+    it('does not warn about requires-python missing from the lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile(
+          'uv pip compile pyproject.toml --output-file=requirements.txt',
+          ['foo==1.0.1'],
+        ),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [project]
+        name = "example"
+        version = "0.0.0"
+        requires-python = ">=3.11"
+        dependencies = ["foo==1.0.0"]
+      `);
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'requirements.txt',
+      ]);
+
+      const deps = packageFiles![0].deps;
+      expect(
+        deps.find((d) => d.depType === 'requires-python'),
+      ).not.toHaveProperty('lockedVersion');
+      expect(deps.find((d) => d.depName === 'foo')).toHaveProperty(
+        'lockedVersion',
+        '1.0.1',
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     it('no lock files in returned package files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         getSimpleRequirementsFile('pip-compile --output-file=foo.txt foo.in', [
