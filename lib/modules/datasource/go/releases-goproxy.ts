@@ -12,8 +12,12 @@ import { detectPlatform } from '../../../util/common.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
   queryReleases,
-  queryTags,
+  queryTagsByName,
 } from '../../../util/github/graphql/index.ts';
+import type {
+  GithubPackageConfig,
+  GithubTagItem,
+} from '../../../util/github/graphql/types.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { isForbidden, isGone, isNotFound } from '../../../util/http/status.ts';
@@ -28,7 +32,10 @@ import {
   trimTrailingSlash,
 } from '../../../util/url.ts';
 import goVersioning from '../../versioning/go-mod-directive/index.ts';
-import { parseVersionCommit } from '../../versioning/gomod/index.ts';
+import gomodVersioning, {
+  isPseudoVersion,
+  parseVersionCommit,
+} from '../../versioning/gomod/index.ts';
 import { Datasource } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -75,15 +82,9 @@ export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
  * Because we can't tell from the module path alone where the repository ends and the subdirectory begins, we try each candidate prefix - longest first - against the tags we actually found, in the same way as `filterByPrefix` does for direct lookups.
  */
 export function getTagPrefix(goModule: string, tags: Iterable<string>): string {
-  const nameParts = goModule
-    .replace(regEx(/\/v\d+$/), '')
-    .split('/')
-    .slice(1);
   const tagNames = [...tags];
 
-  while (nameParts.length) {
-    const prefix = `${nameParts.join('/')}/`;
-
+  for (const prefix of getTagPrefixCandidates(goModule)) {
     const isUsed = tagNames.some(
       (tag) =>
         tag.startsWith(prefix) &&
@@ -92,12 +93,32 @@ export function getTagPrefix(goModule: string, tags: Iterable<string>): string {
     if (isUsed) {
       return prefix;
     }
-
-    nameParts.shift();
   }
 
   return '';
 }
+
+/**
+ * The subdirectory prefixes a Go module's tags may have, longest first, not including the empty prefix of a module at the repository root.
+ */
+export function getTagPrefixCandidates(goModule: string): string[] {
+  const nameParts = goModule
+    .replace(regEx(/\/v\d+$/), '')
+    .split('/')
+    .slice(1);
+
+  const candidates: string[] = [];
+  while (nameParts.length) {
+    candidates.push(`${nameParts.join('/')}/`);
+    nameParts.shift();
+  }
+  return candidates;
+}
+
+/**
+ * How many of a module's latest versions are used to find out which tag prefix it uses.
+ */
+const tagPrefixProbeSize = 3;
 
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
@@ -249,14 +270,16 @@ export class GoProxyDatasource extends Datasource {
       registryUrl: parsedUrl.origin,
     };
 
-    const [githubTags, githubReleases] = await Promise.all([
-      queryTags(githubConfig, this.githubHttp).catch((err) => {
-        logger.debug(
-          { err, packageName },
-          'Error fetching GitHub Tags for Go module',
-        );
-        return [];
-      }),
+    const versions = releases.map(({ version }) =>
+      version.replace(incompatibleSuffixRegex, ''),
+    );
+    const [{ tagPrefix, tagTimestamps }, githubReleases] = await Promise.all([
+      this.getGithubTagTimestamps(
+        packageName,
+        sourceUrl,
+        githubConfig,
+        versions,
+      ),
       queryReleases(githubConfig, this.githubHttp).catch((err) => {
         logger.debug(
           { err, packageName },
@@ -266,18 +289,22 @@ export class GoProxyDatasource extends Datasource {
       }),
     ]);
 
-    const timestamps = new Map<string, Timestamp>();
-    for (const { version, releaseTimestamp } of githubTags) {
-      timestamps.set(version, releaseTimestamp);
-    }
+    const timestamps = new Map<string, Timestamp>(tagTimestamps);
+    const releasePrefix =
+      tagPrefix ??
+      getTagPrefix(
+        packageName,
+        githubReleases.map(({ version }) => version),
+      );
     for (const { version, releaseTimestamp } of githubReleases) {
-      timestamps.set(version, releaseTimestamp);
+      if (version.startsWith(releasePrefix)) {
+        timestamps.set(version.slice(releasePrefix.length), releaseTimestamp);
+      }
     }
 
-    const tagPrefix = getTagPrefix(packageName, timestamps.keys());
     for (const release of releases) {
       const version = release.version.replace(incompatibleSuffixRegex, '');
-      const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+      const releaseTimestamp = timestamps.get(version);
       if (!releaseTimestamp) {
         continue;
       }
@@ -289,6 +316,118 @@ export class GoProxyDatasource extends Datasource {
         release.releaseTimestamp = releaseTimestamp;
       }
     }
+  }
+
+  /**
+   * The tag prefix of the module, and the creation time of each version's git tag, keyed by version.
+   *
+   * Tags are looked up by name, and only for versions we don't already have a timestamp for, as repositories hosting many modules (such as `github.com/aws/aws-sdk-go-v2`) have tens of thousands of tags.
+   */
+  private async getGithubTagTimestamps(
+    packageName: string,
+    sourceUrl: string,
+    githubConfig: GithubPackageConfig,
+    versions: string[],
+  ): Promise<{
+    tagPrefix: string | null;
+    tagTimestamps: Map<string, Timestamp>;
+  }> {
+    // pseudo-versions are commits, not tags
+    const taggedVersions = versions.filter(
+      (version) => !isPseudoVersion(version),
+    );
+    const probeVersions = taggedVersions
+      .filter((version) => gomodVersioning.isVersion(version))
+      .sort((a, b) => gomodVersioning.sortVersions(b, a))
+      .slice(0, tagPrefixProbeSize);
+
+    const cache = await GoVersionTimestampCache.init(sourceUrl, packageName);
+    const tagTimestamps = new Map<string, Timestamp>();
+    const uncachedVersions: string[] = [];
+    for (const version of taggedVersions) {
+      const timestamp = cache.get(version);
+      if (timestamp) {
+        tagTimestamps.set(version, timestamp);
+      } else {
+        uncachedVersions.push(version);
+      }
+    }
+
+    let tagPrefix: string | null = null;
+    try {
+      const probe = await this.findGithubTagPrefix(
+        packageName,
+        githubConfig,
+        probeVersions,
+      );
+      if (!probe) {
+        return { tagPrefix, tagTimestamps };
+      }
+
+      const { prefix } = probe;
+      tagPrefix = prefix;
+      const tags = [...probe.tags];
+      const versionsToLookUp = uncachedVersions.filter(
+        (version) => !probeVersions.includes(version),
+      );
+      if (versionsToLookUp.length) {
+        tags.push(
+          ...(await queryTagsByName(
+            githubConfig,
+            this.githubHttp,
+            versionsToLookUp.map((version) => `${prefix}${version}`),
+          )),
+        );
+      }
+
+      for (const { version: tagName, releaseTimestamp } of tags) {
+        const version = tagName.slice(prefix.length);
+        tagTimestamps.set(version, releaseTimestamp);
+        if (cache.get(version) !== releaseTimestamp) {
+          cache.set(version, releaseTimestamp);
+        }
+      }
+      await cache.save();
+    } catch (err) {
+      logger.debug(
+        { err, packageName },
+        'Error fetching GitHub Tags for Go module',
+      );
+    }
+
+    return { tagPrefix, tagTimestamps };
+  }
+
+  /**
+   * Finds the tag prefix by looking up the given versions under every candidate prefix in one query, preferring the longest prefix which has any of them.
+   *
+   * @returns the prefix and the tags of the given versions under it, or `null` if none of the versions is tagged under any candidate prefix
+   */
+  private async findGithubTagPrefix(
+    packageName: string,
+    githubConfig: GithubPackageConfig,
+    versions: string[],
+  ): Promise<{ prefix: string; tags: GithubTagItem[] } | null> {
+    const candidates = [...getTagPrefixCandidates(packageName), ''];
+    const tags = await queryTagsByName(
+      githubConfig,
+      this.githubHttp,
+      candidates.flatMap((prefix) =>
+        versions.map((version) => `${prefix}${version}`),
+      ),
+    );
+
+    for (const prefix of candidates) {
+      const tagNames = new Set(
+        versions.map((version) => `${prefix}${version}`),
+      );
+      const prefixTags = tags.filter(({ version }) => tagNames.has(version));
+      if (prefixTags.length) {
+        return { prefix, tags: prefixTags };
+      }
+    }
+
+    return null;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

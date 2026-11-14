@@ -36,6 +36,36 @@ const GithubGraphqlTag = z.object({
 });
 export type GithubGraphqlTag = z.infer<typeof GithubGraphqlTag>;
 
+/**
+ * The fields of a tag `Ref` which `GithubGraphqlTag` validates.
+ */
+export const tagFields = `
+  version: name
+  target {
+    type: __typename
+    ... on Commit {
+      oid
+      releaseTimestamp: committedDate
+    }
+    ... on Tag {
+      target {
+        type: __typename
+        ... on Commit {
+          oid
+        }
+        ... on Tag {
+          target {
+            oid
+          }
+        }
+      }
+      tagger {
+        releaseTimestamp: date
+      }
+    }
+  }
+`;
+
 const query = prepareQuery(`
   refs(
     first: $count
@@ -48,30 +78,7 @@ const query = prepareQuery(`
       endCursor
     }
     nodes {
-      version: name
-      target {
-        type: __typename
-        ... on Commit {
-          oid
-          releaseTimestamp: committedDate
-        }
-        ... on Tag {
-          target {
-            type: __typename
-            ... on Commit {
-              oid
-            }
-            ... on Tag {
-              target {
-                oid
-              }
-            }
-          }
-          tagger {
-            releaseTimestamp: date
-          }
-        }
-      }
+      ${tagFields}
     }
   }`);
 
