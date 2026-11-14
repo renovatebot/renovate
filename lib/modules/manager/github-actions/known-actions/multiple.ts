@@ -1,9 +1,13 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../../util/regex.ts';
+import { CrateDatasource } from '../../../datasource/crate/index.ts';
 import { DockerDatasource } from '../../../datasource/docker/index.ts';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
 import { JavaVersionDatasource } from '../../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import { RustVersionDatasource } from '../../../datasource/rust-version/index.ts';
+import * as semverPartialVersioning from '../../../versioning/semver-partial/index.ts';
 import type { PackageDependency } from '../../types.ts';
 import {
   type ActionSchema,
@@ -159,6 +163,90 @@ const SetupVpWith: ActionSchema = z
     return deps;
   });
 
+function installActionCrate(packageName: string): PackageDependency {
+  return {
+    datasource: CrateDatasource.id,
+    packageName,
+    versioning: semverPartialVersioning.id,
+  };
+}
+
+function installActionRelease(
+  packageName: string,
+  tagPrefix = 'v',
+): PackageDependency {
+  return {
+    datasource: GithubReleasesDatasource.id,
+    packageName,
+    extractVersion: `^${tagPrefix}(?<version>.+)$`,
+  };
+}
+
+// `taiki-e/install-action` installs the tools in its manifests from GitHub
+// releases, and anything else through `cargo-binstall`. Most of them are
+// crates of the same name and version, so the crate datasource is the
+// default, and these are the exceptions.
+// https://github.com/taiki-e/install-action/blob/main/TOOLS.md
+const installActionTools: Record<string, PackageDependency | undefined> = {
+  'auto-doc': installActionRelease('tj-actions/auto-doc'),
+  biome: installActionRelease('biomejs/biome', '(?:@biomejs/biome@|cli/v)'),
+  cosign: installActionRelease('sigstore/cosign'),
+  cyclonedx: installActionRelease('CycloneDX/cyclonedx-cli'),
+  d2: installActionRelease('terrastruct/d2'),
+  deepsource: installActionRelease('DeepSourceCorp/cli'),
+  earthly: installActionRelease('earthly/earthly'),
+  'editorconfig-checker': installActionRelease(
+    'editorconfig-checker/editorconfig-checker',
+  ),
+  kingfisher: installActionRelease('mongodb/kingfisher'),
+  nextest: installActionCrate('cargo-nextest'),
+  'osv-scanner': installActionRelease('google/osv-scanner'),
+  oxfmt: installActionRelease('oxc-project/oxc', 'apps_v'),
+  protoc: installActionRelease('protocolbuffers/protobuf'),
+  'protoc-gen-connect-openapi': installActionRelease(
+    'sudorandom/protoc-gen-connect-openapi',
+  ),
+  rclone: installActionRelease('rclone/rclone'),
+  rust: { datasource: RustVersionDatasource.id, packageName: 'rust' },
+  shellcheck: installActionRelease('koalaman/shellcheck'),
+  shfmt: installActionRelease('mvdan/sh'),
+  syft: installActionRelease('anchore/syft'),
+  taplo: installActionCrate('taplo-cli'),
+  tombi: installActionRelease('tombi-toml/tombi'),
+  trivy: installActionRelease('aquasecurity/trivy'),
+  typos: installActionCrate('typos-cli'),
+  vacuum: installActionRelease('daveshanley/vacuum'),
+  'wasm-bindgen': installActionCrate('wasm-bindgen-cli'),
+  wasmtime: installActionCrate('wasmtime-cli'),
+  wild: installActionCrate('wild-linker'),
+  zola: installActionRelease('getzola/zola'),
+};
+
+// Each tool is `<name>[@<version>][+<component>...]`, where an omitted
+// version or `latest` installs the latest release.
+function parseInstallActionTool(tool: string): PackageDependency {
+  const [name, version] = tool.split('+')[0].split('@');
+  const source = installActionTools[name] ?? installActionCrate(name);
+
+  return {
+    depName: name,
+    ...source,
+    ...parseValue(version === 'latest' ? undefined : version),
+  };
+}
+
+// `tool` is a comma or whitespace separated list, which may contain spaces
+// around a `+`.
+const InstallActionWith: ActionSchema = z
+  .object({ tool: z.string() })
+  .transform(({ tool }) =>
+    tool
+      .replace(regEx(/\s*\+\s*/g), '+')
+      .split(regEx(/[\s,]+/))
+      .filter((t) => t !== '')
+      .map(parseInstallActionTool),
+  );
+
 /**
  * Entries whose emitted dependencies span more than one datasource, so no
  * single-datasource file (or its structural "same datasource" test) applies.
@@ -180,6 +268,12 @@ export const multipleActions: Record<string, KnownActionConfig> = {
     datasource: NpmDatasource.id,
     packageName: 'pnpm',
     withSchema: PnpmSetupWith,
+  },
+  // https://github.com/taiki-e/install-action
+  'taiki-e/install-action': {
+    datasource: DATASOURCE_DETERMINED_DYNAMICALLY,
+    packageName: '', // determined per tool in the `tool` input
+    withSchema: InstallActionWith,
   },
   // https://github.com/voidzero-dev/setup-vp
   'voidzero-dev/setup-vp': {
