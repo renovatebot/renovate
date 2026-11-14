@@ -123,7 +123,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const lockFileName = getLockFileName(packageFile);
+  const lockFileName = await getLockFileName(packageFile);
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
   let lockFileData: MiseLockFile | undefined;
   if (lockFileContent) {
@@ -205,8 +205,8 @@ function getInstalledVersion(
   const version = parseVersion(getPrimaryToolValue(toolData));
   // mise locks an alias like `nodejs` under the name of the tool
   const lockedVersion = lockFileData
-    ? (getLockedVersion(lockFileData, depName) ??
-      getLockedVersion(lockFileData, constraintName))
+    ? (getLockedVersion(lockFileData, depName, version) ??
+      getLockedVersion(lockFileData, constraintName, version))
     : undefined;
   return lockedVersion && isLockedVersionOf(lockedVersion, version)
     ? lockedVersion
@@ -510,7 +510,7 @@ function extractToolEntry(
       : getToolConfig(backend, toolName, version, options);
   const dependency = createDependency(depName, version, toolConfig, depType);
   const lockedVersion = lockFileData
-    ? getLockedVersion(lockFileData, dependency.depName)
+    ? getLockedVersion(lockFileData, dependency.depName, version)
     : undefined;
 
   if (version !== null && lockedVersion) {
