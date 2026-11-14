@@ -106,8 +106,31 @@ function minSatisfyingVersion(
   return minSatisfying(versions.map(vtrim), vtrim(range));
 }
 
-function getPinnedValue(value: string): string {
-  return vtrim(value);
+function applyDelimiter(newValue: string, currentValue: string): string {
+  if (!regEx(/^(?:'|")/).exec(currentValue)) {
+    return newValue;
+  }
+  const delimiter = currentValue[0];
+  return newValue
+    .split(',')
+    .map((element) =>
+      element.replace(
+        regEx(`^(?<whitespace>\\s*)`),
+        `$<whitespace>${delimiter}`,
+      ),
+    )
+    .map(
+      (element) =>
+        element.replace(
+          regEx(/(?<whitespace>\s*)$/),
+          `${delimiter}$<whitespace>`,
+        ), // TODO #12875 adds ' at front when re2 is used
+    )
+    .join(',');
+}
+
+function getPinnedValue(newVersion: string, currentValue = ''): string {
+  return applyDelimiter(vtrim(newVersion), currentValue);
 }
 
 function getNewValue({
@@ -159,26 +182,7 @@ function getNewValue({
         logger.warn({ rangeStrategy }, 'Unsupported range strategy');
     }
   }
-  if (newValue && regEx(/^(?:'|")/).exec(currentValue)) {
-    const delimiter = currentValue[0];
-    return newValue
-      .split(',')
-      .map((element) =>
-        element.replace(
-          regEx(`^(?<whitespace>\\s*)`),
-          `$<whitespace>${delimiter}`,
-        ),
-      )
-      .map(
-        (element) =>
-          element.replace(
-            regEx(/(?<whitespace>\s*)$/),
-            `${delimiter}$<whitespace>`,
-          ), // TODO #12875 adds ' at front when re2 is used
-      )
-      .join(',');
-  }
-  return newValue;
+  return newValue ? applyDelimiter(newValue, currentValue) : newValue;
 }
 
 export function sortVersions(left: string, right: string): number {

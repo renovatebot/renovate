@@ -18,6 +18,7 @@ import { defaultRegistryUrl as npmDefaultRegistryUrl } from '../../../../modules
 import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist/index.ts';
 import { PypiDatasource } from '../../../../modules/datasource/pypi/index.ts';
+import { RubygemsDatasource } from '../../../../modules/datasource/rubygems/index.ts';
 import { id as composerVersioningId } from '../../../../modules/versioning/composer/index.ts';
 import { id as debianVersioningId } from '../../../../modules/versioning/debian/index.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
@@ -29,6 +30,7 @@ import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
 import { id as rezVersioningId } from '../../../../modules/versioning/rez/index.ts';
+import { id as rubyVersioningId } from '../../../../modules/versioning/ruby/index.ts';
 import { id as semverVersioningId } from '../../../../modules/versioning/semver/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
@@ -1321,6 +1323,36 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newValue: '0.4.0',
           newVersion: '0.4.0',
+          updateType: 'pin',
+        },
+      ]);
+    });
+
+    it('keeps the quotes of a quoted ruby range when pinning', async () => {
+      config.manager = 'bundler';
+      config.versioning = rubyVersioningId;
+      config.currentValue = '"~> 2.2"';
+      config.lockedVersion = '2.2.3';
+      config.rangeStrategy = 'pin';
+      config.packageName = 'importmap-rails';
+      config.datasource = RubygemsDatasource.id;
+      vi.spyOn(
+        RubygemsDatasource.prototype,
+        'getReleases',
+      ).mockResolvedValueOnce({
+        releases: [{ version: '2.2.2' }, { version: '2.2.3' }],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 2,
+          newValue: '"2.2.3"',
+          newVersion: '2.2.3',
           updateType: 'pin',
         },
       ]);

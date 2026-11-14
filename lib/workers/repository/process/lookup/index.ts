@@ -382,7 +382,8 @@ export async function lookupUpdates(
         !versioningApi.isSingleVersion(compareValue)
       ) {
         const newValue =
-          versioningApi.getPinnedValue?.(currentVersion) ?? currentVersion;
+          versioningApi.getPinnedValue?.(currentVersion, compareValue) ??
+          currentVersion;
         res.updates.push({
           updateType: 'pin',
           isPin: true,
