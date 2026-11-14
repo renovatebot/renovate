@@ -219,6 +219,171 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('skips PR automerge outside automerge schedule', async () => {
+      schedule.isScheduledNow.mockReturnValue(false);
+      config.updateNotScheduled = false;
+      config.automerge = true;
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'update-not-scheduled',
+      });
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('checks PR automerge outside schedule when rebaseWhen=never', async () => {
+      schedule.isScheduledNow.mockImplementation(
+        (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
+      );
+      config.updateNotScheduled = false;
+      config.automerge = true;
+      config.rebaseWhen = 'never';
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: null,
+        result: 'automerged',
+      });
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips branch update when PR is not automerged outside schedule', async () => {
+      schedule.isScheduledNow.mockImplementation(
+        (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
+      );
+      config.updateNotScheduled = false;
+      config.automerge = true;
+      config.statusCheckNames = {
+        artifactError: null,
+        configValidation: null,
+        mergeConfidence: null,
+        minimumReleaseAge: 'renovate/stability-days',
+      };
+      config.upgrades = partial<BranchUpgradeConfig>([
+        {
+          minimumReleaseAge: '1 day',
+          releaseTimestamp: '2019-01-01' as Timestamp,
+        },
+      ]);
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'update-not-scheduled',
+      });
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
+    it.each([
+      ['outside automerge schedule', false, 'done'],
+      ['inside automerge schedule', true, 'automerged'],
+    ])(
+      'updates branch and checks PR automerge %s when branch updates are scheduled',
+      async (description, automergeScheduled, expectedResult) => {
+        schedule.isScheduledNow.mockImplementation((_config, scheduleKey) => {
+          if (scheduleKey === 'schedule') {
+            return true;
+          }
+          return scheduleKey === 'automergeSchedule' && automergeScheduled;
+        });
+        config.automerge = true;
+        config.ignoreTests = true;
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValue(
+          partial<Pr>({ number: 5, state: 'open' }),
+        );
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+          updatedPackageFiles: [partial<FileChange>()],
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        automerge.tryBranchAutomerge.mockResolvedValueOnce(
+          'automerge aborted - PR exists',
+        );
+        prAutomerge.checkAutoMerge.mockResolvedValueOnce({
+          automerged: automergeScheduled,
+        });
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.baseBranch);
+        expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+        expect(res.result).toBe(expectedResult);
+      },
+    );
+
+    it.each<[string, Pr, CacheFingerprintMatchResult | undefined]>([
+      [
+        'PR targets a different base branch',
+        partial<Pr>({ number: 5, state: 'open', targetBranch: 'other' }),
+        undefined,
+      ],
+      [
+        'branch fingerprint does not match',
+        partial<Pr>({ number: 5, state: 'open' }),
+        'no-match',
+      ],
+    ])(
+      'skips PR automerge outside schedule when %s',
+      async (_description, pr, cacheFingerprintMatch) => {
+        schedule.isScheduledNow.mockImplementation(
+          (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
+        );
+        config.updateNotScheduled = false;
+        config.automerge = true;
+        config.cacheFingerprintMatch = cacheFingerprintMatch;
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toEqual({
+          branchExists: true,
+          prNo: pr.number,
+          result: 'update-not-scheduled',
+        });
+        expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      },
+    );
+
     it('skips branch for fresh release with minimumReleaseAge', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -3971,6 +4136,8 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues branch, skips automerge if there are artifact errors', async () => {
+      config.automerge = true;
+      config.ignoreTests = true;
       vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
