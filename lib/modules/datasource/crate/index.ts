@@ -60,6 +60,9 @@ export class CrateDatasource extends Datasource {
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field in the results.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    'The `rust` constraint is determined from the `rust_version` field in the crates.io index.';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
