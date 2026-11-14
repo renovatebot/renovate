@@ -1,4 +1,9 @@
-import type { BranchResult, PrBlockedBy } from '../../../types.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import type {
+  BranchConfig,
+  BranchResult,
+  PrBlockedBy,
+} from '../../../types.ts';
 
 export interface ProcessBranchResult {
   branchExists: boolean;
@@ -7,4 +12,9 @@ export interface ProcessBranchResult {
   prNo?: number;
   result: BranchResult;
   commitSha?: string | null;
+}
+
+export interface PostUpdateOptionsExecutionResult {
+  updatedArtifacts: FileChange[];
+  artifactErrors: NonNullable<BranchConfig['artifactErrors']>;
 }

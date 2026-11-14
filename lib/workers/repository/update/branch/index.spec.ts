@@ -46,6 +46,7 @@ import * as artifacts from './artifacts.ts';
 import * as _automerge from './automerge.ts';
 import * as _checkExisting from './check-existing.ts';
 import * as _commit from './commit.ts';
+import * as _executePostUpdateOptions from './execute-post-update-options.ts';
 import type { PackageFilesResult } from './get-updated.ts';
 import * as _getUpdated from './get-updated.ts';
 import * as branchWorker from './index.ts';
@@ -54,6 +55,7 @@ import * as _schedule from './schedule.ts';
 
 vi.mock('./get-updated.ts');
 vi.mock('./schedule.ts');
+vi.mock('./execute-post-update-options.ts');
 // only mock the functions which reach out to the platform, the pure decisions
 // of these modules are exercised through `processBranch()` itself
 vi.mock('./check-existing.ts', async (importOriginal) => ({
@@ -99,6 +101,7 @@ const sanitize = vi.mocked(_sanitize);
 const limits = vi.mocked(_limits);
 const repoCache = vi.mocked(_repoCache);
 const changelog = vi.mocked(_changelog);
+const executePostUpdateOptions = vi.mocked(_executePostUpdateOptions);
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
@@ -134,6 +137,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
         artifactErrors: [],
       });
+      executePostUpdateOptions.default.mockResolvedValue(null);
       scm.branchExists.mockResolvedValue(false);
       reuse.shouldReuseExistingBranch.mockImplementation((config) =>
         Promise.resolve(config),
@@ -3856,6 +3860,104 @@ describe('workers/repository/update/branch/index', () => {
         expect.objectContaining({
           topic: expect.stringContaining('Artifact update problem'),
         }),
+      );
+    });
+
+    it('includes Go tidy artifacts returned by post-update options in the branch commit', async () => {
+      const goMod: FileChange = {
+        type: 'addition',
+        path: 'go.mod',
+        contents: 'module example.com/test',
+      };
+      const goSum: FileChange = {
+        type: 'addition',
+        path: 'go.sum',
+        contents: 'tidied checksum data',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [goMod],
+          updatedArtifacts: [],
+          artifactErrors: [],
+          artifactNotices: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      executePostUpdateOptions.default.mockResolvedValueOnce({
+        updatedArtifacts: [goSum],
+        artifactErrors: [],
+      });
+
+      await branchWorker.processBranch({
+        ...config,
+        manager: 'gomod',
+        postUpdateOptions: ['gomodTidy'],
+        upgrades: partial<BranchUpgradeConfig>([
+          {
+            manager: 'gomod',
+            packageFile: 'go.mod',
+            depName: 'github.com/pkg/errors',
+          },
+        ]),
+      });
+
+      expect(executePostUpdateOptions.default).toHaveBeenCalledWith(
+        expect.objectContaining({
+          manager: 'gomod',
+          postUpdateOptions: ['gomodTidy'],
+          updatedPackageFiles: [goMod],
+        }),
+      );
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({ updatedArtifacts: [goSum] }),
+      );
+    });
+
+    it('propagates artifact errors returned by post-update options', async () => {
+      const goMod: FileChange = {
+        type: 'addition',
+        path: 'go.mod',
+        contents: 'module example.com/test',
+      };
+      const tidyError = partial<ArtifactError>({
+        fileName: 'go.sum',
+        stderr: 'go mod tidy failed',
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [goMod],
+          updatedArtifacts: [],
+          artifactErrors: [],
+          artifactNotices: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      executePostUpdateOptions.default.mockResolvedValueOnce({
+        updatedArtifacts: [],
+        artifactErrors: [tidyError],
+      });
+
+      await branchWorker.processBranch({
+        ...config,
+        manager: 'gomod',
+        postUpdateOptions: ['gomodTidy'],
+        upgrades: partial<BranchUpgradeConfig>([
+          {
+            manager: 'gomod',
+            packageFile: 'go.mod',
+            depName: 'github.com/pkg/errors',
+          },
+        ]),
+      });
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({ artifactErrors: [tidyError] }),
       );
     });
 
