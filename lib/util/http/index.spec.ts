@@ -198,7 +198,7 @@ describe('util/http/index', () => {
       'returns the final $status response with Retry-After $retryAfter',
       async ({ status, retryAfter, requests }) => {
         hostRules.add({ matchHost: 'renovate.com', abortOnError: true });
-        const headers =
+        const headers: httpMock.ReplyHeaders =
           retryAfter === undefined ? {} : { 'retry-after': retryAfter };
         httpMock
           .scope(baseUrl)
