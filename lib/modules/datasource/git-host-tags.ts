@@ -45,27 +45,23 @@ export abstract class GitHostTagsDatasource<
   ): Promise<GitHostTag[] | null>;
 
   /**
-   * Whether the lookups against `registryUrl` may be stored in the package
-   * cache. `registryUrl` is always the URL returned by
-   * {@link GitHostTagsDatasource.getRegistryUrl}.
+   * Whether data from `registryUrl` may be shared through the package cache.
+   * Accepts the URL returned by {@link GitHostTagsDatasource.getRegistryUrl}.
    */
-  protected isCacheable(_registryUrl: string): boolean {
+  protected isPublic(_registryUrl: string): boolean {
     return true;
   }
 
   /**
-   * Returns the result of `fn`, stored in the package cache under `key` when
-   * {@link GitHostTagsDatasource.isCacheable} or `cachePrivatePackages` allows
-   * it. A subclass whose API client caches the lookups itself overrides it to
-   * call `fn` directly.
+   * Override to bypass package caching when the API client already caches responses.
    */
   protected cachedLookup<T>(
     registryUrl: string | undefined,
     key: string,
     fn: () => Promise<T>,
   ): Promise<T> {
-    const cacheable = this.isCacheable(this.getRegistryUrl(registryUrl));
-    return this.cached({ key, fallback: true, cacheable }, fn);
+    const isPublic = this.isPublic(this.getRegistryUrl(registryUrl));
+    return this.cached({ key, fallback: true, public: isPublic }, fn);
   }
 
   protected getCacheKey(

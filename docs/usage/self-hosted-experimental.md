@@ -82,7 +82,7 @@ Default value: `2` (attempts results in maximum 2 seconds timeout).
 
 Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
 
-Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+Can be useful for slow-running, self-hosted GitLab instances that do not react fast enough for the default delay to help.
 
 Default value: `1000` (milliseconds).
 
@@ -96,6 +96,7 @@ Default value: `250` (milliseconds).
 
 If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
 This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
+If the merge request has a merged results pipeline, Renovate sets the status check on that pipeline instead of skipping it.
 
 ## `RENOVATE_X_HARD_EXIT`
 
@@ -173,7 +174,7 @@ Only applies when `RENOVATE_X_SQLITE_PACKAGE_CACHE` is set.
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.
-Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+Do not combine with `redisUrl`, Redis would be preferred over SQlite.
 
 ## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
 
@@ -183,7 +184,7 @@ If set to a valid path pointing to a file containing a _valid_ Renovate configur
   If the file is missing or contains invalid configuration, the scan will be aborted.
 
 !!! note
-  You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
+  You probably **should not use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 

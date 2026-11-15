@@ -268,6 +268,16 @@ describe('modules/datasource/maven/util', () => {
           'Temporary error',
         );
       });
+
+      it('marks the ExternalHostError as failing only the dependency', async () => {
+        const http = partial<Http>({
+          getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
+        });
+
+        await expect(
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
+        ).rejects.toMatchObject({ onlyThisDependencyAffected: true });
+      });
     });
 
     it('returns empty for connection error', async () => {

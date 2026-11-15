@@ -20,13 +20,13 @@ The `.ts` files are generated from this directory:
 cd lib/modules/datasource/hex/v2
 
 protoc \
-  --plugin=protoc-gen-ts_proto=$(npx -y -p ts-proto@1.178.0 which protoc-gen-ts_proto) \
+  --plugin=protoc-gen-ts_proto=$(pnpm --package=ts-proto@1.178.0 dlx -c 'command -v protoc-gen-ts_proto') \
   --ts_proto_opt=esModuleInterop=true \
   --ts_proto_opt=enumsAsLiterals=true \
   --ts_proto_opt=importSuffix=.js \
   --ts_proto_opt=outputEncodeMethods=decode-only \
   --ts_proto_opt=outputJsonMethods=from-only \
-  --ts_proto_opt=outputPartialMethods=true \
+  --ts_proto_opt=outputPartialMethods=false \
   --ts_proto_out=. \
   package.proto signed.proto
 ```
@@ -36,3 +36,4 @@ Key options:
 - `enumsAsLiterals` — const objects instead of TS enums (required for Node.js strip-only TypeScript mode)
 - `outputEncodeMethods=decode-only` — only decode, no encode (we only read registry data)
 - `outputJsonMethods=from-only` — only fromJSON, no toJSON
+- `outputPartialMethods=false`: omit `create` and `fromPartial`, which the datasource and tests do not use

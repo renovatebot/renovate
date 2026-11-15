@@ -18,7 +18,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
-import * as aws4 from 'aws4';
+import aws4 from 'aws4';
 import { git, logger } from '~test/util.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -334,7 +334,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('checks if nullcheck works for list prs', async () => {
-      // This test expects a clean cache as we want to check the behaviour when an AWS call is made
+      // This test expects a clean cache as we want to check the behavior when an AWS call is made
       await reInitRepo(codeCommit);
 
       codeCommitClient.on(ListPullRequestsCommand).resolvesOnce({});

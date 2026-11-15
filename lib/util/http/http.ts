@@ -27,6 +27,7 @@ import { applyHostGuard } from './host-guard.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
+import { isNotModified } from './status.ts';
 import { getThrottle } from './throttle.ts';
 import type {
   GotOptions,
@@ -342,7 +343,7 @@ export abstract class HttpBase<
         return resCopy;
       }
 
-      const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
+      const deepCopyNeeded = !!memCacheKey && !isNotModified(res);
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 

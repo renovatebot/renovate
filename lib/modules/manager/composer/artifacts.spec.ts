@@ -1284,6 +1284,27 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('quotes each dependency once in the update command', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    await expect(
+      composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo', newVersion: '^1.1 || ^2.0' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "composer update 'foo:^1.1 || ^2.0' --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      },
+    ]);
+  });
+
   it('uses --with-all-dependencies instead of --with-dependencies when composerUpdateAllDependencies is set in postUpdateOptions', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();

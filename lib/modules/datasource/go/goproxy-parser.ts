@@ -2,8 +2,8 @@ import { isString, isTruthy } from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
-import { getEnv } from '../../../util/env.ts';
 import { regEx } from '../../../util/regex.ts';
+import { getGoEnv } from './env.ts';
 import type { GoproxyItem } from './types.ts';
 
 /**
@@ -20,7 +20,7 @@ import type { GoproxyItem } from './types.ts';
  * @see https://golang.org/ref/mod#goproxy-protocol
  */
 export function parseGoproxy(
-  input: string | undefined = getEnv().GOPROXY,
+  input: string | undefined = getGoEnv().GOPROXY,
 ): GoproxyItem[] {
   if (!isString(input)) {
     return [];
@@ -98,7 +98,7 @@ const noproxyLexer = moo.states({
 
 export function parseNoproxy(
   input: unknown = (() => {
-    const env = getEnv();
+    const env = getGoEnv();
     return env.GONOPROXY ?? env.GOPRIVATE;
   })(),
 ): RegExp | null {

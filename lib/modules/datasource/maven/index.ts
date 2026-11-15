@@ -118,11 +118,13 @@ export class MavenDatasource extends Datasource {
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
 
-    if (
+    const isGradlePlugin =
       // groupId
-      (packageName.includes('.gradle.plugin:') ||
-        // artifactId
-        packageName.endsWith('.gradle.plugin')) &&
+      packageName.includes('.gradle.plugin:') ||
+      // artifactId
+      packageName.endsWith('.gradle.plugin');
+    if (
+      isGradlePlugin &&
       MAVEN_CENTRAL_URLS.some((url) => repoUrl === ensureTrailingSlash(url))
     ) {
       logger.debug(
@@ -144,14 +146,15 @@ export class MavenDatasource extends Datasource {
     );
 
     const latestSuitableVersion = getLatestSuitableVersion(releases);
-    const dependencyInfo =
-      latestSuitableVersion &&
-      (await getDependencyInfo(
+    let dependencyInfo;
+    if (latestSuitableVersion) {
+      dependencyInfo = await getDependencyInfo(
         this.http,
         dependency,
         repoUrl,
         latestSuitableVersion,
-      ));
+      );
+    }
 
     const result: ReleaseResult = {
       ...dependency,

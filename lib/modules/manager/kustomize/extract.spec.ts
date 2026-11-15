@@ -230,11 +230,26 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toEqual(sample);
     });
 
-    it('should extract a chart without repo and version', () => {
+    it('should skip a chart without repo and version', () => {
       const pkg = extractHelmChart({ name: 'renovate' });
       expect(pkg).toEqual({
         depName: 'renovate',
         datasource: HelmDatasource.id,
+        skipReason: 'local-chart',
+      });
+    });
+
+    it('should skip a chart with an empty repo', () => {
+      const pkg = extractHelmChart({
+        name: 'renovate',
+        version: '1.0.0',
+        repo: '',
+      });
+      expect(pkg).toEqual({
+        depName: 'renovate',
+        currentValue: '1.0.0',
+        datasource: HelmDatasource.id,
+        skipReason: 'local-chart',
       });
     });
 
@@ -887,6 +902,7 @@ describe('modules/manager/kustomize/extract', () => {
             depName: 'local-chart',
             currentValue: '1.0.0',
             datasource: HelmDatasource.id,
+            skipReason: 'local-chart',
           },
         ],
       });

@@ -84,7 +84,7 @@ The [Mend Developer Platform has an API](https://api-docs.mend.io/developer-plat
 
 ## Troubleshooting
 
-### Secret is stored successfully, but it doesn't work when used in the app
+### Secret is stored successfully, but it does not work when used in the app
 
 The secret might be wrong. Try uploading the secret again.
 

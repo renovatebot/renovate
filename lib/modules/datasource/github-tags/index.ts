@@ -103,10 +103,13 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
         const releaseTimestamp = releasesMap.get(
           release.version,
         )?.releaseTimestamp;
+        if (!releaseTimestamp) {
+          continue;
+        }
+
         if (
-          releaseTimestamp &&
-          (isNullOrUndefined(release.releaseTimestamp) ||
-            releaseTimestamp > release.releaseTimestamp)
+          isNullOrUndefined(release.releaseTimestamp) ||
+          releaseTimestamp > release.releaseTimestamp
         ) {
           release.releaseTimestamp = releaseTimestamp;
         }

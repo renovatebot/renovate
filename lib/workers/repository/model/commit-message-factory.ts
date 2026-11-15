@@ -4,7 +4,7 @@ import type { CommitMessage } from './commit-message.ts';
 import { CustomCommitMessage } from './custom-commit-message.ts';
 import { SemanticCommitMessage } from './semantic-commit-message.ts';
 
-type CommitMessageConfig = Pick<
+export type CommitMessageConfig = Pick<
   RenovateSharedConfig,
   | 'commitMessagePrefix'
   | 'semanticCommits'

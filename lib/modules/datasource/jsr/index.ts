@@ -74,7 +74,7 @@ export class JsrDatasource extends Datasource {
           config.registryUrl,
           config.packageName,
         ),
-        cacheable: true,
+        public: true,
         fallback: true,
       },
       () => this._getReleases(config),

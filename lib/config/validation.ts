@@ -115,6 +115,13 @@ const tzRe = regEx(/^:timezone\((?<timezone>.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 
+function isRepoRootPath(parentPath: string | undefined): boolean {
+  if (!parentPath) {
+    return false;
+  }
+  return parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath);
+}
+
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
@@ -174,7 +181,8 @@ function initOptions(): void {
     optionsByName.set(option.name, option);
 
     const parents = getAllowedParents(option);
-    if (parents) {
+    /* an option which can be used anywhere is valid in any object, even one which `any` doesn't (yet) expand to */
+    if (parents && !option.scopes?.includes('any')) {
       optionParents[option.name] = parents;
       // TODO: types (#22198)
       optionLocations[option.name] = describeAllowedLocations(option)!;
@@ -376,12 +384,12 @@ export async function validateConfig(
               });
             }
           }
-          const parentName =
-            parentOptionName ??
-            (parentPath &&
-            (parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath))
+          let parentName = parentOptionName;
+          if (is.undefined(parentName)) {
+            parentName = isRepoRootPath(parentPath)
               ? '.'
-              : getParentName(parentPath));
+              : getParentName(parentPath);
+          }
           if (
             !isPreset &&
             parentName &&
@@ -390,10 +398,16 @@ export async function validateConfig(
             /* an object which may only be top-level is already reported above, with a message which says so more precisely */
             !topLevelObjects.includes(key)
           ) {
+            /* the path of the parent, like `packageRules[1]`, naming a custom manager like we do in `enabledManagers` */
+            const { customType } = config as Partial<CustomManager>;
+            const parent =
+              parentName === 'customManagers' && isString(customType)
+                ? parentPath?.replace('customManagers', `custom.${customType}`)
+                : parentPath;
             const usedIn =
               parentName === '.'
                 ? 'at the top level of a config'
-                : `in "${parentName}"`;
+                : `in "${parent}"`;
             const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
             warnings.push({
               topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -773,13 +787,18 @@ export async function validateConfig(
                     }
                   }
                 }
+                const isSelectorKey =
+                  selectors.includes(key) ||
+                  key === 'matchCurrentVersion' ||
+                  key === 'matchCurrentValue';
+                // top level in a preset
+                const isStringPathOrNotPreset =
+                  isString(parentPath) || !isPreset;
                 if (
-                  (selectors.includes(key) ||
-                    key === 'matchCurrentVersion' ||
-                    key === 'matchCurrentValue') &&
+                  isSelectorKey &&
                   // TODO: can be undefined ? #22198
                   !rulesRe.test(parentPath!) && // Inside a packageRule
-                  (isString(parentPath) || !isPreset) // top level in a preset
+                  isStringPathOrNotPreset
                 ) {
                   errors.push({
                     topic: ConfigValidationTopic.Error,
@@ -1386,7 +1405,12 @@ function describeAllowedValues(option: RenovateOptions): string {
     const page = option.globalOnly
       ? 'self-hosted-configuration'
       : 'configuration-options';
-    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${option.name.toLowerCase()}`;
+    // options which can only be used in one parent, like `packageRules`, are documented under it
+    const heading =
+      option.parents?.length === 1
+        ? `${option.parents[0]}${option.name}`
+        : option.name;
+    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${heading.toLowerCase()}`;
   }
   return `allowedValues: ${JSON.stringify(allowedValues)}`;
 }

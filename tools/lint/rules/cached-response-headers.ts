@@ -69,11 +69,13 @@ function isError(node: ESTree.Expression): boolean {
 
 /** whether `node` is an error or the `response` of an error, whose `headers` are those of the error response */
 function isErrorResponse(node: ESTree.Expression): boolean {
+  if (isError(node)) {
+    return true;
+  }
   return (
-    isError(node) ||
-    (node.type === 'MemberExpression' &&
-      propertyName(node) === 'response' &&
-      isError(node.object))
+    node.type === 'MemberExpression' &&
+    propertyName(node) === 'response' &&
+    isError(node.object)
   );
 }
 
