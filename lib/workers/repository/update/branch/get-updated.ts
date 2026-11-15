@@ -687,9 +687,7 @@ interface PendingVersionCheck {
 }
 
 function hasPendingVersions(updatedDeps: BranchUpgradeConfig[]): boolean {
-  return updatedDeps.some(
-    (dep) => dep.depName && isNonEmptyArray(dep.pendingVersions),
-  );
+  return updatedDeps.some((dep) => isNonEmptyArray(dep.pendingVersions));
 }
 
 /**

@@ -67,10 +67,9 @@ function resolveLockedDependency(
   }
 
   const depName = dep.depName!;
-  const workspaceEntry =
-    workspacePath && workspace.name
-      ? lock.packages[`${workspace.name}/${depName}`]
-      : undefined;
+  const workspaceEntry = workspacePath
+    ? lock.packages[`${workspace.name}/${depName}`]
+    : undefined;
   const entry = workspaceEntry ?? lock.packages[depName];
   if (!entry) {
     // Overrides of transitive dependencies need not have a root lock entry.

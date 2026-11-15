@@ -341,6 +341,11 @@ describe('modules/manager/bun/extract', () => {
       {
         lockfileVersion: 1,
         workspaces: { '': {} },
+        packages: { foo: [123], bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
         packages: { foo: ['foo'], bar: ['bar@1.0.0'] },
       },
       {
