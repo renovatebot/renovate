@@ -464,12 +464,13 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (hasPendingVersions(updatedDeps)) {
+        const dependencyToUpgradeInfo = getPendingUpgrades(updatedDeps);
+        if (dependencyToUpgradeInfo.size) {
           pendingVersionChecks.push({
             manager,
             packageFileName: packageFile.path,
             packageFileContent: packageFile.contents!.toString(),
-            updatedDeps,
+            dependencyToUpgradeInfo,
             hadArtifactResults: isNonEmptyArray(results),
           });
         }
@@ -521,12 +522,13 @@ export async function getUpdatedPackageFiles(
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
-        if (hasPendingVersions(updatedDeps)) {
+        const dependencyToUpgradeInfo = getPendingUpgrades(updatedDeps);
+        if (dependencyToUpgradeInfo.size) {
           pendingVersionChecks.push({
             manager,
             packageFileName: packageFile.path,
             packageFileContent: packageFile.contents!.toString(),
-            updatedDeps,
+            dependencyToUpgradeInfo,
             hadArtifactResults: isNonEmptyArray(results),
           });
         }
@@ -678,16 +680,35 @@ function processUpdateArtifactResults(
   }
 }
 
+interface PendingUpgradeInfo {
+  pendingVersions: Set<string>;
+  newVersion: string | undefined;
+}
+
 interface PendingVersionCheck {
   manager: string;
   packageFileName: string;
   packageFileContent: string;
-  updatedDeps: BranchUpgradeConfig[];
+  dependencyToUpgradeInfo: Map<string, PendingUpgradeInfo>;
   hadArtifactResults: boolean;
 }
 
-function hasPendingVersions(updatedDeps: BranchUpgradeConfig[]): boolean {
-  return updatedDeps.some((dep) => isNonEmptyArray(dep.pendingVersions));
+function getPendingUpgrades(
+  updatedDeps: BranchUpgradeConfig[],
+): Map<string, PendingUpgradeInfo> {
+  const dependencyToUpgradeInfo = new Map<string, PendingUpgradeInfo>();
+  for (const dep of updatedDeps) {
+    if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
+      dependencyToUpgradeInfo.set(
+        JSON.stringify([dep.depName, dep.packageName ?? dep.depName]),
+        {
+          pendingVersions: new Set(dep.pendingVersions),
+          newVersion: dep.newVersion,
+        },
+      );
+    }
+  }
+  return dependencyToUpgradeInfo;
 }
 
 /**
@@ -705,27 +726,9 @@ async function checkForPendingVersions(
     manager,
     packageFileName,
     packageFileContent,
-    updatedDeps,
+    dependencyToUpgradeInfo,
     hadArtifactResults,
   } = check;
-  const dependencyToUpgradeInfo = new Map<
-    string,
-    {
-      pendingVersions: Set<string>;
-      newVersion: string | undefined;
-    }
-  >();
-  for (const dep of updatedDeps) {
-    if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
-      dependencyToUpgradeInfo.set(
-        JSON.stringify([dep.depName, dep.packageName ?? dep.depName]),
-        {
-          pendingVersions: new Set(dep.pendingVersions),
-          newVersion: dep.newVersion,
-        },
-      );
-    }
-  }
 
   const packageFileConfig = patchConfigForArtifactsUpdate(
     config,
