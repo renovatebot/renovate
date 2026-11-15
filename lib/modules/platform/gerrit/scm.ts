@@ -11,7 +11,7 @@ import { client } from './client.ts';
 import type { GerritLabels } from './schema.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
 
-const CODE_REVIEW_LABEL = 'Code-Review';
+export const CODE_REVIEW_LABEL = 'Code-Review';
 
 /**
  * Gerrit SCM strategy:
