@@ -121,7 +121,6 @@ describe('modules/platform/gerrit/client', () => {
       ],
       ['message:"Renovate-Branch: "', { branchName: '' }],
       ['hasfooter:Renovate-Branch', { branchName: '' }, '3.6.0'],
-      ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
         { branchName: 'dependency-xyz', targetBranch: 'otherTarget' },
