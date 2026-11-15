@@ -101,6 +101,7 @@ async function fetchRegistryToken(
 
 /**
  * Returns the registry token issued by `authUrl`, reusing a token from earlier in the repository run until it is due for refresh.
+ * Lookups that find the same token due for refresh share one new token request.
  */
 async function getRegistryToken(
   http: Http,
@@ -112,23 +113,32 @@ async function getRegistryToken(
     'registry-token',
     authUrl,
   );
-  const cachedToken = memCache.get<Promise<RegistryToken> | undefined>(
-    cacheKey,
-  );
-  if (cachedToken) {
-    const registryToken = await cachedToken;
-    if (DateTime.now() < registryToken.refreshAt) {
-      return registryToken.token;
+  for (;;) {
+    const cachedToken = memCache.get<Promise<RegistryToken> | undefined>(
+      cacheKey,
+    );
+    if (cachedToken) {
+      const registryToken = await cachedToken;
+      if (DateTime.now() < registryToken.refreshAt) {
+        return registryToken.token;
+      }
+      // Another lookup waiting on the same token may have started its refresh
+      // first: wait for that one rather than request a second token.
+      if (memCache.get(cacheKey) !== cachedToken) {
+        continue;
+      }
     }
-  }
 
-  const pendingToken = fetchRegistryToken(http, authUrl, opts);
-  memCache.set(cacheKey, pendingToken);
-  try {
-    return (await pendingToken).token;
-  } catch (err) {
-    memCache.set(cacheKey, undefined);
-    throw err;
+    // Set synchronously after the check above, so that no other lookup can
+    // start a request between them.
+    const pendingToken = fetchRegistryToken(http, authUrl, opts);
+    memCache.set(cacheKey, pendingToken);
+    try {
+      return (await pendingToken).token;
+    } catch (err) {
+      memCache.set(cacheKey, undefined);
+      throw err;
+    }
   }
 }
 

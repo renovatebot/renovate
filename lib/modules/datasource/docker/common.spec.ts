@@ -2,8 +2,8 @@ import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
-import * as memCache from '../../../util/cache/memory/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
@@ -421,6 +421,35 @@ describe('modules/datasource/docker/common', () => {
         expect(headers).toEqual([
           { authorization: 'Bearer first' },
           { authorization: 'Bearer first' },
+        ]);
+      });
+
+      it('shares one refresh between concurrent lookups of an expired token', async () => {
+        // Only the token requests are counted: a second refresh would find no mock.
+        httpMock
+          .scope(registryHost)
+          .get('/v2/')
+          .reply(401, '', challenge)
+          .persist();
+        httpMock
+          .scope(registryHost)
+          .get(tokenPath)
+          .reply(200, { token: 'first', expires_in: 300 })
+          .get(tokenPath)
+          .reply(200, { token: 'second', expires_in: 300 });
+
+        await getAuthHeaders(http, registryHost, 'repo');
+        vi.setSystemTime(new Date('2026-01-01T00:04:30Z'));
+        const headers = await Promise.all([
+          getAuthHeaders(http, registryHost, 'repo'),
+          getAuthHeaders(http, registryHost, 'repo'),
+          getAuthHeaders(http, registryHost, 'repo'),
+        ]);
+
+        expect(headers).toEqual([
+          { authorization: 'Bearer second' },
+          { authorization: 'Bearer second' },
+          { authorization: 'Bearer second' },
         ]);
       });
 
