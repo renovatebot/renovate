@@ -51,7 +51,6 @@ describe('config/decrypt/bcpgp', () => {
       );
     });
 
-    // The first wasm-dotnet call also initializes the runtime on shared CI runners.
     it('works broken PGP message', async () => {
       vi.stubEnv('RENOVATE_X_PGP_RUNTIME', 'wasm-dotnet');
       await expect(
@@ -68,7 +67,7 @@ describe('config/decrypt/bcpgp', () => {
         { runtime: 'wasm-dotnet' },
         'Using configured PGP runtime',
       );
-    }, 15_000);
+    });
 
     it('fails with ECC and AEAD (wasm-dotnet', async () => {
       // not supported by bouncycastle C# implementation

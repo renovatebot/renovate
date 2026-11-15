@@ -229,23 +229,29 @@ describe('modules/manager/bun/extract', () => {
       expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
-    it('rejects a missing required peer dependency', async () => {
+    it('omits an uninstalled peer dependency without failing other dependencies', async () => {
       const result = await extractPackageFile(
-        JSON.stringify({ peerDependencies: { foo: '^1.0.0' } }),
+        JSON.stringify({
+          dependencies: { prettier: '^3.0.0' },
+          peerDependencies: { foo: '^1.0.0' },
+        }),
         'package.json',
         {
           lockFiles: ['bun.lock'],
           fileContents: {
             'bun.lock': JSON.stringify({
-              lockfileVersion: 1,
+              lockfileVersion: 0,
               workspaces: { '': {} },
-              packages: {},
+              overrides: { nested: { foo: '1.0.0' } },
+              packages: { prettier: ['prettier@3.10.1'] },
             }),
           },
         },
       );
 
-      expect(result).toBeNull();
+      expect(result?.deps).toMatchObject([
+        { depName: 'prettier', lockedVersion: '3.10.1' },
+      ]);
     });
 
     it('retains tool versions from the manifest instead of looking them up in the lock', async () => {
@@ -312,42 +318,10 @@ describe('modules/manager/bun/extract', () => {
 
     it.each([
       { lockfileVersion: 3, workspaces: { '': {} }, packages: {} },
-      {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        packages: { foo: ['foo'] },
-      },
-      {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        packages: { foo: ['foo@workspace:missing'] },
-      },
-      {
-        lockfileVersion: 1,
-        workspaces: { '': {}, local: { name: 'other' } },
-        packages: { foo: ['foo@workspace:local'] },
-      },
-      {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        overrides: { foo: 'npm:baz@1.0.0' },
-        packages: { foo: ['bar@1.0.0'] },
-      },
       { lockfileVersion: 2, workspaces: {}, packages: {} },
-      { lockfileVersion: 2, workspaces: { '': {} }, packages: { foo: null } },
-      { lockfileVersion: 2, workspaces: { '': {} }, packages: {} },
-      {
-        lockfileVersion: 2,
-        workspaces: { '': {} },
-        packages: { foo: ['bar@1.3.0'] },
-      },
-      {
-        lockfileVersion: 2,
-        workspaces: { '': {} },
-        packages: { foo: ['foo@github:owner/repo'] },
-      },
+      { lockfileVersion: 2, workspaces: { '': {} }, packages: null },
     ])(
-      'returns null when the lock cannot establish a resolved npm version: %j',
+      'returns null when the lockfile structure is unsupported or invalid: %j',
       async (value) => {
         await expect(
           extractPackageFile(manifest, 'package.json', {
@@ -355,6 +329,60 @@ describe('modules/manager/bun/extract', () => {
             fileContents: { 'bun.lock': JSON.stringify(value) },
           }),
         ).resolves.toBeNull();
+      },
+    );
+
+    it.each([
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: null, bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: ['foo'], bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {} },
+        packages: { foo: ['foo@workspace:missing'], bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 1,
+        workspaces: { '': {}, local: { name: 'other' } },
+        packages: { foo: ['foo@workspace:local'], bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 2,
+        workspaces: { '': {} },
+        packages: { bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 2,
+        workspaces: { '': {} },
+        packages: { foo: ['baz@1.3.0'], bar: ['bar@1.0.0'] },
+      },
+      {
+        lockfileVersion: 2,
+        workspaces: { '': {} },
+        packages: { foo: ['foo@github:owner/repo'], bar: ['bar@1.0.0'] },
+      },
+    ])(
+      'omits a dependency when the lock cannot establish a resolved npm version: %j',
+      async (value) => {
+        const result = await extractPackageFile(
+          JSON.stringify({ dependencies: { foo: '^1.2.0', bar: '^1.0.0' } }),
+          'package.json',
+          {
+            lockFiles: ['bun.lock'],
+            fileContents: { 'bun.lock': JSON.stringify(value) },
+          },
+        );
+
+        expect(result?.deps).toMatchObject([
+          { depName: 'bar', lockedVersion: '1.0.0' },
+        ]);
       },
     );
 

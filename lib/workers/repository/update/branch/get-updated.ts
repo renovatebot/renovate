@@ -409,13 +409,7 @@ export async function getUpdatedPackageFiles(
     contents: updatedFileContents[name],
   }));
   const updatedArtifacts: FileChange[] = [];
-  const pendingVersionChecks: {
-    manager: string;
-    packageFileName: string;
-    packageFileContent: string;
-    updatedDeps: BranchUpgradeConfig[];
-    hadArtifactResults: boolean;
-  }[] = [];
+  const pendingVersionChecks: PendingVersionCheck[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
   if (isNonEmptyArray(updatedPackageFiles)) {
@@ -470,13 +464,15 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        pendingVersionChecks.push({
-          manager,
-          packageFileName: packageFile.path,
-          packageFileContent: packageFile.contents!.toString(),
-          updatedDeps,
-          hadArtifactResults: isNonEmptyArray(results),
-        });
+        if (hasPendingVersions(updatedDeps)) {
+          pendingVersionChecks.push({
+            manager,
+            packageFileName: packageFile.path,
+            packageFileContent: packageFile.contents!.toString(),
+            updatedDeps,
+            hadArtifactResults: isNonEmptyArray(results),
+          });
+        }
       }
     }
   }
@@ -525,13 +521,15 @@ export async function getUpdatedPackageFiles(
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
-        pendingVersionChecks.push({
-          manager,
-          packageFileName: packageFile.path,
-          packageFileContent: packageFile.contents!.toString(),
-          updatedDeps,
-          hadArtifactResults: isNonEmptyArray(results),
-        });
+        if (hasPendingVersions(updatedDeps)) {
+          pendingVersionChecks.push({
+            manager,
+            packageFileName: packageFile.path,
+            packageFileContent: packageFile.contents!.toString(),
+            updatedDeps,
+            hadArtifactResults: isNonEmptyArray(results),
+          });
+        }
       }
     }
   }
@@ -579,25 +577,23 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
-  // A later workspace update can rewrite a lockfile produced by an earlier one.
-  // Validate against the final artifact contents that will be committed.
-  const fileContents = Object.fromEntries(
-    updatedArtifacts.map((file) => [
-      file.path,
-      file.type === 'addition' ? file.contents : null,
-    ]),
-  );
-  for (const check of pendingVersionChecks) {
-    await checkForPendingVersions(
-      check.manager,
-      check.packageFileName,
-      check.packageFileContent,
-      check.updatedDeps,
-      artifactErrors,
-      fileContents,
-      check.hadArtifactResults,
-      config,
+  if (isNonEmptyArray(pendingVersionChecks)) {
+    // A later workspace update can rewrite a lockfile produced by an earlier one.
+    // Validate against the final artifact contents that will be committed.
+    const fileContents = Object.fromEntries(
+      updatedArtifacts.map((file) => [
+        file.path,
+        file.type === 'addition' ? file.contents : null,
+      ]),
     );
+    for (const check of pendingVersionChecks) {
+      await checkForPendingVersions(
+        check,
+        fileContents,
+        artifactErrors,
+        config,
+      );
+    }
   }
   return {
     reuseExistingBranch, // Need to overwrite original config
@@ -682,21 +678,38 @@ function processUpdateArtifactResults(
   }
 }
 
+interface PendingVersionCheck {
+  manager: string;
+  packageFileName: string;
+  packageFileContent: string;
+  updatedDeps: BranchUpgradeConfig[];
+  hadArtifactResults: boolean;
+}
+
+function hasPendingVersions(updatedDeps: BranchUpgradeConfig[]): boolean {
+  return updatedDeps.some(
+    (dep) => dep.depName && isNonEmptyArray(dep.pendingVersions),
+  );
+}
+
 /**
  * When using Minimum Release Age, and a package manager that doesn't support being told an explicit version to update to (#41624) it is possible that an artifact update leads to a different version of a dependency being used compared to what Renovate is expecting.
  *
  * We should report these cases more explicitly with an Artifact Error, to allow the reviewers to decide what to do with the changes.
  */
 async function checkForPendingVersions(
-  manager: string,
-  packageFileName: string,
-  packageFileContent: string,
-  updatedDeps: BranchUpgradeConfig[],
-  artifactErrors: ArtifactError[],
+  check: PendingVersionCheck,
   fileContents: NonNullable<ExtractConfig['fileContents']>,
-  hadArtifactResults: boolean,
+  artifactErrors: ArtifactError[],
   config: BranchConfig,
 ): Promise<void> {
+  const {
+    manager,
+    packageFileName,
+    packageFileContent,
+    updatedDeps,
+    hadArtifactResults,
+  } = check;
   const dependencyToUpgradeInfo = new Map<
     string,
     {
@@ -714,9 +727,6 @@ async function checkForPendingVersions(
         },
       );
     }
-  }
-  if (!dependencyToUpgradeInfo.size) {
-    return;
   }
 
   const packageFileConfig = patchConfigForArtifactsUpdate(

@@ -15,7 +15,6 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 
-import { extractDependency } from '../npm/extract/common/dependency.ts';
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
@@ -43,17 +42,66 @@ const lockfileDependencyTypes = new Set<string | undefined>([
 ]);
 
 const BunLock = z.object({
-  lockfileVersion: z.union([z.literal(1), z.literal(2)]),
+  lockfileVersion: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   workspaces: z.record(
     z.string(),
     z.object({
       name: z.string().optional(),
-      optionalPeers: z.array(z.string()).optional(),
     }),
   ),
-  overrides: z.record(z.string(), z.string()).optional(),
-  packages: z.record(z.string(), z.tuple([z.string()]).rest(z.unknown())),
+  packages: z.record(z.string(), z.unknown()),
 });
+
+function resolveLockedDependency(
+  dep: PackageDependency<NpmManagerData>,
+  lock: z.infer<typeof BunLock>,
+  workspace: z.infer<typeof BunLock>['workspaces'][string],
+  workspacePath: string,
+): PackageDependency<NpmManagerData> | null {
+  if (
+    !lockfileDependencyTypes.has(dep.depType) ||
+    dep.datasource !== 'npm' ||
+    dep.skipReason
+  ) {
+    return dep;
+  }
+
+  const depName = dep.depName!;
+  const workspaceEntry =
+    workspacePath && workspace.name
+      ? lock.packages[`${workspace.name}/${depName}`]
+      : undefined;
+  const entry = workspaceEntry ?? lock.packages[depName];
+  if (!entry) {
+    // Overrides of transitive dependencies need not have a root lock entry.
+    return dep.depType === 'overrides' ? dep : null;
+  }
+  if (!isArray(entry) || !isString(entry[0])) {
+    return null;
+  }
+
+  const separator = entry[0].indexOf('@', 1);
+  if (separator === -1) {
+    return null;
+  }
+  const resolvedName = entry[0].slice(0, separator);
+  const reference = entry[0].slice(separator + 1);
+  if (reference.startsWith('workspace:')) {
+    return null;
+  }
+
+  const packageName = dep.packageName ?? depName;
+  if (resolvedName !== packageName) {
+    return null;
+  }
+
+  const version = semver.valid(reference);
+  if (!version) {
+    return null;
+  }
+  dep.lockedVersion = version;
+  return dep;
+}
 
 /** Re-extract a manifest using versions from the regenerated text lockfile. */
 export async function extractPackageFile(
@@ -107,60 +155,15 @@ export async function extractPackageFile(
 
   const deps: PackageDependency<NpmManagerData>[] = [];
   for (const dep of result.deps) {
-    const isLockfileDependency = lockfileDependencyTypes.has(dep.depType);
-    if (!isLockfileDependency || dep.datasource !== 'npm' || dep.skipReason) {
-      deps.push(dep);
-      continue;
+    const resolved = resolveLockedDependency(
+      dep,
+      lock,
+      workspace,
+      workspacePath,
+    );
+    if (resolved) {
+      deps.push(resolved);
     }
-    const depName = dep.depName!;
-    const workspaceKey = `${workspace.name}/${depName}`;
-    const workspaceEntry = workspacePath
-      ? lock.packages[workspaceKey]
-      : undefined;
-    const entry = workspaceEntry ?? lock.packages[depName];
-    if (!entry) {
-      const isOptionalPeer =
-        dep.depType === 'peerDependencies' &&
-        workspace.optionalPeers?.includes(depName);
-      if (isOptionalPeer) {
-        continue;
-      }
-      // Overrides of transitive dependencies need not have a root lock entry.
-      if (dep.depType === 'overrides') {
-        deps.push(dep);
-        continue;
-      }
-      return null;
-    }
-    const separator = entry[0].indexOf('@', 1);
-    if (separator === -1) {
-      return null;
-    }
-    const resolvedName = entry[0].slice(0, separator);
-    const reference = entry[0].slice(separator + 1);
-    if (reference.startsWith('workspace:')) {
-      const target = lock.workspaces[reference.slice('workspace:'.length)];
-      if (target?.name === resolvedName) {
-        continue;
-      }
-      return null;
-    }
-    const packageName = dep.packageName ?? depName;
-    if (resolvedName !== packageName) {
-      const override = lock.overrides?.[depName];
-      const replacement = extractDependency('overrides', depName, override);
-      if (replacement.packageName === resolvedName) {
-        // The override record, rather than the shadowed declaration, owns this identity.
-        continue;
-      }
-      return null;
-    }
-    const version = semver.valid(reference);
-    if (!version) {
-      return null;
-    }
-    dep.lockedVersion = version;
-    deps.push(dep);
   }
   return { ...result, deps };
 }
