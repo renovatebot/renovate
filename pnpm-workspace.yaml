@@ -22,6 +22,8 @@ catalog:
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
+  # GHSA-xcx6-jx8p-x3h5, fixed in 7.1.0
+  '@azure/msal-node@<7.1.0': 7.1.1
   '@simple-git/argv-parser@2.0.0': 2.0.1
   '@yarnpkg/core@4.5.0>tar': 'catalog:'
   esbuild: 'catalog:'

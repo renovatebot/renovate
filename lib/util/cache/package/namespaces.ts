@@ -25,6 +25,7 @@ export const packageCacheNamespaces = [
   'datasource-aws-rds',
   'datasource-aws-eks-addon',
   'datasource-azure-bicep-resource',
+  'datasource-azure-compute-gallery',
   'datasource-azure-pipelines-tasks',
   'datasource-azure-tags',
   'datasource-bazel',
