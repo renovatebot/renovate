@@ -943,6 +943,7 @@ export async function validateConfig(
                   }
                 } else if (key === 'constraints') {
                   const { get: getVersioning } =
+                    // oxlint-disable-next-line no-restricted-imports -- versioning validation needs the real versioning code
                     await import('../modules/versioning/index.ts');
                   for (const [k, v] of Object.entries(val)) {
                     if (!isString(v)) {
