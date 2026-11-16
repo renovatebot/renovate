@@ -119,6 +119,15 @@ describe('modules/datasource/clojure/index', () => {
     expect(res).toMatchObject({ isPrivate: true });
   });
 
+  it('does not mark anonymous results from a default registry as private', async () => {
+    mockGenericPackage();
+
+    const res = await get('org.example:package', baseUrl);
+
+    expect(res).not.toBeNull();
+    expect(res).not.toHaveProperty('isPrivate');
+  });
+
   it('collects releases from all registry urls', async () => {
     mockGenericPackage();
     mockGenericPackage({

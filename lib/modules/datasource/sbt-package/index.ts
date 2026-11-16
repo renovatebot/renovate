@@ -106,7 +106,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('.')));
     }
 
-    let isPrivate = !this.getDefaultRegistryUrls('').includes(registryUrl);
+    let isPrivate = false;
     let dependencyUrl: string | undefined;
     let packageUrls: string[] | undefined;
     for (const packageRootUrl of packageRootUrls) {

@@ -25,8 +25,9 @@ import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
+import { CLOJARS_REPO } from '../clojure/common.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { isMavenCentral } from './common.ts';
+import { MAVEN_REPO, isMavenCentral } from './common.ts';
 import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
@@ -106,6 +107,15 @@ function isMetadataUrl(url: string): boolean {
   return url.endsWith('/maven-metadata.xml');
 }
 
+const defaultRegistryUrls = [MAVEN_REPO, CLOJARS_REPO].map((registryUrl) =>
+  ensureTrailingSlash(registryUrl),
+);
+
+/** Returns whether the URL is located below one of the default registries. */
+function isDefaultRegistryUrl(url: string): boolean {
+  return defaultRegistryUrls.some((registryUrl) => url.startsWith(registryUrl));
+}
+
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
@@ -133,7 +143,7 @@ export async function downloadHttpProtocol(
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = {
         data: res.body,
-        isCacheable: !res.authorization,
+        isCacheable: !res.authorization && isDefaultRegistryUrl(url),
       };
 
       const lastModified = asTimestamp(res?.headers?.['last-modified']);
@@ -275,7 +285,7 @@ export async function downloadS3Protocol(
         }
 
         const data = await streamToString(Body);
-        const result: MavenFetchSuccess = { data };
+        const result: MavenFetchSuccess = { data, isCacheable: false };
 
         const lastModified = asTimestamp(LastModified);
         if (lastModified) {

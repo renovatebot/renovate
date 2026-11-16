@@ -795,6 +795,21 @@ describe('modules/datasource/maven/index', () => {
 
       expect(res).toMatchObject({ isPrivate: true });
     });
+
+    it.each`
+      registryUrl
+      ${'https://anonymous.registry.renovatebot.com'}
+      ${'https://repo.maven.apache.org.evil/maven2'}
+    `(
+      'marks anonymous results from $registryUrl as private',
+      async ({ registryUrl }) => {
+        mockGenericPackage({ base: registryUrl });
+
+        const res = await get('org.example:package', registryUrl);
+
+        expect(res).toMatchObject({ isPrivate: true });
+      },
+    );
   });
 
   describe('fetching parent info', () => {

@@ -174,10 +174,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (
-      metadata.isPrivate ||
-      !this.getDefaultRegistryUrls('').includes(registryUrl)
-    ) {
+    if (metadata.isPrivate) {
       result.isPrivate = true;
     }
 
