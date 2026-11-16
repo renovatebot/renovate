@@ -2,6 +2,7 @@
 
 import crypto from 'node:crypto';
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -385,16 +386,31 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
+  // the branch config only takes its settings from the first upgrade, so also check the other upgrades for `executionMode=branch`
+  const [branchPostUpgradeTasks, ...otherBranchPostUpgradeTasks] = [
+    config,
+    ...config.upgrades,
+  ]
+    .map(({ postUpgradeTasks }) => postUpgradeTasks)
+    .filter((tasks) => tasks?.executionMode === 'branch');
+
+  const skippedCommands = otherBranchPostUpgradeTasks
+    .filter((tasks) => !dequal(tasks, branchPostUpgradeTasks))
+    .map((tasks) => tasks?.commands);
+  if (skippedCommands.length) {
+    logger.warn(
+      { branchName: config.branchName, skippedCommands },
+      'Skipping `postUpgradeTasks` with `executionMode=branch` that differ from the first one found',
+    );
+  }
+
   const branchUpgradeCommands: BranchUpgradeConfig[] = [
     {
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       constraints: config.constraints,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
-          : undefined,
+      postUpgradeTasks: branchPostUpgradeTasks,
     },
   ];
 
