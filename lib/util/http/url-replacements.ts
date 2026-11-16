@@ -30,6 +30,27 @@ function matchesHostType(
   return hostType !== undefined && matchHostTypes.includes(hostType);
 }
 
+interface ActiveUrlReplacements {
+  urlReplacements: UrlReplacement[];
+  rules: UrlReplacement[];
+}
+
+let activeUrlReplacements: ActiveUrlReplacements | undefined;
+
+/**
+ * Returns the usable global `urlReplacements`, computed again only when `urlReplacements` changes.
+ */
+function getActiveUrlReplacements(): UrlReplacement[] {
+  const urlReplacements = GlobalConfig.get('urlReplacements');
+  if (activeUrlReplacements?.urlReplacements !== urlReplacements) {
+    activeUrlReplacements = {
+      urlReplacements,
+      rules: getUrlReplacements(urlReplacements),
+    };
+  }
+  return activeUrlReplacements.rules;
+}
+
 /**
  * Applies the global `urlReplacements` rules for `hostType` to `url`.
  */
@@ -37,7 +58,7 @@ function replaceUrl(
   url: string,
   hostType: string | undefined,
 ): UrlPrefixResult<UrlReplacement & UrlPrefixRule> {
-  const rules = getUrlReplacements(GlobalConfig.get('urlReplacements'))
+  const rules = getActiveUrlReplacements()
     .filter((rule) => matchesHostType(rule, hostType))
     .map((rule) => ({
       ...rule,

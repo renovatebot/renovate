@@ -2,6 +2,7 @@ import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import * as hostRules from '../host-rules.ts';
 import { parseUrl } from '../url.ts';
+import * as urlReplacementsModule from '../url-replacements.ts';
 import {
   applyUrlReplacements,
   hostRuleHasCredentials,
@@ -15,6 +16,29 @@ describe('util/http/url-replacements', () => {
   describe('applyUrlReplacements', () => {
     afterEach(() => {
       GlobalConfig.reset();
+    });
+
+    it('checks the rules again only after urlReplacements changes', () => {
+      const getUrlReplacements = vi.spyOn(
+        urlReplacementsModule,
+        'getUrlReplacements',
+      );
+      const urlReplacements = [
+        { matchUrlPrefix: mavenCentral, replaceUrlPrefix: mirror },
+      ];
+      GlobalConfig.set({ urlReplacements });
+
+      applyUrlReplacements(parseUrl(artifactUrl)!, { hostType: 'maven' });
+      applyUrlReplacements(parseUrl(artifactUrl)!, { hostType: 'maven' });
+      GlobalConfig.set({ urlReplacements: [...urlReplacements] });
+      const res = applyUrlReplacements(parseUrl(artifactUrl)!, {
+        hostType: 'maven',
+      });
+
+      expect(res.toString()).toBe(
+        `${mirror}org/example/foo/maven-metadata.xml`,
+      );
+      expect(getUrlReplacements).toHaveBeenCalledTimes(2);
     });
 
     it('skips a rule whose replaceUrlPrefix another rule rewrites', () => {
