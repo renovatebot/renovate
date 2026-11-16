@@ -7,7 +7,7 @@ Read the full document before you start using the `pip-compile` manager.
 
 ### Non-configured managerFilePatterns
 
-The `pip-compile` manager has an empty array for default `managerFilePatterns`, meaning it won't match any files ever by default.
+The `pip-compile` manager has an empty array for default `managerFilePatterns`, meaning it will not match any files ever by default.
 You can "activate" the manager by specifying a `managerFilePatterns` pattern such as:
 
 ```json
@@ -25,7 +25,7 @@ You can "activate" the manager by specifying a `managerFilePatterns` pattern suc
 As Renovate matches a `pip-compile` output file it will extract original command that was used to create it from header in this file.
 Because of that `pip-compile` manager poses restrictions on how this file is generated:
 
-- Use default header generation, don't use `--no-header` option.
+- Use default header generation, do not use `--no-header` option.
 - Pass all source files explicitly.
 
 In turn `pip-compile` manager will find all source files and parse them as package files using their respective managers.

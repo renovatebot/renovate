@@ -57,7 +57,7 @@ export function parseValue(
  *
  * Renovate's default versionings treat a partial version as pinned, and so
  * replace it with a full-precision one (e.g. `3.3` -> `3.3.6`), which drops
- * the rolling behaviour the workflow asked for. `semver-partial` versioning
+ * the rolling behavior the workflow asked for. `semver-partial` versioning
  * keeps the value's precision instead (`3.3` -> `3.4`).
  */
 export function parsePartialValue(

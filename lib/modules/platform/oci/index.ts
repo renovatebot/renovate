@@ -309,8 +309,9 @@ export async function findPr({
       const targetBranchMatches =
         !targetBranch || pr.targetBranch === targetBranch;
       const stateMatches =
-        state === 'all' ||
-        (state === '!open' ? pr.state !== 'open' : pr.state === state);
+        state === '!open'
+          ? pr.state !== 'open'
+          : state === 'all' || pr.state === state;
       return (
         pr.sourceBranch === branchName &&
         titleMatches &&
@@ -509,13 +510,12 @@ export async function ensureComment({
   const header = topic ? `### ${topic}\n\n` : '';
   const data = sanitize(`${header}${content}`);
   const comments = await client.list<OciComment>(path, {});
-  const existing = comments.find(
-    (comment) =>
-      isOwnComment(comment) &&
-      (topic
-        ? comment.data.startsWith(sanitize(header))
-        : comment.data === data),
-  );
+  const existing = comments.find((comment) => {
+    const matchesContent = topic
+      ? comment.data.startsWith(sanitize(header))
+      : comment.data === data;
+    return isOwnComment(comment) && matchesContent;
+  });
   if (!existing) {
     await client.post(path, { data });
   } else if (existing.data !== data) {
@@ -530,12 +530,11 @@ export async function ensureCommentRemoval(
   const path = `${await prPath(config.number)}/comments`;
   const comments = await client.list<OciComment>(path, {});
   for (const comment of comments) {
-    if (
-      isOwnComment(comment) &&
-      (config.type === 'by-topic'
+    const matchesContent =
+      config.type === 'by-topic'
         ? comment.data.startsWith(sanitize(`### ${config.topic}\n\n`))
-        : comment.data === sanitize(config.content))
-    ) {
+        : comment.data === sanitize(config.content);
+    if (isOwnComment(comment) && matchesContent) {
       await client.delete(`${path}/${encodeURIComponent(comment.id)}`);
     }
   }
@@ -611,7 +610,7 @@ export function ensureIssue(
   _config: EnsureIssueConfig,
 ): Promise<EnsureIssueResult | null> {
   logger.once.warn(
-    'OCI issues and the Dependency Dashboard are not supported; set dependencyDashboard=false',
+    'OCI issues and the Dependency Dashboard are not supported; set dependencyDashboard.enabled=false',
   );
   return Promise.resolve(null);
 }

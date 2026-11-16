@@ -225,6 +225,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     packageName: 'containerbase/python-prebuild',
     versioning: 'python',
   },
+  renovate: {
+    datasource: 'npm',
+    packageName: 'renovate',
+    versioning: 'npm',
+  },
   ruby: {
     datasource: 'github-releases',
     packageName: 'containerbase/ruby-prebuild',

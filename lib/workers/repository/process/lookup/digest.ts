@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import { logger } from '../../../../logger/index.ts';
 import type {
@@ -168,10 +168,12 @@ async function resolveUpdateDigest(
     )?.newDigest;
   }
 
-  update.newDigest ??= await getDigest(
-    getDigestInputConfig(config, res, update),
-    update.newValue,
-  );
+  if (isNullOrUndefined(update.newDigest)) {
+    update.newDigest = await getDigest(
+      getDigestInputConfig(config, res, update),
+      update.newValue,
+    );
+  }
 
   // If the digest could not be determined, report this as otherwise the
   // update will be omitted later on without notice.

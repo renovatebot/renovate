@@ -96,7 +96,7 @@ module.exports = {
   repositories: ['ocid1.devopsrepository.oc1.eu-milan-1.example'],
   gitAuthor: 'Renovate Bot <renovate@example.com>',
   gitUrl: 'default', // HTTPS; use 'ssh' for SSH
-  dependencyDashboard: false,
+  dependencyDashboard: { enabled: false },
   automerge: false,
   platformAutomerge: false,
   draftPR: false,

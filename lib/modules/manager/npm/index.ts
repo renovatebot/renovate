@@ -3,10 +3,17 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import type { MinimumReleaseAgeSupport } from '../types.ts';
+import {
+  minReleaseAgeNpmRange,
+  minimumReleaseAgeEnforcedPnpmRange,
+  minimumReleaseAgePnpmRange,
+  minimumReleaseAgeYarnRange,
+} from './minimum-release-age.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
 export { extractAllPackageFiles } from './extract/index.ts';
+export { enforcesMinimumReleaseAge } from './minimum-release-age.ts';
 export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,
@@ -31,10 +38,22 @@ export const categories: Category[] = ['js'];
 export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   npm: {
     passesMinimumReleaseAge: true,
-    note: 'Passes `--before`. Uses the older date if the repository `.npmrc` has a `before` setting. Skipped if the `.npmrc` has `min-release-age`.',
+    readsConfiguredAge: minReleaseAgeNpmRange,
+    enforcedInLockFile: true,
+    note: 'Passes `--before`, unless `.npmrc` sets `min-release-age`. If `minimumReleaseAgePackageManagerSync` is enabled, reads `.npmrc`, see [npm](#npm).',
   },
-  pnpm: {},
-  yarn: {},
+  pnpm: {
+    passesMinimumReleaseAge: minimumReleaseAgePnpmRange,
+    readsConfiguredAge: minimumReleaseAgePnpmRange,
+    enforcedInLockFile: minimumReleaseAgeEnforcedPnpmRange,
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `--config.minimum-release-age` and reads `pnpm-workspace.yaml`, see [pnpm](#pnpm).',
+  },
+  yarn: {
+    passesMinimumReleaseAge: minimumReleaseAgeYarnRange,
+    readsConfiguredAge: minimumReleaseAgeYarnRange,
+    enforcedInLockFile: minimumReleaseAgeYarnRange,
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `YARN_NPM_MINIMAL_AGE_GATE` and reads `.yarnrc.yml`, see [Yarn](#yarn).',
+  },
 };
 
 export const defaultConfig = {

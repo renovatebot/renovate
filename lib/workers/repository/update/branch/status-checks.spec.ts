@@ -72,7 +72,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       );
     });
 
-    it('honours a custom productLinks documentation url', async () => {
+    it('honors a custom productLinks documentation url', async () => {
       config.stabilityStatus = 'green';
       GlobalConfig.set({
         productLinks: { documentation: 'https://example.com/docs/' },
@@ -434,6 +434,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         isLockFileMaintenance: true,
         updateType: 'lockFileMaintenance',
         minimumReleaseAge: '1 day',
+        minimumReleaseAgePackageManagerSync: true,
         releaseTimestamp: undefined,
       };
 
@@ -459,6 +460,28 @@ describe('workers/repository/update/branch/status-checks', () => {
           stabilityStatus: 'yellow',
         });
       });
+
+      it('returns yellow without asking the package manager without minimumReleaseAgePackageManagerSync', async () => {
+        const config = branchConfig([
+          { ...upgrade, minimumReleaseAgePackageManagerSync: false },
+        ]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'yellow',
+        });
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
+      });
+    });
+
+    it('returns null for a security update with only an extracted minimum release age', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          isVulnerabilityAlert: true,
+          minimumReleaseAgeExtracted: '3 days',
+          releaseTimestamp: undefined,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toBeNull();
     });
 
     it('returns yellow if the minimum release age plus its buffer is not met', async () => {
