@@ -105,10 +105,9 @@ export async function generateUpdate(
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
-  if (
-    (config.isLockfileOnly || rangeStrategy === 'update-lockfile') &&
-    currentValue === update.newValue
-  ) {
+  const isLockfileStrategy =
+    config.isLockfileOnly === true || rangeStrategy === 'update-lockfile';
+  if (isLockfileStrategy && currentValue === update.newValue) {
     update.isLockfileUpdate = true;
   }
   if (

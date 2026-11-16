@@ -128,14 +128,14 @@ function mergeNpmrcDocuments(
 }
 
 /**
- * Whether the repository `.npmrc` is ignored in favour of a configured `npmrc` without `npmrcMerge`.
+ * Whether the repository `.npmrc` is ignored in favor of a configured `npmrc` without `npmrcMerge`.
  */
 function isRepoNpmrcIgnored(config: NpmrcConfig): boolean {
   return isString(config.npmrc) && !config.npmrcMerge;
 }
 
 /**
- * Combines the configured `npmrc` with the sanitized repository `.npmrc`, honouring `npmrcMerge`.
+ * Combines the configured `npmrc` with the sanitized repository `.npmrc`, honoring `npmrcMerge`.
  *
  * @returns the `npmrc` to use for the package file, or `undefined` when there is neither
  */
@@ -230,11 +230,11 @@ const npmrcCommentRegex = regEx(/[#;]/);
  * Whether the repository `.npmrc` has content `hasNpmrcCredentials()` does not read: a `#` or `;` anywhere, which may start a comment, or a non-blank line which is neither a setting nor a section.
  */
 function hasUnreadContent(repoNpmrc: SanitizedRepoNpmrc): boolean {
-  return (
-    npmrcCommentRegex.test(repoNpmrc.content) ||
-    parseNpmrc(repoNpmrc.content).lines.some(
-      (line) => line.type === 'other' && !!line.raw.trim(),
-    )
+  if (npmrcCommentRegex.test(repoNpmrc.content)) {
+    return true;
+  }
+  return parseNpmrc(repoNpmrc.content).lines.some(
+    (line) => line.type === 'other' && !!line.raw.trim(),
   );
 }
 

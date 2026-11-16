@@ -519,6 +519,67 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
+    it('applies the packageRules of the package file after those of the repository', async () => {
+      config.packageRules = [
+        { matchDatasources: ['npm'], minimumReleaseAge: '1 day' },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            packageRules: [
+              {
+                matchDatasources: ['npm'],
+                minimumReleaseAgeExtracted: '3 days',
+              },
+              {
+                matchPackageNames: ['@myorg/*'],
+                minimumReleaseAgeExtracted: null,
+              },
+            ],
+            deps: [
+              { depName: 'foo', packageName: 'foo', datasource: 'npm' },
+              {
+                depName: '@myorg/bar',
+                packageName: '@myorg/bar',
+                datasource: 'npm',
+              },
+              {
+                depName: 'node',
+                packageName: 'node',
+                datasource: 'node-version',
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      const lookupConfigs = Object.fromEntries(
+        lookupUpdates.mock.calls.map(([c]) => [c.depName, c]),
+      );
+      expect(lookupConfigs).toMatchObject({
+        foo: {
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeExtracted: '3 days',
+        },
+        '@myorg/bar': {
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeExtracted: null,
+        },
+      });
+      expect(lookupConfigs.node).not.toHaveProperty(
+        'minimumReleaseAgeExtracted',
+      );
+      expect(packageFiles.npm[0].deps[0]).not.toHaveProperty(
+        'minimumReleaseAgeExtracted',
+      );
+    });
+
     describe('constraintsVersioning', () => {
       it('is merged from packageFile with config', async () => {
         config.constraintsVersioning = { gomodMod: 'config-version' };
@@ -919,7 +980,72 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       });
+      expect(packageFiles.maven[0].deps[0]).not.toHaveProperty('lookupFailed');
     });
+
+    it('throws external host errors for onboarded repos', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
+          },
+        ],
+      };
+      const err = new ExternalHostError(new Error('some error'));
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await expect(
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
+      ).rejects.toThrow(err);
+    });
+
+    it.each`
+      repoIsOnboarded
+      ${true}
+      ${false}
+    `(
+      'marks the dependency as failed for dependency-only external host errors (repoIsOnboarded=$repoIsOnboarded)',
+      async ({ repoIsOnboarded }: { repoIsOnboarded: boolean }) => {
+        config.rangeStrategy = 'auto';
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        const err = new ExternalHostError(
+          new Error('some error'),
+          undefined,
+          true,
+        );
+        lookupUpdates.mockRejectedValueOnce(err);
+
+        await fetchUpdates({ ...config, repoIsOnboarded }, packageFiles);
+
+        expect(packageFiles.maven[0].deps[0]).toMatchObject({
+          depName: 'bbb',
+          updates: [],
+          lookupFailed: true,
+          warnings: [{ topic: 'Lookup Error', message: 'bbb: some error' }],
+        });
+      },
+    );
 
     it('removes URL credentials from external host warnings', async () => {
       config.rangeStrategy = 'auto';

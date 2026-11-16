@@ -2268,6 +2268,31 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('findPr(branchName, prTitle, state)', () => {
+    it('returns null if the source branch differs', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-b',
+            target_branch: 'master',
+            title: 'branch b pr',
+            state: 'opened',
+            description: 'a merge request',
+            detailed_merge_status: 'mergeable',
+            created_at: '2025-05-19T12:00:00.000Z',
+            updated_at: '2025-05-19T12:00:00.000Z',
+          },
+        ]);
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+      });
+      expect(res).toBeNull();
+    });
+
     it('returns true if no title and all state', async () => {
       httpMock
         .scope(gitlabApiHost)

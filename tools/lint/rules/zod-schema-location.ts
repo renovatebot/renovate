@@ -48,6 +48,9 @@ export default defineRule({
   createOnce(context) {
     let zodBinding: string | null = null;
     let schemaHelperBindings = new Set<string>();
+    function isZodReference(name: string): boolean {
+      return name === zodBinding || schemaHelperBindings.has(name);
+    }
 
     return {
       before() {
@@ -111,10 +114,7 @@ export default defineRule({
             continue;
           }
           const leftmost = getLeftmostIdentifier(declarator.init);
-          if (
-            leftmost !== null &&
-            (leftmost === zodBinding || schemaHelperBindings.has(leftmost))
-          ) {
+          if (leftmost !== null && isZodReference(leftmost)) {
             context.report({
               node: declarator.id,
               messageId: 'moveToSchemaFile',

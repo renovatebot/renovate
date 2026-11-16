@@ -1,13 +1,13 @@
 #### Maven Central rate limiting and caching
 
 Maven Central, hosted by Sonatype, receives a very large number of requests and has implemented rate limiting measures to manage organizational overconsumption.
-If you're experiencing 429 (rate limited) responses from Maven Central, you may need to optimize your caching strategy.
+If you are experiencing 429 (rate limited) responses from Maven Central, you may need to optimize your caching strategy.
 
 Renovate includes Maven caching optimizations, but they rely on having a _persistent_ datasource cache.
 By default, Renovate uses a file-based cache, which means:
 
 - **Persistent environments** (like self-hosted runners with persistent storage) will benefit from cross-run caching
-- **Ephemeral environments** (like GitHub Actions or other CI/CD with fresh containers each run) won't benefit from caching across runs
+- **Ephemeral environments** (like GitHub Actions or other CI/CD with fresh containers each run) will not benefit from caching across runs
 
 To maximize caching effectiveness and reduce Maven Central requests:
 
