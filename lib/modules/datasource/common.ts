@@ -271,9 +271,10 @@ export function applyConstraintsFiltering<
       configConstraints,
     ) as [ConstraintName, string][]) {
       const isAdditional = isAdditionalConstraintName(name);
-      let constraintVersioningName =
-        (isAdditional ? getAdditionalConstraintVersioning(name) : undefined) ??
-        versioningName;
+      const additionalVersioningName = isAdditional
+        ? getAdditionalConstraintVersioning(name)
+        : undefined;
+      let constraintVersioningName = additionalVersioningName ?? versioningName;
       if (isAdditional && config.constraintsVersioning?.[name]) {
         const val = config.constraintsVersioning[name];
         logger.once.debug(
