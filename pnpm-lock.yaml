@@ -20,6 +20,7 @@ overrides:
   katex@>=0.11.0 <0.18.2: 0.19.1
   markdown-it@>=15.0.0 <15.0.3: 15.0.3
   protobufjs@8.0.1: 8.8.1
+  re2js@>=2.2.0 <2.8.7: 2.8.7
   shell-quote@>=1.8.4 <1.11.0: 1.12.0
   smol-toml@<=1.8.0: 1.9.1
   source-map-js@>=1.0.0 <1.2.2: 1.2.2
@@ -5181,9 +5182,9 @@ packages:
     resolution: {integrity: sha512-J0RHubiwH/isNWD2Z+TX+hpVZCkaS/X30KPtYwckK5sjEaW8BRhnd15EPIjBB5GxD174iEVtJmmCoqfErH1qDQ==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
-  re2js@2.8.6:
-    resolution: {integrity: sha512-xLgQil4kIUCrAzVk9fRSkxkFNwmygLFjVxXrLc65aE1F0+Zsb8rxumFBy4XKyvgMCTL6kilDq3EZ0piE2dP/Dg==}
-    engines: {node: '>=18.0.0'}
+  re2js@2.8.7:
+    resolution: {integrity: sha512-bRSL/vn3KAmlGfGNoVpcsBXLaVvl6AbuvMMWbz0m3vBj60nj+p2/biozfBUOSBP+5XTduF6mr6IO/ZVjmqqkVQ==}
+    engines: {node: '>=20.0.0'}
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
@@ -9800,7 +9801,7 @@ snapshots:
       micromark-extension-gfm-table: 2.1.2
       micromark-extension-math: 3.1.0
       micromark-util-types: 2.0.3
-      re2js: 2.8.6
+      re2js: 2.8.7
       string-width: 8.3.0
     transitivePeerDependencies:
       - supports-color
@@ -10769,7 +10770,7 @@ snapshots:
       node-gyp: 13.1.0
     optional: true
 
-  re2js@2.8.6: {}
+  re2js@2.8.7: {}
 
   react-is@18.3.1: {}
 
