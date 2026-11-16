@@ -1,6 +1,10 @@
 import { logger } from '../logger/index.ts';
-import { getDefaultConfig } from '../modules/datasource/index.ts';
-import { allManagersList, get } from '../modules/manager/index.ts';
+import { coerceObject } from '../util/object.ts';
+import {
+  getDatasourceDefaultConfig,
+  getManagerCategories,
+  getManagerNames,
+} from './modules-data.ts';
 import * as options from './options/index.ts';
 import type {
   AllConfig,
@@ -20,14 +24,14 @@ export function getManagerConfig(
     ...config,
     manager,
   };
-  const categories = get(manager, 'categories');
+  const categories = getManagerCategories(manager);
   if (categories) {
     managerConfig.categories = categories;
   }
   // TODO: fix types #22198
   // @ts-expect-error -- not easily typed
   managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
-  for (const i of allManagersList) {
+  for (const i of getManagerNames()) {
     // @ts-expect-error -- not easily typed
     delete managerConfig[i];
   }
@@ -39,14 +43,14 @@ export function getManagerConfig(
  *
  * The lookup config and the flattened branch upgrade are assembled separately, so both have to apply the datasource defaults themselves.
  */
-export async function applyDatasourceDefaultConfig<
-  T extends { datasource?: string },
->(config: T): Promise<T> {
+export function applyDatasourceDefaultConfig<T extends { datasource?: string }>(
+  config: T,
+): T {
   if (!config.datasource) {
     return config;
   }
-  const defaultConfig = await getDefaultConfig(config.datasource);
-  return mergeChildConfig(config, defaultConfig);
+  const defaultConfig = getDatasourceDefaultConfig(config.datasource);
+  return mergeChildConfig(config, coerceObject(defaultConfig));
 }
 
 export function removeGlobalConfig(

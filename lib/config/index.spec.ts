@@ -1,4 +1,3 @@
-import * as datasource from '../modules/datasource/index.ts';
 import { getConfig } from './defaults.ts';
 import {
   applyDatasourceDefaultConfig,
@@ -9,7 +8,6 @@ import {
 } from './index.ts';
 import type { RenovateConfig } from './types.ts';
 
-vi.mock('../modules/datasource/npm/index.ts');
 vi.mock('../../config.ts', () => ({ default: {} }));
 
 const defaultConfig = getConfig();
@@ -169,43 +167,35 @@ describe('config/index', () => {
   });
 
   describe('applyDatasourceDefaultConfig()', () => {
-    it('lets the datasource defaults win over the given config', async () => {
-      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({
-        commitMessageTopic: 'Dummy {{depName}}',
-      });
-
-      const res = await applyDatasourceDefaultConfig({
-        datasource: 'dummy',
+    it('lets the datasource defaults win over the given config', () => {
+      const res = applyDatasourceDefaultConfig({
+        datasource: 'docker',
         packageName: 'package',
         commitMessageTopic: 'dependency {{depName}}',
       });
 
-      expect(res).toEqual({
-        datasource: 'dummy',
+      expect(res).toMatchObject({
+        datasource: 'docker',
         packageName: 'package',
-        commitMessageTopic: 'Dummy {{depName}}',
+        commitMessageTopic: '{{{depName}}} Docker tag',
       });
     });
 
-    it('keeps the config as-is for a datasource without defaults', async () => {
-      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({});
-
-      const res = await applyDatasourceDefaultConfig({
-        datasource: 'dummy',
+    it('keeps the config as-is for a datasource without defaults', () => {
+      const res = applyDatasourceDefaultConfig({
+        datasource: 'npm',
         packageName: 'package',
       });
 
-      expect(res).toEqual({ datasource: 'dummy', packageName: 'package' });
+      expect(res).toEqual({ datasource: 'npm', packageName: 'package' });
     });
 
-    it('keeps the config as-is without a datasource', async () => {
-      const getDefaultConfig = vi.spyOn(datasource, 'getDefaultConfig');
+    it('keeps the config as-is without a datasource', () => {
       const config: RenovateConfig = { depName: 'dep' };
 
-      const res = await applyDatasourceDefaultConfig(config);
+      const res = applyDatasourceDefaultConfig(config);
 
       expect(res).toEqual({ depName: 'dep' });
-      expect(getDefaultConfig).not.toHaveBeenCalled();
     });
   });
 

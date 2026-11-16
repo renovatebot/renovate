@@ -2,6 +2,7 @@ import {
   getAdditionalConstraints,
   getDatasourceDefaultConfig,
   getManagerCategories,
+  getManagerNames,
   getSupportedToolNames,
   getToolConfig,
   getToolDescription,
@@ -87,6 +88,13 @@ describe('config/modules-data', () => {
       ${'unknown'} | ${false}
     `('isCustomManager($value) === $expected', ({ value, expected }) => {
       expect(isCustomManager(value)).toBe(expected);
+    });
+  });
+
+  describe('getManagerNames()', () => {
+    it('returns the managers and the custom managers', () => {
+      expect(getManagerNames()).toContain('npm');
+      expect(getManagerNames()).toContain('regex');
     });
   });
 
