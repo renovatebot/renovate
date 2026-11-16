@@ -4530,8 +4530,31 @@ For example:
 }
 ```
 
-!!! note
-  The tool objects inside `installTools` currently do not expose any additional configurability.
+Each tool object can set a `constraint`, which supports templating with the same fields as `commands`.
+The compiled value must be a version of that tool.
+If `constraint` is unset, or compiles to an empty string, Renovate uses the matching entry from [`constraints`](#constraints).
+
+For example, to install exactly the pnpm version that is being upgraded to:
+
+```json title="Installing the pnpm version that is being upgraded to"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["pnpm"],
+      "postUpgradeTasks": {
+        "commands": ["pnpm dedupe"],
+        "installTools": {
+          "pnpm": {
+            "constraint": "{{{newVersion}}}"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+Without the `packageRules` entry, `{{{newVersion}}}` applies to every dependency.
 
 ### `postUpgradeTasks.workingDirTemplate`
 

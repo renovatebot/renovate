@@ -181,7 +181,7 @@ export async function postUpgradeCommandsExecutor(
             if (upgrade.postUpgradeTasks?.installTools) {
               execOpts.toolConstraints ??= [];
 
-              for (const [tool] of Object.entries(
+              for (const [tool, toolConfig] of Object.entries(
                 upgrade.postUpgradeTasks?.installTools,
               )) {
                 const validTool = isToolName(tool);
@@ -198,10 +198,17 @@ export async function postUpgradeCommandsExecutor(
                   continue;
                 }
 
-                execOpts.toolConstraints.push({
-                  toolName: tool,
-                  constraint: upgrade.constraints?.[tool],
-                });
+                let constraint = upgrade.constraints?.[tool];
+                if (toolConfig?.constraint) {
+                  const compiledConstraint = compile(
+                    toolConfig.constraint,
+                    mergeChildConfig(config, upgrade),
+                  ).trim();
+                  if (compiledConstraint !== '') {
+                    constraint = compiledConstraint;
+                  }
+                }
+                execOpts.toolConstraints.push({ toolName: tool, constraint });
               }
             }
             const execResult = await gitExec(compiledCmd, execOpts);

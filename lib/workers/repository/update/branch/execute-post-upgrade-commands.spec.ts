@@ -4,6 +4,7 @@ import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import type { InstallToolConfig } from '../../../../config/types.ts';
 import * as _exec from '../../../../util/exec/index.ts';
 import type { ConstraintName, ToolName } from '../../../../util/exec/types.ts';
 import * as _gitAuth from '../../../../util/git/auth.ts';
@@ -1356,11 +1357,50 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       interface TestCase {
         description: string;
         constraints?: Partial<Record<ConstraintName, string>>;
-        installTools: Partial<Record<ToolName, Record<never, never>>>;
+        installTools: Partial<Record<ToolName, InstallToolConfig>>;
+        newVersion?: string;
         expected: { toolName: string; constraint: string | undefined }[];
       }
 
       it.each<TestCase>([
+        {
+          description: 'a configured constraint is used',
+          constraints: { npm: '10.2.3' },
+          installTools: { npm: { constraint: '11.0.0' } },
+          expected: [{ toolName: 'npm', constraint: '11.0.0' }],
+        },
+        {
+          description: 'a configured constraint is templated',
+          newVersion: '1.2.3',
+          installTools: { renovate: { constraint: '{{{newVersion}}}' } },
+          expected: [{ toolName: 'renovate', constraint: '1.2.3' }],
+        },
+        {
+          description:
+            'a constraint that compiles to whitespace falls back to `constraints`',
+          constraints: { npm: '10.2.3' },
+          installTools: { npm: { constraint: ' {{{newVersion}}} ' } },
+          expected: [{ toolName: 'npm', constraint: '10.2.3' }],
+        },
+        {
+          description: 'a compiled constraint is trimmed',
+          newVersion: '1.2.3',
+          installTools: { npm: { constraint: ' {{{newVersion}}} ' } },
+          expected: [{ toolName: 'npm', constraint: '1.2.3' }],
+        },
+        {
+          description: 'an unset constraint falls back to `constraints`',
+          constraints: { npm: '10.2.3' },
+          installTools: { npm: { constraint: undefined } },
+          expected: [{ toolName: 'npm', constraint: '10.2.3' }],
+        },
+        {
+          description:
+            'a constraint that compiles to an empty string falls back to `constraints`',
+          constraints: { npm: '10.2.3' },
+          installTools: { npm: { constraint: '{{{newVersion}}}' } },
+          expected: [{ toolName: 'npm', constraint: '10.2.3' }],
+        },
         {
           description: 'constraints are passed',
           constraints: { npm: '10.2.3' },
@@ -1412,24 +1452,81 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match
           expected: [],
         },
-      ])('$description', async ({ constraints, installTools, expected }) => {
-        const commands = partial<BranchUpgradeConfig>([
-          {
-            constraints,
-            manager: 'some-manager',
-            branchName: 'main',
-            postUpgradeTasks: {
-              commands: ['some-command'],
-              executionMode: 'update',
-              installTools,
+      ])(
+        '$description',
+        async ({ constraints, installTools, newVersion, expected }) => {
+          const commands = partial<BranchUpgradeConfig>([
+            {
+              constraints,
+              newVersion,
+              manager: 'some-manager',
+              branchName: 'main',
+              postUpgradeTasks: {
+                commands: ['some-command'],
+                executionMode: 'update',
+                installTools,
+              },
             },
-          },
-        ]);
+          ]);
+          const config: BranchConfig = {
+            manager: 'some-manager',
+            updatedPackageFiles: [
+              { type: 'addition', path: 'some-existing-dir', contents: '' },
+              { type: 'addition', path: 'artifact', contents: '' },
+            ],
+            upgrades: [
+              {
+                manager: 'some-manager',
+                branchName: 'main',
+                depName: 'some-dep1',
+              },
+              {
+                manager: 'some-manager',
+                branchName: 'main',
+                depName: 'some-dep2',
+              },
+            ],
+            branchName: 'main',
+            baseBranch: 'base',
+          };
+          exec.exec.mockResolvedValueOnce({
+            stdout: 'success',
+            stderr: '',
+          });
+          git.getRepoStatus.mockResolvedValueOnce(
+            partial<StatusResult>({
+              modified: [],
+              not_added: [],
+              deleted: [],
+            }),
+          );
+          const localDir = upath.join(tmpDir.path, 'local');
+          GlobalConfig.set({
+            localDir,
+            allowedCommands: ['some-command'],
+          });
+          fs.localPathIsFile.mockResolvedValueOnce(true);
+
+          const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+            commands,
+            config,
+          );
+
+          expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+            'some-command',
+            expect.objectContaining({
+              toolConstraints: expected,
+            }),
+          );
+          expect(res.artifactErrors).toHaveLength(0);
+        },
+      );
+
+      it('compiles a templated constraint from the branch config when using executionMode=branch', async () => {
         const config: BranchConfig = {
           manager: 'some-manager',
           updatedPackageFiles: [
             { type: 'addition', path: 'some-existing-dir', contents: '' },
-            { type: 'addition', path: 'artifact', contents: '' },
           ],
           upgrades: [
             {
@@ -1437,45 +1534,35 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               branchName: 'main',
               depName: 'some-dep1',
             },
-            {
-              manager: 'some-manager',
-              branchName: 'main',
-              depName: 'some-dep2',
-            },
           ],
+          newVersion: '2.0.0',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'branch',
+            installTools: { npm: { constraint: '{{{newVersion}}}' } },
+          },
           branchName: 'main',
           baseBranch: 'base',
         };
-        exec.exec.mockResolvedValueOnce({
-          stdout: 'success',
-          stderr: '',
-        });
+        exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
         git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({
-            modified: [],
-            not_added: [],
-            deleted: [],
-          }),
+          partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
         );
-        const localDir = upath.join(tmpDir.path, 'local');
         GlobalConfig.set({
-          localDir,
+          localDir: upath.join(tmpDir.path, 'local'),
           allowedCommands: ['some-command'],
         });
         fs.localPathIsFile.mockResolvedValueOnce(true);
 
-        const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
-          commands,
-          config,
-        );
+        const res = await postUpgradeCommands.default(config);
 
         expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
           'some-command',
           expect.objectContaining({
-            toolConstraints: expected,
+            toolConstraints: [{ toolName: 'npm', constraint: '2.0.0' }],
           }),
         );
-        expect(res.artifactErrors).toHaveLength(0);
+        expect(res?.artifactErrors).toHaveLength(0);
       });
 
       it('passes the branch-level constraints when using executionMode=branch', async () => {

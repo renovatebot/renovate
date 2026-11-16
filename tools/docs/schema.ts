@@ -1,5 +1,8 @@
 import { isPlainObject } from '@sindresorhus/is';
-import { getOptions } from '../../lib/config/options/index.ts';
+import {
+  getOptions,
+  installToolConfigProperties,
+} from '../../lib/config/options/index.ts';
 import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type {
   AllowedParents,
@@ -292,6 +295,7 @@ function createSingleConfig(
       temp.properties[toolName] = {
         type: 'object',
         description: description ? `${base}. ${description}` : base,
+        properties: installToolConfigProperties(),
         additionalProperties: false,
       };
     }

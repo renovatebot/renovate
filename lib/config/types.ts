@@ -329,13 +329,23 @@ export interface LegacyAdminConfig {
 
 export type ExecutionMode = 'branch' | 'update';
 
+/**
+ * The settings of a tool listed in `postUpgradeTasks.installTools`.
+ */
+export interface InstallToolConfig {
+  /**
+   * A templated version constraint for the tool.
+   */
+  constraint?: string;
+}
+
 export interface PostUpgradeTasks {
   commands?: string[];
   workingDirTemplate?: string;
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
-  installTools?: Partial<Record<ToolName, Record<never, never>>>;
+  installTools?: Partial<Record<ToolName, InstallToolConfig>>;
 }
 
 export type UpdateConfig<

@@ -4181,6 +4181,55 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('validates postUpgradeTasks.installTools constraint', async () => {
+      const config = {
+        postUpgradeTasks: {
+          executionMode: 'update' as const,
+          installTools: {
+            renovate: { constraint: '{{{newVersion}}}' },
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('rejects invalid postUpgradeTasks.installTools tool values', async () => {
+      const config = {
+        postUpgradeTasks: {
+          installTools: {
+            npm: 'latest',
+            node: { version: '22' },
+            pnpm: { constraint: 10 },
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: the tool values are not valid
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `postUpgradeTasks.installTools.node.version` configuration: only `constraint` is allowed.',
+        },
+        {
+          message:
+            'Invalid `postUpgradeTasks.installTools.npm` configuration: value must be an object.',
+        },
+        {
+          message:
+            'Invalid `postUpgradeTasks.installTools.pnpm.constraint` configuration: value must be a string.',
+        },
+      ]);
+    });
+
     it('rejects invalid postUpgradeTasks.installTools tool names', async () => {
       const config = {
         postUpgradeTasks: {

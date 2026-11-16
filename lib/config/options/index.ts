@@ -65,6 +65,19 @@ function additionalConstraintProperties(): Record<string, unknown> {
 }
 
 /**
+ * The settings of a single `installTools` entry, as the keys of an object option.
+ */
+export function installToolConfigProperties(): Record<string, unknown> {
+  return {
+    constraint: {
+      type: 'string',
+      description:
+        'A version constraint for the tool. Supports templating, e.g. `{{{newVersion}}}`. Falls back to the matching `constraints` entry when unset or empty.',
+    },
+  };
+}
+
+/**
  * The Containerbase tools which can be installed, as the keys of an object option.
  */
 function installToolProperties(): Record<string, unknown> {
@@ -78,6 +91,7 @@ function installToolProperties(): Record<string, unknown> {
     properties[toolName] = {
       type: 'object',
       description: description ? `${base}. ${description}` : base,
+      properties: installToolConfigProperties(),
       additionalProperties: false,
     };
   }

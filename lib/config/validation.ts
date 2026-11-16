@@ -930,12 +930,34 @@ export async function validateConfig(
                     errors = errors.concat(subValidation.errors);
                   }
                 } else if (key === 'installTools') {
-                  for (const toolName of Object.keys(val)) {
+                  for (const [toolName, toolValue] of Object.entries(val)) {
                     if (!isToolName(toolName)) {
                       warnings.push({
                         topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${toolName}\` configuration: not a valid tool name.`,
                       });
+                    }
+                    if (!isPlainObject(toolValue)) {
+                      errors.push({
+                        topic: ConfigValidationTopic.Error,
+                        message: `Invalid \`${currentPath}.${toolName}\` configuration: value must be an object.`,
+                      });
+                      continue;
+                    }
+                    for (const [settingName, settingValue] of Object.entries(
+                      toolValue,
+                    )) {
+                      if (settingName !== 'constraint') {
+                        errors.push({
+                          topic: ConfigValidationTopic.Error,
+                          message: `Invalid \`${currentPath}.${toolName}.${settingName}\` configuration: only \`constraint\` is allowed.`,
+                        });
+                      } else if (!isString(settingValue)) {
+                        errors.push({
+                          topic: ConfigValidationTopic.Error,
+                          message: `Invalid \`${currentPath}.${toolName}.constraint\` configuration: value must be a string.`,
+                        });
+                      }
                     }
                   }
                 } else if (key === 'constraints') {
