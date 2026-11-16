@@ -310,6 +310,20 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       ).toEqual(['must NOT have additional properties']);
     });
 
+    it('allows every Containerbase tool in `installTools`, not only those with extra documentation', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { node: {}, ruby: {} } },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { 'not-a-tool': {} } },
+        }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
     it('validates the children of a map of configs', () => {
       expect(
         schemaErrors(repoSchema, {
