@@ -1452,7 +1452,9 @@ function validateUrlReplacementChains(
   val: unknown[],
   currentPath: string,
 ): ValidationMessage[] {
-  const rules = val.filter(isPlainObject).filter(isValidUrlReplacement);
+  const rules = val.flatMap((rule) =>
+    isPlainObject(rule) && isValidUrlReplacement(rule) ? [rule] : [],
+  );
   return rules
     .filter((rule) => isChainedUrlReplacement(rule, rules))
     .map((rule) => ({
