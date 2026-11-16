@@ -34,7 +34,7 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match.ts';
 import * as template from '../util/template/index.ts';
-import { isHttpUrlPrefix, parseUrl } from '../util/url.ts';
+import { isHttpUrl, isHttpUrlPrefix, parseUrl } from '../util/url.ts';
 import {
   isChainedUrlReplacement,
   isValidUrlReplacement,
@@ -1432,13 +1432,26 @@ function getPossibleConfigFileNames({
 }
 
 /**
- * Returns the error message for the invalid url prefix `val`, which names the normalized prefix when only the normalization is missing.
+ * Returns whether `url` has a username, password, query or fragment.
+ */
+function hasUserinfoQueryOrFragment(url: URL): boolean {
+  return [url.username, url.password, url.search, url.hash].some(
+    isNonEmptyString,
+  );
+}
+
+/**
+ * Returns the error message for the invalid url prefix `val`, which names what the prefix must not contain, or the normalized prefix when only the normalization is missing.
  */
 function getUrlPrefixMessage(
   val: string,
   currentPath: string | undefined,
 ): string {
-  const normalized = parseUrl(val)?.href;
+  const url = parseUrl(val);
+  if (isHttpUrl(url) && hasUserinfoQueryOrFragment(url!)) {
+    return `Configuration option \`${currentPath}\` must not contain a username, password, query or fragment.`;
+  }
+  const normalized = url?.href;
   if (val.endsWith('/') && isHttpUrlPrefix(normalized)) {
     return `Configuration option \`${currentPath}\` must be normalized, use \`${normalized}\` instead.`;
   }
@@ -1478,12 +1491,22 @@ function validateUrlReplacement(
       },
     ];
   }
-  const messages: ValidationMessage[] = ['matchUrlPrefix', 'replaceUrlPrefix']
+  const prefixNames = ['matchUrlPrefix', 'replaceUrlPrefix'];
+  const messages: ValidationMessage[] = prefixNames
     .filter((name) => isNullOrUndefined(val[name]))
     .map((name) => ({
       topic: ConfigValidationTopic.Error,
       message: `Configuration option \`${currentPath}\` requires \`${name}\`.`,
     }));
+  // the nested validation only warns about values which are not strings
+  messages.push(
+    ...prefixNames
+      .filter((name) => !isNullOrUndefined(val[name]) && !isString(val[name]))
+      .map((name) => ({
+        topic: ConfigValidationTopic.Error,
+        message: `Configuration option \`${currentPath}.${name}\` must be a string.`,
+      })),
+  );
 
   // the nested validation skips `null` and only warns about other non-list values
   const { matchHostTypes } = val;
