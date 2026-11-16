@@ -1756,10 +1756,11 @@ Containerbase replaces the URL prefixes like Renovate does, for whole hosts and 
 It applies them to its tool downloads, like `install-tool`, and to the npm, pip and gem registry it uses to install npm-, pip- and gem-based tools.
 It doesn't apply them to the requests of the package managers Renovate runs.
 Rules with `matchHostTypes` only apply to Renovate's own requests.
+Rules which Renovate ignores for its own requests, like invalid rules or rules whose mirror another rule rewrites, aren't passed either.
 
 Containerbase only supports anonymous access to the mirror.
 So Renovate doesn't pass a rule when any host rule which can apply to the `replaceUrlPrefix` has a `username`, a `password`, a `token`, a client certificate or key, or any `headers`, for any host type.
-This includes host rules without `matchHost`, and host rules whose `matchHost` is a URL under the `replaceUrlPrefix`.
+This includes host rules without `matchHost`, host rules whose `matchHost` is a URL under the `replaceUrlPrefix`, and the credentials Renovate takes from registry URLs, like `https://user:password@mirror.example.com/`.
 
 The exported rules don't take effect when:
 
