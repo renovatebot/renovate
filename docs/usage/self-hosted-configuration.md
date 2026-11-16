@@ -1751,7 +1751,9 @@ Rewriting a paginated GitHub or GitLab API, like `api.github.com`, stops paginat
 
 Renovate also passes the rules without `matchHostTypes` to child processes, as the `URL_REPLACE_<n>_FROM` and `URL_REPLACE_<n>_TO` environment variables of containerbase.
 They are numbered in the order of `urlReplacements`, after the highest index below 1,000,000 of any `URL_REPLACE_*` variables which the child process already gets from Renovate's environment, `customEnvVariables` or the repository's `env`.
-Indexes of 1,000,000 or more are not counted, so Renovate's rules may be numbered below them, but never reuse an index which is already set.Containerbase replaces the URL prefixes like Renovate does, for whole hosts and for path prefixes.
+Indexes of 1,000,000 or more are not counted, so Renovate's rules may be numbered below them, but never reuse an index which is already set.
+Containerbase applies the existing `URL_REPLACE_*` variables with lower indexes before the rules of Renovate, and each rule to the result of the previous ones, so an existing variable can rewrite a URL which a rule of Renovate then rewrites again.
+Do not combine existing `URL_REPLACE_*` variables with `urlReplacements` rules whose prefixes overlap.Containerbase replaces the URL prefixes like Renovate does, for whole hosts and for path prefixes.
 It applies them to its tool downloads, like `install-tool`, and to the npm, pip and gem registry it uses to install npm-, pip- and gem-based tools.
 It does not apply them to the requests of the package managers Renovate runs.
 Rules with `matchHostTypes` only apply to Renovate's own requests.
