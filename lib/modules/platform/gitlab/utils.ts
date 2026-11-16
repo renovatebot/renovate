@@ -3,8 +3,9 @@ import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
+import { statLocalFile } from '../../../util/fs/index.ts';
 import * as git from '../../../util/git/index.ts';
-import type { FileAddition } from '../../../util/git/types.ts';
+import type { FileAddition, FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -122,13 +123,32 @@ export function getRepoUrl(
   return repoUrl.toString();
 }
 
+// The Commits API cannot express symlinks or submodule (gitlink) updates.
+export async function requiresGitCommit(files: FileChange[]): Promise<boolean> {
+  for (const file of files) {
+    if (file.type === 'deletion') {
+      continue;
+    }
+    if (file.isSymlink) {
+      return true;
+    }
+    // git-submodules reports updates as empty additions on the submodule directory
+    if (
+      file.contents === '' &&
+      (await statLocalFile(file.path))?.isDirectory()
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function toAdditionAction(
   file: FileAddition,
   startBranch: string,
 ): Promise<GitlabCommitAction> {
   // The GitLab API requires the caller to declare whether a file is being
-  // created or updated, so we check whether it already exists on the parent
-  // branch reference used by start_branch.
+  // created or updated, so we check whether it already exists on the base branch.
   const fileExists = (await git.getFile(file.path, startBranch)) !== null;
 
   const action: GitlabCommitAction = {
@@ -144,11 +164,16 @@ export async function toAdditionAction(
     action.encoding = 'base64';
   }
 
-  if (file.isExecutable) {
-    action.execute_filemode = true;
-  }
-
   return action;
+}
+
+// GitLab only honours execute_filemode on chmod actions, not on create/update.
+export function toChmodAction(filePath: string): GitlabCommitAction {
+  return {
+    action: 'chmod',
+    file_path: filePath,
+    execute_filemode: true,
+  };
 }
 
 export function toDeletionAction(filePath: string): GitlabCommitAction {

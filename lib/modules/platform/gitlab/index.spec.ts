@@ -18,6 +18,7 @@ import type { BranchStatus } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { toBase64 } from '../../../util/string.ts';
+import { isLimitReached, setMaxLimit } from '../../../workers/global/limits.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
@@ -572,6 +573,7 @@ describe('modules/platform/gitlab/index', () => {
 
     beforeEach(async () => {
       await initRepo();
+      setMaxLimit('Commits', 1);
       git.prepareCommit.mockImplementation((commitConfig) =>
         Promise.resolve({
           parentCommitSha: preparedParentSha,
@@ -603,6 +605,30 @@ describe('modules/platform/gitlab/index', () => {
       expect(git.fetchBranch).not.toHaveBeenCalled();
     });
 
+    it('falls back to git commit and push when the commit contains a symlink', async () => {
+      const gitSha = fakeSha('gitlab-git-commit');
+      git.commitFiles.mockResolvedValueOnce(gitSha);
+      const commitConfig = {
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition' as const,
+            path: 'link',
+            contents: 'target',
+            isSymlink: true,
+          },
+        ],
+        message: 'msg',
+      };
+
+      const res = await gitlab.commitFiles(commitConfig);
+
+      expect(res).toBe(gitSha);
+      expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith(commitConfig);
+      expect(git.prepareCommit).not.toHaveBeenCalled();
+      expect(isLimitReached('Commits')).toBeFalse();
+    });
+
     it.each([{ message: 'title\n\nbody' }, { message: ['title', 'body'] }])(
       'includes trailers in the API commit message for $message',
       async ({ message }) => {
@@ -614,7 +640,7 @@ describe('modules/platform/gitlab/index', () => {
           .scope(gitlabApiHost)
           .post('/api/v4/projects/some%2Frepo/repository/commits', {
             branch: 'some-branch',
-            start_branch: 'master',
+            start_sha: preparedParentSha,
             commit_message:
               'title\n\nbody\n\nSigned-off-by: Renovate Bot <bot@example.com>\nX-Test: value',
             actions: [{ action: 'delete', file_path: 'old.txt' }],
@@ -681,7 +707,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'master',
+          start_sha: preparedParentSha,
           commit_message: 'title\n\nbody',
           actions: [
             {
@@ -742,7 +768,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'master',
+          start_sha: preparedParentSha,
           commit_message: 'msg',
           actions: [
             {
@@ -772,6 +798,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(scope.isDone()).toBeTrue();
       expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
       expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
+      expect(isLimitReached('Commits')).toBeTrue();
       expect(res).toBe(fetchedSha);
     });
 
@@ -782,7 +809,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'master',
+          start_sha: preparedParentSha,
           commit_message: 'msg',
           actions: [
             {
@@ -824,7 +851,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'master',
+          start_sha: preparedParentSha,
           commit_message: 'msg',
           actions: [
             {
@@ -858,20 +885,24 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBe(fetchedSha);
     });
 
-    it('sets execute_filemode for executable files and recreates the branch from the base branch', async () => {
+    it('adds a chmod action for executable files and recreates the branch from the base branch', async () => {
       git.getFile.mockResolvedValueOnce(null);
 
       const scope = httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'develop',
+          start_sha: preparedParentSha,
           commit_message: 'msg',
           actions: [
             {
               action: 'create',
               file_path: 'script.sh',
               content: 'echo hi',
+            },
+            {
+              action: 'chmod',
+              file_path: 'script.sh',
               execute_filemode: true,
             },
           ],
@@ -909,7 +940,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'master',
+          start_sha: preparedParentSha,
           commit_message: 'msg',
           actions: [
             {
@@ -966,6 +997,7 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(scope.isDone()).toBeTrue();
       expect(res).toBeNull();
+      expect(isLimitReached('Commits')).toBeFalse();
       expect(git.resetToCommit).not.toHaveBeenCalled();
       expect(git.fetchBranch).not.toHaveBeenCalled();
     });

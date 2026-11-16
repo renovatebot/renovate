@@ -71,7 +71,7 @@ export interface GitlabPrCacheData {
 }
 
 export interface GitlabCommitAction {
-  action: 'create' | 'update' | 'delete';
+  action: 'create' | 'update' | 'delete' | 'chmod';
   file_path: string;
   content?: string;
   encoding?: 'base64';

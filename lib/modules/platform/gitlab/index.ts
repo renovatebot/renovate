@@ -43,6 +43,7 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url.ts';
+import { incLimitedValue } from '../../../workers/global/limits.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -93,7 +94,9 @@ import {
   defaults,
   getRepoUrl,
   prInfo,
+  requiresGitCommit,
   toAdditionAction,
+  toChmodAction,
   toDeletionAction,
 } from './utils.ts';
 
@@ -284,6 +287,13 @@ export async function commitFiles(
   const { baseBranch, branchName, files, message, trailers } = commitConfig;
   const startBranch = baseBranch ?? config.defaultBranch;
 
+  if (await requiresGitCommit(files)) {
+    logger.debug(
+      `GitLab platformCommit: falling back to git push for ${branchName} because it contains symlinks or submodule updates`,
+    );
+    return git.commitFiles(commitConfig);
+  }
+
   const commitResult = await git.prepareCommit(commitConfig);
   if (!commitResult) {
     logger.debug(
@@ -304,6 +314,9 @@ export async function commitFiles(
       actions.push(toDeletionAction(file.path));
     } else {
       actions.push(await toAdditionAction(file, startBranch));
+      if (file.isExecutable) {
+        actions.push(toChmodAction(file.path));
+      }
     }
   }
 
@@ -321,13 +334,14 @@ export async function commitFiles(
       {
         body: {
           branch: branchName,
-          start_branch: startBranch,
+          start_sha: commitResult.parentCommitSha,
           commit_message: formatCommitMessage(message, trailers),
           actions,
           force: true,
         },
       },
     );
+    incLimitedValue('Commits');
 
     const commitSha = toLongCommitSha(res.body.id);
     logger.debug(
