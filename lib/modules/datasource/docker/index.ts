@@ -107,7 +107,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'Supported on Docker Hub, where the release timestamp is determined from the `tag_last_pushed` field in the results, and on registries with a known [`registryType`](../../../configuration-options.md#hostrulesregistrytype). **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
+    'Supported on Docker Hub, where the release timestamp is determined from the `tag_last_pushed` field in the results, and on registries with a known `hostRules.registryType`. **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';

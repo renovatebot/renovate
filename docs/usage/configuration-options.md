@@ -2616,14 +2616,14 @@ You usually need this for self-managed GitLab, where the registry and the GitLab
 
 Set this on a host rule for a Docker registry to tell Renovate which software runs the registry.
 Renovate then fetches the time each tag was pushed from the registry's own API, and sets it as the release timestamp.
-The registry records this time itself, so whoever pushes an image can't backdate it.
+The registry records this time itself, so whoever pushes an image cannot backdate it.
 This lets features like [`minimumReleaseAge`](#minimumreleaseage) work for images from self-hosted registries.
 
 Supported values:
 
 - `gitlab`: GitLab container registry. Renovate reads each tag's `publishedAt` time with the GitLab API. Requests use `gitlab` host rules that match the API URL, so an existing token for your GitLab platform also works here
 
-`registry.gitlab.com` is detected automatically, so it doesn't need this option.
+`registry.gitlab.com` is detected automatically, so it does not need this option.
 If the registry's API fails, Renovate still returns the tags, but without release timestamps.
 
 ```json
