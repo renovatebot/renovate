@@ -157,9 +157,7 @@ export const presets: Record<string, Preset> = {
       {
         description:
           'Group commander major updates, they depend on each other.',
-        groupName: 'commander',
-        matchDatasources: ['npm'],
-        matchPackageNames: ['@commander-js/extra-typings', 'commander'],
+        extends: ['group:commander'],
         matchUpdateTypes: ['major'],
       },
       {
