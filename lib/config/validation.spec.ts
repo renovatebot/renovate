@@ -4553,6 +4553,44 @@ describe('config/validation', () => {
         ]);
       });
 
+      it('errors for a rule whose replaceUrlPrefix another rule rewrites', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: 'https://a.example.com/',
+            },
+            {
+              matchUrlPrefix: 'https://a.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/',
+            },
+            {
+              matchUrlPrefix: 'https://mirror.example.com',
+              replaceUrlPrefix: 'https://other.example.com/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              "Configuration option `urlReplacements[0].replaceUrlPrefix` overlaps the `matchUrlPrefix` of another rule, but a rewritten URL can't be rewritten again.",
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[2].matchUrlPrefix` must be an absolute http or https URL ending with `/`.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
       it('errors for null prefixes and matchHostTypes', async () => {
         const config: AllConfig = {
           urlReplacements: [

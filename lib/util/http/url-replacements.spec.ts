@@ -17,7 +17,7 @@ describe('util/http/url-replacements', () => {
       GlobalConfig.reset();
     });
 
-    it('applies the rules in order to the result of the previous one', () => {
+    it('skips a rule whose replaceUrlPrefix another rule rewrites', () => {
       GlobalConfig.set({
         urlReplacements: [
           {
@@ -39,7 +39,16 @@ describe('util/http/url-replacements', () => {
         applyUrlReplacements(parseUrl(artifactUrl)!, {
           hostType: 'maven',
         }).toString(),
-      ).toBe(`${mirror}org/example/foo/maven-metadata.xml`);
+      ).toBe('https://b.example.com/org/example/foo/maven-metadata.xml');
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          rule: {
+            matchUrlPrefix: mavenCentral,
+            replaceUrlPrefix: 'https://a.example.com/',
+          },
+        },
+        'urlReplacements: ignoring a rule whose replaceUrlPrefix another rule rewrites',
+      );
     });
 
     it('returns the url unchanged without rules', () => {

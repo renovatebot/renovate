@@ -36,6 +36,10 @@ import {
 import * as template from '../util/template/index.ts';
 import { isHttpUrlPrefix, parseUrl } from '../util/url.ts';
 import {
+  isChainedUrlReplacement,
+  isValidUrlReplacement,
+} from '../util/url-replacements.ts';
+import {
   AllVersioningsListLiteral,
   type VersioningName,
 } from '../versioning-list.generated.ts';
@@ -1275,6 +1279,9 @@ async function validateGlobalConfig(
             errors.push(...subValidation.errors);
           }
         }
+        if (key === 'urlReplacements') {
+          errors.push(...validateUrlReplacementChains(val, currentPath!));
+        }
 
         if (isRegexOrGlobOption(key)) {
           warnings.push(
@@ -1436,6 +1443,22 @@ function getUrlPrefixMessage(
     return `Configuration option \`${currentPath}\` must be normalized, use \`${normalized}\` instead.`;
   }
   return `Configuration option \`${currentPath}\` must be an absolute http or https URL ending with \`/\`.`;
+}
+
+/**
+ * Checks that no valid `urlReplacements` entry rewrites the `replaceUrlPrefix` of another one.
+ */
+function validateUrlReplacementChains(
+  val: unknown[],
+  currentPath: string,
+): ValidationMessage[] {
+  const rules = val.filter(isPlainObject).filter(isValidUrlReplacement);
+  return rules
+    .filter((rule) => isChainedUrlReplacement(rule, rules))
+    .map((rule) => ({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}[${val.indexOf(rule)}].replaceUrlPrefix\` overlaps the \`matchUrlPrefix\` of another rule, but a rewritten URL can't be rewritten again.`,
+    }));
 }
 
 /**
