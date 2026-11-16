@@ -4537,6 +4537,9 @@ In the Renovate Docker image, `renovate-config-validator` runs the installed ver
 The installed version comes from the matching `renovate` entry in [`constraints`](#constraints).
 Once installed, every later `renovate-config-validator` call in the same container, also for other repositories, uses that version.
 
+The `renovate` tool needs the Containerbase `node` tool.
+The full Renovate image has it, the slim image does not, so list `node` before `renovate`, as tools install in the order they are listed.
+
 ```json title="Validating the config with the installed Renovate version"
 {
   "packageRules": [
@@ -4547,6 +4550,7 @@ Once installed, every later `renovate-config-validator` call in the same contain
           "renovate-config-validator --no-global --strict --migrate renovate.json"
         ],
         "installTools": {
+          "node": {},
           "renovate": {}
         }
       }
