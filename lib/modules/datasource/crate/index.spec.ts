@@ -15,11 +15,14 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import type { HostRule } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
 import type { RegistryConfig } from './schema.ts';
@@ -1184,5 +1187,65 @@ describe('modules/datasource/crate/index', () => {
         );
       });
     });
+  });
+
+  describe('crates.io with urlReplacements', () => {
+    const datasource = new CrateDatasource();
+    const cratesIoUrl = 'https://index.crates.io';
+
+    afterEach(() => {
+      GlobalConfig.reset();
+      hostRules.clear();
+    });
+
+    function useMirror(mirrorRule: HostRule, matchUrlPrefix: string): void {
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix,
+            replaceUrlPrefix: 'https://mirror.example.com/crates/',
+          },
+        ],
+      });
+      hostRules.add(mirrorRule);
+    }
+
+    it.each`
+      mirrorRule                                           | matchUrlPrefix                | expected
+      ${{ matchHost: 'mirror.example.com', token: 'abc' }} | ${'https://index.crates.io/'} | ${false}
+      ${{ matchHost: 'mirror.example.com', token: 'abc' }} | ${'https://crates.io/'}       | ${false}
+      ${{ matchHost: 'mirror.example.com', timeout: 100 }} | ${'https://index.crates.io/'} | ${true}
+    `(
+      'caches as public=$expected for mirror rule $mirrorRule of $matchUrlPrefix',
+      async ({ mirrorRule, matchUrlPrefix, expected }) => {
+        useMirror(mirrorRule, matchUrlPrefix);
+        const cache = vi
+          .spyOn(withCacheModule, 'withCache')
+          .mockResolvedValue(null);
+
+        await datasource.getReleases({
+          packageName: 'clap',
+          registryUrl: cratesIoUrl,
+        });
+        await datasource.getCrateMetadata(
+          {
+            flavor: 'crates.io',
+            rawUrl: cratesIoUrl,
+            url: parseUrl(cratesIoUrl)!,
+          },
+          'clap',
+        );
+        await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${cratesIoUrl}` },
+          { version: '4.5.17' },
+        );
+
+        expect(cache.mock.calls.map(([options]) => options.public)).toEqual([
+          expected,
+          expected,
+          expected,
+        ]);
+      },
+    );
   });
 });

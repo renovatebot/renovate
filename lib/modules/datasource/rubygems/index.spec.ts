@@ -1,7 +1,10 @@
 import * as marshal from '@hyrious/marshal';
 import { codeBlock } from 'common-tags';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { RubygemsDatasource } from './index.ts';
@@ -347,5 +350,41 @@ describe('modules/datasource/rubygems/index', () => {
         ],
       });
     });
+  });
+
+  describe('getReleases with urlReplacements', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+      hostRules.clear();
+    });
+
+    it.each`
+      mirrorRule                                           | expected
+      ${{ matchHost: 'mirror.example.com', token: 'abc' }} | ${false}
+      ${{ matchHost: 'mirror.example.com', timeout: 100 }} | ${true}
+    `(
+      'caches as public=$expected for mirror rule $mirrorRule',
+      async ({ mirrorRule, expected }) => {
+        GlobalConfig.set({
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://rubygems.org/',
+              replaceUrlPrefix: 'https://mirror.example.com/gems/',
+            },
+          ],
+        });
+        hostRules.add(mirrorRule);
+        const cache = vi
+          .spyOn(withCacheModule, 'withCache')
+          .mockResolvedValueOnce(null);
+
+        await new RubygemsDatasource().getReleases({
+          packageName: 'rails',
+          registryUrl: 'https://rubygems.org',
+        });
+
+        expect(cache.mock.calls[0][0].public).toBe(expected);
+      },
+    );
   });
 });

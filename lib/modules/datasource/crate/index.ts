@@ -12,6 +12,7 @@ import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { isNotFound } from '../../../util/http/status.ts';
+import { mayUseMirrorWithCredentials } from '../../../util/http/url-replacements.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -325,7 +326,9 @@ export class CrateDatasource extends Datasource {
       {
         namespace: `datasource-${CrateDatasource.id}-metadata`,
         key: buildCacheKey(info.rawUrl, packageName),
-        public: info.flavor === 'crates.io',
+        public:
+          info.flavor === 'crates.io' &&
+          !CrateDatasource.mayUseCratesIoMirrorWithCredentials(),
         ttlMinutes: 24 * 60, // 24 hours
       },
       () => this._getCrateMetadata(info, packageName),
@@ -576,7 +579,19 @@ export class CrateDatasource extends Datasource {
     }
     const normalized = registryUrl.replace(regEx(/^sparse\+/), '');
     const parsed = parseUrl(normalized);
-    return parsed?.hostname === 'index.crates.io';
+    return (
+      parsed?.hostname === 'index.crates.io' &&
+      !CrateDatasource.mayUseCratesIoMirrorWithCredentials()
+    );
+  }
+
+  /**
+   * Returns whether `urlReplacements` can send requests to the crates.io index or API to a mirror with credentials.
+   */
+  private static mayUseCratesIoMirrorWithCredentials(): boolean {
+    return ['https://index.crates.io/', 'https://crates.io/'].some((url) =>
+      mayUseMirrorWithCredentials(url, CrateDatasource.id),
+    );
   }
 
   public static getIndexSuffix(packageName: string): string[] {

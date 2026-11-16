@@ -3,6 +3,7 @@ import * as packageCache from '../../../util/cache/package/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import type { Http } from '../../../util/http/index.ts';
+import { mayUseMirrorWithCredentials } from '../../../util/http/url-replacements.ts';
 import type { AsyncResult } from '../../../util/result.ts';
 import { Result } from '../../../util/result.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -80,7 +81,10 @@ export class MetadataCache {
     ): Promise<void> {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       // v8 ignore else -- needs a save against a non-rubygems.org host
-      if (registryHostname === 'rubygems.org') {
+      if (
+        registryHostname === 'rubygems.org' &&
+        !mayUseMirrorWithCredentials(registryUrl, 'rubygems')
+      ) {
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         const ttl = ttlMinutes + ttlRandomDelta;
         await packageCache.set(cacheNs, cacheKey, cache, ttl);

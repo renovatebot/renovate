@@ -7,6 +7,7 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { isRateLimitedOrServerError } from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
+import { mayUseMirrorWithCredentials } from '../../../util/http/url-replacements.ts';
 import * as p from '../../../util/promises.ts';
 import { parseUrl, replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
@@ -106,7 +107,10 @@ export class PackagistDatasource extends Datasource {
 
   private static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
-    return !!opts.password;
+    return (
+      !!opts.password ||
+      mayUseMirrorWithCredentials(regUrl, PackagistDatasource.id)
+    );
   }
 
   private static getPackagistFileUrl(

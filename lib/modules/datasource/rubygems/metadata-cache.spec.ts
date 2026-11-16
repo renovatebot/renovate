@@ -1,4 +1,6 @@
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { Http } from '../../../util/http/index.ts';
 import { MetadataCache } from './metadata-cache.ts';
@@ -378,5 +380,35 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     expect(res).toEqual({
       releases: [{ version: '1' }, { version: '2' }, { version: '3' }],
     });
+  });
+
+  it('does not cache metadata of a rubygems.org mirror with credentials', async () => {
+    GlobalConfig.set({
+      urlReplacements: [
+        {
+          matchUrlPrefix: 'https://rubygems.org/',
+          replaceUrlPrefix: 'https://mirror.example.com/gems/',
+        },
+      ],
+    });
+    hostRules.add({ matchHost: 'mirror.example.com', token: 'abc' });
+    const cache = new MetadataCache(new Http('rubygems'));
+    httpMock
+      .scope('https://mirror.example.com')
+      .get('/gems/api/v1/versions/foobar.json')
+      .reply(200, [{ number: '1.0.0', created_at: '2023-01-01' }])
+      .get('/gems/api/v1/gems/foobar.json')
+      .reply(200, {});
+
+    const res = await cache.getRelease('https://rubygems.org', 'foobar', [
+      '1.0.0',
+    ]);
+
+    GlobalConfig.reset();
+    hostRules.clear();
+    expect(res.releases).toEqual([
+      { version: '1.0.0', releaseTimestamp: '2023-01-01T00:00:00.000Z' },
+    ]);
+    expect(packageCache.set).not.toHaveBeenCalled();
   });
 });

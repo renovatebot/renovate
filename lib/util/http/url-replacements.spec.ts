@@ -3,7 +3,10 @@ import { GlobalConfig } from '../../config/global.ts';
 import * as hostRules from '../host-rules.ts';
 import { parseUrl } from '../url.ts';
 import * as urlReplacementsModule from '../url-replacements.ts';
-import { applyUrlReplacements } from './url-replacements.ts';
+import {
+  applyUrlReplacements,
+  mayUseMirrorWithCredentials,
+} from './url-replacements.ts';
 
 const mavenCentral = 'https://repo.maven.apache.org/maven2/';
 const mirror = 'https://mirror.example.com/maven-public/';
@@ -279,6 +282,72 @@ describe('util/http/url-replacements', () => {
           }).toString(),
         ).toBe(`${mirror}org/example/foo/maven-metadata.xml`);
       });
+    });
+  });
+
+  describe('mayUseMirrorWithCredentials', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+      hostRules.clear();
+    });
+
+    it.each`
+      url
+      ${undefined}
+      ${'not a url'}
+      ${'https://repo.maven.apache.org/maven2'}
+    `('is false for $url without rules', ({ url }) => {
+      hostRules.add({ matchHost: 'mirror.example.com', token: 'secret' });
+
+      expect(mayUseMirrorWithCredentials(url, 'maven')).toBeFalse();
+    });
+
+    it.each`
+      url                                                | hostType   | expected
+      ${'https://repo.maven.apache.org/maven2'}          | ${'maven'} | ${true}
+      ${'https://repo.maven.apache.org/maven2/org/foo/'} | ${'maven'} | ${true}
+      ${'https://repo.maven.apache.org/'}                | ${'maven'} | ${true}
+      ${'https://repo.maven.apache.org/other/'}          | ${'maven'} | ${false}
+      ${'https://repo.maven.apache.org/maven2'}          | ${'npm'}   | ${false}
+    `(
+      'is $expected for $url with $hostType and a mirror with a token',
+      ({ url, hostType, expected }) => {
+        GlobalConfig.set({
+          urlReplacements: [
+            {
+              matchUrlPrefix: mavenCentral,
+              replaceUrlPrefix: mirror,
+              matchHostTypes: ['maven'],
+            },
+          ],
+        });
+        hostRules.add({ matchHost: 'mirror.example.com', token: 'secret' });
+
+        expect(mayUseMirrorWithCredentials(url, hostType)).toBe(expected);
+      },
+    );
+
+    it('is false for an anonymous mirror', () => {
+      GlobalConfig.set({
+        urlReplacements: [
+          { matchUrlPrefix: mavenCentral, replaceUrlPrefix: mirror },
+        ],
+      });
+      hostRules.add({ matchHost: 'mirror.example.com', timeout: 1000 });
+
+      expect(mayUseMirrorWithCredentials(mavenCentral, 'maven')).toBeFalse();
+    });
+
+    it('is false when the original registry has credentials', () => {
+      GlobalConfig.set({
+        urlReplacements: [
+          { matchUrlPrefix: mavenCentral, replaceUrlPrefix: mirror },
+        ],
+      });
+      hostRules.add({ matchHost: 'mirror.example.com', token: 'secret' });
+      hostRules.add({ matchHost: 'repo.maven.apache.org', token: 'secret' });
+
+      expect(mayUseMirrorWithCredentials(mavenCentral, 'maven')).toBeFalse();
     });
   });
 });

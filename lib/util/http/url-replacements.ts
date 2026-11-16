@@ -9,7 +9,7 @@ import type { UrlReplacement } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import { coerceObject } from '../object.ts';
-import { parseUrl } from '../url.ts';
+import { ensureTrailingSlash, parseUrl } from '../url.ts';
 import {
   getUrlReplacements,
   hostRuleHasCredentials,
@@ -140,4 +140,40 @@ export function applyUrlReplacements(
     .join(', ');
   logger.once.debug(`urlReplacements: replacing ${appliedRules}`);
   return parseUrl(replacedUrl)!;
+}
+
+/**
+ * Returns whether the global `urlReplacements` send a request with `hostType` to `url` to a mirror whose host rule has credentials.
+ */
+function isRewrittenToMirrorWithCredentials(
+  url: string,
+  hostType: string,
+): boolean {
+  const parsedUrl = parseUrl(url)!;
+  const fetchUrl = applyUrlReplacements(parsedUrl, { hostType });
+  return (
+    fetchUrl !== parsedUrl &&
+    hostRuleHasCredentials(findMatchingRule(fetchUrl.toString(), { hostType }))
+  );
+}
+
+/**
+ * Returns whether the global `urlReplacements` can send a request with `hostType` to `url`, or to a URL under it, to a mirror whose host rule has credentials.
+ */
+export function mayUseMirrorWithCredentials(
+  url: string | undefined,
+  hostType: string,
+): boolean {
+  const href = parseUrl(url)?.href;
+  if (!href) {
+    return false;
+  }
+  const prefix = ensureTrailingSlash(href);
+  // a rule for a path under `url` only applies to the requests under that path
+  const nestedPrefixes = getActiveUrlReplacements()
+    .map(({ matchUrlPrefix }) => matchUrlPrefix)
+    .filter((matchUrlPrefix) => matchUrlPrefix.startsWith(prefix));
+  return [prefix, ...nestedPrefixes].some((requestUrl) =>
+    isRewrittenToMirrorWithCredentials(requestUrl, hostType),
+  );
 }

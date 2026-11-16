@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { Http } from '../../../util/http/index.ts';
 import { isServerError } from '../../../util/http/status.ts';
+import { mayUseMirrorWithCredentials } from '../../../util/http/url-replacements.ts';
 import { AsyncResult, Result } from '../../../util/result.ts';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
@@ -108,7 +109,12 @@ export class RubygemsDatasource extends Datasource {
       {
         key: buildCacheKey('releases', config.registryUrl, config.packageName),
         fallback: true,
-        public: registryHostname === 'rubygems.org',
+        public:
+          registryHostname === 'rubygems.org' &&
+          !mayUseMirrorWithCredentials(
+            config.registryUrl,
+            RubygemsDatasource.id,
+          ),
       },
       () => this.fetchReleases(config),
     );

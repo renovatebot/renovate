@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { mayUseMirrorWithCredentials } from '../../../util/http/url-replacements.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -271,7 +272,9 @@ export class HexDatasource extends Datasource {
       {
         namespace: `datasource-${HexDatasource.id}`,
         key: buildCacheKey(registryUrl, config.packageName),
-        public: isDefault,
+        public:
+          isDefault &&
+          !mayUseMirrorWithCredentials(registryUrl, HexDatasource.id),
         fallback: true,
       },
       () => this._getReleases(config),

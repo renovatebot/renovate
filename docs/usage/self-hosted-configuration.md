@@ -1736,7 +1736,7 @@ Any host rule which matches the mirror URL applies to rewritten requests, includ
 If the mirror is on an internal host, it needs its own host rule in your global config with [`allowInternal=true`](#hostrulesallowinternal).
 
 A response of the mirror counts as authorized when the host rule for the mirror URL has a token, a password, a client certificate or key, or any `headers`.
-Datasources which check this, like `maven` and `pypi`, cache such responses like those of a private registry.
+Datasources which tell public and private registries apart, like `maven`, `pypi`, `packagist`, `rubygems`, `hex` and `crate`, cache the responses of such a mirror like those of a private registry, even when the original registry is public.
 Other datasources decide by their own rules, for example `npm` by the `Cache-Control` header of the response.
 
 !!! warning

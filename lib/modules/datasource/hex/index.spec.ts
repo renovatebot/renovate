@@ -6,8 +6,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import { getPkgReleases } from '../index.ts';
 import { HexDatasource } from './index.ts';
 import type { Package } from './v2/package.ts';
@@ -943,5 +945,38 @@ describe('modules/datasource/hex/index', () => {
       expect(result).not.toBeNull();
       expect(result?.releases.length).toBeGreaterThan(0);
     });
+  });
+
+  describe('getReleases with urlReplacements', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+      hostRules.clear();
+    });
+
+    it.each`
+      mirrorRule                                           | expected
+      ${{ matchHost: 'mirror.example.com', token: 'abc' }} | ${false}
+      ${{ matchHost: 'mirror.example.com', timeout: 100 }} | ${true}
+    `(
+      'caches as public=$expected for mirror rule $mirrorRule',
+      async ({ mirrorRule, expected }) => {
+        GlobalConfig.set({
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://hex.pm/',
+              replaceUrlPrefix: 'https://mirror.example.com/hex/',
+            },
+          ],
+        });
+        hostRules.add(mirrorRule);
+        const cache = vi
+          .spyOn(withCacheModule, 'withCache')
+          .mockResolvedValueOnce(null);
+
+        await new HexDatasource().getReleases({ packageName: 'certifi' });
+
+        expect(cache.mock.calls[0][0].public).toBe(expected);
+      },
+    );
   });
 });
