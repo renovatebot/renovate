@@ -3,20 +3,14 @@ import {
   type UrlPrefixRule,
   replaceUrlPrefix,
 } from '@renovatebot/base-image';
-import {
-  isArray,
-  isNonEmptyObject,
-  isNonEmptyString,
-  isString,
-  isUndefined,
-} from '@sindresorhus/is';
+import { isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
 import type { UrlReplacement } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
-import { coerceArray } from '../array.ts';
 import { coerceObject } from '../object.ts';
-import { isHttpUrlPrefix, parseUrl } from '../url.ts';
+import { parseUrl } from '../url.ts';
+import { getUrlReplacements } from '../url-replacements.ts';
 import { credentialHeaders } from './host-guard.ts';
 import { type HostRulesGotOptions, findMatchingRule } from './host-rules.ts';
 
@@ -37,32 +31,13 @@ function matchesHostType(
 }
 
 /**
- * Returns whether `matchHostTypes` of `rule` is unset or a list of strings.
- */
-function hasValidMatchHostTypes({ matchHostTypes }: UrlReplacement): boolean {
-  return isUndefined(matchHostTypes) || isArray(matchHostTypes, isString);
-}
-
-/**
- * Returns whether both prefixes of `rule` are valid url prefixes, and its `matchHostTypes` is unset or a list of strings.
- */
-export function isValidUrlReplacement(rule: UrlReplacement): boolean {
-  return (
-    isHttpUrlPrefix(rule.matchUrlPrefix) &&
-    isHttpUrlPrefix(rule.replaceUrlPrefix) &&
-    hasValidMatchHostTypes(rule)
-  );
-}
-
-/**
  * Applies the global `urlReplacements` rules for `hostType` to `url`.
  */
 function replaceUrl(
   url: string,
   hostType: string | undefined,
 ): UrlPrefixResult<UrlReplacement & UrlPrefixRule> {
-  const rules = coerceArray(GlobalConfig.get('urlReplacements'))
-    .filter(isValidUrlReplacement)
+  const rules = getUrlReplacements(GlobalConfig.get('urlReplacements'))
     .filter((rule) => matchesHostType(rule, hostType))
     .map((rule) => ({
       ...rule,
@@ -135,7 +110,7 @@ export function applyUrlReplacements(
 
   const hostRule = findMatchingRule(originalUrl, options);
   if (hostRule.enabled === false) {
-    logger.debug(
+    logger.once.debug(
       `urlReplacements: not replacing ${originalUrl}, the host is disabled`,
     );
     return url;
@@ -143,7 +118,7 @@ export function applyUrlReplacements(
 
   // a certificate authority alone isn't authentication, but such hosts stay on their own connection settings
   if (optionsHaveCredentials(options) || hostRuleHasCredentialsOrCa(hostRule)) {
-    logger.debug(
+    logger.once.debug(
       `urlReplacements: not replacing ${originalUrl}, the request has credentials`,
     );
     return url;

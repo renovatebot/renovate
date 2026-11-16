@@ -1669,7 +1669,7 @@ For example: `:warning:` will be replaced with `⚠️`.
 
 Use `urlReplacements` to send Renovate's own HTTP requests to a mirror, for example of a public registry.
 Each rule replaces the `matchUrlPrefix` at the start of a request URL with the `replaceUrlPrefix`.
-Renovate ignores rules whose prefixes don't meet the requirements listed below.
+Renovate ignores rules whose prefixes don't meet the requirements listed below, and logs a warning for them.
 The rules apply in order, and each rule is checked against the result of the previous one.
 `urlReplacements` applies to all repositories, and can't be set in a [`repositories`](#repositories) object entry.
 

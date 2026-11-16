@@ -170,7 +170,7 @@ describe('util/http/url-replacements', () => {
         expect(
           applyUrlReplacements(url, { hostType: 'maven', ...options }),
         ).toBe(url);
-        expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect(logger.logger.once.debug).toHaveBeenCalledWith(
           `urlReplacements: not replacing ${artifactUrl}, the request has credentials`,
         );
       });
@@ -231,7 +231,7 @@ describe('util/http/url-replacements', () => {
         const url = parseUrl(artifactUrl)!;
 
         expect(applyUrlReplacements(url, { hostType: 'maven' })).toBe(url);
-        expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect(logger.logger.once.debug).toHaveBeenCalledWith(
           `urlReplacements: not replacing ${artifactUrl}, the host is disabled`,
         );
       });

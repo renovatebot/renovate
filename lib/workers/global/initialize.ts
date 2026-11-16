@@ -11,14 +11,13 @@ import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
-import { coerceArray } from '../../util/array.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { setEmojiConfig } from '../../util/emoji.ts';
 import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
-import { isValidUrlReplacement } from '../../util/http/url-replacements.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
+import { getUrlReplacements } from '../../util/url-replacements.ts';
 import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
 import { setMaxLimit } from './limits.ts';
 
@@ -114,12 +113,10 @@ function setGlobalHostRules(config: AllConfig): void {
  * Logs the active global `urlReplacements`.
  */
 function logUrlReplacements(config: AllConfig): void {
-  const replacements = coerceArray(config.urlReplacements)
-    .filter(isValidUrlReplacement)
-    .map(
-      ({ matchUrlPrefix, replaceUrlPrefix }) =>
-        `${matchUrlPrefix} → ${replaceUrlPrefix}`,
-    );
+  const replacements = getUrlReplacements(config.urlReplacements).map(
+    ({ matchUrlPrefix, replaceUrlPrefix }) =>
+      `${matchUrlPrefix} → ${replaceUrlPrefix}`,
+  );
   if (replacements.length) {
     logger.info(`Using urlReplacements: ${replacements.join(', ')}`);
   }

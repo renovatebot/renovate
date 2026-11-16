@@ -227,6 +227,15 @@ describe('workers/global/initialize', () => {
       expect(logger.logger.info).toHaveBeenCalledWith(
         'Using urlReplacements: https://repo.example.com/maven2/ → https://mirror.example.com/maven-public/, https://registry.example.com/ → https://mirror.example.com/npm/',
       );
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          rule: {
+            matchUrlPrefix: 'https://invalid.example.com',
+            replaceUrlPrefix: 'https://mirror.example.com/invalid/',
+          },
+        },
+        'urlReplacements: ignoring an invalid rule',
+      );
     });
 
     it('does not log without urlReplacements', async () => {
