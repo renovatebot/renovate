@@ -454,9 +454,12 @@ If your environment uses an HTTP proxy configured via environment variables (`HT
 
 In some cases, you may need to adjust the `NO_PROXY` variable if Renovate encounters network or TLS errors when accessing internal or excluded domains.
 
-Renovate uses the [global-agent](https://github.com/gajus/global-agent) library to manage proxy connections.
+Renovate applies the proxy settings to all of its own HTTP requests, for example to the platform API and to package registries.
+It uses the [built-in proxy support of Node.js](https://nodejs.org/docs/latest-v24.x/api/http.html#httpsetglobalproxyfromenvproxyenv) where it is available (Node.js v24.14.0 and newer).
+On older Node.js versions, or if you set `RENOVATE_X_GLOBAL_AGENT=true`, Renovate uses the [global-agent](https://github.com/gajus/global-agent) library instead.
+Tools that Renovate runs, such as git or package managers, read the proxy environment variables themselves.
 
-To exclude a domain and all its subdomains, you must use a wildcard — for example:
+With `global-agent`, to exclude a domain and all its subdomains, you must use a wildcard — for example:
 
 ```
 NO_PROXY=*.example.org
@@ -466,4 +469,4 @@ This configuration ensures that both `example.org` and `www.example.org` are acc
 
 If a tool that Renovate runs (such as git) still has proxy-related issues, note that different tools interpret NO_PROXY formats differently. See [GitLab’s detailed explanation](https://about.gitlab.com/blog/we-need-to-talk-no-proxy/#no_proxy-format) for guidance on tool-specific behavior.
 
-To debug the proxy configuration behavior you can set the environment variable `ROARR_LOG=true` to enable log printing to stdout.
+To debug the proxy configuration behavior of `global-agent` you can set the environment variable `ROARR_LOG=true` to enable log printing to stdout.
