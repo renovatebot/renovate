@@ -331,7 +331,7 @@ export interface Platform {
   ): Promise<void>;
   /**
    * Cancels platform auto-merge for the expected actor without scheduling restoration.
-   * Returns cancelled if this request disabled it, otherwise the reason:
+   * Returns canceled if this request disabled it, otherwise the reason:
    * another actor, auto-merge not enabled, unchanged commit message or unconfirmed state.
    * Does not confirm the PR is open or prevent queued merges or re-enablement.
    * Propagates request failures.

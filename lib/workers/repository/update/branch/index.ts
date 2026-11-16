@@ -75,7 +75,7 @@ export async function processBranch(
   forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
-  // PR whose platform automerge was cancelled before the push
+  // PR whose platform automerge was canceled before the push
   let automergeCancelledPrNo: number | undefined;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
@@ -726,7 +726,7 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    // re-enable platform automerge which was cancelled before the push,
+    // re-enable platform automerge which was canceled before the push,
     // unless the repository, branch or PR is gone or the rate limit is hit
     const canReattempt = !(
       err?.statusCode === 404 ||
