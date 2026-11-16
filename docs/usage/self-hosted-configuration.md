@@ -1726,13 +1726,13 @@ Such requests stay on the original host, and Renovate logs this at debug level.
 So any host rule with credentials which also matches the original URL keeps the mirror from being used, for example a credential rule with only a `hostType` and no `matchHost`.
 Scope your credential host rules with `matchHost`.
 
-A rewritten request never gets the credentials of the original host.
-Its host rules, authentication and [`internalHostAccess`](#internalhostaccess) are resolved for the mirror URL only, and aren't merged with the host rules of the original URL.
+Renovate applies only the host rules that match the mirror URL to a rewritten request.
+Host rules for the original URL don't apply to it, including credentials, `abortOnError`, `abortIgnoreStatusCodes`, timeouts and concurrency limits.
+Renovate's built-in `abortOnError` for `registry.npmjs.org` doesn't apply to a mirror either.
+Add a host rule for the mirror with the options you need, such as `abortOnError`.
+Authentication and [`internalHostAccess`](#internalhostaccess) are also resolved for the mirror URL only.
 Any host rule which matches the mirror URL applies to rewritten requests, including rules with a broad `matchHost` domain.
 If the mirror is on an internal host, it needs its own host rule in your global config with [`allowInternal=true`](#hostrulesallowinternal).
-Other settings of the original host's rules, like `abortOnError` and `abortIgnoreStatusCodes`, don't apply to rewritten requests either.
-This includes the rules Renovate adds itself, like the `abortOnError` rule for `registry.npmjs.org`.
-Set them on a host rule for the mirror instead.
 
 A response of the mirror counts as authorized when the host rule for the mirror URL has a token, a password, a client certificate or key, or any `headers`.
 Datasources which check this, like `maven` and `pypi`, cache such responses like those of a private registry.
