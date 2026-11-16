@@ -119,10 +119,44 @@ function isAnonymousRule(rule: UrlReplacement): boolean {
   return true;
 }
 
+interface ExportableRules {
+  urlReplacements: UrlReplacement[];
+  hostRulesRevision: number;
+  rules: UrlReplacement[];
+}
+
+let exportableRules: ExportableRules | undefined;
+
+/**
+ * Returns the global `urlReplacements` without `matchHostTypes` and without credentials for the replacement URL, computed again only when `urlReplacements` or the host rules change.
+ */
+function getExportableRules(): UrlReplacement[] {
+  const urlReplacements = GlobalConfig.get('urlReplacements');
+  const hostRulesRevision = hostRules.getRevision();
+  if (
+    exportableRules?.urlReplacements !== urlReplacements ||
+    exportableRules.hostRulesRevision !== hostRulesRevision
+  ) {
+    exportableRules = {
+      urlReplacements,
+      hostRulesRevision,
+      rules: getUrlReplacements(urlReplacements)
+        .filter(isExportableRule)
+        .filter(isAnonymousRule),
+    };
+  }
+  return exportableRules.rules;
+}
+
 /**
  * Returns the global `urlReplacements` without `matchHostTypes` and without credentials for the replacement URL as containerbase `URL_REPLACE_<n>_FROM` and `URL_REPLACE_<n>_TO` variables, numbered after those in `process.env`, `customEnvVariables` and the repository's `env`.
  */
 function getUrlReplacementEnv(): NodeJS.ProcessEnv {
+  const rules = getExportableRules();
+  if (!rules.length) {
+    return {};
+  }
+
   const existingKeys = new Set(
     Object.keys(getEnv()).filter((key) => urlReplaceRegex.test(key)),
   );
@@ -134,9 +168,6 @@ function getUrlReplacementEnv(): NodeJS.ProcessEnv {
   let index = Math.max(0, ...existingIndexes);
 
   const env: NodeJS.ProcessEnv = {};
-  const rules = getUrlReplacements(GlobalConfig.get('urlReplacements'))
-    .filter(isExportableRule)
-    .filter(isAnonymousRule);
   for (const rule of rules) {
     // skip any number an existing variable uses, whatever its size
     do {

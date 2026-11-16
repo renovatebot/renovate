@@ -236,6 +236,30 @@ describe('util/exec/env', () => {
       expect(getChildProcessEnv()).not.toHaveProperty('URL_REPLACE_2_FROM');
     });
 
+    it('checks the host rules again only after they change', () => {
+      const someRule = vi.spyOn(hostRules, 'someRule');
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/repo/',
+          },
+        ],
+      });
+
+      const first = getChildProcessEnv();
+      const second = getChildProcessEnv();
+      hostRules.add({ matchHost: 'mirror.example.com', token: 'secret' });
+      const third = getChildProcessEnv();
+
+      expect(first).toMatchObject({
+        URL_REPLACE_2_FROM: 'https://repo.example.com/',
+      });
+      expect(second).toEqual(first);
+      expect(third).not.toHaveProperty('URL_REPLACE_2_FROM');
+      expect(someRule).toHaveBeenCalledTimes(2);
+    });
+
     it('skips the rules which are skipped for requests', () => {
       GlobalConfig.set({
         urlReplacements: [
