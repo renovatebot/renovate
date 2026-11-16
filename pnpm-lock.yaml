@@ -14,7 +14,7 @@ catalogs:
 overrides:
   esbuild: 0.28.2
   katex@>=0.11.0 <0.18.2: 0.19.1
-  re2js@>=2.2.0 <2.8.7: 2.8.7
+  re2js@>=2.2.0 <2.8.7: 2.9.1
   vite: 8.3.6
 
 importers:
@@ -5173,8 +5173,8 @@ packages:
     resolution: {integrity: sha512-J0RHubiwH/isNWD2Z+TX+hpVZCkaS/X30KPtYwckK5sjEaW8BRhnd15EPIjBB5GxD174iEVtJmmCoqfErH1qDQ==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
-  re2js@2.8.7:
-    resolution: {integrity: sha512-bRSL/vn3KAmlGfGNoVpcsBXLaVvl6AbuvMMWbz0m3vBj60nj+p2/biozfBUOSBP+5XTduF6mr6IO/ZVjmqqkVQ==}
+  re2js@2.9.1:
+    resolution: {integrity: sha512-JIT3bEEUZTOR2YS1walNEIfH4cF/cQeZcBUFq7ldqO6lR6g0X5CBq/S8rsa9omzZcsNf8qc36jCkWpKKtncrZg==}
     engines: {node: '>=20.0.0'}
 
   react-is@18.3.1:
@@ -9792,7 +9792,7 @@ snapshots:
       micromark-extension-gfm-table: 2.1.2
       micromark-extension-math: 3.1.0
       micromark-util-types: 2.0.3
-      re2js: 2.8.7
+      re2js: 2.9.1
       string-width: 8.3.0
     transitivePeerDependencies:
       - supports-color
@@ -10761,7 +10761,7 @@ snapshots:
       node-gyp: 13.1.0
     optional: true
 
-  re2js@2.8.7: {}
+  re2js@2.9.1: {}
 
   react-is@18.3.1: {}
 
