@@ -885,6 +885,15 @@ export function find(
   return res;
 }
 
+/**
+ * Returns whether `predicate` holds for any host rule, including those registered by {@link detachUrlCredentials}.
+ */
+export function someRule(
+  predicate: (rule: Readonly<HostRule>) => boolean,
+): boolean {
+  return hostRules.some((rule) => predicate(rule));
+}
+
 // the functions below leave out the rules registered by `detachUrlCredentials()`, which apply only to the requests `find()` is searched for
 
 export function hosts({ hostType }: { hostType: string }): string[] {

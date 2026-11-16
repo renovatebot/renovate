@@ -157,15 +157,16 @@ describe('util/exec/env', () => {
     });
 
     it.each`
-      name                         | rule
-      ${'username'}                | ${{ username: 'user' }}
-      ${'empty password'}          | ${{ password: '' }}
-      ${'token'}                   | ${{ token: 'secret' }}
-      ${'token for a host type'}   | ${{ hostType: 'maven', token: 'secret' }}
-      ${'header'}                  | ${{ headers: { 'X-Api-Key': 'key' } }}
-      ${'client certificate'}      | ${{ httpsCertificate: 'cert' }}
-      ${'client private key'}      | ${{ httpsPrivateKey: 'key' }}
-      ${'token for a deeper path'} | ${{ matchHost: 'https://mirror.example.com/maven/private/', token: 'secret' }}
+      name                                      | rule
+      ${'username'}                             | ${{ username: 'user' }}
+      ${'empty password'}                       | ${{ password: '' }}
+      ${'token'}                                | ${{ token: 'secret' }}
+      ${'token for a host type'}                | ${{ hostType: 'maven', token: 'secret' }}
+      ${'header'}                               | ${{ headers: { 'X-Api-Key': 'key' } }}
+      ${'client certificate'}                   | ${{ httpsCertificate: 'cert' }}
+      ${'client private key'}                   | ${{ httpsPrivateKey: 'key' }}
+      ${'token for a deeper path'}              | ${{ matchHost: 'https://mirror.example.com/maven/private/', token: 'secret' }}
+      ${'token for a deeper unnormalized path'} | ${{ matchHost: 'https://Mirror.example.com:443/maven/private/', token: 'secret' }}
     `('skips a rule whose mirror has a $name', ({ rule }) => {
       hostRules.add(
         {
@@ -216,6 +217,51 @@ describe('util/exec/env', () => {
       });
 
       expect(getChildProcessEnv()).not.toHaveProperty('URL_REPLACE_2_FROM');
+    });
+
+    it('skips a rule whose mirror has credentials detached from a registry url', () => {
+      hostRules.detachUrlCredentials(
+        'https://user:0123456789abcdef@mirror.example.com/maven/',
+        ['maven'],
+      );
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/maven2/',
+            replaceUrlPrefix: 'https://mirror.example.com/maven/',
+          },
+        ],
+      });
+
+      expect(getChildProcessEnv()).not.toHaveProperty('URL_REPLACE_2_FROM');
+    });
+
+    it('skips the rules which are skipped for requests', () => {
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/',
+            replaceUrlPrefix: 'https://a.example.com/',
+          },
+          {
+            matchUrlPrefix: 'https://a.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/',
+            matchHostTypes: ['maven'],
+          },
+          {
+            matchUrlPrefix: 'https://dl.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/dl/',
+          },
+        ],
+      });
+
+      const env = getChildProcessEnv();
+
+      expect(env).toMatchObject({
+        URL_REPLACE_2_FROM: 'https://dl.example.com/',
+        URL_REPLACE_2_TO: 'https://mirror.example.com/dl/',
+      });
+      expect(env).not.toHaveProperty('URL_REPLACE_3_FROM');
     });
 
     it('passes a rule whose mirror only has host rules without credentials', () => {

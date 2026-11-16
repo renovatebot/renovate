@@ -3,13 +3,13 @@ import { GlobalConfig } from '../../config/global.ts';
 import type { UrlReplacement } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
-import { coerceArray } from '../array.ts';
 import { getEnv } from '../env.ts';
 import * as hostRules from '../host-rules.ts';
 import { regEx } from '../regex.ts';
+import { parseUrl } from '../url.ts';
 import {
+  getUrlReplacements,
   hostRuleHasCredentials,
-  isValidUrlReplacement,
 } from '../url-replacements.ts';
 
 export const basicEnvVars = [
@@ -69,34 +69,41 @@ const urlReplaceRegex = regEx(/^URL_REPLACE_\d+_(?:FROM|TO)$/);
 const maxUrlReplaceIndex = 1_000_000;
 
 /**
- * Returns whether `rule` is valid and applies to every host type.
+ * Returns whether `rule` applies to every host type.
  */
 function isExportableRule(rule: UrlReplacement): boolean {
-  return isUndefined(rule.matchHostTypes) && isValidUrlReplacement(rule);
+  return isUndefined(rule.matchHostTypes);
+}
+
+/**
+ * Returns whether `matchHost` is a URL under `url`.
+ */
+function isUrlUnder(matchHost: string, url: string): boolean {
+  return parseUrl(matchHost)?.href.startsWith(url) ?? false;
 }
 
 /**
  * Returns whether `rule` can apply to requests to `url`: it has no `matchHost`, its `matchHost` matches `url`, or it is a URL under `url`.
  */
-function mayMatchUrl({ matchHost }: HostRule, url: string): boolean {
+function mayMatchUrl({ matchHost }: Readonly<HostRule>, url: string): boolean {
   return (
     !isNonEmptyString(matchHost) ||
     hostRules.matchesHost(url, matchHost) ||
-    matchHost.startsWith(url)
+    isUrlUnder(matchHost, url)
   );
 }
 
-function hasCredentials(rule: HostRule): boolean {
+function hasCredentials(rule: Readonly<HostRule>): boolean {
   return hostRuleHasCredentials(rule) || isNonEmptyString(rule.username);
 }
 
 /**
- * Returns whether a host rule which can apply to requests to `url` has credentials.
+ * Returns whether a host rule which can apply to requests to `url` has credentials, including the credentials detached from registry URLs.
  */
 function hasHostRuleCredentials(url: string): boolean {
-  return hostRules
-    .getAll()
-    .some((rule) => mayMatchUrl(rule, url) && hasCredentials(rule));
+  return hostRules.someRule(
+    (rule) => mayMatchUrl(rule, url) && hasCredentials(rule),
+  );
 }
 
 /**
@@ -127,7 +134,7 @@ function getUrlReplacementEnv(): NodeJS.ProcessEnv {
   let index = Math.max(0, ...existingIndexes);
 
   const env: NodeJS.ProcessEnv = {};
-  const rules = coerceArray(GlobalConfig.get('urlReplacements'))
+  const rules = getUrlReplacements(GlobalConfig.get('urlReplacements'))
     .filter(isExportableRule)
     .filter(isAnonymousRule);
   for (const rule of rules) {
