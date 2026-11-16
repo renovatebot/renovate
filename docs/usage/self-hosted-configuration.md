@@ -1751,23 +1751,23 @@ Rewriting a paginated GitHub or GitLab API, like `api.github.com`, stops paginat
 
 Renovate also passes the rules without `matchHostTypes` to child processes, as the `URL_REPLACE_<n>_FROM` and `URL_REPLACE_<n>_TO` environment variables of containerbase.
 They are numbered in the order of `urlReplacements`, after the highest index below 1,000,000 of any `URL_REPLACE_*` variables which the child process already gets from Renovate's environment, `customEnvVariables` or the repository's `env`.
-Indexes of 1,000,000 or more aren't counted, so Renovate's rules may be numbered below them, but never reuse an index which is already set.
+Indexes of 1,000,000 or more are not counted, so Renovate's rules may be numbered below them, but never reuse an index which is already set.
 Containerbase replaces the URL prefixes like Renovate does, for whole hosts and for path prefixes.
 It applies them to its tool downloads, like `install-tool`, and to the npm, pip and gem registry it uses to install npm-, pip- and gem-based tools.
-It doesn't apply them to the requests of the package managers Renovate runs.
+It does not apply them to the requests of the package managers Renovate runs.
 Rules with `matchHostTypes` only apply to Renovate's own requests.
-Rules which Renovate ignores for its own requests, like invalid rules or rules whose mirror another rule rewrites, aren't passed either.
+Rules which Renovate ignores for its own requests, like invalid rules or rules whose mirror another rule rewrites, are not passed either.
 
 Containerbase only supports anonymous access to the mirror.
-So Renovate doesn't pass a rule when any host rule which can apply to the `replaceUrlPrefix` has a `username`, a `password`, a `token`, a client certificate or key, or any `headers`, for any host type.
+So Renovate does not pass a rule when any host rule which can apply to the `replaceUrlPrefix` has a `username`, a `password`, a `token`, a client certificate or key, or any `headers`, for any host type.
 This includes host rules without `matchHost`, host rules whose `matchHost` is a URL under the `replaceUrlPrefix`, and the credentials Renovate takes from registry URLs, like `https://user:password@mirror.example.com/`.
 
-The exported rules don't take effect when:
+The exported rules do not take effect when:
 
-- `CONTAINERBASE_CDN` is set, as containerbase rewrites tool download URLs to the CDN before it applies the URL replacements, so the exported `matchUrlPrefix` values are matched against the CDN URLs and rules for the original hosts don't apply to tool downloads
+- `CONTAINERBASE_CDN` is set, as containerbase rewrites tool download URLs to the CDN before it applies the URL replacements, so the exported `matchUrlPrefix` values are matched against the CDN URLs and rules for the original hosts do not apply to tool downloads
 - `binarySource=docker` is used, as the sidecar container only gets the environment variables Renovate explicitly passes to it
 
-Don't put secrets, like a token, in the prefixes of rules without `matchHostTypes`: they are passed to child processes, which can run repository code.
+Do not put secrets, like a token, in the prefixes of rules without `matchHostTypes`: they are passed to child processes, which can run repository code.
 
 ### `urlReplacements.matchHostTypes`
 

@@ -65,7 +65,7 @@ export const hardcodedProcessEnv: Readonly<NodeJS.ProcessEnv> = {
 
 const urlReplaceRegex = regEx(/^URL_REPLACE_\d+_(?:FROM|TO)$/);
 
-// existing `URL_REPLACE_<n>_*` indexes from this one up don't move the start of the numbering, but are still skipped
+// existing `URL_REPLACE_<n>_*` indexes from this one up do not move the start of the numbering, but are still skipped
 const maxUrlReplaceIndex = 1_000_000;
 
 /**
