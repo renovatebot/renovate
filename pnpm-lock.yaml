@@ -12,18 +12,9 @@ catalogs:
       version: 7.5.22
 
 overrides:
-  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
-  '@simple-git/argv-parser@2.0.0': 2.0.1
-  '@yarnpkg/core@4.5.0>tar': 7.5.22
   esbuild: 0.28.2
-  http-cache-semantics@<=4.2.0: 4.3.0
   katex@>=0.11.0 <0.18.2: 0.19.1
-  markdown-it@>=15.0.0 <15.0.3: 15.0.3
-  protobufjs@8.0.1: 8.8.1
   re2js@>=2.2.0 <2.8.7: 2.8.7
-  shell-quote@>=1.8.4 <1.11.0: 1.12.0
-  smol-toml@<=1.8.0: 1.9.1
-  source-map-js@>=1.0.0 <1.2.2: 1.2.2
   vite: 8.3.6
 
 importers:
