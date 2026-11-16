@@ -29,13 +29,19 @@ export async function extractPackageFile(
         json = parseJson(content, packageFile);
         break;
       case 'yaml':
-        json = parseYaml(content);
+        json = parseYaml(content, { maxAliasCount: config.yamlMaxAliasCount });
         break;
       case 'toml':
         json = parseToml(content);
         break;
     }
   } catch (err) {
+    if (config.fileFormat === 'yaml' && config.yamlMaxAliasCount === 0) {
+      logger.warn(
+        { fileName: packageFile, fileFormat: config.fileFormat },
+        'Unable to parse YAML with aliases disabled; skipping custom JSONata extraction',
+      );
+    }
     logger.debug(
       { err, fileName: packageFile, fileFormat: config.fileFormat },
       'Error while parsing file',

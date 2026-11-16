@@ -1298,6 +1298,14 @@ Only the `json`, `toml` and `yaml` formats are supported.
 }
 ```
 
+### `customManagers.yamlMaxAliasCount`
+
+This option applies only to custom JSONata managers with `fileFormat: "yaml"`.
+It sets the YAML parser's alias expansion limit. The default preserves existing alias resolution.
+Set it to `0` to reject files containing any YAML alias, including aliases outside the matched dependency or in another document.
+This is useful when updating a shared anchor could also change a value outside the manager's intended scope.
+The whole file is skipped with a warning when it cannot be parsed with aliases disabled; literal values without aliases remain supported.
+
 ### `customManagers.matchStrings`
 
 Each `matchStrings` must be one of the following:

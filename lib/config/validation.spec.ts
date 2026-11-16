@@ -1160,6 +1160,59 @@ describe('config/validation', () => {
       ]);
     });
 
+    it.each([0, 10000])(
+      'accepts a YAML alias limit of %s',
+      async (yamlMaxAliasCount) => {
+        const config: RenovateConfig = {
+          customManagers: [
+            {
+              customType: 'jsonata',
+              fileFormat: 'yaml',
+              managerFilePatterns: ['/packages\\.yaml$/'],
+              matchStrings: [
+                'packages.{"depName": name, "currentValue": version, "datasource": "npm"}',
+              ],
+              yamlMaxAliasCount,
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+
+        expect(errors).toBeEmptyArray();
+        expect(warnings).toBeEmptyArray();
+      },
+    );
+
+    it('rejects a negative YAML alias limit', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            fileFormat: 'yaml',
+            managerFilePatterns: ['/packages\\.yaml$/'],
+            matchStrings: [
+              'packages.{"depName": name, "currentValue": version, "datasource": "npm"}',
+            ],
+            yamlMaxAliasCount: -1,
+          },
+        ],
+      };
+
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+
+      expect(errors).not.toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
     it('error if no fileFormat in custom JSONata manager', async () => {
       const config: RenovateConfig = {
         customManagers: [
