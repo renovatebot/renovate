@@ -133,10 +133,11 @@ export async function requiresGitCommit(files: FileChange[]): Promise<boolean> {
       return true;
     }
     // git-submodules reports updates as empty additions on the submodule directory
-    if (
-      file.contents === '' &&
-      (await statLocalFile(file.path))?.isDirectory()
-    ) {
+    if (file.contents !== '') {
+      continue;
+    }
+    const stats = await statLocalFile(file.path);
+    if (stats?.isDirectory()) {
       return true;
     }
   }
@@ -167,7 +168,7 @@ export async function toAdditionAction(
   return action;
 }
 
-// GitLab only honours execute_filemode on chmod actions, not on create/update.
+// GitLab only applies execute_filemode on chmod actions, not on create/update.
 export function toChmodAction(filePath: string): GitlabCommitAction {
   return {
     action: 'chmod',
