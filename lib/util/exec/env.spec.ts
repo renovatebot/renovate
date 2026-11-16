@@ -261,6 +261,42 @@ describe('util/exec/env', () => {
       expect(someRule).toHaveBeenCalledTimes(2);
     });
 
+    it('skips a rule when an earlier rule within its prefix is not passed', () => {
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/npm/',
+            replaceUrlPrefix: 'https://mirror.example.com/npm/',
+            matchHostTypes: ['npm'],
+          },
+          {
+            matchUrlPrefix: 'https://repo.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/repo/',
+          },
+          {
+            matchUrlPrefix: 'https://dl.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/dl/',
+          },
+          {
+            matchUrlPrefix: 'https://dl.example.com/tools/',
+            replaceUrlPrefix: 'https://mirror.example.com/tools/',
+            matchHostTypes: ['npm'],
+          },
+        ],
+      });
+
+      const env = getChildProcessEnv();
+
+      expect(env).toMatchObject({
+        URL_REPLACE_2_FROM: 'https://dl.example.com/',
+        URL_REPLACE_2_TO: 'https://mirror.example.com/dl/',
+      });
+      expect(env).not.toHaveProperty('URL_REPLACE_3_FROM');
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
+        'urlReplacements: not passing https://repo.example.com/ to child processes, https://repo.example.com/npm/ is not passed',
+      );
+    });
+
     it('skips the rules which are skipped for requests', () => {
       GlobalConfig.set({
         urlReplacements: [

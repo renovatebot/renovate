@@ -143,15 +143,43 @@ function getExportableRules(): UrlReplacement[] {
     exportableRules?.urlReplacements !== urlReplacements ||
     exportableRules.hostRulesRevision !== hostRulesRevision
   ) {
+    const activeRules = getUrlReplacements(urlReplacements);
+    const passedRules = activeRules
+      .filter(isExportableRule)
+      .filter(isAnonymousRule);
     exportableRules = {
       urlReplacements,
       hostRulesRevision,
-      rules: getUrlReplacements(urlReplacements)
-        .filter(isExportableRule)
-        .filter(isAnonymousRule),
+      rules: passedRules.filter(
+        (rule) => !isShadowedByUnpassedRule(rule, activeRules, passedRules),
+      ),
     };
   }
   return exportableRules.rules;
+}
+
+/**
+ * Returns whether a rule of `activeRules` before `rule`, which wins over it for the URLs within its `matchUrlPrefix`, is not in `passedRules`, and logs that once.
+ */
+function isShadowedByUnpassedRule(
+  rule: UrlReplacement,
+  activeRules: UrlReplacement[],
+  passedRules: UrlReplacement[],
+): boolean {
+  const shadowingRule = activeRules
+    .slice(0, activeRules.indexOf(rule))
+    .find(
+      (other) =>
+        other.matchUrlPrefix.startsWith(rule.matchUrlPrefix) &&
+        !passedRules.includes(other),
+    );
+  if (!shadowingRule) {
+    return false;
+  }
+  logger.once.debug(
+    `urlReplacements: not passing ${rule.matchUrlPrefix} to child processes, ${shadowingRule.matchUrlPrefix} is not passed`,
+  );
+  return true;
 }
 
 /**
