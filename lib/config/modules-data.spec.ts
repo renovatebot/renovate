@@ -1,8 +1,10 @@
 import {
+  getAdditionalConstraints,
   getDatasourceDefaultConfig,
   getManagerCategories,
   getSupportedToolNames,
   getToolConfig,
+  getToolDescription,
   isConstraintName,
   isCustomManager,
   isToolName,
@@ -28,6 +30,27 @@ describe('config/modules-data', () => {
 
     it('returns undefined for an unsupported tool', () => {
       expect(getToolConfig('git')).toBeUndefined();
+    });
+  });
+
+  describe('getToolDescription()', () => {
+    it('returns the documentation of a tool', () => {
+      expect(getToolDescription('ruby')).toBe(
+        'Also used in the `rubygems` Datasource',
+      );
+    });
+
+    it('returns undefined for a tool without documentation', () => {
+      expect(getToolDescription('node')).toBeUndefined();
+    });
+  });
+
+  describe('getAdditionalConstraints()', () => {
+    it('returns the constraints which are not a tool', () => {
+      expect(getAdditionalConstraints()).toContainEqual({
+        name: 'ghActionsLock',
+        description: expect.any(String),
+      });
     });
   });
 

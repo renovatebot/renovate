@@ -1,4 +1,10 @@
 import { isPlainObject } from '@sindresorhus/is';
+import {
+  getAdditionalConstraints,
+  getSupportedToolNames,
+  getToolConfig,
+  getToolDescription,
+} from '../../lib/config/modules-data.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type {
@@ -7,15 +13,6 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
-import {
-  getSupportedToolNames,
-  getToolConfig,
-} from '../../lib/util/exec/containerbase.ts';
-import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
-import {
-  additionalConstraintDefinitions,
-  toolDefinitionDocumentation,
-} from '../../lib/util/exec/types.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 import { readDocsHeadings } from './utils.ts';
@@ -237,8 +234,7 @@ function createSingleConfig(
         continue;
       }
 
-      const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
-      const description = def?.description ?? '';
+      const description = getToolDescription(toolName) ?? '';
 
       const base = `A constraint for the \`${toolName}\` Containerbase tool`;
       temp.properties[toolName] = {
@@ -247,10 +243,7 @@ function createSingleConfig(
       };
     }
 
-    for (const {
-      name,
-      description,
-    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    for (const { name, description } of getAdditionalConstraints()) {
       temp.properties[name] = {
         type: 'string',
         // prioritize contraint definitions, as they're more useful than the generated one
@@ -263,10 +256,7 @@ function createSingleConfig(
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const {
-      name,
-      description,
-    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    for (const { name, description } of getAdditionalConstraints()) {
       temp.properties[name] = {
         type: 'string',
         // prioritize contraint definitions, as they're more useful than the generated one
@@ -285,8 +275,7 @@ function createSingleConfig(
         continue;
       }
 
-      const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
-      const description = def?.description ?? '';
+      const description = getToolDescription(toolName) ?? '';
 
       const base = `Install the \`${toolName}\` Containerbase tool`;
       temp.properties[toolName] = {

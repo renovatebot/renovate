@@ -36,6 +36,23 @@ export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
   return data.tools[toolName];
 }
 
+/**
+ * The additional documentation of a `tool`, if it has one.
+ */
+export function getToolDescription(toolName: ToolName): string | undefined {
+  return data.toolDocs.find((t) => t.name === toolName)?.description;
+}
+
+/**
+ * The constraints which aren't a Containerbase `tool`.
+ */
+export function getAdditionalConstraints(): readonly {
+  name: AdditionalConstraintName;
+  description?: string;
+}[] {
+  return data.constraints;
+}
+
 export function isToolName(value: unknown): value is ToolName {
   return isString(value) && data.toolNames.some((n) => n === value);
 }

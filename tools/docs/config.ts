@@ -2,6 +2,12 @@ import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
 import { MigrationsService } from '../../lib/config/migrations/index.ts';
+import {
+  getAdditionalConstraints,
+  getSupportedToolNames,
+  getToolConfig,
+  getToolDescription,
+} from '../../lib/config/modules-data.ts';
 import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
@@ -9,15 +15,6 @@ import {
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
-import {
-  getSupportedToolNames,
-  getToolConfig,
-} from '../../lib/util/exec/containerbase.ts';
-import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
-import {
-  additionalConstraintDefinitions,
-  toolDefinitionDocumentation,
-} from '../../lib/util/exec/types.ts';
 import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
@@ -362,9 +359,8 @@ function generateToolsForConstraints(): string {
     if (!toolConfig) {
       continue;
     }
-    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     // Newlines in the Markdown-rendered table will break table rendering
-    const desc = def?.description?.replaceAll('\n', '<br>') ?? '';
+    const desc = getToolDescription(toolName)?.replaceAll('\n', '<br>') ?? '';
     output += `| \`${toolName}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
   }
 
@@ -374,10 +370,7 @@ function generateToolsForConstraints(): string {
 function generateAdditionalConstraints(): string {
   let output = '| Constraint | Additional Information |\n';
   output += '| --- | --- |\n';
-  for (const {
-    name,
-    description,
-  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+  for (const { name, description } of getAdditionalConstraints()) {
     // Newlines in the Markdown-rendered table will break table rendering
     const desc = description?.replaceAll('\n', '<br>') ?? '';
     output += `| \`${name}\` | ${desc} |\n`;
