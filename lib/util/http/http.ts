@@ -235,7 +235,7 @@ export abstract class HttpBase<
       resolvedUrl,
       httpOptions,
     );
-    // cache keys use `url`, the request itself uses `fetchHref`
+    // the request and its cache entries use `fetchHref`, logs and response handling use `url`
     const fetchHref = fetchUrl.toString();
 
     const method = options.method.toLowerCase();
@@ -328,15 +328,18 @@ export abstract class HttpBase<
       const cachedTask = async (
         provider: HttpCacheProvider,
       ): Promise<HttpResponse<unknown>> => {
-        let res = await provider.bypassServer<unknown>(options.method, url);
+        let res = await provider.bypassServer<unknown>(
+          options.method,
+          fetchHref,
+        );
         if (!res) {
-          await provider.setCacheHeaders(method, url, options);
+          await provider.setCacheHeaders(method, fetchHref, options);
           res = await httpTask();
         }
         const resCopy = copyResponse(res, false);
         resCopy.authorization = authorization;
         this.handleResponse(resolvedUrl, resCopy);
-        return await provider.wrapServerResponse(method, url, resCopy);
+        return await provider.wrapServerResponse(method, fetchHref, resCopy);
       };
 
       if (cacheProvider) {
@@ -382,7 +385,7 @@ export abstract class HttpBase<
 
       const staleResponse = await cacheProvider?.bypassServer<
         string | Uint8Array
-      >(method, url, true);
+      >(method, fetchHref, true);
       if (staleResponse) {
         logger.debug(
           { err },

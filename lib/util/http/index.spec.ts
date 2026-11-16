@@ -1252,12 +1252,16 @@ describe('util/http/index', () => {
       expect(httpMock.allUsed()).toBeTrue();
     });
 
-    it('keeps the cacheProvider key of the original url', async () => {
+    it('keys cacheProvider entries by the replaced url', async () => {
       GlobalConfig.set({ urlReplacements });
       httpMock
         .scope('https://mirror.example.com')
         .get('/maven-public/foo')
         .reply(200, 'mirrored');
+      httpMock
+        .scope('https://repo.example.com')
+        .get('/maven2/foo')
+        .reply(200, 'original');
       await http.getText('https://repo.example.com/maven2/foo', {
         cacheProvider: memCacheProvider,
       });
@@ -1267,8 +1271,35 @@ describe('util/http/index', () => {
         cacheProvider: memCacheProvider,
       });
 
-      expect(res.body).toBe('mirrored');
+      expect(res.body).toBe('original');
       expect(httpMock.allUsed()).toBeTrue();
+    });
+
+    it('returns the stale cacheProvider entry of the replaced url on errors', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored')
+        .get('/maven-public/foo')
+        .reply(500);
+      await http.getText('https://repo.example.com/maven2/foo', {
+        cacheProvider: memCacheProvider,
+      });
+      const bypassServer = vi
+        .spyOn(memCacheProvider, 'bypassServer')
+        .mockResolvedValueOnce(null);
+
+      const res = await http.getText('https://repo.example.com/maven2/foo', {
+        cacheProvider: memCacheProvider,
+      });
+
+      expect(res.body).toBe('mirrored');
+      expect(bypassServer).toHaveBeenLastCalledWith(
+        'get',
+        'https://mirror.example.com/maven-public/foo',
+        true,
+      );
     });
 
     it('marks responses of a mirror without credentials as public', async () => {

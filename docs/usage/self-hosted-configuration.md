@@ -1699,7 +1699,8 @@ A proxy of `repo.maven.apache.org` keeps the dates of Maven Central, while a pro
 Timestamps can only be later than the real release, so [`minimumReleaseAge`](./configuration-options.md#minimumreleaseage) waits longer, never shorter.
 
 The rewrite only applies to the HTTP requests Renovate makes itself, not to package manager commands.
-Registry URLs, lookup results and cache keys keep the original URL.
+Registry URLs, lookup results and package cache keys keep the original URL.
+Cached HTTP responses are stored under the mirror URL, so responses of the mirror and of the original host are never mixed up.
 
 It is not applied to Docker registries, use [`registryAliases`](./configuration-options.md#registryaliases) for those.
 It also doesn't apply to these features, as they use their own clients:
