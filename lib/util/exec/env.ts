@@ -6,9 +6,11 @@ import type { HostRule } from '../../types/index.ts';
 import { coerceArray } from '../array.ts';
 import { getEnv } from '../env.ts';
 import * as hostRules from '../host-rules.ts';
-import { hostRuleHasCredentials } from '../http/url-replacements.ts';
 import { regEx } from '../regex.ts';
-import { isValidUrlReplacement } from '../url-replacements.ts';
+import {
+  hostRuleHasCredentials,
+  isValidUrlReplacement,
+} from '../url-replacements.ts';
 
 export const basicEnvVars = [
   'HTTP_PROXY',
