@@ -2,7 +2,7 @@
 
 The information on this page is for the Mend-hosted cloud apps:
 
-- Renovate App on GitHub
+- Mend Renovate app on GitHub
 - Mend App on Bitbucket
 - Mend App on Azure DevOps
 
@@ -77,7 +77,7 @@ Secrets can be scoped to your organization _or_ to your repository:
 The web UI has _two_ settings pages.
 One page is for the organization, and the other page is for the repository.
 
-Make sure you're making the changes on the right page!
+Make sure you are making the changes on the right page!
 
 ### Example
 

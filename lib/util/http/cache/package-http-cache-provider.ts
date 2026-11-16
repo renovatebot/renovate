@@ -9,6 +9,7 @@ import { resolveTtlValues } from '../../cache/package/ttl.ts';
 import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import { regEx } from '../../regex.ts';
 import { HttpCacheStats } from '../../stats.ts';
+import { isOk } from '../status.ts';
 import type { HttpResponse } from '../types.ts';
 import { copyResponse } from '../util.ts';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
@@ -169,7 +170,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
+    if (isOk(resp) && !this.cacheAllowed(resp)) {
       return resp;
     }
 

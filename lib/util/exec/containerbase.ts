@@ -45,9 +45,9 @@ const typeVersioning: Record<ToolType, VersioningName> = {
 const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
   composer: 'composer',
   deno: 'deno',
-  erlang: 'semver-coerced',
+  erlang: 'semver-extended',
   gradle: 'gradle',
-  jb: 'loose',
+  jb: 'semver-extended',
   maven: 'maven',
   node: 'node',
   paket: 'paket',
@@ -63,7 +63,11 @@ const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
  */
 export function getToolVersioning(toolName: ToolName): VersioningName {
   const { type }: ToolMetadata = tools[toolName];
-  return toolVersioning[toolName] ?? (type ? typeVersioning[type] : 'npm');
+  const versioning = toolVersioning[toolName];
+  if (versioning) {
+    return versioning;
+  }
+  return type ? typeVersioning[type] : 'npm';
 }
 
 /**
@@ -288,10 +292,19 @@ export async function generateInstallCommands(
       resolvedTools[toolName] = toolVersion;
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
-        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+        // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
+        const parentActive = isSupportedToolName(parent)
+          ? memCache.get<string | undefined>(
+              buildCacheKey('containerbase-active', parent),
+            )
+          : undefined;
+        const active = parentActive
+          ? `${toolVersion}@${parent}:${parentActive}`
+          : toolVersion;
+        if (memCache.get<string | undefined>(cacheKey) === active) {
           continue;
         }
-        memCache.set(cacheKey, toolVersion);
+        memCache.set(cacheKey, active);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);

@@ -1,7 +1,8 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -378,14 +379,31 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (isArray(config.updatedPackageFiles) &&
-      config.updatedPackageFiles.length > 0) ||
-    (isArray(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    isNonEmptyArray(config.updatedPackageFiles) ||
+    isNonEmptyArray(config.updatedArtifacts);
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */
     logger.debug('No changes to package files, skipping post-upgrade tasks');
     return null;
+  }
+
+  // the branch config only takes its settings from the first upgrade, so also check the other upgrades for `executionMode=branch`
+  const [branchPostUpgradeTasks, ...otherBranchPostUpgradeTasks] = [
+    config,
+    ...config.upgrades,
+  ]
+    .map(({ postUpgradeTasks }) => postUpgradeTasks)
+    .filter((tasks) => tasks?.executionMode === 'branch');
+
+  const skippedCommands = otherBranchPostUpgradeTasks
+    .filter((tasks) => !dequal(tasks, branchPostUpgradeTasks))
+    .map((tasks) => tasks?.commands);
+  if (skippedCommands.length) {
+    logger.warn(
+      { branchName: config.branchName, skippedCommands },
+      'Skipping `postUpgradeTasks` with `executionMode=branch` that differ from the first one found',
+    );
   }
 
   const branchUpgradeCommands: BranchUpgradeConfig[] = [
@@ -394,10 +412,7 @@ export default async function executePostUpgradeCommands(
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       constraints: config.constraints,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
-          : undefined,
+      postUpgradeTasks: branchPostUpgradeTasks,
     },
   ];
 

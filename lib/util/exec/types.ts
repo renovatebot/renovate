@@ -79,6 +79,7 @@ export const supportedToolNames = [
   'pnpm',
   'poetry',
   'python',
+  'renovate',
   'ruby',
   'rust',
   'uv',

@@ -133,11 +133,10 @@ export function validateLogLevel(
     'fatal',
   ];
 
-  if (
-    isUndefined(logLevelToCheck) ||
-    (isString(logLevelToCheck) &&
-      allowedValues.includes(logLevelToCheck as BunyanLogLevel))
-  ) {
+  const isAllowedString =
+    isString(logLevelToCheck) &&
+    allowedValues.includes(logLevelToCheck as BunyanLogLevel);
+  if (isUndefined(logLevelToCheck) || isAllowedString) {
     // log level is in the allowed values or its undefined
     return (logLevelToCheck as BunyanLogLevel) ?? defaultLevel;
   }

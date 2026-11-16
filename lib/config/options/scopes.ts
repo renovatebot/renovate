@@ -32,7 +32,7 @@ const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
 };
 
 /**
- * The scopes of an option which is honoured wherever per-update config is applied, which is most of our options.
+ * The scopes of an option which is honored wherever per-update config is applied, which is most of our options.
  */
 export const sharedScopes: ConfigScope[] = [
   'repo',
@@ -44,9 +44,9 @@ export const sharedScopes: ConfigScope[] = [
 ];
 
 /**
- * The scopes of an option which is honoured when we look up a dependency's updates.
+ * The scopes of an option which is honored when we look up a dependency's updates.
  *
- * That happens before we know an update's type, and before a group's config is merged in, so an option which shapes the updates we find isn't honoured in either.
+ * That happens before we know an update's type, and before a group's config is merged in, so an option which shapes the updates we find isn't honored in either.
  */
 export const lookupScopes: ConfigScope[] = [
   'repo',

@@ -109,6 +109,17 @@ const staticGroups = {
       },
     ],
   },
+  commander: {
+    description:
+      'Group `commander` and `@commander-js/extra-typings` packages together.',
+    packageRules: [
+      {
+        groupName: 'commander',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@commander-js/extra-typings', 'commander'],
+      },
+    ],
+  },
   definitelyTyped: {
     description: 'Group all `@types` packages together.',
     packageRules: [
@@ -451,6 +462,16 @@ const staticGroups = {
       {
         extends: ['packages:postcss'],
         groupName: 'postcss packages',
+      },
+    ],
+  },
+  primer: {
+    description: 'Group all `@primer` packages together.',
+    packageRules: [
+      {
+        groupName: 'Primer packages',
+        groupSlug: 'primer',
+        matchPackageNames: ['@primer/**'],
       },
     ],
   },

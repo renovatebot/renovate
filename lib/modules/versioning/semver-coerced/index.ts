@@ -3,7 +3,7 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../../util/regex.ts';
-import { coerceString } from '../../../util/string.ts';
+import { coerceString, stripVersionPrefix } from '../../../util/string.ts';
 import { isBreaking as semverIsBreaking } from '../semver/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
@@ -139,7 +139,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (currentVersion === `v${currentValue}`) {
-    return newVersion.replace(regEx(/^v/), '');
+    return stripVersionPrefix(newVersion);
   }
   return newVersion;
 }

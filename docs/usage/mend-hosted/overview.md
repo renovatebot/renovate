@@ -8,6 +8,7 @@ Mend provides cloud hosting services for running Renovate in free and paid versi
 They are available for Git repositories hosted on the following cloud platforms:
 
 - GitHub
+- GitLab
 - Bitbucket Cloud
 - Azure DevOps
 

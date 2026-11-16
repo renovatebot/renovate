@@ -104,7 +104,14 @@ export interface BranchUpgradeConfig
   remediationNotPossible?: boolean;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
-  minimumReleaseAgeExtracted?: string;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
+  minimumReleaseAgeExtracted?: string | null;
+  /**
+   * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
+   *
+   * Package managers apply a minimum release age to every package they resolve, so Renovate passes them this value instead of a `minimumReleaseAge` from `packageRules`.
+   */
+  minimumReleaseAgeRepository?: string | null;
   sourceDirectory?: string;
   sourceRepoSlug?: string;
 
@@ -129,6 +136,8 @@ export interface BranchUpgradeConfig
   sourceRepoName?: string;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /** The constraints which other managers share for the directory of the package file, see `ToolConstraintsConfig` */
+  sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -164,6 +173,7 @@ export type CacheFingerprintMatchResult =
 export interface BranchConfig
   extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
   automergeComment?: string;
+  automergeLabel?: string;
   automergedPreviously?: boolean;
   baseBranch: string;
   branchAutomergeFailureMessage?: string;
@@ -181,6 +191,8 @@ export interface BranchConfig
 
   errors?: ValidationMessage[];
   forcePr?: boolean;
+  /** True for a group branch in a run where a dependency lookup failed, so the branch must not be updated. */
+  skippedForLookupFailure?: boolean;
   hasTypes?: boolean;
   isModified?: boolean;
   isScheduledNow?: boolean;
