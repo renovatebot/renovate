@@ -50,7 +50,7 @@ export function isChainedUrlReplacement(
 }
 
 /**
- * Returns whether `rule` is valid, and logs a warning once when it isn't.
+ * Returns whether `rule` is valid, and logs a warning once when it is not.
  */
 function isUsableUrlReplacement(rule: UrlReplacement): boolean {
   if (isValidUrlReplacement(rule)) {

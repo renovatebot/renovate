@@ -74,7 +74,7 @@ export class GlobalConfig {
   )[];
 
   /**
-   * The options of `OPTIONS` which a `repositories[]` entry can't override.
+   * The options of `OPTIONS` which a `repositories[]` entry cannot override.
    */
   static NON_REPOSITORY_OPTIONS = [
     'urlReplacements',

@@ -1669,12 +1669,12 @@ For example: `:warning:` will be replaced with `⚠️`.
 
 Use `urlReplacements` to send Renovate's own HTTP requests to a mirror, for example of a public registry.
 Each rule replaces the `matchUrlPrefix` at the start of a request URL with the `replaceUrlPrefix`.
-Renovate ignores rules whose prefixes don't meet the requirements listed below, and logs a warning for them.
+Renovate ignores rules whose prefixes do not meet the requirements listed below, and logs a warning for them.
 Each rule maps one original prefix to one mirror, and a mirror URL must not be rewritten again.
 So the `replaceUrlPrefix` of a rule must not overlap the `matchUrlPrefix` of another rule: neither may start with the other.
 Renovate ignores such rules too, and logs a warning for them.
 When several rules match a URL, the first one applies.
-`urlReplacements` applies to all repositories, and can't be set in a [`repositories`](#repositories) object entry.
+`urlReplacements` applies to all repositories, and cannot be set in a [`repositories`](#repositories) object entry.
 
 ```json {configType=global}
 {
@@ -1691,7 +1691,7 @@ When several rules match a URL, the first one applies.
 Each datasource requests with its own host type, so a rule for Maven Central lists the host types of all datasources which use it.
 
 The `sbt-package` and `sbt-plugin` datasources look up versions through HTML directory listings.
-Many mirrors don't serve complete listings: Nexus 3 group repositories don't serve listings at the repository URL, and proxy repositories only list cached content.
+Many mirrors do not serve complete listings: Nexus 3 group repositories do not serve listings at the repository URL, and proxy repositories only list cached content.
 Leave `sbt` out of `matchHostTypes` unless your mirror lists the remote content.
 
 A mirror caches metadata such as `maven-metadata.xml`, so new releases can show up later than on the original registry.
@@ -1706,7 +1706,7 @@ Registry URLs, lookup results and package cache keys keep the original URL.
 Cached HTTP responses are stored under the mirror URL, so responses of the mirror and of the original host are never mixed up.
 
 It is not applied to Docker registries, use [`registryAliases`](./configuration-options.md#registryaliases) for those.
-It also doesn't apply to these features, as they use their own clients:
+It also does not apply to these features, as they use their own clients:
 
 - Git operations, like clone, fetch and push
 - the Azure DevOps platform API and the `azure-tags` datasource
@@ -1727,8 +1727,8 @@ So any host rule with credentials which also matches the original URL keeps the 
 Scope your credential host rules with `matchHost`.
 
 Renovate applies only the host rules that match the mirror URL to a rewritten request.
-Host rules for the original URL don't apply to it, including credentials, `abortOnError`, `abortIgnoreStatusCodes`, timeouts and concurrency limits.
-Renovate's built-in `abortOnError` for `registry.npmjs.org` doesn't apply to a mirror either.
+Host rules for the original URL do not apply to it, including credentials, `abortOnError`, `abortIgnoreStatusCodes`, timeouts and concurrency limits.
+Renovate's built-in `abortOnError` for `registry.npmjs.org` does not apply to a mirror either.
 Add a host rule for the mirror with the options you need, such as `abortOnError`.
 Authentication and [`internalHostAccess`](#internalhostaccess) are also resolved for the mirror URL only.
 Any host rule which matches the mirror URL applies to rewritten requests, including rules with a broad `matchHost` domain.
@@ -1746,7 +1746,7 @@ Rewriting a paginated GitHub or GitLab API, like `api.github.com`, stops paginat
 
 !!! warning
   `urlReplacements` is not a security or egress control.
-  Requests with credentials, requests to Docker registries, requests whose host type isn't in `matchHostTypes`, URLs which don't match a `matchUrlPrefix`, and redirects to other hosts still go to the original or redirected host.
+  Requests with credentials, requests to Docker registries, requests whose host type is not in `matchHostTypes`, URLs which do not match a `matchUrlPrefix`, and redirects to other hosts still go to the original or redirected host.
 
 ### `urlReplacements.matchHostTypes`
 
@@ -1758,7 +1758,7 @@ It must not be empty or contain `docker`, as such a rule would never apply.
 The URL prefix to replace, for example `https://repo.example.com/`.
 It must be an absolute `http://` or `https://` URL which:
 
-- ends with `/`, so the replacement can't change the host
+- ends with `/`, so the replacement cannot change the host
 - is already normalized, for example a lowercase host, no default port, and no `..` segments
 - has no username, password, query or fragment
 

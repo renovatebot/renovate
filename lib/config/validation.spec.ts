@@ -4580,7 +4580,7 @@ describe('config/validation', () => {
         expect(errors).toEqual([
           {
             message:
-              "Configuration option `urlReplacements[0].replaceUrlPrefix` overlaps the `matchUrlPrefix` of another rule, but a rewritten URL can't be rewritten again.",
+              'Configuration option `urlReplacements[0].replaceUrlPrefix` overlaps the `matchUrlPrefix` of another rule, but a rewritten URL cannot be rewritten again.',
             topic: 'Configuration Error',
           },
           {

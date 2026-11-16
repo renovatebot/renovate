@@ -1459,7 +1459,7 @@ function validateUrlReplacementChains(
     .filter((rule) => isChainedUrlReplacement(rule, rules))
     .map((rule) => ({
       topic: ConfigValidationTopic.Error,
-      message: `Configuration option \`${currentPath}[${val.indexOf(rule)}].replaceUrlPrefix\` overlaps the \`matchUrlPrefix\` of another rule, but a rewritten URL can't be rewritten again.`,
+      message: `Configuration option \`${currentPath}[${val.indexOf(rule)}].replaceUrlPrefix\` overlaps the \`matchUrlPrefix\` of another rule, but a rewritten URL cannot be rewritten again.`,
     }));
 }
 

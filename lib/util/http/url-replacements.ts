@@ -14,7 +14,7 @@ import { getUrlReplacements } from '../url-replacements.ts';
 import { credentialHeaders } from './host-guard.ts';
 import { type HostRulesGotOptions, findMatchingRule } from './host-rules.ts';
 
-// the Docker registry token flow can't be decided per request, use `registryAliases` instead
+// the Docker registry token flow cannot be decided per request, use `registryAliases` instead
 const excludedHostTypes: readonly (string | undefined)[] = ['docker'];
 
 /**
@@ -116,7 +116,7 @@ export function applyUrlReplacements(
     return url;
   }
 
-  // a certificate authority alone isn't authentication, but such hosts stay on their own connection settings
+  // a certificate authority alone is not authentication, but such hosts stay on their own connection settings
   if (optionsHaveCredentials(options) || hostRuleHasCredentialsOrCa(hostRule)) {
     logger.once.debug(
       `urlReplacements: not replacing ${originalUrl}, the request has credentials`,

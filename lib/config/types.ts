@@ -675,7 +675,7 @@ export const namedParents = [
 ] as const;
 
 /**
- * The objects which only the global config has, and which the `any` scope doesn't cover.
+ * The objects which only the global config has, and which the `any` scope does not cover.
  */
 const globalOnlyParents = ['urlReplacements'] as const;
 
