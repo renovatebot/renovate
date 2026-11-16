@@ -93,12 +93,18 @@ function mayMatchUrl({ matchHost }: Readonly<HostRule>, url: string): boolean {
   );
 }
 
+/**
+ * Returns whether `rule` has credentials, a client certificate or key, or a certificate authority, which child processes do not get.
+ */
 function hasCredentials(rule: Readonly<HostRule>): boolean {
-  return hostRuleHasCredentials(rule) || isNonEmptyString(rule.username);
+  return (
+    hostRuleHasCredentials(rule) ||
+    [rule.username, rule.httpsCertificateAuthority].some(isNonEmptyString)
+  );
 }
 
 /**
- * Returns whether a host rule which can apply to requests to `url` has credentials, including the credentials detached from registry URLs.
+ * Returns whether a host rule which can apply to requests to `url` has credentials or a certificate authority, including the credentials detached from registry URLs.
  */
 function hasHostRuleCredentials(url: string): boolean {
   return hostRules.someRule(
@@ -107,12 +113,12 @@ function hasHostRuleCredentials(url: string): boolean {
 }
 
 /**
- * Returns whether `rule` can be passed to containerbase, which only supports anonymous access to the replacement host.
+ * Returns whether `rule` can be passed to containerbase, which only supports anonymous access to the replacement host with the default TLS settings.
  */
 function isAnonymousRule(rule: UrlReplacement): boolean {
   if (hasHostRuleCredentials(rule.replaceUrlPrefix)) {
     logger.once.debug(
-      `urlReplacements: not passing ${rule.matchUrlPrefix} to child processes, ${rule.replaceUrlPrefix} has credentials`,
+      `urlReplacements: not passing ${rule.matchUrlPrefix} to child processes, ${rule.replaceUrlPrefix} has credentials or a certificate authority`,
     );
     return false;
   }

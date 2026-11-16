@@ -165,6 +165,7 @@ describe('util/exec/env', () => {
       ${'header'}                               | ${{ headers: { 'X-Api-Key': 'key' } }}
       ${'client certificate'}                   | ${{ httpsCertificate: 'cert' }}
       ${'client private key'}                   | ${{ httpsPrivateKey: 'key' }}
+      ${'certificate authority'}                | ${{ httpsCertificateAuthority: 'ca' }}
       ${'token for a deeper path'}              | ${{ matchHost: 'https://mirror.example.com/maven/private/', token: 'secret' }}
       ${'token for a deeper unnormalized path'} | ${{ matchHost: 'https://Mirror.example.com:443/maven/private/', token: 'secret' }}
     `('skips a rule whose mirror has a $name', ({ rule }) => {
@@ -196,7 +197,7 @@ describe('util/exec/env', () => {
       });
       expect(env).not.toHaveProperty('URL_REPLACE_3_FROM');
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
-        'urlReplacements: not passing https://repo.example.com/maven2/ to child processes, https://mirror.example.com/maven/ has credentials',
+        'urlReplacements: not passing https://repo.example.com/maven2/ to child processes, https://mirror.example.com/maven/ has credentials or a certificate authority',
       );
     });
 
@@ -291,7 +292,7 @@ describe('util/exec/env', () => {
     it('passes a rule whose mirror only has host rules without credentials', () => {
       hostRules.add({ matchHost: 'mirror.example.com', timeout: 1000 });
       hostRules.add(
-        { matchHost: 'mirror.example.com', httpsCertificateAuthority: 'ca' },
+        { matchHost: 'other.example.com', httpsCertificateAuthority: 'ca' },
         { trusted: true },
       );
       hostRules.add({ matchHost: 'other.example.com', token: 'secret' });
