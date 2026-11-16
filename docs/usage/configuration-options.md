@@ -4533,6 +4533,32 @@ For example:
 !!! note
   The tool objects inside `installTools` currently do not expose any additional configurability.
 
+In the Renovate Docker image, `renovate-config-validator` runs the installed version when the `renovate` tool is installed, instead of the bundled one.
+The installed version comes from the matching `renovate` entry in [`constraints`](#constraints).
+Once installed, every later `renovate-config-validator` call in the same container, also for other repositories, uses that version.
+
+The `renovate` tool needs the Containerbase `node` tool.
+The full Renovate image has it, the slim image does not, so list `node` before `renovate`, as tools install in the order they are listed.
+
+```json title="Validating the config with the installed Renovate version"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["renovate"],
+      "postUpgradeTasks": {
+        "commands": [
+          "renovate-config-validator --no-global --strict --migrate renovate.json"
+        ],
+        "installTools": {
+          "node": {},
+          "renovate": {}
+        }
+      }
+    }
+  ]
+}
+```
+
 ### `postUpgradeTasks.workingDirTemplate`
 
 A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
