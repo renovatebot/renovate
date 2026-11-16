@@ -2010,6 +2010,27 @@ None detected
                     ],
                   },
                   {
+                    depName: 'dep-with-version-only-update',
+                    lockedVersion: '3.0.0',
+                    updates: [
+                      {
+                        newVersion: '3.0.1',
+                        updateType: 'patch' as const,
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'dep-with-lock-file-update-without-version',
+                    currentValue: '^4.0.0',
+                    updates: [
+                      {
+                        newValue: '^4.0.0',
+                        updateType: 'patch' as const,
+                        isLockfileUpdate: true,
+                      },
+                    ],
+                  },
+                  {
                     depName: 'dep-with-no-version-info',
                   },
                 ],
@@ -2047,6 +2068,16 @@ None detected
           // Locked version with a lock file update, which has no newValue
           expect(dashboardBody).toInclude(
             ' - `dep-with-locked-version-update lock file @ 3.0.0` → [Updates: `lock file @ 3.0.1`]',
+          );
+
+          // An update with no newValue that is not a lock file update
+          expect(dashboardBody).toInclude(
+            ' - `dep-with-version-only-update lock file @ 3.0.0` → [Updates: `3.0.1`]',
+          );
+
+          // A lock file update with no newVersion
+          expect(dashboardBody).toInclude(
+            ' - `dep-with-lock-file-update-without-version ^4.0.0` → [Updates: `^4.0.0`]',
           );
 
           // No version info case
