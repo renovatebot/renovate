@@ -68,5 +68,7 @@ minimumReleaseAgeExclude:
   # security update: markdown-it@15.0.3 and its dependency argparse@3.0.3
   - markdown-it@15.0.3
   - argparse@3.0.3
+  # Renovate security update: minimatch@11.0.1
+  - minimatch@11.0.1
 
 provenance: true
