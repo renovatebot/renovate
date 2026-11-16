@@ -170,7 +170,12 @@ describe('modules/datasource/maven/util', () => {
       ${MAVEN_REPO}                                     | ${false}      | ${true}
       ${MAVEN_REPO}                                     | ${true}       | ${false}
       ${'https://clojars.org/repo'}                     | ${false}      | ${true}
-      ${MAVEN_CENTRAL_MIRROR}                           | ${false}      | ${false}
+      ${MAVEN_CENTRAL_MIRROR}                           | ${false}      | ${true}
+      ${MAVEN_CENTRAL_MIRROR}                           | ${true}       | ${false}
+      ${'https://repo1.maven.org.evil/maven2'}          | ${false}      | ${false}
+      ${'https://REPO.Maven.Apache.org/maven2'}         | ${false}      | ${true}
+      ${'https://repo.maven.apache.org:443/maven2'}     | ${false}      | ${true}
+      ${'not-a-url'}                                    | ${false}      | ${false}
       ${'https://custom.registry.renovatebot.com'}      | ${false}      | ${false}
       ${'https://repo.maven.apache.org.evil/maven2'}    | ${false}      | ${false}
       ${'https://repo.maven.apache.org/maven2-private'} | ${false}      | ${false}

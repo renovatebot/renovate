@@ -24,10 +24,10 @@ import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { CLOJARS_REPO } from '../clojure/common.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { MAVEN_REPO, isMavenCentral } from './common.ts';
+import { MAVEN_CENTRAL_URLS, isMavenCentral } from './common.ts';
 import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
@@ -107,13 +107,19 @@ function isMetadataUrl(url: string): boolean {
   return url.endsWith('/maven-metadata.xml');
 }
 
-const defaultRegistryUrls = [MAVEN_REPO, CLOJARS_REPO].map((registryUrl) =>
-  ensureTrailingSlash(registryUrl),
+const defaultRegistryUrls = [...MAVEN_CENTRAL_URLS, CLOJARS_REPO].map(
+  (registryUrl) => ensureTrailingSlash(parseUrl(registryUrl)!.href),
 );
 
-/** Returns whether the URL is located below one of the default registries. */
+/** Returns whether the normalized URL is located below one of the default registries. */
 function isDefaultRegistryUrl(url: string): boolean {
-  return defaultRegistryUrls.some((registryUrl) => url.startsWith(registryUrl));
+  const href = parseUrl(url)?.href;
+  if (!href) {
+    return false;
+  }
+  return defaultRegistryUrls.some((registryUrl) =>
+    href.startsWith(registryUrl),
+  );
 }
 
 export async function downloadHttpProtocol(
