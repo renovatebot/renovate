@@ -5,6 +5,7 @@ import is, {
   isNonEmptyArray,
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
   isObject,
   isPlainObject,
   isString,
@@ -158,6 +159,19 @@ function isRegexOrGlobOption(key: string): boolean {
 
 function isGlobalOption(key: string): boolean {
   return optionGlobals.has(key);
+}
+
+/**
+ * Returns whether `key` is an option of `urlReplacements` used outside of a `urlReplacements` entry.
+ */
+function isMisplacedUrlReplacementOption(
+  key: string,
+  parentPath: string | undefined,
+): boolean {
+  return (
+    !!optionParents[key]?.includes('urlReplacements') &&
+    getParentName(parentPath) !== 'urlReplacements'
+  );
 }
 
 function initOptions(): void {
@@ -324,6 +338,15 @@ export async function validateConfig(
 
         if (isGlobalOption(key)) {
           if (configType === 'global') {
+            if (isMisplacedUrlReplacementOption(key, parentPath)) {
+              const usedIn = parentPath
+                ? `in "${parentPath}"`
+                : 'at the top level of a config';
+              errors.push({
+                topic: ConfigValidationTopic.Error,
+                message: `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`,
+              });
+            }
             await validateGlobalConfig(
               key,
               val,
@@ -1211,7 +1234,7 @@ async function validateGlobalConfig(
         if (isUrlPrefixOption && !isHttpUrlPrefix(val)) {
           errors.push({
             topic: ConfigValidationTopic.Error,
-            message: `Configuration option \`${currentPath}\` must be an absolute http or https URL ending with \`/\`.`,
+            message: getUrlPrefixMessage(val, currentPath),
           });
         }
       } else {
@@ -1402,6 +1425,20 @@ function getPossibleConfigFileNames({
 }
 
 /**
+ * Returns the error message for the invalid url prefix `val`, which names the normalized prefix when only the normalization is missing.
+ */
+function getUrlPrefixMessage(
+  val: string,
+  currentPath: string | undefined,
+): string {
+  const normalized = parseUrl(val)?.href;
+  if (val.endsWith('/') && isHttpUrlPrefix(normalized)) {
+    return `Configuration option \`${currentPath}\` must be normalized, use \`${normalized}\` instead.`;
+  }
+  return `Configuration option \`${currentPath}\` must be an absolute http or https URL ending with \`/\`.`;
+}
+
+/**
  * Checks that a `urlReplacements` entry is an object with both `matchUrlPrefix` and `replaceUrlPrefix`.
  */
 function validateUrlReplacement(
@@ -1417,14 +1454,15 @@ function validateUrlReplacement(
     ];
   }
   const messages: ValidationMessage[] = ['matchUrlPrefix', 'replaceUrlPrefix']
-    .filter((name) => isUndefined(val[name]))
+    .filter((name) => isNullOrUndefined(val[name]))
     .map((name) => ({
       topic: ConfigValidationTopic.Error,
       message: `Configuration option \`${currentPath}\` requires \`${name}\`.`,
     }));
 
+  // the nested validation skips `null` and only warns about other non-list values
   const { matchHostTypes } = val;
-  if (!isUndefined(matchHostTypes) && !isArray(matchHostTypes, isString)) {
+  if (!isUndefined(matchHostTypes) && !isArray(matchHostTypes)) {
     messages.push({
       topic: ConfigValidationTopic.Error,
       message: `Configuration option \`${currentPath}.matchHostTypes\` must be a list of strings.`,

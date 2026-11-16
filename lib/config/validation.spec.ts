@@ -4457,7 +4457,7 @@ describe('config/validation', () => {
         ${'repo.example.com/maven2/'}     | ${'file:///tmp/maven/'}
         ${'https://repo.example.com'}     | ${'https://mirror.example.com'}
         ${'https://repo.example.com/foo'} | ${'https://mirror.example.com/foo'}
-        ${'https://Repo.example.com/'}    | ${'https://u@mirror.example.com/'}
+        ${'https://repo.example.com/?a/'} | ${'https://u@mirror.example.com/'}
       `(
         'errors for prefixes $matchUrlPrefix and $replaceUrlPrefix',
         async ({ matchUrlPrefix, replaceUrlPrefix }) => {
@@ -4485,6 +4485,135 @@ describe('config/validation', () => {
           ]);
         },
       );
+
+      it.each`
+        matchUrlPrefix                      | normalized
+        ${'https://Repo.example.com/'}      | ${'https://repo.example.com/'}
+        ${'https://repo.example.com:443/'}  | ${'https://repo.example.com/'}
+        ${'https://repo.example.com/a/../'} | ${'https://repo.example.com/'}
+      `(
+        'errors with the normalized prefix for $matchUrlPrefix',
+        async ({ matchUrlPrefix, normalized }) => {
+          const config: AllConfig = {
+            urlReplacements: [
+              {
+                matchUrlPrefix,
+                replaceUrlPrefix: 'https://mirror.example.com/',
+              },
+            ],
+          };
+
+          const { errors, warnings } = await configValidation.validateConfig(
+            'global',
+            config,
+          );
+
+          expect(warnings).toBeEmptyArray();
+          expect(errors).toEqual([
+            {
+              message: `Configuration option \`urlReplacements[0].matchUrlPrefix\` must be normalized, use \`${normalized}\` instead.`,
+              topic: 'Configuration Error',
+            },
+          ]);
+        },
+      );
+
+      it.each`
+        option
+        ${'matchUrlPrefix'}
+        ${'replaceUrlPrefix'}
+        ${'matchHostTypes'}
+      `('errors for $option outside of urlReplacements', async ({ option }) => {
+        const config: AllConfig = {
+          [option]: option === 'matchHostTypes' ? ['maven'] : 'https://a.b/',
+          packageRules: [
+            {
+              matchPackageNames: ['foo'],
+              [option]:
+                option === 'matchHostTypes' ? ['maven'] : 'https://a.b/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message: `"${option}" can't be used at the top level of a config, as it can only be used in \`urlReplacements\`.`,
+            topic: 'Configuration Error',
+          },
+          {
+            message: `"${option}" can't be used in "packageRules[0]", as it can only be used in \`urlReplacements\`.`,
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('errors for null prefixes and matchHostTypes', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: null,
+              replaceUrlPrefix: null,
+              matchHostTypes: null,
+            },
+          ] as never,
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0].matchHostTypes` must be a list of strings.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[0]` requires `matchUrlPrefix`.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[0]` requires `replaceUrlPrefix`.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('errors once for matchHostTypes with other entries than strings', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/',
+              matchHostTypes: ['maven', 1] as never,
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0].matchHostTypes` should be a list of strings',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
 
       it('errors for missing prefixes and invalid entries', async () => {
         const config: AllConfig = {
