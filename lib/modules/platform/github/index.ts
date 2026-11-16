@@ -2390,7 +2390,7 @@ export async function cancelPlatformAutomerge({
 }
 
 /**
- * Enables GitHub-native automerge again, with one delayed retry for automerge cancelled in this run.
+ * Enables GitHub-native automerge again, with one delayed retry for automerge canceled in this run.
  */
 export async function reattemptPlatformAutomerge({
   number,
