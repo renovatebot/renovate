@@ -10,6 +10,10 @@ export const JuliaProject = Toml.pipe(
   z.object({
     version: z.string().optional().catch(undefined),
     manifest: z.string().optional().catch(undefined),
+    workspace: z
+      .object({ projects: LooseArray(z.string()).optional() })
+      .optional()
+      .catch(undefined),
     deps: LooseRecord(z.string()).optional().catch(undefined),
     weakdeps: LooseRecord(z.string()).optional().catch(undefined),
     extras: LooseRecord(z.string()).optional().catch(undefined),

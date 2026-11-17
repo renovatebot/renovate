@@ -2,18 +2,59 @@ import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import {
   getSiblingFileName,
+  isValidLocalPath,
   localPathExists,
   readLocalDirectory,
+  readLocalFile,
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as juliaVersioning } from '../../versioning/julia/index.ts';
+import { JuliaProject } from './schema.ts';
 
 const versionedManifestRegex = regEx(/^(?:Julia)?Manifest-v\d+\.\d+\.toml$/);
 
 /**
+ * Returns the workspace project whose manifest the project uses, as Julia's
+ * `Base.base_project` finds it: the nearest project file in a parent
+ * directory, within the repository, whose `[workspace]` lists the project's
+ * directory in `projects`.
+ * @param packageFile - the project file
+ * @returns the workspace's project file and its `manifest` entry
+ */
+async function getWorkspaceProject(
+  packageFile: string,
+): Promise<{ projectFile: string; manifest?: string } | null> {
+  const projectDir = upath.dirname(packageFile);
+  let dir = projectDir;
+  while (dir !== '.') {
+    dir = upath.dirname(dir);
+    // Julia takes the first of these that exists as the directory's project.
+    for (const fileName of ['JuliaProject.toml', 'Project.toml']) {
+      const projectFile = upath.join(dir, fileName);
+      const content = await readLocalFile(projectFile, 'utf8');
+      if (!content) {
+        continue;
+      }
+
+      const parsed = JuliaProject.safeParse(content);
+      const projects = parsed.success
+        ? parsed.data.workspace?.projects
+        : undefined;
+      if (
+        projects?.some((project) => upath.join(dir, project) === projectDir)
+      ) {
+        return { projectFile, manifest: parsed.data?.manifest };
+      }
+      break;
+    }
+  }
+  return null;
+}
+
+/**
  * Returns the manifests that some Julia version uses with the project file,
- * as Julia's `Base.project_file_manifest_path` picks them: the file that the
- * project's `manifest` entry names, or else for Julia X.Y the first of
+ * as Pkg picks them: those of the workspace that lists the project, else the
+ * file that the project's `manifest` entry names, else for Julia X.Y the first of
  * `JuliaManifest-vX.Y.toml`, `Manifest-vX.Y.toml`, `JuliaManifest.toml` and
  * `Manifest.toml` that exists.
  * @param packageFile - the project file
@@ -23,8 +64,22 @@ export async function getManifestFileNames(
   packageFile: string,
   manifest: string | undefined,
 ): Promise<string[]> {
+  const workspace = await getWorkspaceProject(packageFile);
+  if (workspace) {
+    return getManifestFileNames(workspace.projectFile, workspace.manifest);
+  }
+
+  // Pkg reads and writes the named manifest even before it exists, while Base
+  // falls back to the default names when it does not exist.
   if (manifest) {
     const manifestFile = getSiblingFileName(packageFile, manifest);
+    if (!isValidLocalPath(manifestFile)) {
+      logger.debug(
+        { packageFile, manifestFile },
+        'Julia manifest is outside the repository',
+      );
+      return [];
+    }
     return (await localPathExists(manifestFile)) ? [manifestFile] : [];
   }
 

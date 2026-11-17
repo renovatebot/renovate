@@ -49,3 +49,4 @@ The default `rangeStrategy` is `widen`, which adds a specifier for the new relea
 The manager updates `Project.toml` only, not `Manifest.toml`.
 
 The locked versions come from the manifest that the project's `manifest` entry names, or else from `JuliaManifest.toml` or `Manifest.toml`, or else from the versioned manifest of the newest Julia, such as `Manifest-v1.12.toml`.
+A project that a workspace's `[workspace]` lists in `projects` takes them from the workspace's manifest instead, as Julia 1.12 and later do.
