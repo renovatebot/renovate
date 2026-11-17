@@ -4416,7 +4416,7 @@ Use the workspace's target Vite+ release to align existing Vite+, Vite+ core, Vi
 Renovate runs `vp sync-versions --json` during npm artifact updates and validates its plan before applying manifest changes.
 Managed version ranges become exact versions from the selected Vite+ release.
 
-The planner requires Vite+ 0.3.1 or later, Containerbase 14.30.0 or later, and dynamic tool installation (`binarySource=install` in a Containerbase environment, or `binarySource=docker`).
+The planner requires Vite+ 0.3.1 or later, Containerbase 14.30.0 or later, and dynamic tool installation (`binarySource=install` in a Containerbase environment).
 Older Vite+ releases and other binary sources leave declarations unchanged and add an artifact notice.
 Each workspace supports up to 256 manifests, 1 MiB per manifest, and 16 MiB per request.
 Exceeding these limits produces an artifact error.
