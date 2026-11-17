@@ -108,6 +108,8 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   /** The lower bound for the minimum release age which Renovate passes to the package manager. */
   minimumReleaseAgePackageManager?: Nullish<string>;
   minimumReleaseAgePackageManagerSync?: boolean;
+  /** Extracted package files of the repository, grouped by manager. */
+  packageFiles?: Record<string, PackageFile[]>;
   /** All upgrades of the branch, including those of other managers and package files. */
   upgrades?: Upgrade[];
 }

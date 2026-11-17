@@ -4410,6 +4410,25 @@ During lock file maintenance, Renovate always runs `npm install` twice, even wit
 
 Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
+### `vitePlusSyncVersions`
+
+Use the workspace's target Vite+ release to align existing Vite+, Vite+ core, Vitest, and official Vitest provider declarations before regenerating lockfiles.
+Renovate runs `vp sync-versions --json` during npm artifact updates and validates its plan before applying manifest changes.
+Managed version ranges become exact versions from the selected Vite+ release.
+
+The planner requires Vite+ 0.3.1 or later, Containerbase 14.30.0 or later, and dynamic tool installation (`binarySource=install` in a Containerbase environment, or `binarySource=docker`).
+Older Vite+ releases and other binary sources leave declarations unchanged and add an artifact notice.
+Each workspace supports up to 256 manifests, 1 MiB per manifest, and 16 MiB per request.
+Exceeding these limits produces an artifact error.
+Additional compatibility changes appear in artifact notices.
+
+When reconciliation changes a selected upgrade target, Renovate disables its automerge for that run.
+For an existing PR, Renovate also cancels platform automerge that it enabled unless the branch already contains the reconciled targets.
+Automerge enabled by another user is left unchanged.
+If the platform cannot confirm cancellation, Renovate reports an error and leaves the branch unchanged.
+
+The `group:vitePlus` preset enables this option.
+
 ### `yarnDedupeFewer`
 
 Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.

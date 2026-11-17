@@ -23,4 +23,14 @@ describe('config/presets/internal/group', () => {
       ],
     });
   });
+
+  it('enables Vite+ version reconciliation for the Vite+ group', () => {
+    expect(presets.vitePlus).toMatchObject({
+      packageRules: [
+        {
+          postUpdateOptions: ['vitePlusSyncVersions'],
+        },
+      ],
+    });
+  });
 });

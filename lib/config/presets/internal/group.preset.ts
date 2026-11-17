@@ -964,6 +964,7 @@ const staticGroups = {
       {
         extends: ['packages:vitePlus'],
         groupName: 'Vite+ packages',
+        postUpdateOptions: ['vitePlusSyncVersions'],
       },
     ],
   },

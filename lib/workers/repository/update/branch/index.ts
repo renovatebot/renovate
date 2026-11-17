@@ -8,6 +8,7 @@ import {
 import { logger, removeMeta } from '../../../../logger/index.ts';
 import { updateActionsLockfile } from '../../../../modules/manager/github-actions/artifacts.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
+import { hasReconciledVitePlusTargets } from '../../../../modules/manager/npm/vite-plus.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -26,6 +27,7 @@ import {
   compileCommitBody,
   compileCommitTrailers,
 } from '../../model/commit-body.ts';
+import { refreshBranchConfig } from '../../updates/generate.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -395,10 +397,20 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (!(
-      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
-    )) {
+    const canReuseArtifacts =
+      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched';
+    if (
+      !canReuseArtifacts ||
+      config.postUpdateOptions?.includes('vitePlusSyncVersions')
+    ) {
       await scm.checkoutBranch(config.baseBranch);
+      config.upgrades = config.upgrades.map((upgrade) => ({ ...upgrade }));
+      const previousTargets = new Map(
+        config.upgrades.map((upgrade) => [
+          upgrade,
+          { newValue: upgrade.newValue, newVersion: upgrade.newVersion },
+        ]),
+      );
       const res = await getUpdatedPackageFiles(config);
       if (res.artifactErrors && config.artifactErrors) {
         res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
@@ -421,6 +433,78 @@ export async function processBranch(
         config,
         branchConfig.packageFiles!,
       );
+      config.upgrades = config.upgrades.filter((upgrade) => {
+        const previous = previousTargets.get(upgrade)!;
+        const targetChanged =
+          previous.newValue !== upgrade.newValue ||
+          previous.newVersion !== upgrade.newVersion;
+        return !targetChanged || upgrade.newValue !== upgrade.currentValue;
+      });
+      if (!config.upgrades.length) {
+        logger.debug('No upgrades remain after updating artifacts');
+        if (branchExists) {
+          const { cleanUpBranches } = await import('../../finalize/prune.ts');
+          await cleanUpBranches(
+            {
+              ...config,
+              baseBranchPatterns: [],
+              baseBranches: [config.baseBranch],
+            },
+            [config.branchName],
+          );
+          branchExists = await scm.branchExists(config.branchName);
+        }
+        return {
+          branchExists,
+          prNo: branchPr?.number,
+          result: 'no-work',
+        };
+      }
+      if (
+        !branchExists &&
+        config.minimumGroupSize &&
+        config.minimumGroupSize > config.upgrades.length &&
+        !dependencyDashboardCheck
+      ) {
+        logger.debug(
+          `Skipping branch creation as minimumGroupSize: ${config.minimumGroupSize} is not met`,
+        );
+        return {
+          branchExists: false,
+          result: 'minimum-group-size-not-met',
+        };
+      }
+      const targetChanged = refreshBranchConfig(config, previousTargets);
+      let targetsAlreadyReconciled = false;
+      if (targetChanged && branchPr && branchExists) {
+        targetsAlreadyReconciled = await hasReconciledVitePlusTargets(config);
+      }
+      if (targetChanged && branchPr && !targetsAlreadyReconciled) {
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would cancel platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          const cancellation = await platform.cancelPlatformAutomerge?.({
+            number: branchPr.number,
+          });
+          const cancellationConfirmed =
+            cancellation?.cancelled === true ||
+            cancellation?.reason === 'not-enabled' ||
+            cancellation?.reason === 'enabled-by-other';
+          if (!cancellationConfirmed) {
+            logger.warn(
+              { prNo: branchPr.number },
+              'Cannot confirm platform automerge is disabled after version reconciliation',
+            );
+            return {
+              branchExists,
+              prNo: branchPr.number,
+              result: 'error',
+            };
+          }
+        }
+      }
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );

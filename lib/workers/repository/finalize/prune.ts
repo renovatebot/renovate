@@ -13,7 +13,7 @@ import { PackageFiles } from '../package-files.ts';
 import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
-async function cleanUpBranches(
+export async function cleanUpBranches(
   config: RenovateConfig,
   remainingBranches: string[],
 ): Promise<void> {
