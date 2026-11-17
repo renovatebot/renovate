@@ -1254,6 +1254,12 @@
         "matchPackageNames": ["@tsconfig/node22", "@tsconfig/node23"],
         "replacementName": "@tsconfig/node24",
         "replacementVersion": "24.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node24"],
+        "replacementName": "@tsconfig/node26",
+        "replacementVersion": "26.0.0"
       }
     ]
   },
