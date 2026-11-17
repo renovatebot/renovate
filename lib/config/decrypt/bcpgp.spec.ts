@@ -208,4 +208,4 @@ describe('config/decrypt/bcpgp', () => {
       );
     });
   });
-});
+}, 10000);

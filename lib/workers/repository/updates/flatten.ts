@@ -99,6 +99,22 @@ function applyVulnerabilityConcurrentLimits(
   }
 }
 
+/**
+ * Re-assigns the options with the scopes `repo` and `manager` which apply to
+ * the whole lock file from `managerConfig`, after all rules are applied to
+ * `updateConfig`, so Renovate ignores their values from `packageRules`,
+ * `lockFileMaintenance`, the update types and `vulnerabilityAlerts`.
+ */
+function applyManagerScopedOptions(
+  updateConfig: RenovateConfig,
+  managerConfig: RenovateConfig,
+): void {
+  updateConfig.minimumReleaseAgePackageManager =
+    managerConfig.minimumReleaseAgePackageManager;
+  updateConfig.minimumReleaseAgePackageManagerSync =
+    managerConfig.minimumReleaseAgePackageManagerSync;
+}
+
 export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
@@ -120,6 +136,8 @@ export async function flattenUpdates(
         managerConfig,
         packageFile,
       ) as never;
+      packageFileConfig.minimumReleaseAgeRepository =
+        managerConfig.minimumReleaseAge;
       const packagePath = packageFile.packageFile?.split('/');
       // `split` always yields at least one element, so there is always a file
       // name to drop here
@@ -135,6 +153,13 @@ export async function flattenUpdates(
       for (const dep of packageFile.deps) {
         if (dep.updates!.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
+          // dependency managerData extends the package file's, it must not replace it
+          if (packageFileConfig.managerData && dep.managerData) {
+            depConfig.managerData = {
+              ...packageFileConfig.managerData,
+              ...dep.managerData,
+            };
+          }
           // @ts-expect-error -- not easily typed
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
@@ -182,6 +207,7 @@ export async function flattenUpdates(
               updateConfig,
               'update-type-merge',
             );
+            applyManagerScopedOptions(updateConfig, managerConfig);
             applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
@@ -219,6 +245,7 @@ export async function flattenUpdates(
           lockFileConfig,
           'lock-file-maintenance-merge-2',
         );
+        applyManagerScopedOptions(lockFileConfig, managerConfig);
         // Remove unnecessary objects
         for (const updateType of updateTypes) {
           // @ts-expect-error -- not easily typed
@@ -248,6 +275,7 @@ export async function flattenUpdates(
                 config.vulnerabilityAlerts,
               );
               delete updateConfig.vulnerabilityAlerts;
+              applyManagerScopedOptions(updateConfig, managerConfig);
               updateConfig.isVulnerabilityAlert = true;
               updateConfig.isRemediation = true;
               updateConfig.lockFile = lockFile;

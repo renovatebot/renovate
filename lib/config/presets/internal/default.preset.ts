@@ -390,14 +390,15 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinAllExceptPeerDependencies: {
-    description: 'Pin all dependency versions except `peerDependencies`.',
+    description:
+      'Pin all dependency versions except `engines`, `devEngines` and `peerDependencies`.',
     packageRules: [
       {
         matchPackageNames: ['*'],
         rangeStrategy: 'pin',
       },
       {
-        matchDepTypes: ['engines', 'peerDependencies'],
+        matchDepTypes: ['engines', 'devEngines.*', 'peerDependencies'],
         rangeStrategy: 'auto',
       },
     ],

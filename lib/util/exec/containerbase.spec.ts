@@ -67,6 +67,14 @@ describe('util/exec/containerbase', () => {
       });
     });
 
+    it('returns config for the renovate tool', () => {
+      expect(getToolConfig('renovate')).toEqual({
+        datasource: 'npm',
+        packageName: 'renovate',
+        versioning: 'npm',
+      });
+    });
+
     it('returns undefined for an unknown tool', () => {
       // @ts-expect-error -- intentionally using invalid tool name
       expect(getToolConfig('unknown-tool')).toBeUndefined();
