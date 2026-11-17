@@ -1,7 +1,7 @@
 import { defineRule } from '@oxlint/plugins';
 
 /**
- * Flags `x ?? []` in favour of `coerceArray(x)` from `lib/util/array.ts`.
+ * Flags `x ?? []` in favor of `coerceArray(x)` from `lib/util/array.ts`.
  *
  * Only a bare `[]` literal counts: `x ?? [1]` keeps a meaningful default, and
  * `x ?? ([] as Foo[])` carries an assertion the helper cannot express.

@@ -87,6 +87,11 @@ export function getOptionDocsUrl(
 }
 
 /**
+ * A negation, regex or glob, as accepted by `patternMatch` options.
+ */
+const patternMatchRegex = String.raw`^!|^/.*/i?$|[*?[\]{}()]`;
+
+/**
  * Suggests values in an editor, while still accepting anything else matching `items`.
  */
 function suggestValues(
@@ -118,7 +123,13 @@ function createSingleConfig(
         temp.items.format = option.format;
       }
       if (option.allowedValues) {
-        if (option.allowString) {
+        if (option.patternMatch) {
+          /* anything other than an allowed value needs to be a pattern, which may match one */
+          temp.items.anyOf = [
+            { enum: option.allowedValues },
+            { type: 'string', pattern: patternMatchRegex },
+          ];
+        } else if (option.allowString) {
           temp.items.anyOf = [
             { enum: option.allowedValues },
             { type: 'string' },
@@ -242,7 +253,7 @@ function createSingleConfig(
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritize contraint definitions, as they're more useful than the generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -258,7 +269,7 @@ function createSingleConfig(
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritize contraint definitions, as they're more useful than the generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -268,12 +279,17 @@ function createSingleConfig(
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const {
-      name,
-      description,
-    } of toolDefinitionDocumentation as readonly ConstraintDefinition[]) {
-      const base = `Install the \`${name}\` Containerbase tool`;
-      temp.properties[name] = {
+    for (const toolName of getSupportedToolNames()) {
+      const toolConfig = getToolConfig(toolName);
+      if (!toolConfig) {
+        continue;
+      }
+
+      const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
+      const description = def?.description ?? '';
+
+      const base = `Install the \`${toolName}\` Containerbase tool`;
+      temp.properties[toolName] = {
         type: 'object',
         description: description ? `${base}. ${description}` : base,
         additionalProperties: false,

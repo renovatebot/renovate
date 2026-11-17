@@ -195,6 +195,17 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
 
+    it('should use the conflict state from config without checking the branch', async () => {
+      config.automerge = true;
+      config.isConflicted = true;
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'Conflicted',
+      });
+      expect(scm.isBranchConflicted).not.toHaveBeenCalled();
+    });
+
     it('dryRun full should not automerge', async () => {
       config.automerge = true;
       GlobalConfig.set({ dryRun: 'full' });

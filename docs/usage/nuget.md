@@ -60,7 +60,7 @@ You can set alternative feeds:
 }
 ```
 
-In the example above we've set three NuGet feeds.
+In the example above we have set three NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the three feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged into a single dependency update.
 
@@ -135,7 +135,7 @@ If you use Azure DevOps:
 
 ## Ignoring package files when using presets
 
-Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you're using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged.
+Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you are using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged.
 For example:
 
 ```json

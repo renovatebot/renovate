@@ -97,7 +97,13 @@ export class MavenDatasource extends Datasource {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
     const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
     return metadataXmlResult
-      .transform(({ data: metadata }) => extractVersions(metadata))
+      .transform(({ data: metadata, isCacheable }) => {
+        const res = extractVersions(metadata);
+        if (isCacheable === false) {
+          res.isPrivate = true;
+        }
+        return res;
+      })
       .onError((err) => {
         logger.debug(
           `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
@@ -146,14 +152,15 @@ export class MavenDatasource extends Datasource {
     );
 
     const latestSuitableVersion = getLatestSuitableVersion(releases);
-    const dependencyInfo =
-      latestSuitableVersion &&
-      (await getDependencyInfo(
+    let dependencyInfo;
+    if (latestSuitableVersion) {
+      dependencyInfo = await getDependencyInfo(
         this.http,
         dependency,
         repoUrl,
         latestSuitableVersion,
-      ));
+      );
+    }
 
     const result: ReleaseResult = {
       ...dependency,
@@ -168,7 +175,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
+    if (metadata.isPrivate) {
       result.isPrivate = true;
     }
 

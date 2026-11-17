@@ -1,6 +1,7 @@
 import {
   isDate,
   isNonEmptyString,
+  isNullOrUndefined,
   isTruthy,
   isUndefined,
 } from '@sindresorhus/is';
@@ -128,7 +129,7 @@ export function massageName(
   let name = input ?? '';
 
   if (version) {
-    name = name.replace(RegExp(`^(Release )?v?${version}`, 'i'), '').trim();
+    name = name.replace(regEx(`^(Release )?v?${version}`, 'i'), '').trim();
   }
 
   name = name.trim();
@@ -515,12 +516,14 @@ export async function addReleaseNotes(
         releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
         if (!releaseNotes) {
           releaseNotes = await getReleaseNotesMd(input.project, v, source);
-          releaseNotes ??= await getReleaseNotes(
-            input.project,
-            v,
-            config,
-            source,
-          );
+          if (isNullOrUndefined(releaseNotes)) {
+            releaseNotes = await getReleaseNotes(
+              input.project,
+              v,
+              config,
+              source,
+            );
+          }
 
           // If there is no release notes, at least try to show the compare URL
           if (!releaseNotes && v.compare.url) {

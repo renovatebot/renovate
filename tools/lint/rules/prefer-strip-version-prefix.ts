@@ -2,7 +2,7 @@ import type { ESTree } from '@oxlint/plugins';
 import { defineRule } from '@oxlint/plugins';
 
 /**
- * Flags `x.replace(/^v/, '')` in favour of `stripVersionPrefix(x)` from
+ * Flags `x.replace(/^v/, '')` in favor of `stripVersionPrefix(x)` from
  * `lib/util/string.ts`.
  *
  * Only a pattern that removes nothing but a leading `v` counts: `/^v/`, `/^v/i`

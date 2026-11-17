@@ -233,6 +233,27 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
+  it('skips dependency info when no suitable version is found', async () => {
+    mockGenericPackage({
+      meta: codeBlock`
+        <metadata>
+          <groupId>org.example</groupId>
+          <artifactId>package</artifactId>
+          <versioning>
+            <versions>
+              <version></version>
+            </versions>
+          </versioning>
+        </metadata>
+      `,
+      pom: null,
+    });
+
+    const res = await get();
+
+    expect(res).toMatchObject({ releases: [] });
+  });
+
   it('keeps respectLatest when metadata has no latest tag', async () => {
     mockGenericPackage({
       meta: codeBlock`
@@ -738,6 +759,78 @@ describe('modules/datasource/maven/index', () => {
       isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(2);
+  });
+
+  describe('private results', () => {
+    it('marks results from the default registry as private when fetched with credentials', async () => {
+      hostRules.add({
+        hostType: datasource,
+        matchHost: 'repo.maven.apache.org',
+        token: '123test',
+      });
+      mockGenericPackage();
+
+      const res = await get('org.example:package', baseUrl);
+
+      expect(res).toMatchObject({ isPrivate: true });
+    });
+
+    it('keeps results private when parent POM info is merged in', async () => {
+      hostRules.add({
+        hostType: datasource,
+        matchHost: 'repo.maven.apache.org',
+        token: '123test',
+      });
+      mockGenericPackage({
+        meta: Fixtures.get('child-no-info/meta.xml'),
+        pom: Fixtures.get('child-no-info/pom.xml'),
+        latest: '2.0.0',
+      });
+      mockGenericPackage({
+        dep: 'org.example:parent',
+        meta: null,
+        pom: Fixtures.get('parent-scm-homepage/pom.xml'),
+        latest: '1.0.0',
+      });
+
+      const res = await get('org.example:package', baseUrl);
+
+      expect(res).toMatchObject({
+        isPrivate: true,
+        homepage: 'https://parent-home.example.com',
+      });
+    });
+
+    it('does not mark anonymous results from the default registry as private', async () => {
+      mockGenericPackage();
+
+      const res = await get('org.example:package', baseUrl);
+
+      expect(res).not.toHaveProperty('isPrivate');
+    });
+
+    it('marks results from a custom registry as private', async () => {
+      mockGenericPackage({ base: baseUrlCustom });
+
+      const res = await get('org.example:package', baseUrlCustom);
+
+      expect(res).toMatchObject({ isPrivate: true });
+    });
+
+    it.each`
+      registryUrl
+      ${'https://anonymous.registry.renovatebot.com'}
+      ${'https://repo.maven.apache.org.evil/maven2'}
+    `(
+      'marks anonymous results from $registryUrl as private',
+      async ({ registryUrl }) => {
+        mockGenericPackage({ base: registryUrl });
+
+        const res = await get('org.example:package', registryUrl);
+
+        expect(res).toMatchObject({ isPrivate: true });
+      },
+    );
   });
 
   describe('fetching parent info', () => {

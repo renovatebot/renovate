@@ -90,7 +90,7 @@ Two discussion categories are available:
 
 ## Contributing Notes
 
-- PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests wouldn't prove anything.
+- PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests would not prove anything.
 - Do not force push PR branches. The exception is branches of a GitHub stack of PRs (`gh stack`), which may be force pushed when rebasing or reordering the stack. Stacks need their branches in the upstream `renovatebot/renovate` repository, so this exception only applies if you have write access to it; PRs from forks cannot be stacked.
 - Follow the PR template (`.github/pull_request_template.md`). Before running `gh pr create`, read that file in full and use its exact section structure for the PR body — do not substitute a generic Summary/Test plan format.
 - PRs should be raised as a draft PR, and only marked ready once the CLA has been signed, and the user has confirmed that the changes are ready to go

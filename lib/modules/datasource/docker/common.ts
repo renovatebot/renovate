@@ -18,6 +18,7 @@ import {
   isNotFound,
   isOk,
   isRateLimited,
+  isRateLimitedOrServerError,
   isServerError,
   isUnauthorized,
 } from '../../../util/http/status.ts';
@@ -105,12 +106,23 @@ export async function getAuthHeaders(
       );
       return getAuthHeaders(http, registryHost, dockerRepository);
     }
+    if (isRateLimitedOrServerError(apiCheckResponse)) {
+      throw new ExternalHostError(
+        new Error(
+          `Registry auth probe ${apiCheckUrl} failed with status ${apiCheckResponse.statusCode}`,
+        ),
+      );
+    }
     if (
       !isUnauthorized(apiCheckResponse) ||
       !isNonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(
-        { apiCheckUrl, res: apiCheckResponse },
+        {
+          apiCheckUrl,
+          statusCode: apiCheckResponse.statusCode,
+          res: apiCheckResponse,
+        },
         'Invalid registry response',
       );
       return undefined;
@@ -242,6 +254,9 @@ export async function getAuthHeaders(
       authorization: `Bearer ${token}`,
     };
   } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     /* v8 ignore if -- quay.io errors are swallowed pending #9604, not reproduced in specs */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
