@@ -12,6 +12,7 @@ import { isDynamicInstall } from '../../../util/exec/containerbase.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ToolConstraint } from '../../../util/exec/types.ts';
 import {
+  deleteLocalFile,
   readLocalFile,
   withSystemTempDir,
   writeLocalFile,
@@ -1001,8 +1002,12 @@ async function reconcileWorkspace(
   if (config.reuseExistingBranch) {
     // Start every call from the branch's manifests so the calls agree and unchanged files are not returned.
     for (const path of getWorkspaceManifests(workspace).keys()) {
-      const contents = await getFile(path, config.branchName);
-      if (!isNullOrUndefined(contents)) {
+      const contents = await getFile(path, config.branchName, {
+        throwOnError: true,
+      });
+      if (isNullOrUndefined(contents)) {
+        await deleteLocalFile(path);
+      } else {
         await writeLocalFile(path, contents);
       }
     }

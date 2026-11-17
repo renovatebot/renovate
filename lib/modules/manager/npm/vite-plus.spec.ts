@@ -652,6 +652,7 @@ describe('modules/manager/npm/vite-plus', () => {
       deps: [],
     });
     await writeLocalFile(leafPath, baseLeaf);
+    await writeLocalFile('pnpm-workspace.yaml', 'packages:\n  - packages/*\n');
     const branchFiles = new Map([
       ['package.json', root],
       [leafPath, branchLeaf],
@@ -677,7 +678,32 @@ describe('modules/manager/npm/vite-plus', () => {
     );
 
     expect(result).toEqual([]);
-    expect(getFileMock).toHaveBeenCalledWith(leafPath, 'renovate/vite-plus');
+    expect(getFileMock).toHaveBeenCalledWith(leafPath, 'renovate/vite-plus', {
+      throwOnError: true,
+    });
+    await expect(readLocalFile('pnpm-workspace.yaml')).resolves.toBeNull();
+  });
+
+  it('reports a failed branch manifest read on a reused branch', async () => {
+    const root = packageJson('0.3.1', '4.1.11');
+    await mockFiles({ 'package.json': root });
+    getFileMock.mockRejectedValueOnce(new Error('git read failed'));
+
+    const result = await reconcile(
+      {
+        ...config(root),
+        branchName: 'renovate/vite-plus',
+        reuseExistingBranch: true,
+      },
+      packageFiles(),
+    );
+
+    expect(result).toEqual([
+      {
+        artifactError: { fileName: 'package.json', stderr: 'git read failed' },
+      },
+    ]);
+    expect(execMock).not.toHaveBeenCalled();
   });
 
   it('returns only the error when planning fails on a reused branch', async () => {
