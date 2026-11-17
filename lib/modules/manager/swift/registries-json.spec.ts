@@ -77,13 +77,11 @@ describe('modules/manager/swift/registries-json', () => {
   });
 
   describe('discoverRegistryUrls', () => {
-    beforeEach(() => {
-      // `fs` is mocked, so give `getSiblingFileName` the real path behavior.
-      fs.getSiblingFileName.mockImplementation((file, sibling) => {
-        const slash = file.lastIndexOf('/');
-        const dir = slash >= 0 ? file.slice(0, slash) : '';
-        return dir ? `${dir}/${sibling}` : sibling;
-      });
+    beforeEach(async () => {
+      const { getSiblingFileName } = await vi.importActual<
+        typeof import('../../../util/fs/index.ts')
+      >('../../../util/fs/index.ts');
+      fs.getSiblingFileName.mockImplementation(getSiblingFileName);
     });
 
     it('returns an empty list when no registries.json file exists', async () => {

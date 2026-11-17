@@ -239,12 +239,11 @@ describe('modules/manager/swift/index', () => {
       version: 1,
     });
 
-    beforeEach(() => {
-      // `fs` is mocked, so give `getSiblingFileName` the real path behavior.
-      fs.getSiblingFileName.mockImplementation((file, sibling) => {
-        const slash = file.lastIndexOf('/');
-        return slash >= 0 ? `${file.slice(0, slash)}/${sibling}` : sibling;
-      });
+    beforeEach(async () => {
+      const { getSiblingFileName } = await vi.importActual<
+        typeof import('../../../util/fs/index.ts')
+      >('../../../util/fs/index.ts');
+      fs.getSiblingFileName.mockImplementation(getSiblingFileName);
     });
 
     it('returns null when no Package.swift files supplied', async () => {

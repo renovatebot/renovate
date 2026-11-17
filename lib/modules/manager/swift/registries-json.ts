@@ -20,6 +20,7 @@ export function parseRegistriesJson(content: string): ParsedRegistries {
   const result: ParsedRegistries = { named: {} };
   const parsed = Json.pipe(RegistriesJson).safeParse(content);
   if (!parsed.success) {
+    logger.debug({ err: parsed.error }, 'swift: invalid registries.json');
     return result;
   }
 
