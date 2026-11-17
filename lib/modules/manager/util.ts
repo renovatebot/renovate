@@ -172,8 +172,15 @@ export function fileAddition(
 export function artifactError(
   fileName: string | undefined,
   stderr: string,
+  timedOut = false,
 ): UpdateArtifactsResult {
-  return { artifactError: { fileName, stderr } };
+  return {
+    artifactError: {
+      fileName,
+      stderr,
+      ...(timedOut && { timedOut: true }),
+    },
+  };
 }
 
 /**
@@ -189,6 +196,7 @@ export function artifactErrorResult(
     artifactError(
       fileName,
       artifactErrorMessageFromExecError(err, err.message),
+      err.timedOut,
     ),
   ];
 }

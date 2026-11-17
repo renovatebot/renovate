@@ -17,6 +17,7 @@ import { setCustomEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
@@ -1310,6 +1311,87 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it.each`
+    signal       | exitCode
+    ${'SIGTERM'} | ${undefined}
+    ${'SIGKILL'} | ${undefined}
+    ${undefined} | ${143}
+  `(
+    'lets an opted-in caller handle a timeout with signal=$signal, exitCode=$exitCode',
+    async ({ signal, exitCode }) => {
+      const timeoutError = new ExecError('Command timed out', {
+        cmd: 'foobar',
+        stdout: '',
+        stderr: '',
+        options: {},
+        signal,
+        exitCode,
+        timedOut: true,
+      });
+      cpExec.mockRejectedValueOnce(timeoutError);
+
+      await expect(exec('foobar', { abortOnTimeout: false })).rejects.toBe(
+        timeoutError,
+      );
+    },
+  );
+
+  it.each`
+    signal       | exitCode
+    ${'SIGTERM'} | ${undefined}
+    ${'SIGKILL'} | ${undefined}
+    ${undefined} | ${143}
+  `(
+    'still aborts a timeout with signal=$signal, exitCode=$exitCode by default',
+    async ({ signal, exitCode }) => {
+      cpExec.mockRejectedValueOnce(
+        new ExecError('Command timed out', {
+          cmd: 'foobar',
+          stdout: '',
+          stderr: '',
+          options: {},
+          signal,
+          exitCode,
+          timedOut: true,
+        }),
+      );
+
+      await expect(exec('foobar')).rejects.toThrow(TEMPORARY_ERROR);
+    },
+  );
+
+  it('aborts a command timeout when explicitly configured', async () => {
+    cpExec.mockRejectedValueOnce(
+      new ExecError('Command timed out', {
+        cmd: 'foobar',
+        stdout: '',
+        stderr: '',
+        options: {},
+        exitCode: 143,
+        timedOut: true,
+      }),
+    );
+
+    await expect(exec('foobar', { abortOnTimeout: true })).rejects.toThrow(
+      TEMPORARY_ERROR,
+    );
+  });
+
+  it('still aborts an opted-in caller on an external SIGTERM', async () => {
+    const interruption = new ExecError('Interrupted', {
+      cmd: 'foobar',
+      stdout: '',
+      stderr: '',
+      options: {},
+      signal: 'SIGTERM',
+    });
+    cpExec.mockRejectedValueOnce(interruption);
+
+    await expect(exec('foobar', { abortOnTimeout: false })).rejects.toThrow(
+      TEMPORARY_ERROR,
+    );
   });
 
   describe('getToolSettingsOptions()', () => {
