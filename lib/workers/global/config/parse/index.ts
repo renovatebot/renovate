@@ -8,7 +8,7 @@ import {
 } from '../../../../config/global.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
-import type { AllConfig } from '../../../../config/types.ts';
+import type { AllConfig, UrlReplacement } from '../../../../config/types.ts';
 import { mergeChildConfig } from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
@@ -78,6 +78,32 @@ function getInterpolatedHostRules(config: AllConfig): HostRule[] {
 }
 
 /**
+ * Returns the administrator's `urlReplacements` whose secrets and variables can be applied yet.
+ */
+function getInterpolatedUrlReplacements(config: AllConfig): UrlReplacement[] {
+  return coerceArray(config.urlReplacements).flatMap((rule) => {
+    const ruleConfig: AllConfig = { urlReplacements: [clone(rule)] };
+    try {
+      const interpolated: AllConfig = applySecretsAndVariablesToConfig({
+        config: ruleConfig,
+        secrets: config.secrets,
+        variables: config.variables,
+        deleteSecrets: true,
+        deleteVariables: true,
+      });
+      return coerceArray(interpolated.urlReplacements);
+    } catch (err) {
+      // a rule which is left out only keeps requests on the original host
+      logger.debug(
+        { err },
+        'Not applying a urlReplacements rule to globalExtends, as its secrets or variables cannot be resolved yet',
+      );
+      return [];
+    }
+  });
+}
+
+/**
  * Resolves `globalExtends` presets with the administrator's own `hostRules` and `internalHostAccess` in effect.
  */
 async function resolveGlobalExtendsAsAdmin(
@@ -86,7 +112,10 @@ async function resolveGlobalExtendsAsAdmin(
 ): Promise<AllConfig> {
   // `globalExtends` is fetched before `start()` sets `GlobalConfig` and `globalInitialize()` registers `hostRules`, so the administrator's own `internalHostAccess`, `endpoint` and `hostRules` are applied for the duration of that fetch only - `globalInitialize()` then registers the final, merged `hostRules`
   try {
-    setHttpGlobalConfig(config);
+    setHttpGlobalConfig({
+      ...config,
+      urlReplacements: getInterpolatedUrlReplacements(config),
+    });
     for (const rule of getInterpolatedHostRules(config)) {
       // the same `trusted` tier as `setGlobalHostRules()`, so that `allowInternal` is kept and can grant
       addHostRule(rule, { trusted: true });

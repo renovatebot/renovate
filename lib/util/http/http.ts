@@ -37,6 +37,10 @@ import type {
   HttpResponse,
   SafeJsonError,
 } from './types.ts';
+import {
+  applyUrlReplacements,
+  hostRuleHasCredentials,
+} from './url-replacements.ts';
 import { copyResponse } from './util.ts';
 
 export interface InternalJsonUnsafeOptions<
@@ -144,9 +148,8 @@ export abstract class HttpBase<
   ): {
     options: InternalGotOptions & InternalHttpOptions;
     hostRule: CombinedHostRule;
+    fetchUrl: URL;
   } {
-    const url = resolvedUrl.toString();
-
     let options = merge<InternalGotOptions, InternalHttpOptions>(
       {
         ...this.options,
@@ -165,6 +168,10 @@ export abstract class HttpBase<
       options.readOnly = true;
     }
 
+    // everything below acts on the URL which is actually requested
+    const fetchUrl = applyUrlReplacements(resolvedUrl, options);
+    const url = fetchUrl.toString();
+
     const hostRule = findMatchingRule(url, options);
     options = applyHostRule(url, options, hostRule);
     if (options.enabled === false) {
@@ -175,7 +182,7 @@ export abstract class HttpBase<
 
     // enforced here so it runs before anything else - including cache lookups - can act on the URL, and for the stream path too
     const guard = applyHostGuard(
-      resolvedUrl,
+      fetchUrl,
       options.hostType,
       hostRule.internalHostGrant,
       options.responseBecomesConfig,
@@ -195,7 +202,7 @@ export abstract class HttpBase<
       ];
     }
 
-    return { options, hostRule };
+    return { options, hostRule, fetchUrl };
   }
 
   private async request(
@@ -224,7 +231,12 @@ export abstract class HttpBase<
 
     this.processOptions(resolvedUrl, httpOptions);
 
-    const { options, hostRule } = this.prepareOptions(resolvedUrl, httpOptions);
+    const { options, hostRule, fetchUrl } = this.prepareOptions(
+      resolvedUrl,
+      httpOptions,
+    );
+    // the request and its cache entries use `fetchHref`, logs and response handling use `url`
+    const fetchHref = fetchUrl.toString();
 
     const method = options.method.toLowerCase();
     const isReadMethod = ['head', 'get'].includes(method);
@@ -233,6 +245,12 @@ export abstract class HttpBase<
 
     const timeout = options.timeout ?? 60000;
     options.timeout = timeout;
+
+    // a response of the mirror is private when the mirror's own host rule has credentials
+    const mirrorHasCredentials =
+      fetchHref !== url && hostRuleHasCredentials(hostRule);
+    const authorization =
+      !!options.headers?.authorization || mirrorHasCredentials;
 
     let cacheProvider: HttpCacheProvider | undefined;
     if (isReadMethod && options.cacheProvider) {
@@ -243,6 +261,7 @@ export abstract class HttpBase<
       ? hash(
           `got-${JSON.stringify({
             url,
+            fetchHref,
             headers: options.headers,
             method,
             responseType: options.responseType,
@@ -284,35 +303,43 @@ export abstract class HttpBase<
       const startTime = Date.now();
       const fetchTask: GotTask = () => {
         const queueMs = Date.now() - startTime;
-        return fetch(url, this._normalizeOptions(options), { queueMs });
+        return fetch(fetchHref, this._normalizeOptions(options), { queueMs });
       };
 
-      const throttle = getThrottle(url);
+      const throttle = getThrottle(fetchHref);
       const throttledTask = throttle
         ? () => throttle.add(fetchTask)
         : fetchTask;
 
-      const queue = getQueue(url);
+      const queue = getQueue(fetchHref);
       const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       function httpTask(): Promise<HttpResponse<unknown>> {
-        return wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
+        return wrapWithRetry(
+          queuedTask,
+          fetchHref,
+          getRetryAfter,
+          maxRetryAfter,
+        );
       }
 
       // cached responses don't hit the server, so they skip the throttle and queue
       const cachedTask = async (
         provider: HttpCacheProvider,
       ): Promise<HttpResponse<unknown>> => {
-        let res = await provider.bypassServer<unknown>(options.method, url);
+        let res = await provider.bypassServer<unknown>(
+          options.method,
+          fetchHref,
+        );
         if (!res) {
-          await provider.setCacheHeaders(method, url, options);
+          await provider.setCacheHeaders(method, fetchHref, options);
           res = await httpTask();
         }
         const resCopy = copyResponse(res, false);
-        resCopy.authorization = !!options?.headers?.authorization;
+        resCopy.authorization = authorization;
         this.handleResponse(resolvedUrl, resCopy);
-        return await provider.wrapServerResponse(method, url, resCopy);
+        return await provider.wrapServerResponse(method, fetchHref, resCopy);
       };
 
       if (cacheProvider) {
@@ -345,7 +372,7 @@ export abstract class HttpBase<
 
       const deepCopyNeeded = !!memCacheKey && !isNotModified(res);
       const resCopy = copyResponse(res, deepCopyNeeded);
-      resCopy.authorization = !!options?.headers?.authorization;
+      resCopy.authorization = authorization;
 
       this.handleResponse(resolvedUrl, resCopy);
 
@@ -358,7 +385,7 @@ export abstract class HttpBase<
 
       const staleResponse = await cacheProvider?.bypassServer<
         string | Uint8Array
-      >(method, url, true);
+      >(method, fetchHref, true);
       if (staleResponse) {
         logger.debug(
           { err },
@@ -766,15 +793,15 @@ export abstract class HttpBase<
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
     const resolvedUrl = this.resolveUrl(url, options);
 
-    const { options: combinedOptions } = this.prepareOptions(resolvedUrl, {
-      ...options,
-      method: 'get',
-    });
-
-    return stream(
-      resolvedUrl.toString(),
-      this._normalizeOptions(combinedOptions),
+    const { options: combinedOptions, fetchUrl } = this.prepareOptions(
+      resolvedUrl,
+      {
+        ...options,
+        method: 'get',
+      },
     );
+
+    return stream(fetchUrl.toString(), this._normalizeOptions(combinedOptions));
   }
 
   async getToml<Schema extends ZodType<any, any, any>>(

@@ -585,6 +585,51 @@ describe('workers/global/config/parse/index', () => {
         );
       });
 
+      it('applies `urlReplacements` with variables, and skips those whose secrets are not available yet', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: ['http://example.com/config.json'],
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'http://example.com/',
+              replaceUrlPrefix: '{{ secrets.FROM_PRESET }}',
+            },
+            {
+              matchUrlPrefix: 'http://example.com/',
+              replaceUrlPrefix: '{{ variables.MIRROR }}',
+            },
+          ],
+          variables: { MIRROR: 'http://mirror.example.com/presets/' },
+        });
+        httpMock
+          .scope('http://mirror.example.com')
+          .get('/presets/config.json')
+          .reply(200, {
+            repositories: ['g/r1'],
+            secrets: { FROM_PRESET: 'http://other.example.com/' },
+          });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/r1']);
+        expect(parsedConfig.urlReplacements).toEqual([
+          {
+            matchUrlPrefix: 'http://example.com/',
+            replaceUrlPrefix: 'http://other.example.com/',
+          },
+          {
+            matchUrlPrefix: 'http://example.com/',
+            replaceUrlPrefix: 'http://mirror.example.com/presets/',
+          },
+        ]);
+        expect(logger.debug).toHaveBeenCalledWith(
+          { err: expect.any(Error) },
+          'Not applying a urlReplacements rule to globalExtends, as its secrets or variables cannot be resolved yet',
+        );
+      });
+
       it('still applies the `hostRules` which resolve when another one does not', async () => {
         fileConfigParser.getConfig.mockResolvedValue({
           globalExtends: [presetUrl],
