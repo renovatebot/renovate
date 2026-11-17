@@ -19,7 +19,7 @@ export interface GithubRestAsset {
   url: string;
   browser_download_url: string;
   size: number;
-  /** `sha256:<hex>`, which GitHub records for assets uploaded since mid-2025. */
+  /** `sha256:<hex>`, which GitHub records for assets uploaded since June 2025. */
   digest?: string | null;
 }
 

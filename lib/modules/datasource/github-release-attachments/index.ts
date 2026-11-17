@@ -217,15 +217,16 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
   /**
    * Attempts to resolve the digest for the specified package.
    *
-   * Releases are fetched by `currentGitRef` and `newGitRef`, their tags, falling back to `currentValue` and `newValue`.
-   * `currentValue` and `newValue` are used to map asset names, so they may be versions taken from tags by `extractVersion`.
+   * Releases are fetched by their tags, `currentGitRef` and `newGitRef`, falling back to `currentValue` and `newValue`.
+   * Asset names are mapped with `currentValue` and `newValue`, which may be versions that `extractVersion` took from the tags.
    * Requires `currentValue` and `currentDigest`.
    *
    * There may be many assets attached to the release. This function will:
    *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
+   *     - Match the SHA-256 that GitHub records for each asset.
    *     - Download small release assets, parse as checksum manifests (e.g. `SHASUMS.txt`).
    *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
-   *  - Map the hashed asset to `newValue` and return the updated digest as a string
+   *  - Map the hashed asset to `newValue` and return the updated digest as a string, preferring the SHA-256 GitHub recorded
    */
   override async getDigest(
     {
