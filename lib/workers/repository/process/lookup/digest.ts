@@ -138,7 +138,6 @@ function getDigestInputConfig(
     ...config,
     registryUrl: update.registryUrl ?? res.registryUrl,
     lookupName: res.lookupName,
-    // lets datasources find releases by tag when `extractVersion` changed the version
     currentGitRef: findGitRef(dependency, res.currentVersion),
     newGitRef: findGitRef(dependency, update.newVersion ?? res.currentVersion),
   };

@@ -143,7 +143,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
       expect(digest).toEqual(nextDigest);
     });
 
-    it('fetches releases by their tags when versions are taken from them', async () => {
+    it('fetches releases by tag for versions extracted from tags', async () => {
       const oldContent = '1'.repeat(10 * 1024);
       const newContent = '2'.repeat(10 * 1024);
       releaseMock.withAssets('v.0.9.8.0', {
