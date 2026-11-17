@@ -1769,7 +1769,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
           stdout: '',
           stderr:
-            "  × No solution found when resolving dependencies:\n  ╰─▶ Because dep1==0.2.35 was published after the exclude newer time and your project depends on dep1==0.2.35, we can conclude that your project's requirements are unsatisfiable.",
+            "Resolving despite existing lockfile due to removal of exclude newer span\nerror: No solution found when resolving dependencies\n  cause: Because there is no version of dep1==0.2.35 and your project depends on dep1==0.2.35, we can conclude that your project's requirements are unsatisfiable.",
           options: {},
         });
         const success = { stdout: '', stderr: '' };

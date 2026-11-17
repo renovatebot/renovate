@@ -390,7 +390,8 @@ export class UvProcessor extends BasePyProjectProcessor {
           } catch (err) {
             if (
               excludeNewerFlag &&
-              err.stderr?.includes('exclude newer time')
+              err.stderr?.includes('exclude newer') &&
+              err.stderr?.includes('unsatisfiable')
             ) {
               logger.warn(
                 { err },
