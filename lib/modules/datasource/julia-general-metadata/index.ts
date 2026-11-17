@@ -28,6 +28,10 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `registered` field in the results.';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repo` field of the package info, and the source directory from its `subdir` field.';
+
   private getVersions(
     registryUrl: string,
     name: string,
@@ -47,24 +51,22 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
     );
   }
 
-  private getUuid(
+  private getInfo(
     registryUrl: string,
     name: string,
-  ): Promise<string | undefined> {
+  ): Promise<JuliaPackageInfo | null> {
     return withCache(
       {
         namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
-        key: buildCacheKey('getUuid', name),
+        key: buildCacheKey('getInfo', name),
         public: true,
         fallback: true,
       },
-      async () => {
-        const info = await this.fetchJsonOrNull(
+      () =>
+        this.fetchJsonOrNull(
           joinUrlParts(registryUrl, 'api', name, 'info.json'),
           JuliaPackageInfo,
-        );
-        return info?.uuid;
-      },
+        ),
     );
   }
 
@@ -81,17 +83,28 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
     // UUID, as Pkg's REPL does. A name is unique only within a registry, so a
     // package from another registry can have the name of a General package.
     const [name, uuid] = packageName.split('=');
-    const [generalUuid, releases] = await Promise.all([
-      uuid ? this.getUuid(registryUrl, name) : undefined,
+    const [info, releases] = await Promise.all([
+      this.getInfo(registryUrl, name),
       this.getVersions(registryUrl, name),
     ]);
-    if (uuid && generalUuid?.toLowerCase() !== uuid.toLowerCase()) {
+    if (uuid && info?.uuid.toLowerCase() !== uuid.toLowerCase()) {
       logger.debug(
-        { packageName, generalUuid },
+        { packageName, generalUuid: info?.uuid },
         'Package is not the General package of that name',
       );
       return null;
     }
-    return releases;
+    if (!releases) {
+      return null;
+    }
+
+    const result: ReleaseResult = { ...releases };
+    if (info?.repo) {
+      result.sourceUrl = info.repo;
+    }
+    if (info?.subdir) {
+      result.sourceDirectory = info.subdir;
+    }
+    return result;
   }
 }
