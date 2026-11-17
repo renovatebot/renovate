@@ -281,8 +281,10 @@ For example, if you package file exists at `home/packages/package.json`, then:
 `packageFileDir` will be `home/packages`
 
 These values can be referenced inside `depNameTemplate` or `packageNameTemplate`.
-Only the regex manager's `*Template` fields get the bare filename in `packageFile`.
-In all other templates, like `branchName`, `commitMessage` or `packageRules`, `packageFile` is the full path relative to the repository root.
+
+!!! note
+  Only the regex manager's `*Template` fields get the bare filename in `packageFile`.
+  In all other templates, like `branchName`, `commitMessage` or `packageRules`, `packageFile` is the full path relative to the repository root.
 
 If your dependency folder looks like:
 
