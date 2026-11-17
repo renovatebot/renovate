@@ -5,9 +5,13 @@ import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import * as exactVersioning from '../../versioning/exact/index.ts';
+import * as semverCoerced from '../../versioning/semver-coerced/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { ApmManifest } from './schema.ts';
 
@@ -15,6 +19,7 @@ interface DatasourceResult {
   datasource: string;
   packageName: string;
   registryUrls?: string[];
+  versioning?: string;
 }
 
 /**
@@ -51,17 +56,60 @@ function determineDatasource(
   };
 }
 
+/**
+ * Determine the datasource for a ref that the default versioning can't read as
+ * a version, such as a branch. It has no tag to look up, so Renovate follows
+ * the ref's commit instead, as github-actions does for `uses: owner/action@main`:
+ * with `github-digest` on GitHub hosts, and `git-refs` on every other host, both
+ * with `exact` versioning so the branch name itself counts as a valid value.
+ */
+function determineRefDatasource(
+  host: string,
+  platform: string | null,
+  repoPath: string,
+): DatasourceResult {
+  if (platform === 'github') {
+    return {
+      datasource: GithubDigestDatasource.id,
+      packageName: repoPath,
+      versioning: exactVersioning.id,
+      ...(host === 'github.com' ? {} : { registryUrls: [`https://${host}`] }),
+    };
+  }
+
+  return {
+    datasource: GitRefsDatasource.id,
+    packageName: `https://${host}/${repoPath}`,
+    versioning: exactVersioning.id,
+  };
+}
+
 /** A trailing ` # <tag>` comment on a manifest line. */
 const commentTagRegex = regEx(/^\s+#\s*(?<tag>\S.*?)\s*$/);
 
 /**
  * Renders both `owner/repo#<tag>` and the digest-pinned
  * `owner/repo#<sha> # <tag>` form, mirroring the github-actions
- * `uses: owner/action@<sha> # v4` behaviour so `pinDigests` can pin a bare tag
+ * `uses: owner/action@<sha> # v4` behavior so `pinDigests` can pin a bare tag
  * to a SHA and keep the trailing tag comment current.
  */
 const autoReplaceStringTemplate =
   '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}';
+
+/**
+ * Match `<name>--v<version>`, `<name>-v<version>`, and `<name>_v<version>` tags.
+ */
+const packageTagRegex = regEx(
+  /^(?<compatibility>.+?[-_])v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/,
+);
+
+function packageTagConfig(
+  currentValue: string,
+): Pick<PackageDependency, 'versionCompatibility'> {
+  return packageTagRegex.test(currentValue)
+    ? { versionCompatibility: packageTagRegex.source }
+    : {};
+}
 
 /**
  * APM virtual-package subpaths (skills/prompts/etc.) begin at one of these
@@ -201,21 +249,9 @@ export function parseApmDependency(
     };
   }
 
-  const { datasource, packageName, registryUrls } = determineDatasource(
-    host,
-    platform,
-    repoPath,
-  );
-  const dep: PackageDependency = {
-    ...base,
-    datasource,
-    packageName,
-    ...(registryUrls ? { registryUrls } : {}),
-    autoReplaceStringTemplate,
-  };
-
+  let tail: PinnedTail | undefined;
   if (isLongCommitSha(ref)) {
-    const tail = findPinnedTail(entry);
+    tail = findPinnedTail(entry);
     if (!tail) {
       // Bare SHA with no recoverable tag comment - no version to track.
       return {
@@ -224,18 +260,40 @@ export function parseApmDependency(
         skipReason: 'unversioned-reference',
       };
     }
+  }
+  const currentValue = tail?.currentValue ?? ref;
+
+  // This checks Renovate's default versioning, not the dependency's effective
+  // one, on purpose: extraction runs before packageRules are applied, so a
+  // `versioning` set for this dependency isn't known yet.
+  const { datasource, packageName, registryUrls, versioning } =
+    semverCoerced.api.isValid(currentValue)
+      ? determineDatasource(host, platform, repoPath)
+      : determineRefDatasource(host, platform, repoPath);
+  const dep: PackageDependency = {
+    ...base,
+    datasource,
+    packageName,
+    ...(registryUrls ? { registryUrls } : {}),
+    ...(versioning ? { versioning } : {}),
+    autoReplaceStringTemplate,
+  };
+
+  if (tail) {
     return {
       ...dep,
-      currentValue: tail.currentValue,
+      currentValue,
       currentDigest: ref,
       replaceString: tail.replaceString,
+      ...packageTagConfig(tail.currentValue),
     };
   }
 
   return {
     ...dep,
-    currentValue: ref,
+    currentValue,
     replaceString: entry,
+    ...packageTagConfig(ref),
   };
 }
 

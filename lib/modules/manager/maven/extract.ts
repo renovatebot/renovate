@@ -35,6 +35,10 @@ const supportedExtensionsNamespaces = [
   'http://maven.apache.org/EXTENSIONS/1.2.0',
 ];
 
+function isModelVersion4(child: any): boolean {
+  return child.name === 'modelVersion' && child.val === '4.0.0';
+}
+
 function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
@@ -55,10 +59,7 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
   if (attr.xmlns === 'http://maven.apache.org/POM/4.0.0') {
     return project;
   }
-  if (
-    isNonEmptyArray(children) &&
-    children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
-  ) {
+  if (isNonEmptyArray(children) && children.some(isModelVersion4)) {
     return project;
   }
   return null;
@@ -88,7 +89,7 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
 function containsPlaceholder(str: string | null | undefined): boolean {
   return (
     !!str &&
-    (regEx(/\${[^}]*?}/).test(str) || regEx(/\{\{[^}]*?\}\}/).test(str))
+    [regEx(/\${[^}]*?}/), regEx(/\{\{[^}]*?\}\}/)].some((re) => re.test(str))
   );
 }
 
@@ -100,11 +101,9 @@ function getCNBDependencies(
   for (const node of nodes) {
     const depString = node.val.trim();
     if (isDockerRef(depString)) {
-      const dep = getDockerDep(
-        depString.replace(DOCKER_PREFIX, ''),
-        true,
-        config.registryAliases,
-      );
+      const dep = getDockerDep(depString.replace(DOCKER_PREFIX, ''), {
+        registryAliases: config.registryAliases,
+      });
 
       dep.fileReplacePosition = node.position!; // TODO: should not be null
       // v8 ignore else -- the extractor always populates this field

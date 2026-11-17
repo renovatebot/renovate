@@ -38,10 +38,7 @@ function extractDefinition(
   // extract environments
   const environments = [...definition.executors, ...definition.jobs];
   for (const dockerImage of environments) {
-    deps.push({
-      ...getDep(dockerImage, true, registryAliases),
-      depType: 'docker',
-    });
+    deps.push(getDep(dockerImage, { registryAliases, depType: 'docker' }));
   }
 }
 
@@ -67,10 +64,7 @@ export function extractPackageFile(
   extractDefinition(deps, parsed, registryAliases);
 
   for (const alias of parsed.aliases) {
-    deps.push({
-      ...getDep(alias, true, registryAliases),
-      depType: 'docker',
-    });
+    deps.push(getDep(alias, { registryAliases, depType: 'docker' }));
   }
 
   if (!deps.length) {

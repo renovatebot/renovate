@@ -8,10 +8,11 @@ import { ExecError } from '../../../util/exec/exec-error.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
+import type { DenoManagerData } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const updateArtifact: UpdateArtifact = {
+const updateArtifact: UpdateArtifact<DenoManagerData> = {
   config: {
     constraints: { deno: '2.4.5' },
   },
@@ -21,10 +22,6 @@ const updateArtifact: UpdateArtifact = {
 };
 
 describe('modules/manager/deno/artifacts', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('updateArtifacts()', () => {
     let localDirResult: DirectoryResult;
     let localDir: string;
@@ -216,7 +213,7 @@ describe('modules/manager/deno/artifacts', () => {
   });
 
   it('depType tasks returns an error', async () => {
-    const updateArtifact: UpdateArtifact = {
+    const updateArtifact: UpdateArtifact<DenoManagerData> = {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
@@ -242,7 +239,7 @@ describe('modules/manager/deno/artifacts', () => {
   });
 
   it('depType tasks.command returns an error', async () => {
-    const updateArtifact: UpdateArtifact = {
+    const updateArtifact: UpdateArtifact<DenoManagerData> = {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
@@ -295,7 +292,7 @@ describe('modules/manager/deno/artifacts', () => {
   });
 
   it('deno command execution', async () => {
-    const updateArtifact: UpdateArtifact = {
+    const updateArtifact: UpdateArtifact<DenoManagerData> = {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
@@ -320,7 +317,7 @@ describe('modules/manager/deno/artifacts', () => {
 
   describe('private registries', () => {
     it('should add private registries to deno install command allow-import option', async () => {
-      const updateArtifact: UpdateArtifact = {
+      const updateArtifact: UpdateArtifact<DenoManagerData> = {
         config: {
           isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],
@@ -358,7 +355,7 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     it('quotes the allow-import list when a hostRule resolvedHost contains shell metacharacters', async () => {
-      const updateArtifact: UpdateArtifact = {
+      const updateArtifact: UpdateArtifact<DenoManagerData> = {
         config: {
           isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],

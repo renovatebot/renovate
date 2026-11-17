@@ -1156,6 +1156,197 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
     });
 
+    it('executes branch-level commands when only a later upgrade has executionMode=branch', async () => {
+      const branchPostUpgradeTasks = {
+        commands: ['some-command'],
+        fileFilters: ['**/*'],
+        executionMode: 'branch' as const,
+      };
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep1',
+            packageFile: 'first.json',
+          },
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep2',
+            packageFile: 'second_image.json',
+            postUpgradeTasks: branchPostUpgradeTasks,
+          },
+        ],
+        postUpgradeTasks: {
+          commands: [],
+          fileFilters: ['**/*'],
+          executionMode: 'update',
+        },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.anything(),
+      );
+      expect(res?.artifactErrors).toHaveLength(0);
+    });
+
+    it('executes each distinct executionMode=branch commands when multiple upgrades have them', async () => {
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep1',
+            postUpgradeTasks: {
+              commands: ['first-command'],
+              fileFilters: ['**/*'],
+              executionMode: 'branch',
+            },
+          },
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep2',
+            postUpgradeTasks: {
+              commands: ['second-command'],
+              fileFilters: ['**/*'],
+              executionMode: 'branch',
+            },
+          },
+        ],
+        postUpgradeTasks: {
+          commands: ['first-command'],
+          fileFilters: ['**/*'],
+          executionMode: 'branch',
+        },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValue({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['first-command', 'second-command'],
+      });
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(exec.exec.mock.calls.map(([cmd]) => cmd)).toEqual([
+        'first-command',
+        'second-command',
+      ]);
+      expect(res?.artifactErrors).toHaveLength(0);
+    });
+
+    it('only executes identical executionMode=branch commands once when multiple upgrades have them', async () => {
+      const postUpgradeTasks = {
+        commands: ['some-command'],
+        fileFilters: ['**/*'],
+        executionMode: 'branch' as const,
+      };
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep1',
+            postUpgradeTasks: { ...postUpgradeTasks },
+          },
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep2',
+            postUpgradeTasks: { ...postUpgradeTasks },
+          },
+        ],
+        postUpgradeTasks: { ...postUpgradeTasks },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.anything(),
+      );
+      expect(res?.artifactErrors).toHaveLength(0);
+    });
+
+    it('does not execute branch-level commands when no upgrade has executionMode=branch', async () => {
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [
+          {
+            manager: 'some-manager',
+            branchName: 'main',
+            depName: 'some-dep1',
+          },
+        ],
+        postUpgradeTasks: {
+          commands: ['some-command'],
+          fileFilters: ['**/*'],
+          executionMode: 'update',
+        },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['some-command'],
+      });
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(exec.exec).not.toHaveBeenCalled();
+      expect(res?.artifactErrors).toHaveLength(0);
+    });
+
     describe('when using installTools', () => {
       interface TestCase {
         description: string;
@@ -1280,6 +1471,49 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           }),
         );
         expect(res.artifactErrors).toHaveLength(0);
+      });
+
+      it('passes the branch-level constraints when using executionMode=branch', async () => {
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+          ],
+          constraints: { npm: '10.2.3' },
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'branch',
+            installTools: { npm: {} },
+          },
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+        );
+        GlobalConfig.set({
+          localDir: upath.join(tmpDir.path, 'local'),
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        const res = await postUpgradeCommands.default(config);
+
+        expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+          'some-command',
+          expect.objectContaining({
+            toolConstraints: [{ toolName: 'npm', constraint: '10.2.3' }],
+          }),
+        );
+        expect(res?.artifactErrors).toHaveLength(0);
       });
 
       it(`logs when skipping a constraint that isn't a known tool`, async () => {

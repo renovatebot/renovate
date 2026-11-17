@@ -148,6 +148,112 @@ describe.concurrent('config-validator', () => {
       });
     });
 
+    it('applies the migration with --migrate, keeping comments, so --strict passes', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.jsonc');
+        await fs.writeFile(
+          file,
+          codeBlock`
+            {
+              // keep this comment
+              "extends": ["config:base"],
+              "packageRules": [
+                {
+                  "packagePatterns": ["foo"],
+                  "automerge": true
+                }
+              ]
+            }
+          `,
+        );
+
+        const { exitCode, all } = await runValidator([
+          '--no-global',
+          '--strict',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(0);
+        expect(all).toContain('Applied config migration');
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(
+          `${codeBlock`
+            {
+              // keep this comment
+              "extends": ["config:recommended"],
+              "packageRules": [
+                {
+                  "automerge": true,
+                  "matchPackageNames": [
+                    "/foo/"
+                  ]
+                }
+              ]
+            }
+          `}\n`,
+        );
+      });
+    });
+
+    it('does not rewrite a file that needs no migration with --migrate', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.json');
+        const content = '{"extends":   ["config:recommended"]}';
+        await fs.writeFile(file, content);
+
+        const { exitCode } = await runValidator([
+          '--no-global',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(0);
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(content);
+      });
+    });
+
+    it('does not apply the migration to an unsupported file type with --migrate', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.yaml');
+        const content = 'extends:\n  - config:base\n';
+        await fs.writeFile(file, content);
+
+        const { exitCode, all } = await runValidator([
+          '--no-global',
+          '--strict',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(1);
+        expect(all).toContain(
+          'Config migration cannot be applied automatically to this file type',
+        );
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(content);
+      });
+    });
+
+    it('reports a migration that could not be written with --migrate, without calling the config invalid', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = path.join(dirPath, 'renovate.json');
+        const content = '{"extends":["config:base"]}';
+        await fs.writeFile(file, content);
+        await fs.chmod(file, 0o444);
+
+        const { exitCode, all } = await runValidator([
+          '--no-global',
+          '--strict',
+          '--migrate',
+          file,
+        ]);
+
+        expect(exitCode).toBe(1);
+        expect(all).toContain('Config migration could not be written');
+        expect(all).not.toContain('File is not valid Renovate config');
+        await expect(fs.readFile(file, 'utf8')).resolves.toBe(content);
+      });
+    });
+
     it('treats file as global config by default', async () => {
       await withTmpDir(async (dirPath) => {
         const file = await writeGlobalConfig(dirPath, 'config.json', {
@@ -324,50 +430,53 @@ describe.concurrent('config-validator', () => {
         expect(all).toContain('Validating package.json > renovate');
       });
     });
+
+    it('does not overwrite package.json with its renovate config with --migrate', async () => {
+      await withTmpDir(async (dirPath) => {
+        const pkgJson = path.join(dirPath, 'package.json');
+        const content = JSON.stringify({
+          name: 'test',
+          renovate: { extends: ['config:base'] },
+        });
+        await fs.writeFile(pkgJson, content);
+
+        const { all } = await runValidator(['--migrate'], { cwd: dirPath });
+
+        expect(all).toContain(
+          'Config migration cannot be applied automatically to this file type',
+        );
+        await expect(fs.readFile(pkgJson, 'utf8')).resolves.toBe(content);
+      });
+    });
   });
 
   describe('hostRules', () => {
-    it("filters the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
+    it("does not drop the self-hosted admin's own hostRules headers against allowedHeaders when registering them", async () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - `hostRules.add()` no longer filters (and warns about) the admin's own headers
+      //
+      // this does not (yet) extend to the separate, pre-existing top-level config security validation in `lib/config/validation.ts`, which still reports a global config's own `hostRules[].headers` outside its own `allowedHeaders` as a `Config security error` - the same limitation `allowedEnv`/`env` already have there, so `exitCode` is still 1 here
       await withTmpDir(async (dirPath) => {
         const configFile = await writeGlobalConfig(dirPath, 'config.json', {
           allowedHeaders: ['X-*'],
           hostRules: [
             {
               matchHost: 'registry.example.com',
-              headers: { 'X-Allowed': 'yes', Authorization: 'denied' },
+              headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
             },
           ],
         });
 
-        const { all } = await runValidator([], {
+        const { exitCode, all } = await runValidator([], {
           cwd: dirPath,
           env: { RENOVATE_CONFIG_FILE: configFile },
         });
 
-        expect(all).toContain(
-          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-        );
-        expect(all).toContain('Authorization');
-      });
-    });
-
-    it("honors a CLI-arg global config file's own allowedHeaders", async () => {
-      // a global config file brings its own `allowedHeaders`, and its hostRules should be filtered against those - not the surrounding environment's - as a real run would after parsing it
-      await withTmpDir(async (dirPath) => {
-        const configFile = await writeGlobalConfig(dirPath, 'config.json', {
-          allowedHeaders: ['Authorization'],
-          hostRules: [
-            {
-              matchHost: 'registry.example.com',
-              headers: { Authorization: 'Bearer token' },
-            },
-          ],
-        });
-
-        const { all } = await runValidator([configFile], { cwd: dirPath });
-
         expect(all).not.toContain(
           "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+        );
+        expect(exitCode).toBe(1);
+        expect(all).toContain(
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
         );
       });
     });

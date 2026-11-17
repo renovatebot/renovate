@@ -13,9 +13,13 @@ export function sanitizeMarkdown(markdown: string): string {
     '$<pre>#&#8203;$<digit>',
   );
   // Put a zero width space after every @ symbol to prevent unintended hyperlinking,
-  // but leave URLs, code blocks (triple backticks), and inline code spans untouched
+  // but leave URLs, code blocks (triple or quadruple backticks), and inline code spans untouched
   res = res
-    .split(regEx(/(?<skip>```[\s\S]*?```|`[^`\n]*?`|https?:\/\/[^\s<]+)/gi))
+    .split(
+      regEx(
+        /(?<skip>````[\s\S]*?````|```[\s\S]*?```|`[^`\n]*?`|https?:\/\/[^\s<]+)/gi,
+      ),
+    )
     .map((part) =>
       part.startsWith('`') || regEx(/^https?:\/\//i).test(part)
         ? part

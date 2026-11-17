@@ -25,7 +25,7 @@ export async function loadModules<T>(
     const moduleUrl = pathToFileURL(modulePath).href;
     const module = await import(moduleUrl);
     // istanbul ignore if
-    if (!module || (validate && !validate(module, moduleName))) {
+    if (validate && !validate(module, moduleName)) {
       throw new Error(`Invalid module: ${modulePath}`);
     }
     result[moduleName] = module as T;

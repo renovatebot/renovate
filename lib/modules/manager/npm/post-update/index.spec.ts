@@ -4,6 +4,7 @@ import { fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   determineLockFileDirs,
   getAdditionalFiles,
@@ -23,8 +24,8 @@ vi.mock('./yarn.ts');
 vi.mock('./pnpm.ts');
 
 describe('modules/manager/npm/post-update/index', () => {
-  let baseConfig: PostUpdateConfig;
-  let updateConfig: PostUpdateConfig;
+  let baseConfig: PostUpdateConfig<NpmManagerData>;
+  let updateConfig: PostUpdateConfig<NpmManagerData>;
   const additionalFiles: AdditionalPackageFiles = {
     npm: [
       { packageFile: 'dummy.txt' },
@@ -58,7 +59,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
   beforeEach(() => {
     GlobalConfig.set({ localDir: '' });
-    baseConfig = partial<PostUpdateConfig>({
+    baseConfig = partial<PostUpdateConfig<NpmManagerData>>({
       upgrades: [],
     });
     updateConfig = {
@@ -610,6 +611,98 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it.each(['packageManager', 'devEngines.packageManager'])(
+      'collects Yarn binary artifacts for %s updates',
+      async (depType) => {
+        const actualYarn = await vi.importActual<typeof yarn>('./yarn.ts');
+        vi.mocked(yarn.isYarnUpdate).mockImplementation(
+          actualYarn.isYarnUpdate,
+        );
+        const plannedManifest = JSON.stringify(
+          depType === 'packageManager'
+            ? { packageManager: 'yarn@4.6.0' }
+            : {
+                devEngines: {
+                  packageManager: { name: 'yarn', version: '4.6.0' },
+                },
+              },
+        );
+        let diskManifest = plannedManifest;
+        const oldYarnrc = 'yarnPath: .yarn/releases/yarn-4.5.0.cjs\n';
+        const newYarnrc = 'yarnPath: .yarn/releases/yarn-4.6.0.cjs\n';
+        git.getFile.mockImplementation((fileName) =>
+          Promise.resolve(
+            fileName === '.yarnrc.yml' ? oldYarnrc : 'lock contents',
+          ),
+        );
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'package.json') {
+            return Promise.resolve(diskManifest);
+          }
+          if (fileName === '.yarnrc.yml') {
+            return Promise.resolve(newYarnrc);
+          }
+          if (fileName === '.yarn/releases/yarn-4.6.0.cjs') {
+            return Promise.resolve('new yarn binary');
+          }
+          return Promise.resolve(null);
+        });
+        spyYarn.mockImplementation(() => {
+          // Yarn also adds packageManager when only devEngines was declared.
+          diskManifest = JSON.stringify({
+            ...JSON.parse(plannedManifest),
+            packageManager: 'yarn@4.6.0',
+          });
+          return Promise.resolve({ lockFile: 'lock contents' });
+        });
+        const config = partial<PostUpdateConfig<NpmManagerData>>({
+          upgrades: [
+            {
+              depName: 'yarn',
+              depType,
+              newValue: '4.6.0',
+              managerData: { yarnLock: 'yarn.lock' },
+            },
+          ],
+          updatedPackageFiles: [
+            {
+              type: 'addition',
+              path: 'package.json',
+              contents: plannedManifest,
+            },
+          ],
+        });
+
+        const res = await getAdditionalFiles(config, {
+          npm: [
+            {
+              packageFile: 'package.json',
+              managerData: { yarnLock: 'yarn.lock' },
+            },
+          ],
+        });
+
+        expect(JSON.parse(diskManifest).packageManager).toBe('yarn@4.6.0');
+        expect(config.updatedPackageFiles).toEqual([
+          { type: 'addition', path: 'package.json', contents: plannedManifest },
+        ]);
+        expect(res).toEqual({
+          artifactErrors: [],
+          artifactNotices: [],
+          updatedArtifacts: [
+            { type: 'addition', path: '.yarnrc.yml', contents: newYarnrc },
+            { type: 'deletion', path: '.yarn/releases/yarn-4.5.0.cjs' },
+            {
+              type: 'addition',
+              path: '.yarn/releases/yarn-4.6.0.cjs',
+              contents: 'new yarn binary',
+              isExecutable: true,
+            },
+          ],
+        });
+      },
+    );
+
     it('works', async () => {
       await expect(
         getAdditionalFiles({ ...updateConfig }, additionalFiles),
@@ -682,7 +775,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
         ],
       };
-      const config = partial<PostUpdateConfig>({
+      const config = partial<PostUpdateConfig<NpmManagerData>>({
         upgrades: [{}],
         updatedPackageFiles: [
           {
@@ -736,7 +829,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
         ],
       };
-      const config = partial<PostUpdateConfig>({
+      const config = partial<PostUpdateConfig<NpmManagerData>>({
         upgrades: [{}],
         updatedPackageFiles: [
           {
@@ -765,15 +858,18 @@ describe('modules/manager/npm/post-update/index', () => {
       fs.writeLocalFile.mockResolvedValueOnce().mockRejectedValueOnce(err);
 
       await expect(
-        getAdditionalFiles(partial<PostUpdateConfig>({ upgrades: [] }), {
-          npm: [
-            {
-              packageFile: 'package.json',
-              npmrc: '',
-              managerData: { npmrcFileName: npmrcFilename },
-            },
-          ],
-        }),
+        getAdditionalFiles(
+          partial<PostUpdateConfig<NpmManagerData>>({ upgrades: [] }),
+          {
+            npm: [
+              {
+                packageFile: 'package.json',
+                npmrc: '',
+                managerData: { npmrcFileName: npmrcFilename },
+              },
+            ],
+          },
+        ),
       ).toResolve();
 
       expect(fs.writeLocalFile).toHaveBeenNthCalledWith(1, npmrcFilename, '\n');
@@ -786,6 +882,24 @@ describe('modules/manager/npm/post-update/index', () => {
         { npmrcFilename, err },
         'Error restoring .npmrc',
       );
+    });
+
+    it('adds the minimum release age notice', async () => {
+      spyNpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: '{}',
+        minimumReleaseAgeNotice: 'some notice',
+      });
+      fs.readLocalFile.mockResolvedValue('');
+
+      const res = await getAdditionalFiles(
+        { ...updateConfig, reuseExistingBranch: true },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        { file: 'package-lock.json', message: 'some notice' },
+      ]);
     });
 
     it('adds artifact notice on beforeFallback', async () => {
@@ -928,6 +1042,64 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
 
+    it('adds artifact notice on pnpm minimumReleaseAgeNotice', async () => {
+      spyPnpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: 'some-contents:',
+        minimumReleaseAgeNotice: 'some notice',
+      });
+
+      const res = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          reuseExistingBranch: true,
+          upgrades: [
+            {
+              isRemediation: true,
+              packageFile: 'packages/pnpm/package.json',
+            },
+          ],
+        },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        { file: 'packages/pnpm/pnpm-lock.yaml', message: 'some notice' },
+      ]);
+    });
+
+    it('adds pnpm minimumReleaseAgeNotice to the artifact error', async () => {
+      spyPnpm.mockResolvedValueOnce({
+        error: true,
+        stdout: 'some-error',
+        minimumReleaseAgeNotice: 'some notice',
+      });
+
+      const res = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          upgrades: [
+            {
+              isRemediation: true,
+              packageFile: 'packages/pnpm/package.json',
+            },
+          ],
+        },
+        additionalFiles,
+      );
+
+      expect(res).toStrictEqual({
+        artifactErrors: [
+          {
+            fileName: 'packages/pnpm/pnpm-lock.yaml',
+            stderr: 'some notice\n\nsome-error',
+          },
+        ],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
+    });
+
     it('no npm files', async () => {
       await expect(getAdditionalFiles(baseConfig, {})).resolves.toStrictEqual({
         artifactErrors: [],
@@ -1013,6 +1185,24 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactNotices: [],
         updatedArtifacts: [],
       });
+    });
+
+    it('lockfile maintenance branch does not exist', async () => {
+      scm.branchExists.mockResolvedValueOnce(false);
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      await getAdditionalFiles(
+        {
+          ...updateConfig,
+          reuseExistingBranch: true,
+          isLockFileMaintenance: true,
+        },
+        additionalFiles,
+      );
+      expect(scm.branchExists).toHaveBeenCalledOnce();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        'Skipping lockFileMaintenance update',
+      );
+      expect(spyNpm).toHaveBeenCalled();
     });
 
     it('fails for npm', async () => {

@@ -152,7 +152,7 @@ function toSourcePath(target: string): string | null {
 }
 
 async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
-  const coverageData = await loadCoverage('./coverage');
+  const coverageData = await loadCoverage(args.coverageDir);
   if (!coverageData) {
     return [];
   }
@@ -184,11 +184,17 @@ function parseCliArgs(): CliArgs {
     .option('--all', 'run fixers first, then all lint checks and tests')
     .option('--fix', 'run fixers only (oxlint-fix, biome-fix, prettier-fix)')
     .option('--no-test', 'skip tests')
+    .option(
+      '--coverage-dir <dir>',
+      'directory the tests write their coverage report to',
+      'coverage',
+    )
     .action((targets, opts) => {
       args = {
         all: opts.all ?? false,
         fix: opts.fix ?? false,
         noTest: !opts.test,
+        coverageDir: opts.coverageDir,
         targets,
       };
     })
@@ -198,12 +204,15 @@ function parseCliArgs(): CliArgs {
 }
 
 async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
-  if (args.noTest || (args.fix && !args.all)) {
+  const isFixWithoutAll = args.fix && !args.all;
+  if (args.noTest || isFixWithoutAll) {
     return [];
   }
 
+  const coverageArg = `--coverage.reportsDirectory=${args.coverageDir}`;
+
   if (args.targets.length === 0) {
-    return [{ name: 'test', cmd: 'pnpm', args: ['vitest'] }];
+    return [{ name: 'test', cmd: 'pnpm', args: ['vitest', coverageArg] }];
   }
 
   const patterns = [
@@ -218,14 +227,22 @@ async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
   }
   let fileCount = 0;
   for (const p of patterns) {
-    fileCount += extname(p) === '' ? await countSpecFiles(p) : 1;
+    if (extname(p) === '') {
+      fileCount += await countSpecFiles(p);
+    } else {
+      fileCount += 1;
+    }
   }
   if (fileCount === 0) {
     return [];
   }
   const name = `test (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
   return [
-    { name, cmd: 'pnpm', args: ['vitest', '--passWithNoTests', ...patterns] },
+    {
+      name,
+      cmd: 'pnpm',
+      args: ['vitest', '--passWithNoTests', coverageArg, ...patterns],
+    },
   ];
 }
 
@@ -337,7 +354,10 @@ async function main(): Promise<void> {
   );
   const hasFailure = allResults.some((r) => !r.result.success);
 
-  const coverage = testChecks.length > 0 ? await collectCoverage(args) : [];
+  let coverage: CoverageInfo[] = [];
+  if (testChecks.length > 0) {
+    coverage = await collectCoverage(args);
+  }
 
   printCoverageReport(coverage);
   printFailedOutputs(progress.results);

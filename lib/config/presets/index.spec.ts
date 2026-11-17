@@ -416,10 +416,14 @@ describe('config/presets/index', () => {
           'stylelint**',
           'codelyzer',
           '/\\btslint\\b/',
+          '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
+          'rumdl',
           'standard',
         ],
       });
@@ -431,7 +435,7 @@ describe('config/presets/index', () => {
       expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(23);
+      expect(rule.matchPackageNames).toHaveLength(27);
     });
 
     it('migrates automerge in presets', async () => {
@@ -1491,6 +1495,7 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'security:php2shell',
           'helpers:forgejoDigestChangelogs',
           'helpers:giteaDigestChangelogs',
           'helpers:githubDigestChangelogs',
@@ -1566,10 +1571,14 @@ describe('config/presets/index', () => {
           'packages:tslint',
         ],
         matchPackageNames: [
+          '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
+          'rumdl',
           'standard',
         ],
       });

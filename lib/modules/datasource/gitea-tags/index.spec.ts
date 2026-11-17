@@ -1,4 +1,7 @@
+import type { MockInstance } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GiteaTagsDatasource } from './index.ts';
 
@@ -268,6 +271,41 @@ describe('modules/datasource/gitea-tags/index', () => {
     });
   });
 
+  describe('getDigest with errors', () => {
+    it('returns null when the tag is not found', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/some/dep2/tags/v1.0.0')
+        .reply(404);
+      const res = await getDigest(
+        { datasource, packageName: 'some/dep2' },
+        'v1.0.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null when the repository is not found', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get(
+          '/api/v1/repos/some/dep2/commits?stat=false&verification=false&files=false&page=1&limit=1',
+        )
+        .reply(404);
+      const res = await getDigest({ datasource, packageName: 'some/dep2' });
+      expect(res).toBeNull();
+    });
+
+    it('throws ExternalHostError on server errors', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/some/dep2/tags/v1.0.0')
+        .reply(502);
+      await expect(
+        getDigest({ datasource, packageName: 'some/dep2' }, 'v1.0.0'),
+      ).rejects.toThrow(ExternalHostError);
+    });
+  });
+
   describe('getTagCommit', () => {
     it('returns tags commit hash from gitea.com', async () => {
       const body = {
@@ -296,6 +334,34 @@ describe('modules/datasource/gitea-tags/index', () => {
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
     });
 
+    it('caches the digest of a tag separately from the latest commit', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://gitea.com')
+        .get(
+          '/api/v1/repos/gitea/helm-chart/commits?stat=false&verification=false&files=false&page=1&limit=1',
+        )
+        .reply(200, [{ sha: 'latest-sha', created: '2023-08-25T08:26:28Z' }])
+        .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
+        .reply(200, {
+          name: 'v9.0.1',
+          commit: { sha: 'tag-sha', created: '2023-07-19T08:42:55+02:00' },
+        });
+      const config = { datasource, packageName: 'gitea/helm-chart' };
+
+      await expect(getDigest(config)).resolves.toBe('latest-sha');
+      await expect(getDigest(config, 'v9.0.1')).resolves.toBe('tag-sha');
+    });
+
     it('falls back to the default registry when none is given', async () => {
       const body = {
         name: 'v9.0.1',
@@ -309,9 +375,8 @@ describe('modules/datasource/gitea-tags/index', () => {
         .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
         .reply(200, body);
 
-      const res = await new GiteaTagsDatasource().getTagCommit(
-        undefined,
-        'gitea/helm-chart',
+      const res = await new GiteaTagsDatasource().getDigest(
+        { packageName: 'gitea/helm-chart' },
         'v9.0.1',
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
@@ -332,6 +397,45 @@ describe('modules/datasource/gitea-tags/index', () => {
           'https://git.example.com',
         ),
       ).toBe('https://git.example.com/gitea/helm-chart');
+    });
+  });
+
+  describe('package cache', () => {
+    let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+    beforeEach(() => {
+      setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+    });
+
+    afterEach(() => {
+      setCache.mockRestore();
+    });
+
+    it('caches the tags of the public instance', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/gitea/helm-chart/tags')
+        .reply(200, []);
+
+      await new GiteaTagsDatasource().getReleases({
+        packageName: 'gitea/helm-chart',
+      });
+
+      expect(setCache).toHaveBeenCalledOnce();
+    });
+
+    it('does not cache the tags of a self-hosted instance', async () => {
+      httpMock
+        .scope('https://gitea.example.com')
+        .get('/api/v1/repos/gitea/helm-chart/tags')
+        .reply(200, []);
+
+      await new GiteaTagsDatasource().getReleases({
+        registryUrl: 'https://gitea.example.com',
+        packageName: 'gitea/helm-chart',
+      });
+
+      expect(setCache).not.toHaveBeenCalled();
     });
   });
 });

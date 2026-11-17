@@ -5,9 +5,10 @@ import * as lockFiles from '../../../../../modules/manager/npm/post-update/index
 import * as npm from '../../../../../modules/manager/npm/post-update/npm.ts';
 import * as pnpm from '../../../../../modules/manager/npm/post-update/pnpm.ts';
 import * as yarn from '../../../../../modules/manager/npm/post-update/yarn.ts';
+import type { NpmManagerData } from '../../../../../modules/manager/npm/types.ts';
 import type { PostUpdateConfig } from '../../../../../modules/manager/types.ts';
 
-const config: PostUpdateConfig = {
+const config: PostUpdateConfig<NpmManagerData> = {
   upgrades: [],
   branchName: 'some-branch',
 };

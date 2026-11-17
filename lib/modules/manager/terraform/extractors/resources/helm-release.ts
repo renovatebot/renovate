@@ -10,11 +10,11 @@ import {
   isOCIRegistry,
   removeOCIPrefix,
 } from '../../../helmv3/oci.ts';
+import { isLocalChartPath } from '../../../helmv3/utils.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
-import { checkIfStringIsPath } from '../../util.ts';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -61,7 +61,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
           dep,
           getOciChartDep(helmRelease.chart, undefined, config.registryAliases),
         );
-      } else if (checkIfStringIsPath(helmRelease.chart)) {
+      } else if (isLocalChartPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
       } else if (isNonEmptyString(helmRelease.repository)) {
         if (isOCIRegistry(helmRelease.repository)) {

@@ -151,5 +151,22 @@ describe('modules/datasource/github-releases/index', () => {
       );
       expect(digest).toBeNull();
     });
+
+    it('returns null when newValue is not provided', async () => {
+      const queryTagsSpy = vi.spyOn(githubGraphql, 'queryTags');
+
+      const digest = await getDigest(
+        {
+          datasource: GithubReleasesDatasource.id,
+          packageName,
+          currentValue,
+          currentDigest,
+        },
+        undefined,
+      );
+
+      expect(digest).toBeNull();
+      expect(queryTagsSpy).not.toHaveBeenCalled();
+    });
   });
 });

@@ -10,7 +10,6 @@ describe('util/http/forgejo', () => {
 
   beforeEach(() => {
     forgejoHttp = new ForgejoHttp();
-    hostRules.clear();
 
     setBaseUrl(baseUrl);
     setGiteaBaseUrl('https://gitea.renovatebot.com/api/v1');

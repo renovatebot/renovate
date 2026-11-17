@@ -17,8 +17,11 @@ import {
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
+import type { JsonnetBundlerManagerData } from './types.ts';
 
-function dependencyUrl(dep: PackageDependency): string {
+function dependencyUrl(
+  dep: PackageDependency<JsonnetBundlerManagerData>,
+): string {
   const url = dep.packageName!;
   if (dep.managerData?.subdir) {
     return url.concat('/', dep.managerData.subdir);
@@ -27,7 +30,7 @@ function dependencyUrl(dep: PackageDependency): string {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<JsonnetBundlerManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, config } = updateArtifact;
   logger.trace({ packageFileName }, 'jsonnet-bundler.updateArtifacts()');

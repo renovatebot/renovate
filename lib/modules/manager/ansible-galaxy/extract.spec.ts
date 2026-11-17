@@ -138,6 +138,20 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       );
     });
 
+    it('skips a galaxy collection without a name', () => {
+      const yamlFile = codeBlock`collections:
+      - type: galaxy
+        version: 1.0.0`;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.0',
+          depType: 'galaxy-collection',
+          skipReason: 'invalid-name',
+        },
+      ]);
+    });
+
     it('check if an empty file returns null', () => {
       const res = extractPackageFile('\n', 'requirements.yml');
       expect(res).toBeNull();

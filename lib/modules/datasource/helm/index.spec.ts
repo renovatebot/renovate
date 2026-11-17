@@ -284,7 +284,6 @@ describe('modules/datasource/helm/index', () => {
 
     afterEach(() => {
       s3mock.reset();
-      hostRules.clear();
     });
 
     it('returns releases from an S3 bucket', async () => {

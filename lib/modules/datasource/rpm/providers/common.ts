@@ -1,11 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { createGunzip } from 'node:zlib';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
+import { createDecompressStream } from '../../../../util/compress.ts';
 import * as fs from '../../../../util/fs/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
 import type { Http, HttpOptions } from '../../../../util/http/index.ts';
+import { isNotModified } from '../../../../util/http/status.ts';
 import { acquireLock } from '../../../../util/mutex.ts';
 import type { ReleaseResult } from '../../types.ts';
 import { datasource } from '../common.ts';
@@ -65,7 +66,7 @@ async function checkIfModified(
 
   try {
     const response = await http.head(url, options);
-    return response.statusCode !== 304;
+    return !isNotModified(response);
   } catch (err) {
     logger.warn(
       {
@@ -113,11 +114,25 @@ async function decompressFile(
   compressedFile: string,
   decompressedFile: string,
 ): Promise<void> {
-  await fs.pipeline(
-    fs.createCacheReadStream(compressedFile),
-    createGunzip(),
-    fs.createCacheWriteStream(decompressedFile),
-  );
+  const readStream = fs.createCacheReadStream(compressedFile);
+  const decompressStream = await createDecompressStream(readStream);
+
+  if (decompressStream === readStream) {
+    // The file is not compressed: rename it into place instead of copying it
+    readStream.destroy();
+    await fs.renameCacheFile(compressedFile, decompressedFile);
+    return;
+  }
+
+  const tempFile = `${decompressedFile}.${randomUUID()}.tmp`;
+
+  try {
+    await fs.pipeline(decompressStream, fs.createCacheWriteStream(tempFile));
+    // Only replace the shared cache file after a successful decompress.
+    await fs.renameCacheFile(tempFile, decompressedFile);
+  } finally {
+    await fs.rmCache(tempFile);
+  }
 }
 
 export async function getCachedDecompressedFile(
@@ -140,10 +155,6 @@ export async function getCachedDecompressedFile(
       cacheDir,
       `${randomUUID()}_${urlHash}.gz`,
     );
-    const decompressedTempFile = upath.join(
-      cacheDir,
-      `${randomUUID()}_${urlHash}.${extension}`,
-    );
 
     try {
       const wasUpdated = await downloadFileToCache(
@@ -155,9 +166,7 @@ export async function getCachedDecompressedFile(
 
       if (wasUpdated || !lastTimestamp) {
         try {
-          // Only replace the shared cache file after a successful decompress.
-          await decompressFile(compressedFile, decompressedTempFile);
-          await fs.renameCacheFile(decompressedTempFile, decompressedFile);
+          await decompressFile(compressedFile, decompressedFile);
           lastTimestamp = await getFileCreationTime(decompressedFile);
         } catch (err) {
           logger.warn(
@@ -181,9 +190,6 @@ export async function getCachedDecompressedFile(
     } finally {
       if (await fs.cachePathExists(compressedFile)) {
         await fs.rmCache(compressedFile);
-      }
-      if (await fs.cachePathExists(decompressedTempFile)) {
-        await fs.rmCache(decompressedTempFile);
       }
     }
   } finally {

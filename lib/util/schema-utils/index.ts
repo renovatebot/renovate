@@ -302,7 +302,7 @@ export const Jsonc = z.string().transform((str, ctx): unknown => {
 export const UtcDate = z
   .string()
   .describe('ISO 8601 string')
-  .transform((str, ctx): DateTime => {
+  .transform((str, ctx): DateTime<true> => {
     const date = DateTime.fromISO(str, { zone: 'utc' });
     if (!date.isValid) {
       ctx.addIssue({ code: 'custom', message: 'Invalid date' });
@@ -353,6 +353,7 @@ export const Toml = z.string().transform((str, ctx) => {
 
 export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   try {
+    // oxlint-disable-next-line renovate/prefer-parser-pipe -- this is the Ini helper itself
     return ini.parse(str);
   } catch /* v8 ignore next -- TODO: add test #40625 */ {
     ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
@@ -360,10 +361,11 @@ export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   }
 });
 
-export function withDepType<
-  Output extends PackageDependency[],
-  Schema extends z.ZodType<Output>,
->(schema: Schema, depType: string, force = true): z.ZodType<Output> {
+export function withDepType<Output extends PackageDependency[]>(
+  schema: z.ZodType<Output>,
+  depType: string,
+  force = true,
+): z.ZodType<Output> {
   return schema.transform((deps) => {
     for (const dep of deps) {
       if (!dep.depType || force) {
@@ -454,3 +456,13 @@ export type EmailAddress = z.infer<typeof EmailAddress>;
 export function isEmailAdress(value: string): boolean {
   return EmailAddress.safeParse(value).success;
 }
+
+export const StringOrStringArray = z.union([z.string(), z.array(z.string())]);
+
+/**
+ * A config option definition whose value is a string or an array of strings.
+ */
+export const StringOrStringArrayOption = z.union([
+  z.object({ type: z.literal('string') }),
+  z.object({ type: z.literal('array'), subType: z.literal('string') }),
+]);

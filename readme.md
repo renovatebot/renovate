@@ -61,7 +61,7 @@ Access internal packages.
 
 ### Other ways to run Renovate
 
-If you can’t use a pre-built job scheduling system, or want to build your own, the following options are available:
+If you cannot use a pre-built job scheduling system, or want to build your own, the following options are available:
 
 #### Run Renovate on your Pipeline
 

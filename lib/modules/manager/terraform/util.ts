@@ -14,12 +14,6 @@ export function checkFileContainsDependency(
   return checkList.some((check) => content.includes(check));
 }
 
-const pathStringRegex = regEx(/(?:.|..)?(?:\/[^/])+/);
-export function checkIfStringIsPath(path: string): boolean {
-  const match = pathStringRegex.exec(path);
-  return !!match;
-}
-
 export function massageProviderLookupName(dep: PackageDependency): void {
   dep.packageName ??= dep.depName;
 
@@ -39,7 +33,7 @@ export function getLockedVersion(
 ): string | undefined {
   const depRegistryUrl = dep.registryUrls
     ? dep.registryUrls[0]
-    : TerraformProviderDatasource.defaultRegistryUrls[0];
+    : TerraformProviderDatasource.getDefaultRegistryUrls()[0];
   const foundLock = locks.find(
     (lock) =>
       lock.packageName === dep.packageName &&
@@ -65,7 +59,10 @@ export function applyOciDependency(
   // Strip optional `//subfolder` sub-path (e.g. `example.com/repo//modules/vpc`)
   const imageRef = (url.host + url.pathname).replace(regEx(/\/\/.+$/), '');
 
-  const parsed = getDep(imageRef, false, registryAliases);
+  const parsed = getDep(imageRef, {
+    specifyReplaceString: false,
+    registryAliases,
+  });
   dep.packageName = parsed.packageName;
   dep.datasource = parsed.datasource;
   dep.currentValue = url.searchParams.get('tag') ?? undefined;

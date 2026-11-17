@@ -137,8 +137,10 @@ function getNewValue({
     return currentValue;
   }
   // Keep new range precision the same as current
+  const isTildeOrCaret =
+    currentValue.startsWith('~') || currentValue.startsWith('^');
   if (
-    (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
+    isTildeOrCaret &&
     rangeStrategy === 'replace' &&
     newCargo.split('.').length > currentValue.split('.').length
   ) {

@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -6,7 +7,6 @@ import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -20,15 +20,19 @@ import {
   artifactErrorResult,
   fileAddition,
   resolveToolConstraint,
+  updateLockFile,
 } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
+import { getMinPublishAgeEnv } from './minimum-release-age.ts';
+import type { CargoManagerData, MinPublishAgeEnv } from './types.ts';
 
-const gitExec = withGitEnvironment(['cargo']);
+const gitExec = withGitEnvironment(['cargo', CrateDatasource.id]);
 
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
   constraint: string | undefined,
+  extraEnv: Record<string, string>,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
     manifestPath,
@@ -41,6 +45,7 @@ async function cargoUpdate(
 
   const execOptions: ExecOptions = {
     docker: {},
+    extraEnv,
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
   await gitExec(cmd, execOptions);
@@ -50,6 +55,7 @@ async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
   constraint: string | undefined,
+  extraEnv: Record<string, string>,
 ): Promise<void> {
   const cmds = [];
 
@@ -78,6 +84,7 @@ async function cargoUpdatePrecise(
 
   const execOptions: ExecOptions = {
     docker: {},
+    extraEnv,
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
 
@@ -85,19 +92,40 @@ async function cargoUpdatePrecise(
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<CargoManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   return await updateArtifactsImpl(updateArtifact);
 }
 
+/**
+ * Adds `notice` to the results, which hold the lock file.
+ */
+function withNotice(
+  results: UpdateArtifactsResult[] | null,
+  lockFileName: string,
+  notice: string | undefined,
+): UpdateArtifactsResult[] | null {
+  if (!notice || !results) {
+    return results;
+  }
+  return results.map(({ file }) => ({
+    file,
+    notice: { file: lockFileName, message: notice },
+  }));
+}
+
+/**
+ * @param inheritedMinPublishAge The minimum publish age of a failed attempt, which has already updated crates of the lock file with it.
+ */
 async function updateArtifactsImpl(
   {
     packageFileName,
     updatedDeps,
     newPackageFileContent,
     config,
-  }: UpdateArtifact,
+  }: UpdateArtifact<CargoManagerData>,
   recursionLimit = 10,
+  inheritedMinPublishAge?: MinPublishAgeEnv,
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`cargo.updateArtifacts(${packageFileName})`);
 
@@ -108,9 +136,10 @@ async function updateArtifactsImpl(
     packageFileName,
     'Cargo.lock',
   );
-  const existingLockFileContent = lockFileName
-    ? await readLocalFile(lockFileName)
-    : null;
+  let existingLockFileContent: string | null = null;
+  if (lockFileName) {
+    existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  }
   if (!existingLockFileContent || !lockFileName) {
     logger.debug('No Cargo.lock found');
     return null;
@@ -119,50 +148,70 @@ async function updateArtifactsImpl(
   const { isLockFileMaintenance } = config;
   if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
-    return [fileAddition(lockFileName, existingLockFileContent)];
+    return withNotice(
+      [fileAddition(lockFileName, existingLockFileContent)],
+      lockFileName,
+      inheritedMinPublishAge?.notice,
+    );
   }
 
   const rustConstraint = await resolveToolConstraint(config, 'rust');
+  let minPublishAge = inheritedMinPublishAge;
+  if (isNullOrUndefined(minPublishAge)) {
+    minPublishAge = await getMinPublishAgeEnv({
+      config,
+      manager: 'cargo',
+      packageFile: packageFileName,
+      upgrades: updatedDeps,
+      rustConstraint,
+    });
+  }
+  const { env: extraEnv, notice } = minPublishAge;
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug(`Updating ${lockFileName}`);
+    const results = await updateLockFile({
+      lockFileName,
+      existingLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: async () => {
+        logger.debug(`Updating ${lockFileName}`);
 
-    if (isLockFileMaintenance) {
-      await cargoUpdate(packageFileName, true, rustConstraint);
-    } else {
-      const hasNonCrateDep = updatedDeps.some(
-        (dep) => dep.datasource !== CrateDatasource.id,
-      );
-      const crateDepWithoutLockedVersion = updatedDeps.find(
-        (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
-      );
-      // Non-crate dependencies (like git ones) do not have locked versions.
-      // For crate dependencies, a locked version is expected.
-      // In both situations, perform a regular workspace lockfile update.
-      if (hasNonCrateDep || crateDepWithoutLockedVersion) {
-        // v8 ignore else -- needs a workspace update driven only by a non-crate dep
-        if (crateDepWithoutLockedVersion) {
-          // Only warn when a crate dependency has no locked version
-          logger.warn(
-            { dependency: crateDepWithoutLockedVersion.depName },
-            'Missing locked version for dependency',
+        if (isLockFileMaintenance) {
+          await cargoUpdate(packageFileName, true, rustConstraint, extraEnv);
+          return;
+        }
+
+        const hasNonCrateDep = updatedDeps.some(
+          (dep) => dep.datasource !== CrateDatasource.id,
+        );
+        const crateDepWithoutLockedVersion = updatedDeps.find(
+          (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
+        );
+        // Non-crate dependencies (like git ones) do not have locked versions.
+        // For crate dependencies, a locked version is expected.
+        // In both situations, perform a regular workspace lockfile update.
+        if (hasNonCrateDep || crateDepWithoutLockedVersion) {
+          // v8 ignore else -- needs a workspace update driven only by a non-crate dep
+          if (crateDepWithoutLockedVersion) {
+            // Only warn when a crate dependency has no locked version
+            logger.warn(
+              { dependency: crateDepWithoutLockedVersion.depName },
+              'Missing locked version for dependency',
+            );
+          }
+          await cargoUpdate(packageFileName, false, rustConstraint, extraEnv);
+        } else {
+          // If all dependencies have locked versions then update them precisely.
+          await cargoUpdatePrecise(
+            packageFileName,
+            updatedDeps,
+            rustConstraint,
+            extraEnv,
           );
         }
-        await cargoUpdate(packageFileName, false, rustConstraint);
-      } else {
-        // If all dependencies have locked versions then update them precisely.
-        await cargoUpdatePrecise(packageFileName, updatedDeps, rustConstraint);
-      }
-    }
-
-    logger.debug('Returning updated Cargo.lock');
-    const newCargoLockContent = await readLocalFile(lockFileName);
-    if (existingLockFileContent === newCargoLockContent) {
-      logger.debug('Cargo.lock is unchanged');
-      return null;
-    }
-    return [fileAddition(lockFileName, newCargoLockContent)];
+      },
+    });
+    return withNotice(results, lockFileName, notice);
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
@@ -200,6 +249,7 @@ async function updateArtifactsImpl(
             config,
           },
           recursionLimit - 1,
+          minPublishAge,
         );
       }
     }

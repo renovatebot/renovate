@@ -58,8 +58,10 @@ export async function updateArtifacts({
       packageFileName,
       'mix.lock',
     );
-    existingLockFileContent =
-      parentLockFileName && (await readLocalFile(parentLockFileName, 'utf8'));
+    existingLockFileContent = null;
+    if (parentLockFileName) {
+      existingLockFileContent = await readLocalFile(parentLockFileName, 'utf8');
+    }
 
     if (parentLockFileName && existingLockFileContent) {
       lockFileName = parentLockFileName;
@@ -164,8 +166,7 @@ export async function updateArtifacts({
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
         constraint:
-          (await resolveToolConstraint(config, 'erlang')) ??
-          `^${erlangVersion}`,
+          (await resolveToolConstraint(config, 'erlang')) ?? erlangVersion,
       },
       {
         toolName: 'elixir',

@@ -1,7 +1,7 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { parse } from '../../../util/html.ts';
-import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -16,9 +16,9 @@ export class ArtifactoryDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
-
-  override readonly caching = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'merge';
 
@@ -26,7 +26,7 @@ export class ArtifactoryDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -91,7 +91,7 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
+      if (isNotFound(err)) {
         logger.warn(
           { registryUrl, packageName },
           'artifactory: `Not Found` error',
@@ -105,13 +105,12 @@ export class ArtifactoryDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

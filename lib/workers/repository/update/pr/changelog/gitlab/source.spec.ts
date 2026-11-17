@@ -63,7 +63,6 @@ describe('workers/repository/update/pr/changelog/gitlab/source', () => {
 
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'gitlab',
         matchHost,
