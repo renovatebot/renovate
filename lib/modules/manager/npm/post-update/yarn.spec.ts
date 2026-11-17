@@ -1060,6 +1060,38 @@ describe('modules/manager/npm/post-update/yarn', () => {
     ]);
   });
 
+  it.each`
+    yarnCompatibility        | version
+    ${'>=1.22.0'}            | ${'1.22.19'}
+    ${'^1.22.0 || >=1.22.5'} | ${'1.22.19'}
+    ${'^1.22.0'}             | ${'1.22.19'}
+  `(
+    'installs yarn 1 for $yarnCompatibility',
+    async ({ yarnCompatibility, version }) => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({
+        localDir: '.',
+        binarySource: 'install',
+        cacheDir: '/tmp/cache',
+      });
+      Fixtures.mock({ 'yarn.lock': plocktest1YarnLockV1 }, 'some-dir');
+      vi.mocked(getPkgReleases).mockResolvedValueOnce({
+        releases: [{ version: '1.22.19' }, { version: '4.1.0' }],
+      });
+      const execSnapshots = mockExecAll();
+      const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+        constraints: { node: '16.16.0', yarn: yarnCompatibility },
+        skipInstalls: false,
+      });
+      await yarnHelper.generateLockFile('some-dir', {}, config);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool node 16.16.0' },
+        { cmd: `install-tool yarn ${version}` },
+        { cmd: expect.stringContaining('yarn install') },
+      ]);
+    },
+  );
+
   it('uses devEngine.packageManager(object) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
