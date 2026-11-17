@@ -41,10 +41,9 @@ export function repoRefs(
   config: KasConfig,
 ): { tag?: string; branch?: string } {
   const defaults = config.defaults?.repos;
-  return {
-    tag: ('tag' in repo ? repo.tag : defaults?.tag) ?? undefined,
-    branch: ('branch' in repo ? repo.branch : defaults?.branch) ?? undefined,
-  };
+  const tag = 'tag' in repo ? repo.tag : defaults?.tag;
+  const branch = 'branch' in repo ? repo.branch : defaults?.branch;
+  return { tag: tag ?? undefined, branch: branch ?? undefined };
 }
 
 function deepMerge(
