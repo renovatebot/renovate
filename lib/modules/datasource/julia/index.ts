@@ -56,7 +56,7 @@ export class JuliaDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    "For a cloned registry, the source URL is determined from the `repo` field in the package's `Package.toml`. General's packages have no source URL.";
+    "For General, the source URL and source directory come from GeneralMetadata.jl, as with the `julia-general-metadata` datasource. For a cloned registry, the source URL is determined from the `repo` field in the package's `Package.toml`.";
 
   async getReleases({
     packageName,
