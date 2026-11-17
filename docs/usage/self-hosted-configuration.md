@@ -26,6 +26,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## `allowCustomCrateGitRegistries`
 
+## `allowCustomVcpkgRegistries`
+
 ## `allowPlugins`
 
 ## `allowScripts`

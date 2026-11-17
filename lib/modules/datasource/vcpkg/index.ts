@@ -7,15 +7,19 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
-import { parseUrl } from '../../../util/url.ts';
+import { isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { VcpkgPortVersions } from './schema.ts';
 
 const defaultRegistryUrl = 'https://github.com/microsoft/vcpkg';
+// The default registry's files, served without a clone.
+const defaultRegistryFilesUrl =
+  'https://raw.githubusercontent.com/microsoft/vcpkg/master';
 
 type CloneResult =
   | {
@@ -56,38 +60,21 @@ export class VcpkgDatasource extends Datasource {
       return null;
     }
 
-    const url = parseUrl(registryUrl);
-    if (!url) {
-      logger.debug(`Could not parse registry URL ${registryUrl}`);
-      return null;
-    }
-
-    const clonePath = await VcpkgDatasource.fetchClonePath(registryUrl, url);
-    if (!clonePath) {
-      return null;
-    }
-
-    const firstLetter = packageName.charAt(0).toLowerCase();
-    const portPath = upath.join(
-      clonePath,
-      'versions',
-      `${firstLetter}-`,
-      `${packageName}.json`,
-    );
-
-    let parsed: VcpkgPortVersions;
-    try {
-      const content = await readCacheFile(portPath, 'utf8');
-      parsed = Json.pipe(VcpkgPortVersions).parse(content);
-    } catch (err) {
-      logger.debug(
-        { err, packageName, registryUrl },
-        'vcpkg datasource: could not read or parse port versions file',
+    const portFile = `versions/${packageName.charAt(0).toLowerCase()}-/${packageName}.json`;
+    let portVersions: VcpkgPortVersions | null;
+    if (registryUrl === defaultRegistryUrl) {
+      portVersions = await this.fetchPortVersions(portFile);
+    } else {
+      portVersions = await VcpkgDatasource.readClonedPortVersions(
+        registryUrl,
+        portFile,
       );
+    }
+    if (!portVersions) {
       return null;
     }
 
-    const releases: Release[] = parsed.versions.map((entry) => {
+    const releases: Release[] = portVersions.versions.map((entry) => {
       const upstream =
         entry.version ??
         entry['version-semver'] ??
@@ -96,11 +83,7 @@ export class VcpkgDatasource extends Datasource {
         entry['version-string']!;
       const portVersion = entry['port-version'] ?? 0;
       const version = portVersion > 0 ? `${upstream}#${portVersion}` : upstream;
-      const release: Release = {
-        version,
-        newDigest: entry['git-tree'],
-      };
-      return release;
+      return { version };
     });
 
     return { releases };
@@ -119,9 +102,70 @@ export class VcpkgDatasource extends Datasource {
         ),
         // A custom registry may be private.
         public: config.registryUrl === defaultRegistryUrl,
+        fallback: true,
       },
       () => this._getReleases(config),
     );
+  }
+
+  /**
+   * Returns the port's versions file from the default registry, or `null` if
+   * the registry has no such port.
+   */
+  private async fetchPortVersions(
+    portFile: string,
+  ): Promise<VcpkgPortVersions | null> {
+    try {
+      return await this.fetchJsonOrNull(
+        `${defaultRegistryFilesUrl}/${portFile}`,
+        VcpkgPortVersions,
+      );
+    } catch (err) {
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Returns the port's versions file from a clone of a custom registry, or
+   * `null` if the registry has no such port or may not be cloned.
+   */
+  private static async readClonedPortVersions(
+    registryUrl: string,
+    portFile: string,
+  ): Promise<VcpkgPortVersions | null> {
+    // A repository's config must not make the Renovate host clone any URL,
+    // with the host's own credentials, unless the admin allows it.
+    if (!GlobalConfig.get('allowCustomVcpkgRegistries')) {
+      logger.once.warn(
+        { registryUrl },
+        'vcpkg datasource: allowCustomVcpkgRegistries=true is required for cloning registries other than the default one',
+      );
+      return null;
+    }
+
+    const url = parseUrl(registryUrl);
+    if (!url) {
+      logger.debug(`Could not parse registry URL ${registryUrl}`);
+      return null;
+    }
+
+    const clonePath = await VcpkgDatasource.fetchClonePath(registryUrl, url);
+    try {
+      const content = await readCacheFile(
+        upath.join(clonePath, portFile),
+        'utf8',
+      );
+      return Json.pipe(VcpkgPortVersions).parse(content);
+    } catch (err) {
+      logger.debug(
+        { err, portFile, registryUrl },
+        'vcpkg datasource: could not read or parse port versions file',
+      );
+      return null;
+    }
   }
 
   /**
@@ -136,10 +180,15 @@ export class VcpkgDatasource extends Datasource {
     return `vcpkg-registry-${proto}-${host}-${hash}`;
   }
 
+  /**
+   * Returns the path of the registry's clone, cloning it once per run. Throws
+   * if the clone fails, so that the package cache serves the releases from an
+   * earlier run.
+   */
   private static async fetchClonePath(
     registryUrl: string,
     url: URL,
-  ): Promise<string | null> {
+  ): Promise<string> {
     const cacheKey = buildCacheKey(
       'vcpkg-datasource',
       'registry-clone-path',
@@ -158,11 +207,11 @@ export class VcpkgDatasource extends Datasource {
       const cached = memCache.get<CloneResult>(cacheKey);
 
       if (cached?.err) {
-        logger.warn(
+        logger.debug(
           { err: cached.err, registryUrl },
           'Previous git clone failed, bailing out.',
         );
-        return null;
+        throw cached.err;
       }
 
       if (cached?.clonePath) {
@@ -179,11 +228,7 @@ export class VcpkgDatasource extends Datasource {
       memCache.set(cacheKey, result);
 
       if (result.err) {
-        logger.warn(
-          { err: result.err, registryUrl },
-          'Git clone failed, bailing out.',
-        );
-        return null;
+        throw result.err;
       }
 
       return result.clonePath;
@@ -200,6 +245,14 @@ export class VcpkgDatasource extends Datasource {
 
     const git = createSimpleGit({
       config: { maxConcurrentProcesses: 1 },
+      ...(isHttpUrl(registryFetchUrl) && {
+        // The host rules' credentials for this registry, which `registryUrls`
+        // cannot carry.
+        authentication: {
+          hostTypes: [VcpkgDatasource.id],
+          url: registryFetchUrl,
+        },
+      }),
     });
 
     try {

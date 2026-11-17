@@ -1254,6 +1254,14 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'allowCustomVcpkgRegistries',
+    description:
+      'Set this to `true` to allow cloning vcpkg registries other than the default one.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'ignorePlugins',
     scopes: sharedScopes,
     description:
