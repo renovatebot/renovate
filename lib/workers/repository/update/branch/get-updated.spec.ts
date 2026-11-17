@@ -185,6 +185,43 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('passes already updated files to updateArtifacts for Vite+ reconciliation', async () => {
+      config.reuseExistingBranch = true;
+      config.postUpdateOptions = ['vitePlusSyncVersions'];
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      npm.updateDependency.mockReturnValue('existing content');
+      npm.updateArtifacts.mockResolvedValueOnce(null);
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(npm.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'package.json',
+          newPackageFileContent: 'existing content',
+        }),
+      );
+    });
+
+    it('skips updateArtifacts for already updated files without Vite+ reconciliation', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      npm.updateDependency.mockReturnValue('existing content');
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(npm.updateArtifacts).not.toHaveBeenCalled();
+    });
+
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({

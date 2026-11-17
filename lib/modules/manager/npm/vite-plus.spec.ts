@@ -442,7 +442,7 @@ describe('modules/manager/npm/vite-plus', () => {
       newVersion: '0.3.1',
       newValue: '0.3.1',
       displayTo: '0.3.1',
-      isBreaking: false,
+      isBreaking: true,
       newMajor: 0,
       newMinor: 3,
       newPatch: 1,
@@ -616,6 +616,28 @@ describe('modules/manager/npm/vite-plus', () => {
     ]);
     await expect(readLocalFile(leafPath, 'utf8')).resolves.toBe(latest);
     expect(execMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('fails when an extracted workspace manifest cannot be read', async () => {
+    const root = packageJson('0.3.1', '4.1.11');
+    const files = packageFiles();
+    files.npm!.push({
+      packageFile: 'packages/missing/package.json',
+      managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+      deps: [],
+    });
+    await mockFiles({ 'package.json': root });
+
+    await expect(reconcile(config(root), files)).resolves.toEqual([
+      { file: { type: 'addition', path: 'package.json', contents: root } },
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: 'Cannot read Vite+ manifest packages/missing/package.json',
+        },
+      },
+    ]);
+    expect(execMock).not.toHaveBeenCalled();
   });
 
   it('preserves peer updates while aligning selected installation dependencies', async () => {
@@ -2101,7 +2123,7 @@ describe('modules/manager/npm/vite-plus', () => {
     await reconcile(updateConfig, files);
 
     expect(updateConfig.upgrades[0]).toMatchObject({
-      isBreaking: false,
+      isBreaking: true,
       newMinor: 3,
       updateType: 'patch',
     });

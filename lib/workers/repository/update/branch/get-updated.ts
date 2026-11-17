@@ -397,6 +397,13 @@ export async function getUpdatedPackageFiles(
       } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
+      } else if (
+        reuseExistingBranch &&
+        !updatedFileContents[packageFile] &&
+        config.postUpdateOptions?.includes('vitePlusSyncVersions')
+      ) {
+        // Vite+ reconciliation runs in updateArtifacts, so it must also see files the branch already updated.
+        nonUpdatedFileContents[packageFile] = newContent;
       }
     }
   }

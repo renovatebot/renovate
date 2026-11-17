@@ -285,6 +285,10 @@ async function readManifestSnapshot(
 ): Promise<ManifestSnapshot | undefined> {
   const contents = await readLocalFile(path, 'utf8');
   if (isNullOrUndefined(contents)) {
+    // Extracted manifests exist on disk, so a missing one means the read failed.
+    if (kind !== 'pnpmWorkspace') {
+      throw new Error(`Cannot read Vite+ manifest ${path}`);
+    }
     return undefined;
   }
   if (Buffer.byteLength(contents) > MAX_MANIFEST_BYTES) {
@@ -738,7 +742,10 @@ function updateUpgradeMetadata(
         upgrade.newMajor,
         upgrade.newMinor,
       );
-      upgrade.isBreaking = upgrade.updateType === 'major';
+      upgrade.isBreaking = npmVersioning.api.isBreaking!(
+        upgrade.currentVersion,
+        version,
+      );
     }
   }
 }
