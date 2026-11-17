@@ -38,6 +38,35 @@ describe('workers/repository/model/commit-config-file', () => {
 
       expect(res).toBe('RENOV-123: add renovate.json');
     });
+
+    it('compiles a templated prefix', () => {
+      const res = createConfigFileCommitMessage(
+        {
+          commitMessagePrefix:
+            'RENOV-123 | {{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}:',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: 'config',
+        },
+        'add renovate.json',
+      );
+
+      expect(res).toBe('RENOV-123 | chore(config): add renovate.json');
+    });
+
+    it('falls back to a semantic commit message when the prefix compiles to empty', () => {
+      const res = createConfigFileCommitMessage(
+        {
+          commitMessagePrefix: '{{#if groupName}}RENOV-123:{{/if}}',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: 'config',
+        },
+        'add renovate.json',
+      );
+
+      expect(res).toBe('chore(config): add renovate.json');
+    });
   });
 
   describe('commitConfigFile()', () => {

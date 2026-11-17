@@ -126,6 +126,8 @@ export interface RenovateSharedConfig {
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
+  minimumReleaseAgePackageManager?: Nullish<string>;
+  minimumReleaseAgePackageManagerSync?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -768,6 +770,11 @@ export interface RenovateOptionBase {
    * Platforms which support this option, leave undefined if all platforms support it.
    */
   supportedPlatforms?: PlatformId[];
+
+  /**
+   * Datasources which support this option, leave undefined if all datasources support it.
+   */
+  supportedDatasources?: string[];
 
   /**
    * Conditions that must be met for this option to be required.

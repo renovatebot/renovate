@@ -320,6 +320,6 @@ export async function extractAllPackageFiles(
     }
   }
 
-  await postExtract(npmFiles);
+  await postExtract(npmFiles, config);
   return npmFiles;
 }
