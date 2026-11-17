@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
+import { logger } from '../../../logger/index.ts';
 import { getLockedVersions } from './locked-version.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -25,6 +26,34 @@ describe('modules/manager/julia/locked-version', () => {
         new Map([['7876af07-990d-54b4-ab0e-23690620f79a', '0.5.3']]),
       );
       expect(fs.readLocalFile).toHaveBeenCalledWith('Manifest.toml', 'utf8');
+    });
+
+    it('skips packages from Pkg.develop or a git URL', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        julia_version = "1.10.13"
+        manifest_format = "2.0"
+
+        [[deps.Bar]]
+        git-tree-sha1 = "3e6a0c7ec2509c35e228751266905188d0ca36bc"
+        repo-rev = "master"
+        repo-url = "https://github.com/example/Bar.jl"
+        uuid = "33333333-3333-3333-3333-333333333333"
+        version = "1.2.0"
+
+        [[deps.Example]]
+        git-tree-sha1 = "46e44e869b4d90b96bd8ed1fdcf32244fddfb6cc"
+        uuid = "7876af07-990d-54b4-ab0e-23690620f79a"
+        version = "0.5.3"
+
+        [[deps.Foo]]
+        path = "../Foo"
+        uuid = "22222222-2222-2222-2222-222222222222"
+        version = "0.3.1"
+      `);
+
+      await expect(getLockedVersions('Manifest.toml')).resolves.toEqual(
+        new Map([['7876af07-990d-54b4-ab0e-23690620f79a', '0.5.3']]),
+      );
     });
 
     it('reads a manifest of the older layout', async () => {
@@ -58,10 +87,14 @@ describe('modules/manager/julia/locked-version', () => {
       );
     });
 
-    it('returns null for a missing manifest', async () => {
+    it('returns null for a manifest that cannot be read', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
 
       await expect(getLockedVersions('Manifest.toml')).resolves.toBeNull();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { manifestFile: 'Manifest.toml' },
+        'Failed to read Julia manifest',
+      );
     });
 
     it('returns null for invalid TOML', async () => {

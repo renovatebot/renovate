@@ -28,7 +28,14 @@ export const JuliaProject = Toml.pipe(
 );
 
 const ManifestPackages = LooseRecord(
-  LooseArray(z.object({ uuid: z.string(), version: z.string().optional() })),
+  LooseArray(
+    z.object({
+      uuid: z.string(),
+      version: z.string().optional(),
+      path: z.string().optional(),
+      'repo-url': z.string().optional(),
+    }),
+  ),
 );
 
 export const JuliaManifest = Toml.pipe(
