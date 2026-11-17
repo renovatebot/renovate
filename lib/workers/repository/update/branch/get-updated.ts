@@ -426,6 +426,11 @@ export async function getUpdatedPackageFiles(
       sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
         const updatedDeps = packageFileUpdatedDeps[packageFile.path];
+        const artifactConfig = patchConfigForArtifactsUpdate(
+          config,
+          manager,
+          packageFile.path,
+        );
         const results = await managerUpdateArtifacts(manager, {
           packageFileName: packageFile.path,
           updatedDeps,
@@ -435,11 +440,7 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             updatedFileContents,
           ),
-          config: patchConfigForArtifactsUpdate(
-            config,
-            manager,
-            packageFile.path,
-          ),
+          config: artifactConfig,
         });
         if (manager === 'mise') {
           const removedLockFiles = removeUnrefreshedLockfileOnlyChanges(
@@ -464,16 +465,13 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        const dependencyToUpgradeInfo = getPendingUpgrades(updatedDeps);
-        if (dependencyToUpgradeInfo.size) {
-          pendingVersionChecks.push({
-            manager,
-            packageFileName: packageFile.path,
-            packageFileContent: packageFile.contents!.toString(),
-            dependencyToUpgradeInfo,
-            hadArtifactResults: isNonEmptyArray(results),
-          });
-        }
+        addPendingVersionCheck(pendingVersionChecks, {
+          manager,
+          packageFile,
+          updatedDeps,
+          lockFiles: artifactConfig.lockFiles,
+          results,
+        });
       }
     }
   }
@@ -498,6 +496,11 @@ export async function getUpdatedPackageFiles(
       sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
         const updatedDeps = packageFileUpdatedDeps[packageFile.path];
+        const artifactConfig = patchConfigForArtifactsUpdate(
+          config,
+          manager,
+          packageFile.path,
+        );
         const results = await managerUpdateArtifacts(manager, {
           packageFileName: packageFile.path,
           updatedDeps,
@@ -507,11 +510,7 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             updatedFileContents,
           ),
-          config: patchConfigForArtifactsUpdate(
-            config,
-            manager,
-            packageFile.path,
-          ),
+          config: artifactConfig,
         });
         processUpdateArtifactResults(
           results,
@@ -522,16 +521,13 @@ export async function getUpdatedPackageFiles(
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
-        const dependencyToUpgradeInfo = getPendingUpgrades(updatedDeps);
-        if (dependencyToUpgradeInfo.size) {
-          pendingVersionChecks.push({
-            manager,
-            packageFileName: packageFile.path,
-            packageFileContent: packageFile.contents!.toString(),
-            dependencyToUpgradeInfo,
-            hadArtifactResults: isNonEmptyArray(results),
-          });
-        }
+        addPendingVersionCheck(pendingVersionChecks, {
+          manager,
+          packageFile,
+          updatedDeps,
+          lockFiles: artifactConfig.lockFiles,
+          results,
+        });
       }
     }
   }
@@ -689,13 +685,31 @@ interface PendingVersionCheck {
   manager: string;
   packageFileName: string;
   packageFileContent: string;
+  lockFiles: string[] | undefined;
   dependencyToUpgradeInfo: Map<string, PendingUpgradeInfo>;
   hadArtifactResults: boolean;
 }
 
-function getPendingUpgrades(
-  updatedDeps: BranchUpgradeConfig[],
-): Map<string, PendingUpgradeInfo> {
+/**
+ * Queues a pending-version check for a package file whose upgrades have pending versions.
+ * The check runs after all artifact updates, so that it sees the final lockfile contents.
+ */
+function addPendingVersionCheck(
+  pendingVersionChecks: PendingVersionCheck[],
+  {
+    manager,
+    packageFile,
+    updatedDeps,
+    lockFiles,
+    results,
+  }: {
+    manager: string;
+    packageFile: FileAddition;
+    updatedDeps: BranchUpgradeConfig[];
+    lockFiles: string[] | undefined;
+    results: UpdateArtifactsResult[] | null;
+  },
+): void {
   const dependencyToUpgradeInfo = new Map<string, PendingUpgradeInfo>();
   for (const dep of updatedDeps) {
     if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
@@ -708,7 +722,16 @@ function getPendingUpgrades(
       );
     }
   }
-  return dependencyToUpgradeInfo;
+  if (dependencyToUpgradeInfo.size) {
+    pendingVersionChecks.push({
+      manager,
+      packageFileName: packageFile.path,
+      packageFileContent: packageFile.contents!.toString(),
+      lockFiles,
+      dependencyToUpgradeInfo,
+      hadArtifactResults: isNonEmptyArray(results),
+    });
+  }
 }
 
 /**
@@ -726,16 +749,12 @@ async function checkForPendingVersions(
     manager,
     packageFileName,
     packageFileContent,
+    lockFiles,
     dependencyToUpgradeInfo,
     hadArtifactResults,
   } = check;
 
-  const packageFileConfig = patchConfigForArtifactsUpdate(
-    config,
-    manager,
-    packageFileName,
-  );
-  const hasUpdatedLockFile = packageFileConfig.lockFiles?.some((path) =>
+  const hasUpdatedLockFile = lockFiles?.some((path) =>
     Object.hasOwn(fileContents, path),
   );
   if (!hadArtifactResults && !hasUpdatedLockFile) {
@@ -745,7 +764,7 @@ async function checkForPendingVersions(
     manager,
     packageFileContent,
     packageFileName,
-    { ...packageFileConfig, fileContents },
+    { ...config, lockFiles, fileContents },
   );
   if (!extracted) {
     logger.warn(

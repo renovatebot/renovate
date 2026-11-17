@@ -52,6 +52,17 @@ const BunLock = z.object({
   packages: z.record(z.string(), z.unknown()),
 });
 
+function omitDependency(
+  dep: PackageDependency<NpmManagerData>,
+  reason: string,
+): null {
+  logger.debug(
+    { depName: dep.depName, depType: dep.depType, reason },
+    'Omitting dependency that cannot be resolved from bun.lock',
+  );
+  return null;
+}
+
 function resolveLockedDependency(
   dep: PackageDependency<NpmManagerData>,
   lock: z.infer<typeof BunLock>,
@@ -73,30 +84,32 @@ function resolveLockedDependency(
   const entry = workspaceEntry ?? lock.packages[depName];
   if (!entry) {
     // Overrides of transitive dependencies need not have a root lock entry.
-    return dep.depType === 'overrides' ? dep : null;
+    return dep.depType === 'overrides'
+      ? dep
+      : omitDependency(dep, 'no-lock-entry');
   }
   if (!isArray(entry) || !isString(entry[0])) {
-    return null;
+    return omitDependency(dep, 'invalid-lock-entry');
   }
 
   const separator = entry[0].indexOf('@', 1);
   if (separator === -1) {
-    return null;
+    return omitDependency(dep, 'invalid-lock-entry');
   }
   const resolvedName = entry[0].slice(0, separator);
   const reference = entry[0].slice(separator + 1);
   if (reference.startsWith('workspace:')) {
-    return null;
+    return omitDependency(dep, 'workspace-reference');
   }
 
   const packageName = dep.packageName ?? depName;
   if (resolvedName !== packageName) {
-    return null;
+    return omitDependency(dep, 'package-name-mismatch');
   }
 
   const version = semver.valid(reference);
   if (!version) {
-    return null;
+    return omitDependency(dep, 'non-semver-reference');
   }
   dep.lockedVersion = version;
   return dep;

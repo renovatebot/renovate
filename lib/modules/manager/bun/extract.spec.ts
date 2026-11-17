@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
+import { logger } from '../../../logger/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { stripNpmrc } from '../npm/npmrc.ts';
 import type { ExtractConfig } from '../types.ts';
@@ -334,48 +335,72 @@ describe('modules/manager/bun/extract', () => {
 
     it.each([
       {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        packages: { foo: null, bar: ['bar@1.0.0'] },
+        reason: 'no-lock-entry',
+        value: {
+          lockfileVersion: 1,
+          workspaces: { '': {} },
+          packages: { foo: null, bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        packages: { foo: [123], bar: ['bar@1.0.0'] },
+        reason: 'invalid-lock-entry',
+        value: {
+          lockfileVersion: 1,
+          workspaces: { '': {} },
+          packages: { foo: [123], bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        packages: { foo: ['foo'], bar: ['bar@1.0.0'] },
+        reason: 'invalid-lock-entry',
+        value: {
+          lockfileVersion: 1,
+          workspaces: { '': {} },
+          packages: { foo: ['foo'], bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 1,
-        workspaces: { '': {} },
-        packages: { foo: ['foo@workspace:missing'], bar: ['bar@1.0.0'] },
+        reason: 'workspace-reference',
+        value: {
+          lockfileVersion: 1,
+          workspaces: { '': {} },
+          packages: { foo: ['foo@workspace:missing'], bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 1,
-        workspaces: { '': {}, local: { name: 'other' } },
-        packages: { foo: ['foo@workspace:local'], bar: ['bar@1.0.0'] },
+        reason: 'workspace-reference',
+        value: {
+          lockfileVersion: 1,
+          workspaces: { '': {}, local: { name: 'other' } },
+          packages: { foo: ['foo@workspace:local'], bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 2,
-        workspaces: { '': {} },
-        packages: { bar: ['bar@1.0.0'] },
+        reason: 'no-lock-entry',
+        value: {
+          lockfileVersion: 2,
+          workspaces: { '': {} },
+          packages: { bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 2,
-        workspaces: { '': {} },
-        packages: { foo: ['baz@1.3.0'], bar: ['bar@1.0.0'] },
+        reason: 'package-name-mismatch',
+        value: {
+          lockfileVersion: 2,
+          workspaces: { '': {} },
+          packages: { foo: ['baz@1.3.0'], bar: ['bar@1.0.0'] },
+        },
       },
       {
-        lockfileVersion: 2,
-        workspaces: { '': {} },
-        packages: { foo: ['foo@github:owner/repo'], bar: ['bar@1.0.0'] },
+        reason: 'non-semver-reference',
+        value: {
+          lockfileVersion: 2,
+          workspaces: { '': {} },
+          packages: { foo: ['foo@github:owner/repo'], bar: ['bar@1.0.0'] },
+        },
       },
     ])(
-      'omits a dependency when the lock cannot establish a resolved npm version: %j',
-      async (value) => {
+      'omits a dependency when the lock cannot establish a resolved npm version ($reason)',
+      async ({ reason, value }) => {
         const result = await extractPackageFile(
           JSON.stringify({ dependencies: { foo: '^1.2.0', bar: '^1.0.0' } }),
           'package.json',
@@ -388,6 +413,10 @@ describe('modules/manager/bun/extract', () => {
         expect(result?.deps).toMatchObject([
           { depName: 'bar', lockedVersion: '1.0.0' },
         ]);
+        expect(logger.debug).toHaveBeenCalledWith(
+          { depName: 'foo', depType: 'dependencies', reason },
+          'Omitting dependency that cannot be resolved from bun.lock',
+        );
       },
     );
 
