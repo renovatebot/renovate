@@ -117,9 +117,10 @@ export async function extractPackageFile(
   }
 
   const lockedVersionsManifest = getLockedVersionsManifest(manifestFiles);
-  const lockedVersions = lockedVersionsManifest
-    ? await getLockedVersions(lockedVersionsManifest)
-    : null;
+  let lockedVersions: Map<string, string> | null = null;
+  if (lockedVersionsManifest) {
+    lockedVersions = await getLockedVersions(lockedVersionsManifest);
+  }
   if (lockedVersions) {
     for (const dep of deps) {
       // `packageName` is `<name>=<uuid>` for a dependency with a UUID.
