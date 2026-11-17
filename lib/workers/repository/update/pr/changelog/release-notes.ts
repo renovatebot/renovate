@@ -130,7 +130,7 @@ export function massageName(
   let name = input ?? '';
 
   if (version) {
-    name = name.replace(RegExp(`^(Release )?v?${version}`, 'i'), '').trim();
+    name = name.replace(regEx(`^(Release )?v?${version}`, 'i'), '').trim();
   }
 
   name = name.trim();

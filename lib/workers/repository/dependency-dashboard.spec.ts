@@ -1792,6 +1792,44 @@ None detected
           expect(body).not.toContain('<details>');
         });
 
+        it('shows the new locked version for lockfile-only updates', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.clear();
+          PackageFiles.add('main', {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'js-yaml',
+                    currentValue: '^4.1.0',
+                    lockedVersion: '4.1.0',
+                    updates: [
+                      {
+                        newValue: '^4.1.0',
+                        newVersion: '4.1.1',
+                        isLockfileUpdate: true,
+                      },
+                      { newValue: '^5.0.0', newVersion: '5.0.0' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            {},
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain(
+            ' - `js-yaml ^4.1.0` → [Updates: `lock file @ 4.1.1`, `^5.0.0`]',
+          );
+        });
+
         it('shows different combinations of version+digest for a given dependency', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', packageFilesWithDigest);
@@ -1972,6 +2010,27 @@ None detected
                     ],
                   },
                   {
+                    depName: 'dep-with-version-only-update',
+                    lockedVersion: '3.0.0',
+                    updates: [
+                      {
+                        newVersion: '3.0.1',
+                        updateType: 'patch' as const,
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'dep-with-lock-file-update-without-version',
+                    currentValue: '^4.0.0',
+                    updates: [
+                      {
+                        newValue: '^4.0.0',
+                        updateType: 'patch' as const,
+                        isLockfileUpdate: true,
+                      },
+                    ],
+                  },
+                  {
                     depName: 'dep-with-no-version-info',
                   },
                 ],
@@ -2008,7 +2067,17 @@ None detected
 
           // Locked version with a lock file update, which has no newValue
           expect(dashboardBody).toInclude(
-            ' - `dep-with-locked-version-update lock file @ 3.0.0` → [Updates: `3.0.1`]',
+            ' - `dep-with-locked-version-update lock file @ 3.0.0` → [Updates: `lock file @ 3.0.1`]',
+          );
+
+          // An update with no newValue that is not a lock file update
+          expect(dashboardBody).toInclude(
+            ' - `dep-with-version-only-update lock file @ 3.0.0` → [Updates: `3.0.1`]',
+          );
+
+          // A lock file update with no newVersion
+          expect(dashboardBody).toInclude(
+            ' - `dep-with-lock-file-update-without-version ^4.0.0` → [Updates: `^4.0.0`]',
           );
 
           // No version info case

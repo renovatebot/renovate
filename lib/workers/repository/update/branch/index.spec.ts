@@ -1008,6 +1008,63 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'no-work',
       });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('warns if no work because of artifact errors', async () => {
+      const artifactErrors = [
+        partial<ArtifactError>({
+          fileName: 'package-lock.json',
+          stderr: 'npm error code ERESOLVE',
+        }),
+      ];
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors,
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await expect(
+        branchWorker.processBranch({
+          ...config,
+          updateType: 'lockFileMaintenance',
+        }),
+      ).resolves.toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'no-work',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        { errors: artifactErrors },
+        'Branch not created because artifact update failed',
+      );
+    });
+
+    it('does not warn about artifact errors in dry-run', async () => {
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [
+          partial<ArtifactError>({ fileName: 'package-lock.json' }),
+        ],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'no-work',
+      });
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Branch not created because artifact update failed',
+      );
     });
 
     it('returns if pending checks', async () => {
