@@ -10,4 +10,10 @@ if [[ ! -d "/tmp/containerbase" ]]; then
   containerbase-cli init tool all
 fi
 
-/usr/local/renovate/node --use-openssl-ca /usr/local/renovate/dist/config-validator.js "$@"
+if [[ -x "/opt/containerbase/bin/renovate-config-validator" ]]; then
+  # prefer a validator installed via `postUpgradeTasks.installTools`
+  export NODE_OPTIONS="--use-openssl-ca${NODE_OPTIONS:+ ${NODE_OPTIONS}}"
+  exec /opt/containerbase/bin/renovate-config-validator "$@"
+fi
+
+exec /usr/local/renovate/node --use-openssl-ca /usr/local/renovate/dist/config-validator.js "$@"

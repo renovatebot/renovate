@@ -128,14 +128,14 @@ function mergeNpmrcDocuments(
 }
 
 /**
- * Whether the repository `.npmrc` is ignored in favour of a configured `npmrc` without `npmrcMerge`.
+ * Whether the repository `.npmrc` is ignored in favor of a configured `npmrc` without `npmrcMerge`.
  */
 function isRepoNpmrcIgnored(config: NpmrcConfig): boolean {
   return isString(config.npmrc) && !config.npmrcMerge;
 }
 
 /**
- * Combines the configured `npmrc` with the sanitized repository `.npmrc`, honouring `npmrcMerge`.
+ * Combines the configured `npmrc` with the sanitized repository `.npmrc`, honoring `npmrcMerge`.
  *
  * @returns the `npmrc` to use for the package file, or `undefined` when there is neither
  */

@@ -189,8 +189,10 @@ describe('config/migration', () => {
         constraints: {
           python: '3.7',
         },
-        dependencyDashboard: true,
-        dependencyDashboardTitle: 'foo',
+        dependencyDashboard: {
+          enabled: true,
+          title: 'foo',
+        },
         enabled: true,
         enabledManagers: ['npm'],
         exposeAllEnv: true,

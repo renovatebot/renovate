@@ -236,7 +236,7 @@ Renovate's `mise` manager does not support the following tool syntax:
   e.g. [`aqua:helm/helm`](https://github.com/aquaproj/aqua-registry/blob/main/pkgs/helm/helm/registry.yaml) is not supported, but `helm` or `aqua:helm` is supported.
 
 - `aqua` packages with [`version_filter`](https://aquaproj.github.io/docs/reference/registry-config/version-prefix).
-  We don't read the aqua registry itself, so we can't support this feature.
+  We do not read the aqua registry itself, so we cannot support this feature.
   If some packages using `version_filter` like [`aqua:biomejs/biome`](https://github.com/aquaproj/aqua-registry/blob/main/pkgs/biomejs/biome/registry.yaml) are not updated or updated incorrectly, set `extractVersion` in the Renovate config manually like below.
 
   ```json

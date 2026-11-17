@@ -834,11 +834,14 @@ async function sanitizeReviewers(
           ).body;
 
           // There are cases where an active user may still not be a member of a workspace
-          if (
-            reviewerUser.account_status === 'active' &&
-            (await isAccountMemberOfWorkspace(reviewer, config.repository))
-          ) {
-            sanitizedReviewers.push(reviewer);
+          if (reviewerUser.account_status === 'active') {
+            const isMember = await isAccountMemberOfWorkspace(
+              reviewer,
+              config.repository,
+            );
+            if (isMember) {
+              sanitizedReviewers.push(reviewer);
+            }
           }
         }
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace

@@ -23,8 +23,17 @@ query {
             name
           }
         }
-        timelineItems(last: 1, itemTypes: [REMOVED_FROM_MERGE_QUEUE_EVENT]) {
+        timelineItems(
+          last: 1
+          itemTypes: [
+            REMOVED_FROM_MERGE_QUEUE_EVENT
+            PULL_REQUEST_COMMIT
+            REVIEW_DISMISSED_EVENT
+            PULL_REQUEST_REVIEW
+          ]
+        ) {
           nodes {
+            __typename
             ... on RemovedFromMergeQueueEvent {
               reason
             }
@@ -41,7 +50,7 @@ RESULT=$(gh api graphql -f query="$QUERY") || { echo "Failed to query GraphQL AP
 DEQUEUED_PRS=$(echo "$RESULT" | jq --arg label "$LABEL" '
   [.data.search.nodes[]
     | select(.mergeQueueEntry == null)
-    | select(.timelineItems.nodes | length > 0)
+    | select(.timelineItems.nodes[0].__typename == "RemovedFromMergeQueueEvent")
     | select([.labels.nodes[].name] | index($label) | not)
     | {number, reason: .timelineItems.nodes[0].reason}]') || { echo "Failed to parse GraphQL response"; exit 1; }
 

@@ -50,12 +50,12 @@ The function returns an array of detected or extracted dependencies, including t
 - versioning used (like SemVer, PEP 440)
 - a list of lock files ( `lockFiles` ) that are associated with this package file, if applicable
 
-The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
+The `extractPackageFile` function does not need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract a correct list of dependencies.
 
-In general, we extract _all_ dependencies from each dependency file, even if they have values we don't support.
+In general, we extract _all_ dependencies from each dependency file, even if they have values we do not support.
 
-If the function reads parts of a dependency file that it can't parse, it should give a `skipReason` message to the `extractPackageFile` function.
+If the function reads parts of a dependency file that it cannot parse, it should give a `skipReason` message to the `extractPackageFile` function.
 Make sure the `skipReason` message is helpful to someone reading the logs.
 
 If `extractPackageFile` is passed a file which is a "false match", so not a package file, or a file with no dependencies then it can return `null`.
@@ -64,7 +64,7 @@ Downstream this results in the file being ignored and removed from the list of p
 ### `extractAllPackageFiles(packageFiles)` (async, optional)
 
 Normally a package manager parses or extracts all package files in _parallel_, and can thus use the `extractPackageFile` function.
-If the package manager you're adding works in _serial_, use this function instead.
+If the package manager you are adding works in _serial_, use this function instead.
 
 For example the npm and Yarn package manager must process the `package.json` and `package-lock` or `yarn.lock` files together.
 This allows features like Workspaces to work.
@@ -98,7 +98,7 @@ This should be placed in `dep-types.ts`.
 
 ### `supportsDynamicDepTypesNote` (optional)
 
-Use this to provide a Markdown note about dynamically generated `depType` values that can't be listed in `knownDepTypes`.
+Use this to provide a Markdown note about dynamically generated `depType` values that cannot be listed in `knownDepTypes`.
 
 This note will be rendered after the `knownDepTypes` table (regardless of whether any known `depTypes` are present).
 
@@ -152,7 +152,7 @@ The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of 
 
 Use `updateDependency` if _both_ conditions apply:
 
-- the manager can't be updated to use the standard replacing mechanism
+- the manager cannot be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
 
 It returns the new package file content, or `null` on failure.
@@ -239,7 +239,7 @@ To do this, the manager needs to:
 2. Match each dependency from the package file to its entry in the lock file
 3. Add the matched version as `lockedVersion`
 
-Once `lockedVersion` is provided, Renovate should be able to "pin" constraints/ranges into exact versions, if the user configures as such (e.g. `rangeStrategy=pin`), however Renovate _won't_ automatically be able to make lockfile-only updates.
+Once `lockedVersion` is provided, Renovate should be able to "pin" constraints/ranges into exact versions, if the user configures as such (e.g. `rangeStrategy=pin`), however Renovate _will not_ automatically be able to make lockfile-only updates.
 
 ### Lock file-only updates
 
@@ -262,7 +262,7 @@ A mix of the following approaches are used in Renovate, from best to worst:
 
 - Renovate calls a tool command to specifically update the dependency in question to the specific version, e.g. `<tool> update <dependency name>@<new version>`
 - Renovate manually updates the locked version in the lock file it needs updated, then calls a `<tool> install` command to "fix" up the remaining parts (hashes, transitive dependencies, etc). This is good, if it works, but it is prone to breaking in future releases if the maintainers of the tool do not know people are using their package manager in this manner, even if it works unintentionally.
-- Renovate calls a tool command similar to the first approach, except the tool does not support specific versions, e.g. `<tool> update <dependency name>`. This approach can be problematic because Renovate might _want_ to update to e.g. `v1.1.1` but instead the tool finds a newer `v1.1.2` and that's what the user gets instead
+- Renovate calls a tool command similar to the first approach, except the tool does not support specific versions, e.g. `<tool> update <dependency name>`. This approach can be problematic because Renovate might _want_ to update to e.g. `v1.1.1` but instead the tool finds a newer `v1.1.2` and that is what the user gets instead
 
 ##### Difficult cases
 
@@ -272,7 +272,7 @@ A further complication is that sometimes:
 - there are peer dependency problems
 - or there is some other conflict
 
-In those cases it's best if the tool supports creating a list of dependencies to update, and the tool then updates all dependencies at once.
+In those cases it is best if the tool supports creating a list of dependencies to update, and the tool then updates all dependencies at once.
 
 #### updateLockedDependency()
 

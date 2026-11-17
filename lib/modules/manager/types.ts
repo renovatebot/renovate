@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  PackageRule,
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -30,7 +31,8 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig extends CustomExtractConfig {
+export interface ExtractConfig
+  extends CustomExtractConfig, Pick<ToolConstraintsConfig, 'constraints'> {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
@@ -95,7 +97,19 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: Nullish<string>;
+  /**
+   * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
+   *
+   * Package managers apply a minimum release age to every package they resolve, so Renovate passes them this value instead of a `minimumReleaseAge` from `packageRules`.
+   */
+  minimumReleaseAgeRepository?: Nullish<string>;
+  /** The lower bound for the minimum release age which Renovate passes to the package manager. */
+  minimumReleaseAgePackageManager?: Nullish<string>;
+  minimumReleaseAgePackageManagerSync?: boolean;
+  /** All upgrades of the branch, including those of other managers and package files. */
+  upgrades?: Upgrade[];
 }
 
 export interface RangeConfig<T = unknown> extends ManagerData<T> {
@@ -128,11 +142,29 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
   /**
-   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
+   * Rules from the package manager's own configuration, applied after the `packageRules` of the repository.
    *
+   * Managers use them to set `minimumReleaseAgeExtracted` per dependency.
+   */
+  packageRules?: ExtractedPackageRule[];
+}
+
+/**
+ * A `packageRules` entry which a manager builds from the package manager's own configuration.
+ *
+ * A rule which sets a duration must match on `matchDatasources`, so that it does not apply to lock file maintenance, which has no datasource unless the package file sets one.
+ */
+export interface ExtractedPackageRule extends Pick<
+  PackageRule,
+  Extract<keyof PackageRule, `match${string}`>
+> {
+  /**
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days` or an ISO 8601 date, or `null` for packages it excludes.
+   *
+   * A date counts as the time elapsed since that date, so that the age stays correct when Renovate reuses a cached extract result.
    * Renovate uses the larger of this and `minimumReleaseAge`.
    */
-  minimumReleaseAgeExtracted?: string;
+  minimumReleaseAgeExtracted: string | null;
 }
 
 export interface PackageFile<T = unknown> extends PackageFileContent<T> {
@@ -323,6 +355,16 @@ export interface Upgrade<
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  minimumReleaseAge?: string | null;
+  minimumReleaseAgeBuffer?: string | null;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
+  minimumReleaseAgeExtracted?: string | null;
+  /** @see UpdateArtifactsConfig.minimumReleaseAgeRepository */
+  minimumReleaseAgeRepository?: string | null;
+  /** @see UpdateArtifactsConfig.minimumReleaseAgePackageManager */
+  minimumReleaseAgePackageManager?: string | null;
+  minimumReleaseAgePackageManagerSync?: boolean;
+  releaseTimestamp?: Timestamp;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
   vulnerabilitySeverity?: string;
@@ -482,7 +524,7 @@ export interface SharedConstraints extends SharedConstraintsScope {
 export type MinimumReleaseAgeToolCapability = boolean | string;
 
 export interface MinimumReleaseAgeToolSupport {
-  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  /** Renovate passes the repository or manager `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
   passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
   /** Renovate reads the package manager's own minimum release age setting */
   readsConfiguredAge?: MinimumReleaseAgeToolCapability;

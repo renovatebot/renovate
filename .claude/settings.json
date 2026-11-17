@@ -14,7 +14,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/pretooluse-check.ts\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/pretooluse-check.ts\"",
+            "statusMessage": "Checking command against repo conventions"
           }
         ]
       }
@@ -24,7 +25,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/sessionstart-check.ts\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/sessionstart-check.ts\"",
+            "statusMessage": "Installing toolchain and dependencies"
           }
         ]
       }
@@ -34,7 +36,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/cwdchanged-check.ts\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/cwdchanged-check.ts\"",
+            "statusMessage": "Provisioning checkout if not yet installed"
           }
         ]
       }
@@ -44,7 +47,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/stop-check.ts\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/stop-check.ts\"",
+            "statusMessage": "Running pnpm check on changed files"
           }
         ]
       }

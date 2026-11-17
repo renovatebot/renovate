@@ -22,7 +22,7 @@ APM also documents pinning to a commit SHA with the release tag kept as a traili
 With `pinDigests` enabled (part of the `config:best-practices` preset) Renovate keeps both the SHA and the tag comment current, the same way it does for `github-actions` (`uses: owner/action@<sha> # v4`).
 A SHA pin without a tag comment is skipped, as there is no version to track.
 
-A ref that Renovate's default versioning can't read as a version, such as a branch (`owner/repo#main`, or `owner/repo#<sha> # main`), is followed by its commit instead.
+A ref that Renovate's default versioning cannot read as a version, such as a branch (`owner/repo#main`, or `owner/repo#<sha> # main`), is followed by its commit instead.
 On GitHub hosts this uses the `github-digest` datasource, as `github-actions` does for `uses: owner/action@main`, and on other hosts it uses `git-refs`, both with `exact` versioning.
 Renovate then updates the SHA of a branch-pinned commit as the branch moves, and with `pinDigests` it pins a plain branch ref to its commit, keeping the branch as the comment.
 A branch whose name the default versioning reads as a version, such as `release/2024`, is still looked up as a tag.
