@@ -97,7 +97,7 @@ describe('util/exec/index', () => {
   const processEnv = envMock.full;
   const dockerPullCmd = `docker pull ${fullImage}`;
   const dockerRemoveCmd = `docker ps --filter name=${name} -aq`;
-  const dockerPullOpts = {};
+  const dockerPullOpts = { env: envMock.basic };
   const dockerRemoveOpts = dockerPullOpts;
 
   const containerbaseEnv = {
@@ -784,8 +784,8 @@ describe('util/exec/index', () => {
           `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
-          dockerPullOpts,
-          dockerRemoveOpts,
+          { env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' } },
+          { env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_VALUE' } },
           {
             cwd,
             env: {
@@ -820,8 +820,8 @@ describe('util/exec/index', () => {
           `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
-          dockerPullOpts,
-          dockerRemoveOpts,
+          { env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' } },
+          { env: { ...envMock.basic, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' } },
           {
             cwd,
             env: {
