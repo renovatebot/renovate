@@ -25,7 +25,7 @@ describe('modules/manager/mise/constraints', () => {
       ${'pypi:poetry'}                | ${'poetry'}
       ${'gem:bundler'}                | ${'bundler'}
       ${'asdf:mise-plugins/mise-php'} | ${undefined}
-      ${'asdf:mise-plugins/asdf-php'} | ${'php'}
+      ${'asdf:mise-plugins/asdf-php'} | ${undefined}
       ${'npm:prettier'}               | ${undefined}
       ${'cargo:pnpm'}                 | ${undefined}
       ${'terraform'}                  | ${undefined}

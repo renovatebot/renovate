@@ -3,9 +3,12 @@ import { type RenovateConfig, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { SkipReason } from '../../../types/skip-reason.ts';
+import { calculateMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
 import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
 vi.mock('../../../util/git/semantic.ts');
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 let config: RenovateConfig;
 
@@ -380,19 +383,115 @@ describe('workers/repository/updates/flatten', () => {
       expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
     });
 
-    it('passes minimumReleaseAgeExtracted from the package file to all updates', async () => {
-      config.lockFileMaintenance!.enabled = true;
+    describe('packageRules of the package file', () => {
+      function packageFiles(): Record<string, PackageFile[]> {
+        return {
+          npm: [
+            {
+              packageFile: 'package.json',
+              lockFiles: ['pnpm-lock.yaml'],
+              packageRules: [
+                {
+                  matchDatasources: ['npm'],
+                  minimumReleaseAgeExtracted: '3 days',
+                },
+                {
+                  matchPackageNames: ['@myorg/*'],
+                  minimumReleaseAgeExtracted: null,
+                },
+              ],
+              deps: [
+                {
+                  depName: 'foo',
+                  packageName: 'foo',
+                  datasource: 'npm',
+                  currentValue: '1.0.0',
+                  updates: [{ newValue: '2.0.0', updateType: 'major' }],
+                },
+                {
+                  depName: '@myorg/bar',
+                  packageName: '@myorg/bar',
+                  datasource: 'npm',
+                  currentValue: '1.0.0',
+                  updates: [{ newValue: '2.0.0', updateType: 'major' }],
+                },
+                {
+                  depName: 'node',
+                  packageName: 'node',
+                  datasource: 'node-version',
+                  currentValue: '20.0.0',
+                  updates: [{ newValue: '22.0.0', updateType: 'major' }],
+                },
+              ],
+            },
+          ],
+        };
+      }
+
+      it('set minimumReleaseAgeExtracted on the updates they match', async () => {
+        config.lockFileMaintenance!.enabled = true;
+        config.minimumReleaseAge = '1 day';
+        config.minimumReleaseAgeBuffer = null;
+        config.packageRules = [
+          { matchPackageNames: ['foo'], minimumReleaseAge: '2 days' },
+        ];
+
+        const res = await flattenUpdates(config, packageFiles());
+
+        expect(res).toMatchObject([
+          {
+            depName: 'foo',
+            minimumReleaseAge: '2 days',
+            minimumReleaseAgeExtracted: '3 days',
+          },
+          {
+            depName: '@myorg/bar',
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeExtracted: null,
+          },
+          { depName: 'node', minimumReleaseAge: '1 day' },
+          { updateType: 'lockFileMaintenance', minimumReleaseAge: '1 day' },
+        ]);
+        expect(res[2]).not.toHaveProperty('minimumReleaseAgeExtracted');
+        expect(res[3]).not.toHaveProperty('minimumReleaseAgeExtracted');
+        expect(res.map(calculateMinimumReleaseAgeMs)).toEqual([
+          3 * DAY_MS,
+          DAY_MS,
+          DAY_MS,
+          DAY_MS,
+        ]);
+      });
+
+      it('do not hold back a vulnerability alert', async () => {
+        config.packageRules = [
+          { matchPackageNames: ['foo'], isVulnerabilityAlert: true },
+        ];
+
+        const res = await flattenUpdates(config, packageFiles());
+
+        expect(res[0]).toMatchObject({
+          depName: 'foo',
+          isVulnerabilityAlert: true,
+          minimumReleaseAgeExtracted: '3 days',
+        });
+        expect(calculateMinimumReleaseAgeMs(res[0])).toBe(0);
+      });
+    });
+
+    it('passes the minimumReleaseAge before packageRules as minimumReleaseAgeRepository', async () => {
+      config.minimumReleaseAge = '3 days';
+      config.packageRules = [
+        { matchUpdateTypes: ['major'], minimumReleaseAge: '14 days' },
+      ];
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             packageFile: 'package.json',
-            lockFiles: ['package-lock.json'],
-            minimumReleaseAgeExtracted: '3 days',
             deps: [
               {
                 depName: 'foo',
                 currentValue: '1.0.0',
-                updates: [{ newValue: '2.0.0' }],
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
               },
             ],
           },
@@ -402,10 +501,114 @@ describe('workers/repository/updates/flatten', () => {
       const res = await flattenUpdates(config, packageFiles);
 
       expect(res).toMatchObject([
-        { depName: 'foo', minimumReleaseAgeExtracted: '3 days' },
         {
-          updateType: 'lockFileMaintenance',
-          minimumReleaseAgeExtracted: '3 days',
+          depName: 'foo',
+          minimumReleaseAge: '14 days',
+          minimumReleaseAgeRepository: '3 days',
+        },
+      ]);
+    });
+
+    it('passes minimumReleaseAgePackageManager of the manager config', async () => {
+      config.minimumReleaseAgePackageManager = '1 day';
+      // @ts-expect-error -- managers are not defined on RenovateConfig
+      config.npm = { minimumReleaseAgePackageManager: '7 days' };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+        cargo: [
+          {
+            packageFile: 'Cargo.toml',
+            deps: [
+              {
+                depName: 'bar',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        { depName: 'foo', minimumReleaseAgePackageManager: '7 days' },
+        { depName: 'bar', minimumReleaseAgePackageManager: '1 day' },
+      ]);
+    });
+
+    it('ignores minimumReleaseAgePackageManager and minimumReleaseAgePackageManagerSync of rules', async () => {
+      // @ts-expect-error -- managers are not defined on RenovateConfig
+      config.npm = {
+        minimumReleaseAgePackageManager: '3 days',
+        minimumReleaseAgePackageManagerSync: true,
+      };
+      config.packageRules = [
+        {
+          matchPackageNames: ['*'],
+          minimumReleaseAgePackageManager: '14 days',
+          minimumReleaseAgePackageManagerSync: false,
+        },
+      ];
+      config.lockFileMaintenance = {
+        enabled: true,
+        minimumReleaseAgePackageManager: '7 days',
+        minimumReleaseAgePackageManagerSync: false,
+      };
+      config.vulnerabilityAlerts = {
+        minimumReleaseAgePackageManager: '7 days',
+        minimumReleaseAgePackageManagerSync: false,
+      };
+      config.remediations = {
+        'package-lock.json': [
+          { depName: 'bar', currentVersion: '1.0.0', newVersion: '1.0.1' },
+        ],
+      };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        {
+          depName: 'foo',
+          minimumReleaseAgePackageManager: '3 days',
+          minimumReleaseAgePackageManagerSync: true,
+        },
+        {
+          isLockFileMaintenance: true,
+          minimumReleaseAgePackageManager: '3 days',
+          minimumReleaseAgePackageManagerSync: true,
+        },
+        {
+          depName: 'bar',
+          isRemediation: true,
+          minimumReleaseAgePackageManager: '3 days',
+          minimumReleaseAgePackageManagerSync: true,
         },
       ]);
     });

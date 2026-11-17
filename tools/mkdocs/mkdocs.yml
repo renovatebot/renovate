@@ -35,7 +35,7 @@ extra:
 # Set the main title for the project.
 # Required setting.
 # https://www.mkdocs.org/user-guide/configuration/#site_name
-site_name: Renovate Docs
+site_name: Mend Renovate CLI Docs
 
 # Set the canonical URL of the site.
 # https://www.mkdocs.org/user-guide/configuration/#site_url
