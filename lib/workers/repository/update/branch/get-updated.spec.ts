@@ -207,6 +207,63 @@ describe('workers/repository/update/branch/get-updated', () => {
       );
     });
 
+    it('does not run other managers for already updated files with Vite+ reconciliation', async () => {
+      config.reuseExistingBranch = true;
+      config.postUpdateOptions = ['vitePlusSyncVersions'];
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        branchName: 'some-branch',
+      });
+      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(gitSubmodules.updateArtifacts).not.toHaveBeenCalled();
+    });
+
+    it.each(['notice', 'file', 'artifactError'] as const)(
+      'only marks reused manifests updated for file changes or errors: %s',
+      async (kind) => {
+        config.reuseExistingBranch = true;
+        config.postUpdateOptions = ['vitePlusSyncVersions'];
+        config.upgrades.push({
+          packageFile: 'package.json',
+          manager: 'npm',
+          branchName: 'some-branch',
+        });
+        npm.updateDependency.mockReturnValue('existing content');
+        const notice = {
+          file: 'package.json',
+          message: 'Dynamic installation is required',
+        };
+        const artifactError = {
+          fileName: 'package.json',
+          stderr: 'Planner failed',
+        };
+        const file = {
+          type: 'addition' as const,
+          path: 'package.json',
+          contents: 'aligned',
+        };
+        const result = {
+          notice: { notice },
+          file: { file },
+          artifactError: { artifactError },
+        }[kind];
+        npm.updateArtifacts.mockResolvedValueOnce([result]);
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res.updatedPackageFiles).toHaveLength(kind === 'notice' ? 0 : 1);
+        expect(res.artifactNotices).toEqual(kind === 'notice' ? [notice] : []);
+        expect(res.artifactErrors).toEqual(
+          kind === 'artifactError' ? [artifactError] : [],
+        );
+      },
+    );
+
     it('skips updateArtifacts for already updated files without Vite+ reconciliation', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({

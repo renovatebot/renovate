@@ -399,6 +399,7 @@ export async function getUpdatedPackageFiles(
         delete nonUpdatedFileContents[packageFile];
       } else if (
         reuseExistingBranch &&
+        manager === 'npm' &&
         !updatedFileContents[packageFile] &&
         config.postUpdateOptions?.includes('vitePlusSyncVersions')
       ) {
@@ -524,7 +525,7 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (isNonEmptyArray(results)) {
+        if (results?.some((result) => result.file ?? result.artifactError)) {
           updatedPackageFiles.push(packageFile);
           await checkForPendingVersions(
             manager,
