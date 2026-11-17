@@ -276,6 +276,7 @@ export function refreshBranchConfig(
     ) {
       upgrade.automerge = false;
     }
+    upgrade.displayTo = upgrade.newValue;
     upgrade.isMajor = upgrade.updateType === 'major';
     upgrade.isMinor = upgrade.updateType === 'minor';
     upgrade.isPatch = upgrade.updateType === 'patch';

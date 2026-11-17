@@ -243,14 +243,24 @@ describe('modules/manager/npm/vite-plus', () => {
       depName: 'vite-plus',
       newVersion: '0.3.1',
       newValue: '0.3.1',
-      displayTo: '0.3.1',
       isBreaking: true,
       newMajor: 0,
       newMinor: 3,
       newPatch: 1,
-      prettyNewVersion: 'v0.3.1',
       updateType: 'minor',
     });
+  });
+
+  it('leaves display metadata for the branch worker to derive', async () => {
+    const proposed = packageJson('0.3.1', '4.0.0');
+    const updateConfig = config(proposed);
+    await mockFiles({ 'package.json': proposed });
+    mockPlan((request) => validPlan(request, packageJson('0.3.1', '4.1.11')));
+
+    await reconcile(updateConfig, packageFiles());
+
+    expect(updateConfig.upgrades[0]).not.toHaveProperty('displayTo');
+    expect(updateConfig.upgrades[0]).not.toHaveProperty('prettyNewVersion');
   });
 
   it.each([false, true])(
@@ -934,7 +944,6 @@ describe('modules/manager/npm/vite-plus', () => {
       packageName: '@voidzero-dev/vite-plus-core',
       newVersion: '0.3.1',
       newValue: '0.3.1',
-      displayTo: '0.3.1',
       updateType: 'minor',
     });
   });

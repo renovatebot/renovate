@@ -110,6 +110,16 @@ describe('workers/repository/updates/generate', () => {
 
       refreshBranchConfig(config, previousTargets);
 
+      expect(config.upgrades[0]).toMatchObject({
+        displayTo: '4.1.11',
+        prettyNewVersion: 'v4.1.11',
+        prettyNewMajor: 'v4',
+        isMajor: false,
+        isMinor: false,
+        isPatch: true,
+        isPin: false,
+      });
+      expect(config.displayTo).toBe('4.1.11');
       expect(config.prTitle).toBe('Update dependency vitest to v4.1.11');
       expect(config.commitMessage).toStartWith(
         'Update dependency vitest to v4.1.11',

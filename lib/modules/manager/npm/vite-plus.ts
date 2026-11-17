@@ -110,14 +110,6 @@ interface ValidatedPlan {
   dependencies: ManifestDependency[];
 }
 
-interface MutableUpgrade extends Upgrade<NpmManagerData> {
-  displayTo?: string;
-  isBreaking?: boolean;
-  newMinor?: number;
-  newPatch?: number;
-  prettyNewVersion?: string;
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return isPlainObject(value);
 }
@@ -726,7 +718,7 @@ function updateUpgradeMetadata(
   upgrades: Upgrade<NpmManagerData>[],
   dependencies: ManifestDependency[],
 ): void {
-  for (const upgrade of upgrades as MutableUpgrade[]) {
+  for (const upgrade of upgrades) {
     const version = dependencies.find((dependency) =>
       matchesUpgrade(dependency, upgrade),
     )?.version;
@@ -735,17 +727,19 @@ function updateUpgradeMetadata(
     }
     upgrade.newVersion = version;
     upgrade.newValue = version;
-    upgrade.displayTo = version;
-    upgrade.prettyNewVersion = `v${version}`;
-    upgrade.newMajor = npmVersioning.api.getMajor(version)!;
-    upgrade.newMinor = npmVersioning.api.getMinor(version)!;
-    upgrade.newPatch = npmVersioning.api.getPatch(version)!;
+    const newMajor = npmVersioning.api.getMajor(version)!;
+    const newMinor = npmVersioning.api.getMinor(version)!;
+    Object.assign(upgrade, {
+      newMajor,
+      newMinor,
+      newPatch: npmVersioning.api.getPatch(version)!,
+    });
     if (upgrade.currentValue === version) {
       continue;
     }
     if (upgrade.currentVersion === version) {
       upgrade.updateType = 'pin';
-      upgrade.isBreaking = false;
+      Object.assign(upgrade, { isBreaking: false });
       continue;
     }
     if (
@@ -759,16 +753,13 @@ function updateUpgradeMetadata(
         version,
       )
         ? 'rollback'
-        : getAlignedUpdateType(
-            currentMajor,
-            currentMinor,
-            upgrade.newMajor,
-            upgrade.newMinor,
-          );
-      upgrade.isBreaking = npmVersioning.api.isBreaking!(
-        upgrade.currentVersion,
-        version,
-      );
+        : getAlignedUpdateType(currentMajor, currentMinor, newMajor, newMinor);
+      Object.assign(upgrade, {
+        isBreaking: npmVersioning.api.isBreaking!(
+          upgrade.currentVersion,
+          version,
+        ),
+      });
     }
   }
 }
