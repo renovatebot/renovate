@@ -4422,10 +4422,9 @@ Each workspace supports up to 256 manifests, 1 MiB per manifest, and 16 MiB per 
 Exceeding these limits produces an artifact error.
 Additional compatibility changes appear in artifact notices.
 
-When reconciliation changes a selected upgrade target, Renovate disables its automerge for that run.
-For an existing PR, Renovate also cancels platform automerge that it enabled unless the branch already contains the reconciled targets.
-Automerge enabled by another user is left unchanged.
-If the platform cannot confirm cancellation, Renovate reports an error and leaves the branch unchanged.
+Automerge stays enabled when the reconciled update is no riskier than lookup's update; otherwise Renovate disables it.
+Renovate cancels its own platform automerge before pushing.
+Automerge enabled by others is left unchanged.
 
 The `group:vitePlus` preset enables this option.
 

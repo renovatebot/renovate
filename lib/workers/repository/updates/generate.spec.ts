@@ -59,7 +59,10 @@ describe('workers/repository/updates/generate', () => {
     let config: BranchConfig;
     let previousTargets: Map<
       BranchUpgradeConfig,
-      Pick<BranchUpgradeConfig, 'newValue' | 'newVersion'>
+      Pick<
+        BranchUpgradeConfig,
+        'newValue' | 'newVersion' | 'updateType' | 'isBreaking'
+      >
     >;
 
     beforeEach(() => {
@@ -91,9 +94,8 @@ describe('workers/repository/updates/generate', () => {
     it('leaves an unchanged branch untouched', () => {
       const original = structuredClone(config);
 
-      const targetChanged = refreshBranchConfig(config, previousTargets);
+      refreshBranchConfig(config, previousTargets);
 
-      expect(targetChanged).toBeFalse();
       expect(config).toEqual(original);
     });
 
@@ -106,9 +108,8 @@ describe('workers/repository/updates/generate', () => {
         commitBodyTable: true,
       });
 
-      const targetChanged = refreshBranchConfig(config, previousTargets);
+      refreshBranchConfig(config, previousTargets);
 
-      expect(targetChanged).toBeTrue();
       expect(config.prTitle).toBe('Update dependency vitest to v4.1.11');
       expect(config.commitMessage).toStartWith(
         'Update dependency vitest to v4.1.11',
@@ -116,7 +117,7 @@ describe('workers/repository/updates/generate', () => {
       expect(config.commitMessage).toContain('| npm');
       expect(config.commitMessage).toContain('4.1.11');
       expect(config.commitMessage).not.toContain('4.2.0');
-      expect(config.automerge).toBeFalse();
+      expect(config.automerge).toBeTrue();
     });
 
     it('refreshes pin classification without a new major', () => {
@@ -135,8 +136,73 @@ describe('workers/repository/updates/generate', () => {
         updateType: 'pin',
         prettyNewVersion: undefined,
         prettyNewMajor: undefined,
-        automerge: false,
+        automerge: true,
       });
+    });
+
+    it.each`
+      previousType   | updateType       | wasBreaking | isBreaking | automerge
+      ${'major'}     | ${'major'}       | ${true}     | ${true}    | ${true}
+      ${'major'}     | ${'minor'}       | ${true}     | ${false}   | ${true}
+      ${'minor'}     | ${'patch'}       | ${false}    | ${false}   | ${true}
+      ${'patch'}     | ${'pin'}         | ${false}    | ${false}   | ${true}
+      ${'pin'}       | ${'pinDigest'}   | ${false}    | ${false}   | ${true}
+      ${'pinDigest'} | ${'digest'}      | ${false}    | ${false}   | ${true}
+      ${'digest'}    | ${'patch'}       | ${false}    | ${false}   | ${false}
+      ${'patch'}     | ${'minor'}       | ${false}    | ${false}   | ${false}
+      ${'minor'}     | ${'major'}       | ${false}    | ${true}    | ${false}
+      ${'minor'}     | ${'patch'}       | ${false}    | ${true}    | ${false}
+      ${'major'}     | ${'rollback'}    | ${true}     | ${false}   | ${false}
+      ${'major'}     | ${undefined}     | ${true}     | ${false}   | ${false}
+      ${'major'}     | ${'replacement'} | ${true}     | ${false}   | ${false}
+      ${undefined}   | ${'patch'}       | ${false}    | ${false}   | ${false}
+      ${'rollback'}  | ${'patch'}       | ${false}    | ${false}   | ${false}
+    `(
+      'compares $previousType to $updateType with breaking=$isBreaking',
+      ({ previousType, updateType, wasBreaking, isBreaking, automerge }) => {
+        const upgrade = config.upgrades[0];
+        previousTargets.set(upgrade, {
+          ...upgrade,
+          updateType: previousType,
+          isBreaking: wasBreaking,
+        });
+        Object.assign(upgrade, {
+          newValue: '4.1.11',
+          newVersion: '4.1.11',
+          updateType,
+          isBreaking,
+        });
+
+        refreshBranchConfig(config, previousTargets);
+
+        expect(upgrade.automerge).toBe(automerge);
+        expect(config.automerge).toBe(automerge);
+      },
+    );
+
+    it.each(['branch', 'upgrade'] as const)(
+      'does not enable disabled %s automerge',
+      (disabled) => {
+        if (disabled === 'branch') {
+          config.automerge = false;
+        } else {
+          config.upgrades[0].automerge = false;
+        }
+        config.upgrades[0].newValue = '4.1.11';
+        config.upgrades[0].newVersion = '4.1.11';
+
+        refreshBranchConfig(config, previousTargets);
+
+        expect(config.automerge).toBeFalse();
+      },
+    );
+
+    it('turns off branch automerge for an unchanged upgrade that forbids it', () => {
+      config.upgrades[0].automerge = false;
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.automerge).toBeFalse();
     });
 
     it('preserves a grouped message with no version extra', () => {

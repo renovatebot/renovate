@@ -27,7 +27,6 @@ import type {
   ArtifactNotice,
   PackageDependency,
   PackageFile,
-  PostUpdateConfig,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
@@ -778,66 +777,6 @@ function matchesUpgrade(
     dependency.depType === upgrade.depType &&
     dependency.packageName === effectivePackageName(upgrade)
   );
-}
-
-export async function hasReconciledVitePlusTargets({
-  branchName,
-  upgrades,
-}: Pick<PostUpdateConfig, 'branchName' | 'upgrades'>): Promise<boolean> {
-  const dependenciesByFile = new Map<string, ManifestDependency[]>();
-  for (const upgrade of upgrades) {
-    if (
-      upgrade.manager !== 'npm' ||
-      upgrade.depType === 'peerDependencies' ||
-      !isManagedPackage(effectivePackageName(upgrade))
-    ) {
-      continue;
-    }
-    const path = upgrade.packageFile;
-    if (!path) {
-      return false;
-    }
-    let dependencies = dependenciesByFile.get(path);
-    if (!dependencies) {
-      const kind =
-        upath.basename(path) === 'pnpm-workspace.yaml'
-          ? 'pnpmWorkspace'
-          : packageFileKind(path);
-      if (!kind) {
-        continue;
-      }
-      const contents = await getFile(path, branchName, { throwOnError: true });
-      if (!contents || Buffer.byteLength(contents) > MAX_MANIFEST_BYTES) {
-        return false;
-      }
-      try {
-        const manifest = parseManifest(kind, contents);
-        dependencies = collectManifestDependencies(
-          { path, kind },
-          manifest,
-          manifest,
-          [],
-        );
-      } catch {
-        logger.debug(
-          { packageFile: path },
-          'Cannot verify existing Vite+ dependency targets',
-        );
-        return false;
-      }
-      dependenciesByFile.set(path, dependencies);
-    }
-    const matches = dependencies.filter((dependency) =>
-      matchesUpgrade(dependency, upgrade),
-    );
-    if (
-      !matches.length ||
-      matches.some((dependency) => dependency.version !== upgrade.newVersion)
-    ) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function additionalAlignmentNotices(

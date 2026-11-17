@@ -8,7 +8,6 @@ import {
 import { logger, removeMeta } from '../../../../logger/index.ts';
 import { updateActionsLockfile } from '../../../../modules/manager/github-actions/artifacts.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
-import { hasReconciledVitePlusTargets } from '../../../../modules/manager/npm/vite-plus.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -397,6 +396,7 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
+    let reconciliationDisabledPlatformAutomerge = false;
     const canReuseArtifacts =
       config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched';
     if (
@@ -408,7 +408,12 @@ export async function processBranch(
       const previousTargets = new Map(
         config.upgrades.map((upgrade) => [
           upgrade,
-          { newValue: upgrade.newValue, newVersion: upgrade.newVersion },
+          {
+            newValue: upgrade.newValue,
+            newVersion: upgrade.newVersion,
+            updateType: upgrade.updateType,
+            isBreaking: upgrade.isBreaking,
+          },
         ]),
       );
       const res = await getUpdatedPackageFiles(config);
@@ -474,37 +479,12 @@ export async function processBranch(
           result: 'minimum-group-size-not-met',
         };
       }
-      const targetChanged = refreshBranchConfig(config, previousTargets);
-      let targetsAlreadyReconciled = false;
-      if (targetChanged && branchPr && branchExists) {
-        targetsAlreadyReconciled = await hasReconciledVitePlusTargets(config);
-      }
-      if (targetChanged && branchPr && !targetsAlreadyReconciled) {
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            `DRY-RUN: Would cancel platform automerge for PR #${branchPr.number}`,
-          );
-        } else {
-          const cancellation = await platform.cancelPlatformAutomerge?.({
-            number: branchPr.number,
-          });
-          const cancellationConfirmed =
-            cancellation?.cancelled === true ||
-            cancellation?.reason === 'not-enabled' ||
-            cancellation?.reason === 'enabled-by-other';
-          if (!cancellationConfirmed) {
-            logger.warn(
-              { prNo: branchPr.number },
-              'Cannot confirm platform automerge is disabled after version reconciliation',
-            );
-            return {
-              branchExists,
-              prNo: branchPr.number,
-              result: 'error',
-            };
-          }
-        }
-      }
+      const usedPlatformAutomerge =
+        getPlatformPrOptions(config).usePlatformAutomerge;
+      refreshBranchConfig(config, previousTargets);
+      reconciliationDisabledPlatformAutomerge =
+        !!usedPlatformAutomerge &&
+        !getPlatformPrOptions(config).usePlatformAutomerge;
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );
@@ -633,9 +613,12 @@ export async function processBranch(
 
       // platform auto-merge keeps the commit message it was enabled with
       const platformPrOptions = getPlatformPrOptions(config);
+      const shouldCancelPlatformAutomerge =
+        !!platformPrOptions.usePlatformAutomerge ||
+        reconciliationDisabledPlatformAutomerge;
       if (
         branchPr &&
-        platformPrOptions.usePlatformAutomerge &&
+        shouldCancelPlatformAutomerge &&
         platform.cancelPlatformAutomerge
       ) {
         if (GlobalConfig.get('dryRun')) {

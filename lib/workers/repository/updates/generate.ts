@@ -226,15 +226,36 @@ function appendCommitBodyTable(config: BranchConfig): void {
   }
 }
 
+function updateRisk(
+  updateType: BranchUpgradeConfig['updateType'],
+): number | undefined {
+  switch (updateType) {
+    case 'pin':
+    case 'pinDigest':
+    case 'digest':
+      return 0;
+    case 'patch':
+      return 1;
+    case 'minor':
+      return 2;
+    case 'major':
+      return 3;
+    default:
+      return undefined;
+  }
+}
+
 export function refreshBranchConfig(
   config: BranchConfig,
   previousTargets: ReadonlyMap<
     BranchUpgradeConfig,
-    Pick<BranchUpgradeConfig, 'newValue' | 'newVersion'>
+    Pick<
+      BranchUpgradeConfig,
+      'newValue' | 'newVersion' | 'updateType' | 'isBreaking'
+    >
   >,
-): boolean {
+): void {
   let changed = previousTargets.size !== config.upgrades.length;
-  let targetChanged = false;
   for (const upgrade of config.upgrades) {
     const previous = previousTargets.get(upgrade);
     if (
@@ -244,9 +265,17 @@ export function refreshBranchConfig(
       continue;
     }
     changed = true;
-    targetChanged = true;
-    config.automerge = false;
-    upgrade.automerge = false;
+    const previousRisk = updateRisk(previous?.updateType);
+    const reconciledRisk = updateRisk(upgrade.updateType);
+    const becameBreaking = upgrade.isBreaking && !previous?.isBreaking;
+    if (
+      previousRisk === undefined ||
+      reconciledRisk === undefined ||
+      reconciledRisk > previousRisk ||
+      becameBreaking
+    ) {
+      upgrade.automerge = false;
+    }
     upgrade.isMajor = upgrade.updateType === 'major';
     upgrade.isMinor = upgrade.updateType === 'minor';
     upgrade.isPatch = upgrade.updateType === 'patch';
@@ -257,8 +286,11 @@ export function refreshBranchConfig(
     upgrade.prettyNewMajor =
       upgrade.newMajor === undefined ? undefined : `v${upgrade.newMajor}`;
   }
+  config.automerge =
+    Boolean(config.automerge) &&
+    config.upgrades.every((upgrade) => upgrade.automerge);
   if (!changed) {
-    return false;
+    return;
   }
 
   const [firstUpgrade] = config.upgrades;
@@ -315,7 +347,6 @@ export function refreshBranchConfig(
   const commitMessage = compileCommitMessage(config);
   compilePrTitle(config, commitMessage);
   appendCommitBodyTable(config);
-  return targetChanged;
 }
 
 // Sorted by priority, from low to high

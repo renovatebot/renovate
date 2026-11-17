@@ -13,7 +13,6 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
-  TEMPORARY_ERROR,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as _githubActionsArtifacts from '../../../../modules/manager/github-actions/artifacts.ts';
@@ -151,7 +150,9 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
-        upgrades: partial<BranchUpgradeConfig>([{ depName: 'some-dep-name' }]),
+        upgrades: partial<BranchUpgradeConfig>([
+          { depName: 'some-dep-name', automerge: true },
+        ]),
         baseBranch: 'base-branch',
         manager: 'some-manager',
         major: undefined,
@@ -1113,7 +1114,7 @@ describe('workers/repository/update/branch/index', () => {
           isMinor: false,
           isPatch: true,
           isBreaking: false,
-          automerge: false,
+          automerge: true,
           commitMessage:
             'Update dependency vitest to v4.1.11\n\nSelected 4.1.11',
           prTitle: 'Align vitest to 4.1.11',
@@ -1132,7 +1133,7 @@ describe('workers/repository/update/branch/index', () => {
           isMinor: false,
           isPatch: true,
           isPin: false,
-          automerge: false,
+          automerge: true,
         });
         expect(config.upgrades[0]).toMatchObject({
           newVersion: '5.0.0',
@@ -1203,26 +1204,21 @@ describe('workers/repository/update/branch/index', () => {
           isMajor: false,
           isPatch: true,
           isBreaking: false,
-          automerge: false,
+          automerge: true,
           commitMessage:
             'Update dependency vitest to v4.1.11\n\nSelected 4.1.11',
           prTitle: 'Update dependency vitest to v4.1.11',
         });
         expect(selectedVersions).toEqual(['5.0.0', '5.0.0']);
         expect(config.upgrades).toEqual(originalUpgrades);
-        expect(platform.cancelPlatformAutomerge).toHaveBeenCalledTimes(2);
+        expect(platform.cancelPlatformAutomerge).toHaveBeenCalledTimes(1);
         expect(
           platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
-        ).toBeLessThan(
-          getUpdated.getUpdatedPackageFiles.mock.invocationCallOrder[1],
-        );
-        expect(
-          platform.cancelPlatformAutomerge.mock.invocationCallOrder[1],
         ).toBeLessThan(commit.commitFilesToBranch.mock.invocationCallOrder[0]);
         expect(prWorker.ensurePr).toHaveBeenCalledWith(
           expect.objectContaining({
             newVersion: '4.1.11',
-            automerge: false,
+            automerge: true,
             prTitle: 'Update dependency vitest to v4.1.11',
           }),
         );
@@ -1274,12 +1270,14 @@ describe('workers/repository/update/branch/index', () => {
         expect(config.upgrades).toEqual(originalUpgrades);
         expect(npmPostExtract.getAdditionalFiles).toHaveBeenCalledTimes(1);
         expect(commit.commitFilesToBranch).toHaveBeenCalledExactlyOnceWith(
-          expect.objectContaining({ newVersion: '4.1.11', automerge: false }),
+          expect.objectContaining({ newVersion: '4.1.11', automerge: true }),
         );
       });
 
       describe('platform automerge cancellation', () => {
         beforeEach(() => {
+          config.upgrades[0].updateType = 'pin';
+          config.upgrades[0].isBreaking = false;
           config.upgrades[0].depType = 'devDependencies';
           git.getFile.mockImplementation((path, branchName) =>
             Promise.resolve(
@@ -1323,14 +1321,18 @@ describe('workers/repository/update/branch/index', () => {
         });
 
         it.each([
-          { cancelled: true },
-          { cancelled: false, reason: 'not-enabled' },
-          { cancelled: false, reason: 'enabled-by-other' },
+          'cancelled',
+          'not-enabled',
+          'enabled-by-other',
+          'unconfirmed',
+          'unchanged',
         ] as const)(
-          'does not cancel or re-enable again after reconciliation: %j',
-          async (cancellation) => {
+          'continues after %s cancellation without restoring disabled automerge',
+          async (reason) => {
             platform.cancelPlatformAutomerge.mockResolvedValueOnce(
-              cancellation,
+              reason === 'cancelled'
+                ? { cancelled: true }
+                : { cancelled: false, reason },
             );
             commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
@@ -1339,64 +1341,33 @@ describe('workers/repository/update/branch/index', () => {
             expect(result.result).toBe('done');
             expect(
               platform.cancelPlatformAutomerge,
-            ).toHaveBeenCalledExactlyOnceWith({ number: 5 });
-            expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
-            expect(prWorker.getPlatformPrOptions).toHaveReturnedWith(
-              expect.objectContaining({ usePlatformAutomerge: false }),
-            );
-          },
-        );
-
-        it.each([true, false])(
-          'confirms cancellation before updating PR content with branchExists=%s',
-          async (branchExists) => {
-            scm.branchExists.mockResolvedValue(branchExists);
-            config.automerge = false;
-            platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-              cancelled: true,
+            ).toHaveBeenCalledExactlyOnceWith({
+              number: 5,
+              platformPrOptions: expect.objectContaining({
+                usePlatformAutomerge: false,
+              }),
             });
-
-            const result = await branchWorker.processBranch(config);
-
-            expect(result.result).toBe(branchExists ? 'done' : 'pr-created');
-            expect(
-              platform.cancelPlatformAutomerge,
-            ).toHaveBeenCalledExactlyOnceWith({ number: 5 });
             expect(
               platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
             ).toBeLessThan(
               commit.commitFilesToBranch.mock.invocationCallOrder[0],
             );
-            expect(prWorker.ensurePr).toHaveBeenCalledWith(
-              expect.objectContaining({
-                automerge: false,
-                newVersion: '4.1.11',
-              }),
-            );
-            expect(git.getFile).toHaveBeenCalledTimes(branchExists ? 1 : 0);
+            for (const [options] of platform.reattemptPlatformAutomerge.mock
+              .calls) {
+              expect(
+                options.platformPrOptions?.usePlatformAutomerge,
+              ).toBeFalse();
+            }
           },
         );
 
-        it.each`
-          manager   | depType               | packageFile
-          ${'npm'}  | ${'peerDependencies'} | ${'package.json'}
-          ${'deno'} | ${'imports'}          | ${'deno.json'}
-        `(
-          'refreshes a reconciled mixed group with $manager $depType',
-          async ({ manager, depType, packageFile }) => {
-            config.upgrades.push({
-              ...config.upgrades[0],
-              manager,
-              depType,
-              packageFile,
-            });
-            git.getFile.mockResolvedValue(
-              '{"devDependencies":{"vitest":"4.1.11"}}',
-            );
+        it.each([true, false])(
+          'continues without a cancellation API, automerge=%s',
+          async (automerge) => {
+            config.automerge = automerge;
             const optionalPlatform: Platform = platform;
             const cancel = platform.cancelPlatformAutomerge;
             optionalPlatform.cancelPlatformAutomerge = undefined;
-
             try {
               const result = await branchWorker.processBranch(config);
 
@@ -1409,277 +1380,71 @@ describe('workers/repository/update/branch/index', () => {
           },
         );
 
-        it.each`
-          cancellation     | reuseExistingBranch | forceRebase
-          ${'unsupported'} | ${false}            | ${false}
-          ${'unsupported'} | ${true}             | ${false}
-          ${'unsupported'} | ${false}            | ${true}
-          ${'supported'}   | ${false}            | ${false}
-          ${'supported'}   | ${true}             | ${false}
-          ${'supported'}   | ${false}            | ${true}
-        `(
-          'refreshes an already reconciled PR with $cancellation cancellation, reuse=$reuseExistingBranch and forceRebase=$forceRebase',
-          async ({ cancellation, reuseExistingBranch, forceRebase }) => {
-            scm.branchExists.mockResolvedValueOnce(false);
-            platform.getBranchPr.mockResolvedValueOnce(null);
-            getUpdated.getUpdatedPackageFiles
-              .mockReset()
-              .mockResolvedValue({ ...updatedPackageFiles });
-            let committedManifest: string | null = null;
-            commit.commitFilesToBranch.mockImplementation((branch) => {
-              committedManifest = findFileContent(
-                branch.updatedPackageFiles,
-                'package.json',
-              );
-              return Promise.resolve(commitSha);
-            });
-            git.getFile.mockImplementation((path, branchName) =>
-              Promise.resolve(
-                path === 'package.json' && branchName === config.branchName
-                  ? committedManifest
-                  : null,
-              ),
-            );
-            const cancel = platform.cancelPlatformAutomerge;
-            cancel.mockResolvedValue({
-              cancelled: false,
-              reason:
-                cancellation === 'unchanged' ? 'unchanged' : 'unconfirmed',
-            });
-            const optionalPlatform: Platform = platform;
-            if (cancellation === 'unsupported') {
-              optionalPlatform.cancelPlatformAutomerge = undefined;
-            }
+        it('does not cancel when platform automerge was already disabled', async () => {
+          config.automerge = false;
 
-            try {
-              const first = await branchWorker.processBranch(config);
-              config.reuseExistingBranch = reuseExistingBranch;
-              config.cacheFingerprintMatch = reuseExistingBranch
-                ? 'matched'
-                : 'no-fingerprint';
-              const second = await branchWorker.processBranch(
-                config,
-                forceRebase,
-              );
+          await branchWorker.processBranch(config);
 
-              expect(first.result).toBe('pr-created');
-              expect(second.result).toBe('done');
-              expect(committedManifest).toBe(
-                '{"devDependencies":{"vitest":"4.1.11"}}',
-              );
-              expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(2);
-              expect(prWorker.ensurePr).toHaveBeenCalledTimes(2);
-              expect(prWorker.ensurePr).toHaveBeenLastCalledWith(
-                expect.objectContaining({
-                  newVersion: '4.1.11',
-                  prTitle: 'Update dependency vitest to v4.1.11',
-                  automerge: false,
-                }),
-              );
-              expect(config.upgrades[0].newVersion).toBe('5.0.0');
-              expect(cancel).not.toHaveBeenCalled();
-            } finally {
-              optionalPlatform.cancelPlatformAutomerge = cancel;
-            }
-          },
-        );
+          expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
+          expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
+        });
 
-        it('retries branch read failures without canceling automerge or committing', async () => {
+        it('preserves automerge across repeated reconciliation with ranged workspace targets', async () => {
           getUpdated.getUpdatedPackageFiles
             .mockReset()
             .mockResolvedValue({ ...updatedPackageFiles });
-          git.getFile
-            .mockRejectedValueOnce(new Error('spawn git EAGAIN'))
-            .mockResolvedValueOnce('{"devDependencies":{"vitest":"4.1.11"}}');
-
-          const failed = await branchWorker.processBranch(config);
-
-          expect(failed.result).toBe('error');
-          expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
-          expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
-
-          const retried = await branchWorker.processBranch(config);
-
-          expect(retried.result).toBe('done');
-          expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
-          expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
-        });
-
-        it('cancels when the Vite+ target changes but the reconciled Vitest target does not', async () => {
+          config.upgrades[0].updateType = 'major';
+          config.upgrades[0].isBreaking = true;
           config.upgrades.push({
             ...config.upgrades[0],
-            depName: 'vite-plus',
-            packageName: 'vite-plus',
-            newValue: '0.4.0',
-            newVersion: '0.4.0',
+            packageFile: 'other/package.json',
+            currentValue: '^4',
+            newValue: '^4.2.0',
+            newVersion: '4.2.0',
           });
-          git.getFile.mockResolvedValue(
-            '{"devDependencies":{"vitest":"4.1.11","vite-plus":"0.3.0"}}',
-          );
-          const reconcile =
-            npmPostExtract.getAdditionalFiles.getMockImplementation()!;
-          npmPostExtract.getAdditionalFiles.mockImplementationOnce(
-            async (branch, packageFiles) => {
-              const result = await reconcile(branch, packageFiles);
-              branch.updatedPackageFiles = [
-                {
-                  type: 'addition',
-                  path: 'package.json',
-                  contents:
-                    '{"devDependencies":{"vitest":"4.1.11","vite-plus":"0.4.0"}}',
-                },
-              ];
-              return result;
-            },
-          );
-          platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-            cancelled: true,
-          });
+          git.getFile.mockResolvedValue('{"devDependencies":{"vitest":"^4"}}');
 
-          const result = await branchWorker.processBranch(config);
+          await branchWorker.processBranch(config);
+          await branchWorker.processBranch(config);
 
-          expect(result.result).toBe('done');
-          expect(
-            platform.cancelPlatformAutomerge,
-          ).toHaveBeenCalledExactlyOnceWith({ number: 5 });
-          expect(
-            platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
-          ).toBeLessThan(
-            commit.commitFilesToBranch.mock.invocationCallOrder[0],
+          expect(prWorker.ensurePr).toHaveBeenCalledTimes(2);
+          expect(prWorker.ensurePr).toHaveBeenLastCalledWith(
+            expect.objectContaining({ automerge: true }),
           );
+          expect(git.getFile).not.toHaveBeenCalled();
         });
 
-        it('reconciles targets and cancels automerge when the branch fingerprint matches', async () => {
+        it('reconciles when the branch fingerprint matches', async () => {
           config.reuseExistingBranch = true;
           config.cacheFingerprintMatch = 'matched';
-          platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-            cancelled: true,
-          });
           getUpdated.getUpdatedPackageFiles
             .mockReset()
-            .mockResolvedValueOnce({ ...updatedPackageFiles });
-          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
-            Object.assign(branch.upgrades[0], {
-              newValue: '4.1.11',
-              newVersion: '4.1.11',
-              newMajor: 4,
-              newMinor: 1,
-              newPatch: 11,
-              updateType: 'patch',
-              isBreaking: false,
-            });
-            return Promise.resolve({
-              artifactErrors: [],
-              updatedArtifacts: [],
-            });
-          });
-          commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
-          const result = await branchWorker.processBranch(config);
-
-          expect(result.result).toBe('done');
-          expect(npmPostExtract.getAdditionalFiles).toHaveBeenCalledTimes(1);
-          expect(
-            platform.cancelPlatformAutomerge,
-          ).toHaveBeenCalledExactlyOnceWith({ number: 5 });
-          expect(prWorker.ensurePr).toHaveBeenCalledWith(
-            expect.objectContaining({
-              newVersion: '4.1.11',
-              automerge: false,
-              prTitle: 'Update dependency vitest to v4.1.11',
-            }),
-          );
-        });
-
-        it.each(['unsupported', 'unconfirmed', 'unchanged'] as const)(
-          'blocks commits and retries when cancellation is %s',
-          async (cancellation) => {
-            config.reuseExistingBranch = true;
-            config.cacheFingerprintMatch = 'no-fingerprint';
-            getUpdated.getUpdatedPackageFiles
-              .mockReset()
-              .mockResolvedValue({ ...updatedPackageFiles });
-            const cancel = platform.cancelPlatformAutomerge;
-            cancel.mockResolvedValue({
-              cancelled: false,
-              reason: 'unconfirmed',
-            });
-            const optionalPlatform: Platform = platform;
-            if (cancellation === 'unsupported') {
-              optionalPlatform.cancelPlatformAutomerge = undefined;
-            }
-
-            try {
-              const result = await branchWorker.processBranch(config);
-
-              expect(result).toEqual({
-                branchExists: true,
-                prNo: 5,
-                result: 'error',
+            .mockResolvedValue({ ...updatedPackageFiles });
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce(
+            async (branch) => {
+              Object.assign(branch.upgrades[0], {
+                newValue: '4.1.11',
+                newVersion: '4.1.11',
+                updateType: 'patch',
               });
-              expect(logger.warn).toHaveBeenCalledWith(
-                { prNo: 5 },
-                'Cannot confirm platform automerge is disabled after version reconciliation',
-              );
-              expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(
-                1,
-              );
-              expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
-              expect(prWorker.ensurePr).not.toHaveBeenCalled();
-              expect(cancel).toHaveBeenCalledTimes(
-                cancellation === 'unsupported' ? 0 : 1,
-              );
-            } finally {
-              optionalPlatform.cancelPlatformAutomerge = cancel;
-            }
-          },
-        );
-
-        it('does not cancel for unchanged targets', async () => {
-          npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-            artifactErrors: [],
-            updatedArtifacts: [],
-          });
+              return Promise.resolve({
+                artifactErrors: [],
+                updatedArtifacts: [],
+              });
+            },
+          );
 
           await branchWorker.processBranch(config);
 
+          expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(1);
           expect(
             platform.cancelPlatformAutomerge,
           ).toHaveBeenCalledExactlyOnceWith({
             number: 5,
             platformPrOptions: expect.objectContaining({
-              usePlatformAutomerge: true,
+              usePlatformAutomerge: false,
             }),
           });
-          expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
-        });
-
-        it('does not cancel when pruning leaves the selected target unchanged', async () => {
-          config.upgrades.push({
-            ...config.upgrades[0],
-            depName: '@vitest/coverage-v8',
-            packageName: '@vitest/coverage-v8',
-          });
-          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
-            branch.upgrades[1].newValue = branch.upgrades[1].currentValue!;
-            branch.upgrades[1].newVersion = branch.upgrades[1].currentVersion;
-            return Promise.resolve({
-              artifactErrors: [],
-              updatedArtifacts: [],
-            });
-          });
-
-          await branchWorker.processBranch(config);
-
-          expect(
-            platform.cancelPlatformAutomerge,
-          ).toHaveBeenCalledExactlyOnceWith({
-            number: 5,
-            platformPrOptions: expect.objectContaining({
-              usePlatformAutomerge: true,
-            }),
-          });
-          expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
         });
 
         it('does not cancel or push in dry-run', async () => {
@@ -1695,44 +1460,8 @@ describe('workers/repository/update/branch/index', () => {
           expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
           expect(scm.commitAndPush).not.toHaveBeenCalled();
           expect(logger.info).toHaveBeenCalledWith(
-            'DRY-RUN: Would cancel platform automerge for PR #5',
+            'DRY-RUN: Would check platform automerge for PR #5',
           );
-        });
-
-        it.each([TEMPORARY_ERROR, REPOSITORY_CHANGED])(
-          'propagates cancellation failure %s',
-          async (message) => {
-            platform.cancelPlatformAutomerge.mockRejectedValueOnce(
-              new Error(message),
-            );
-
-            await expect(branchWorker.processBranch(config)).rejects.toThrow(
-              message,
-            );
-
-            expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
-            expect(prWorker.ensurePr).not.toHaveBeenCalled();
-          },
-        );
-
-        it('reports other cancellation exceptions as branch errors', async () => {
-          const error = new Error('cancellation failed');
-          platform.cancelPlatformAutomerge.mockRejectedValueOnce(error);
-
-          const result = await branchWorker.processBranch(config);
-
-          expect(result).toEqual({
-            branchExists: true,
-            prNo: 5,
-            result: 'error',
-            commitSha: null,
-          });
-          expect(logger.warn).toHaveBeenCalledWith(
-            { err: error },
-            'Error updating branch',
-          );
-          expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
-          expect(prWorker.ensurePr).not.toHaveBeenCalled();
         });
       });
 
