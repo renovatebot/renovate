@@ -45,7 +45,7 @@ workflows:
         - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
     '.github/workflows/dependency-review.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294'
+        - 'actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec'
     '.github/workflows/devcontainer.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca'
@@ -95,9 +95,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294':
-        ref: 'v5.0.0'
-        commit: 'sha1-a1d282b36b6f3519aa1f3fc636f609c47dddb294'
+    'actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec':
+        ref: 'v5.0.1'
+        commit: 'sha1-bbc44d14a204704ccc493733616cd1e93a0321ec'
         owner_id: 44036562
         repo_id: 476372928
     'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346':
