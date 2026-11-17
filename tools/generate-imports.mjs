@@ -20,9 +20,10 @@ if (!(await fs.pathExists('data'))) {
  * @param {string} code
  */
 async function updateFile(file, code) {
-  const oldCode = (await fs.pathExists(file))
-    ? await fs.readFile(file, 'utf8')
-    : null;
+  let oldCode = null;
+  if (await fs.pathExists(file)) {
+    oldCode = await fs.readFile(file, 'utf8');
+  }
   if (code !== oldCode) {
     await fs.writeFile(file, code);
   }

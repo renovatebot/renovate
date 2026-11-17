@@ -272,7 +272,7 @@ function getToolConfig(
       // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
       const backends = getOrderedMiseRegistryBackends(toolName);
 
-      // prioritise the github backend as the best source for data
+      // prioritize the github backend as the best source for data
       if (backends.github) {
         const result = getToolConfig(
           'github',
@@ -368,11 +368,10 @@ function getConfigFromTooling(
     return null;
   } // Return null if no toolDefinition is found
 
-  return (
-    (isFunction(toolDefinition.config)
-      ? toolDefinition.config(version)
-      : toolDefinition.config) ?? null
-  ); // Ensure null is returned instead of undefined
+  const config = isFunction(toolDefinition.config)
+    ? toolDefinition.config(version)
+    : toolDefinition.config;
+  return config ?? null; // Ensure null is returned instead of undefined
 }
 
 function getLtsDatasource(
