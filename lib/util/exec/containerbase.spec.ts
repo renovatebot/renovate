@@ -420,6 +420,40 @@ describe('util/exec/containerbase', () => {
       ).resolves.toBe('11.0.0');
     });
 
+    it.each`
+      toolName    | parent      | parentVersion  | constraints
+      ${'pdm'}    | ${'python'} | ${'3.12.4'}    | ${['>=3.13', '>=3.9']}
+      ${'elixir'} | ${'erlang'} | ${'26.2.5.16'} | ${['>=27.0.0', '>=25.0.0 <28.0.0']}
+    `(
+      'filters $toolName by the $parent versioning',
+      async ({ toolName, parent, parentVersion, constraints }) => {
+        const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+          '../../modules/datasource/index.ts',
+        );
+        datasource.getPkgReleases.mockImplementation(getPkgReleases);
+        httpMock
+          .scope('https://containerbase.github.io/tool-versions')
+          .get('/index.json')
+          .reply(404)
+          .get(`/v1/${toolName}.json`)
+          .reply(200, {
+            $schema:
+              'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+            tool: toolName,
+            updatedAt: '2026-11-17T03:00:00.000Z',
+            versions: [
+              { version: '2.0.0', constraints: { [parent]: constraints[0] } },
+              { version: '1.0.0', constraints: { [parent]: constraints[1] } },
+              { version: '0.9.0' },
+            ],
+          });
+
+        await expect(
+          resolveConstraint({ toolName }, { [parent]: parentVersion }),
+        ).resolves.toBe('1.0.0');
+      },
+    );
+
     it('resolves rust nightlies with the containerbase datasource', async () => {
       const { getPkgReleases } = await vi.importActual<typeof _datasource>(
         '../../modules/datasource/index.ts',
@@ -565,6 +599,7 @@ describe('util/exec/containerbase', () => {
         versioning: 'npm',
         constraintsFiltering: 'strict',
         constraints: { node: '20.17.0', containerbase: containerbase.version },
+        constraintsVersioning: { node: 'node' },
       });
     });
 

@@ -309,11 +309,20 @@ async function getPkgReleases(
   const containerbase: Partial<Record<ConstraintName, string>> =
     isReleaseVersion(packageVersion) ? { containerbase: packageVersion } : {};
   if (Object.keys(resolvedTools).length) {
+    // each resolved tool is compared with its own versioning, like a python
+    // version with `>=3.10`, not with the versioning of the looked up tool
+    const constraintsVersioning: Partial<Record<ConstraintName, string>> = {};
+    for (const name of Object.keys(resolvedTools)) {
+      if (isToolName(name) && allToolConfig[name]) {
+        constraintsVersioning[name] = allToolConfig[name].versioning;
+      }
+    }
     // drop releases whose runtime constraints (e.g. `engines.node`) exclude the runtime versions we install
     const compatible = await getPkgReleases({
       ...config,
       constraintsFiltering: 'strict',
       constraints: { ...resolvedTools, ...containerbase },
+      constraintsVersioning,
     });
     if (compatible?.releases.length) {
       return compatible;

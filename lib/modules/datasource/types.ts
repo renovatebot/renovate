@@ -4,10 +4,7 @@ import type {
 } from '../../config/types.ts';
 import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type { ModuleApi } from '../../types/index.ts';
-import type {
-  AdditionalConstraintName,
-  ConstraintName,
-} from '../../util/exec/types.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 
 /**
@@ -52,9 +49,11 @@ export interface GetReleasesConfig {
   currentValue?: string;
   constraints?: Partial<Record<ConstraintName, string>>;
   /**
-   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   * Any specific overrides for the versioning of a constraint. The repository
+   * config only allows `AdditionalConstraintName`s, util/exec sets the
+   * versioning of the tool constraints it resolves.
    */
-  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  constraintsVersioning?: Partial<Record<ConstraintName, string>>;
   constraintsFiltering?: ConstraintsFilter;
 }
 

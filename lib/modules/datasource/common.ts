@@ -275,7 +275,7 @@ export function applyConstraintsFiltering<
         ? getAdditionalConstraintVersioning(name)
         : undefined;
       let constraintVersioningName = additionalVersioningName ?? versioningName;
-      if (isAdditional && config.constraintsVersioning?.[name]) {
+      if (config.constraintsVersioning?.[name]) {
         const val = config.constraintsVersioning[name];
         logger.once.debug(
           { packageName: config.packageName, release },
