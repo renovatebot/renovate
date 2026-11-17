@@ -386,33 +386,23 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
-  // the branch config only takes its settings from the first upgrade, so also check the other upgrades for `executionMode=branch`
-  const [branchPostUpgradeTasks, ...otherBranchPostUpgradeTasks] = [
-    config,
-    ...config.upgrades,
-  ]
+  // the branch config only takes its settings from the first upgrade, so also check the other upgrades for `executionMode=branch`, only running identical tasks once
+  const branchPostUpgradeTasks = [config, ...config.upgrades]
     .map(({ postUpgradeTasks }) => postUpgradeTasks)
-    .filter((tasks) => tasks?.executionMode === 'branch');
-
-  const skippedCommands = otherBranchPostUpgradeTasks
-    .filter((tasks) => !dequal(tasks, branchPostUpgradeTasks))
-    .map((tasks) => tasks?.commands);
-  if (skippedCommands.length) {
-    logger.warn(
-      { branchName: config.branchName, skippedCommands },
-      'Skipping `postUpgradeTasks` with `executionMode=branch` that differ from the first one found',
+    .filter((tasks) => tasks?.executionMode === 'branch')
+    .filter(
+      (tasks, index, allTasks) =>
+        allTasks.findIndex((other) => dequal(other, tasks)) === index,
     );
-  }
 
-  const branchUpgradeCommands: BranchUpgradeConfig[] = [
-    {
+  const branchUpgradeCommands: BranchUpgradeConfig[] =
+    branchPostUpgradeTasks.map((postUpgradeTasks) => ({
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       constraints: config.constraints,
-      postUpgradeTasks: branchPostUpgradeTasks,
-    },
-  ];
+      postUpgradeTasks,
+    }));
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>

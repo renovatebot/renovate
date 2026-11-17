@@ -1209,7 +1209,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(res?.artifactErrors).toHaveLength(0);
     });
 
-    it('only executes the first executionMode=branch commands when multiple upgrades have them', async () => {
+    it('executes each distinct executionMode=branch commands when multiple upgrades have them', async () => {
       const config: BranchConfig = {
         manager: 'some-manager',
         updatedPackageFiles: [
@@ -1245,30 +1245,26 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         branchName: 'main',
         baseBranch: 'base',
       };
-      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
-      git.getRepoStatus.mockResolvedValueOnce(
+      exec.exec.mockResolvedValue({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
       );
       GlobalConfig.set({
         localDir: upath.join(tmpDir.path, 'local'),
         allowedCommands: ['first-command', 'second-command'],
       });
-      fs.localPathIsFile.mockResolvedValueOnce(true);
+      fs.localPathIsFile.mockResolvedValue(true);
 
       const res = await postUpgradeCommands.default(config);
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+      expect(exec.exec.mock.calls.map(([cmd]) => cmd)).toEqual([
         'first-command',
-        expect.anything(),
-      );
+        'second-command',
+      ]);
       expect(res?.artifactErrors).toHaveLength(0);
-      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { branchName: 'main', skippedCommands: [['second-command']] },
-        'Skipping `postUpgradeTasks` with `executionMode=branch` that differ from the first one found',
-      );
     });
 
-    it('does not warn when multiple upgrades have the same executionMode=branch commands', async () => {
+    it('only executes identical executionMode=branch commands once when multiple upgrades have them', async () => {
       const postUpgradeTasks = {
         commands: ['some-command'],
         fileFilters: ['**/*'],
@@ -1314,7 +1310,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         expect.anything(),
       );
       expect(res?.artifactErrors).toHaveLength(0);
-      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     it('does not execute branch-level commands when no upgrade has executionMode=branch', async () => {

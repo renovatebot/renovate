@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { fetchers } from '../../modules/datasource/custom/formats/index.ts';
+import { getDatasourceList } from '../../modules/datasource/index.ts';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { StringOrStringArrayOption } from '../../util/schema-utils/index.ts';
@@ -61,6 +62,20 @@ describe('config/options/index', () => {
         expect(option.supportedPlatforms).toBeNonEmptyArray();
         for (const item of option.supportedPlatforms!) {
           expect(platformList).toContain(item);
+        }
+      });
+  });
+
+  it('supportedDatasources should have valid names', () => {
+    const opts = getOptions();
+    const datasourceList = getDatasourceList();
+
+    opts
+      .filter((option) => option.supportedDatasources)
+      .forEach((option) => {
+        expect(option.supportedDatasources).toBeNonEmptyArray();
+        for (const item of option.supportedDatasources!) {
+          expect(datasourceList).toContain(item);
         }
       });
   });

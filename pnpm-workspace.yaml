@@ -23,7 +23,7 @@ catalog:
 overrides:
   esbuild: 'catalog:'
   katex@>=0.11.0 <0.18.2: 0.19.1
-  re2js@>=2.2.0 <2.8.7: 2.9.1
+  re2js@>=2.2.0 <2.8.7: 2.10.0
   vite: 'catalog:'
 
 ignoredOptionalDependencies:
