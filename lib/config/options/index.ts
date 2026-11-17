@@ -220,6 +220,7 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     experimental: true,
     advancedUse: true,
+    supportedDatasources: ['maven'],
   },
   {
     name: 'matchUrlPrefix',
