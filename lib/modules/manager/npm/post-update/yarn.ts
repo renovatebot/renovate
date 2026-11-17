@@ -157,7 +157,7 @@ export async function generateLockFile(
     let packageManagerDeclared =
       !!config.managerData?.hasPackageManager ||
       upgrades.some((upgrade) => !!upgrade.managerData?.hasPackageManager);
-    // dep-level managerData can shadow the flag (e.g. nested resolutions), see #25853
+    // only upgrades of the package file declaring `packageManager` carry the flag (not yarn workspace packages), see #25853
     if (!isYarn1 && !packageManagerDeclared) {
       packageManagerDeclared = await hasPackageManager(lockFileDir);
     }

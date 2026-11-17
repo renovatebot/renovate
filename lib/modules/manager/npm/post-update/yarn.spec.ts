@@ -908,7 +908,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe('package-lock-contents');
   });
 
-  it('supports corepack on grouping when only a later upgrade has the flag', async () => {
+  it('supports corepack on grouping when only the root package upgrade has the flag', async () => {
     vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
@@ -936,9 +936,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
       {
-        managerData: { key: 'some-dep/some-transitive-dep' },
+        packageFile: 'packages/a/package.json',
+        managerData: {},
       },
       {
+        packageFile: 'package.json',
         managerData: { hasPackageManager: true },
       },
     ]);
