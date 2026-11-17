@@ -76,7 +76,6 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       {
         ttlMinutes: 1440,
         namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-        public: true,
         key: buildCacheKey('findDigestFile', release.html_url, digest),
       },
       () => this._findDigestFile(release, digest),
@@ -100,7 +99,6 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       {
         ttlMinutes: 1440,
         namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-        public: true,
         key: buildCacheKey(
           'downloadAndDigest',
           asset.browser_download_url,
