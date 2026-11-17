@@ -126,8 +126,9 @@ export class ContainerbaseDatasource extends Datasource {
 
   /**
    * Reads the root index of the registry, `null` when it has none, or
-   * `undefined` when it can't be read. The index is optional, so errors don't
-   * fail the lookup, and `undefined` isn't cached, so the next lookup retries.
+   * `undefined` when the site can't be reached. The index is optional, so
+   * errors don't fail the lookup. A missing index is cached like any other
+   * result, `undefined` isn't, so the next lookup retries.
    */
   private fetchFormats(
     registryUrl: string,
@@ -145,7 +146,7 @@ export class ContainerbaseDatasource extends Datasource {
             { err, datasource: this.id, registryUrl },
             'Failed to read the containerbase root index',
           );
-          return undefined;
+          return isUnreachable(err) ? undefined : null;
         }
       },
     );

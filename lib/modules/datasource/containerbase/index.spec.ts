@@ -3,6 +3,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { ContainerbaseDatasource, defaultRegistryUrl } from './index.ts';
@@ -335,6 +336,34 @@ describe('modules/datasource/containerbase/index', () => {
       expect(res?.releases).toEqual([{ version: '10.0.0', isStable: true }]);
       expect(logger.once.warn).not.toHaveBeenCalled();
     });
+
+    it.each`
+      status | cached
+      ${404} | ${[null]}
+      ${403} | ${[null]}
+      ${500} | ${[]}
+      ${429} | ${[]}
+    `(
+      'caches $cached for a root index failing with $status',
+      async ({ status, cached }) => {
+        const setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(status)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, pnpm);
+
+        await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        const formats = setCache.mock.calls
+          .filter(([, key]) => key.includes('formats'))
+          .map(([, , record]) => record);
+        expect(formats).toEqual(
+          cached.map((value: unknown) => expect.objectContaining({ value })),
+        );
+      },
+    );
 
     it('ignores an invalid root index', async () => {
       httpMock
