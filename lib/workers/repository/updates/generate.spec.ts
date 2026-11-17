@@ -315,6 +315,22 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
+    it('disables automerge for a changed target without a current version', () => {
+      Object.assign(config.upgrades[0], {
+        currentVersion: undefined,
+        newValue: '4.1.11',
+        newVersion: '4.1.11',
+      });
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.upgrades[0]).toMatchObject({
+        updateType: 'minor',
+        automerge: false,
+      });
+      expect(config.automerge).toBeFalse();
+    });
+
     it.each(['branch', 'upgrade'] as const)(
       'does not enable disabled %s automerge',
       (disabled) => {

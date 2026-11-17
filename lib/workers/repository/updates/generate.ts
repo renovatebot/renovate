@@ -269,6 +269,7 @@ export function refreshBranchConfig(
     changed = true;
     const versioningApi = allVersioning.get(upgrade.versioning);
     const { currentVersion, newVersion } = upgrade;
+    let unclassified = false;
     if (newVersion && versioningApi.isVersion(newVersion)) {
       upgrade.newMajor = versioningApi.getMajor(newVersion)!;
       upgrade.newMinor = versioningApi.getMinor(newVersion)!;
@@ -288,12 +289,16 @@ export function refreshBranchConfig(
         upgrade.isBreaking = versioningApi.isBreaking
           ? versioningApi.isBreaking(currentVersion, newVersion)
           : upgrade.updateType === 'major';
+      } else {
+        unclassified = true;
       }
     }
     const previousRisk = updateRisk(previous?.updateType);
     const reconciledRisk = updateRisk(upgrade.updateType);
     const becameBreaking = upgrade.isBreaking && !previous?.isBreaking;
+    // without a current version, updateType is still lookup's and does not describe the new target
     if (
+      unclassified ||
       previousRisk === undefined ||
       reconciledRisk === undefined ||
       reconciledRisk > previousRisk ||
