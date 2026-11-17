@@ -4,7 +4,6 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { resolveConstraint } from '../../../util/exec/containerbase.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
@@ -36,27 +35,20 @@ const hexRepoOrgUrlRegex = regEx(
   `^https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
 );
 
-// https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
-const defaultErlangVersion = '22';
+// oldest erlang major containerbase provides
+const defaultErlangConstraint = '24';
 
-// highest supported erlang major per minimum elixir version, newest elixir first
-// TODO: replace once a datasource provides erlang constraints per elixir release
-const elixirErlangVersions = [
-  { elixir: '1.20.0', erlang: '29' },
-  { elixir: '1.19.0', erlang: '28' },
-  { elixir: '1.18.0', erlang: '27' },
-  { elixir: '1.17.0', erlang: '27' },
-  { elixir: '1.16.0', erlang: '26' },
-  { elixir: '1.15.0', erlang: '26' },
-  { elixir: '1.14.0', erlang: '25' },
-  { elixir: '1.13.4', erlang: '25' },
-  { elixir: '1.13.0', erlang: '24' },
-  { elixir: '1.12.0', erlang: '24' },
-  { elixir: '1.11.4', erlang: '24' },
-  { elixir: '1.11.0', erlang: '23' },
-  { elixir: '1.10.3', erlang: '23' },
-  { elixir: '1.10.0', erlang: '22' },
-  { elixir: '1.7.0', erlang: '22' },
+// supported erlang range per elixir minor, newest elixir first
+// https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
+// TODO: replace with the erlang constraints of the containerbase datasource
+const elixirErlangConstraints = [
+  { elixir: '1.20.x', erlang: '>=27 <30' },
+  { elixir: '1.19.x', erlang: '>=26 <29' },
+  { elixir: '1.18.x', erlang: '>=25 <28' },
+  { elixir: '1.17.x', erlang: '>=25 <28' },
+  { elixir: '1.16.x', erlang: '>=24 <27' },
+  { elixir: '1.15.x', erlang: '>=24 <27' },
+  { elixir: '1.14.x', erlang: '>=23 <26' },
 ];
 
 export async function updateArtifacts({
@@ -231,44 +223,35 @@ export async function updateArtifacts({
 }
 
 /**
- * Returns the erlang and elixir tool constraints, picking the erlang version from the resolved elixir version unless erlang is constrained.
+ * Returns the erlang and elixir tool constraints, taking erlang from the elixir constraint unless erlang is constrained.
  */
 async function getToolConstraints(
   config: UpdateArtifactsConfig,
 ): Promise<ToolConstraint[]> {
-  const erlangConstraint = await resolveToolConstraint(config, 'erlang');
   const elixirConstraint = await resolveToolConstraint(config, 'elixir');
-  const binarySource = GlobalConfig.get('binarySource');
-  const installsTools = binarySource === 'docker' || binarySource === 'install';
-
-  if (erlangConstraint || !installsTools) {
-    return [
-      {
-        toolName: 'erlang',
-        constraint: erlangConstraint ?? defaultErlangVersion,
-      },
-      { toolName: 'elixir', constraint: elixirConstraint },
-    ];
-  }
-
-  const elixirVersion = await resolveConstraint({
-    toolName: 'elixir',
-    constraint: elixirConstraint,
-  });
-  const erlangVersion =
-    elixirErlangVersions.find(({ elixir }) =>
-      semver.satisfies(elixirVersion, `>=${elixir}`, {
-        includePrerelease: true,
-      }),
-    )?.erlang ?? defaultErlangVersion;
-  logger.debug(
-    `Using erlang ${erlangVersion} for elixir ${elixirVersion} in mix artifacts`,
-  );
+  const erlangConstraint =
+    (await resolveToolConstraint(config, 'erlang')) ??
+    getErlangConstraint(elixirConstraint);
 
   return [
-    { toolName: 'erlang', constraint: erlangVersion },
-    { toolName: 'elixir', constraint: elixirVersion },
+    { toolName: 'erlang', constraint: erlangConstraint },
+    { toolName: 'elixir', constraint: elixirConstraint },
   ];
+}
+
+/**
+ * Returns the erlang range of the newest elixir minor within the elixir constraint, or the default erlang constraint.
+ */
+function getErlangConstraint(elixirConstraint: string | undefined): string {
+  const elixirRange = semver.validRange(elixirConstraint) ?? '*';
+  const erlangConstraint =
+    elixirErlangConstraints.find(({ elixir }) =>
+      semver.intersects(elixir, elixirRange, { includePrerelease: true }),
+    )?.erlang ?? defaultErlangConstraint;
+  logger.debug(
+    `Using erlang ${erlangConstraint} for elixir ${elixirConstraint} in mix artifacts`,
+  );
+  return erlangConstraint;
 }
 
 async function checkLockFileReadError(
