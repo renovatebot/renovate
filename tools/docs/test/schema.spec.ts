@@ -296,6 +296,20 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       ).toEqual(['must be equal to one of the allowed values']);
     });
 
+    it('allows every Containerbase tool Renovate supports in installTools', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { renovate: {}, npm: {} } },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { bogusTool: {} } },
+        }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
     it('rejects unknown keys in an option which only has its own children', () => {
       expect(
         schemaErrors(repoSchema, { toolSettings: { jvmMemory: 256 } }),

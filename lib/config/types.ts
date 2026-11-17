@@ -784,6 +784,11 @@ export interface RenovateOptionBase {
   supportedPlatforms?: PlatformId[];
 
   /**
+   * Datasources which support this option, leave undefined if all datasources support it.
+   */
+  supportedDatasources?: string[];
+
+  /**
    * Conditions that must be met for this option to be required.
    */
   requiredIf?: RenovateRequiredOption[];

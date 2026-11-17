@@ -542,6 +542,7 @@ Currently, this config option only works with these managers:
 
 - `cargo`
 - `helmv3`
+- `julia`
 - `npm`
 - `nuget`
 - `maven`
@@ -4484,6 +4485,8 @@ Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
 
+If multiple updates on the branch have different `postUpgradeTasks` with `executionMode=branch`, for instance when different `packageRules` match different files in the branch, each distinct set of tasks is executed once, in the order the updates appear in the branch.
+
 ### `postUpgradeTasks.fileFilters`
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -4532,6 +4535,32 @@ For example:
 
 !!! note
   The tool objects inside `installTools` currently do not expose any additional configurability.
+
+In the Renovate Docker image, `renovate-config-validator` runs the installed version when the `renovate` tool is installed, instead of the bundled one.
+The installed version comes from the matching `renovate` entry in [`constraints`](#constraints).
+Once installed, every later `renovate-config-validator` call in the same container, also for other repositories, uses that version.
+
+The `renovate` tool needs the Containerbase `node` tool.
+The full Renovate image has it, the slim image does not, so list `node` before `renovate`, as tools install in the order they are listed.
+
+```json title="Validating the config with the installed Renovate version"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["renovate"],
+      "postUpgradeTasks": {
+        "commands": [
+          "renovate-config-validator --no-global --strict --migrate renovate.json"
+        ],
+        "installTools": {
+          "node": {},
+          "renovate": {}
+        }
+      }
+    }
+  ]
+}
+```
 
 ### `postUpgradeTasks.workingDirTemplate`
 
