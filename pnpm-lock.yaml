@@ -573,7 +573,10 @@ importers:
         version: 3.0.3
       tsdown:
         specifier: 0.23.7
-        version: 0.23.7(oxc-resolver@11.24.2)(typescript@7.0.2)
+        version: 0.23.7(oxc-resolver@11.24.2)(tsrs@0.23.0-ts7.1.0-beta)(typescript@7.0.2)
+      tsrs:
+        specifier: 0.23.0-ts7.1.0-beta
+        version: 0.23.0-ts7.1.0-beta
       type-fest:
         specifier: 5.10.0
         version: 5.10.0
@@ -2414,6 +2417,52 @@ packages:
   '@thi.ng/zipper@2.1.181':
     resolution: {integrity: sha512-hNnVHHGjZziANFqIVokVIIHvSfr7ICZhLEWr5Azo/DCEFb+k6/u2Pi9esHFoC+8HNu5kIHRDW5J8eKNwab1fIA==}
     engines: {node: '>=18'}
+
+  '@tsrs/darwin-arm64@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-Bk1aFZRo4d4RKtOU8OEVLXWZ7E0JqnL8xKhOb+FuvRRb9Qxu5UIgD0W3xiGvixzZ99I7f8Bj/NCTN30xX7MkEA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@tsrs/darwin-x64@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-asvC3hDKmRHjgfrr3o+bGVxhdPA5xfLCwcpfhIW4MCLcutBA8nltb4chtWRfEWsnKVimxtNvjnP0XldhgnJtkw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@tsrs/linux-arm64-gnu@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-5Uhhvo7q5b5Xwv11uLCDcPBlzTvNcsDtog05eK5lsS8763BioGuKobYtmsBPQU6KyowzRv4GoocqSePd5yaEJw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tsrs/linux-arm64-musl@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-v5vZCEec88vACtPHRPKie9JziE+X77VCNj/dNhj/buGAJwUZW2MMaQjJxKiSY4VwVo302kRfKKATyPljD23U6Q==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@tsrs/linux-x64-gnu@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-QJTJkk5XhkZSU/LBvjeFPpfRLDuICJbS9ij6q2rBy/Olw4T8WN7DGiE8ig687gI2dfnzlfScZsJYFtK2+CngnA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tsrs/linux-x64-musl@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-cOW2i9W+ybOABvrmJpd8fI+Cbm5ej0unCSYBRyFAE0FLnQyuQT0+7vdNkrJn4QjaK62OS99vknW56/DfCcRrMA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@tsrs/win32-x64@0.23.0-ts7.1.0-beta':
+    resolution: {integrity: sha512-Af9+bfGuTHtp41AOkWMmkQlWYPYvp3hvdw6dCRI6IlLdy4/5AqaJaFjDoCUTLJMojNjJjC4Ux/GhE2+CRoIomg==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [win32]
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -5711,6 +5760,11 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  tsrs@0.23.0-ts7.1.0-beta:
+    resolution: {integrity: sha512-A7UU5bUA8caDkidkMfrfeF4etU92ODZxasCqIb1eaJ36+BAZgyZ6Znq7NVu/c1HFG57E6la/TeofpZhPdgmLBw==}
+    engines: {node: '>=16.20.0'}
+    hasBin: true
+
   tunnel@0.0.6:
     resolution: {integrity: sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==}
     engines: {node: '>=0.6.11 <=0.7.0 || >=0.7.3'}
@@ -7849,6 +7903,27 @@ snapshots:
       '@thi.ng/arrays': 2.14.26
       '@thi.ng/checks': 3.11.1
       '@thi.ng/errors': 2.6.17
+
+  '@tsrs/darwin-arm64@0.23.0-ts7.1.0-beta':
+    optional: true
+
+  '@tsrs/darwin-x64@0.23.0-ts7.1.0-beta':
+    optional: true
+
+  '@tsrs/linux-arm64-gnu@0.23.0-ts7.1.0-beta':
+    optional: true
+
+  '@tsrs/linux-arm64-musl@0.23.0-ts7.1.0-beta':
+    optional: true
+
+  '@tsrs/linux-x64-gnu@0.23.0-ts7.1.0-beta':
+    optional: true
+
+  '@tsrs/linux-x64-musl@0.23.0-ts7.1.0-beta':
+    optional: true
+
+  '@tsrs/win32-x64@0.23.0-ts7.1.0-beta':
+    optional: true
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
@@ -10916,7 +10991,7 @@ snapshots:
       semver-compare: 1.0.0
       sprintf-js: 1.1.3
 
-  rolldown-plugin-dts@0.30.0(oxc-resolver@11.24.2)(rolldown@1.3.0)(typescript@7.0.2):
+  rolldown-plugin-dts@0.30.0(oxc-resolver@11.24.2)(rolldown@1.3.0)(tsrs@0.23.0-ts7.1.0-beta)(typescript@7.0.2):
     dependencies:
       dts-resolver: 3.0.0(oxc-resolver@11.24.2)
       get-tsconfig: 5.0.0-beta.6
@@ -10924,6 +10999,7 @@ snapshots:
       rolldown: 1.3.0
       yuku: 0.27.0
     optionalDependencies:
+      tsrs: 0.23.0-ts7.1.0-beta
       typescript: 7.0.2
     transitivePeerDependencies:
       - '@yuku-toolchain/wasm'
@@ -11343,7 +11419,7 @@ snapshots:
     optionalDependencies:
       typescript: 7.0.2
 
-  tsdown@0.23.7(oxc-resolver@11.24.2)(typescript@7.0.2):
+  tsdown@0.23.7(oxc-resolver@11.24.2)(tsrs@0.23.0-ts7.1.0-beta)(typescript@7.0.2):
     dependencies:
       cac: 7.1.0
       defu: 6.1.7
@@ -11353,7 +11429,7 @@ snapshots:
       obug: 3.0.0
       picomatch: 4.0.7
       rolldown: 1.3.0
-      rolldown-plugin-dts: 0.30.0(oxc-resolver@11.24.2)(rolldown@1.3.0)(typescript@7.0.2)
+      rolldown-plugin-dts: 0.30.0(oxc-resolver@11.24.2)(rolldown@1.3.0)(tsrs@0.23.0-ts7.1.0-beta)(typescript@7.0.2)
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyps: 0.5.1
@@ -11370,6 +11446,16 @@ snapshots:
       - vue-tsc
 
   tslib@2.8.1: {}
+
+  tsrs@0.23.0-ts7.1.0-beta:
+    optionalDependencies:
+      '@tsrs/darwin-arm64': 0.23.0-ts7.1.0-beta
+      '@tsrs/darwin-x64': 0.23.0-ts7.1.0-beta
+      '@tsrs/linux-arm64-gnu': 0.23.0-ts7.1.0-beta
+      '@tsrs/linux-arm64-musl': 0.23.0-ts7.1.0-beta
+      '@tsrs/linux-x64-gnu': 0.23.0-ts7.1.0-beta
+      '@tsrs/linux-x64-musl': 0.23.0-ts7.1.0-beta
+      '@tsrs/win32-x64': 0.23.0-ts7.1.0-beta
 
   tunnel@0.0.6: {}
 
