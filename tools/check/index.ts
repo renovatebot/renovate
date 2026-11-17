@@ -78,7 +78,7 @@ const OTHER_CHECKS = [
   'lint-documentation',
   'lint-other',
   'test-schema',
-  'type-check',
+  'type-check:tsrs',
 ].map(pnpmScript);
 
 function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
