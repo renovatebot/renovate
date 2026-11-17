@@ -19,6 +19,7 @@ import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
 import { compile } from '../template/index.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
+import { hostRuleHasCredentials } from '../url-replacements.ts';
 import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
@@ -37,10 +38,7 @@ import type {
   HttpResponse,
   SafeJsonError,
 } from './types.ts';
-import {
-  applyUrlReplacements,
-  hostRuleHasCredentials,
-} from './url-replacements.ts';
+import { applyUrlReplacements } from './url-replacements.ts';
 import { copyResponse } from './util.ts';
 
 export interface InternalJsonUnsafeOptions<

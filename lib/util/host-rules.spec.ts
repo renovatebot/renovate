@@ -14,10 +14,12 @@ import {
   findDetachedCredentials,
   getAll,
   getDetachedCredentialsHash,
+  getRevision,
   hasDetachedCredentials,
   hostType,
   hosts,
   matchesHost,
+  someRule,
   usesGithubUrlFallback,
 } from './host-rules.ts';
 import { redactedFields, sanitize } from './sanitize.ts';
@@ -2405,6 +2407,32 @@ describe('util/host-rules', () => {
       add(hostRule1);
       add(hostRule2);
       expect(getAll()).toMatchObject([hostRule1, hostRule2]);
+    });
+  });
+
+  describe('getRevision()', () => {
+    it('changes when a rule is added or the rules are cleared', () => {
+      const initial = getRevision();
+
+      add({ matchHost: 'example.com', timeout: 1000 });
+      const added = getRevision();
+      clear();
+      const cleared = getRevision();
+
+      expect(added).not.toBe(initial);
+      expect(cleared).not.toBe(added);
+    });
+  });
+
+  describe('someRule()', () => {
+    it('includes the rules registered for url credentials', () => {
+      add({ matchHost: 'example.com', timeout: 1000 });
+      detachUrlCredentials('https://user:0123456789abcdef@example.com/repo/', [
+        'maven',
+      ]);
+
+      expect(someRule((rule) => rule.username === 'user')).toBeTrue();
+      expect(someRule((rule) => rule.token === 'token')).toBeFalse();
     });
   });
 

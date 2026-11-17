@@ -3,14 +3,17 @@ import {
   type UrlPrefixRule,
   replaceUrlPrefix,
 } from '@renovatebot/base-image';
-import { isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
 import type { UrlReplacement } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import { coerceObject } from '../object.ts';
 import { parseUrl } from '../url.ts';
-import { getUrlReplacements } from '../url-replacements.ts';
+import {
+  getUrlReplacements,
+  hostRuleHasCredentials,
+} from '../url-replacements.ts';
 import { credentialHeaders } from './host-guard.ts';
 import { type HostRulesGotOptions, findMatchingRule } from './host-rules.ts';
 
@@ -83,19 +86,6 @@ function optionsHaveCredentials(options: HostRulesGotOptions): boolean {
     [options.token, options.username, options.password].some(
       isNonEmptyString,
     ) || hasCredentialHeader(options.headers)
-  );
-}
-
-/**
- * Returns whether the host rule carries credentials which a request would send, a client certificate or key, or any header.
- */
-export function hostRuleHasCredentials(hostRule: HostRule): boolean {
-  return (
-    hostRule.password !== undefined ||
-    [hostRule.token, hostRule.httpsCertificate, hostRule.httpsPrivateKey].some(
-      isNonEmptyString,
-    ) ||
-    isNonEmptyObject(hostRule.headers)
   );
 }
 

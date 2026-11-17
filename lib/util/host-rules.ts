@@ -72,6 +72,11 @@ export interface CombinedHostRuleWithTrustedHeaders extends CombinedHostRule {
 let hostRules: RegisteredHostRule[] = [];
 
 /**
+ * Changes whenever a host rule is added or the host rules are cleared.
+ */
+let revision = 0;
+
+/**
  * The credentials of a host rule registered by {@link detachUrlCredentials}.
  */
 interface DetachedCredentials {
@@ -262,6 +267,7 @@ function register(
     });
   }
   hostRules.push(rule);
+  revision += 1;
   return rule;
 }
 
@@ -885,6 +891,22 @@ export function find(
   return res;
 }
 
+/**
+ * Returns a number which changes whenever a host rule is added or the host rules are cleared.
+ */
+export function getRevision(): number {
+  return revision;
+}
+
+/**
+ * Returns whether `predicate` holds for any host rule, including those registered by {@link detachUrlCredentials}.
+ */
+export function someRule(
+  predicate: (rule: Readonly<HostRule>) => boolean,
+): boolean {
+  return hostRules.some((rule) => predicate(rule));
+}
+
 // the functions below leave out the rules registered by `detachUrlCredentials()`, which apply only to the requests `find()` is searched for
 
 export function hosts({ hostType }: { hostType: string }): string[] {
@@ -921,6 +943,7 @@ export function getAll(): HostRule[] {
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
+  revision += 1;
   detachedCredentials = [];
   detachedRules = new WeakSet();
   sanitize.clearRepoSanitizedSecretsList();

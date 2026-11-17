@@ -1,6 +1,13 @@
-import { isArray, isString, isUndefined } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import type { UrlReplacement } from '../config/types.ts';
 import { logger } from '../logger/index.ts';
+import type { HostRule } from '../types/index.ts';
 import { coerceArray } from './array.ts';
 import { isHttpUrlPrefix } from './url.ts';
 
@@ -77,4 +84,17 @@ export function getUrlReplacements(
     );
     return false;
   });
+}
+
+/**
+ * Returns whether the host rule carries credentials which a request would send, a client certificate or key, or any header.
+ */
+export function hostRuleHasCredentials(hostRule: HostRule): boolean {
+  return (
+    hostRule.password !== undefined ||
+    [hostRule.token, hostRule.httpsCertificate, hostRule.httpsPrivateKey].some(
+      isNonEmptyString,
+    ) ||
+    isNonEmptyObject(hostRule.headers)
+  );
 }

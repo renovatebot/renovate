@@ -2,11 +2,28 @@ import { logger } from '~test/util.ts';
 import type { UrlReplacement } from '../config/types.ts';
 import {
   getUrlReplacements,
+  hostRuleHasCredentials,
   isChainedUrlReplacement,
   isValidUrlReplacement,
 } from './url-replacements.ts';
 
 describe('util/url-replacements', () => {
+  describe('hostRuleHasCredentials', () => {
+    it.each`
+      name                       | rule                                   | expected
+      ${'token'}                 | ${{ token: 'secret' }}                 | ${true}
+      ${'empty password'}        | ${{ password: '' }}                    | ${true}
+      ${'client certificate'}    | ${{ httpsCertificate: 'cert' }}        | ${true}
+      ${'client private key'}    | ${{ httpsPrivateKey: 'key' }}          | ${true}
+      ${'header'}                | ${{ headers: { 'X-Api-Key': 'key' } }} | ${true}
+      ${'certificate authority'} | ${{ httpsCertificateAuthority: 'ca' }} | ${false}
+      ${'username'}              | ${{ username: 'user' }}                | ${false}
+      ${'timeout'}               | ${{ timeout: 1000 }}                   | ${false}
+    `('is $expected for a $name', ({ rule, expected }) => {
+      expect(hostRuleHasCredentials(rule)).toBe(expected);
+    });
+  });
+
   describe('isValidUrlReplacement', () => {
     it.each`
       matchUrlPrefix                 | replaceUrlPrefix                 | matchHostTypes | expected

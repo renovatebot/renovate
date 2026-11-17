@@ -3,10 +3,7 @@ import { GlobalConfig } from '../../config/global.ts';
 import * as hostRules from '../host-rules.ts';
 import { parseUrl } from '../url.ts';
 import * as urlReplacementsModule from '../url-replacements.ts';
-import {
-  applyUrlReplacements,
-  hostRuleHasCredentials,
-} from './url-replacements.ts';
+import { applyUrlReplacements } from './url-replacements.ts';
 
 const mavenCentral = 'https://repo.maven.apache.org/maven2/';
 const mirror = 'https://mirror.example.com/maven-public/';
@@ -282,22 +279,6 @@ describe('util/http/url-replacements', () => {
           }).toString(),
         ).toBe(`${mirror}org/example/foo/maven-metadata.xml`);
       });
-    });
-  });
-
-  describe('hostRuleHasCredentials', () => {
-    it.each`
-      name                       | rule                                   | expected
-      ${'token'}                 | ${{ token: 'secret' }}                 | ${true}
-      ${'empty password'}        | ${{ password: '' }}                    | ${true}
-      ${'client certificate'}    | ${{ httpsCertificate: 'cert' }}        | ${true}
-      ${'client private key'}    | ${{ httpsPrivateKey: 'key' }}          | ${true}
-      ${'header'}                | ${{ headers: { 'X-Api-Key': 'key' } }} | ${true}
-      ${'certificate authority'} | ${{ httpsCertificateAuthority: 'ca' }} | ${false}
-      ${'username'}              | ${{ username: 'user' }}                | ${false}
-      ${'timeout'}               | ${{ timeout: 1000 }}                   | ${false}
-    `('is $expected for a $name', ({ rule, expected }) => {
-      expect(hostRuleHasCredentials(rule)).toBe(expected);
     });
   });
 });
