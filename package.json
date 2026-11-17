@@ -64,6 +64,7 @@
     "schedule-test-shards": "SCHEDULE_TEST_SHARDS=true node tools/test-shards.ts",
     "tsc": "tsc",
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
+    "type-check:tsrs": "run-s 'generate:*' && tsrs --noEmit",
     "update-static-data": "node tools/static-data/update.ts"
   },
   "repository": {
@@ -322,7 +323,7 @@
     "graphql": "17.1.0",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
-    "knip": "6.44.2",
+    "knip": "6.45.0",
     "lint-staged": "17.6.0",
     "markdownlint-cli2": "0.24.0",
     "markdownlint-cli2-formatter-template": "0.0.4",
@@ -336,6 +337,7 @@
     "semantic-release": "25.0.9",
     "tmp-promise": "3.0.3",
     "tsdown": "0.23.7",
+    "tsrs": "0.23.0-ts7.1.0-beta",
     "type-fest": "5.10.0",
     "typescript": "7.0.2",
     "unified": "11.0.5",
