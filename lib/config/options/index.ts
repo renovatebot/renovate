@@ -3103,6 +3103,15 @@ const options: Readonly<RenovateOptions>[] = [
     default: null,
   },
   {
+    name: 'excludeAssignees',
+    scopes: sharedScopes,
+    description:
+      'Assignees to exclude from resolved list (`assignees` and `assigneesFromCodeOwners`) before determining who to assign.',
+    type: 'array',
+    subType: 'string',
+    mergeable: true,
+  },
+  {
     name: 'assignAutomerge',
     scopes: sharedScopes,
     description:
@@ -3172,6 +3181,15 @@ const options: Readonly<RenovateOptions>[] = [
     scopes: sharedScopes,
     description:
       'Additional reviewers for Pull Requests (in contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it).',
+    type: 'array',
+    subType: 'string',
+    mergeable: true,
+  },
+  {
+    name: 'excludeReviewers',
+    scopes: sharedScopes,
+    description:
+      'Reviewers to exclude from resolved list (`reviewers`, `reviewersFromCodeOwners` and `additionalReviewers`) before determining who to assign.',
     type: 'array',
     subType: 'string',
     mergeable: true,

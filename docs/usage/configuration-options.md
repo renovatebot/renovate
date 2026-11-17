@@ -1833,6 +1833,19 @@ Behavior:
 }
 ```
 
+## `excludeAssignees`
+
+Use `excludeAssignees` to exclude users from resolved list (`assignees` and `assigneesFromCodeOwners`) before determining who to assign.
+
+For example, to assign code owners but never your bot account:
+
+```json
+{
+  "assigneesFromCodeOwners": true,
+  "excludeAssignees": ["renovate-bot"]
+}
+```
+
 ## `excludeCommitPaths`
 
 Be careful you know what you are doing with this option.
@@ -1846,6 +1859,19 @@ Example:
 ```
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
+
+## `excludeReviewers`
+
+Use `excludeReviewers` to exclude users or teams from resolved list (`reviewers`, `reviewersFromCodeOwners` and `additionalReviewers`) before determining who to assign.
+
+For example, to request reviews from code owners but never from your bot account:
+
+```json
+{
+  "reviewersFromCodeOwners": true,
+  "excludeReviewers": ["renovate-bot"]
+}
+```
 
 ## `expandCodeOwnersGroups`
 
@@ -2687,6 +2713,8 @@ It would take the entire `"config:recommended"` preset - which has a lot of sub-
 By default, Renovate does not add assignees or reviewers to PRs which are configured for automerge.
 If tests have failed, Renovate then does add them, but only if the assignees and reviewers list is empty.
 In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
+`ignoreReviewers` does not remove reviewers from the PR.
+To remove reviewers, use [`excludeReviewers`](#excludereviewers).
 
 ```json
 {

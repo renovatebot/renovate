@@ -532,11 +532,13 @@ export interface AssigneesAndReviewersConfig {
   expandCodeOwnersGroups?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
+  excludeAssignees?: string[];
   ignoreReviewers?: string[];
   reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
   reviewersSampleSize?: number;
   additionalReviewers?: string[];
+  excludeReviewers?: string[];
   filterUnavailableUsers?: boolean;
 }
 
