@@ -280,7 +280,9 @@ For example, if you package file exists at `home/packages/package.json`, then:
 `packageFile` will be `package.json`
 `packageFileDir` will be `home/packages`
 
-These values can be referenced inside `depNameTemplate` or `packageNameTemplate`
+These values can be referenced inside `depNameTemplate` or `packageNameTemplate`.
+Only the regex manager's `*Template` fields get the bare filename in `packageFile`.
+In all other templates, like `branchName`, `commitMessage` or `packageRules`, `packageFile` is the full path relative to the repository root.
 
 If your dependency folder looks like:
 
@@ -303,3 +305,6 @@ You can configure the regex manager like:
   ]
 }
 ```
+
+`lookup (split packageFileDir '/') 1` takes the second path segment (`my-lib`).
+Change the index if your package directories are nested deeper.
