@@ -151,6 +151,10 @@
       "matchPackageNames": ["@commander-js/extra-typings", "commander"],
       "matchUpdateTypes": ["major"],
       "groupName": "commander"
+    },
+    {
+      "matchPackageNames": ["tsrs"],
+      "ignoreUnstable": false
     }
   ],
   "customManagers": [
