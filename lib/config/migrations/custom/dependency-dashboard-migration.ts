@@ -1,0 +1,66 @@
+import { isBoolean, isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
+import type {
+  DependencyDashboardConfig,
+  RenovateOptions,
+} from '../../types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+
+/**
+ * The flat Dependency Dashboard options which moved into `dependencyDashboard`, with the field they moved to and the type they had.
+ */
+export const flatDependencyDashboardOptions: Record<
+  string,
+  { field: keyof DependencyDashboardConfig; type: RenovateOptions['type'] }
+> = {
+  customizeDashboard: { field: 'customize', type: 'object' },
+  dependencyDashboardAutoclose: { field: 'autoclose', type: 'boolean' },
+  dependencyDashboardFooter: { field: 'footer', type: 'string' },
+  dependencyDashboardHeader: { field: 'header', type: 'string' },
+  dependencyDashboardLabels: { field: 'labels', type: 'array' },
+  dependencyDashboardOSVVulnerabilitySummary: {
+    field: 'osvVulnerabilitySummary',
+    type: 'string',
+  },
+  dependencyDashboardReportAbandonment: {
+    field: 'reportAbandonment',
+    type: 'boolean',
+  },
+  dependencyDashboardTitle: { field: 'title', type: 'string' },
+};
+
+/**
+ * Converts a `dependencyDashboard` value from before it was an object, including the strings which were accepted for the boolean.
+ *
+ * Returns `undefined` for a value which can't be converted, so it's left for validation to report.
+ */
+function toObject(value: unknown): Record<string, unknown> | undefined {
+  if (isNullOrUndefined(value)) {
+    return {};
+  }
+  if (isPlainObject(value)) {
+    return { ...value };
+  }
+  if (isBoolean(value) || value === 'true' || value === 'false') {
+    return { enabled: value === true || value === 'true' };
+  }
+  return undefined;
+}
+
+export class DependencyDashboardMigration extends AbstractMigration {
+  override readonly propertyName =
+    // oxlint-disable-next-line renovate/require-regex-util -- must stay a native RegExp: MigrationsService matches propertyName via isRegExp(), which RE2 instances fail
+    /^(?:customizeDashboard|dependencyDashboard(?:Autoclose|Footer|Header|Labels|OSVVulnerabilitySummary|ReportAbandonment|Title)?)$/;
+
+  override run(value: unknown, key: string): void {
+    const dependencyDashboard = toObject(this.get('dependencyDashboard'));
+    if (!dependencyDashboard) {
+      return;
+    }
+
+    if (key !== 'dependencyDashboard') {
+      dependencyDashboard[flatDependencyDashboardOptions[key].field] ??= value;
+      this.delete(key);
+    }
+    this.setHard('dependencyDashboard', dependencyDashboard);
+  }
+}

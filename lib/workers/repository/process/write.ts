@@ -237,15 +237,21 @@ export async function writeUpdates(
         }
         if (
           branch.result === 'automerged' &&
-          branch.automergeType !== 'pr-comment'
+          branch.automergeType !== 'pr-comment' &&
+          branch.automergeType !== 'label'
         ) {
           // Stop processing other branches because base branch has been changed
           return 'automerged';
         }
-        if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-          incCountValue(
-            branch.isVulnerabilityAlert ? 'VulnerabilityBranches' : 'Branches',
-          );
+        if (!branchExisted) {
+          const nowExists = await scm.branchExists(branch.branchName);
+          if (nowExists) {
+            incCountValue(
+              branch.isVulnerabilityAlert
+                ? 'VulnerabilityBranches'
+                : 'Branches',
+            );
+          }
         }
       },
       {

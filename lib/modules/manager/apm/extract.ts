@@ -90,7 +90,7 @@ const commentTagRegex = regEx(/^\s+#\s*(?<tag>\S.*?)\s*$/);
 /**
  * Renders both `owner/repo#<tag>` and the digest-pinned
  * `owner/repo#<sha> # <tag>` form, mirroring the github-actions
- * `uses: owner/action@<sha> # v4` behaviour so `pinDigests` can pin a bare tag
+ * `uses: owner/action@<sha> # v4` behavior so `pinDigests` can pin a bare tag
  * to a SHA and keep the trailing tag comment current.
  */
 const autoReplaceStringTemplate =

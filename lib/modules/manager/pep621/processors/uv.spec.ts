@@ -18,6 +18,7 @@ import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import type { PyProject, UvSource } from '../schema.ts';
+import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
 
@@ -148,6 +149,40 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'https://github.com/foo/dep5',
           currentValue: 'master',
           skipReason: 'git-dependency',
+        },
+      ]);
+    });
+
+    it('strips the git+ prefix from git sources', () => {
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv.sources]
+        dep1 = { git = "git+ssh://git@github.com/foo/dep1", rev = "1ca7d263f0f5038b53f74c5a757f18b8106c9390" }
+        dep2 = { git = "git+https://github.com/foo/dep2", rev = "1ca7d263f0f5038b53f74c5a757f18b8106c9390" }
+      `)!;
+
+      const dependencies = [
+        { depName: 'dep1', packageName: 'dep1' },
+        { depName: 'dep2', packageName: 'dep2' },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'ssh://git@github.com/foo/dep1',
+          currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+          replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/foo/dep2',
+          currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+          replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
         },
       ]);
     });
@@ -565,7 +600,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('throws TEMPORARY_ERROR', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
       const result = processor.updateArtifacts(
-        partial<UpdateArtifact>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
         partial(),
       );
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);
@@ -574,7 +609,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('returns if no lockfile found', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
       const result = await processor.updateArtifacts(
-        partial<UpdateArtifact>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
         partial(),
       );
       expect(result).toBeNull();
@@ -854,6 +889,162 @@ describe('modules/manager/pep621/processors/uv', () => {
           cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
         },
       ]);
+    });
+
+    it('pins the upgrade of a transitive dep to the new version', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.uvTransitiveDependencies,
+          newVersion: '3.15',
+          isVulnerabilityAlert: true,
+        },
+        // no version was determined, so let uv resolve it
+        {
+          packageName: 'dep2',
+          depType: depTypes.uvTransitiveDependencies,
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1==3.15 --upgrade-package dep2',
+        },
+      ]);
+    });
+
+    it('updates a build requirement which the lock file holds', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        // something depends on it at runtime, so the lock holds a version
+        {
+          packageName: 'setuptools',
+          depType: depTypes.buildSystemRequires,
+          lockedVersion: '69.5.1',
+          newVersion: '78.1.1',
+          isVulnerabilityAlert: true,
+        },
+        // a build requirement proper, which the lock file knows nothing about
+        {
+          packageName: 'hatchling',
+          depType: depTypes.buildSystemRequires,
+          newVersion: '1.27.0',
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package setuptools==78.1.1',
+        },
+      ]);
+    });
+
+    it('leaves the lock file alone on a routine upgrade of a build requirement', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      // no vulnerability to fix, so the locked copy is left as it is
+      const updatedDeps = [
+        {
+          packageName: 'setuptools',
+          depType: depTypes.buildSystemRequires,
+          lockedVersion: '69.5.1',
+          newVersion: '78.1.1',
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      // the lock file is refreshed, but `setuptools` is not given to `uv` to
+      // upgrade, so the version it holds stays where it is
+      expect(execSnapshots).toHaveLength(1);
+      expect(execSnapshots[0].cmd).toBe('uv lock ');
+      expect(execSnapshots[0].cmd).not.toInclude('setuptools');
+    });
+
+    it('does not pin the upgrade of a transitive dep locked at several versions', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.uvTransitiveDependencies,
+          newVersion: '3.15',
+          isVulnerabilityAlert: true,
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+        },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { packageName: 'dep1', newVersion: '3.15' },
+        expect.stringContaining('vulnerabilityFixStrategy cannot be honoured'),
+      );
     });
 
     it('performs update on private package registry', async () => {

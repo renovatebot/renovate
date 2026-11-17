@@ -1,4 +1,10 @@
-import { PoetryPyProject, PoetrySection, PoetrySources } from './schema.ts';
+import { codeBlock } from 'common-tags';
+import {
+  PoetryMinReleaseAgeConfig,
+  PoetryPyProject,
+  PoetrySection,
+  PoetrySources,
+} from './schema.ts';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
@@ -162,7 +168,7 @@ describe('modules/manager/poetry/schema', () => {
 
     it('source with priority="primary" disables the implicit PyPI source', () => {
       // A configured primary source is sufficient to disable the implicit
-      // PyPI source, matching Poetry's own resolution behaviour:
+      // PyPI source, matching Poetry's own resolution behavior:
       // https://python-poetry.org/docs/1.8/repositories/#default-package-source-deprecated
       expect(
         PoetrySources.parse([
@@ -413,6 +419,19 @@ build-backend = "poetry.masonry.api"
 `;
       const result = PoetryPyProject.parse(input);
       expect(result.poetryRequirement).toBeUndefined();
+    });
+  });
+
+  describe('PoetryMinReleaseAgeConfig', () => {
+    it('keeps a non-integer solver.min-release-age', () => {
+      const input = codeBlock`
+        [solver]
+        min-release-age = 2.5
+      `;
+
+      const result = PoetryMinReleaseAgeConfig.parse(input);
+
+      expect(result).toEqual({ days: 2.5, exclude: [] });
     });
   });
 });

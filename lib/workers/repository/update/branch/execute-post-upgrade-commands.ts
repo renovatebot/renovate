@@ -2,6 +2,7 @@
 
 import crypto from 'node:crypto';
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -385,18 +386,23 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
-  const branchUpgradeCommands: BranchUpgradeConfig[] = [
-    {
+  // the branch config only takes its settings from the first upgrade, so also check the other upgrades for `executionMode=branch`, only running identical tasks once
+  const branchPostUpgradeTasks = [config, ...config.upgrades]
+    .map(({ postUpgradeTasks }) => postUpgradeTasks)
+    .filter((tasks) => tasks?.executionMode === 'branch')
+    .filter(
+      (tasks, index, allTasks) =>
+        allTasks.findIndex((other) => dequal(other, tasks)) === index,
+    );
+
+  const branchUpgradeCommands: BranchUpgradeConfig[] =
+    branchPostUpgradeTasks.map((postUpgradeTasks) => ({
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       constraints: config.constraints,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
-          : undefined,
-    },
-  ];
+      postUpgradeTasks,
+    }));
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>
