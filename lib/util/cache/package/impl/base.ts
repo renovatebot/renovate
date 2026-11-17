@@ -124,7 +124,8 @@ export abstract class PackageCacheBase {
 // backend-native TTL.
 function isExpiredLegacyEntry(entry: LegacyEntry): boolean {
   const { expiry } = entry;
-  return (
-    expiry !== undefined && (!expiry.isValid || DateTime.local() >= expiry)
-  );
+  if (expiry === undefined) {
+    return false;
+  }
+  return !expiry.isValid || DateTime.local() >= expiry;
 }

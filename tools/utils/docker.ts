@@ -5,7 +5,7 @@ import { setTimeout } from 'node:timers/promises';
 import type { SemVer } from 'semver';
 import { logger } from '../../lib/logger/index.ts';
 import { toMs } from '../../lib/util/pretty-time.ts';
-import { commandError, exec, run } from './exec.ts';
+import { commandError, exec } from './exec.ts';
 
 const file = 'tools/docker/bake.hcl';
 const tmp = fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
@@ -91,7 +91,28 @@ export async function bake(
   return meta;
 }
 
+const signAttempts = 3;
+const signDelay = 10_000;
+
+/**
+ * Signs an image with cosign, retrying a failed signing a few times.
+ */
 export async function sign(image: string): Promise<void> {
-  logger.info(`Signing ${image} ...`);
-  await run('cosign', ['sign', '--yes', image]);
+  for (let attempt = 1; ; attempt++) {
+    logger.info(`Signing ${image} ...`);
+    const result = await exec('cosign', ['sign', '--yes', image], {
+      reject: false,
+      stdio: 'inherit',
+    });
+    if (!result.failed) {
+      return;
+    }
+    const message = result.shortMessage ?? `Signing ${image} failed`;
+    if (attempt >= signAttempts) {
+      throw commandError(message);
+    }
+    logger.warn(message);
+    logger.info(`Retrying in ${signDelay / 1000}s ...`);
+    await setTimeout(signDelay);
+  }
 }

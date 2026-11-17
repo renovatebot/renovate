@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
 import { type RenovateConfig, logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import type { PackageRuleInputConfig } from '../../../config/types.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
@@ -35,6 +36,17 @@ vi.mock('@renovatebot/osv-offline', () => {
 });
 
 describe('workers/repository/process/vulnerabilities', () => {
+  beforeEach(() => {
+    // `unstubEnvs` restores both after each test
+    vi.stubEnv('OSV_OFFLINE_ROOT_DIR', undefined);
+    vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', undefined);
+    GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('create()', () => {
     beforeEach(resetOsv);
 
@@ -54,11 +66,67 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 
+  describe('osv-offline directory', () => {
+    beforeEach(() => {
+      resetOsv();
+      createMock.mockResolvedValue({});
+    });
+
+    it('keeps a configured root directory', async () => {
+      vi.stubEnv('OSV_OFFLINE_ROOT_DIR', '/custom/osv');
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe('/custom/osv');
+    });
+
+    it('keeps the osv-offline default when downloads are disabled', async () => {
+      vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', 'TRUE');
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBeUndefined();
+    });
+
+    it('uses a directory in cacheDir by default', async () => {
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe(
+        '/tmp/renovate/cache/osv-offline',
+      );
+    });
+  });
+
+  describe('cleanup()', () => {
+    beforeEach(resetOsv);
+
+    it('disposes the shared databases once', async () => {
+      const dispose = vi.fn();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+        [Symbol.dispose]: dispose,
+      });
+      await Vulnerabilities.create();
+
+      await Vulnerabilities.cleanup();
+      await Vulnerabilities.cleanup();
+
+      expect(dispose).toHaveBeenCalledOnce();
+    });
+
+    it('does nothing when the databases were never opened', async () => {
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+
+    it('ignores a failed initialization', async () => {
+      createMock.mockRejectedValue(new Error());
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
+
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+  });
+
   describe('fetchVulnerabilities()', () => {
     let config: RenovateConfig;
     let vulnerabilities: Vulnerabilities;
 
     beforeAll(async () => {
+      GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
       resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
@@ -857,6 +925,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     };
 
     beforeAll(async () => {
+      GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
       resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,

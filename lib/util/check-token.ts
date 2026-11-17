@@ -32,12 +32,11 @@ export function checkGithubToken(
     .map((file) => file.deps)
     .flat();
   for (const dep of deps) {
-    if (
-      !dep.skipReason &&
-      (dep.datasource === GithubTagsDatasource.id ||
-        dep.datasource === GithubReleasesDatasource.id ||
-        dep.datasource === GithubReleaseAttachmentsDatasource.id)
-    ) {
+    const isGithubDatasource =
+      dep.datasource === GithubTagsDatasource.id ||
+      dep.datasource === GithubReleasesDatasource.id ||
+      dep.datasource === GithubReleaseAttachmentsDatasource.id;
+    if (!dep.skipReason && isGithubDatasource) {
       dep.skipReason = 'github-token-required';
       // v8 ignore else -- TODO: add test #40625
       if (dep.depName) {

@@ -1,4 +1,7 @@
-import { massageMarkdownLinks } from './massage-markdown-links.ts';
+import {
+  massageCommitMessageLinks,
+  massageMarkdownLinks,
+} from './massage-markdown-links.ts';
 
 describe('modules/platform/github/massage-markdown-links', () => {
   it('performs multiple replacements', () => {
@@ -91,4 +94,43 @@ describe('modules/platform/github/massage-markdown-links', () => {
       expect(massageMarkdownLinks(input)).toEqual(output);
     },
   );
+
+  describe('massageCommitMessageLinks', () => {
+    it('replaces links in release notes', () => {
+      const input = [
+        'chore(deps): update dependency renovate to v44.220.0',
+        '',
+        '- **config:** add option ([#43916](https://github.com/renovatebot/renovate/issues/43916)) ([18bfe0a](https://github.com/renovatebot/renovate/commit/18bfe0a)), closes [#1](https://github.com/renovatebot/renovate/pull/1)',
+      ].join('\n');
+
+      expect(massageCommitMessageLinks(input)).toBe(
+        [
+          'chore(deps): update dependency renovate to v44.220.0',
+          '',
+          '- **config:** add option ([#43916](https://redirect.github.com/renovatebot/renovate/issues/43916)) ([18bfe0a](https://github.com/renovatebot/renovate/commit/18bfe0a)), closes [#1](https://redirect.github.com/renovatebot/renovate/pull/1)',
+        ].join('\n'),
+      );
+    });
+
+    it.each`
+      input                                                   | output
+      ${'https://github.com/foo/bar/discussions/1'}           | ${'https://redirect.github.com/foo/bar/discussions/1'}
+      ${'https://github.com/foo/bar/issues/1'}                | ${'https://redirect.github.com/foo/bar/issues/1'}
+      ${'https://github.com/foo/bar/pull/1'}                  | ${'https://redirect.github.com/foo/bar/pull/1'}
+      ${'https://github.com/foo/bar/pull/1#issuecomment-123'} | ${'https://redirect.github.com/foo/bar/pull/1#issuecomment-123'}
+      ${'https://www.github.com/foo/bar.foo/pull/1'}          | ${'https://redirect.github.com/foo/bar.foo/pull/1'}
+      ${'http://GitHub.com/Foo/bar/issues/1'}                 | ${'http://redirect.github.com/Foo/bar/issues/1'}
+      ${'https://redirect.github.com/foo/bar/issues/1'}       | ${'https://redirect.github.com/foo/bar/issues/1'}
+      ${'https://api.github.com/repos/foo/bar/issues/1'}      | ${'https://api.github.com/repos/foo/bar/issues/1'}
+      ${'https://github.com/foo/bar/releases/tag/1.0.0'}      | ${'https://github.com/foo/bar/releases/tag/1.0.0'}
+      ${'https://github.com/foo/bar/compare/1.0.0...2.0.0'}   | ${'https://github.com/foo/bar/compare/1.0.0...2.0.0'}
+      ${'github.com/foo/bar/issues/1'}                        | ${'github.com/foo/bar/issues/1'}
+      ${'foo/bar#1'}                                          | ${'foo/bar#1'}
+    `(
+      '$input -> $output',
+      ({ input, output }: { input: string; output: string }) => {
+        expect(massageCommitMessageLinks(input)).toBe(output);
+      },
+    );
+  });
 });

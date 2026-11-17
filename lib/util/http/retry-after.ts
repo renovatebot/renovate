@@ -3,6 +3,7 @@ import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { logger } from '../../logger/index.ts';
 import { parseUrl } from '../url.ts';
+import { isClientError } from './status.ts';
 import type { Task } from './types.ts';
 
 const hostDelays = new Map<string, Promise<unknown>>();
@@ -74,7 +75,7 @@ export function getRetryAfter(err: unknown): number | null {
     return null;
   }
 
-  if (err.response.statusCode < 400 || err.response.statusCode >= 500) {
+  if (!isClientError(err)) {
     logger.debug(
       { url: err.response.url },
       `Retry-After: unexpected status code ${err.response.statusCode}`,

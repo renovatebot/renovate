@@ -1,6 +1,7 @@
 import {
   isArray,
   isNonEmptyArray,
+  isNullOrUndefined,
   isNumber,
   isUndefined,
 } from '@sindresorhus/is';
@@ -33,6 +34,7 @@ import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
 import { isPrAlreadyExistsError } from '../../../../util/http/github.ts';
+import { isBadGateway } from '../../../../util/http/status.ts';
 import { memoize } from '../../../../util/memoize.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -59,10 +61,10 @@ import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
 ): PlatformPrOptions {
+  const isPrOrBranchAutomerge =
+    config.automergeType === 'pr' || config.automergeType === 'branch';
   const usePlatformAutomerge = Boolean(
-    config.automerge &&
-    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-    config.platformAutomerge,
+    config.automerge && isPrOrBranchAutomerge && config.platformAutomerge,
   );
 
   return {
@@ -184,9 +186,10 @@ export async function ensurePr(
     dependencyDashboardCheck === 'approvePr' ||
     dependencyDashboardCheck === 'unpend';
   // Check if PR already exists
-  const existingPr =
-    (await platform.getBranchPr(branchName, config.baseBranch)) ??
-    (await tryReuseAutoclosedPr(branchName, prTitle));
+  let existingPr = await platform.getBranchPr(branchName, config.baseBranch);
+  if (isNullOrUndefined(existingPr)) {
+    existingPr = await tryReuseAutoclosedPr(branchName, prTitle);
+  }
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
@@ -224,11 +227,11 @@ export async function ensurePr(
       !config.forcePr
     ) {
       logger.debug(`Branch automerge is enabled`);
-      if (
-        config.stabilityStatus !== 'yellow' &&
-        (await getBranchStatus()) === 'yellow' &&
-        isNumber(config.prNotPendingHours)
-      ) {
+      let isPending = false;
+      if (config.stabilityStatus !== 'yellow') {
+        isPending = (await getBranchStatus()) === 'yellow';
+      }
+      if (isPending && isNumber(config.prNotPendingHours)) {
         logger.debug('Checking how long this branch has been pending');
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
@@ -238,7 +241,11 @@ export async function ensurePr(
           config.forcePr = true;
         }
       }
-      if (config.forcePr || (await getBranchStatus()) === 'red') {
+      let createPr = !!config.forcePr;
+      if (!createPr) {
+        createPr = (await getBranchStatus()) === 'red';
+      }
+      if (createPr) {
         logger.debug(`Branch tests failed, so will create PR`);
       } else {
         // Branch should be automerged, so we don't want to create a PR
@@ -263,12 +270,13 @@ export async function ensurePr(
         logger.debug(`Branch status is yellow - checking timeout`);
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         const elapsedHours = getElapsedHours(lastCommitTime);
-        if (
-          !dependencyDashboardCheck &&
-          ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-            (isNumber(config.prNotPendingHours) &&
-              elapsedHours < config.prNotPendingHours))
-        ) {
+        const isStabilityPending =
+          !!config.stabilityStatus && config.stabilityStatus !== 'yellow';
+        const isWithinNotPendingHours =
+          isNumber(config.prNotPendingHours) &&
+          elapsedHours < config.prNotPendingHours;
+        const isAwaitingTests = isStabilityPending || isWithinNotPendingHours;
+        if (!dependencyDashboardCheck && isAwaitingTests) {
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
@@ -350,7 +358,7 @@ export async function ensurePr(
               > :exclamation: **Important**
               >
               > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
-              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md#githubcom-token-for-changelogs-and-tools).
             `,
           ),
         );
@@ -414,11 +422,15 @@ export async function ensurePr(
         !existingPr.hasAssignees &&
         !hasNotIgnoredReviewers(existingPr, config) &&
         config.automerge &&
-        !config.assignAutomerge &&
-        (await getBranchStatus()) === 'red'
+        !config.assignAutomerge
       ) {
-        logger.debug(`Setting assignees and reviewers as status checks failed`);
-        await addParticipants(config, existingPr);
+        const branchStatus = await getBranchStatus();
+        if (branchStatus === 'red') {
+          logger.debug(
+            `Setting assignees and reviewers as status checks failed`,
+          );
+          await addParticipants(config, existingPr);
+        }
       }
       // Check if existing PR needs updating
       const existingPrTitle = stripEmojis(existingPr.title);
@@ -584,7 +596,7 @@ export async function ensurePr(
           logger.warn('A pull requests already exists');
           return { type: 'without-pr', prBlockedBy: 'Error' };
         }
-        if (err.statusCode === 502) {
+        if (isBadGateway(err)) {
           logger.warn(
             { branch: branchName },
             'Deleting branch due to server error',
@@ -626,11 +638,11 @@ export async function ensurePr(
     }
     // Skip assign and review if automerging PR
     if (pr) {
-      if (
-        config.automerge &&
-        !config.assignAutomerge &&
-        (await getBranchStatus()) !== 'red'
-      ) {
+      let skipParticipants = false;
+      if (config.automerge && !config.assignAutomerge) {
+        skipParticipants = (await getBranchStatus()) !== 'red';
+      }
+      if (skipParticipants) {
         logger.debug(
           `Skipping assignees and reviewers as automerge=${config.automerge}`,
         );
