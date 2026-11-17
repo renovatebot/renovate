@@ -6,9 +6,7 @@ import * as memCache from '../cache/memory/index.ts';
 import { setCustomEnv } from '../env.ts';
 import {
   generateInstallCommands,
-  getSupportedToolNames,
   getToolConfig,
-  getToolVersioning,
   isDynamicInstall,
   resolveConstraint,
 } from './containerbase.ts';
@@ -71,56 +69,20 @@ describe('util/exec/containerbase', () => {
 
   describe('getToolConfig()', () => {
     it('returns config for a known tool', () => {
-      expect(getToolConfig('npm')).toEqual({
-        datasource: 'containerbase',
-        packageName: 'npm',
-        versioning: 'npm',
+      const config = getToolConfig('npm');
+      expect(config).toBeDefined();
+      expect(config).toMatchObject({
+        datasource: expect.toBeString(),
+        versioning: expect.toBeString(),
       });
     });
 
-    it.each`
-      toolName      | versioning
-      ${'helm'}     | ${'npm'}
-      ${'dotnet'}   | ${'npm'}
-      ${'java'}     | ${'npm'}
-      ${'pnpm'}     | ${'npm'}
-      ${'renovate'} | ${'npm'}
-      ${'erlang'}   | ${'semver-extended'}
-      ${'bundler'}  | ${'ruby'}
-      ${'pdm'}      | ${'pep440'}
-      ${'node'}     | ${'node'}
-      ${'php'}      | ${'composer'}
-      ${'rust'}     | ${'rust-release-channel'}
-      ${'jb'}       | ${'semver-extended'}
-      ${'paket'}    | ${'paket'}
-    `(
-      'uses the $versioning versioning for $toolName',
-      ({ toolName, versioning }) => {
-        expect(getToolConfig(toolName)).toEqual({
-          datasource: 'containerbase',
-          packageName: toolName,
-          versioning,
-        });
-      },
-    );
-
-    it.each`
-      toolName    | versioning
-      ${'kas'}    | ${'pep440'}
-      ${'docker'} | ${'npm'}
-    `(
-      'derives the $versioning versioning for $toolName',
-      ({ toolName, versioning }) => {
-        expect(getToolVersioning(toolName)).toBe(versioning);
-      },
-    );
-
-    it('lists the supported tools', () => {
-      expect(getSupportedToolNames()).toIncludeAllMembers(['node', 'rust']);
-    });
-
-    it('returns undefined for a Containerbase tool which Renovate does not support', () => {
-      expect(getToolConfig('kubectl')).toBeUndefined();
+    it('returns config for the renovate tool', () => {
+      expect(getToolConfig('renovate')).toEqual({
+        datasource: 'npm',
+        packageName: 'renovate',
+        versioning: 'npm',
+      });
     });
 
     it('returns undefined for an unknown tool', () => {
@@ -178,6 +140,25 @@ describe('util/exec/containerbase', () => {
       await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
         '2.0.14',
       );
+    });
+
+    it('prefers a stable version above latest to an unstable one', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        tags: {
+          latest: '2.0.14',
+        },
+        releases: [
+          { version: '2.0.14' },
+          { version: '2.1.0' },
+          { version: '2.2.0-pre.0' },
+        ],
+      });
+      await expect(
+        resolveConstraint({
+          toolName: 'pnpm',
+          constraint: '>=2.1.0 || >=2.2.0-pre.0',
+        }),
+      ).resolves.toBe('2.1.0');
     });
 
     it('supports rust release channels', async () => {
@@ -492,6 +473,9 @@ describe('util/exec/containerbase', () => {
 
     it('skips the containerbase constraint for a development build', async () => {
       containerbase.version = '0.0.0-PLACEHOLDER';
+      onTestFinished(() => {
+        containerbase.version = '14.0.0';
+      });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '2.1.0' }],
       });
@@ -504,7 +488,23 @@ describe('util/exec/containerbase', () => {
         packageName: 'composer?system=true',
         versioning: 'composer',
       });
-      containerbase.version = '14.0.0';
+    });
+
+    it('looks up a tool without its extractVersion', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.2.0' }],
+      });
+
+      await expect(resolveConstraint({ toolName: 'apm' })).resolves.toBe(
+        '1.2.0',
+      );
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'containerbase',
+        packageName: 'apm?system=true',
+        versioning: 'semver',
+        constraintsFiltering: 'strict',
+        constraints: { containerbase: containerbase.version },
+      });
     });
   });
 

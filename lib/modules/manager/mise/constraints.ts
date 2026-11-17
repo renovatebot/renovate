@@ -2,7 +2,7 @@ import {
   getSupportedToolNames,
   getToolConfig,
 } from '../../../util/exec/containerbase.ts';
-import type { SupportedToolName } from '../../../util/exec/types.ts';
+import type { ToolName } from '../../../util/exec/types.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import { get as getVersioning } from '../../versioning/index.ts';
@@ -19,7 +19,7 @@ import { getOrderedMiseRegistryBackends } from './upgradeable-tooling.ts';
 /**
  * mise short names which differ from the Containerbase tool name.
  */
-const toolNameAliases = new Map<string, SupportedToolName>([
+const toolNameAliases = new Map<string, ToolName>([
   ['flux2', 'flux'],
   ['go', 'golang'],
   ['nodejs', 'node'],
@@ -28,11 +28,8 @@ const toolNameAliases = new Map<string, SupportedToolName>([
 /**
  * The Containerbase tools Renovate can install, by their mise short name.
  */
-const toolNames = new Map<string, SupportedToolName>([
-  ...getSupportedToolNames().map((name): [string, SupportedToolName] => [
-    name,
-    name,
-  ]),
+const toolNames = new Map<string, ToolName>([
+  ...getSupportedToolNames().map((name): [string, ToolName] => [name, name]),
   ...toolNameAliases,
 ]);
 
@@ -44,7 +41,7 @@ const shortNameBackends = new Set(['', 'core', 'asdf', 'vfox']);
 /**
  * The Containerbase tools by the backend names the mise registry lists for them, e.g. `npm:pnpm` or `aqua:astral-sh/uv`.
  */
-const backendConstraintNames = new Map<string, SupportedToolName>();
+const backendConstraintNames = new Map<string, ToolName>();
 for (const [shortName, toolName] of toolNames) {
   const backends = Object.entries(
     getOrderedMiseRegistryBackends(shortName),
@@ -75,9 +72,7 @@ const configFiles = configFileLocations
 /**
  * Returns the constraint name of a mise tool, such as `pnpm` for `npm:pnpm`.
  */
-export function getConstraintName(
-  depName: string,
-): SupportedToolName | undefined {
+export function getConstraintName(depName: string): ToolName | undefined {
   const delimiterIndex = depName.indexOf(':');
   const backend = depName.substring(0, delimiterIndex);
   const toolName = depName.substring(delimiterIndex + 1);
@@ -91,7 +86,7 @@ export function getConstraintName(
  * Returns the mise version of a tool as a constraint, or `null` unless it is a full version or a partial version which the tool versioning reads as a range.
  */
 export function getConstraintValue(
-  constraintName: SupportedToolName,
+  constraintName: ToolName,
   version: string | null | undefined,
 ): string | null {
   if (!version) {

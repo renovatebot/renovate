@@ -9,7 +9,7 @@ import { getToolConfig } from '../../../util/exec/containerbase.ts';
 import {
   type ConstraintName,
   type ToolName,
-  isSupportedToolName,
+  isToolName,
 } from '../../../util/exec/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 
@@ -113,7 +113,7 @@ function updateSharedConstraint(
   const constraints = { ...shared.constraints };
   for (const [name, constraint] of Object.entries(shared.constraints)) {
     // the managers only share the constraints of tools
-    if (isSupportedToolName(name)) {
+    if (isToolName(name)) {
       let current = constraint;
       for (const upgrade of updates) {
         current = getUpdatedConstraint(name, current, upgrade) ?? current;
@@ -155,7 +155,7 @@ export function getSharedConstraints(
   }
   const constraints: Partial<Record<ConstraintName, string>> = {};
   for (const [name, { value }] of Object.entries(merged)) {
-    if (value !== null && isSupportedToolName(name)) {
+    if (value !== null && isToolName(name)) {
       constraints[name] = value;
     }
   }

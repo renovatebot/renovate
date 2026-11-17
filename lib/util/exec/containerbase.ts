@@ -1,6 +1,5 @@
 import {
   type ToolMetadata,
-  type ToolType,
   isContainerbase,
   isReleaseVersion,
   packageVersion,
@@ -12,7 +11,6 @@ import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
-import type { VersioningName } from '../../versioning-list.generated.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
@@ -20,81 +18,267 @@ import { regEx } from '../regex.ts';
 import {
   type ConstraintName,
   type Opt,
-  type SupportedToolName,
   type ToolConfig,
   type ToolConstraint,
   type ToolName,
-  isSupportedToolName,
-  supportedToolNames,
+  isToolName,
 } from './types.ts';
-
-/**
- * The versioning of the tools which a package manager installs, by its type.
- */
-const typeVersioning: Record<ToolType, VersioningName> = {
-  dotnet: 'nuget',
-  gem: 'ruby',
-  npm: 'npm',
-  pip: 'pep440',
-};
-
-/**
- * The tools whose versions or constraints need another versioning than `npm`
- * or the one of their type.
- */
-const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
-  composer: 'composer',
-  deno: 'deno',
-  erlang: 'semver-extended',
-  gradle: 'gradle',
-  jb: 'semver-extended',
-  maven: 'maven',
-  node: 'node',
-  paket: 'paket',
-  php: 'composer',
-  pixi: 'conda',
-  python: 'python',
-  ruby: 'ruby',
-  rust: 'rust-release-channel',
-};
-
-/**
- * Returns the versioning of a tool: its own one, the one of its type, or `npm`.
- */
-export function getToolVersioning(toolName: ToolName): VersioningName {
-  const { type }: ToolMetadata = tools[toolName];
-  const versioning = toolVersioning[toolName];
-  if (versioning) {
-    return versioning;
-  }
-  return type ? typeVersioning[type] : 'npm';
-}
-
-/**
- * Builds the lookup config of each supported tool.
- */
-function getAllToolConfig(): Partial<Record<SupportedToolName, ToolConfig>> {
-  const toolConfig: Partial<Record<SupportedToolName, ToolConfig>> = {};
-  for (const toolName of supportedToolNames) {
-    toolConfig[toolName] = {
-      datasource: 'containerbase',
-      packageName: toolName,
-      versioning: getToolVersioning(toolName),
-    };
-  }
-  return toolConfig;
-}
 
 /**
  * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
  */
-export const allToolConfig = getAllToolConfig();
+export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
+  apm: {
+    datasource: 'github-releases',
+    packageName: 'microsoft/apm',
+    versioning: 'semver',
+    extractVersion: '^v(?<version>.*)$',
+  },
+  bazelisk: {
+    datasource: 'github-releases',
+    packageName: 'bazelbuild/bazelisk',
+    versioning: 'semver',
+  },
+  bun: {
+    datasource: 'github-releases',
+    packageName: 'oven-sh/bun',
+    extractVersion: '^bun-v(?<version>.*)$',
+    versioning: 'npm',
+  },
+  bundler: {
+    datasource: 'rubygems',
+    packageName: 'bundler',
+    versioning: 'ruby',
+  },
+  cocoapods: {
+    datasource: 'rubygems',
+    packageName: 'cocoapods',
+    versioning: 'ruby',
+  },
+  composer: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/composer-prebuild',
+    versioning: 'composer',
+  },
+  conan: {
+    datasource: 'pypi',
+    packageName: 'conan',
+    versioning: 'pep440',
+  },
+  copier: {
+    datasource: 'pypi',
+    packageName: 'copier',
+    versioning: 'pep440',
+  },
+  corepack: {
+    datasource: 'npm',
+    packageName: 'corepack',
+    versioning: 'npm',
+  },
+  deno: {
+    datasource: 'github-releases',
+    packageName: 'denoland/deno',
+    versioning: 'deno',
+  },
+  devbox: {
+    datasource: 'github-releases',
+    packageName: 'jetify-com/devbox',
+    versioning: 'semver',
+  },
+  dotnet: {
+    datasource: 'dotnet-version',
+    packageName: 'dotnet-sdk',
+    versioning: 'semver',
+  },
+  erlang: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/erlang-prebuild',
+    versioning: 'semver-extended',
+  },
+  elixir: {
+    datasource: 'github-releases',
+    packageName: 'elixir-lang/elixir',
+    versioning: 'semver',
+  },
+  flux: {
+    datasource: 'github-releases',
+    packageName: 'fluxcd/flux2',
+    versioning: 'semver',
+  },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
+    versioning: 'semver',
+  },
+  gleam: {
+    datasource: 'github-releases',
+    packageName: 'gleam-lang/gleam',
+    versioning: 'semver',
+  },
+  golang: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/golang-prebuild',
+    versioning: 'npm',
+  },
+  gradle: {
+    datasource: 'gradle-version',
+    packageName: 'gradle',
+    versioning: 'gradle',
+  },
+  hashin: {
+    datasource: 'pypi',
+    packageName: 'hashin',
+    versioning: 'pep440',
+  },
+  helm: {
+    datasource: 'github-releases',
+    packageName: 'helm/helm',
+    versioning: 'semver',
+  },
+  helmfile: {
+    datasource: 'github-releases',
+    packageName: 'helmfile/helmfile',
+    versioning: 'semver',
+  },
+  java: {
+    datasource: 'java-version',
+    packageName: 'java?system=true',
+    versioning: 'npm',
+  },
+  jb: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/jb-prebuild',
+    versioning: 'semver-extended',
+  },
+  kustomize: {
+    datasource: 'github-releases',
+    packageName: 'kubernetes-sigs/kustomize',
+    extractVersion: '^kustomize/v(?<version>.*)$',
+    versioning: 'semver',
+  },
+  maven: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/maven-prebuild',
+    versioning: 'maven',
+  },
+  mise: {
+    datasource: 'github-releases',
+    packageName: 'jdx/mise',
+    versioning: 'npm',
+  },
+  nix: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/nix-prebuild',
+    versioning: 'semver',
+  },
+  node: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/node-prebuild',
+    versioning: 'node',
+  },
+  npm: {
+    datasource: 'npm',
+    packageName: 'npm',
+    versioning: 'npm',
+  },
+  paket: {
+    datasource: 'nuget',
+    packageName: 'paket',
+    versioning: 'paket',
+  },
+  pdm: {
+    datasource: 'github-releases',
+    packageName: 'pdm-project/pdm',
+    versioning: 'semver',
+  },
+  php: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/php-prebuild',
+    versioning: 'composer',
+  },
+  'pip-tools': {
+    datasource: 'pypi',
+    packageName: 'pip-tools',
+    versioning: 'pep440',
+  },
+  pipenv: {
+    datasource: 'pypi',
+    packageName: 'pipenv',
+    versioning: 'pep440',
+  },
+  pnpm: {
+    datasource: 'npm',
+    packageName: 'pnpm',
+    versioning: 'npm',
+  },
+  pixi: {
+    datasource: 'github-releases',
+    packageName: 'prefix-dev/pixi',
+    versioning: 'conda',
+    extractVersion: '^v(?<version>.*)$',
+  },
+  poetry: {
+    datasource: 'pypi',
+    packageName: 'poetry',
+    versioning: 'pep440',
+  },
+  python: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/python-prebuild',
+    versioning: 'python',
+  },
+  renovate: {
+    datasource: 'npm',
+    packageName: 'renovate',
+    versioning: 'npm',
+  },
+  ruby: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/ruby-prebuild',
+    versioning: 'ruby',
+  },
+  rust: {
+    datasource: 'rust-version',
+    packageName: 'rust',
+    versioning: 'rust-release-channel',
+  },
+  uv: {
+    datasource: 'pypi',
+    packageName: 'uv',
+    versioning: 'pep440',
+  },
+  yarn: {
+    datasource: 'npm',
+    packageName: 'yarn',
+    versioning: 'npm',
+  },
+  'yarn-slim': {
+    datasource: 'npm',
+    packageName: 'yarn',
+    versioning: 'npm',
+  },
+  dart: {
+    datasource: 'dart-version',
+    packageName: 'dart',
+    versioning: 'npm',
+  },
+  flutter: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/flutter-prebuild',
+    versioning: 'npm',
+  },
+  vendir: {
+    datasource: 'github-releases',
+    packageName: 'carvel-dev/vendir',
+    versioning: 'semver',
+  },
+} as const;
 
 /**
  * All Containerbase `tool`s that Renovate supports configuring the version of.
  */
-export function getSupportedToolNames(): readonly SupportedToolName[] {
-  return supportedToolNames;
+export function getSupportedToolNames(): readonly ToolName[] {
+  return Object.keys(allToolConfig) as readonly ToolName[];
 }
 
 let _getPkgReleases: Promise<
@@ -107,15 +291,18 @@ let _getPkgReleases: Promise<
  * runtime versions already resolved for the other tools.
  */
 async function getPkgReleases(
-  toolConfig: ToolConfig,
+  toolName: ToolName,
+  { versioning }: ToolConfig,
   resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
-  // only the releases with files for the arch the tool is installed on
+  // the containerbase data has the versions without prefixes, so no
+  // `extractVersion`, and only the releases with files for the host arch
   const config: ToolConfig = {
-    ...toolConfig,
-    packageName: `${toolConfig.packageName}?system=true`,
+    datasource: 'containerbase',
+    packageName: `${toolName}?system=true`,
+    versioning,
   };
   // drop releases which need a newer containerbase, a development build has no
   // release version and skips it like the containerbase cli
@@ -147,11 +334,11 @@ async function getPkgReleases(
 }
 
 export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
-  return isSupportedToolName(toolName) ? allToolConfig[toolName] : undefined;
+  return allToolConfig[toolName];
 }
 
 export function supportsDynamicInstall(toolName: ToolName): boolean {
-  return isSupportedToolName(toolName);
+  return !!allToolConfig[toolName];
 }
 
 export function isDynamicInstall(
@@ -191,7 +378,7 @@ export async function resolveConstraint(
   resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<string> {
   const { toolName } = toolConstraint;
-  const toolConfig = getToolConfig(toolName);
+  const toolConfig = allToolConfig[toolName];
   if (!toolConfig) {
     throw new Error(`Invalid tool to install: ${toolName}`);
   }
@@ -214,7 +401,7 @@ export async function resolveConstraint(
     }
   }
 
-  const pkgReleases = await getPkgReleases(toolConfig, resolvedTools);
+  const pkgReleases = await getPkgReleases(toolName, toolConfig, resolvedTools);
   const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
@@ -226,9 +413,12 @@ export async function resolveConstraint(
     (r) => !constraint || versioning.matches(r.version, constraint),
   );
 
-  const stableMatchingVersion = matchingReleases
-    .filter((r) => isStable(r.version, versioning, pkgReleases?.tags?.latest))
-    .pop()?.version;
+  const latest = pkgReleases?.tags?.latest;
+  // a stable version above `latest` is still better than an unstable one
+  const stableMatchingVersion =
+    matchingReleases.findLast((r) => isStable(r.version, versioning, latest))
+      ?.version ??
+    matchingReleases.findLast((r) => isStable(r.version, versioning))?.version;
   if (stableMatchingVersion) {
     logger.debug(
       { toolName, constraint, resolvedVersion: stableMatchingVersion },
@@ -247,7 +437,7 @@ export async function resolveConstraint(
   }
 
   const stableVersion = releases
-    .filter((r) => isStable(r.version, versioning, pkgReleases?.tags?.latest))
+    .filter((r) => isStable(r.version, versioning, latest))
     .pop()?.version;
   if (stableVersion) {
     logger.warn(
@@ -282,7 +472,7 @@ export async function generateInstallCommands(
       const { toolName } = toolConstraint;
       const { parent }: ToolMetadata = tools[toolName];
       const parentConstraint: Partial<Record<ConstraintName, string>> = {};
-      if (isSupportedToolName(parent) && resolvedTools[parent]) {
+      if (isToolName(parent) && resolvedTools[parent]) {
         parentConstraint[parent] = resolvedTools[parent];
       }
       const toolVersion = await resolveConstraint(
@@ -293,7 +483,7 @@ export async function generateInstallCommands(
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
         // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
-        const parentActive = isSupportedToolName(parent)
+        const parentActive = isToolName(parent)
           ? memCache.get<string | undefined>(
               buildCacheKey('containerbase-active', parent),
             )

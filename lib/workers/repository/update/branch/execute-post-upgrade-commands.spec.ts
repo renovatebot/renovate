@@ -1392,12 +1392,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           expected: [{ toolName: 'node', constraint: undefined }],
         },
         {
-          description: 'tools which are no constraint name have no constraint',
-          constraints: { npm: '10.2.3' },
-          installTools: { kubectl: {} },
-          expected: [{ toolName: 'kubectl', constraint: undefined }],
-        },
-        {
           description: `a constraint that isn't a valid tool is ignored (without being referenced by \`installTools\`)`,
           constraints: {
             // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase

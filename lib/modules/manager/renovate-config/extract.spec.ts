@@ -469,18 +469,18 @@ describe('modules/manager/renovate-config/extract', () => {
         ).toEqual({
           deps: [
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'bazelisk',
-              packageName: 'bazelisk',
-              versioning: 'npm',
+              packageName: 'bazelbuild/bazelisk',
+              versioning: 'semver',
               currentValue: '1.2.3',
               depType: 'tool-constraint',
               commitMessageTopic: '{{{depName}}} tool constraint',
             },
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'maven',
-              packageName: 'maven',
+              packageName: 'containerbase/maven-prebuild',
               versioning: 'maven',
               currentValue: '4.0.0',
               depType: 'tool-constraint',
@@ -506,18 +506,18 @@ describe('modules/manager/renovate-config/extract', () => {
         ).toEqual({
           deps: [
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'bazelisk',
-              packageName: 'bazelisk',
-              versioning: 'npm',
+              packageName: 'bazelbuild/bazelisk',
+              versioning: 'semver',
               currentValue: '>= 1.2.3',
               depType: 'tool-constraint',
               commitMessageTopic: '{{{depName}}} tool constraint',
             },
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'maven',
-              packageName: 'maven',
+              packageName: 'containerbase/maven-prebuild',
               versioning: 'maven',
               currentValue: '< 4.0.0',
               depType: 'tool-constraint',
@@ -551,18 +551,18 @@ describe('modules/manager/renovate-config/extract', () => {
         ).toEqual({
           deps: [
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'golang',
-              packageName: 'golang',
+              packageName: 'containerbase/golang-prebuild',
               versioning: 'npm',
               currentValue: '1.20.5',
               depType: 'tool-constraint',
               commitMessageTopic: '{{{depName}}} tool constraint',
             },
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'golang',
-              packageName: 'golang',
+              packageName: 'containerbase/golang-prebuild',
               versioning: 'npm',
               currentValue: '1.26.0',
               depType: 'tool-constraint',
@@ -619,9 +619,9 @@ describe('modules/manager/renovate-config/extract', () => {
         ).toEqual({
           deps: [
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'golang',
-              packageName: 'golang',
+              packageName: 'containerbase/golang-prebuild',
               versioning: 'npm',
               currentValue: '1.20.5',
               depType: 'tool-constraint',
@@ -672,47 +672,22 @@ describe('modules/manager/renovate-config/extract', () => {
         ).toEqual({
           deps: [
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'bazelisk',
-              packageName: 'bazelisk',
-              versioning: 'npm',
+              packageName: 'bazelbuild/bazelisk',
+              versioning: 'semver',
               currentValue: '>= 1.2.3',
               depType: 'tool-constraint',
               commitMessageTopic: '{{{depName}}} tool constraint',
             },
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'maven',
-              packageName: 'maven',
+              packageName: 'containerbase/maven-prebuild',
               versioning: 'maven',
               currentValue: '< 4.0.0',
               depType: 'tool-constraint',
               commitMessageTopic: '{{{depName}}} tool constraint',
-            },
-          ],
-        });
-      });
-
-      it('sets skipReason=unsupported for a Containerbase tool which Renovate does not support', () => {
-        expect(
-          extractPackageFile(
-            codeBlock`
-            {
-              "constraints": {
-                "kubectl": "1.30.0"
-              }
-            }
-          `,
-            'renovate.json',
-          ),
-        ).toEqual({
-          deps: [
-            {
-              depName: 'kubectl',
-              skipReason: 'unsupported',
-              currentValue: '1.30.0',
-              depType: 'constraint',
-              commitMessageTopic: '{{{depName}}} constraint',
             },
           ],
         });
@@ -735,10 +710,10 @@ describe('modules/manager/renovate-config/extract', () => {
         ).toEqual({
           deps: [
             {
-              datasource: 'containerbase',
+              datasource: 'github-releases',
               depName: 'gleam',
-              packageName: 'gleam',
-              versioning: 'npm',
+              packageName: 'gleam-lang/gleam',
+              versioning: 'semver',
               currentValue: '3.4.5',
               depType: 'tool-constraint',
               commitMessageTopic: '{{{depName}}} tool constraint',
@@ -791,18 +766,18 @@ describe('modules/manager/renovate-config/extract', () => {
           },
 
           {
-            datasource: 'containerbase',
+            datasource: 'github-releases',
             depName: 'bazelisk',
-            packageName: 'bazelisk',
-            versioning: 'npm',
+            packageName: 'bazelbuild/bazelisk',
+            versioning: 'semver',
             currentValue: '>= 1.2.3',
             depType: 'tool-constraint',
             commitMessageTopic: '{{{depName}}} tool constraint',
           },
           {
-            datasource: 'containerbase',
+            datasource: 'github-releases',
             depName: 'maven',
-            packageName: 'maven',
+            packageName: 'containerbase/maven-prebuild',
             versioning: 'maven',
             currentValue: '< 4.0.0',
             depType: 'tool-constraint',

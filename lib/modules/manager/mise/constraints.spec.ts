@@ -1,5 +1,5 @@
 import { getSupportedToolNames } from '../../../util/exec/containerbase.ts';
-import type { SupportedToolName } from '../../../util/exec/types.ts';
+import type { ToolName } from '../../../util/exec/types.ts';
 import {
   getConstraintName,
   getConstraintValue,
@@ -67,7 +67,7 @@ describe('modules/manager/mise/constraints', () => {
       ${'python'}    | ${'3.12.4'}        | ${'3.12.4'}
       ${'python'}    | ${'3.12'}          | ${null}
       ${'ruby'}      | ${'3.3'}           | ${null}
-      ${'helm'}      | ${'3'}             | ${'3'}
+      ${'helm'}      | ${'3'}             | ${null}
       ${'node'}      | ${'latest'}        | ${null}
       ${'node'}      | ${'lts'}           | ${null}
       ${'node'}      | ${'ref:main'}      | ${null}
@@ -84,9 +84,9 @@ describe('modules/manager/mise/constraints', () => {
     `(
       'returns $expected for $constraintName $version',
       ({ constraintName, version, expected }) => {
-        expect(
-          getConstraintValue(constraintName as SupportedToolName, version),
-        ).toBe(expected);
+        expect(getConstraintValue(constraintName as ToolName, version)).toBe(
+          expected,
+        );
       },
     );
   });
