@@ -1,4 +1,4 @@
-import { GlobalConfig } from './global.ts';
+import { GlobalConfig, setHttpGlobalConfig } from './global.ts';
 import type { InternalGlobalConfigOptions, RepoGlobalConfig } from './types.ts';
 
 describe('config/global', () => {
@@ -20,5 +20,35 @@ describe('config/global', () => {
     expect(defined, 'OPTIONS should be sorted alphabetically').toStrictEqual(
       sorted,
     );
+  });
+
+  describe('setHttpGlobalConfig', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('sets the http options only', () => {
+      setHttpGlobalConfig({
+        allowedHeaders: ['X-Custom'],
+        endpoint: 'https://api.github.com/',
+        internalHostAccess: 'block',
+        platform: 'github',
+        userAgent: 'renovate',
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/',
+          },
+        ],
+      });
+
+      expect(GlobalConfig.get()).toEqual({
+        allowedHeaders: ['X-Custom'],
+        endpoint: 'https://api.github.com/',
+        internalHostAccess: 'block',
+        platform: 'github',
+        userAgent: 'renovate',
+      });
+    });
   });
 });

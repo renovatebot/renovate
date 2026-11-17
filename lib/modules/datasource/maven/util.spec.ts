@@ -1,8 +1,11 @@
 import { vi } from 'vitest';
+import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { MAVEN_CENTRAL_MIRROR, MAVEN_REPO } from './common.ts';
@@ -203,6 +206,303 @@ describe('modules/datasource/maven/util', () => {
         });
       },
     );
+
+    describe('with urlReplacements', () => {
+      const pomUrl =
+        'https://repo.maven.apache.org/maven2/org/example/foo/1.0.0/foo-1.0.0.pom';
+
+      afterEach(() => {
+        GlobalConfig.reset();
+      });
+
+      it.each`
+        mirrorToken  | host
+        ${undefined} | ${'https://mirror.example.com/maven-public'}
+        ${'secret'}  | ${'https://repo.maven.apache.org/maven2'}
+      `(
+        'requests $host as cacheable for a mirror token $mirrorToken',
+        async ({ mirrorToken, host }) => {
+          GlobalConfig.set({
+            urlReplacements: [
+              {
+                matchUrlPrefix: 'https://repo.maven.apache.org/maven2/',
+                replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+              },
+            ],
+          });
+          hostRules.add({
+            matchHost: 'mirror.example.com',
+            token: mirrorToken,
+          });
+          httpMock
+            .scope(host)
+            .get('/org/example/foo/1.0.0/foo-1.0.0.pom')
+            .reply(200, '<project/>');
+
+          const res = await downloadHttpProtocol(new Http('maven'), pomUrl);
+
+          expect(res.unwrap()).toEqual({
+            ok: true,
+            val: { data: '<project/>', isCacheable: true },
+          });
+        },
+      );
+
+      describe('error logs', () => {
+        const mirrorPomUrl =
+          'https://mirror.example.com/maven-public/org/example/foo/1.0.0/foo-1.0.0.pom';
+
+        beforeEach(() => {
+          GlobalConfig.set({
+            urlReplacements: [
+              {
+                matchUrlPrefix: 'https://repo.maven.apache.org/maven2/',
+                replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+              },
+            ],
+          });
+        });
+
+        it('logs the mirror url when the mirror rejects the request', async () => {
+          httpMock
+            .scope('https://mirror.example.com')
+            .get('/maven-public/org/example/foo/1.0.0/foo-1.0.0.pom')
+            .reply(401);
+
+          const res = await downloadHttpProtocol(new Http('maven'), pomUrl);
+
+          expect(res.unwrap()).toEqual({
+            ok: false,
+            err: { type: 'permission-issue' } satisfies MavenFetchError,
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            { failedUrl: mirrorPomUrl, mirror: true },
+            'Dependency lookup unauthorized by the urlReplacements mirror',
+          );
+          expect(logger.logger.debug).not.toHaveBeenCalledWith(
+            expect.stringContaining('Please add authentication'),
+          );
+        });
+
+        it('logs the original url when the requested url is unknown', async () => {
+          const http = partial<Http>({
+            getText: () =>
+              Promise.reject(
+                httpError({
+                  request: { context: { urlReplaced: true } },
+                  response: { statusCode: 403 },
+                }),
+              ),
+          });
+
+          await downloadHttpProtocol(http, pomUrl);
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            { failedUrl: pomUrl, mirror: true },
+            'Dependency lookup unauthorized by the urlReplacements mirror',
+          );
+        });
+
+        it.each`
+          status
+          ${429}
+          ${503}
+        `(
+          'throws an ExternalHostError and logs the mirror url for a $status of a Maven Central mirror',
+          async ({ status }) => {
+            vi.spyOn(packageCache, 'getCacheType').mockReturnValue('redis');
+            httpMock
+              .scope('https://mirror.example.com')
+              .get('/maven-public/org/example/foo/1.0.0/foo-1.0.0.pom')
+              .reply(status);
+
+            await expect(
+              downloadHttpProtocol(new Http('maven'), pomUrl),
+            ).rejects.toBeInstanceOf(ExternalHostError);
+
+            expect(logger.logger.debug).toHaveBeenCalledWith(
+              {
+                failedUrl: mirrorPomUrl,
+                mirror: true,
+                err: expect.any(HttpError),
+              },
+              'Temporary error',
+            );
+          },
+        );
+
+        it('logs the mirror url for rate limiting of a Maven Central mirror', async () => {
+          vi.spyOn(packageCache, 'getCacheType').mockReturnValue('redis');
+          httpMock
+            .scope('https://mirror.example.com')
+            .get('/maven-public/org/example/foo/1.0.0/foo-1.0.0.pom')
+            .reply(429);
+
+          await expect(
+            downloadHttpProtocol(new Http('maven'), pomUrl),
+          ).rejects.toThrow(ExternalHostError);
+
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { failedUrl: mirrorPomUrl, mirror: true },
+            'Maven Central rate limiting detected despite Redis caching.',
+          );
+        });
+      });
+
+      describe('maven-metadata.xml 404 caching', () => {
+        const metadataUrl =
+          'https://repo.maven.apache.org/maven2/org/example/foo/maven-metadata.xml';
+
+        beforeEach(() => {
+          GlobalConfig.set({
+            urlReplacements: [
+              {
+                matchUrlPrefix: 'https://repo.maven.apache.org/maven2/',
+                replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+              },
+            ],
+          });
+          vi.spyOn(packageCache, 'get').mockResolvedValue(undefined);
+        });
+
+        const mirrorMetadataUrl =
+          'https://mirror.example.com/maven-public/org/example/foo/maven-metadata.xml';
+
+        it('caches a 404 of the mirror for 15 minutes under the mirror URL', async () => {
+          const setSpy = vi
+            .spyOn(packageCache, 'set')
+            .mockResolvedValue(undefined);
+          httpMock
+            .scope('https://mirror.example.com')
+            .get('/maven-public/org/example/foo/maven-metadata.xml')
+            .reply(404);
+
+          const res = await downloadHttpProtocol(
+            new Http('maven'),
+            metadataUrl,
+          );
+
+          expect(res.unwrap()).toEqual({
+            ok: false,
+            err: {
+              type: 'not-found',
+              isMirror: true,
+            } satisfies MavenFetchError,
+          });
+          expect(setSpy).toHaveBeenCalledWith(
+            'datasource-maven:metadata-not-found',
+            `mirror:${mirrorMetadataUrl}`,
+            true,
+            15,
+          );
+        });
+
+        it('caches a 404 of the mirror used directly as registry under the plain URL', async () => {
+          const setSpy = vi
+            .spyOn(packageCache, 'set')
+            .mockResolvedValue(undefined);
+          httpMock
+            .scope('https://mirror.example.com')
+            .get('/maven-public/org/example/foo/maven-metadata.xml')
+            .reply(404);
+
+          await downloadHttpProtocol(new Http('maven'), mirrorMetadataUrl);
+
+          expect(setSpy).toHaveBeenCalledWith(
+            'datasource-maven:metadata-not-found',
+            mirrorMetadataUrl,
+            true,
+            expect.toBeWithin(720, 840),
+          );
+        });
+
+        it('reads a cached 404 of the mirror under the mirror URL', async () => {
+          const getSpy = vi.spyOn(packageCache, 'get').mockResolvedValue(true);
+
+          const res = await downloadHttpProtocol(
+            new Http('maven'),
+            metadataUrl,
+          );
+
+          expect(res.unwrap()).toEqual({
+            ok: false,
+            err: { type: 'not-found' } satisfies MavenFetchError,
+          });
+          expect(getSpy).toHaveBeenCalledExactlyOnceWith(
+            'datasource-maven:metadata-not-found',
+            `mirror:${mirrorMetadataUrl}`,
+          );
+        });
+
+        it('reads a cached 404 under the original URL without the rule', async () => {
+          GlobalConfig.reset();
+          const getSpy = vi.spyOn(packageCache, 'get').mockResolvedValue(true);
+
+          await downloadHttpProtocol(new Http('maven'), metadataUrl);
+
+          expect(getSpy).toHaveBeenCalledExactlyOnceWith(
+            'datasource-maven:metadata-not-found',
+            metadataUrl,
+          );
+        });
+
+        it('caches a 404 of the original host for at least 12 hours when the request is not rewritten', async () => {
+          const setSpy = vi
+            .spyOn(packageCache, 'set')
+            .mockResolvedValue(undefined);
+          hostRules.add({
+            matchHost: 'repo.maven.apache.org',
+            token: 'secret',
+          });
+          httpMock
+            .scope('https://repo.maven.apache.org')
+            .get('/maven2/org/example/foo/maven-metadata.xml')
+            .reply(404);
+
+          const res = await downloadHttpProtocol(
+            new Http('maven'),
+            metadataUrl,
+          );
+
+          expect(res.unwrap()).toEqual({
+            ok: false,
+            err: { type: 'not-found' } satisfies MavenFetchError,
+          });
+          expect(setSpy).toHaveBeenCalledWith(
+            'datasource-maven:metadata-not-found',
+            metadataUrl,
+            true,
+            expect.toBeWithin(720, 840),
+          );
+        });
+
+        it('caches a 404 for at least 12 hours for a host type which is never rewritten', async () => {
+          const setSpy = vi
+            .spyOn(packageCache, 'set')
+            .mockResolvedValue(undefined);
+          httpMock
+            .scope('https://repo.maven.apache.org')
+            .get('/maven2/org/example/foo/maven-metadata.xml')
+            .reply(404);
+
+          const res = await downloadHttpProtocol(
+            new Http('clojure'),
+            metadataUrl,
+          );
+
+          expect(res.unwrap()).toEqual({
+            ok: false,
+            err: { type: 'not-found' } satisfies MavenFetchError,
+          });
+          expect(setSpy).toHaveBeenCalledWith(
+            'datasource-maven:metadata-not-found',
+            metadataUrl,
+            true,
+            expect.toBeWithin(720, 840),
+          );
+        });
+      });
+    });
 
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({

@@ -6,6 +6,7 @@ import {
   getQueryString,
   hasUrlCredentials,
   isHttpUrl,
+  isHttpUrlPrefix,
   isUserinfoPlaceholder,
   joinUrlParts,
   massageHostUrl,
@@ -113,6 +114,29 @@ describe('util/url', () => {
     expect(isHttpUrl('http://github.com')).toBeTrue();
     expect(isHttpUrl('https://github.com')).toBeTrue();
     expect(isHttpUrl(parseUrl('https://github.com')!)).toBeTrue();
+  });
+
+  it.each`
+    value                             | expected
+    ${undefined}                      | ${false}
+    ${'https://example.com'}          | ${false}
+    ${'https://example.com/foo'}      | ${false}
+    ${'ssh://example.com/'}           | ${false}
+    ${'example.com/'}                 | ${false}
+    ${'https://Example.com/'}         | ${false}
+    ${'https://example.com:443/'}     | ${false}
+    ${'http://example.com:80/'}       | ${false}
+    ${'https://bücher.example/'}      | ${false}
+    ${'https://example.com/a/../'}    | ${false}
+    ${'https://example.com/?a=/'}     | ${false}
+    ${'https://example.com/#/'}       | ${false}
+    ${'https://user@example.com/'}    | ${false}
+    ${'https://user:pw@example.com/'} | ${false}
+    ${'https://:pw@example.com/'}     | ${false}
+    ${'https://example.com/'}         | ${true}
+    ${'http://example.com:8080/foo/'} | ${true}
+  `('isHttpUrlPrefix($value) is $expected', ({ value, expected }) => {
+    expect(isHttpUrlPrefix(value)).toBe(expected);
   });
 
   it('parses URL', () => {

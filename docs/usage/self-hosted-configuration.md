@@ -1665,6 +1665,104 @@ Secret names must start with an upper or lower case character and can have only 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
 
+## `urlReplacements`
+
+Use `urlReplacements` to make Renovate fetch from a mirror instead of a Maven registry, for example from a mirror of Maven Central.
+`urlReplacements` currently applies to Maven registries only: it rewrites the requests of the `maven` datasource, which use the `maven` host type.
+Requests of all other datasources, including `clojure`, `sbt-package` and `sbt-plugin`, keep their original URL.
+Each rule replaces the `matchUrlPrefix` at the start of a request URL with the `replaceUrlPrefix`.
+Renovate ignores rules whose prefixes do not meet the requirements listed below, and logs a warning for them.
+Each rule maps one original prefix to one mirror, and a mirror URL must not be rewritten again.
+So the `replaceUrlPrefix` of a rule must not overlap the `matchUrlPrefix` of another rule: neither may start with the other.
+Renovate ignores such rules too, and logs a warning for them.
+When several rules match a URL, the first one applies.
+So a rule whose `matchUrlPrefix` starts with the `matchUrlPrefix` of an earlier rule never applies: put the rule with the longer `matchUrlPrefix` first.
+Config validation warns about such rules, and Renovate ignores them and logs a warning.
+`urlReplacements` applies to all repositories, and cannot be set in a [`repositories`](#repositories) object entry.
+
+```json {configType=global}
+{
+  "urlReplacements": [
+    {
+      "matchUrlPrefix": "https://repo.maven.apache.org/maven2/",
+      "replaceUrlPrefix": "https://mirror.example.com/maven-public/"
+    },
+    {
+      "matchUrlPrefix": "https://repo1.maven.org/maven2/",
+      "replaceUrlPrefix": "https://mirror.example.com/maven-public/"
+    }
+  ]
+}
+```
+
+Maven Central is also available at `https://repo1.maven.org/maven2/`, and that URL needs its own rule, like in the example above.
+
+The mirror must not require credentials, as Renovate only supports anonymous mirrors for now.
+
+A mirror caches metadata such as `maven-metadata.xml`, so new releases can show up later than on the original registry.
+Set the metadata cache time of the mirror to the delay you accept, for example "Maximum metadata age" in Nexus (24 hours by default) or "Metadata Retrieval Cache Period" in Artifactory.
+
+Maven release timestamps come from the `Last-Modified` header of the mirror, which depends on the upstream of the mirror.
+A proxy of `repo.maven.apache.org` keeps the dates of Maven Central, while a proxy of a re-hosted copy, like the Maven Central mirror of Google, reports the upload time of that copy, which is later.
+Timestamps can only be later than the real release, so [`minimumReleaseAge`](./configuration-options.md#minimumreleaseage) waits longer, never shorter.
+If the mirror sends no `Last-Modified` header, the releases have no timestamp.
+With a `minimumReleaseAge`, their updates then stay pending with the default [`minimumReleaseAgeBehaviour`](./configuration-options.md#minimumreleaseagebehaviour) `timestamp-required`, and skip the age check with `timestamp-optional`.
+
+The `maven` datasource treats temporary errors of a Maven Central mirror, like rate limiting (HTTP 429) or server errors (HTTP 5xx), like those of Maven Central itself: it logs them as Maven Central errors and fails the lookup of that dependency.
+Renovate adds a lookup warning for the dependency and still updates the other dependencies of the repository, but in that run it leaves group branches unchanged and does not prune stale branches.
+
+The rewrite only applies to the HTTP requests Renovate makes itself, not to package manager commands.
+It does not apply to `s3://` Maven registries either, as Renovate uses the AWS SDK for them.
+Registry URLs and lookup results keep the original URL.
+Cached HTTP responses are stored under the mirror URL, so responses of the mirror and of the original host are never mixed up.
+The lookup results and not-found responses of the `maven` datasource are cached separately for a mirror too, so Renovate instances with and without a mirror rule can share a package cache.
+
+The `maven` datasource caches not-found responses (HTTP 404) of a mirror for 15 minutes, while it caches those of the original host for 12 to 24 hours.
+A [`cacheTtlOverride`](#cachettloverride) which matches the `datasource-maven:metadata-not-found` or `datasource-maven:postprocess-reject` namespace replaces these times, for a mirror too.
+Proxies like Nexus or Artifactory also return HTTP 404 when their upstream is unavailable or rate limited, and keep that result in their own negative cache.
+Keep this cache of the mirror short too, for example "Not found cache TTL" in Nexus or "Missed Retrieval Cache Period" in Artifactory.
+
+Renovate does not rewrite a request when:
+
+- the request itself has credentials
+- the host rule for the original URL has a `token`, a `password`, a client certificate or key, a certificate authority, or any `headers`
+- the host rule for the original URL has `enabled=false`
+- the host rule for the mirror URL has a `token`, a `password`, a client certificate or key, or any `headers`
+
+Renovate sends such requests to the original host, or rejects them when the original host is disabled, and logs this at debug level.
+So any host rule with credentials which also matches the original URL keeps the mirror from being used, for example a credential rule with only a `hostType` and no `matchHost`.
+Scope your credential host rules with `matchHost`.
+
+Renovate applies only the host rules that match the mirror URL to a rewritten request.
+Host rules for the original URL do not apply to it, including credentials, `abortOnError`, `abortIgnoreStatusCodes`, timeouts and concurrency limits.
+Add a host rule for the mirror with the options you need, such as `timeout` or `concurrentRequestLimit`.
+Do not set `abortOnError` for a Maven mirror: the `maven` datasource turns the resulting errors into lookups without results, so Renovate can prune branches of updates it then no longer finds.
+[`internalHostAccess`](#internalhostaccess) is also resolved for the mirror URL only.
+Any host rule which matches the mirror URL applies to rewritten requests, including rules with a broad `matchHost` domain.
+So a host rule with credentials which matches the mirror URL keeps the mirror from being used too.
+If the mirror is on an internal host, it needs its own host rule in your global config with [`allowInternal=true`](#hostrulesallowinternal).
+
+!!! warning
+  `urlReplacements` is not a security or egress control.
+  Requests of other datasources, requests with credentials, URLs which do not match a `matchUrlPrefix`, and redirects to other hosts still go to the original or redirected host.
+
+### `urlReplacements.matchUrlPrefix`
+
+The URL prefix to replace, for example `https://repo.example.com/`.
+It must be an absolute `http://` or `https://` URL which:
+
+- ends with `/`, so the replacement cannot change the host
+- is already normalized, for example a lowercase host, no default port, and no `..` segments
+- has no username, password, query or fragment
+
+It can use [`secrets`](#secrets) and [`variables`](#variables), like `{{ variables.MAVEN_MIRROR }}`.
+Config validation skips such values, and Renovate ignores the rule with a warning when the applied value does not meet these requirements.
+
+### `urlReplacements.replaceUrlPrefix`
+
+The URL prefix to use instead of `matchUrlPrefix`.
+It has the same requirements as `matchUrlPrefix`.
+
 ## `useCloudMetadataServices`
 
 Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).

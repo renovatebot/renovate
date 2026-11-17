@@ -287,6 +287,12 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   productLinks?: Record<string, string>;
   rebaseAllOpenBranches?: boolean;
   toolSettings?: GlobalToolSettingsOptions;
+  urlReplacements?: UrlReplacement[];
+}
+
+export interface UrlReplacement {
+  matchUrlPrefix: string;
+  replaceUrlPrefix: string;
 }
 
 /**
@@ -667,9 +673,15 @@ export const namedParents = [
   'vulnerabilityAlerts',
 ] as const;
 
+/**
+ * The objects which only the global config has, and which the `any` scope does not cover.
+ */
+const globalOnlyParents = ['urlReplacements'] as const;
+
 export type AllowedParents =
   | '.'
   | (typeof namedParents)[number]
+  | (typeof globalOnlyParents)[number]
   | ManagerName
   | CustomManagerName
   | UpdateTypeOptions;

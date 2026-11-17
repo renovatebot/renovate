@@ -13,12 +13,15 @@ import { hasProxy } from '../../proxy.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
+import { HttpStats } from '../stats.ts';
 import { memCacheProvider } from './cache/memory-http-cache-provider.ts';
+import * as httpHostRules from './host-rules.ts';
 import { applyDefaultHeaders } from './http.ts';
 import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
 import * as throttle from './throttle.ts';
 import type { HttpResponse } from './types.ts';
+import { isUrlReplacedError } from './url-replacements.ts';
 
 vi.mock('node:dns/promises', () => ({
   default: { lookup: vi.fn() },
@@ -1091,6 +1094,393 @@ describe('util/http/index', () => {
         await expect(
           http.postJson('http://renovate.com', Some),
         ).rejects.toThrow(z.ZodError);
+      });
+    });
+  });
+
+  describe('urlReplacements', () => {
+    const urlReplacements = [
+      {
+        matchUrlPrefix: 'https://repo.example.com/maven2/',
+        replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+      },
+    ];
+
+    beforeEach(() => {
+      http = new Http('maven');
+      memCache.init();
+    });
+
+    afterEach(() => {
+      GlobalConfig.reset();
+      memCache.reset();
+    });
+
+    it('requests the original url with another host type', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://repo.example.com')
+        .get('/maven2/foo')
+        .reply(200, 'original');
+
+      const res = await new Http('dummy').getText(
+        'https://repo.example.com/maven2/foo',
+      );
+
+      expect(res.body).toBe('original');
+    });
+
+    it('requests the replaced url and records it in the stats', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.body).toBe('mirrored');
+      expect(HttpStats.getDataPoints()).toMatchObject([
+        { method: 'get', url: 'https://mirror.example.com/maven-public/foo' },
+      ]);
+    });
+
+    it('marks errors of a replaced url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(404);
+
+      const res = http.getText('https://repo.example.com/maven2/foo');
+
+      await expect(res).rejects.toSatisfy(
+        (err: HttpError) => err instanceof HttpError && isUrlReplacedError(err),
+      );
+    });
+
+    it('does not mark errors of the original url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock.scope('https://repo.example.com').get('/maven2/foo').reply(404);
+
+      const res = new Http('dummy').getText(
+        'https://repo.example.com/maven2/foo',
+      );
+
+      await expect(res).rejects.toSatisfy(
+        (err: HttpError) =>
+          err instanceof HttpError && !isUrlReplacedError(err),
+      );
+    });
+
+    it('applies the hostRules of the replaced url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'mirror.example.com', abortOnError: true });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(500);
+
+      await expect(
+        http.getText('https://repo.example.com/maven2/foo'),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('rejects a request when the mirror host is disabled', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'mirror.example.com', enabled: false });
+
+      await expect(
+        http.getText('https://repo.example.com/maven2/foo'),
+      ).rejects.toThrow(HOST_DISABLED);
+    });
+
+    it('requests the original url when the hostRule of the mirror has credentials', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'mirror.example.com', token: 'mirror-token' });
+      httpMock
+        .scope('https://repo.example.com', { badheaders: ['authorization'] })
+        .get('/maven2/foo')
+        .reply(200, 'original');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.body).toBe('original');
+      expect(res.authorization).toBeFalse();
+    });
+
+    it('requests the original url when its hostRule has credentials', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'repo.example.com', token: 'repo-token' });
+      httpMock
+        .scope('https://repo.example.com', {
+          reqheaders: { authorization: 'Bearer repo-token' },
+        })
+        .get('/maven2/foo')
+        .reply(200, 'original');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.body).toBe('original');
+    });
+
+    it('looks up the hostRule of a request which stays on the original url once', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'repo.example.com', token: 'repo-token' });
+      const findMatchingRule = vi.spyOn(httpHostRules, 'findMatchingRule');
+      httpMock
+        .scope('https://repo.example.com')
+        .get('/maven2/foo')
+        .reply(200, 'original');
+
+      await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(findMatchingRule).toHaveBeenCalledExactlyOnceWith(
+        'https://repo.example.com/maven2/foo',
+        expect.any(Object),
+      );
+    });
+
+    it('looks up the hostRules of the original and the replaced url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      const findMatchingRule = vi.spyOn(httpHostRules, 'findMatchingRule');
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(findMatchingRule.mock.calls.map(([url]) => url)).toEqual([
+        'https://repo.example.com/maven2/foo',
+        'https://mirror.example.com/maven-public/foo',
+      ]);
+    });
+
+    it('never sends the credentials of the original host to the mirror', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({
+        hostType: 'maven',
+        matchHost: 'repo.example.com',
+        username: 'user',
+        password: 'secret',
+      });
+      httpMock
+        .scope('https://repo.example.com', {
+          reqheaders: { authorization: /^Basic / },
+        })
+        .get('/maven2/foo')
+        .reply(200, 'original');
+
+      // the mirror has no mock, so a request to it fails the test
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.body).toBe('original');
+    });
+
+    it('does not merge the host rules of the original host into a rewritten request', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'repo.example.com', abortOnError: true });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(500);
+
+      await expect(
+        http.getText('https://repo.example.com/maven2/foo'),
+      ).rejects.toThrow('Request failed with status code 500');
+    });
+
+    it('rejects a request when the original host is disabled', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'repo.example.com', enabled: false });
+
+      await expect(
+        http.getText('https://repo.example.com/maven2/foo'),
+      ).rejects.toThrow(HOST_DISABLED);
+    });
+
+    it('requests the original url with explicit credentials', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://repo.example.com', {
+          reqheaders: { authorization: 'Basic abc' },
+        })
+        .get('/maven2/foo')
+        .reply(200, 'original');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo', {
+        headers: { authorization: 'Basic abc' },
+      });
+
+      expect(res.body).toBe('original');
+    });
+
+    it('throttles and queues a rewritten request by the replaced url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      const getThrottle = vi.spyOn(throttle, 'getThrottle');
+      const getQueue = vi.spyOn(queue, 'getQueue');
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(getThrottle).toHaveBeenCalledExactlyOnceWith(
+        'https://mirror.example.com/maven-public/foo',
+      );
+      expect(getQueue).toHaveBeenCalledExactlyOnceWith(
+        'https://mirror.example.com/maven-public/foo',
+      );
+    });
+
+    it('requests the replaced url on the stream path', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of http.stream(
+        'https://repo.example.com/maven2/foo',
+      )) {
+        chunks.push(chunk as Buffer);
+      }
+
+      expect(Buffer.concat(chunks).toString()).toBe('mirrored');
+    });
+
+    it('does not share memCache entries between the original and the replaced url', async () => {
+      httpMock
+        .scope('https://repo.example.com')
+        .get('/maven2/foo')
+        .reply(200, 'original');
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+      await http.getText('https://repo.example.com/maven2/foo');
+      GlobalConfig.set({ urlReplacements });
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.body).toBe('mirrored');
+      expect(httpMock.allUsed()).toBeTrue();
+    });
+
+    it('keys cacheProvider entries by the replaced url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+      httpMock
+        .scope('https://repo.example.com')
+        .get('/maven2/foo')
+        .reply(200, 'original');
+      await http.getText('https://repo.example.com/maven2/foo', {
+        cacheProvider: memCacheProvider,
+      });
+      GlobalConfig.reset();
+
+      const res = await http.getText('https://repo.example.com/maven2/foo', {
+        cacheProvider: memCacheProvider,
+      });
+
+      expect(res.body).toBe('original');
+      expect(httpMock.allUsed()).toBeTrue();
+    });
+
+    it('returns the stale cacheProvider entry of the replaced url on errors', async () => {
+      GlobalConfig.set({ urlReplacements });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored')
+        .get('/maven-public/foo')
+        .reply(500);
+      await http.getText('https://repo.example.com/maven2/foo', {
+        cacheProvider: memCacheProvider,
+      });
+      const bypassServer = vi
+        .spyOn(memCacheProvider, 'bypassServer')
+        .mockResolvedValueOnce(null);
+
+      const res = await http.getText('https://repo.example.com/maven2/foo', {
+        cacheProvider: memCacheProvider,
+      });
+
+      expect(res.body).toBe('mirrored');
+      expect(bypassServer).toHaveBeenLastCalledWith(
+        'get',
+        'https://mirror.example.com/maven-public/foo',
+        true,
+      );
+    });
+
+    it('marks responses of a mirror without credentials as public', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'mirror.example.com', timeout: 1000 });
+      httpMock
+        .scope('https://mirror.example.com', { badheaders: ['authorization'] })
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.body).toBe('mirrored');
+      expect(res.authorization).toBeFalse();
+    });
+
+    describe('when internalHostAccess=block', () => {
+      const internalReplacements = [
+        {
+          matchUrlPrefix: 'https://repo.example.com/maven2/',
+          replaceUrlPrefix: 'http://10.1.2.3/maven-public/',
+        },
+      ];
+
+      it('blocks a replaced url on an internal host', async () => {
+        GlobalConfig.set({
+          internalHostAccess: 'block',
+          urlReplacements: internalReplacements,
+        });
+
+        await expect(
+          http.get('https://repo.example.com/maven2/foo'),
+        ).rejects.toThrow(HOST_BLOCKED);
+      });
+
+      it('blocks a replaced url on an internal host on the stream path', () => {
+        GlobalConfig.set({
+          internalHostAccess: 'block',
+          urlReplacements: internalReplacements,
+        });
+
+        expect(() =>
+          http.stream('https://repo.example.com/maven2/foo'),
+        ).toThrow(HOST_BLOCKED);
+      });
+
+      it('permits a replaced url on an internal host with a trusted allowInternal hostRule', async () => {
+        GlobalConfig.set({
+          internalHostAccess: 'block',
+          urlReplacements: internalReplacements,
+        });
+        hostRules.add(
+          { matchHost: 'http://10.1.2.3/maven-public/', allowInternal: true },
+          { trusted: true },
+        );
+        httpMock
+          .scope('http://10.1.2.3')
+          .get('/maven-public/foo')
+          .reply(200, 'mirrored');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo');
+
+        expect(res.body).toBe('mirrored');
       });
     });
   });
