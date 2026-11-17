@@ -318,6 +318,20 @@ export async function getUpdatedPackageFiles(
           { manager },
           'isLockFileUpdate without updateLockedDependency',
         );
+        if (
+          reuseExistingBranch &&
+          get(manager, 'updateArtifacts') &&
+          !config.skipArtifactsUpdate
+        ) {
+          logger.debug(
+            { packageFile, depName },
+            'Lock file update cannot be verified on the existing branch, so will rebase first',
+          );
+          return getUpdatedPackageFiles({
+            ...config,
+            reuseExistingBranch: false,
+          });
+        }
         if (!updatedFileContents[packageFile]) {
           nonUpdatedFileContents[packageFile] = packageFileContent!;
         }

@@ -1057,6 +1057,155 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    describe('lock file update without updateLockedDependency on reuse', () => {
+      beforeEach(() => {
+        config.reuseExistingBranch = true;
+        git.getFile.mockResolvedValue('existing content');
+      });
+
+      it('rebases and updates artifacts once', async () => {
+        config.upgrades.push({
+          packageFile: 'pyproject.toml',
+          lockFile: 'uv.lock',
+          manager: 'pep621',
+          branchName: '',
+          depName: 'requests',
+          isLockfileUpdate: true,
+        });
+        pep621.updateArtifacts.mockResolvedValueOnce([
+          {
+            file: { type: 'addition', path: 'uv.lock', contents: 'new lock' },
+          },
+        ]);
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res).toEqual({
+          artifactErrors: [],
+          artifactNotices: [],
+          reuseExistingBranch: false,
+          updatedArtifacts: [
+            { type: 'addition', path: 'uv.lock', contents: 'new lock' },
+          ],
+          updatedPackageFiles: [
+            {
+              type: 'addition',
+              path: 'pyproject.toml',
+              contents: 'existing content',
+            },
+          ],
+        });
+        expect(pep621.updateArtifacts).toHaveBeenCalledOnce();
+      });
+
+      it('rebases once for a lock file update after an unchanged upgrade', async () => {
+        config.upgrades.push(
+          {
+            packageFile: 'pyproject.toml',
+            lockFile: 'uv.lock',
+            manager: 'pep621',
+            branchName: '',
+            depName: 'django',
+          },
+          {
+            packageFile: 'pyproject.toml',
+            lockFile: 'uv.lock',
+            manager: 'pep621',
+            branchName: '',
+            depName: 'requests',
+            isLockfileUpdate: true,
+          },
+        );
+        autoReplace.doAutoReplace
+          .mockResolvedValueOnce('existing content')
+          .mockResolvedValueOnce('new content');
+        pep621.updateArtifacts.mockResolvedValueOnce([
+          {
+            file: { type: 'addition', path: 'uv.lock', contents: 'new lock' },
+          },
+        ]);
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res).toMatchObject({
+          reuseExistingBranch: false,
+          updatedPackageFiles: [
+            {
+              type: 'addition',
+              path: 'pyproject.toml',
+              contents: 'new content',
+            },
+          ],
+        });
+        expect(pep621.updateArtifacts).toHaveBeenCalledOnce();
+      });
+
+      it('keeps the branch when the manager has no updateArtifacts', async () => {
+        config.upgrades.push({
+          packageFile: 'index.html',
+          manager: 'html',
+          branchName: '',
+          isLockfileUpdate: true,
+        });
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res).toEqual({
+          artifactErrors: [],
+          artifactNotices: [],
+          reuseExistingBranch: true,
+          updatedArtifacts: [],
+          updatedPackageFiles: [],
+        });
+      });
+
+      it('keeps the branch when skipArtifactsUpdate is set', async () => {
+        config.skipArtifactsUpdate = true;
+        config.upgrades.push({
+          packageFile: 'pyproject.toml',
+          lockFile: 'uv.lock',
+          manager: 'pep621',
+          branchName: '',
+          isLockfileUpdate: true,
+        });
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res).toEqual({
+          artifactErrors: [],
+          artifactNotices: [],
+          reuseExistingBranch: true,
+          updatedArtifacts: [],
+          updatedPackageFiles: [],
+        });
+        expect(pep621.updateArtifacts).not.toHaveBeenCalled();
+      });
+
+      it.each(['already-updated', 'unsupported'] as const)(
+        'keeps the branch for updateLockedDependency status %s',
+        async (status) => {
+          config.upgrades.push({
+            packageFile: 'package.json',
+            lockFile: 'package-lock.json',
+            manager: 'npm',
+            branchName: '',
+            isLockfileUpdate: true,
+          });
+          npm.updateLockedDependency.mockResolvedValueOnce({ status });
+
+          const res = await getUpdatedPackageFiles(config);
+
+          expect(res).toEqual({
+            artifactErrors: [],
+            artifactNotices: [],
+            reuseExistingBranch: true,
+            updatedArtifacts: [],
+            updatedPackageFiles: [],
+          });
+        },
+      );
+    });
+
     it('does not update artifacts when skipArtifactsUpdate=true', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
