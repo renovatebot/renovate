@@ -65,6 +65,13 @@ export async function pushForReview(options: {
     }
   }
 
+  // When the pusher cannot read every ref, Gerrit rejects a thin pack whose
+  // delta base is an older commit's tree ("Missing tree", see
+  // https://github.com/eclipse-jgit/jgit/issues/316). Git falls back to such a
+  // base when it lacks the advertised tip of the target branch, so fetch it.
+  // `--refmap=` keeps origin/<target> where the run's base is.
+  await git.fetchRevSpec('--refmap=', `refs/heads/${options.targetBranch}`);
+
   return git.pushCommit({
     sourceRef: options.sourceRef,
     targetRef: `refs/for/${options.targetBranch}`,

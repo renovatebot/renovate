@@ -43,6 +43,20 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
+    it('fetches the target branch before pushing', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await pushForReview({
+        sourceRef: 'renovate/feat',
+        targetBranch: 'main',
+        files: [],
+      });
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        '--refmap=',
+        'refs/heads/main',
+      );
+      expect(git.fetchRevSpec).toHaveBeenCalledBefore(git.pushCommit);
+    });
+
     it('adds hashtag push options for each label', async () => {
       git.pushCommit.mockResolvedValueOnce(true);
       await expect(
