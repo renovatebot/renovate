@@ -427,6 +427,8 @@ describe('modules/datasource/julia/index', () => {
       const clone = mockClone();
       httpMock
         .scope('https://juliaregistries.github.io/GeneralMetadata.jl/api')
+        .get('/Example/info.json')
+        .reply(200, { name: 'Example', uuid: exampleUuid })
         .get('/Example/versions.json')
         .reply(200, { '0.5.4': { registered: '2019-07-17T05:33:46' } });
       const result = await getPkgReleases({
