@@ -43,10 +43,11 @@ function getRepositoryPath(
     return null;
   }
   const segmentCount = trimSlashes(groups.base).split('/').length;
-  if (
-    (url.hostname === 'dev.azure.com' && segmentCount !== 2) ||
-    (url.hostname.endsWith('.visualstudio.com') && segmentCount !== 1)
-  ) {
+  const isInvalidDevAzure =
+    url.hostname === 'dev.azure.com' && segmentCount !== 2;
+  const isInvalidVisualStudio =
+    url.hostname.endsWith('.visualstudio.com') && segmentCount !== 1;
+  if (isInvalidDevAzure || isInvalidVisualStudio) {
     return null;
   }
   return { base: groups.base, repository: groups.repository };
