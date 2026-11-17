@@ -207,8 +207,25 @@ describe('workers/repository/updates/generate', () => {
       },
     );
 
-    it('turns off branch automerge for an unchanged upgrade that forbids it', () => {
-      config.upgrades[0].automerge = false;
+    it.each([false, undefined])(
+      'preserves unchanged branch automerge when upgrade automerge is %s',
+      (automerge) => {
+        config.automerge = true;
+        config.upgrades[0].automerge = automerge;
+        const original = structuredClone(config);
+
+        refreshBranchConfig(config, previousTargets);
+
+        expect(config).toEqual(original);
+      },
+    );
+
+    it('checks unchanged upgrades when a changed branch aggregates automerge', () => {
+      const unchanged = { ...config.upgrades[0], automerge: false };
+      config.upgrades.push(unchanged);
+      previousTargets.set(unchanged, { ...unchanged });
+      config.upgrades[0].newValue = '4.1.11';
+      config.upgrades[0].newVersion = '4.1.11';
 
       refreshBranchConfig(config, previousTargets);
 

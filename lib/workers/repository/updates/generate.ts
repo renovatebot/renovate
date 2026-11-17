@@ -287,12 +287,12 @@ export function refreshBranchConfig(
     upgrade.prettyNewMajor =
       upgrade.newMajor === undefined ? undefined : `v${upgrade.newMajor}`;
   }
-  config.automerge =
-    Boolean(config.automerge) &&
-    config.upgrades.every((upgrade) => upgrade.automerge);
   if (!changed) {
     return;
   }
+  config.automerge =
+    Boolean(config.automerge) &&
+    config.upgrades.every((upgrade) => upgrade.automerge);
 
   const [firstUpgrade] = config.upgrades;
   Object.assign(config, {
