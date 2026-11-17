@@ -11,6 +11,7 @@
     "ch.qos.logback:logback-access": "https://logback.qos.ch/news.html",
     "ch.qos.logback:logback-classic": "https://logback.qos.ch/news.html",
     "ch.qos.logback:logback-core": "https://logback.qos.ch/news.html",
+    "org.cyclonedx.bom:org.cyclonedx.bom.gradle.plugin": "https://github.com/CycloneDX/cyclonedx-gradle-plugin/releases",
     "org.slf4j:jcl-over-slf4j": "https://www.slf4j.org/news.html",
     "org.slf4j:jul-over-slf4j": "https://www.slf4j.org/news.html",
     "org.slf4j:jul-to-slf4j": "https://www.slf4j.org/news.html",
