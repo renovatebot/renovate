@@ -10,6 +10,8 @@ import type { Pr } from '../types.ts';
 import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types.ts';
 import { prFieldsFilter, prInfo, prStates } from './utils.ts';
 
+const syncedCacheKey = 'bitbucket:pr-cache-synced';
+
 export class BitbucketPrCache {
   private items: Pr[] = [];
   private cache: BitbucketPrCacheData;
@@ -24,8 +26,7 @@ export class BitbucketPrCache {
     repoCache.platform.bitbucket ??= {};
 
     let pullRequestCache = repoCache.platform.bitbucket.pullRequestsCache as
-      | BitbucketPrCacheData
-      | undefined;
+      BitbucketPrCacheData | undefined;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {
@@ -52,13 +53,11 @@ export class BitbucketPrCache {
     author: string | null,
   ): Promise<BitbucketPrCache> {
     const res = new BitbucketPrCache(repo, author);
-    const isSynced = memCache.get<true | undefined>(
-      'bitbucket-pr-cache-synced',
-    );
+    const isSynced = memCache.get<true | undefined>(syncedCacheKey);
 
     if (!isSynced) {
       await res.sync(http);
-      memCache.set('bitbucket-pr-cache-synced', true);
+      memCache.set(syncedCacheKey, true);
     }
 
     return res;

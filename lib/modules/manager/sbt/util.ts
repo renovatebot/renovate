@@ -1,4 +1,3 @@
-import { regEx } from '../../../util/regex.ts';
 import { get } from '../../versioning/index.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
 
@@ -22,12 +21,17 @@ export function normalizeScalaVersion(str: string): string {
     }
   }
   const isScala3 = versioning.isGreaterThan(str, '3.0.0');
-  if (regEx(/^\d+\.\d+\.\d+$/).test(str)) {
-    if (isScala3) {
-      return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1');
-    } else {
-      return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
-    }
+  const major = versioning.getMajor(str);
+  const minor = versioning.getMinor(str);
+  const patch = versioning.getPatch(str);
+  // only plain `major.minor.patch` versions are normalized
+  if (
+    major !== null &&
+    minor !== null &&
+    patch !== null &&
+    str === `${major}.${minor}.${patch}`
+  ) {
+    return isScala3 ? `${major}` : `${major}.${minor}`;
   }
   // istanbul ignore next
   return str;

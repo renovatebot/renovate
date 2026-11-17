@@ -45,6 +45,28 @@ describe('modules/datasource/buildpacks-registry/index', () => {
       });
     });
 
+    it('processes data without a homepage', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/heroku/nohomepage')
+        .reply(200, {
+          latest: {
+            version: '1.1.0',
+            namespace: 'heroku',
+            name: 'nohomepage',
+          },
+          versions: [{ version: '1.0.0' }, { version: '1.1.0' }],
+        });
+      const res = await getPkgReleases({
+        datasource: BuildpacksRegistryDatasource.id,
+        packageName: 'heroku/nohomepage',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://registry.buildpacks.io',
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+      });
+    });
+
     it('returns null on empty result', async () => {
       httpMock.scope(baseUrl).get('/heroku/empty').reply(200, {});
       const res = await getPkgReleases({

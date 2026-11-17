@@ -6,6 +6,10 @@ describe('modules/manager/composer/schema', () => {
       expect(ReposRecord.parse({})).toEqual([]);
     });
 
+    it('ignores a disabled repository that is not packagist', () => {
+      expect(ReposRecord.parse({ 'some-other-repo': false })).toEqual([]);
+    });
+
     it('parses repositories', () => {
       expect(
         ReposRecord.parse({
@@ -86,6 +90,23 @@ describe('modules/manager/composer/schema', () => {
             url: 'https://some-vcs.com',
           },
         },
+      });
+    });
+
+    it('ignores an inline package repository', () => {
+      expect(
+        Repos.parse([
+          { type: 'package' },
+          {
+            name: 'wpackagist',
+            type: 'composer',
+            url: 'https://wpackagist.org',
+          },
+        ]),
+      ).toEqual({
+        pathRepos: {},
+        registryUrls: ['https://wpackagist.org', 'https://repo.packagist.org'],
+        gitRepos: {},
       });
     });
 

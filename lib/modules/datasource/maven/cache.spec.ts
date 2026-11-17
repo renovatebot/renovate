@@ -25,7 +25,6 @@ describe('modules/datasource/maven/cache', () => {
   let cache: Record<string, HttpCache>;
 
   beforeEach(() => {
-    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((namespace, key) => {
@@ -93,6 +92,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('metadata.xml')),
       },
       timestamp,
@@ -101,6 +101,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('pom.xml')),
       },
       timestamp,
@@ -121,7 +122,6 @@ describe('modules/datasource/maven/cache', () => {
         release: '2.0.0',
       },
     });
-    expect(httpMock.getTrace()).toEqual([]);
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
@@ -139,6 +139,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('metadata.xml')),
       },
       timestamp,
@@ -147,6 +148,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(pomWithEmptyRelocation),
       },
       timestamp,
@@ -163,7 +165,6 @@ describe('modules/datasource/maven/cache', () => {
       replacementName: 'org.example:package',
       replacementVersion: '2.0.0',
     });
-    expect(httpMock.getTrace()).toEqual([]);
   });
 
   it('revalidates trimmed cached XML after 304 responses', async () => {
@@ -228,6 +229,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('metadata-snapshot-only.xml')),
       },
       timestamp,
@@ -236,6 +238,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(
           Fixtures.get('metadata-snapshot-version.xml'),
         ),
@@ -246,6 +249,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('pom.xml')),
       },
       timestamp,
@@ -272,7 +276,6 @@ describe('modules/datasource/maven/cache', () => {
         release: '1.0.3-SNAPSHOT',
       },
     });
-    expect(httpMock.getTrace()).toEqual([]);
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 });

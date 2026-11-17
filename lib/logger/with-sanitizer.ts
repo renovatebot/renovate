@@ -11,18 +11,18 @@ export function withSanitizer(streamConfig: BunyanStream): BunyanStream {
 
   const stream = streamConfig.stream as BunyanNodeStream;
   if (stream?.writable) {
-    const write = (
+    function write(
       chunk: BunyanRecord,
       enc: BufferEncoding,
       cb: (err?: Error | null) => void,
-    ): void => {
+    ): void {
       const raw = sanitizeValue(chunk);
       const result =
         streamConfig.type === 'raw'
           ? raw
           : quickStringify(raw)?.replace(regEx(/\n?$/), '\n');
       stream.write(result, enc, cb);
-    };
+    }
 
     return {
       ...streamConfig,

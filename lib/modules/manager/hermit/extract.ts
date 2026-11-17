@@ -75,7 +75,7 @@ async function listHermitPackages(
     const fileName = f
       .replace(`${hermitFolder}/`, '')
       .substring(1)
-      .replace(/\.pkg$/, '');
+      .replace(regEx(/\.pkg$/), '');
     const channelParts = fileName.split('@');
 
     if (channelParts.length > 1) {

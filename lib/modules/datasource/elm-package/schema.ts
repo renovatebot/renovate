@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import type { ReleaseResult } from '../types.ts';
 
@@ -6,7 +6,7 @@ import type { ReleaseResult } from '../types.ts';
  * Response from package.elm-lang.org/packages/{author}/{package}/releases.json
  * Maps version strings to Unix timestamps
  */
-export const ElmPackageReleasesSchema = z
+export const ElmPackageReleases = z
   .record(z.string(), z.number())
   .refine((obj) => Object.keys(obj).length > 0, 'No releases found')
   .transform((releases): ReleaseResult => {

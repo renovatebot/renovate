@@ -17,16 +17,19 @@ describe('config/app-strings', () => {
     expect(filenames.includes('def')).toBeTrue();
   });
 
-  it('expands brace patterns for json and json5 filenames', () => {
+  it('expands brace patterns for json, jsonc and json5 filenames', () => {
     const filenames = getConfigFileNames();
 
     expect(filenames.includes('renovate.json')).toBeTrue();
+    expect(filenames.includes('renovate.jsonc')).toBeTrue();
     expect(filenames.includes('renovate.json5')).toBeTrue();
     expect(filenames.includes('.renovaterc.json')).toBeTrue();
+    expect(filenames.includes('.renovaterc.jsonc')).toBeTrue();
     expect(filenames.includes('.renovaterc.json5')).toBeTrue();
 
-    expect(filenames.includes('renovate.json{,5}')).toBeFalse();
+    expect(filenames.includes('renovate.json{,c,5}')).toBeFalse();
 
+    expect(filenames.includes('package.jsonc')).toBeFalse();
     expect(filenames.includes('package.json5')).toBeFalse();
   });
 
@@ -34,6 +37,16 @@ describe('config/app-strings', () => {
     const filenames = getConfigFileNames('gitea');
     expect(filenames.includes('.github/renovate.json')).toBeFalse();
     expect(filenames.includes('.gitea/renovate.json')).toBeTrue();
+
+    const platformSpecificFilenames = filenames.filter((v) =>
+      v.startsWith('.gitea/'),
+    );
+    expect(platformSpecificFilenames).toEqual([
+      '.gitea/renovate.json',
+      '.gitea/renovate.jsonc',
+      '.gitea/renovate.json5',
+    ]);
+
     expect(
       getConfigFileNames('github').includes('.github/renovate.json'),
     ).toBeTrue();
@@ -45,9 +58,11 @@ describe('config/app-strings', () => {
     expect(filenames.includes('.local/renovate.json')).toBeFalse();
     expect(filenames).toEqual([
       'renovate.json',
+      'renovate.jsonc',
       'renovate.json5',
       '.renovaterc',
       '.renovaterc.json',
+      '.renovaterc.jsonc',
       '.renovaterc.json5',
       'package.json',
     ]);

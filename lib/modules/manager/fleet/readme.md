@@ -5,7 +5,9 @@ To enable GitRepo updates you have to extend your [`managerFilePatterns`](../../
 
 ```json
 {
-  "managerFilePatterns": ["/(^|/)fleet.ya?ml/", "/myGitRepoManifests\\.yaml/"]
+  "fleet": {
+    "managerFilePatterns": ["/(^|/)fleet.ya?ml/", "/myGitRepoManifests\\.yaml/"]
+  }
 }
 ```
 

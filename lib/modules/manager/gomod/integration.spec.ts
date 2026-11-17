@@ -2,6 +2,8 @@ import { codeBlock } from 'common-tags';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import { normalizeDepNames } from '../../../workers/repository/extract/manager-files.ts';
 import { fetchUpdates } from '../../../workers/repository/process/fetch.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
 import type { PackageFile } from '../types.ts';
@@ -15,10 +17,12 @@ describe('modules/manager/gomod/integration', () => {
     baseConfig = partial<LookupUpdateConfig>(getConfig() as never);
     baseConfig.manager = 'gomod';
     baseConfig.constraintsFiltering = 'strict';
+    vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValue([]);
+    vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue([]);
   });
 
   describe('when constraintsFiltering=strict', () => {
-    it('only suggests updates within the minor version of the `go` directive', async () => {
+    it('only suggests updates <= minor version of the `go` directive', async () => {
       // make sure we can validate all suggested releases
       baseConfig.separateMultipleMinor = true;
 
@@ -31,6 +35,8 @@ describe('modules/manager/gomod/integration', () => {
       const extracted = extractPackageFile(goMod);
       expect(extracted).not.toBeNull();
       expect(extracted?.deps).toHaveLength(2);
+      // the extract worker is bypassed, so fill in `packageName` as it would
+      extracted!.deps.forEach(normalizeDepNames);
 
       const dep = extracted!.deps.find(
         (d) => d.depName === 'github.com/renovate-tests/some-module',
@@ -103,6 +109,17 @@ describe('modules/manager/gomod/integration', () => {
 
       const updates = packageFiles.gomod[0].deps[1].updates;
       expect(updates).toEqual([
+        {
+          bucket: 'v0.2',
+          hasAttestation: undefined,
+          isBreaking: true,
+          newMajor: 0,
+          newMinor: 2,
+          newPatch: 0,
+          newValue: 'v0.2.0',
+          newVersion: 'v0.2.0',
+          updateType: 'minor',
+        },
         {
           bucket: 'v0.3',
           hasAttestation: undefined,

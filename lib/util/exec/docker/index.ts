@@ -1,8 +1,9 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { join } from 'shlex';
+import { isNonEmptyString, isString, isTruthy } from '@sindresorhus/is';
+import { join, quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../array.ts';
 import { newlineRegex, regEx } from '../../regex.ts';
 import { uniq } from '../../uniq.ts';
 import { rawExec } from '../common.ts';
@@ -124,7 +125,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .trim()
         .split(newlineRegex)
         .map((container) => container.trim())
-        .filter(Boolean);
+        .filter(isTruthy);
       logger.debug({ containerIds }, 'Removing dangling child containers');
       await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
     } else {
@@ -147,9 +148,10 @@ export async function generateDockerCommand(
   preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
   sideCarImage: string,
+  hasInput = false,
 ): Promise<string> {
   const { envVars, cwd } = options;
-  const volumes = options.volumes ?? [];
+  const volumes = coerceArray(options.volumes);
   const {
     localDir,
     cacheDir,
@@ -159,6 +161,9 @@ export async function generateDockerCommand(
     dockerCliOptions,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
+  if (hasInput) {
+    result.push('-i');
+  }
   const containerName = getContainerName(sideCarName, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
@@ -204,35 +209,60 @@ export async function generateDockerCommand(
 
   const bashCommandParts = [];
 
+  function preparePreCommand(command: string): string {
+    return hasInput ? `{ ${command}\n} </dev/null >&2` : command;
+  }
+
   for (const preCommand of preCommands) {
     if (
       isCommandWithOptions(preCommand) &&
       isString(join(preCommand.command))
     ) {
+      const command = preparePreCommand(join(preCommand.command));
       if (preCommand.ignoreFailure) {
-        bashCommandParts.push(`${join(preCommand.command)} || true`);
+        bashCommandParts.push(`${command} || true`);
       } else {
-        bashCommandParts.push(join(preCommand.command));
+        bashCommandParts.push(command);
       }
     } else if (isString(preCommand)) {
-      bashCommandParts.push(preCommand);
+      bashCommandParts.push(preparePreCommand(preCommand));
     }
   }
 
-  for (const command of commands) {
+  for (const [index, command] of commands.entries()) {
+    const commandText = isCommandWithOptions(command)
+      ? join(command.command)
+      : command;
+    const preparedCommand =
+      index === commands.length - 1
+        ? commandText
+        : preparePreCommand(commandText);
     if (isCommandWithOptions(command)) {
       if (command.ignoreFailure) {
-        bashCommandParts.push(`${join(command.command)} || true`);
+        bashCommandParts.push(`${preparedCommand} || true`);
       } else {
-        bashCommandParts.push(join(command.command));
+        bashCommandParts.push(preparedCommand);
       }
     } else {
-      bashCommandParts.push(command);
+      bashCommandParts.push(preparedCommand);
     }
   }
 
   const bashCommand = bashCommandParts.join(' && ');
-  result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
+  // Single-quote the whole `-c` argument rather than hand-escaping `"`. Escaping
+  // only `"` left `\` unhandled, so a value containing `\"` produced a string that
+  // `shlex.split` rejects outright ("Got EOF while in a quoted string"), failing
+  // the update.
+  //
+  // It also left `$` and backticks live in the outer context, which silently
+  // defeats the `quote()` calls the managers apply: their single quotes are not
+  // special inside double quotes. That is inert while nothing pairs
+  // `ExecOptions.shell` with `docker` — `rawExec` otherwise splits argv without a
+  // shell — but it made the wrapper one `shell: true` away from turning a quoted
+  // dep name into host-side command substitution, which is how the flux manager
+  // was configured until it moved to `CommandWithOptions`. Being correct here
+  // means that pairing is no longer load-bearing.
+  result.push(`bash -l -c ${quote(bashCommand)}`);
 
   return result.join(' ');
 }

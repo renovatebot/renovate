@@ -66,10 +66,10 @@ Avoid names like `ComplexNumberSchema`.
 
 ### Inferred types
 
-Create inferred types after schemas if they're needed somewhere in the code.
+Create inferred types after schemas if they are needed somewhere in the code.
 Place such inferred types just after the schema definition using the same name.
 
-While IDEs may confuse schema and type name sometimes, it's obvious which is which from the syntactic context.
+While IDEs may confuse schema and type name sometimes, it is obvious which is which from the syntactic context.
 
 Example:
 
@@ -108,7 +108,7 @@ const volume = width * height * length;
 ```
 
 The code above refers to the `color` and `weight` fields, which Renovate does _not_ need to do its job.
-Here's the **correct** code:
+Here is the **correct** code:
 
 ```ts
 const Box = z.object({
@@ -287,6 +287,64 @@ const Versions = LooseArray(
 );
 ```
 
+### Use `Nullish` and `DeepNullish` to handle null as absent
+
+External APIs sometimes return `null` for fields that are conceptually absent rather than intentionally null.
+`Nullish` and `DeepNullish` normalize this by converting `null` (and `undefined`) to `undefined`, which Zod then treats as absent.
+
+#### `Nullish` — single field
+
+Wrap one field with `Nullish` when only that field needs to accept `null`:
+
+```ts
+const Release = z.object({
+  version: z.string(),
+  releaseTimestamp: Nullish(z.string()),
+});
+
+Release.parse({ version: '1.0.0', releaseTimestamp: null });
+// => { version: '1.0.0' }  (releaseTimestamp absent)
+```
+
+#### `DeepNullish` — whole schema at once
+
+When an API returns `null` in many optional fields, applying `Nullish` to each one individually is tedious.
+`DeepNullish` walks the schema at build time and replaces every `.optional()` field with `Nullish` semantics in one call.
+
+Prefer `DeepNullish` over manual `Nullish` wrapping when the schema has multiple optional fields:
+
+```ts
+const Release = DeepNullish(
+  z.object({
+    version: z.string(),
+    releaseTimestamp: z.string().optional(),
+    gitRef: z.string().optional(),
+  }),
+);
+
+Release.parse({ version: '1.0.0', releaseTimestamp: null, gitRef: null });
+// => { version: '1.0.0' }
+```
+
+`DeepNullish` also recurses into the **output side** of `pipe` / transform nodes, so it works directly with `Json.pipe(…)`:
+
+```ts
+const Release = DeepNullish(
+  Json.pipe(
+    z.object({
+      version: z.string(),
+      releaseTimestamp: z.string().optional(),
+    }),
+  ),
+);
+
+Release.parse('{"version":"1.0.0","releaseTimestamp":null}');
+// => { version: '1.0.0' }
+```
+
+!!! note
+  Intentional `.nullable()` fields are preserved — `null` is kept, not stripped.
+
 ### Combining with `Result` class
 
 The `Result` (and `AsyncResult`) class represents the result of an operation, like `Result.ok(200)` or `Result.err(404)`.
@@ -311,9 +369,7 @@ const { val, err } = Result.parse(url, z.string().url())
 You can use schema parsing in the middle of the `Result` transform chain:
 
 ```ts
-const UserConfig = z.object({
-  /* ... */
-});
+const UserConfig = z.object({/* ... */});
 
 const config = await Result.wrap(readLocalFile('config.json'))
   .transform((content) => Json.pipe(UserConfig).safeParse(content))

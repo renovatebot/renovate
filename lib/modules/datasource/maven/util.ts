@@ -1,21 +1,33 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
+import {
+  isForbidden,
+  isNotFound,
+  isRateLimited,
+  isRateLimitedOrServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { CLOJARS_REPO } from '../clojure/common.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { MAVEN_REPO } from './common.ts';
+import { MAVEN_CENTRAL_URLS, isMavenCentral } from './common.ts';
 import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
@@ -24,21 +36,12 @@ import type {
   MavenFetchSuccess,
 } from './types.ts';
 
-function getHost(url: string): string | undefined {
-  return parseUrl(url)?.host;
-}
-
 function isTemporaryError(err: HttpError): boolean {
   if (err.code === 'ECONNRESET') {
     return true;
   }
 
-  if (err.response) {
-    const status = err.response.statusCode;
-    return status === 429 || (status >= 500 && status < 600);
-  }
-
-  return false;
+  return isRateLimitedOrServerError(err);
 }
 
 function isHostError(err: HttpError): boolean {
@@ -46,12 +49,11 @@ function isHostError(err: HttpError): boolean {
 }
 
 function isNotFoundError(err: HttpError): boolean {
-  return err.code === 'ENOTFOUND' || err.response?.statusCode === 404;
+  return err.code === 'ENOTFOUND' || isNotFound(err);
 }
 
 function isPermissionsIssue(err: HttpError): boolean {
-  const status = err.response?.statusCode;
-  return status === 401 || status === 403;
+  return isUnauthorized(err) || isForbidden(err);
 }
 
 function isConnectionError(err: HttpError): boolean {
@@ -105,6 +107,21 @@ function isMetadataUrl(url: string): boolean {
   return url.endsWith('/maven-metadata.xml');
 }
 
+const defaultRegistryUrls = [...MAVEN_CENTRAL_URLS, CLOJARS_REPO].map(
+  (registryUrl) => ensureTrailingSlash(parseUrl(registryUrl)!.href),
+);
+
+/** Returns whether the normalized URL is located below one of the default registries. */
+function isDefaultRegistryUrl(url: string): boolean {
+  const href = parseUrl(url)?.href;
+  if (!href) {
+    return false;
+  }
+  return defaultRegistryUrls.some((registryUrl) =>
+    href.startsWith(registryUrl),
+  );
+}
+
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
@@ -126,15 +143,14 @@ export async function downloadHttpProtocol(
     }
   }
 
-  const fetchResult = await Result.wrap<HttpResponse, Error>(
+  const fetchResult = await Result.wrap<HttpResponse>(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
-      const result: MavenFetchSuccess = { data: res.body };
-
-      if (!res.authorization) {
-        result.isCacheable = true;
-      }
+      const result: MavenFetchSuccess = {
+        data: res.body,
+        isCacheable: !res.authorization && isDefaultRegistryUrl(url),
+      };
 
       const lastModified = asTimestamp(res?.headers?.['last-modified']);
       if (lastModified) {
@@ -150,8 +166,8 @@ export async function downloadHttpProtocol(
       }
 
       const failedUrl = url;
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ failedUrl }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ failedUrl }, refusedHostMessage(err));
         return Result.err({ type: 'host-disabled' });
       }
 
@@ -182,9 +198,9 @@ export async function downloadHttpProtocol(
 
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
-        if (getHost(url) === getHost(MAVEN_REPO)) {
-          const statusCode = err?.response?.statusCode;
-          if (statusCode === 429) {
+
+        if (isMavenCentral(url)) {
+          if (isRateLimited(err)) {
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },
@@ -198,9 +214,8 @@ export async function downloadHttpProtocol(
             }
           }
           return Result.err({ type: 'maven-central-temporary-error', err });
-        } else {
-          return Result.err({ type: 'temporary-error' });
         }
+        return Result.err({ type: 'temporary-error' });
       }
 
       if (isConnectionError(err)) {
@@ -219,7 +234,7 @@ export async function downloadHttpProtocol(
 
   const { err } = fetchResult.unwrap();
   if (err?.type === 'maven-central-temporary-error') {
-    throw new ExternalHostError(err.err);
+    throw new ExternalHostError(err.err, undefined, true);
   }
 
   return fetchResult;
@@ -276,7 +291,7 @@ export async function downloadS3Protocol(
         }
 
         const data = await streamToString(Body);
-        const result: MavenFetchSuccess = { data };
+        const result: MavenFetchSuccess = { data, isCacheable: false };
 
         const lastModified = asTimestamp(LastModified);
         if (lastModified) {
@@ -520,8 +535,12 @@ export async function getDependencyInfo(
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const pomXmlResult = await downloadMavenXml(http, pomUrl);
   const dependencyInfoResult = await pomXmlResult.transform(
-    async ({ data: pomContent }) => {
+    async ({ data: pomContent, isCacheable }) => {
       const result: DependencyInfo = {};
+
+      if (isCacheable === false) {
+        result.isPrivate = true;
+      }
 
       const homepage = pomContent.valueWithPath('url');
       if (homepage && !containsPlaceholder(homepage)) {
@@ -569,18 +588,15 @@ export async function getDependencyInfo(
       }
 
       const parent = pomContent.childNamed('parent');
-      if (
-        recursionLimit > 0 &&
-        parent &&
-        (!result.sourceUrl || !result.homepage)
-      ) {
+      const isMissingInfo = !result.sourceUrl || !result.homepage;
+      if (recursionLimit > 0 && parent && isMissingInfo) {
         // if we found a parent and are missing some information
         // trying to get the scm/homepage information from it
         const [parentGroupId, parentArtifactId, parentVersion] = [
           'groupId',
           'artifactId',
           'version',
-        ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+        ].map((k) => parent.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
         if (parentGroupId && parentArtifactId && parentVersion) {
           const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
           const parentDependency = getDependencyParts(parentDisplayId);
@@ -591,6 +607,9 @@ export async function getDependencyInfo(
             parentVersion,
             recursionLimit - 1,
           );
+          if (parentInformation.isPrivate) {
+            result.isPrivate = true;
+          }
           if (!result.sourceUrl && parentInformation.sourceUrl) {
             result.sourceUrl = parentInformation.sourceUrl;
           }

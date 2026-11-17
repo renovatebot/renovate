@@ -1,6 +1,8 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import type { CustomDatasourceConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { detachUrlCredentials } from '../../../util/host-rules.ts';
 import * as template from '../../../util/template/index.ts';
 import type { GetReleasesConfig } from '../types.ts';
 
@@ -30,9 +32,13 @@ export function massageCustomDatasourceConfig(
     );
     return null;
   }
-  const registryUrl = template.compile(registryUrlTemplate, templateInput);
+  // the credentials of a URL template are detached from the URL it compiles, the one which is requested with the `custom` host type
+  const registryUrl = detachUrlCredentials(
+    template.compile(registryUrlTemplate, templateInput),
+    ['custom'],
+  );
 
-  const transformTemplates = customDatasource.transformTemplates ?? [];
+  const transformTemplates = coerceArray(customDatasource.transformTemplates);
   const transform: string[] = [];
   for (const transformTemplate of transformTemplates) {
     const templated = template.compile(transformTemplate, templateInput);

@@ -1,12 +1,23 @@
+// oxlint-disable renovate/prefer-stub-env -- these tests assert on the *whole*
+// env handed to the child process, so they need `process.env` to hold exactly
+// the fixture and nothing else. `vi.stubEnv()` cannot express that: it refuses
+// to delete `PROD`, `DEV` and `SSR`, setting them to '' instead, and those
+// would then show up in the `exposeAllEnv` expectations. Nothing here stubs,
+// so the two styles are not mixed.
 import { mockDeep } from 'vitest-mock-extended';
 import { exec as cpExec, envMock } from '~test/exec-util.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import * as _datasource from '../../modules/datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
+import * as memCache from '../cache/memory/index.ts';
 import { setCustomEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
+import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
@@ -14,6 +25,7 @@ import type {
   ExecOptions,
   ExecResult,
   RawExecOptions,
+  ToolConstraint,
   VolumeOption,
 } from './types.ts';
 import { asRawCommand } from './utils.ts';
@@ -25,6 +37,7 @@ vi.mock('./hermit.ts', async () => ({
   getHermitEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
+const datasource = vi.mocked(_datasource);
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -63,6 +76,7 @@ describe('util/exec/index', () => {
 
   afterEach(() => {
     process.env = processEnvOrig;
+    memCache.reset();
   });
 
   const sideCarName = dockerModule.sideCarName;
@@ -199,7 +213,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'Low trust level',
+      'By default, exposeAllEnv=false',
       {
         processEnv,
         inCmd,
@@ -220,7 +234,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'High trust level',
+      'When exposeAllEnv=true, all environment variables are passed to child',
       {
         processEnv: envMock.full,
         inCmd,
@@ -250,7 +264,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -258,6 +272,41 @@ describe('util/exec/index', () => {
           {
             cwd,
             env: containerbaseEnv,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+        adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
+      'Explicit Docker env vars',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker: { envVars: ['FORCED_ENV_VAR'] },
+          env: { FORCED_ENV_VAR: 'forced' },
+          cwd,
+        },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e FORCED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            env: {
+              ...containerbaseEnv,
+              FORCED_ENV_VAR: 'forced',
+            },
             timeout: 900000,
             maxBuffer: 10485760,
             stdin: 'pipe',
@@ -316,7 +365,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -370,7 +419,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -398,7 +447,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -426,7 +475,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -457,7 +506,7 @@ describe('util/exec/index', () => {
         outCmd: [
           `docker pull ghcr.io/renovatebot/base-image`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -488,7 +537,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           `docker ps --filter name=myprefix_${sideCarName} -aq`,
-          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -522,7 +571,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c 'preCommand1 && preCommand2 && ${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -550,7 +599,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -640,6 +689,30 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Explicit input',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          input: '{"request":true}',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            input: '{"request":true}',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Custom environment variables for child',
       {
         processEnv: envMock.basic,
@@ -708,7 +781,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -744,7 +817,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -914,7 +987,7 @@ describe('util/exec/index', () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      adminConfig = {} as any,
+      adminConfig = {},
       hermitEnvs,
     } = testOpts;
 
@@ -929,12 +1002,12 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables);
+    setCustomEnv(coerceObject(adminConfig.customEnvVariables));
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
 
-    await exec(cmd as string, inOpts);
+    await exec(cmd, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);
@@ -970,17 +1043,39 @@ describe('util/exec/index', () => {
       `echo hello`,
       `docker pull ${fullImage}`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `echo hello`,
       `echo hello`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
     ]);
   });
+
+  it.each(Object.keys(hardcodedProcessEnv))(
+    'always forwards %s into the Docker sidecar',
+    async (envVar) => {
+      process.env = processEnv;
+
+      const actualCmd: string[] = [];
+      cpExec.mockImplementation((execCmd) => {
+        actualCmd.push(asRawCommand(execCmd));
+        return Promise.resolve({ stdout: '', stderr: '' });
+      });
+
+      GlobalConfig.set({
+        ...globalConfig,
+        localDir: cwd,
+        binarySource: 'docker',
+      });
+      await exec(inCmd, { docker });
+
+      expect(actualCmd.at(-1)).toContain(`-e ${envVar} `);
+    },
+  );
 
   it('throws when an error is thrown', async () => {
     process.env = processEnv;
@@ -1011,14 +1106,13 @@ describe('util/exec/index', () => {
     process.env = processEnv;
     const stdout = 'out';
     const stderr = 'err';
-    cpExec.mockImplementation(
-      (): Promise<ExecResult> =>
-        // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
-        Promise.resolve({
-          stdout,
-          stderr,
-          exitCode: 10,
-        }),
+    cpExec.mockImplementation((): Promise<ExecResult> =>
+      // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
+      Promise.resolve({
+        stdout,
+        stderr,
+        exitCode: 10,
+      }),
     );
     GlobalConfig.set({ ...globalConfig });
     const promise = exec([
@@ -1084,6 +1178,132 @@ describe('util/exec/index', () => {
     await expect(promise).rejects.toThrow('No tool releases found.');
   });
 
+  it('logs "Executing command" with the command and environment variable names', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await exec(inCmd);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        command: inCmd,
+        env: [
+          'HTTP_PROXY',
+          'HTTPS_PROXY',
+          'NO_PROXY',
+          'HOME',
+          'PATH',
+          'LC_ALL',
+          'LANG',
+          'CI',
+        ],
+      },
+      'Executing command',
+    );
+  });
+
+  it('returns redacted command output without including it in completion logs', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(
+      exec(inCmd, { input: 'private input', redactOutput: true }),
+    ).resolves.toEqual({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        durationMs: expect.any(Number),
+        stdoutBytes: 16,
+        stderrBytes: 15,
+      },
+      'exec completed',
+    );
+    expect(cpExec.mock.calls[0][1]).toMatchObject({ redactOutput: true });
+    expect(logger.logger.trace).toHaveBeenCalledWith(
+      {
+        commandOptions: expect.not.objectContaining({
+          input: expect.anything(),
+        }),
+        hasInput: true,
+      },
+      'Command options',
+    );
+  });
+
+  it('omits redacted command errors from logs', async () => {
+    process.env = processEnv;
+    const error = new Error('private manifest');
+    cpExec.mockRejectedValue(error);
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(exec(inCmd, { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number) },
+      'rawExec err',
+    );
+  });
+
+  it('does not send final input to Hermit environment discovery', async () => {
+    process.env = processEnv;
+    getHermitEnvsMock.mockResolvedValue({});
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'hermit' });
+
+    await exec('foobar', { input: 'private input', redactOutput: true });
+
+    expect(getHermitEnvsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ stdin: 'ignore', redactOutput: true }),
+    );
+    expect(getHermitEnvsMock.mock.calls[0][0]).not.toHaveProperty('input');
+    expect(cpExec).toHaveBeenCalledWith(
+      'foobar',
+      expect.objectContaining({ input: 'private input', stdin: 'pipe' }),
+    );
+  });
+
+  it('keeps exit metadata in redacted failure logs', async () => {
+    const error = new ExecError('private error', {
+      cmd: 'foobar',
+      stdout: 'private output',
+      stderr: 'private warning',
+      options: {},
+      exitCode: 1,
+    });
+    cpExec.mockRejectedValue(error);
+
+    await expect(exec('foobar', { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number), exitCode: 1, signal: undefined },
+      'rawExec err',
+    );
+  });
+
+  it('forwards input through the Docker invocation', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+
+    await exec('foobar', { docker, input: 'private input' });
+
+    const invocation = cpExec.mock.calls.find(([cmd]) =>
+      asRawCommand(cmd).startsWith('docker run'),
+    );
+    expect(invocation).toEqual([
+      expect.stringContaining('docker run --rm -i '),
+      expect.objectContaining({ input: 'private input', stdin: 'pipe' }),
+    ]);
+  });
+
   it('logs ignored tool constraints for binarySource=global', async () => {
     process.env = processEnv;
     cpExec.mockResolvedValue({ stdout: '', stderr: '' });
@@ -1091,7 +1311,7 @@ describe('util/exec/index', () => {
     await exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
     expect(logger.logger.once.debug).toHaveBeenCalledWith(
       { toolConstraints: [{ toolName: 'npm' }] },
-      'Ignoring tool contraints because of `binarySource=global`',
+      'Ignoring tool constraints because of `binarySource=global`',
     );
   });
 
@@ -1107,6 +1327,247 @@ describe('util/exec/index', () => {
     process.env.CONTAINERBASE = 'true';
     await exec('foobar', { preCommands: ['install-pip foobar'] });
     expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
+  });
+
+  it('passes input only to the final command', async () => {
+    process.env = processEnv;
+    const calls: { command: string; input: unknown }[] = [];
+    cpExec.mockImplementation((execCmd, options) => {
+      calls.push({
+        command: asRawCommand(execCmd),
+        input: options.input,
+      });
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    await exec('foobar', {
+      input: 'private manifest',
+      preCommands: ['prepare'],
+    });
+
+    expect(calls).toEqual([
+      { command: 'prepare', input: undefined },
+      { command: 'foobar', input: 'private manifest' },
+    ]);
+  });
+
+  it('only installs a tool once per run for binarySource=install', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.2.3' }],
+    });
+    const actualCmds: string[] = [];
+    cpExec.mockImplementation((execCmd) => {
+      actualCmds.push(asRawCommand(execCmd));
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints = [{ toolName: 'npm' as const }];
+    await exec('foobar', { toolConstraints });
+    await exec('foobar', { toolConstraints });
+
+    expect(actualCmds).toEqual([`install-tool npm 1.2.3`, `foobar`, `foobar`]);
+  });
+
+  it('retries a failed tool installation before reusing a successful install', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockRejectedValueOnce(new Error('installation failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'npm', constraint: '1.1.0' },
+    ];
+
+    await expect(exec('npm --version', { toolConstraints })).rejects.toThrow(
+      'installation failed',
+    );
+    await exec('npm --version', { toolConstraints });
+    await exec('npm --version', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.1.0',
+      'install-tool npm 1.1.0',
+      'npm --version',
+      'npm --version',
+    ]);
+  });
+
+  it('retries a rejected installation in each workspace', async () => {
+    process.env = processEnv;
+    memCache.init();
+    const error = new ExecError('installation failed', {
+      cmd: 'install-tool npm 1.0.0',
+      stdout: '',
+      stderr: '',
+      options: {},
+      exitCode: 1,
+    });
+    cpExec.mockImplementation((cmd) => {
+      if (asRawCommand(cmd) === 'install-tool npm 1.0.0') {
+        return Promise.reject(error);
+      }
+      return Promise.reject(new Error('npm is not installed'));
+    });
+    GlobalConfig.set({
+      ...globalConfig,
+      binarySource: 'install',
+      localDir: cwd,
+    });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'npm', constraint: '1.0.0' },
+    ];
+
+    for (const cwdFile of ['apps/a/package.json', 'apps/b/package.json']) {
+      await expect(
+        exec('npm --version', {
+          cwdFile,
+          toolConstraints,
+          redactOutput: true,
+        }),
+      ).rejects.toBe(error);
+    }
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.0.0',
+      'install-tool npm 1.0.0',
+    ]);
+  });
+
+  it.each`
+    preCommands    | failedCommand
+    ${[]}          | ${'foobar'}
+    ${['prepare']} | ${'prepare'}
+  `(
+    'keeps installed tools active after $failedCommand fails',
+    async ({ preCommands, failedCommand }) => {
+      process.env = processEnv;
+      memCache.init();
+      cpExec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+      cpExec.mockRejectedValueOnce(new Error('command failed'));
+      cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+      GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+      process.env.CONTAINERBASE = 'true';
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'npm', constraint: '1.1.0' },
+      ];
+
+      await expect(
+        exec('foobar', { toolConstraints, preCommands }),
+      ).rejects.toThrow('command failed');
+      await exec('foobar', { toolConstraints });
+
+      expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+        'install-tool npm 1.1.0',
+        failedCommand,
+        'foobar',
+      ]);
+    },
+  );
+
+  it('does not skip an uninstalled tool after another constraint fails to resolve', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockRejectedValueOnce(new Error('lookup failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const npm: ToolConstraint = { toolName: 'npm', constraint: '1.2.3' };
+
+    await expect(
+      exec('foobar', { toolConstraints: [npm, { toolName: 'yarn' }] }),
+    ).rejects.toThrow('lookup failed');
+    expect(cpExec).not.toHaveBeenCalled();
+    await exec('foobar', { toolConstraints: [npm] });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.2.3',
+      'foobar',
+    ]);
+  });
+
+  it('retries every requested tool after a partial installation fails', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+    cpExec.mockRejectedValueOnce(new Error('npm installation failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'node', constraint: '24.21.0' },
+      { toolName: 'npm', constraint: '1.1.0' },
+    ];
+
+    await expect(exec('npm --version', { toolConstraints })).rejects.toThrow(
+      'npm installation failed',
+    );
+    await exec('npm --version', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool node 24.21.0',
+      'install-tool npm 1.1.0',
+      'install-tool node 24.21.0',
+      'install-tool npm 1.1.0',
+      'npm --version',
+    ]);
+  });
+
+  it('reactivates an earlier version after a failed version switch', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'npm', constraint: '1.1.0' },
+    ];
+    await exec('npm --version', { toolConstraints });
+    cpExec.mockRejectedValueOnce(new Error('installation failed'));
+
+    await expect(
+      exec('npm --version', {
+        toolConstraints: [{ toolName: 'npm', constraint: '1.2.0' }],
+      }),
+    ).rejects.toThrow('installation failed');
+    await exec('npm --version', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.1.0',
+      'npm --version',
+      'install-tool npm 1.2.0',
+      'install-tool npm 1.1.0',
+      'npm --version',
+    ]);
+  });
+
+  it('installs a tool on every exec for binarySource=docker', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.2.3' }],
+    });
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+    const toolConstraints = [{ toolName: 'npm' as const }];
+    await exec('foobar', { docker, toolConstraints });
+    await exec('foobar', { docker, toolConstraints });
+
+    const dockerRunCmds = cpExec.mock.calls
+      .map((call) => asRawCommand(call[0]))
+      .filter((cmd) => cmd.startsWith('docker run'));
+    expect(dockerRunCmds).toHaveLength(2);
+    expect(dockerRunCmds.every((cmd) => cmd.includes('install-tool npm'))).toBe(
+      true,
+    );
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
@@ -1158,23 +1619,26 @@ describe('util/exec/index', () => {
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('converts to TEMPORARY_ERROR', async () => {
-    cpExec.mockImplementation(() => {
-      class ErrorSignal extends Error {
-        signal?: string;
-      }
-      const error = new ErrorSignal();
-      error.signal = 'SIGTERM';
-      throw error;
-    });
-    const removeDockerContainerSpy = vi.spyOn(
-      dockerModule,
-      'removeDockerContainer',
-    );
-    const promise = exec('foobar', {});
-    await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
-    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
-  });
+  it.each([false, true])(
+    'converts to TEMPORARY_ERROR with redactOutput=%s',
+    async (redactOutput) => {
+      cpExec.mockImplementation(() => {
+        class ErrorSignal extends Error {
+          signal?: string;
+        }
+        const error = new ErrorSignal();
+        error.signal = 'SIGTERM';
+        throw error;
+      });
+      const removeDockerContainerSpy = vi.spyOn(
+        dockerModule,
+        'removeDockerContainer',
+      );
+      const promise = exec('foobar', { redactOutput });
+      await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
+      expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+    },
+  );
 
   describe('getToolSettingsOptions()', () => {
     const config: UpdateArtifactsConfig = {

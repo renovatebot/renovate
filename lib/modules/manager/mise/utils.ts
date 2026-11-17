@@ -8,8 +8,7 @@ export function parseTomlFile(
   const res = MiseFile.safeParse(content);
   if (res.success) {
     return res.data;
-  } else {
-    logger.debug({ err: res.error, packageFile }, 'Error parsing Mise file.');
-    return null;
   }
+  logger.debug({ err: res.error, packageFile }, 'Error parsing Mise file.');
+  return null;
 }

@@ -4,8 +4,8 @@ Renovate supports [Forgejo](https://forgejo.org).
 
 ## Authentication
 
-First, [create a Personal Access Token (PAT)](https://forgejo.org/docs/latest/user/api-usage/#authentication) for the bot account.
-The bot account should have full name and email address configured.
+First, [create a Personal Access Token (PAT)](https://forgejo.org/docs/latest/user/api-usage/#authentication) for the Renovate account.
+The Renovate account should have full name and email address configured.
 Then let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
@@ -29,7 +29,7 @@ If you use Forgejo packages, add the `read:packages` scope.
 
 ## Unsupported platform features/concepts
 
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Forgejo versions older than v10.0.0 do not support required branch autodelete for automerge.
 
 ## Features awaiting implementation
 

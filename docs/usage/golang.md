@@ -7,7 +7,7 @@ description: Go modules support in Renovate
 
 Renovate supports upgrading dependencies in `go.mod` files and associated `go.sum` checksums.
 
-If you're self-hosting Renovate, you may use these environment variables:
+If you are self-hosting Renovate, you may use these environment variables:
 
 - `GOPROXY`
 - `GONOPROXY`
@@ -32,7 +32,7 @@ To learn what these variables do, read the [Go Modules Reference about the`GOPRO
 ## Enabling Go Modules Updating
 
 Renovate updates Go Modules by default.
-To install Renovate Bot itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+To install Renovate itself, either enable the [Mend Renovate app](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
 
@@ -51,15 +51,34 @@ To enable this replace massaging behavior, add `gomodMassage` to your `postUpdat
 Go Modules tidying is not enabled by default, and is opt-in via the [`postUpdateOptions`](./configuration-options.md#postupdateoptions) config option.
 The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
 
+### Monorepo tidying for local `replace` directives
+
+In Go monorepos it is common for one module to depend on another in the same repo via a local `replace` directive, for example:
+
+```text
+// api/go.mod
+replace example.com/shared => ../shared
+```
+
+When Renovate updates the shared module, running `go mod tidy` only in that module leaves the dependent `go.sum` files stale.
+Add `gomodTidyAll` to [`postUpdateOptions`](./configuration-options.md#postupdateoptions) to also tidy every `go.mod` which transitively depends on the updated module, in dependency order.
+The `gomodTidy1.17` and `gomodTidyE` flags apply to those commands as well.
+`gomodTidyAll` implies `gomodTidy`, so you only need to set one of them.
+Renovate runs these commands with `go -C`, so this option needs Go 1.20 or later.
+
+Avoid combining `gomodTidyAll` with `gomodMassage`.
+Massaging comments out the relative `replace` directives that `gomodTidyAll` follows, so the two options work against each other.
+Massaging only rewrites the `go.mod` of the updated module, and Go ignores `replace` directives outside the main module, so the tidy commands for the dependent modules still behave correctly.
+But if the updated module itself uses a relative `replace`, then massaging removes that directive and `go mod tidy` fails for that module.
+
 ### Module Vendoring
 
 Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.
 Renovate will commit all files changed within the `vendor/` folder.
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate does not support vendoring major upgrades of Go modules.
-    Follow issue [#21010](https://github.com/renovatebot/renovate/issues/21010).
+  Renovate does not support vendoring major upgrades of Go modules.
+  Follow issue [#21010](https://github.com/renovatebot/renovate/issues/21010).
 
 ### Go binary version
 
@@ -98,3 +117,142 @@ module.exports = {
   ],
 };
 ```
+
+### Private Go modules hosted on GitLab
+
+For private GitLab projects, Renovate must authenticate the `?go-get=1` requests it uses to resolve the source repository of a module.
+Add a host rule with `hostType` set to `go` that uses `username` and `password`:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'gitlab.company.com',
+      hostType: 'go',
+      username: 'renovate-bot',
+      password: process.env.GITLAB_PAT,
+    },
+  ],
+};
+```
+
+The `password` must be a personal access token with the `read_api` scope.
+The `username` can be any non-empty string when the password is a personal access token.
+
+!!! warning
+  Use `username` and `password` in the `go` host rule, not `token`.
+  [GitLab only supports Basic authentication for `?go-get=1` requests](https://docs.gitlab.com/development/go_guide/dependencies/#authenticating), and a `token` results in a `Bearer` authorization header.
+
+If you do not run Renovate with GitLab as its platform, you also need a host rule with `hostType` set to `gitlab` to authenticate the GitLab tags API.
+
+Without the `go` host rule, GitLab responds to the unauthenticated `?go-get=1` request with a truncated `go-import` path, so Renovate resolves the wrong repository.
+Lookups then fail with a 404 response for a tags URL with a truncated project path, for example: `https://gitlab.company.com/api/v4/projects/group%2Fsubgroup/repository/tags?per_page=100`.
+
+### Private Go modules served by a module proxy
+
+Some Go modules are not served from version control, but instead through a module proxy.
+
+For instance, when interacting with a private [Buf Schema Registry](https://buf.build/docs/bsr/) (BSR), the Go toolchain is pointed to a module proxy on the BSR, which allows serving the module directly, instead of retrieving it from source control.
+
+They advertise this with a `go-import` meta tag that uses `mod` instead of `git`, for example:
+
+```html
+<meta
+  name="go-import"
+  content="bsr.example.com/gen/go mod https://bsr.example.com/gen/go"
+/>
+```
+
+When Renovate looks up a module directly, it follows the `mod` proxy URL, as the `go` command does.
+
+Renovate looks up a module directly when `GOPROXY` is set to `direct`, or the module matches `GONOPROXY` or `GOPRIVATE`.
+
+For a private registry, set `GOPRIVATE` (or `GONOPROXY`) to the registry's host so that the module is not sent to the public proxy:
+
+```sh
+GOPRIVATE=bsr.example.com
+```
+
+Renovate uses the host rule with `hostType` set to `go` to authenticate both the `?go-get=1` request and the requests to the `mod` proxy:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'bsr.example.com',
+      hostType: 'go',
+      token: process.env.BSR_TOKEN,
+    },
+  ],
+};
+```
+
+### Deriving Go environment variables from host rules
+
+If you are self-hosting Renovate, you can set [`goEnvFromHostRules`](./self-hosted-configuration.md#goenvfromhostrules) to `true` to have Renovate derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from your host rules.
+Renovate uses the derived values to look up modules and to run `go`, so you do not have to configure the same hosts twice.
+
+- `GOPROXY`: one URL for each host rule with `hostType` set to `go-proxy`, followed by `https://proxy.golang.org,direct`.
+  When Renovate runs `go`, the rule's `username` and `password` are added to the URL.
+  Rules with only a `token` are skipped, because `go` cannot send a token from a `GOPROXY` URL. Use `username` and `password` instead.
+  For a Buf Schema Registry, set `username` to your BSR username and `password` to your BSR token.
+- `GONOPROXY`: each host rule with `hostType` set to `go` whose `matchHost` includes a path, for example `https://github.com/my-org` becomes `github.com/my-org`.
+  Rules for a host without a path are skipped, so public modules on that host still use the proxy.
+- `GONOSUMDB`: the `go-proxy` hosts, and the `GONOPROXY` values derived from `go` host rules.
+
+Renovate only derives a value if you have not set the environment variable yourself.
+If you set `GOPRIVATE`, Renovate does not derive `GONOPROXY`, and derives `GONOSUMDB` as your `GOPRIVATE` value followed by the `go-proxy` hosts.
+
+For example, with a private proxy and a GitHub organization whose modules may be private:
+
+```js
+module.exports = {
+  goEnvFromHostRules: true,
+  hostRules: [
+    {
+      matchHost: 'bsr.example.com',
+      hostType: 'go-proxy',
+      username: process.env.BSR_USERNAME,
+      password: process.env.BSR_TOKEN,
+    },
+    {
+      matchHost: 'https://github.com/my-org',
+      hostType: 'go',
+      token: process.env.GITHUB_TOKEN,
+    },
+  ],
+};
+```
+
+Renovate uses:
+
+```sh
+GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
+GONOPROXY=github.com/my-org
+GONOSUMDB=bsr.example.com,github.com/my-org
+```
+
+Modules under `github.com/my-org` are fetched directly from GitHub with the token, and skip both proxies and the public checksum database.
+Other modules go through `bsr.example.com`, then the public proxy.
+
+You can also mark private modules with `GOPRIVATE` instead of `go` host rules, for example in the repository config's [`env`](./configuration-options.md#env):
+
+```json
+{
+  "env": {
+    "GOPRIVATE": "github.com/my-org"
+  }
+}
+```
+
+With the same `go-proxy` rule for `bsr.example.com`, Renovate uses:
+
+```sh
+GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
+GOPRIVATE=github.com/my-org
+GONOSUMDB=github.com/my-org,bsr.example.com
+```
+
+`GOPROXY` is still derived from the `go-proxy` rule, and `go` uses `GOPRIVATE` in place of `GONOPROXY`.
+
+If you only want to use your own proxy, without the public proxy, set `GOPROXY` yourself.

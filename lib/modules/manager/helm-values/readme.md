@@ -15,6 +15,14 @@ coreImage:
   registry: docker.io
   repository: bitnami/harbor-core
   tag: 2.1.3-debian-10-r38
+
+cli:
+  image: 'some-docker/dependency'
+  tag: v1.0.0
+
+cli:
+  image: 'some-docker/dependency'
+  version: v1.0.0
 ```
 
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.

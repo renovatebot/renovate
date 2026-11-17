@@ -1,3 +1,4 @@
+import { type CollectionTag, Scalar } from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -19,11 +20,20 @@ import {
 } from './schema.ts';
 import { getGitlabDep } from './utils.ts';
 
+// GitLab `!reference` tags point at other parts of the configuration,
+// so they are resolved to `null` instead of being read as values.
+// A `Scalar` is returned because `yaml` ignores a bare `null` result.
+// See https://docs.gitlab.com/ci/yaml/yaml_optimization/#reference-tags
+const referenceTag: CollectionTag = {
+  tag: '!reference',
+  collection: 'seq',
+  resolve: () => new Scalar(null),
+};
+
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
   /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
 );
-const componentReferenceLatestVersion = '~latest';
 
 function extractDepFromIncludeComponent(
   component: string,
@@ -60,13 +70,6 @@ function extractDepFromIncludeComponent(
     registryUrls: [`https://${componentReference.fqdn}`],
     versioning: semverPartialId,
   };
-  if (dep.currentValue === componentReferenceLatestVersion) {
-    logger.debug(
-      { componentVersion: dep.currentValue },
-      'Ignoring component version',
-    );
-    dep.skipReason = 'unsupported-version';
-  }
   return dep;
 }
 
@@ -77,7 +80,10 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
-    const docs = parseYaml(content, { uniqueKeys: false });
+    const docs = parseYaml(content, {
+      uniqueKeys: false,
+      customTags: [referenceTag],
+    });
 
     for (const doc of docs) {
       const topLevel = Job.parse(doc);
@@ -149,7 +155,7 @@ export async function extractAllPackageFiles(
     }
 
     const { val: docs, err } = Result.wrap(() =>
-      parseYaml(content, { uniqueKeys: false }),
+      parseYaml(content, { uniqueKeys: false, customTags: [referenceTag] }),
     ).unwrap();
 
     if (err) {
@@ -169,6 +175,7 @@ export async function extractAllPackageFiles(
     }
 
     const result = extractPackageFile(content, file, config);
+    // v8 ignore else -- needs a listed file that yields no deps
     if (result !== null) {
       results.push({
         packageFile: file,

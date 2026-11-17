@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('does nothing if branch is up to date', async () => {
-      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      const contents = `${JSON.stringify(config.onboardingConfig, null, 2)}\n`;
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
@@ -101,7 +101,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('does nothing if config hashes match', async () => {
-      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      const contents = `${JSON.stringify(config.onboardingConfig, null, 2)}\n`;
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).not.toHaveBeenCalled();
@@ -115,6 +115,39 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         'DRY-RUN: Would rebase files in onboarding branch',
       );
       expect(scm.commitAndPush).not.toHaveBeenCalled();
+    });
+
+    it('rebases onboarding branch on forgejo', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        onboardingConfigFileName: 'renovate.json',
+        onboardingPrTitle: 'Configure Renovate',
+        platform: 'forgejo',
+      });
+      await rebaseOnboardingBranch(config, hash);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'Configure Renovate',
+      );
+    });
+
+    it('applies the commitBody and commitTrailers values', async () => {
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          commitBody: 'Signed Off: {{{gitAuthor}}}',
+          commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+          gitAuthor: 'Bot <bot@botland.com>',
+        },
+        hash,
+      );
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          message: 'Add renovate.json\n\nSigned Off: Bot <bot@botland.com>',
+          trailers: ['Signed-off-by: Bot <bot@botland.com>'],
+        }),
+      );
     });
 
     it('uses semantic commit PR title when semanticCommits is enabled', async () => {

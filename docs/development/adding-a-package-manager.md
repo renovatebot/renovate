@@ -25,6 +25,7 @@ The manager's `index.ts` file supports the following values or functions:
 | `knownDepTypes`               | yes      |       |
 | `supportsDynamicDepTypesNote` | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
+| `supportsNpmrc`               | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
 | `updateLockedDependency`      | yes      |       |
@@ -49,12 +50,12 @@ The function returns an array of detected or extracted dependencies, including t
 - versioning used (like SemVer, PEP 440)
 - a list of lock files ( `lockFiles` ) that are associated with this package file, if applicable
 
-The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
+The `extractPackageFile` function does not need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract a correct list of dependencies.
 
-In general, we extract _all_ dependencies from each dependency file, even if they have values we don't support.
+In general, we extract _all_ dependencies from each dependency file, even if they have values we do not support.
 
-If the function reads parts of a dependency file that it can't parse, it should give a `skipReason` message to the `extractPackageFile` function.
+If the function reads parts of a dependency file that it cannot parse, it should give a `skipReason` message to the `extractPackageFile` function.
 Make sure the `skipReason` message is helpful to someone reading the logs.
 
 If `extractPackageFile` is passed a file which is a "false match", so not a package file, or a file with no dependencies then it can return `null`.
@@ -63,7 +64,7 @@ Downstream this results in the file being ignored and removed from the list of p
 ### `extractAllPackageFiles(packageFiles)` (async, optional)
 
 Normally a package manager parses or extracts all package files in _parallel_, and can thus use the `extractPackageFile` function.
-If the package manager you're adding works in _serial_, use this function instead.
+If the package manager you are adding works in _serial_, use this function instead.
 
 For example the npm and Yarn package manager must process the `package.json` and `package-lock` or `yarn.lock` files together.
 This allows features like Workspaces to work.
@@ -97,7 +98,7 @@ This should be placed in `dep-types.ts`.
 
 ### `supportsDynamicDepTypesNote` (optional)
 
-Use this to provide a Markdown note about dynamically generated `depType` values that can't be listed in `knownDepTypes`.
+Use this to provide a Markdown note about dynamically generated `depType` values that cannot be listed in `knownDepTypes`.
 
 This note will be rendered after the `knownDepTypes` table (regardless of whether any known `depTypes` are present).
 
@@ -106,6 +107,11 @@ This should be placed in `dep-types.ts`.
 ### `supportsLockFileMaintenance` (optional)
 
 Set to `true` if this package manager needs to update lock files in addition to package files.
+
+### `supportsNpmrc` (optional)
+
+Set to `true` if the manager's returned values carry an `npmrc` resolved from the repository's `.npmrc` and the `npmrc` config.
+Only such a manager may return `NpmrcPackageFileContent` / `NpmrcPackageFile`, the types which have the `npmrc` field; this is checked at compile time.
 
 ### `updateArtifacts` (async, optional)
 
@@ -119,12 +125,40 @@ To _directly_ update dependencies in lock files: use `updateLockedDependency` in
 - after a dependency update (for a package file), or
 - during `lockfileMaintenance`
 
+#### Tool constraints
+
+When `updateArtifacts` runs a tool through `exec()`, resolve the tool's version constraint with `resolveToolConstraint()` from `lib/modules/manager/util.ts` instead of reading `config.constraints` yourself.
+The helper applies, in this order:
+
+1. the user's `constraints` config
+2. a value your manager derives from the updated package files, if you pass a callback
+3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
+4. the `sharedConstraints` that other managers share for the package file's directory, which also win over step 2 or 3 if they are within that constraint, like `20.11.0` within `>=18`
+
+The third step matters during `lockFileMaintenance`.
+Managers like `pipenv` delete the lock file before they run the tool, so a callback that reads the lock file at that point finds nothing.
+The value collected during extraction keeps the tool version constrained in that case.
+
+A manager whose files set tool versions for a whole directory tree, like `mise`, can share them with the package files of other managers by returning a `sharedConstraintsScope` from `extractPackageFile`.
+Renovate passes them as `sharedConstraints` to the package files of other managers in that directory and below.
+They are the versions which a version manager installs, so they win over a range which the package files only require, but not over a version the package files pin, or one outside of the required range.
+Within a manager, the nearest directory wins, then the higher `precedence`.
+Between managers, the order in `lib/workers/repository/extract/shared-constraints.ts` decides.
+Share a `null` value for a tool version which is no constraint, like the Rust channel `stable`, so that it hides the version of a parent directory.
+
+The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints`, `config.extractedConstraints` or `config.sharedConstraints` in managers.
+
 ### `updateDependency` (optional)
 
 Use `updateDependency` if _both_ conditions apply:
 
-- the manager can't be updated to use the standard replacing mechanism
+- the manager cannot be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
+
+It returns the new package file content, or `null` on failure.
+If the update is also applied outside the package file, for example by modifying the checkout on disk, return `{ content, updatedOutOfBand: true }` instead.
+Renovate then treats the package file as updated even if `content` is unchanged, so that `updateArtifacts` still runs for it.
+The `git-submodules` manager uses this.
 
 ### `updateLockedDependency` (optional)
 
@@ -205,7 +239,7 @@ To do this, the manager needs to:
 2. Match each dependency from the package file to its entry in the lock file
 3. Add the matched version as `lockedVersion`
 
-Once `lockedVersion` is provided, Renovate should be able to "pin" constraints/ranges into exact versions, if the user configures as such (e.g. `rangeStrategy=pin`), however Renovate _won't_ automatically be able to make lockfile-only updates.
+Once `lockedVersion` is provided, Renovate should be able to "pin" constraints/ranges into exact versions, if the user configures as such (e.g. `rangeStrategy=pin`), however Renovate _will not_ automatically be able to make lockfile-only updates.
 
 ### Lock file-only updates
 
@@ -228,7 +262,7 @@ A mix of the following approaches are used in Renovate, from best to worst:
 
 - Renovate calls a tool command to specifically update the dependency in question to the specific version, e.g. `<tool> update <dependency name>@<new version>`
 - Renovate manually updates the locked version in the lock file it needs updated, then calls a `<tool> install` command to "fix" up the remaining parts (hashes, transitive dependencies, etc). This is good, if it works, but it is prone to breaking in future releases if the maintainers of the tool do not know people are using their package manager in this manner, even if it works unintentionally.
-- Renovate calls a tool command similar to the first approach, except the tool does not support specific versions, e.g. `<tool> update <dependency name>`. This approach can be problematic because Renovate might _want_ to update to e.g. `v1.1.1` but instead the tool finds a newer `v1.1.2` and that's what the user gets instead
+- Renovate calls a tool command similar to the first approach, except the tool does not support specific versions, e.g. `<tool> update <dependency name>`. This approach can be problematic because Renovate might _want_ to update to e.g. `v1.1.1` but instead the tool finds a newer `v1.1.2` and that is what the user gets instead
 
 ##### Difficult cases
 
@@ -238,7 +272,7 @@ A further complication is that sometimes:
 - there are peer dependency problems
 - or there is some other conflict
 
-In those cases it's best if the tool supports creating a list of dependencies to update, and the tool then updates all dependencies at once.
+In those cases it is best if the tool supports creating a list of dependencies to update, and the tool then updates all dependencies at once.
 
 #### updateLockedDependency()
 

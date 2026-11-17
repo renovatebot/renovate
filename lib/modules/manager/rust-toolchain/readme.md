@@ -1,0 +1,41 @@
+This manager can be used to update the Rust toolchain version in `rust-toolchain.toml` and `rust-toolchain` files.
+
+It supports both the TOML format and the legacy plain-text format as specified in the [Rust toolchain documentation](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file).
+
+Renovate also uses a pinned version like `1.90.0` or `1.90` as the `rust` constraint when it updates `Cargo.lock` files with the `cargo` manager in the same directory and below.
+A branch which updates the pinned version uses the new version for the `cargo` updates in the same branch.
+A channel like `stable` or `nightly`, or a `path`, sets no `rust` constraint, and hides the version of a toolchain file in a parent directory, like with `rustup`.
+A `rust` version in a [mise](../mise/index.md) config file takes precedence over toolchain files in any directory, as mise sets `RUSTUP_TOOLCHAIN`, which `rustup` prefers over a toolchain file.
+
+### Version pinning
+
+If you'd like to pin your toolchain to a particular version, the following configuration can be applied:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["rust-toolchain"],
+      "matchDepTypes": ["toolchain"],
+      "rangeStrategy": "pin"
+    }
+  ]
+}
+```
+
+### Supported renovations
+
+- `1.90.0` → `2.0.0` (major version updates)
+- `1.90.0` → `1.91.0` (minor version updates)
+- `1.90.0` → `1.90.1` (patch version updates)
+- `1.90` → `2.0` (major range updates)
+- `1.90` → `1.91` (minor range updates)
+- `nightly-2025-10-10` → `nightly-2025-10-11` (nightly version updates)
+
+With `rangeStrategy: pin`:
+
+- `1.90` → `1.90.0` (range pinning)
+- `stable` → `1.90.0` (stable channel pinning)
+- `nightly` → `nightly-2025-10-11` (nightly channel pinning)
+
+_Note: The version numbers shown above are just examples for illustration purposes._

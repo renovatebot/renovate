@@ -116,10 +116,6 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('returns null when metadata is not found', async () => {
     httpMock
       .scope(baseUrl)
@@ -192,7 +188,18 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get();
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('returns releases when only snapshot', async () => {
@@ -224,6 +231,52 @@ describe('modules/datasource/maven/index', () => {
         release: '1.0.3-SNAPSHOT',
       },
     });
+  });
+
+  it('skips dependency info when no suitable version is found', async () => {
+    mockGenericPackage({
+      meta: codeBlock`
+        <metadata>
+          <groupId>org.example</groupId>
+          <artifactId>package</artifactId>
+          <versioning>
+            <versions>
+              <version></version>
+            </versions>
+          </versioning>
+        </metadata>
+      `,
+      pom: null,
+    });
+
+    const res = await get();
+
+    expect(res).toMatchObject({ releases: [] });
+  });
+
+  it('keeps respectLatest when metadata has no latest tag', async () => {
+    mockGenericPackage({
+      meta: codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata>
+          <groupId>org.example</groupId>
+          <artifactId>package</artifactId>
+          <versioning>
+            <release>2.0.0</release>
+            <versions>
+              <version>1.0.0</version>
+              <version>2.0.0</version>
+            </versions>
+            <lastUpdated>20210101000000</lastUpdated>
+          </versioning>
+        </metadata>
+      `,
+    });
+
+    const res = await get();
+
+    expect(res?.tags).toEqual({ release: '2.0.0' });
+    expect(res?.respectLatest).toBeUndefined();
   });
 
   it('handles invalid snapshot', async () => {
@@ -267,7 +320,19 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', baseUrlCustom);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://custom.registry.renovatebot.com',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('falls back to next registry url', async () => {
@@ -298,7 +363,19 @@ describe('modules/datasource/maven/index', () => {
       baseUrl,
     );
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('merges releases from multiple registries', async () => {
@@ -341,7 +418,32 @@ describe('modules/datasource/maven/index', () => {
       base,
     );
 
-    expect(res?.releases).toMatchSnapshot();
+    expect(res?.releases).toEqual([
+      {
+        version: '0.0.1',
+      },
+      {
+        version: '1.0.0',
+      },
+      {
+        version: '1.0.1',
+      },
+      {
+        version: '1.0.2',
+      },
+      {
+        version: '1.0.3-SNAPSHOT',
+      },
+      {
+        version: '1.0.4-SNAPSHOT',
+      },
+      {
+        version: '1.0.5-SNAPSHOT',
+      },
+      {
+        version: '2.0.0',
+      },
+    ]);
   });
 
   it('skips registry with invalid metadata structure', async () => {
@@ -357,7 +459,19 @@ describe('modules/datasource/maven/index', () => {
       baseUrl,
     );
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('skips registry with invalid XML', async () => {
@@ -373,7 +487,19 @@ describe('modules/datasource/maven/index', () => {
       baseUrl,
     );
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('handles optional slash at the end of registry url', async () => {
@@ -507,7 +633,18 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', frontendUrl);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('supports artifactregistry urls with auth', async () => {
@@ -622,6 +759,78 @@ describe('modules/datasource/maven/index', () => {
       isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(2);
+  });
+
+  describe('private results', () => {
+    it('marks results from the default registry as private when fetched with credentials', async () => {
+      hostRules.add({
+        hostType: datasource,
+        matchHost: 'repo.maven.apache.org',
+        token: '123test',
+      });
+      mockGenericPackage();
+
+      const res = await get('org.example:package', baseUrl);
+
+      expect(res).toMatchObject({ isPrivate: true });
+    });
+
+    it('keeps results private when parent POM info is merged in', async () => {
+      hostRules.add({
+        hostType: datasource,
+        matchHost: 'repo.maven.apache.org',
+        token: '123test',
+      });
+      mockGenericPackage({
+        meta: Fixtures.get('child-no-info/meta.xml'),
+        pom: Fixtures.get('child-no-info/pom.xml'),
+        latest: '2.0.0',
+      });
+      mockGenericPackage({
+        dep: 'org.example:parent',
+        meta: null,
+        pom: Fixtures.get('parent-scm-homepage/pom.xml'),
+        latest: '1.0.0',
+      });
+
+      const res = await get('org.example:package', baseUrl);
+
+      expect(res).toMatchObject({
+        isPrivate: true,
+        homepage: 'https://parent-home.example.com',
+      });
+    });
+
+    it('does not mark anonymous results from the default registry as private', async () => {
+      mockGenericPackage();
+
+      const res = await get('org.example:package', baseUrl);
+
+      expect(res).not.toHaveProperty('isPrivate');
+    });
+
+    it('marks results from a custom registry as private', async () => {
+      mockGenericPackage({ base: baseUrlCustom });
+
+      const res = await get('org.example:package', baseUrlCustom);
+
+      expect(res).toMatchObject({ isPrivate: true });
+    });
+
+    it.each`
+      registryUrl
+      ${'https://anonymous.registry.renovatebot.com'}
+      ${'https://repo.maven.apache.org.evil/maven2'}
+    `(
+      'marks anonymous results from $registryUrl as private',
+      async ({ registryUrl }) => {
+        mockGenericPackage({ base: registryUrl });
+
+        const res = await get('org.example:package', registryUrl);
+
+        expect(res).toMatchObject({ isPrivate: true });
+      },
+    );
   });
 
   describe('fetching parent info', () => {
@@ -844,18 +1053,18 @@ describe('modules/datasource/maven/index', () => {
 
     it('returns original value for invalid configs', async () => {
       const releaseOrig: Release = { version: '1.2.3' };
-      expect(
-        await postprocessRelease(
+      await expect(
+        postprocessRelease(
           { datasource, registryUrl: MAVEN_REPO }, // packageName is missing
           releaseOrig,
         ),
-      ).toBe(releaseOrig);
-      expect(
-        await postprocessRelease(
+      ).resolves.toBe(releaseOrig);
+      await expect(
+        postprocessRelease(
           { datasource, packageName: 'foo:bar' }, // registryUrl is missing
           releaseOrig,
         ),
-      ).toBe(releaseOrig);
+      ).resolves.toBe(releaseOrig);
     });
 
     it('adds releaseTimestamp', async () => {

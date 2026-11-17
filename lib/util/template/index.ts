@@ -7,6 +7,7 @@ import {
 } from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global.ts';
+import { pkg } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import { toArray } from '../array.ts';
 import { getChildEnv } from '../exec/utils.ts';
@@ -48,6 +49,7 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   replace: (find, replace, context) =>
     (context ?? '').replace(regEx(find, 'g'), replace),
   lowercase: (str: string) => str?.toLowerCase(),
+  uppercase: (str: string) => str?.toUpperCase(),
   containsString: (str, subStr) => str?.includes(subStr),
   equals: (arg1, arg2) => arg1 === arg2,
   includes: (arg1: string[], arg2: string) => {
@@ -180,6 +182,8 @@ export const allowedFields = {
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
+  effectiveDatasource:
+    'The datasources used to fetch releases after delegation',
   hasReleaseNotes: 'true if the upgrade has release notes',
   indentation: 'The indentation of the dependency being updated',
   isGroup: 'true if the upgrade is part of a group',
@@ -238,6 +242,7 @@ export const allowedFields = {
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
   releaseTimestamp: 'The timestamp of the release',
+  renovateVersion: 'The currently running Renovate version.',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceRepo: 'The repository in the sourceUrl, if present',
@@ -326,7 +331,12 @@ export function compile<T>(
   filterFields = true,
 ): string {
   const env = getChildEnv({});
-  const data = { ...GlobalConfig.get(), ...input, env };
+  const data = {
+    ...GlobalConfig.get(),
+    renovateVersion: pkg.version,
+    ...input,
+    env,
+  };
   const warnVariables = new Set<string>();
   const filteredInput = filterFields
     ? proxyCompileInput(data, warnVariables)

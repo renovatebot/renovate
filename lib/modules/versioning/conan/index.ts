@@ -21,10 +21,10 @@ import {
 export const id = 'conan';
 export const displayName = 'conan';
 export const urls = [
-  'https://semver.org/',
-  'https://github.com/podhmo/python-node-semver',
-  'https://github.com/podhmo/python-node-semver/tree/master/examples',
-  'https://docs.conan.io/en/latest/versioning/version_ranges.html#version-ranges',
+  '[Semantic Versioning](https://semver.org/)',
+  '[python-node-semver](https://github.com/podhmo/python-node-semver)',
+  '[python-node-semver examples](https://github.com/podhmo/python-node-semver/tree/master/examples)',
+  '[Conan version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html#version-ranges)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -41,10 +41,8 @@ function isVersion(input: string): boolean {
   if (input && !input.includes('[')) {
     const qualifiers = getOptions(input);
     const version = cleanVersion(input);
-    if (qualifiers.loose) {
-      if (looseAPI.isVersion(version)) {
-        return true;
-      }
+    if (qualifiers.loose && looseAPI.isVersion(version)) {
+      return true;
     }
     return makeVersion(version, qualifiers) !== null;
   }

@@ -5,7 +5,7 @@ describe('config/migrations/custom/automerge-migration', () => {
     await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'none',
-      } as any,
+      },
       {
         automerge: false,
       },
@@ -16,7 +16,7 @@ describe('config/migrations/custom/automerge-migration', () => {
     await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'patch',
-      } as any,
+      },
       {
         patch: {
           automerge: true,
@@ -35,7 +35,7 @@ describe('config/migrations/custom/automerge-migration', () => {
     await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'minor',
-      } as any,
+      },
       {
         minor: {
           automerge: true,
@@ -51,7 +51,7 @@ describe('config/migrations/custom/automerge-migration', () => {
     await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'any',
-      } as any,
+      },
       {
         automerge: true,
       },

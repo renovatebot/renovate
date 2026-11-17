@@ -109,6 +109,21 @@ describe('modules/versioning/maven/index', () => {
   );
 
   it.each`
+    type       | a                               | b                               | expected
+    ${'major'} | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${false}
+    ${'major'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${true}
+    ${'minor'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${false}
+    ${'minor'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${true}
+    ${'minor'} | ${'1'}                          | ${'1-alpha'}                    | ${true}
+    ${'patch'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${false}
+    ${'patch'} | ${'1.1'}                        | ${'1.1-alpha'}                  | ${true}
+    ${'major'} | ${'foobar'}                     | ${'foobar'}                     | ${true}
+    ${'major'} | ${''}                           | ${'1'}                          | ${false}
+  `('isSame("$type", "$a", "$b") === $expected', ({ type, a, b, expected }) => {
+    expect(maven.isSame?.(type, a, b)).toBe(expected);
+  });
+
+  it.each`
     version          | range                              | expected
     ${'0'}           | ${'[0,1]'}                         | ${true}
     ${'1'}           | ${'[0,1]'}                         | ${true}
@@ -234,7 +249,7 @@ describe('modules/versioning/maven/index', () => {
         ${'2.163.9'}          | ${false}
         ${'2.164.0-SNAPSHOT'} | ${false}
       `(
-        'matches("$version", "' + range + '") === $expected',
+        `matches("$version", "${range}") === $expected`,
         ({ version, expected }) => {
           expect(matches(version, range)).toBe(expected);
         },
@@ -253,7 +268,7 @@ describe('modules/versioning/maven/index', () => {
         ${'2.163.9'}          | ${false}
         ${'2.164.0-SNAPSHOT'} | ${false}
       `(
-        'matches("$version", "' + range + '") === $expected',
+        `matches("$version", "${range}") === $expected`,
         ({ version, expected }) => {
           expect(matches(version, range)).toBe(expected);
         },
@@ -271,7 +286,7 @@ describe('modules/versioning/maven/index', () => {
         ${'2.164.0-SNAPSHOT'} | ${true}
         ${'1.0.0'}            | ${true}
       `(
-        'matches("$version", "' + range + '") === $expected',
+        `matches("$version", "${range}") === $expected`,
         ({ version, expected }) => {
           expect(matches(version, range)).toBe(expected);
         },

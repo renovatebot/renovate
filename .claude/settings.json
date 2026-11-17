@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm oxlint:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm vitest:*)",
+      "WebFetch(domain:docs.jsonata.org)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/pretooluse-check.ts\"",
+            "statusMessage": "Checking command against repo conventions"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/sessionstart-check.ts\"",
+            "statusMessage": "Installing toolchain and dependencies"
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/cwdchanged-check.ts\"",
+            "statusMessage": "Provisioning checkout if not yet installed"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/agents/hooks/stop-check.ts\"",
+            "statusMessage": "Running pnpm check on changed files"
+          }
+        ]
+      }
+    ]
+  }
+}

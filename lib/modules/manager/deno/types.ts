@@ -1,6 +1,6 @@
 import type { Minimatch } from 'minimatch';
 
-export interface DenoManagerData extends Record<string, any> {
+export interface DenoManagerData {
   packageName?: string;
   workspaces?: string[];
   /**

@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 const FleetHelmBlock = z.object({
   chart: z.string().optional(),

@@ -4,8 +4,8 @@ The `debian` datasource is meant for projects that:
 - depend on Debian-based systems, or
 - depend on Debian-based distributions, like Ubuntu
 
-By default, Renovate does not detect Debian dependencies.
-For Renovate to update dependencies, you must combine the Debian datasource with [regex managers](../../manager/regex/index.md).
+The [`dockerfile` manager](../../manager/dockerfile/index.md) detects packages installed by `apt install` or `apt-get install` in a `RUN` instruction.
+Anywhere else, you must combine the Debian datasource with [regex managers](../../manager/regex/index.md) for Renovate to detect your dependencies.
 
 ## Set URL when using a Debian repository
 
@@ -17,10 +17,9 @@ To use a Debian repository with the datasource, you must set a properly formatte
   - A rolling release alias like `stable`.
   - A fixed release name such as `bullseye` or `buster`.
 
-<!-- prettier-ignore -->
 !!! note
-    These parameters are used to give Renovate context and are not directly used to call the repository.
-    Therefore, the `registryUrl` has not to be a valid URL for a repository.
+  These parameters are used to give Renovate context and are not directly used to call the repository.
+  Therefore, the `registryUrl` has not to be a valid URL for a repository.
 
 **Example**:
 
@@ -30,10 +29,43 @@ https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&bina
 
 This URL points to the `stable` suite of the Debian repository for `amd64` architecture, including `main`, `contrib`, and `non-free` components.
 
+## Dockerfile support
+
+When using Debian-based images, it is common to use a version pin for your packages, like so:
+
+```dockerfile
+FROM debian:trixie
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl=8.14.1-2 \
+  && rm -rf /var/lib/apt/lists/*
+```
+
+This provides reproducibility in the case that the upstream package updates under you.
+
+The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts these packages, allowing updates to them directly, without needing a Custom Manager.
+
+The `dockerfile` manager does not work out a `registryUrl` from your base image, so it skips these packages with `skipReason: unknown-registry` rather than look them up against a suite which may hold versions your image cannot install.
+Set the `registryUrls` which match your base image with a `packageRules` entry to have them looked up.
+
+<!-- TODO: #45706 auto-detect `registryUrl` -->
+
+```json title="Point deb lookups at the Debian trixie repositories"
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["Dockerfile"],
+      "matchDatasources": ["deb"],
+      "registryUrls": [
+        "https://deb.debian.org/debian?suite=trixie&components=main,contrib,non-free&binaryArch=amd64"
+      ]
+    }
+  ]
+}
+```
+
 ## Usage Example
 
-Say you're using apt packages in a Dockerfile and want to update them.
-With the debian datasource you can "pin" each dependency, and get automatic updates.
+Where the version is not given to `apt` directly - say it is held in an environment variable - you can extract it with a custom manager.
 
 First you would set a custom manager in your `renovate.json` file for `Dockerfile`:
 

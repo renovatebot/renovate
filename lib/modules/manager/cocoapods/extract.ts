@@ -37,9 +37,11 @@ export function parseLine(line: string): ParsedLine {
       ? `${result.spec}/${result.subspec}`
       : result.spec;
     const specName = result.spec;
+    // v8 ignore else -- both derive from `result.spec`, already truthy above
     if (depName) {
       result.depName = depName;
     }
+    // v8 ignore else -- see above
     if (specName) {
       result.specName = specName;
     }
@@ -59,6 +61,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
   if (platformMatch?.groups) {
     const { account, repo, platform } = platformMatch.groups;
+    // v8 ignore else -- the regex only matches when both groups are present
     if (account && repo) {
       const datasource =
         platform === 'github'

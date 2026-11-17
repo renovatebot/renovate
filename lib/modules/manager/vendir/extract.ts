@@ -4,39 +4,30 @@ import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { getDep } from '../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
 import type {
-  GitRefDefinition,
-  GithubReleaseDefinition,
-  HelmChartDefinition,
-  HttpReleaseDefinition,
-  VendirDefinition,
+  GitRef,
+  GithubRelease,
+  HelmChart,
+  HttpRelease,
 } from './schema.ts';
 import { Vendir } from './schema.ts';
 
 export function extractHelmChart(
-  helmChart: HelmChartDefinition,
+  helmChart: HelmChart,
   aliases?: Record<string, string>,
 ): PackageDependency {
   if (isOCIRegistry(helmChart.repository.url)) {
-    const dep = getDep(
-      `${removeOCIPrefix(helmChart.repository.url)}/${helmChart.name}:${helmChart.version}`,
-      false,
-      aliases,
-    );
     return {
-      ...dep,
+      ...getOciChartDep(helmChart.repository.url, helmChart.name, aliases),
       depName: helmChart.name,
       depType: 'HelmChart',
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      pinDigests: false,
+      currentValue: helmChart.version,
     };
   }
   return {
@@ -48,9 +39,7 @@ export function extractHelmChart(
   };
 }
 
-export function extractGitSource(
-  gitSource: GitRefDefinition,
-): PackageDependency {
+export function extractGitSource(gitSource: GitRef): PackageDependency {
   const httpUrl = getHttpUrl(gitSource.url);
   return {
     depName: httpUrl,
@@ -61,7 +50,7 @@ export function extractGitSource(
 }
 
 export function extractGithubReleaseSource(
-  githubRelease: GithubReleaseDefinition,
+  githubRelease: GithubRelease,
 ): PackageDependency {
   return {
     depName: githubRelease.slug,
@@ -73,7 +62,7 @@ export function extractGithubReleaseSource(
 }
 
 export function extractHttpReleaseSource(
-  httpRelease: HttpReleaseDefinition,
+  httpRelease: HttpRelease,
 ): PackageDependency {
   return {
     packageName: httpRelease.url,
@@ -86,7 +75,7 @@ export function extractHttpReleaseSource(
 export function parseVendir(
   content: string,
   packageFile?: string,
-): VendirDefinition | null {
+): Vendir | null {
   try {
     return parseSingleYaml(content, {
       customSchema: Vendir,

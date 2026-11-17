@@ -1,7 +1,7 @@
 import { logger } from '../../../../logger/index.ts';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator.ts';
-import type { Range } from '../range.ts';
 import { parseRanges, satisfiesRange, stringifyRanges } from '../range.ts';
+import type { Range } from '../types.ts';
 import { adapt, decrement, floor, increment } from '../version.ts';
 
 // Common logic for replace, widen, and bump strategies
@@ -20,9 +20,9 @@ export function replacePart(part: Range, to: string): Range {
           version: floor(adapt(to, ver)),
           companion: { ...companion, version: to },
         };
-      } else {
-        return { ...part, version: floor(adapt(to, ver)) };
       }
+      return { ...part, version: floor(adapt(to, ver)) };
+
     case GT:
       return { ...part, version: decrement(to) };
     case GTE:

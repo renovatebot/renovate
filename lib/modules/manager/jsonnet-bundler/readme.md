@@ -2,4 +2,4 @@ Extracts dependencies from `jsonnetfile.json` files, updates `jsonnetfile.lock.j
 
 Supports [lock file maintenance](../../../configuration-options.md#lockfilemaintenance).
 
-This plugin requires `jsonnet-bundler >= v0.4.0` since previous versions don't support updating single dependencies.
+This plugin requires `jsonnet-bundler >= v0.4.0` since previous versions do not support updating single dependencies.

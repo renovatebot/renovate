@@ -704,8 +704,8 @@ dummy 1.2.3
           },
           {
             currentValue: '1.64.0',
-            datasource: 'github-tags',
-            packageName: 'rust-lang/rust',
+            datasource: 'rust-version',
+            packageName: 'rust',
             depName: 'rust',
           },
           {

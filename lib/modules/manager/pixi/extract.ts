@@ -1,9 +1,10 @@
 import { isString } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { coerceNumber } from '../../../util/number.ts';
 import { Result } from '../../../util/result.ts';
 import {
   ensureTrailingSlash,
@@ -57,6 +58,7 @@ export function getUserPixiConfig(
     logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
     return null;
   }
+  /* v8 ignore next -- a successful parse always yields a value */
   return val ?? null;
 }
 
@@ -163,7 +165,7 @@ function orderChannels(channels: Channels = []): string[] {
         return { channel, priority: 0, index };
       }
 
-      return { ...channel, index: 0 };
+      return { ...channel, priority: coerceNumber(channel.priority), index };
     })
     .toSorted((a, b) => {
       // first based on priority then based on index

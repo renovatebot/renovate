@@ -29,7 +29,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
           { host: 'some.domain.com', token: '123test' },
           { matchHost: 'some.domain.com:8080', token: '123test' },
         ],
-      } as any,
+      },
       {
         hostRules: [
           {
@@ -68,6 +68,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
   it('throws when multiple hosts are present', () => {
     expect(() =>
       new HostRulesMigration(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy baseUrl hostRule field is intentionally invalid for this migration test
         {
           hostRules: [
             {

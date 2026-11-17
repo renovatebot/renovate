@@ -55,7 +55,6 @@ describe('modules/manager/vendir/extract', () => {
             registryUrls: ['https://charts.bitnami.com/bitnami'],
           },
           {
-            currentDigest: undefined,
             currentValue: '7.10.1',
             depName: 'oci-chart',
             datasource: 'docker',
@@ -64,7 +63,6 @@ describe('modules/manager/vendir/extract', () => {
             pinDigests: false,
           },
           {
-            currentDigest: undefined,
             currentValue: '7.10.1',
             depName: 'aliased-oci-chart',
             datasource: 'docker',

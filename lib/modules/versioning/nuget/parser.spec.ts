@@ -34,9 +34,11 @@ describe('modules/versioning/nuget/parser', () => {
       expect(parseFloatingRange('abc')).toBeNull();
       expect(parseFloatingRange('1.2.*-foo')).toBeNull();
       expect(parseFloatingRange('1.2.3')).toBeNull();
+      // a major component, floating or numeric, is mandatory
+      expect(parseFloatingRange('-*')).toBeNull();
     });
 
-    test.each`
+    it.each`
       input             | major   | minor        | patch        | revision     | floating      | prerelease
       ${'*-*'}          | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${'*'}
       ${'*-foo*'}       | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${'foo*'}
@@ -75,7 +77,7 @@ describe('modules/versioning/nuget/parser', () => {
   });
 
   describe('getFloatingRangeLowerBound', () => {
-    test.each`
+    it.each`
       input             | major    | minor   | patch  | revision | prerelease
       ${'*-*'}          | ${0}     | ${0}    | ${0}   | ${0}     | ${'0'}
       ${'*-foo*'}       | ${0}     | ${0}    | ${0}   | ${0}     | ${'foo'}
@@ -165,7 +167,7 @@ describe('modules/versioning/nuget/parser', () => {
     });
 
     describe('bounds inclusivity', () => {
-      test.each`
+      it.each`
         input      | minInclusive | maxInclusive
         ${'(1,2)'} | ${false}     | ${false}
         ${'[1,2)'} | ${true}      | ${false}
@@ -221,7 +223,7 @@ describe('modules/versioning/nuget/parser', () => {
   });
 
   describe('versionToString', () => {
-    test.each`
+    it.each`
       version
       ${'1'}
       ${'1.2'}
@@ -239,7 +241,7 @@ describe('modules/versioning/nuget/parser', () => {
   });
 
   describe('rangeToString', () => {
-    test.each`
+    it.each`
       version
       ${'[1]'}
       ${'[1.2]'}

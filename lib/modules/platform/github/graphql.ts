@@ -2,6 +2,7 @@ export const repoInfoQuery = `
 query($owner: String!, $name: String!, $user: String) {
   repository(owner: $owner, name: $name) {
     id
+    sshUrl
     isFork
     parent {
       nameWithOwner
@@ -14,6 +15,7 @@ query($owner: String!, $name: String!, $user: String) {
     mergeCommitAllowed
     rebaseMergeAllowed
     squashMergeAllowed
+    mergeQueue { id }
     defaultBranchRef {
       name
       target {
@@ -26,11 +28,48 @@ query($owner: String!, $name: String!, $user: String) {
       first: 5
     ) {
       nodes {
+        id
         number
         state
         title
         body
         updatedAt
+      }
+    }
+  }
+}
+`;
+
+export const prAutoMergeStateQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
+export const disableAutoMergeMutation = `
+mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId }) {
+    pullRequest {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
       }
     }
   }
@@ -57,12 +96,50 @@ query(
         hasNextPage
       }
       nodes {
+        id
         number
         state
         title
         body
         updatedAt
       }
+    }
+  }
+}
+`;
+
+export const repoMergeQueueQuery = `
+query($owner: String!, $name: String!, $branch: String!) {
+  repository(owner: $owner, name: $name) {
+    mergeQueue(branch: $branch) {
+      id
+    }
+  }
+}
+`;
+
+export const prIsInMergeQueueQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      isInMergeQueue
+    }
+  }
+}
+`;
+
+export const enqueuePullRequestMutation = `
+mutation EnqueuePullRequest(
+  $pullRequestId: ID!,
+) {
+  enqueuePullRequest(
+    input: {
+      pullRequestId: $pullRequestId,
+    }
+  ) {
+    mergeQueueEntry {
+      id
+      position
     }
   }
 }
@@ -84,6 +161,38 @@ mutation EnablePullRequestAutoMerge(
     }
   ) {
     pullRequest {
+      number
+    }
+  }
+}
+`;
+
+export const pinIssueMutation = `
+mutation PinIssue(
+  $issueId: ID!,
+) {
+  pinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
+      number
+    }
+  }
+}
+`;
+
+export const unpinIssueMutation = `
+mutation UnpinIssue(
+  $issueId: ID!,
+) {
+  unpinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
       number
     }
   }

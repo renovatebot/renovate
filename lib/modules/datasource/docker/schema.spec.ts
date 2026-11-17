@@ -1,4 +1,4 @@
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import {
   DistributionListManifest,
   DistributionManifest,
@@ -6,6 +6,9 @@ import {
   OciHelmConfig,
   OciImageIndexManifest,
   OciImageManifest,
+  QuayTagsResponse,
+  RegistryAuthToken,
+  RegistryTagsList,
 } from './schema.ts';
 
 describe('modules/datasource/docker/schema', () => {
@@ -261,6 +264,92 @@ describe('modules/datasource/docker/schema', () => {
     });
   });
 
+  it('parses OCI Zarf package', () => {
+    // ghcr.io/zarf-dev/packages/init:v1.0.0
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.zarf.config.v1+json',
+        digest:
+          'sha256:ff8dd1adf882217f9225cc0c398ae81ef56ed6386e29c3715bba09aeafc6bc23',
+        size: 14430,
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.zarf.layer.v1.blob',
+          digest:
+            'sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e',
+          size: 4345,
+        },
+      ],
+      annotations: {
+        'org.opencontainers.image.title': 'init',
+      },
+    };
+
+    expect(OciImageManifest.parse(manifest)).toMatchObject({
+      config: {
+        mediaType: 'application/vnd.zarf.config.v1+json',
+      },
+      annotations: {
+        'org.opencontainers.image.title': 'init',
+      },
+    });
+
+    expect(Manifest.parse(manifest)).toMatchObject({
+      config: {
+        mediaType: 'application/vnd.zarf.config.v1+json',
+      },
+      annotations: {
+        'org.opencontainers.image.title': 'init',
+      },
+    });
+  });
+
+  it('parses OCI Zarf component', () => {
+    // ghcr.io/zarf-dev/components/init/zarf-agent:v1.0.0
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.zarf.component.config.v1+json',
+        digest:
+          'sha256:c373197e7de00b15173f2980053501d0712b30c27ec1dcdebc8053de470cfd56',
+        size: 1154,
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.zarf.component.layer.v1.blob',
+          digest:
+            'sha256:a3d43f570cc022dd0926a2f8f15f1780b513f0245fffa6be5ac2d99eea5f3952',
+          size: 109,
+        },
+      ],
+      annotations: {
+        'org.opencontainers.image.title': 'zarf-agent',
+      },
+    };
+
+    expect(OciImageManifest.parse(manifest)).toMatchObject({
+      config: {
+        mediaType: 'application/vnd.zarf.component.config.v1+json',
+      },
+      annotations: {
+        'org.opencontainers.image.title': 'zarf-agent',
+      },
+    });
+
+    expect(Manifest.parse(manifest)).toMatchObject({
+      config: {
+        mediaType: 'application/vnd.zarf.component.config.v1+json',
+      },
+      annotations: {
+        'org.opencontainers.image.title': 'zarf-agent',
+      },
+    });
+  });
+
   it('parses distribution manifest', () => {
     const manifest = {
       schemaVersion: 2,
@@ -431,5 +520,49 @@ describe('modules/datasource/docker/schema', () => {
 
   it('throws for invalid manifest', () => {
     expect(() => Manifest.parse({ schemaVersion: 2 })).toThrow(ZodError);
+  });
+
+  it('parses RegistryAuthToken with token field', () => {
+    expect(RegistryAuthToken.parse({ token: 'abc123' })).toEqual({
+      token: 'abc123',
+    });
+  });
+
+  it('parses RegistryAuthToken with access_token field', () => {
+    expect(RegistryAuthToken.parse({ access_token: 'abc123' })).toEqual({
+      access_token: 'abc123',
+    });
+  });
+
+  it('parses RegistryAuthToken with extra fields (lenient)', () => {
+    expect(
+      RegistryAuthToken.parse({ token: 'abc', issued_at: '2024-01-01' }),
+    ).toMatchObject({ token: 'abc' });
+  });
+
+  it('parses RegistryTagsList', () => {
+    expect(RegistryTagsList.parse({ tags: ['1.0', '2.0', 'latest'] })).toEqual({
+      tags: ['1.0', '2.0', 'latest'],
+    });
+  });
+
+  it('parses QuayTagsResponse', () => {
+    expect(
+      QuayTagsResponse.parse({
+        tags: [{ name: '1.0' }, { name: '2.0' }],
+        has_additional: true,
+      }),
+    ).toEqual({
+      tags: [{ name: '1.0' }, { name: '2.0' }],
+      has_additional: true,
+    });
+  });
+
+  it('parses QuayTagsResponse and drops invalid tag entries (LooseArray)', () => {
+    const result = QuayTagsResponse.parse({
+      tags: [{ name: '1.0' }, { invalid: true }, { name: '2.0' }],
+      has_additional: false,
+    });
+    expect(result.tags).toEqual([{ name: '1.0' }, { name: '2.0' }]);
   });
 });

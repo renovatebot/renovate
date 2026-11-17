@@ -5,8 +5,21 @@ import type {
 } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import * as allVersioning from '../../modules/versioning/index.ts';
+import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getRegexPredicate } from '../string-match.ts';
 import { Matcher } from './base.ts';
+
+function matchesCurrentValue(
+  versioningApi: VersioningApi,
+  matchCurrentVersionStr: string,
+  currentValue: string | null | undefined,
+): boolean {
+  return !!(
+    currentValue &&
+    versioningApi.isValid(currentValue) &&
+    versioningApi.matches(matchCurrentVersionStr, currentValue)
+  );
+}
 
 export class CurrentVersionMatcher extends Matcher {
   override matches(
@@ -38,10 +51,10 @@ export class CurrentVersionMatcher extends Matcher {
       try {
         return (
           isUnconstrainedValue ||
-          !!(
-            currentValue &&
-            versioningApi.isValid(currentValue) &&
-            versioningApi.matches(matchCurrentVersionStr, currentValue)
+          matchesCurrentValue(
+            versioningApi,
+            matchCurrentVersionStr,
+            currentValue,
           )
         );
       } catch {

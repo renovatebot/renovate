@@ -1,6 +1,12 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNumericString,
+  isString,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as debianVersioning from '../../versioning/debian/index.ts';
 import * as ubuntuVersioning from '../../versioning/ubuntu/index.ts';
@@ -9,6 +15,9 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { extractApkDeps } from './apk.ts';
+import { extractDebDeps } from './deb.ts';
+import type { GetDepOptions } from './types.ts';
 
 const variableMarker = '$';
 
@@ -51,6 +60,10 @@ function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
   return template;
 }
 
+function lineIncludes(line: string, value: unknown): boolean {
+  return isString(value) && line.includes(value);
+}
+
 function processDepForAutoReplace(
   dep: PackageDependency,
   lineNumberRanges: number[][],
@@ -60,11 +73,10 @@ function processDepForAutoReplace(
   const lineNumberRangesToReplace: number[][] = [];
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
+      const line = lines[lineNumber];
       if (
-        (isString(dep.currentValue) &&
-          lines[lineNumber].includes(dep.currentValue)) ||
-        (isString(dep.currentDigest) &&
-          lines[lineNumber].includes(dep.currentDigest))
+        lineIncludes(line, dep.currentValue) ||
+        lineIncludes(line, dep.currentDigest)
       ) {
         lineNumberRangesToReplace.push(lineNumberRange);
       }
@@ -76,8 +88,7 @@ function processDepForAutoReplace(
   });
 
   const minLine = lineNumberRangesToReplace[0]?.[0];
-  const maxLine =
-    lineNumberRangesToReplace[lineNumberRangesToReplace.length - 1]?.[1];
+  const maxLine = lineNumberRangesToReplace.at(-1)?.[1];
   if (
     lineNumberRanges.length === 1 ||
     minLine === undefined ||
@@ -102,7 +113,7 @@ function processDepForAutoReplace(
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
 
-export function splitImageParts(currentFrom: string): PackageDependency {
+export function splitImageParts(currentFrom: string): PackageDependency<never> {
   let isVariable = false;
   let cleanedCurrentFrom = currentFrom;
 
@@ -129,17 +140,14 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   const depTagSplit = currentDepTag.split(':');
   let depName: string;
   let currentValue: string | undefined;
-  if (
-    depTagSplit.length === 1 ||
-    depTagSplit[depTagSplit.length - 1].includes('/')
-  ) {
+  if (depTagSplit.length === 1 || depTagSplit.at(-1)!.includes('/')) {
     depName = currentDepTag;
   } else {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<never> = {
     depName,
     packageName: depName,
     currentValue,
@@ -163,11 +171,31 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
-export function getDep(
+/**
+ * Extract a Docker dependency from an image reference.
+ */
+export function getDep<T = never>(
   currentFrom: string | null | undefined,
-  specifyReplaceString = true,
-  registryAliases?: Record<string, string>,
-): PackageDependency {
+  options: GetDepOptions = {},
+): PackageDependency<T> {
+  const dep = getDepFromImageRef(
+    currentFrom,
+    options.specifyReplaceString ?? true,
+    options.registryAliases,
+  );
+
+  if (options.depType) {
+    dep.depType = options.depType;
+  }
+
+  return dep;
+}
+
+function getDepFromImageRef(
+  currentFrom: string | null | undefined,
+  specifyReplaceString: boolean,
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency<never> {
   if (
     !isString(currentFrom) ||
     !isNonEmptyStringAndNotWhitespace(currentFrom)
@@ -178,21 +206,41 @@ export function getDep(
   }
 
   // Resolve registry aliases first so that we don't need special casing later on:
-  for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    if (currentFrom.startsWith(`${name}/`)) {
-      const depName = currentFrom.substring(name.length + 1);
-      const dep = getDep(`${value}/${depName}`, false);
-      // retain depName, not sure if condition is necessary
-      if (dep.depName?.startsWith(value)) {
-        dep.packageName = dep.depName;
-        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
-      }
-      if (specifyReplaceString) {
-        dep.replaceString = currentFrom;
-        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
-      }
-      return dep;
+  for (const [name, value] of Object.entries(coerceObject(registryAliases))) {
+    // Allow `${VAR}`/`${VAR:-...}` keys to match without a trailing slash
+    // (`}` is an unambiguous boundary). Bare identifier keys like
+    // `$CI_REGISTRY` still require `/` so they can't eat `$CI_REGISTRY_IMAGE/`.
+    const matchedWithSlash = currentFrom.startsWith(`${name}/`);
+    const matchedAtBoundary =
+      name.endsWith('}') && currentFrom.startsWith(name);
+    if (!matchedWithSlash && !matchedAtBoundary) {
+      continue;
     }
+    const depName = currentFrom.slice(
+      matchedWithSlash ? name.length + 1 : name.length,
+    );
+    // An empty alias value means "no registry prefix", i.e. Docker Hub.
+    const valueWithSlash = value ? ensureTrailingSlash(value) : '';
+    const dep = getDepFromImageRef(
+      `${valueWithSlash}${depName}`,
+      false,
+      undefined,
+    );
+    // TODO: when the inner getDep strips a `library/` prefix (or similar)
+    // the depName no longer starts with `valueWithSlash` and the alias-rooted
+    // depName is not restored.
+    if (dep.depName?.startsWith(valueWithSlash)) {
+      dep.packageName = dep.depName;
+      const [imageAndTag] = currentFrom.split('@');
+      dep.depName = dep.currentValue
+        ? imageAndTag.substring(0, imageAndTag.lastIndexOf(':'))
+        : imageAndTag;
+    }
+    if (specifyReplaceString) {
+      dep.replaceString = currentFrom;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+    }
+    return dep;
   }
 
   const dep = splitImageParts(currentFrom);
@@ -221,10 +269,8 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (
-    (dep.depName === 'debian' || dep.depName?.endsWith('/debian')) &&
-    debianVersioning.api.isVersion(dep.currentValue)
-  ) {
+  const isDebian = dep.depName === 'debian' || dep.depName?.endsWith('/debian');
+  if (isDebian && debianVersioning.api.isVersion(dep.currentValue)) {
     dep.versioning = debianVersioning.id;
   }
 
@@ -258,7 +304,7 @@ export function extractPackageFile(
 
   const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
-  for (let lineNumber = 0; lineNumber < lines.length; ) {
+  for (let lineNumber = 0; lineNumber < lines.length;) {
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];
 
@@ -287,7 +333,9 @@ export function extractPackageFile(
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
-        const dep = getDep(syntaxImage, true, config.registryAliases);
+        const dep = getDep(syntaxImage, {
+          registryAliases: config.registryAliases,
+        });
         dep.depType = 'syntax';
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
@@ -303,7 +351,7 @@ export function extractPackageFile(
       lookForSyntaxDirective = false;
     }
 
-    const lineContinuationRegex = regEx(escapeChar + '[ \\t]*$|^[ \\t]*#', 'm');
+    const lineContinuationRegex = regEx(`${escapeChar}[ \\t]*$|^[ \\t]*#`, 'm');
     let lineLookahead = instruction;
     while (
       !lookForEscapeChar &&
@@ -311,13 +359,11 @@ export function extractPackageFile(
       lineContinuationRegex.test(lineLookahead)
     ) {
       lineLookahead = lines[++lineNumber] || '';
-      instruction += '\n' + lineLookahead;
+      instruction += `\n${lineLookahead}`;
     }
 
     const argRegex = regEx(
-      '^[ \\t]*ARG(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)',
+      `^[ \\t]*ARG(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)`,
       'im',
     );
     const argMatch = argRegex.exec(instruction);
@@ -325,21 +371,21 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) {
+      const isDoubleQuoted =
+        argMatchValue.startsWith('"') && argMatchValue.endsWith('"');
+      const isSingleQuoted =
+        argMatchValue.startsWith("'") && argMatchValue.endsWith("'");
+      if (isDoubleQuoted || isSingleQuoted) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 
       args[argMatch.groups.name] = argMatchValue || '';
     }
 
-    const fromRegex = new RegExp(
-      '^[ \\t]*FROM(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?',
+    const fromRegex = regEx(
+      `^[ \\t]*FROM(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const fromMatch = instruction.match(fromRegex);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
@@ -367,7 +413,9 @@ export function extractPackageFile(
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
-        const dep = getDep(fromImage, true, config.registryAliases);
+        const dep = getDep(fromImage, {
+          registryAliases: config.registryAliases,
+        });
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -381,12 +429,10 @@ export function extractPackageFile(
       }
     }
 
-    const copyFromRegex = new RegExp(
-      '^[ \\t]*COPY(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)',
+    const copyFromRegex = regEx(
+      `^[ \\t]*COPY(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const copyFromMatch = instruction.match(copyFromRegex);
     if (copyFromMatch?.groups?.image) {
       if (stageNames.includes(copyFromMatch.groups.image)) {
@@ -394,12 +440,15 @@ export function extractPackageFile(
           { image: copyFromMatch.groups.image },
           'Skipping alias COPY --from',
         );
-      } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-        const dep = getDep(
-          copyFromMatch.groups.image,
-          true,
-          config.registryAliases,
+      } else if (isNumericString(copyFromMatch.groups.image)) {
+        logger.debug(
+          { image: copyFromMatch.groups.image },
+          'Skipping index reference COPY --from',
         );
+      } else {
+        const dep = getDep(copyFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
@@ -413,18 +462,11 @@ export function extractPackageFile(
           'Dockerfile COPY --from',
         );
         deps.push(dep);
-      } else {
-        logger.debug(
-          { image: copyFromMatch.groups.image },
-          'Skipping index reference COPY --from',
-        );
       }
     }
 
     const runMountFromRegex = regEx(
-      '^[ \\t]*RUN(?:' +
-        escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
+      `^[ \\t]*RUN(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)`,
       'im',
     );
     const runMountFromMatch = instruction.match(runMountFromRegex);
@@ -435,11 +477,9 @@ export function extractPackageFile(
           'Skipping alias RUN --mount=from',
         );
       } else {
-        const dep = getDep(
-          runMountFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(runMountFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
@@ -456,6 +496,21 @@ export function extractPackageFile(
       }
     }
 
+    for (const dep of [
+      ...extractApkDeps(instruction, escapeChar),
+      ...extractDebDeps(instruction, escapeChar),
+    ]) {
+      dep.depType = 'install';
+      if (!dep.skipReason) {
+        // Renovate cannot tell which distribution release the base image
+        // installs from, so any repository it looked the package up against
+        // would offer versions the image cannot install
+        dep.skipReason = 'unknown-registry';
+        dep.skipStage = 'extract';
+      }
+      deps.push(dep);
+    }
+
     lineNumber += 1;
   }
 
@@ -465,6 +520,10 @@ export function extractPackageFile(
   for (const d of deps) {
     d.depType ??= 'stage';
   }
-  deps[deps.length - 1].depType = 'final';
+  // find the last `stage`, and treat it as the `final` stage
+  const lastStage = deps.filter((d) => d.depType === 'stage').at(-1);
+  if (lastStage) {
+    lastStage.depType = 'final';
+  }
   return { deps };
 }

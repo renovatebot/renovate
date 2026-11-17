@@ -5,7 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { MAVEN_REPO } from './common.ts';
+import { MAVEN_CENTRAL_MIRROR, MAVEN_REPO } from './common.ts';
 import type { MavenFetchError } from './types.ts';
 import {
   downloadHttpContent,
@@ -27,7 +27,7 @@ function httpError({
   message?: string;
   code?: HttpError['code'];
   request?: Record<string, unknown>;
-  response?: Partial<Response>;
+  response?: Partial<NonNullable<HttpError['response']>>;
 }): HttpError {
   type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -42,7 +42,7 @@ function httpError({
   }
 
   if (response) {
-    err.response = response as never;
+    err.response = response as HttpError['response'];
   }
 
   return err;
@@ -165,6 +165,45 @@ describe('modules/datasource/maven/util', () => {
   });
 
   describe('downloadHttpProtocol', () => {
+    it.each`
+      registryUrl                                       | authorization | isCacheable
+      ${MAVEN_REPO}                                     | ${false}      | ${true}
+      ${MAVEN_REPO}                                     | ${true}       | ${false}
+      ${'https://clojars.org/repo'}                     | ${false}      | ${true}
+      ${MAVEN_CENTRAL_MIRROR}                           | ${false}      | ${true}
+      ${MAVEN_CENTRAL_MIRROR}                           | ${true}       | ${false}
+      ${'https://repo1.maven.org.evil/maven2'}          | ${false}      | ${false}
+      ${'https://REPO.Maven.Apache.org/maven2'}         | ${false}      | ${true}
+      ${'https://repo.maven.apache.org:443/maven2'}     | ${false}      | ${true}
+      ${'not-a-url'}                                    | ${false}      | ${false}
+      ${'https://custom.registry.renovatebot.com'}      | ${false}      | ${false}
+      ${'https://repo.maven.apache.org.evil/maven2'}    | ${false}      | ${false}
+      ${'https://repo.maven.apache.org/maven2-private'} | ${false}      | ${false}
+    `(
+      'returns isCacheable=$isCacheable for $registryUrl with authorization=$authorization',
+      async ({ registryUrl, authorization, isCacheable }) => {
+        const http = partial<Http>({
+          getText: () =>
+            Promise.resolve({
+              statusCode: 200,
+              body: 'pom text',
+              headers: {},
+              authorization,
+            }),
+        });
+
+        const res = await downloadHttpProtocol(
+          http,
+          `${registryUrl}/org/example/package/1.0.0/package-1.0.0.pom`,
+        );
+
+        expect(res.unwrap()).toEqual({
+          ok: true,
+          val: { data: 'pom text', isCacheable },
+        });
+      },
+    );
+
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({
         getText: () => Promise.reject(httpError({ message: HOST_DISABLED })),
@@ -210,26 +249,29 @@ describe('modules/datasource/maven/util', () => {
         getCacheTypeSpy.mockRestore();
       });
 
-      it('throws ExternalHostError for 429 status with redis cache', async () => {
-        getCacheTypeSpy.mockReturnValue('redis');
-        const http = partial<Http>({
-          getText: () =>
-            Promise.reject(
-              httpError({
-                code: 'ECONNRESET',
-                response: { statusCode: 429 } as never,
-              }),
-            ),
-        });
-        await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
-        ).rejects.toThrow(ExternalHostError);
+      it.each([MAVEN_REPO, MAVEN_CENTRAL_MIRROR])(
+        'throws ExternalHostError for 429 status with redis cache against Maven Central (%s)',
+        async (baseUrl: string) => {
+          getCacheTypeSpy.mockReturnValue('redis');
+          const http = partial<Http>({
+            getText: () =>
+              Promise.reject(
+                httpError({
+                  code: 'ECONNRESET',
+                  response: { statusCode: 429 },
+                }),
+              ),
+          });
+          await expect(
+            downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
+          ).rejects.toThrow(ExternalHostError);
 
-        expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path' },
-          'Maven Central rate limiting detected despite Redis caching.',
-        );
-      });
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { failedUrl: `${MAVEN_REPO}/some/path` },
+            'Maven Central rate limiting detected despite Redis caching.',
+          );
+        },
+      );
 
       it('throws ExternalHostError for 429 status without redis cache', async () => {
         getCacheTypeSpy.mockReturnValue('file');
@@ -238,16 +280,16 @@ describe('modules/datasource/maven/util', () => {
             Promise.reject(
               httpError({
                 code: 'ECONNRESET',
-                response: { statusCode: 429 } as never,
+                response: { statusCode: 429 },
               }),
             ),
         });
         await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
         ).rejects.toThrow(ExternalHostError);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path' },
+          { failedUrl: `${MAVEN_REPO}/some/path` },
           'Maven Central rate limiting detected. Persistent caching required.',
         );
       });
@@ -257,13 +299,23 @@ describe('modules/datasource/maven/util', () => {
           getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
         });
         await expect(
-          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
         ).rejects.toThrow(ExternalHostError);
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          { failedUrl: MAVEN_REPO + '/some/path', err: expect.any(HttpError) },
+          { failedUrl: `${MAVEN_REPO}/some/path`, err: expect.any(HttpError) },
           'Temporary error',
         );
+      });
+
+      it('marks the ExternalHostError as failing only the dependency', async () => {
+        const http = partial<Http>({
+          getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
+        });
+
+        await expect(
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
+        ).rejects.toMatchObject({ onlyThisDependencyAffected: true });
       });
     });
 
@@ -303,9 +355,7 @@ describe('modules/datasource/maven/util', () => {
         vi.spyOn(packageCache, 'get').mockResolvedValue(null);
         const http = partial<Http>({
           getText: () =>
-            Promise.reject(
-              httpError({ response: { statusCode: 404 } as never }),
-            ),
+            Promise.reject(httpError({ response: { statusCode: 404 } })),
         });
 
         const res = await downloadHttpProtocol(http, metadataUrl);
@@ -328,9 +378,7 @@ describe('modules/datasource/maven/util', () => {
           .mockResolvedValue(undefined);
         const http = partial<Http>({
           getText: () =>
-            Promise.reject(
-              httpError({ response: { statusCode: 404 } as never }),
-            ),
+            Promise.reject(httpError({ response: { statusCode: 404 } })),
         });
 
         await downloadHttpProtocol(http, nonMetadataUrl);

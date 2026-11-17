@@ -1,3 +1,5 @@
+import { execa } from 'execa';
+import { quote, split } from 'shlex';
 import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
@@ -147,17 +149,9 @@ describe('util/exec/docker/index', () => {
       cwd: '/tmp/foobar',
       envVars,
     };
-    const command = (img: string, vol?: string, opts?: string): string =>
-      `docker run --rm ` +
-      `--name=renovate_${img} ` +
-      `--label=renovate_child ` +
-      `--user=some-user ` +
-      (vol ? `${vol} ` : '') +
-      (opts ? `${opts} ` : '') +
-      `-e FOO -e BAR ` +
-      `-w "/tmp/foobar" ` +
-      `ghcr.io/renovatebot/base-image ` +
-      `bash -l -c "foo && bar"`;
+    function command(img: string, vol?: string, opts?: string): string {
+      return `docker run --rm --name=renovate_${img} --label=renovate_child --user=some-user ${vol ? `${vol} ` : ''}${opts ? `${opts} ` : ''}-e FOO -e BAR -w "/tmp/foobar" ghcr.io/renovatebot/base-image bash -l -c 'foo && bar'`;
+    }
 
     beforeEach(() => {
       GlobalConfig.set({
@@ -175,6 +169,139 @@ describe('util/exec/docker/index', () => {
         'ghcr.io/renovatebot/base-image',
       );
       expect(res).toBe(command(sideCarName));
+    });
+
+    it('keeps stdin open when the child command receives input', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      expect(res).toContain('docker run --rm -i ');
+      expect(res).toEndWith("bash -l -c '{ foo\n} </dev/null >&2 && bar'");
+    });
+
+    it('separates setup output from the response without consuming input', async () => {
+      mockExecAll();
+      const input = '{"private":"manifest"}';
+      const res = await generateDockerCommand(
+        ['cat'],
+        [
+          'cat',
+          'echo installing',
+          { command: ['echo', 'installed'] },
+          { command: ['echo', 'ignored'], ignoreFailure: true },
+        ],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        {
+          input,
+        },
+      );
+
+      expect(stdout).toBe(input);
+      expect(stderr).toBe('installing\ninstalled\nignored');
+    });
+
+    it('passes input only to the final command in a sequence', async () => {
+      mockExecAll();
+      const input = 'private manifest';
+      const res = await generateDockerCommand(
+        [
+          'cat && echo first',
+          { command: ['cat'] },
+          { command: ['false'], ignoreFailure: true },
+          { command: ['cat'] },
+        ],
+        [],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        { input },
+      );
+
+      expect(stdout).toBe(input);
+      expect(stderr).toBe('first');
+    });
+
+    it('isolates compound setup commands while preserving shell state', async () => {
+      mockExecAll();
+      const input = '{"private":"manifest"}';
+      const res = await generateDockerCommand(
+        ['printf "%s:%s\\n" "$PWD" "$SETUP_STATE" && cat'],
+        ['echo installing && cat && cd / && export SETUP_STATE=ready; # setup'],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        { input },
+      );
+
+      expect(stdout).toBe(`/:ready\n${input}`);
+      expect(stderr).toBe('installing');
+    });
+
+    it('keeps shell metacharacters inert in the outer command', async () => {
+      mockExecAll();
+      // A manager quotes untrusted values with shlex before handing them over.
+      // Wrapping the result in double quotes used to leave `$`, backticks and `\`
+      // live in the outer context, so the host shell substituted them before
+      // `docker run` was even reached. The `-c` argument must stay fully literal.
+      const res = await generateDockerCommand(
+        [`echo ${quote('$(touch pwned)')} ${quote('`touch pwned`')}`],
+        [],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+      );
+
+      // What the host actually executes. `printf` stands in for `docker`, so the
+      // arguments it receives are exactly the ones docker would have received.
+      const { stdout } = await execa(
+        res.replace(/^.*base-image /, `printf '%s\n' `),
+        [],
+        { shell: true },
+      );
+
+      expect(stdout.split('\n')).toEqual([
+        'bash',
+        '-l',
+        '-c',
+        // one argument, still holding the payload verbatim
+        `echo '$(touch pwned)' '\`touch pwned\`'`,
+      ]);
+    });
+
+    it('escapes embedded double quotes without relying on backslashes', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        ['./gradlew -Dorg.gradle.jvmargs="-Xms512m"'],
+        [],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+      );
+
+      expect(res).toEndWith(
+        `bash -l -c './gradlew -Dorg.gradle.jvmargs="-Xms512m"'`,
+      );
     });
 
     it('adds `|| true` if ignoreFailure is set on a pre-command', async () => {
@@ -203,7 +330,7 @@ describe('util/exec/docker/index', () => {
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
           `ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "foo && bar || true && bleh && baz && ls"`,
+          `bash -l -c 'foo && bar || true && bleh && baz && ls'`,
       );
     });
 
@@ -233,7 +360,7 @@ describe('util/exec/docker/index', () => {
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
           `ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "pre && foo && bar || true && bleh && baz"`,
+          `bash -l -c 'pre && foo && bar || true && bleh && baz'`,
       );
     });
 

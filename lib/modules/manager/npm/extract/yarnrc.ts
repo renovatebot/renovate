@@ -5,7 +5,7 @@ import { Result } from '../../../../util/result.ts';
 import { YarnConfig } from '../schema.ts';
 
 const registryRegEx = regEx(
-  /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
+  /^"?(?:@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
 );
 
 export function loadConfigFromLegacyYarnrc(

@@ -4,6 +4,7 @@ import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
 } from '../util/interpolator.ts';
+import { coerceObject } from '../util/object.ts';
 import { regEx } from '../util/regex.ts';
 import { addSecretForSanitizing } from '../util/sanitize.ts';
 import type { AllConfig, RenovateConfig } from './types.ts';
@@ -77,14 +78,14 @@ export function applySecretsAndVariablesToConfig(
 
   const configWithVars = replaceInterpolatedValuesInObject(
     config,
-    variables ?? {},
+    coerceObject(variables),
     options.variables,
     deleteVariables,
   );
 
   return replaceInterpolatedValuesInObject(
     configWithVars,
-    secrets ?? {},
+    coerceObject(secrets),
     options.secrets,
     deleteSecrets,
   );

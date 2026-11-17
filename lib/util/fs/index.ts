@@ -34,9 +34,12 @@ export async function readLocalFile(
 ): Promise<string | Buffer | null> {
   const localFileName = ensureLocalPath(fileName);
   try {
-    const fileContent = encoding
-      ? await fs.readFile(localFileName, encoding)
-      : await fs.readFile(localFileName);
+    let fileContent: string | Buffer;
+    if (encoding) {
+      fileContent = await fs.readFile(localFileName, encoding);
+    } else {
+      fileContent = await fs.readFile(localFileName);
+    }
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
 
@@ -295,7 +298,8 @@ export function listCacheDir(
 
 export async function rmCache(path: string): Promise<void> {
   const fullPath = ensureCachePath(path);
-  await fs.rm(fullPath, { recursive: true });
+  // force: a missing path is a no-op, callers use this for cleanup
+  await fs.rm(fullPath, { recursive: true, force: true });
 }
 
 export async function cachePathExists(pathName: string): Promise<boolean> {

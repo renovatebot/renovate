@@ -1,6 +1,6 @@
 The Home Assistant Manifest manager updates the `requirements` field in Home Assistant integration `manifest.json` files.
 
-```json title="Example manifest.json"
+```json {title="Example manifest.json" configType=none}
 {
   "domain": "my_integration",
   "name": "My Integration",

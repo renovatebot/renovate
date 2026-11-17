@@ -1,12 +1,11 @@
 # AWS CodeCommit
 
-<!-- prettier-ignore -->
 !!! warning "No new features for the Codecommit platform"
-    In July 2024, [Amazon deprecated the CodeCommit platform](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/).
-    In November 2025, [Amazon re-instated support for CodeCommit](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability/).
-    Since July 2024, CodeCommit is in a "feature freeze", and Amazon re-instating support for CodeCommit as of November 2025 does not currently change that.
-    The Renovate maintainers have decided that we will not add any new features unless a company is willing to contribute feature(s) for CodeCommit **and maintain them**.
-    For more details [see Discussion 39741](https://github.com/renovatebot/renovate/discussions/39741#discussioncomment-15172240).
+  In July 2024, [Amazon deprecated the CodeCommit platform](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/).
+  In November 2025, [Amazon re-instated support for CodeCommit](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability/).
+  Since July 2024, CodeCommit is in a "feature freeze", and Amazon re-instating support for CodeCommit as of November 2025 does not currently change that.
+  The Renovate maintainers have decided that we will not add any new features unless a company is willing to contribute feature(s) for CodeCommit **and maintain them**.
+  For more details [see Discussion 39741](https://github.com/renovatebot/renovate/discussions/39741#discussioncomment-15172240).
 
 ## Authentication
 
@@ -14,17 +13,10 @@
 
 #### Machine pre-requisites
 
-<!--
-  TODO: remove ignore
-  prettier & markdownlint conflicting nested list format
-  see: https://github.com/renovatebot/renovate/pull/30608
--->
-<!-- prettier-ignore -->
 1. Install the `aws-cli` program on the machine.
 2. Set up the environment with the `git-credentials-helper`:
-    - For EC2 or Linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
-    - For Windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
-
+   - For EC2 or Linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
+   - For Windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
 3. Set the environment variable `AWS_REGION`.
 
 #### Codebuild Configuration
@@ -75,7 +67,7 @@ Create a new AWS policy for Renovate with these permissions, then attach it to t
 
 Change the `Resource` value to the resources you want to use:
 
-```json title="Example policy JSON file"
+```json {title="Example policy JSON file" configType=none}
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -107,12 +99,12 @@ Change the `Resource` value to the resources you want to use:
 
 ## Running Renovate
 
-Once you have followed method 1, 2 or 3, _and_ have set up the permissions, you're ready to configure Renovate:
+Once you have followed method 1, 2 or 3, _and_ have set up the permissions, you are ready to configure Renovate:
 
 - Set `platform: 'codecommit'`
 - Set `repositories: ['{repository, names, separated, by, comma}']`, or use [Renovate’s `autodiscover` feature](../../../self-hosted-configuration.md#autodiscover)
 
-You're ready to run Renovate now, and it will process your repositories.
+You are ready to run Renovate now, and it will process your repositories.
 
 ## Unsupported platform features/concepts
 
@@ -126,7 +118,7 @@ These Renovate features are not supported on Codecommit:
 
 Limit the number of open Renovate PRs by setting a `prConcurrentLimit`.
 
-If you close a PR but don’t want Renovate to recreate the PR later, then use [package rules](../../../configuration-options.md#packagerules) with the `"enabled": false` key.
+If you close a PR but do not want Renovate to recreate the PR later, then use [package rules](../../../configuration-options.md#packagerules) with the `"enabled": false` key.
 This workaround is needed due to platform limitations.
 
 ## Example configuration

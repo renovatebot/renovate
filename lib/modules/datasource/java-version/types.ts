@@ -1,15 +1,12 @@
 import type { Nullish } from '../../../types/index.ts';
 
-export interface AdoptiumJavaVersion {
-  semver: string;
-}
-
-export interface AdoptiumJavaResponse {
-  versions?: AdoptiumJavaVersion[];
-}
+export type JavaVendor = 'adoptium' | 'oracle-graalvm';
+export type GraalvmReleaseType = 'ga' | 'ea';
 
 export interface PackageConfig {
+  vendor: JavaVendor;
   imageType: string;
   architecture: Nullish<string>;
   os: Nullish<string>;
+  releaseType?: GraalvmReleaseType;
 }

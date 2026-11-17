@@ -1,5 +1,5 @@
 import type { SendHandle, Serializable } from 'node:child_process';
-import { Readable } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 import { execa as _execa } from 'execa';
 import { logger, partial } from '~test/util.ts';
 import * as _instrumentation from '../../instrumentation/index.ts';
@@ -11,7 +11,7 @@ import {
 } from '../sanitize.ts';
 import { exec, rawExec } from './common.ts';
 import { ExecError } from './exec-error.ts';
-import type { DataListener, RawExecOptions } from './types.ts';
+import type { OutputWriter, RawExecOptions } from './types.ts';
 
 vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');
@@ -84,7 +84,7 @@ function getSpawnStub(args: StubArgs): any {
   const listeners: Events = {};
 
   // init listeners
-  const on = (name: string, cb: Listener) => {
+  function on(name: string, cb: Listener) {
     const event = name as keyof Events;
     if (listeners[event]) {
       return;
@@ -99,14 +99,14 @@ function getSpawnStub(args: StubArgs): any {
       default:
         break;
     }
-  };
+  }
 
   // init readable streams
   const stdoutStream = getReadable(stdout, 'utf8');
   const stderrStream = getReadable(stderr, 'utf8');
 
   // define class methods
-  const emit = (name: string, ...arg: (string | number | Error)[]): boolean => {
+  function emit(name: string, ...arg: (string | number | Error)[]): boolean {
     const event = name as keyof Events;
 
     switch (event) {
@@ -121,16 +121,16 @@ function getSpawnStub(args: StubArgs): any {
     }
 
     return !!listeners[event];
-  };
+  }
 
-  const unref = (): void => {
+  function unref(): void {
     /* do nothing*/
-  };
+  }
 
-  const kill = (_signal?: number | NodeJS.Signals): boolean => {
+  function kill(_signal?: number | NodeJS.Signals): boolean {
     /* do nothing*/
     return true;
-  };
+  }
 
   // queue events and wait for event loop to clear
   setTimeout(() => {
@@ -147,13 +147,16 @@ function getSpawnStub(args: StubArgs): any {
   }
 
   return {
-    on,
-    spawnargs: cmd.split(regEx(/\s+/)),
-    stdout: stdoutStream,
-    stderr: stderrStream,
-    emit,
-    unref,
-    kill,
+    nodeChildProcess: {
+      on,
+      spawnargs: cmd.split(regEx(/\s+/)),
+      stdout: stdoutStream,
+      stderr: stderrStream,
+      emit,
+      unref,
+      kill,
+      pid,
+    },
     pid,
   };
 }
@@ -289,6 +292,58 @@ describe('util/exec/common', () => {
       );
     });
 
+    it('does not retain stdin input in command errors', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      const error = await exec(
+        cmd,
+        partial<RawExecOptions>({ input: 'private manifest', timeout: 5 }),
+      ).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ExecError);
+      expect(error).toHaveProperty('options', { timeout: 5 });
+    });
+
+    it('omits command output from errors when redactOutput is set', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      const error = await exec(
+        cmd,
+        partial<RawExecOptions>({
+          redactOutput: true,
+          timeout: 5,
+          outputWriters: { stdout: new PassThrough() },
+          stdout: ['pipe', new PassThrough()],
+          stdio: 'pipe',
+        }),
+      ).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ExecError);
+      expect(error).toMatchObject({
+        message: 'Command failed: ls -l',
+        stdout: '',
+        stderr: '',
+        exitCode: 1,
+      });
+      expect(error).toHaveProperty('options', { timeout: 5 });
+    });
+
     it('does not throw if an error occurs, but we specify ignoreFailure=true', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
@@ -314,6 +369,44 @@ describe('util/exec/common', () => {
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         { command: 'ls -l', stdout, stderr, exitCode: 1 },
         'Ignoring failure to execute comamnd `ls -l`, as ignoreFailure=true is set',
+      );
+    });
+
+    it('redacts ignored failure output from logs without discarding it', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          { command: ['ls', '-l'], ignoreFailure: true },
+          partial<RawExecOptions>({ redactOutput: true, timeout: 5 }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+        exitCode: 1,
+      });
+
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
+        {
+          command: 'ls -l',
+          stdoutBytes: 11,
+          stderrBytes: 11,
+          exitCode: 1,
+        },
+        'Ignoring failure to execute comamnd `ls -l`, as ignoreFailure=true is set',
+      );
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ reject: false }),
       );
     });
 
@@ -570,14 +663,14 @@ describe('util/exec/common', () => {
       execa.mockImplementationOnce((_cmd, _opts) => stub);
 
       const stdoutListenerBuffer: Buffer[] = [];
-      const stdoutListener: DataListener = (chunk: Buffer) => {
+      function stdoutListener(chunk: Buffer): void {
         stdoutListenerBuffer.push(chunk);
-      };
+      }
 
       const stderrListenerBuffer: Buffer[] = [];
-      const stderrListener: DataListener = (chunk: Buffer) => {
+      function stderrListener(chunk: Buffer): void {
         stderrListenerBuffer.push(chunk);
-      };
+      }
 
       await expect(
         exec(
@@ -702,6 +795,75 @@ describe('util/exec/common', () => {
         stdout: '',
       });
     });
+
+    it('uses output writers instead of buffering stream output', async () => {
+      const stdout = 'stdout writer output';
+      const stdoutWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stdout,
+      };
+      const stderr = 'stderr writer output';
+      const stderrWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stderr,
+      };
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            maxBuffer: 1,
+            outputWriters: { stderr: stderrWriter, stdout: stdoutWriter },
+          }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+      });
+
+      expect(stdoutWriter.write).toHaveBeenCalledExactlyOnceWith(
+        Buffer.from(stdout),
+      );
+      expect(stderrWriter.write).toHaveBeenCalledExactlyOnceWith(
+        Buffer.from(stderr),
+      );
+    });
+
+    it('uses stderr writer output in command errors', async () => {
+      const stderr = 'stderr tail';
+      const stderrWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stderr,
+      };
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            maxBuffer: 1,
+            outputWriters: { stderr: stderrWriter },
+          }),
+        ),
+      ).rejects.toMatchObject({
+        message: `Command failed: ${cmd}\nstderr tail`,
+        stderr,
+      });
+    });
   });
 
   describe('rawExec', () => {
@@ -799,12 +961,12 @@ describe('util/exec/common', () => {
     const killSpy = vi.spyOn(process, 'kill');
 
     afterEach(() => {
-      delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
+      vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', undefined);
       vi.restoreAllMocks();
     });
 
     it('calls process.kill on the gpid', async () => {
-      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', 'true');
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
@@ -824,7 +986,7 @@ describe('util/exec/common', () => {
     });
 
     it('handles process.kill call on non existent gpid', async () => {
-      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', 'true');
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });

@@ -11,14 +11,16 @@ That said, we will try to fix security problems in a reasonable timeframe if pos
 
 Renovate the open source project is **not** certified.
 
-Mend is the company which maintains Renovate and provides the Mend Renovate App.
+Mend is the company which maintains Renovate and provides the Mend Renovate app.
 Mend is ISO 27001 and SOC2 certified.
 
 ### Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
+
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
 
 Please do not create GitHub issues for security-related doubts or problems.
 
@@ -30,7 +32,7 @@ We apply the Principle of Least Privilege (PoLP) but do need substantial privile
 
 These permissions are always needed to run the respective app.
 
-| Permission        | The Mend Renovate App |  Forking Renovate  | Why                                                           |
+| Permission        | The Mend Renovate app |  Forking Renovate  | Why                                                           |
 | ----------------- | :-------------------: | :----------------: | ------------------------------------------------------------- |
 | Dependabot alerts |        `read`         |       `read`       | Create vulnerability fix PRs                                  |
 | Administration    |        `read`         |       `read`       | Read branch protections and to be able to assign teams to PRs |
@@ -47,7 +49,7 @@ These permissions are always needed to run the respective app.
 Renovate can also request users's permission to the following resources.
 These permissions will be requested and authorized on an individual-user basis.
 
-| Permission | The Mend Renovate App | Forking Renovate | Why                                                      |
+| Permission | The Mend Renovate app | Forking Renovate | Why                                                      |
 | ---------- | :-------------------: | :--------------: | -------------------------------------------------------- |
 | email      |        `read`         |  not applicable  | Per-user consent requested if logging into App dashboard |
 
@@ -63,7 +65,7 @@ Self-hosted Renovate does not send or submit any package data to Mend for the pu
 According to a strict definition, Renovate may "send data" to third-party registries and source code hosts directly to look up new releases.
 For example, if you have an `npm` package and do not configure a private registry then Renovate will query URLs on `https://registry.npmjs.org` including names of packages used in your repositories.
 You could avoid this by configuring private registries but such registries need to query public registries anyway.
-We don't know of any public registries which reverse lookup IP addresses to associate companies with packages.
+We do not know of any public registries which reverse lookup IP addresses to associate companies with packages.
 
 #### Security awareness for self-hosted Renovate instances
 
@@ -95,6 +97,8 @@ This is particularly true during, for example:
 
 - `postUpgradeTasks`, where scripts specified by the repository are run
 - when a wrapper within the repository is called, like `gradlew` (if setting [`allowedUnsafeExecutions=["gradleWrapper"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
+- when `mise trust` / `mise lock` are run from the repository checkout (if setting [`allowedUnsafeExecutions=["mise"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
+- when `pixi lock` is run to update `pixi.lock` (if setting [`allowedUnsafeExecutions=["pixi"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
 
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
@@ -109,9 +113,8 @@ As it is difficult to craft a regular expression that may deny usage of special 
 
 Separately, there are also opportunities for malicious external code to execute, as part of Renovate's update process.
 
-<!-- prettier-ignore -->
 !!! warning
-    Below are _some_ of the options, but note that this is **not exhaustive**.
+  Below are _some_ of the options, but note that this is **not exhaustive**.
 
 For instance:
 
@@ -195,12 +198,12 @@ Apply updates promptly to ensure that your self-hosted instances get the latest 
 The flexibility and power of self-hosting Renovate also means you must take steps to manage your security.
 By understanding the risks associated with repository management and taking steps to mitigate those risks, organizations can maintain a secure and efficient development workflow.
 
-### Hosted/SaaS (the Mend Renovate App)
+### Hosted/SaaS (the Mend Renovate app)
 
-Users of the Mend Renovate App fall under [Mend's Terms of Service](https://www.mend.io/terms-of-service/) and Privacy Policy.
+Users of the Mend Renovate app fall under [Mend's Terms of Service](https://www.mend.io/terms-of-service/) and Privacy Policy.
 
 In this case the app needs to temporarily clone source code for Renovate to run, but the app does not keep the source code anywhere after jobs are completed.
 
 Mend anonymizes and aggregates package use and update success rates within the hosted app to derive Merge Confidence scores.
 
-The app database keeps a list of dependencies and versions per repo, plus basic into about any Renovate PRs it's created.
+The app database keeps a list of dependencies and versions per repo, plus basic into about any Renovate PRs it is created.

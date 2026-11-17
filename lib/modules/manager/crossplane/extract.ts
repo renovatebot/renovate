@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
@@ -14,7 +15,9 @@ export function extractPackageFile(
   extractConfig?: ExtractConfig,
 ): PackageFileContent | null {
   // avoid parsing the whole file if it doesn't contain any resource having any pkg.crossplane.io/v*
-  if (!/apiVersion:\s+["']?pkg\.crossplane\.io\/v.+["']?/.test(content)) {
+  if (
+    !regEx(/apiVersion:\s+["']?pkg\.crossplane\.io\/v.+["']?/).test(content)
+  ) {
     logger.trace({ packageFile }, 'No Crossplane package found in file.');
     return null;
   }
@@ -27,7 +30,9 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
   for (const xpkg of list) {
-    const dep = getDep(xpkg.spec.package, true, extractConfig?.registryAliases);
+    const dep = getDep(xpkg.spec.package, {
+      registryAliases: extractConfig?.registryAliases,
+    });
     dep.depType = xpkg.kind.toLowerCase();
     deps.push(dep);
   }

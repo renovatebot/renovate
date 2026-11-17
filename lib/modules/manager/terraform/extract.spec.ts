@@ -3,7 +3,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as hashicorp from '../../versioning/hashicorp/index.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -20,7 +23,7 @@ const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
 const terraformBlock = Fixtures.get('terraformBlock.tf');
 const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -37,7 +40,9 @@ describe('modules/manager/terraform/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', '1.tf', {}),
+      ).resolves.toBeNull();
     });
 
     it('returns null for no deps', async () => {
@@ -48,7 +53,7 @@ describe('modules/manager/terraform/extract', () => {
         }
         `;
 
-      expect(await extractPackageFile(src, '1.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '1.tf', {})).resolves.toBeNull();
     });
 
     it('extracts  modules', async () => {
@@ -759,8 +764,19 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
         deps: [{ skipReason: 'local' }],
+      });
+    });
+
+    it('leaves a source too short to be a registry module alone', async () => {
+      const src = codeBlock`
+        module "short" {
+          source = "hashicorp/consul"
+        }
+      `;
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
+        deps: [{ depType: 'module' }],
       });
     });
 
@@ -770,7 +786,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toBeNull();
     });
 
     it('extract helm releases', async () => {
@@ -805,6 +821,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'docker',
           depName: 'public.ecr.aws/karpenter/karpenter',
           depType: 'helm_release',
+          pinDigests: false,
         },
         {
           currentValue: 'v0.22.1',
@@ -812,6 +829,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'karpenter',
           depType: 'helm_release',
           packageName: 'public.ecr.aws/karpenter/karpenter',
+          pinDigests: false,
         },
         {
           datasource: 'helm',
@@ -825,6 +843,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'kube-prometheus',
           depType: 'helm_release',
           packageName: 'index.docker.io/bitnamicharts/kube-prometheus',
+          pinDigests: false,
         },
         {
           currentValue: '1.0.1',
@@ -840,6 +859,77 @@ describe('modules/manager/terraform/extract', () => {
           registryUrls: ['https://charts.helm.sh/stable'],
         },
       ]);
+    });
+
+    it('does not treat a repository qualified chart name as a local chart', async () => {
+      const src = codeBlock`
+        resource "helm_release" "nginx" {
+          name    = "nginx"
+          chart   = "bitnami/nginx"
+          version = "15.0.0"
+        }
+      `;
+
+      const res = await extractPackageFile(src, 'helm.tf', {});
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '15.0.0',
+          datasource: 'helm',
+          depName: 'bitnami/nginx',
+          depType: 'helm_release',
+        },
+      ]);
+    });
+
+    it('extracts helm releases from OCI registries with a port', async () => {
+      const src = codeBlock`
+        resource "helm_release" "redis" {
+          name       = "redis"
+          repository = "oci://registry.example.com:5000/charts"
+          chart      = "redis"
+          version    = "1.0.1"
+        }
+      `;
+      const res = await extractPackageFile(src, 'helm.tf', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.1',
+          datasource: 'docker',
+          depName: 'redis',
+          depType: 'helm_release',
+          packageName: 'registry.example.com:5000/charts/redis',
+          pinDigests: false,
+        },
+      ]);
+    });
+
+    it('extracts no locks when the lock file cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await extractPackageFile(
+        lockedVersion,
+        'lockedVersion.tf',
+        {},
+      );
+      expect(res?.deps.every((dep) => dep.lockedVersion === undefined)).toBe(
+        true,
+      );
+    });
+
+    it('extracts no locks when the lock file holds none', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
+      fs.readLocalFile.mockResolvedValueOnce('# nothing to see here');
+
+      const res = await extractPackageFile(
+        lockedVersion,
+        'lockedVersion.tf',
+        {},
+      );
+      expect(res?.deps.every((dep) => dep.lockedVersion === undefined)).toBe(
+        true,
+      );
     });
 
     it('update lockfile constraints with range strategy update-lockfile', async () => {

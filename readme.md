@@ -61,7 +61,7 @@ Access internal packages.
 
 ### Other ways to run Renovate
 
-If you can’t use a pre-built job scheduling system, or want to build your own, the following options are available:
+If you cannot use a pre-built job scheduling system, or want to build your own, the following options are available:
 
 #### Run Renovate on your Pipeline
 
@@ -136,8 +136,8 @@ Follow us on:
 
 ## Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
 
-Please do not create GitHub issues for security-related doubts or problems.
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).

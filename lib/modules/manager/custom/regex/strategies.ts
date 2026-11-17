@@ -1,11 +1,12 @@
 import { isTruthy } from '@sindresorhus/is';
+import { coerceObject } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import type { PackageDependency } from '../../types.ts';
 import { checkIsValidDependency } from '../utils.ts';
 import type {
   PackageFileInfo,
   RecursionParameter,
-  RegexManagerConfig,
+  RegexExtractConfig,
 } from './types.ts';
 import {
   createDependency,
@@ -15,7 +16,7 @@ import {
 } from './utils.ts';
 
 export function handleAny(
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
@@ -25,9 +26,7 @@ export function handleAny(
     .map((matchResult) =>
       createDependency(
         {
-          groups:
-            matchResult.groups ??
-            /* istanbul ignore next: can this happen? */ {},
+          groups: coerceObject(matchResult.groups),
           replaceString: matchResult[0],
         },
         config,
@@ -41,7 +40,7 @@ export function handleAny(
 }
 
 export function handleCombination(
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
@@ -55,7 +54,7 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
+      groups: coerceObject(match.groups),
       replaceString:
         (match?.groups?.currentValue ?? match?.groups?.currentDigest)
           ? match[0]
@@ -70,7 +69,7 @@ export function handleCombination(
 }
 
 export function handleRecursive(
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
@@ -118,7 +117,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       ...parameters,
       content: match[0],
       index: index + 1,
-      combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
+      combinedGroups: mergeGroups(combinedGroups, coerceObject(match.groups)),
     });
   });
 }

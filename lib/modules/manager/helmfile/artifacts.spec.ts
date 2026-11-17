@@ -4,7 +4,10 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
@@ -20,7 +23,7 @@ const datasource = vi.mocked(_datasource);
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
@@ -78,72 +81,71 @@ describe('modules/manager/helmfile/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
   });
 
   it('returns null if no helmfile.lock found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
-    git.getFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFile);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps: [{ depName: 'dep1' }],
         newPackageFileContent: helmfileYaml,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'helmfile deps -f helmfile.yaml' },
     ]);
   });
 
   it('returns updated helmfile.lock', async () => {
-    git.getFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYaml,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -185,25 +187,23 @@ describe('modules/manager/helmfile/artifacts', () => {
     generated: "2023-03-08T21:30:48.273709455+01:00"
     `;
 
-    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
+    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(
-      lockFileTwoWithoutRepositories as never,
-    );
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwoWithoutRepositories);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYamlWithoutRepositories,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -253,23 +253,23 @@ describe('modules/manager/helmfile/artifacts', () => {
       matchHost: 'ghcr.io',
     });
 
-    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo as never);
+    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileOCIPrivateRepoTwo as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFileOCIPrivateRepoTwo);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYamlOCIPrivateRepo,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -308,6 +308,136 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
+  it('passes helm host rule credentials of classic repositories as environment variables', async () => {
+    const helmfileYamlMixedRepos = codeBlock`
+    repositories:
+      - name: my-charts
+        url: https://charts.example.com/stable
+      - name: public
+        url: https://public.example.com
+      - name: oci-charts
+        url: charts.example.com/oci
+        oci: true
+    releases:
+      - name: chart
+        chart: my-charts/chart
+        version: 0.12.0
+    `;
+    hostRules.add({
+      hostType: 'helm',
+      matchHost: 'charts.example.com',
+      username: 'testuser',
+      password: 'testpass',
+    });
+
+    git.getFile.mockResolvedValueOnce(lockFile);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: helmfileYamlMixedRepos,
+        config,
+      }),
+    ).resolves.not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helmfile deps -f helmfile.yaml',
+        options: {
+          env: {
+            MY_CHARTS_USERNAME: 'testuser',
+            MY_CHARTS_PASSWORD: 'testpass',
+          },
+        },
+      },
+    ]);
+    const execEnv = execSnapshots[0].options?.env;
+    expect(execEnv).not.toHaveProperty('PUBLIC_USERNAME');
+    expect(execEnv).not.toHaveProperty('PUBLIC_PASSWORD');
+    expect(execEnv).not.toHaveProperty('OCI_CHARTS_USERNAME');
+    expect(execEnv).not.toHaveProperty('OCI_CHARTS_PASSWORD');
+  });
+
+  it('passes helm host rule credentials of classic repositories across multiple documents', async () => {
+    const helmfileYamlMultiDoc = codeBlock`
+      repositories:
+        - name: Team-A-charts
+          url: https://charts.team-a.example.com
+        - name: public
+          url: https://public.example.com
+      releases:
+        - name: chart-a
+          chart: Team-A-charts/chart
+          version: 1.0.0
+      ---
+      repositories:
+        - name: team-b
+          url: https://charts.team-b.example.com/stable
+        - name: registry
+          url: registry.team-b.example.com/charts
+          oci: true
+      releases:
+        - name: chart-b
+          chart: team-b/chart
+          version: 2.0.0
+    `;
+    hostRules.add({
+      hostType: 'helm',
+      matchHost: 'charts.team-a.example.com',
+      username: 'user-a',
+      password: 'pass-a',
+    });
+    hostRules.add({
+      hostType: 'helm',
+      matchHost: 'https://charts.team-b.example.com/stable',
+      username: 'user-b',
+      password: 'pass-b',
+    });
+    hostRules.add({
+      hostType: 'helm',
+      matchHost: 'registry.team-b.example.com',
+      username: 'oci-user',
+      password: 'oci-pass',
+    });
+
+    git.getFile.mockResolvedValueOnce(lockFile);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: helmfileYamlMultiDoc,
+        config,
+      }),
+    ).resolves.not.toBeNull();
+
+    const execEnv = execSnapshots.at(-1)?.options?.env;
+    expect(execSnapshots.at(-1)?.cmd).toBe('helmfile deps -f helmfile.yaml');
+    expect(execEnv).toMatchObject({
+      TEAM_A_CHARTS_USERNAME: 'user-a',
+      TEAM_A_CHARTS_PASSWORD: 'pass-a',
+      TEAM_B_USERNAME: 'user-b',
+      TEAM_B_PASSWORD: 'pass-b',
+    });
+    expect(execEnv).not.toHaveProperty('PUBLIC_USERNAME');
+    expect(execEnv).not.toHaveProperty('PUBLIC_PASSWORD');
+    expect(execEnv).not.toHaveProperty('REGISTRY_USERNAME');
+    expect(execEnv).not.toHaveProperty('REGISTRY_PASSWORD');
+  });
+
   it.each([
     {
       binarySource: 'docker' as const,
@@ -319,6 +449,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-e CI ' +
             '-e HELM_EXPERIMENTAL_OCI ' +
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
@@ -326,7 +457,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool helm v3.7.2' +
             ' && ' +
             'install-tool helmfile 0.151.0' +
@@ -334,7 +465,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             'install-tool kustomize 5.0.0' +
             ' && ' +
             'helmfile deps -f helmfile.yaml' +
-            '"',
+            "'",
         },
       ],
     },
@@ -369,14 +500,14 @@ describe('modules/manager/helmfile/artifacts', () => {
       const updatedDeps = [
         { depName: 'dep1', managerData: { needKustomize: true } },
       ];
-      expect(
-        await helmfile.updateArtifacts({
+      await expect(
+        helmfile.updateArtifacts({
           packageFileName: 'helmfile.yaml',
           updatedDeps,
           newPackageFileContent: helmfileYaml,
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -388,6 +519,34 @@ describe('modules/manager/helmfile/artifacts', () => {
       expect(execSnapshots).toMatchObject(expectedCommands);
     },
   );
+
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    git.getFile.mockResolvedValueOnce(lockFile);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    await expect(
+      helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: helmfileYaml,
+        config: {
+          ...config,
+          // the lock file pins helmfile 0.151.0, which takes precedence here
+          extractedConstraints: { helm: '3.7.2', helmfile: '0.100.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool helm 3.7.2' },
+      { cmd: 'install-tool helmfile 0.151.0' },
+      { cmd: 'helmfile deps -f helmfile.yaml' },
+    ]);
+  });
 
   it.each([
     'not found',
@@ -402,14 +561,14 @@ describe('modules/manager/helmfile/artifacts', () => {
       throw new Error(errorMessage);
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYaml,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'helmfile.lock',
@@ -479,23 +638,23 @@ describe('modules/manager/helmfile/artifacts', () => {
     generated: "2023-03-08T21:30:48.273709455+01:00"
     `;
 
-    git.getFile.mockResolvedValueOnce(lockFileMultidoc as never);
+    git.getFile.mockResolvedValueOnce(lockFileMultidoc);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileMultidocUpdated as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFileMultidocUpdated);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'metallb' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: multidocYaml,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',

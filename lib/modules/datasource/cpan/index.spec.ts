@@ -16,22 +16,54 @@ describe('modules/datasource/cpan/index', () => {
           (body) => body.query.bool.filter[0].term['module.name'] === 'FooBar',
         )
         .reply(200, Fixtures.get('empty.json'));
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'FooBar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
+    });
+
+    it('omits the latest tag if no release is marked latest', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post('/v1/file/_search')
+        .reply(200, {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  module: [{ name: 'Foo::Bar', version: '1.0' }],
+                  distribution: 'Foo-Bar',
+                  date: '2020-01-01T00:00:00',
+                  deprecated: false,
+                  maturity: 'released',
+                  status: 'cpan',
+                },
+              },
+            ],
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: CpanDatasource.id,
+        packageName: 'Foo::Bar',
+      });
+      expect(res).toMatchObject({
+        releases: [{ version: '1.0' }],
+        changelogUrl: 'https://metacpan.org/dist/Foo-Bar/changes',
+        homepage: 'https://metacpan.org/pod/Foo::Bar',
+      });
+      expect(res?.tags).toBeUndefined();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -46,12 +78,12 @@ describe('modules/datasource/cpan/index', () => {
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

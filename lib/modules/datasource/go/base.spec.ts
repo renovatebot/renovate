@@ -1,16 +1,11 @@
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-
-const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
@@ -37,8 +32,6 @@ describe('modules/datasource/go/base', () => {
 
   describe('go-get requests', () => {
     beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
       GlobalConfig.reset();
     });
 
@@ -102,7 +95,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitHub EE deps', async () => {
-        hostRules.hostType.mockReturnValue('github');
+        hostRules.add({ matchHost: 'git.enterprise.com', hostType: 'github' });
         httpMock
           .scope('https://git.enterprise.com')
           .get('/example/module?go-get=1')
@@ -224,7 +217,9 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('returns null for invalid GitLab EE go-source URL', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        // a real host rule cannot match an unparseable URL, so spy to reach
+        // the URL parsing branch
+        vi.spyOn(hostRules, 'hostType').mockReturnValueOnce('gitlab');
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/myrepo?go-get=1')
@@ -241,7 +236,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/myrepo?go-get=1')
@@ -259,7 +254,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo?go-get=1')
@@ -279,7 +274,7 @@ describe('modules/datasource/go/base', () => {
       it('supports GitLab EE deps in private subgroup with api/ as part of packageName and api/v4 as part of endpoint', async () => {
         GlobalConfig.set({ endpoint: 'https://my.custom.domain/api/v4' });
 
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/group/subgroup-api/myrepo?go-get=1')
@@ -300,7 +295,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup with version', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/v2?go-get=1')
@@ -318,7 +313,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in private subgroup with vcs indicator', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo?go-get=1')
@@ -336,7 +331,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in private subgroup with vcs indicator and subfolders', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo?go-get=1')
@@ -354,7 +349,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE monorepo deps in subgroup', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'my.custom.domain', hostType: 'gitlab' });
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/monorepo?go-get=1')
@@ -486,6 +481,19 @@ describe('modules/datasource/go/base', () => {
         expect(res).toBeNull();
       });
 
+      it('returns null for non-git imports', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo/bar hg https://example.com/foo/bar">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource('example.com/foo/bar');
+
+        expect(res).toBeNull();
+      });
+
       it('returns null for invalid import URL', async () => {
         const meta =
           '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go git foobar">';
@@ -502,7 +510,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('correctly splits a URL where the endpoint is contained', async () => {
-        hostRules.hostType.mockReturnValue('gitlab');
+        hostRules.add({ matchHost: 'example.com', hostType: 'gitlab' });
 
         GlobalConfig.set({ endpoint: 'https://example.com/gitlab/api/v4/' });
 
@@ -539,6 +547,128 @@ describe('modules/datasource/go/base', () => {
           packageName: 'my-project/my-repo',
           registryUrl: 'https://example.com/gitlab/',
         });
+      });
+    });
+
+    describe('getModProxyUrl', () => {
+      it('returns the proxy URL for mod imports', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go mod https://buf.build/gen/go">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go',
+        );
+
+        expect(res).toBe('https://buf.build/gen/go');
+      });
+
+      it('returns null for git imports', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo/bar git https://example.com/foo/bar.git">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null for go-import prefix mismatch', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/other mod https://example.com/proxy">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null when the prefix is not a path prefix of the module', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo mod https://example.com/proxy">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foobar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl('example.com/foobar');
+
+        expect(res).toBeNull();
+      });
+
+      it('returns the proxy URL when the prefix is the module itself', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo mod https://example.com/proxy">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl('example.com/foo');
+
+        expect(res).toBe('https://example.com/proxy');
+      });
+
+      it.each`
+        url
+        ${'http://example.com/proxy'}
+        ${'ftp://example.com/proxy'}
+        ${'not-a-url'}
+      `('ignores the non-https or invalid proxy URL $url', async ({ url }) => {
+        const meta = `<meta name="go-import" content="example.com/foo mod ${url}">`;
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('finds the mod import among several go-import meta tags', async () => {
+        const meta = `
+          <meta name="go-import" content="example.com/foo/bar git https://example.com/foo/bar.git">
+          <meta name="go-import" content="example.com/foo/bar mod https://example.com/proxy">
+        `;
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBe('https://example.com/proxy');
+      });
+
+      it('returns null without a go-import meta tag', async () => {
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, '<html></html>');
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
       });
     });
   });

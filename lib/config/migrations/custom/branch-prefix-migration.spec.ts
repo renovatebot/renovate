@@ -29,10 +29,10 @@ describe('config/migrations/custom/branch-prefix-migration', () => {
     await expect(BranchPrefixMigration).toMigrate(
       {
         branchPrefix: true,
-      } as any,
+      },
       {
         branchPrefix: true,
-      } as any,
+      },
       false,
     );
   });

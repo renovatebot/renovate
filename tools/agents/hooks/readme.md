@@ -1,0 +1,34 @@
+# Claude Code hooks
+
+This directory contains hook scripts that Claude Code invokes automatically at key points in a session.
+
+## Hooks
+
+### `sessionstart-check.ts` — SessionStart
+
+Runs once on session startup, resume, clear, or compact.
+
+Installs tools and dependencies so the session has a working environment:
+
+1. `mise install` — installs language runtimes declared in `.tool-versions` / `mise.toml`. Failure is non-fatal (logs a warning and continues) so the session works even without `mise`.
+2. `pnpm install` — installs Node dependencies. Failure is fatal and blocks the session.
+
+### `cwdchanged-check.ts` — CwdChanged
+
+Runs on every working-directory change, including `EnterWorktree`.
+
+Install tools and dependencies in the new cwd, so the session has a working environment even when switching to a different worktree or subdirectory.
+
+### `pretooluse-check.ts` — PreToolUse
+
+Runs before every tool call.
+
+Blocks tool invocations that use forbidden package managers or test runners (e.g. `npm`, `yarn`, `npx`, `jest` directly) and requires `pnpm` / `vitest` instead.
+
+### `stop-check.ts` — Stop
+
+Runs when Claude Code is about to stop.
+
+Executes `pnpm check --all` against all files changed since the base branch, including untracked files that are not ignored. If the check fails, the stop is blocked and Claude is prompted to fix the issues before finishing. The block reason includes the check output, cut down to its start and its end when it is long, so Claude sees which checks failed and why. The check only blocks a stop once: when `stop_hook_active` shows Claude is already continuing because this hook blocked it before, the stop is let through without checking again.
+
+The check writes its coverage report to `.cache/stop-hook/coverage` (`pnpm check --coverage-dir`), so it does not clash with a manual `pnpm check` or `pnpm vitest` that uses the default `coverage` directory at the same time. After a passed check the hook stores a fingerprint of the base commit (the merge base with `origin/main`), the changed files and their contents, and the deleted files in `.cache/stop-hook/fingerprint`, and skips the check on later stops while that fingerprint is unchanged. A failed check stores no fingerprint.

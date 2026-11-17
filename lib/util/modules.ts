@@ -1,3 +1,4 @@
+// oxlint-disable-next-line renovate/prefer-fs-util -- synchronously enumerates Renovate's own installed module directories at import time; not repository or cache file access
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import upath from 'upath';
@@ -24,7 +25,7 @@ export async function loadModules<T>(
     const moduleUrl = pathToFileURL(modulePath).href;
     const module = await import(moduleUrl);
     // istanbul ignore if
-    if (!module || (validate && !validate(module, moduleName))) {
+    if (validate && !validate(module, moduleName)) {
       throw new Error(`Invalid module: ${modulePath}`);
     }
     result[moduleName] = module as T;

@@ -3,14 +3,15 @@ import {
   isNonEmptyObject,
   isPlainObject,
 } from '@sindresorhus/is';
+import type { PlatformFamilyId } from '../../../constants/index.ts';
+import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { parseLine } from '../gomod/line-parser.ts';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
@@ -20,6 +21,13 @@ import {
   matchesPrecommitDependencyHeuristic,
 } from './parsing.ts';
 import type { PreCommitConfig } from './types.ts';
+
+/** The platform families pre-commit can resolve `rev:` tags on. */
+const supportedFamilies = [
+  'forgejo',
+  'github',
+  'gitlab',
+] as const satisfies PlatformFamilyId[];
 
 /**
  * Determines the datasource(id) to be used for this dependency
@@ -35,25 +43,37 @@ function determineDatasource(
   repository: string,
   hostname: string,
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostname === 'github.com' || detectPlatform(repository) === 'github') {
+  const platform = detectPlatform(repository);
+
+  if (platform === 'forgejo') {
+    logger.debug(
+      { repository, hostname },
+      'Found forgejo dependency with custom registryUrl',
+    );
+    return {
+      datasource: PLATFORM_FAMILIES.forgejo.tagsDatasource,
+      registryUrls: [`https://${hostname}`],
+    };
+  }
+  if (hostname === 'github.com' || platform === 'github') {
     logger.debug({ repository, hostname }, 'Found github dependency');
-    return { datasource: GithubTagsDatasource.id };
+    return { datasource: PLATFORM_FAMILIES.github.tagsDatasource };
   }
   if (hostname === 'gitlab.com') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
-    return { datasource: GitlabTagsDatasource.id };
+    return { datasource: PLATFORM_FAMILIES.gitlab.tagsDatasource };
   }
-  if (detectPlatform(repository) === 'gitlab') {
+  if (platform === 'gitlab') {
     logger.debug(
       { repository, hostname },
       'Found gitlab dependency with custom registryUrl',
     );
     return {
-      datasource: GitlabTagsDatasource.id,
-      registryUrls: ['https://' + hostname],
+      datasource: PLATFORM_FAMILIES.gitlab.tagsDatasource,
+      registryUrls: [`https://${hostname}`],
     };
   }
-  const hostUrl = 'https://' + hostname;
+  const hostUrl = `https://${hostname}`;
   const res = find({ url: hostUrl });
   if (isEmptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
@@ -63,21 +83,21 @@ function determineDatasource(
     );
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
-  for (const [hostType, sourceId] of [
-    ['github', GithubTagsDatasource.id],
-    ['gitlab', GitlabTagsDatasource.id],
-  ]) {
+  for (const hostType of supportedFamilies) {
     if (isNonEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
         { repository, hostUrl, hostType },
         `Provided hostname matches a ${hostType} hostrule.`,
       );
-      return { datasource: sourceId, registryUrls: [hostname] };
+      return {
+        datasource: PLATFORM_FAMILIES[hostType].tagsDatasource,
+        registryUrls: [hostname],
+      };
     }
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType github nor gitlab',
+    'Provided hostname did not match any of the hostRules of hostType forgejo, github nor gitlab',
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
@@ -184,7 +204,7 @@ function findDependencies(
   for (const item of precommitFile.repos) {
     // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
     if (item.repo !== 'meta') {
-      for (const hook of item.hooks ?? []) {
+      for (const hook of coerceArray(item.hooks)) {
         // normally language are not defined in yaml
         // only support it when it's explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo

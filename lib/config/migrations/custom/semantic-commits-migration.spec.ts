@@ -5,7 +5,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: true,
-      } as any,
+      },
       { semanticCommits: 'enabled' },
     );
   });
@@ -14,7 +14,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: false,
-      } as any,
+      },
       { semanticCommits: 'disabled' },
     );
   });
@@ -23,7 +23,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: null,
-      } as any,
+      },
       { semanticCommits: 'auto' },
     );
   });
@@ -32,7 +32,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'test',
-      } as any,
+      },
       { semanticCommits: 'auto' },
     );
   });
@@ -41,7 +41,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'enabled',
-      } as any,
+      },
       { semanticCommits: 'enabled' },
       false,
     );
@@ -51,7 +51,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'disabled',
-      } as any,
+      },
       { semanticCommits: 'disabled' },
       false,
     );

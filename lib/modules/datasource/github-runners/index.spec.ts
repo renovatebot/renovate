@@ -14,10 +14,12 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '16.04', isDeprecated: true },
           { version: '18.04', isDeprecated: true },
           { version: '20.04', isDeprecated: true },
-          { version: '22.04-arm', isStable: false },
+          { version: '22.04-arm' },
           { version: '22.04' },
-          { version: '24.04-arm', isStable: false },
+          { version: '24.04-arm' },
           { version: '24.04' },
+          { version: '26.04-arm' },
+          { version: '26.04' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
@@ -43,8 +45,10 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '14' },
           { version: '15-xlarge' },
           { version: '15-large' },
+          { version: '15-intel' },
           { version: '15' },
           { version: '26-xlarge' },
+          { version: '26-intel' },
           { version: '26' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
@@ -59,10 +63,29 @@ describe('modules/datasource/github-runners/index', () => {
 
       expect(res).toMatchObject({
         releases: [
+          { version: '11-arm' },
           { version: '2016', isDeprecated: true },
           { version: '2019', isDeprecated: true },
           { version: '2022' },
           { version: '2025' },
+        ],
+        sourceUrl: 'https://github.com/actions/runner-images',
+      });
+    });
+
+    it('returns releases for Xcode', async () => {
+      const res = await getPkgReleases({
+        datasource: GithubRunnersDatasource.id,
+        packageName: 'xcode',
+      });
+
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '27-xlarge',
+            releaseTimestamp: '2026-10-15T00:00:00.000Z',
+          },
+          { version: '27', releaseTimestamp: '2026-10-15T00:00:00.000Z' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
@@ -76,5 +99,20 @@ describe('modules/datasource/github-runners/index', () => {
 
       expect(res).toBeNull();
     });
+
+    it.each(['ubuntu', 'macos', 'windows'])(
+      'every %s release has a releaseTimestamp',
+      async (packageName) => {
+        const res = await getPkgReleases({
+          datasource: GithubRunnersDatasource.id,
+          packageName,
+        });
+
+        expect(res?.releases.length).toBeGreaterThan(0);
+        for (const release of res!.releases) {
+          expect(release.releaseTimestamp).toBeString();
+        }
+      },
+    );
   });
 });

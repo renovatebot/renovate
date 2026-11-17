@@ -17,6 +17,10 @@ describe('modules/versioning/aws-machine-image/index', () => {
     it('should return false', () => {
       expect(aws.isValid('ami-1')).toBeFalsy();
     });
+
+    it('should return false for an empty version', () => {
+      expect(aws.isValid('')).toBeFalsy();
+    });
   });
 
   describe('isVersion(version)', () => {

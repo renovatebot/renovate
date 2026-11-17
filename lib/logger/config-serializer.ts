@@ -1,4 +1,4 @@
-import traverse from 'neotraverse/legacy';
+import { map } from 'neotraverse';
 
 export default function configSerializer<T extends Record<string, unknown>>(
   config: T,
@@ -12,17 +12,17 @@ export default function configSerializer<T extends Record<string, unknown>>(
   ];
   const arrayFields = ['packageFiles', 'upgrades'];
 
-  return traverse(config).map(function scrub(val: string) {
-    if (this.key && val) {
-      const key = this.key.toString();
+  return map(config, (ctx, val) => {
+    if (ctx.key && val) {
+      const key = ctx.key.toString();
       if (templateFields.includes(key)) {
-        this.update('[Template]');
+        ctx.update('[Template]');
       }
       if (contentFields.includes(key)) {
-        this.update('[content]');
+        ctx.update('[content]');
       }
       if (arrayFields.includes(key)) {
-        this.update('[Array]');
+        ctx.update('[Array]');
       }
     }
   });

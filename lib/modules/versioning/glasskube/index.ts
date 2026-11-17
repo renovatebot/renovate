@@ -1,7 +1,6 @@
 import { SemVer } from 'semver';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'glasskube';
 export const displayName = 'glasskube';

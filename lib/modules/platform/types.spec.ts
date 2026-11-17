@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import type { RepoParams } from './types.ts';
 
@@ -6,12 +7,10 @@ describe('modules/platform/types', () => {
     type RequiredRepoGlobalConfig = Required<RepoGlobalConfig>;
     type RequiredRepoParams = Required<RepoParams>;
 
-    const globalConfig: Omit<
-      RequiredRepoGlobalConfig,
-      keyof RequiredRepoParams
-    > = {} as any;
-    const repoConfig: Omit<RequiredRepoParams, keyof RequiredRepoGlobalConfig> =
-      {} as any;
+    const globalConfig =
+      partial<Omit<RequiredRepoGlobalConfig, keyof RequiredRepoParams>>();
+    const repoConfig =
+      partial<Omit<RequiredRepoParams, keyof RequiredRepoGlobalConfig>>();
 
     expectTypeOf(globalConfig).toEqualTypeOf<RequiredRepoGlobalConfig>();
     expectTypeOf(repoConfig).toEqualTypeOf<RequiredRepoParams>();

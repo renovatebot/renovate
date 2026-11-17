@@ -1,6 +1,26 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger/index.ts';
+import type { BunyanRecord } from '../../logger/types.ts';
+import type { PackageDependency } from '../../modules/manager/types.ts';
 import { emojify } from '../../util/emoji.ts';
+
+/**
+ * Checks whether a replacement target already exists as a sibling dependency
+ * in the same package file.
+ */
+export function replacementAlreadyExists(
+  deps: PackageDependency[],
+  currentDep: PackageDependency,
+  newName: string,
+): boolean {
+  return deps.some((sibling) => {
+    if (sibling === currentDep) {
+      return false;
+    }
+    return sibling.depName === newName || sibling.packageName === newName;
+  });
+}
 
 export function extractRepoProblems(
   repository: string | undefined,
@@ -11,8 +31,25 @@ export function extractRepoProblems(
         (problem) =>
           problem.repository === repository && !problem.artifactErrors,
       )
-      .map((problem) => `${formatProblemLevel(problem.level)}: ${problem.msg}`),
+      .map(
+        (problem) =>
+          `${formatProblemLevel(problem.level)}: ${problem.msg}${formatProblemSubject(problem)}`,
+      ),
   );
+}
+
+function formatProblemSubject(problem: BunyanRecord): string {
+  const depName = isNonEmptyString(problem.depName) ? problem.depName : null;
+  const packageFile = isNonEmptyString(problem.packageFile)
+    ? problem.packageFile
+    : null;
+  if (depName && packageFile) {
+    return ` (${depName} in ${packageFile})`;
+  }
+  if (depName ?? packageFile) {
+    return ` (${depName ?? packageFile})`;
+  }
+  return '';
 }
 
 type EmojiLogLevelMapping = Record<number, string>;

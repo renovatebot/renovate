@@ -50,17 +50,23 @@ export function compare(x: NugetVersion, y: NugetVersion): number {
 
   if (xMajor !== yMajor) {
     return Math.sign(xMajor - yMajor);
-  } else if (xMinor !== yMinor) {
+  }
+  if (xMinor !== yMinor) {
     return Math.sign(xMinor - yMinor);
-  } else if (xPatch !== yPatch) {
+  }
+  if (xPatch !== yPatch) {
     return Math.sign(xPatch - yPatch);
-  } else if (xRevision !== yRevision) {
+  }
+  if (xRevision !== yRevision) {
     return Math.sign(xRevision - yRevision);
-  } else if (x.prerelease && !y.prerelease) {
+  }
+  if (x.prerelease && !y.prerelease) {
     return -1;
-  } else if (!x.prerelease && y.prerelease) {
+  }
+  if (!x.prerelease && y.prerelease) {
     return 1;
-  } else if (x.prerelease && y.prerelease) {
+  }
+  if (x.prerelease && y.prerelease) {
     return comparePrereleases(x.prerelease, y.prerelease);
   }
 

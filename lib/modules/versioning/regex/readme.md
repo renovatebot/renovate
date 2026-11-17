@@ -1,12 +1,12 @@
-Regular Expression Versioning is designed to be a flexible fallback versioning approach if Renovate's other versioning schemes don't do the job.
+Regular Expression Versioning is designed to be a flexible fallback versioning approach if Renovate's other versioning schemes do not do the job.
 
 The `regex` scheme makes use of Regular Expression capture groups.
 
 The valid capture groups for `regex` versioning are:
 
 - `major`, `minor`, and `patch`: at least one of these must be provided. When determining whether a package has updates, these values will be compared in the standard semantic versioning fashion. If any of these fields are omitted, they will be treated as if they were `0` -- in this way, you can describe versioning schemes with up to three incrementing values.
-- `build`: this capture group can be used after you've already used the `major`, `minor` and `patch` capture groups and need a fourth version part. `build` updates are handled like `patch` updates.
-- `revision`: this capture group can be used after you've already used the `build` capture groups and need a fifth version part. `revision` updates are handled like `patch` updates.
+- `build`: this capture group can be used after you have already used the `major`, `minor` and `patch` capture groups and need a fourth version part. `build` updates are handled like `patch` updates.
+- `revision`: this capture group can be used after you have already used the `build` capture groups and need a fifth version part. `revision` updates are handled like `patch` updates.
 - `prerelease`: this value, if captured, will mark a given release as a prerelease (e.g. unstable). If this value is captured and you have configured `"ignoreUnstable": true`, the given release will be skipped.
 - `compatibility`: this value defines the "build compatibility" of a given dependency. A proposed Renovate update will never change the specified compatibility value. For example, if you are pinning to `1.2.3-linux` (and `linux` is captured as the compatibility value), Renovate will not update you to `1.2.4-osx`.
 
@@ -79,6 +79,25 @@ Here is another example, this time for handling `ghcr.io/linuxserver/openssh-ser
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/linuxserver/openssh-server"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)_p(?<patch>\\d+)-r(?<build>\\d)-ls(?<revision>.+)$"
+    }
+  ]
+}
+```
+
+The `regex` scheme also accepts a comparator range wherever a version is matched against a constraint, such as `allowedVersions` and `matchCurrentVersion`, evaluated with the scheme's own version comparison: the `major`, `minor`, and `patch` capture groups are compared in that order of precedence, regardless of where they appear in the pattern. For example, calendar versioning `YYYY.DD.MM` (day before month) sorts correctly by capturing the month as `minor` and the day as `patch`, so comparison follows year, then month, then day.
+The supported operators are `<`, `<=`, `>`, `>=`, `=` and `==`, and several comparators separated by whitespace or a comma are combined with logical AND.
+Because the comparison uses the scheme's own ordering rather than npm `semver`, a numeric suffix captured as `build` is ordered correctly, where `semver` would treat it as a prerelease and reject the range.
+
+For example, to hold a GitLab EE image at or below a required upgrade stop, capture the `-ee` suffix as a numeric `build` group and cap it with `allowedVersions`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["gitlab/gitlab-ee"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-ee\\.(?<build>\\d+)$",
+      "allowedVersions": "<=19.1.2-ee.0"
     }
   ]
 }

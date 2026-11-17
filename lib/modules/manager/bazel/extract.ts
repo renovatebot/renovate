@@ -27,10 +27,12 @@ export function extractPackageFile(
       // functionality work correctly.
       const rules = [...dockerRules, ...ociRules, ...gitRules, ...goRules];
       const replaceString = fragment.value;
-      if (rules.some((rule) => replaceString.startsWith(rule))) {
-        if (dep.currentValue && dep.currentDigest) {
-          dep.replaceString = replaceString;
-        }
+      if (
+        rules.some((rule) => replaceString.startsWith(rule)) &&
+        dep.currentValue &&
+        dep.currentDigest
+      ) {
+        dep.replaceString = replaceString;
       }
 
       deps.push(dep);

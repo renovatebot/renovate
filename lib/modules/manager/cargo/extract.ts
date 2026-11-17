@@ -2,10 +2,8 @@ import { isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import {
-  findLocalSiblingOrParent,
-  readLocalFile,
-} from '../../../util/fs/index.ts';
+import { findLocalSiblingOrParent } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { api as versioning } from '../../versioning/cargo/index.ts';
 import type {
   ExtractConfig,
@@ -13,26 +11,41 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractLockFileVersions } from './locked-version.ts';
-import { CargoConfig, CargoManifest } from './schema.ts';
+import {
+  getMinPublishAgeRules,
+  getRegistryMinPublishAges,
+} from './minimum-release-age.ts';
+import type { CargoConfig } from './schema.ts';
+import { CargoManifest } from './schema.ts';
 import type {
   CargoManagerData,
   CargoRegistries,
   CargoRegistryUrl,
 } from './types.ts';
-import { DEFAULT_REGISTRY_URL } from './utils.ts';
-
-const DEFAULT_REGISTRY_ID = 'crates-io';
+import {
+  DEFAULT_REGISTRY_ID,
+  DEFAULT_REGISTRY_URL,
+  readCargoConfig,
+} from './utils.ts';
 
 function getCargoIndexEnv(registryName: string): string | null {
   const registry = registryName.toUpperCase().replaceAll('-', '_');
   return getEnv()[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
 }
 
+/** Returns the index of a registry, from the environment or the cargo config. */
+function getRegistryUrl(
+  registryName: string,
+  cargoRegistries: CargoRegistries,
+): CargoRegistryUrl | undefined {
+  return getCargoIndexEnv(registryName) ?? cargoRegistries[registryName];
+}
+
 function extractFromSection(
   dependencies: PackageDependency<CargoManagerData>[] | undefined,
   cargoRegistries: CargoRegistries,
   target?: string,
-): PackageDependency[] {
+): PackageDependency<CargoManagerData>[] {
   if (!dependencies) {
     return [];
   }
@@ -43,9 +56,10 @@ function extractFromSection(
     let registryUrls: string[] | undefined;
 
     if (dep.managerData?.registryName) {
-      const registryUrl =
-        getCargoIndexEnv(dep.managerData.registryName) ??
-        cargoRegistries[dep.managerData?.registryName];
+      const registryUrl = getRegistryUrl(
+        dep.managerData.registryName,
+        cargoRegistries,
+      );
       if (registryUrl) {
         if (registryUrl !== DEFAULT_REGISTRY_URL) {
           registryUrls = [registryUrl];
@@ -79,28 +93,6 @@ function extractFromSection(
   return deps;
 }
 
-/** Reads `.cargo/config.toml`, or, if not found, `.cargo/config` */
-async function readCargoConfig(): Promise<CargoConfig | null> {
-  for (const configName of ['config.toml', 'config']) {
-    const path = `.cargo/${configName}`;
-    const payload = await readLocalFile(path, 'utf8');
-    if (payload) {
-      const parsedCargoConfig = CargoConfig.safeParse(payload);
-      if (parsedCargoConfig.success) {
-        return parsedCargoConfig.data;
-      } else {
-        logger.debug(
-          { err: parsedCargoConfig.error, path },
-          `Error parsing cargo config`,
-        );
-      }
-    }
-  }
-
-  logger.debug('Neither .cargo/config nor .cargo/config.toml found');
-  return null;
-}
-
 /** Extracts a map of cargo registries from a CargoConfig */
 function extractCargoRegistries(config: CargoConfig): CargoRegistries {
   const result: CargoRegistries = {};
@@ -111,8 +103,8 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
   );
 
   const registryNames = new Set([
-    ...Object.keys(config.registries ?? {}),
-    ...Object.keys(config.source ?? {}),
+    ...Object.keys(coerceObject(config.registries)),
+    ...Object.keys(coerceObject(config.source)),
   ]);
   for (const registryName of registryNames) {
     result[registryName] = resolveRegistryIndex(registryName, config);
@@ -155,15 +147,37 @@ function resolveRegistryIndex(
   const registryIndex = config.registries?.[registryName]?.index;
   if (registryIndex) {
     return registryIndex;
-  } else {
-    // we don't need an explicit index if we're using the default registry
-    if (registryName === DEFAULT_REGISTRY_ID) {
-      return DEFAULT_REGISTRY_URL;
-    } else {
-      logger.debug(`${registryName} cargo registry is missing index`);
-      return null;
+  }
+  // we don't need an explicit index if we're using the default registry
+  if (registryName === DEFAULT_REGISTRY_ID) {
+    return DEFAULT_REGISTRY_URL;
+  }
+  logger.debug(`${registryName} cargo registry is missing index`);
+  return null;
+}
+
+/**
+ * Returns the URL by name of each registry other than crates.io which has a `min-publish-age` in the cargo config, or crates in `deps`, as the crates of that registry have it in `registryUrls`.
+ */
+function getAlternateRegistryUrls(
+  registryMinPublishAges: Record<string, string> | undefined,
+  cargoRegistries: CargoRegistries,
+  deps: PackageDependency<CargoManagerData>[],
+): Record<string, string> {
+  const registryNames = new Set([
+    ...Object.keys(coerceObject(registryMinPublishAges)),
+    ...deps.map((dep) => dep.managerData?.registryName).filter(isString),
+  ]);
+  registryNames.delete(DEFAULT_REGISTRY_ID);
+  const registryUrls: Record<string, string> = {};
+  for (const registryName of registryNames) {
+    const registryUrl = getRegistryUrl(registryName, cargoRegistries);
+    // crates of a registry without a URL are skipped, and those of crates.io have the age of crates.io
+    if (isString(registryUrl)) {
+      registryUrls[registryName] = registryUrl;
     }
   }
+  return registryUrls;
 }
 
 export async function extractPackageFile(
@@ -173,7 +187,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent<CargoManagerData> | null> {
   logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
-  const cargoConfig = (await readCargoConfig()) ?? {};
+  const cargoConfig = coerceObject(await readCargoConfig());
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
   const parsedCargoManifest = CargoManifest.safeParse(content);
@@ -198,7 +212,7 @@ export async function extractPackageFile(
   */
   const targetSection = cargoManifest.target;
   // An array of all dependencies in the target section
-  let targetDeps: PackageDependency[] = [];
+  let targetDeps: PackageDependency<CargoManagerData>[] = [];
   if (targetSection) {
     const targets = Object.keys(targetSection);
     targets.forEach((target) => {
@@ -226,7 +240,7 @@ export async function extractPackageFile(
   }
 
   const workspaceSection = cargoManifest.workspace;
-  let workspaceDeps: PackageDependency[] = [];
+  let workspaceDeps: PackageDependency<CargoManagerData>[] = [];
   if (workspaceSection) {
     workspaceDeps = extractFromSection(
       workspaceSection.dependencies,
@@ -264,14 +278,39 @@ export async function extractPackageFile(
     packageFile,
     'Cargo.lock',
   );
-  const res: PackageFileContent = { deps, packageFileVersion: version };
+  const res: PackageFileContent<CargoManagerData> = {
+    deps,
+    packageFileVersion: version,
+  };
+
+  const registryMinPublishAges = getRegistryMinPublishAges(cargoConfig);
+  // a string if the cargo config replaces crates.io
+  const cratesIoUrl = cargoRegistries[DEFAULT_REGISTRY_ID];
+  const packageRules = getMinPublishAgeRules(
+    cargoConfig,
+    getAlternateRegistryUrls(registryMinPublishAges, cargoRegistries, deps),
+    isString(cratesIoUrl) ? cratesIoUrl : undefined,
+  );
+  if (packageRules.length) {
+    logger.debug(
+      `Found min-publish-age in the cargo config for ${packageFile}: ${JSON.stringify(packageRules)}`,
+    );
+    res.packageRules = packageRules;
+  }
+  if (registryMinPublishAges) {
+    logger.debug(
+      `Found min-publish-age of registries ${Object.keys(registryMinPublishAges).join(', ')} in the cargo config for ${packageFile}`,
+    );
+    res.managerData = { registryMinPublishAges };
+  }
+
   if (lockFileName) {
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`,
     );
 
-    const versionsByPackage = await extractLockFileVersions(lockFileName);
-    if (!versionsByPackage) {
+    const lockFileVersions = await extractLockFileVersions(lockFileName);
+    if (!lockFileVersions) {
       logger.debug(
         `Could not extract lock file versions from ${lockFileName}.`,
       );
@@ -279,6 +318,11 @@ export async function extractPackageFile(
     }
 
     res.lockFiles = [lockFileName];
+    const { versionsByPackage, hasGitSources } = lockFileVersions;
+    // cargo does not check the age of git sources, which lock file maintenance updates
+    if (hasGitSources) {
+      res.managerData = { ...res.managerData, lockFileHasGitSources: true };
+    }
 
     for (const dep of deps) {
       const packageName = dep.packageName ?? dep.depName!;

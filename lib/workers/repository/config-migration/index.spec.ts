@@ -101,4 +101,14 @@ describe('workers/repository/config-migration/index', () => {
     expect(branchList).toBeEmptyArray();
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
   });
+
+  it('always resets MigratedDataFactory even when an error is thrown', async () => {
+    vi.mocked(checkConfigMigrationBranch).mockRejectedValue(
+      new Error('unexpected error'),
+    );
+    await expect(configMigration(config, [])).rejects.toThrow(
+      'unexpected error',
+    );
+    expect(MigratedDataFactory.reset).toHaveBeenCalledTimes(1);
+  });
 });

@@ -11,8 +11,8 @@ Renovate stores its metadata in the _commit message footer_.
 ## Authentication
 
 <figure markdown>
-  ![Gerrit HTTP access token](../../../assets/images/gerrit-http-password.png){ loading=lazy }
-  <figcaption>First, create a HTTP access token for the Renovate account.</figcaption>
+![Gerrit HTTP access token](../../../assets/images/gerrit-http-password.png){ loading=lazy }
+<figcaption>First, create a HTTP access token for the Renovate account.</figcaption>
 </figure>
 
 Let Renovate use your HTTP access token by doing _one_ of the following:
@@ -30,9 +30,8 @@ You must set `platform=gerrit` in your Renovate config file.
 If you use the "Code-Review" label and want to get `automerge` working then you must set `autoApprove=true` in your Renovate config.
 Renovate will now add the _Code-Review_ label with the value "+2" to each of its "pull requests" (Gerrit-Change).
 
-<!-- prettier-ignore -->
 !!! note
-    The bot's user account must have permission to give +2 for the Code-Review label.
+  The Renovate user account must have permission to give +2 for the Code-Review label.
 
 The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used to create pull requests.
 It works similar to the default option `"pr"`.

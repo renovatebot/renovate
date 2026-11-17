@@ -1,0 +1,15 @@
+extends: existence
+message: "Refer to the GitHub app version of Renovate as 'the Mend Renovate app', not '%s'."
+link: https://docs.renovatebot.com/development/style-guide/#correct-name-for-the-github-app
+level: error
+ignorecase: false
+# The optional prefixes make the match include the preceding word, because RE2 has no lookbehind.
+# The exceptions then allow the correct name and unrelated products.
+nonword: true
+tokens:
+  - '(?:Mend |Forking |real |official )?Renovate [Aa]pp\b'
+exceptions:
+  - 'Mend Renovate app'
+  - 'Forking Renovate app'
+  - 'real Renovate app'
+  - 'official Renovate app'
