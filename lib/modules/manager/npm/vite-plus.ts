@@ -754,12 +754,17 @@ function updateUpgradeMetadata(
     ) {
       const currentMajor = npmVersioning.api.getMajor(upgrade.currentVersion);
       const currentMinor = npmVersioning.api.getMinor(upgrade.currentVersion);
-      upgrade.updateType = getAlignedUpdateType(
-        currentMajor,
-        currentMinor,
-        upgrade.newMajor,
-        upgrade.newMinor,
-      );
+      upgrade.updateType = npmVersioning.api.isGreaterThan(
+        upgrade.currentVersion,
+        version,
+      )
+        ? 'rollback'
+        : getAlignedUpdateType(
+            currentMajor,
+            currentMinor,
+            upgrade.newMajor,
+            upgrade.newMinor,
+          );
       upgrade.isBreaking = npmVersioning.api.isBreaking!(
         upgrade.currentVersion,
         version,

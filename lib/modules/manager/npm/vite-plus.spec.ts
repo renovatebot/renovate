@@ -2007,6 +2007,38 @@ describe('modules/manager/npm/vite-plus', () => {
     },
   );
 
+  it.each`
+    currentVersion | isBreaking
+    ${'5.0.0'}     | ${true}
+    ${'4.2.0'}     | ${false}
+    ${'4.1.12'}    | ${false}
+  `(
+    'labels a downgrade from $currentVersion as a rollback',
+    async ({ currentVersion, isBreaking }) => {
+      const base = packageJson('0.3.1', currentVersion);
+      const proposed = packageJson('0.3.1', '5.1.0');
+      const aligned = packageJson('0.3.1', '4.1.11');
+      const updateConfig = config(proposed, '@vitest/coverage-v8', '5.1.0');
+      Object.assign(updateConfig.upgrades[0], {
+        currentVersion,
+        currentValue: currentVersion,
+      });
+      const files = packageFiles();
+      files.npm![0].deps![0].currentVersion = '0.3.1';
+      files.npm![0].deps![0].lockedVersion = '0.3.1';
+      await mockFiles({ 'package.json': base });
+      mockPlan((request) => validPlan(request, aligned));
+
+      await reconcile(updateConfig, files);
+
+      expect(updateConfig.upgrades[0]).toMatchObject({
+        updateType: 'rollback',
+        isBreaking,
+        newVersion: '4.1.11',
+      });
+    },
+  );
+
   it('derives major metadata after aligning a provider', async () => {
     const base = packageJson('0.3.1', '4.0.0');
     const proposed = packageJson('0.3.1', '4.2.0');
