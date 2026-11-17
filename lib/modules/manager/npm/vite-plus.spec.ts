@@ -1908,10 +1908,14 @@ describe('modules/manager/npm/vite-plus', () => {
 
   it('reads the latest handler output for each path', async () => {
     const proposed = packageJson('0.3.1', '4.0.0');
-    const latest = proposed.replace(
-      '{',
-      '{"packageManager":"pnpm@11.0.0+sha512.abc",',
-    );
+    const latest = `${JSON.stringify(
+      {
+        packageManager: 'pnpm@11.0.0+sha512.abc',
+        ...JSON.parse(proposed),
+      },
+      null,
+      2,
+    )}\n`;
     const aligned = latest.replace('4.0.0', '4.1.11');
     const files = packageFiles();
     files.npm!.push({ managerData: { pnpmLockFile: 'pnpm-lock.yaml' } });
@@ -1943,10 +1947,14 @@ describe('modules/manager/npm/vite-plus', () => {
 
   it('returns the latest handler output for the calling file on failure', async () => {
     const proposed = packageJson('0.3.1', '4.0.0');
-    const latest = proposed.replace(
-      '{',
-      '{"packageManager":"pnpm@11.0.0+sha512.abc",',
-    );
+    const latest = `${JSON.stringify(
+      {
+        packageManager: 'pnpm@11.0.0+sha512.abc',
+        ...JSON.parse(proposed),
+      },
+      null,
+      2,
+    )}\n`;
     execMock.mockRejectedValueOnce(new Error('planner unavailable'));
 
     const result = await reconcile(config(proposed), packageFiles(), [
