@@ -640,6 +640,93 @@ describe('modules/manager/npm/vite-plus', () => {
     expect(execMock).not.toHaveBeenCalled();
   });
 
+  it('plans from the branch manifests on a reused branch', async () => {
+    const leafPath = 'packages/test/package.json';
+    const root = packageJson('0.3.1', '4.1.11');
+    const baseLeaf = JSON.stringify({ devDependencies: { vitest: '4.0.0' } });
+    const branchLeaf = baseLeaf.replace('4.0.0', '4.1.11');
+    const files = packageFiles();
+    files.npm!.push({
+      packageFile: leafPath,
+      managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+      deps: [],
+    });
+    await writeLocalFile(leafPath, baseLeaf);
+    const branchFiles = new Map([
+      ['package.json', root],
+      [leafPath, branchLeaf],
+    ]);
+    getFileMock.mockImplementation((path) =>
+      Promise.resolve(branchFiles.get(path) ?? null),
+    );
+    mockPlan((request) => {
+      expect(request.manifests).toEqual([
+        { path: 'package.json', kind: 'packageJson', contents: root },
+        { path: leafPath, kind: 'packageJson', contents: branchLeaf },
+      ]);
+      return { ...(validPlan(request, root) as object), replacements: [] };
+    });
+
+    const result = await reconcile(
+      {
+        ...config(root),
+        branchName: 'renovate/vite-plus',
+        reuseExistingBranch: true,
+      },
+      files,
+    );
+
+    expect(result).toEqual([]);
+    expect(getFileMock).toHaveBeenCalledWith(leafPath, 'renovate/vite-plus');
+  });
+
+  it('returns only the error when planning fails on a reused branch', async () => {
+    const root = packageJson('0.3.1', '4.0.0');
+    await mockFiles({ 'package.json': root });
+    execMock.mockRejectedValueOnce(new Error('planner unavailable'));
+
+    const result = await reconcile(
+      {
+        ...config(root),
+        branchName: 'renovate/vite-plus',
+        reuseExistingBranch: true,
+      },
+      packageFiles(),
+      [{ file: { type: 'addition', path: 'package.json', contents: root } }],
+    );
+
+    expect(result).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: 'Vite+ planner execution failed',
+        },
+      },
+    ]);
+  });
+
+  it('fails when an extracted pnpm-workspace.yaml cannot be read', async () => {
+    const root = packageJson('0.3.1', '4.1.11');
+    const files = packageFiles();
+    files.npm!.push({
+      packageFile: 'pnpm-workspace.yaml',
+      managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+      deps: [],
+    });
+    await mockFiles({ 'package.json': root });
+
+    await expect(reconcile(config(root), files)).resolves.toEqual([
+      { file: { type: 'addition', path: 'package.json', contents: root } },
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: 'Cannot read Vite+ manifest pnpm-workspace.yaml',
+        },
+      },
+    ]);
+    expect(execMock).not.toHaveBeenCalled();
+  });
+
   it('preserves peer updates while aligning selected installation dependencies', async () => {
     const base = JSON.stringify({
       devDependencies: { 'vite-plus': '0.3.1', '@vitest/coverage-v8': '4.0.0' },

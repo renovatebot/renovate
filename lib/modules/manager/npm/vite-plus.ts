@@ -281,12 +281,12 @@ function resolveVitePlusVersion(
 
 async function readManifestSnapshot(
   path: string,
-  kind: ManifestKind,
+  { kind, extracted }: WorkspaceManifest,
 ): Promise<ManifestSnapshot | undefined> {
   const contents = await readLocalFile(path, 'utf8');
   if (isNullOrUndefined(contents)) {
     // Extracted manifests exist on disk, so a missing one means the read failed.
-    if (kind !== 'pnpmWorkspace') {
+    if (extracted) {
       throw new Error(`Cannot read Vite+ manifest ${path}`);
     }
     return undefined;
@@ -307,27 +307,45 @@ function packageFileKind(path: string | undefined): ManifestKind | undefined {
   return undefined;
 }
 
+interface WorkspaceManifest {
+  kind: ManifestKind;
+  extracted: boolean;
+}
+
+function getWorkspaceManifests(
+  workspace: WorkspacePackageFiles,
+): Map<string, WorkspaceManifest> {
+  const manifests = new Map<string, WorkspaceManifest>([
+    [
+      upath.join(
+        workspace.root === '.' ? '' : workspace.root,
+        'pnpm-workspace.yaml',
+      ),
+      { kind: 'pnpmWorkspace', extracted: false },
+    ],
+  ]);
+  for (const { packageFile } of workspace.packageFiles) {
+    const kind =
+      packageFile && upath.basename(packageFile) === 'pnpm-workspace.yaml'
+        ? 'pnpmWorkspace'
+        : packageFileKind(packageFile);
+    if (kind && packageFile) {
+      manifests.set(packageFile, { kind, extracted: true });
+    }
+  }
+  return manifests;
+}
+
 async function collectManifestSnapshots(
   workspace: WorkspacePackageFiles,
 ): Promise<ManifestSnapshot[]> {
-  const paths = new Map<string, ManifestKind>();
-  for (const packageFile of workspace.packageFiles) {
-    const kind = packageFileKind(packageFile.packageFile);
-    if (kind && packageFile.packageFile) {
-      paths.set(packageFile.packageFile, kind);
-    }
-  }
-  const pnpmWorkspacePath = upath.join(
-    workspace.root === '.' ? '' : workspace.root,
-    'pnpm-workspace.yaml',
-  );
-  paths.set(pnpmWorkspacePath, 'pnpmWorkspace');
+  const manifests = getWorkspaceManifests(workspace);
 
   const snapshots = (
     await Promise.all(
-      [...paths.entries()]
+      [...manifests.entries()]
         .sort(([left], [right]) => left.localeCompare(right))
-        .map(([path, kind]) => readManifestSnapshot(path, kind)),
+        .map(([path, manifest]) => readManifestSnapshot(path, manifest)),
     )
   ).filter((snapshot): snapshot is ManifestSnapshot => snapshot !== undefined);
 
@@ -980,6 +998,15 @@ async function reconcileWorkspace(
       latestFiles.set(file.path, file.contents);
     }
   }
+  if (config.reuseExistingBranch) {
+    // Start every call from the branch's manifests so the calls agree and unchanged files are not returned.
+    for (const path of getWorkspaceManifests(workspace).keys()) {
+      const contents = await getFile(path, config.branchName);
+      if (!isNullOrUndefined(contents)) {
+        await writeLocalFile(path, contents);
+      }
+    }
+  }
   for (const [path, contents] of latestFiles) {
     await writeLocalFile(path, contents);
   }
@@ -992,17 +1019,15 @@ async function reconcileWorkspace(
     snapshots,
     vitePlusVersion,
   );
-  // A later call must replace earlier artifacts even when its managed versions already match.
-  const replacements = new Map<string, FileAddition>([
-    [
-      packageFileName,
-      {
-        type: 'addition',
-        path: packageFileName,
-        contents: latestFiles.get(packageFileName)!,
-      },
-    ],
-  ]);
+  const replacements = new Map<string, FileAddition>();
+  if (!config.reuseExistingBranch) {
+    // Replace any earlier call's artifact for this file, which was reconciled from older contents.
+    replacements.set(packageFileName, {
+      type: 'addition',
+      path: packageFileName,
+      contents: latestFiles.get(packageFileName)!,
+    });
+  }
   for (const { path, after } of plan.replacements) {
     await writeLocalFile(path, after);
     replacements.set(path, { type: 'addition', path, contents: after });
@@ -1041,10 +1066,14 @@ export async function reconcileVitePlusVersions(
     }
     const message =
       err instanceof Error ? err.message : 'Unknown Vite+ reconciliation error';
-    return [
-      // An earlier call may have returned this file reconciled from older contents.
-      { file: latestPackageFile(update, artifacts) },
-      { artifactError: { fileName: update.packageFileName, stderr: message } },
-    ];
+    const artifactError = {
+      fileName: update.packageFileName,
+      stderr: message,
+    };
+    if (update.config.reuseExistingBranch) {
+      return [{ artifactError }];
+    }
+    // An earlier call may have returned this file reconciled from older contents.
+    return [{ file: latestPackageFile(update, artifacts) }, { artifactError }];
   }
 }
