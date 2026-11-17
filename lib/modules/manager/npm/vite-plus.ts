@@ -731,22 +731,7 @@ function parseAndValidatePlan(
   return { plan, dependencies };
 }
 
-function getAlignedUpdateType(
-  currentMajor: number | null,
-  currentMinor: number | null,
-  newMajor: number,
-  newMinor: number,
-): 'major' | 'minor' | 'patch' {
-  if (newMajor !== currentMajor) {
-    return 'major';
-  }
-  if (newMinor !== currentMinor) {
-    return 'minor';
-  }
-  return 'patch';
-}
-
-function updateUpgradeMetadata(
+function updateUpgradeTargets(
   upgrades: Upgrade<NpmManagerData>[],
   dependencies: ManifestDependency[],
 ): void {
@@ -759,40 +744,6 @@ function updateUpgradeMetadata(
     }
     upgrade.newVersion = version;
     upgrade.newValue = version;
-    const newMajor = npmVersioning.api.getMajor(version)!;
-    const newMinor = npmVersioning.api.getMinor(version)!;
-    Object.assign(upgrade, {
-      newMajor,
-      newMinor,
-      newPatch: npmVersioning.api.getPatch(version)!,
-    });
-    if (upgrade.currentValue === version) {
-      continue;
-    }
-    if (upgrade.currentVersion === version) {
-      upgrade.updateType = 'pin';
-      Object.assign(upgrade, { isBreaking: false });
-      continue;
-    }
-    if (
-      upgrade.currentVersion &&
-      npmVersioning.isVersion(upgrade.currentVersion)
-    ) {
-      const currentMajor = npmVersioning.api.getMajor(upgrade.currentVersion);
-      const currentMinor = npmVersioning.api.getMinor(upgrade.currentVersion);
-      upgrade.updateType = npmVersioning.api.isGreaterThan(
-        upgrade.currentVersion,
-        version,
-      )
-        ? 'rollback'
-        : getAlignedUpdateType(currentMajor, currentMinor, newMajor, newMinor);
-      Object.assign(upgrade, {
-        isBreaking: npmVersioning.api.isBreaking!(
-          upgrade.currentVersion,
-          version,
-        ),
-      });
-    }
   }
 }
 
@@ -1017,7 +968,7 @@ async function reconcileWorkspace(
   const results: UpdateArtifactsResult[] = [...replacements.values()].map(
     (file) => ({ file }),
   );
-  updateUpgradeMetadata(upgrades, dependencies);
+  updateUpgradeTargets(upgrades, dependencies);
   results.push(
     ...additionalAlignmentNotices(dependencies, upgrades).map((notice) => ({
       notice,

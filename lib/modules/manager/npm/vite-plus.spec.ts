@@ -249,24 +249,27 @@ describe('modules/manager/npm/vite-plus', () => {
       depName: 'vite-plus',
       newVersion: '0.3.1',
       newValue: '0.3.1',
-      isBreaking: true,
-      newMajor: 0,
-      newMinor: 3,
-      newPatch: 1,
-      updateType: 'minor',
     });
   });
 
-  it('leaves display metadata for the branch worker to derive', async () => {
-    const proposed = packageJson('0.3.1', '4.0.0');
-    const updateConfig = config(proposed);
+  it('changes only target values for the branch worker to derive metadata', async () => {
+    const proposed = packageJson('0.3.1', '4.2.0');
+    const updateConfig = config(proposed, '@vitest/coverage-v8', '4.2.0');
+    const files = packageFiles();
+    files.npm![0].deps![0].currentVersion = '0.3.1';
+    files.npm![0].deps![0].lockedVersion = '0.3.1';
+    const originalUpgrade = structuredClone(updateConfig.upgrades[0]);
     await mockFiles({ 'package.json': proposed });
     mockPlan((request) => validPlan(request, packageJson('0.3.1', '4.1.11')));
 
-    await reconcile(updateConfig, packageFiles());
+    await reconcile(updateConfig, files);
 
-    expect(updateConfig.upgrades[0]).not.toHaveProperty('displayTo');
-    expect(updateConfig.upgrades[0]).not.toHaveProperty('prettyNewVersion');
+    expect(execMock).toHaveBeenCalledOnce();
+    expect(updateConfig.upgrades[0]).toEqual({
+      ...originalUpgrade,
+      newValue: '4.1.11',
+      newVersion: '4.1.11',
+    });
   });
 
   it.each([false, true])(
@@ -1065,10 +1068,8 @@ describe('modules/manager/npm/vite-plus', () => {
     expect(updateConfig.upgrades).toHaveLength(1);
     expect(updateConfig.upgrades[0]).toMatchObject({
       currentValue: '^4.1.0',
-      isBreaking: false,
       newValue: '4.1.11',
       newVersion: '4.1.11',
-      updateType: 'pin',
     });
     await expect(
       readLocalFile(updateConfig.packageFileName, 'utf8'),
@@ -1223,7 +1224,6 @@ describe('modules/manager/npm/vite-plus', () => {
       packageName: '@voidzero-dev/vite-plus-core',
       newVersion: '0.3.1',
       newValue: '0.3.1',
-      updateType: 'minor',
     });
   });
 
@@ -2278,104 +2278,6 @@ describe('modules/manager/npm/vite-plus', () => {
         },
       },
     ]);
-  });
-
-  it.each([undefined, 'workspace:*'])(
-    'does not derive an update type from a non-exact current version',
-    async (currentVersion) => {
-      const base = packageJson('0.2.0', '4.0.0');
-      const proposed = packageJson('0.3.1', '4.0.0');
-      const updateConfig = config(proposed);
-      updateConfig.upgrades[0].currentVersion = currentVersion;
-      await mockFiles({ 'package.json': base });
-      mockPlan(() => ({
-        schemaVersion: 1,
-        tool: { name: 'vite-plus', version: '0.3.1' },
-        workspace: '.',
-        replacements: [],
-      }));
-
-      await reconcile(updateConfig, packageFiles());
-
-      expect(updateConfig.upgrades[0].updateType).toBeUndefined();
-    },
-  );
-
-  it.each`
-    currentVersion | isBreaking
-    ${'5.0.0'}     | ${true}
-    ${'4.2.0'}     | ${false}
-    ${'4.1.12'}    | ${false}
-  `(
-    'labels a downgrade from $currentVersion as a rollback',
-    async ({ currentVersion, isBreaking }) => {
-      const base = packageJson('0.3.1', currentVersion);
-      const proposed = packageJson('0.3.1', '5.1.0');
-      const aligned = packageJson('0.3.1', '4.1.11');
-      const updateConfig = config(proposed, '@vitest/coverage-v8', '5.1.0');
-      Object.assign(updateConfig.upgrades[0], {
-        currentVersion,
-        currentValue: currentVersion,
-      });
-      const files = packageFiles();
-      files.npm![0].deps![0].currentVersion = '0.3.1';
-      files.npm![0].deps![0].lockedVersion = '0.3.1';
-      await mockFiles({ 'package.json': base });
-      mockPlan((request) => validPlan(request, aligned));
-
-      await reconcile(updateConfig, files);
-
-      expect(updateConfig.upgrades[0]).toMatchObject({
-        updateType: 'rollback',
-        isBreaking,
-        newVersion: '4.1.11',
-      });
-    },
-  );
-
-  it('derives major metadata after aligning a provider', async () => {
-    const base = packageJson('0.3.1', '4.0.0');
-    const proposed = packageJson('0.3.1', '4.2.0');
-    const aligned = packageJson('0.3.1', '5.0.0');
-    const updateConfig = config(proposed, '@vitest/coverage-v8', '4.2.0');
-    const files = packageFiles();
-    files.npm![0].deps![0].currentVersion = '0.3.1';
-    files.npm![0].deps![0].lockedVersion = '0.3.1';
-    await mockFiles({ 'package.json': base });
-    mockPlan((request) => validPlan(request, aligned));
-
-    await reconcile(updateConfig, files);
-
-    expect(updateConfig.upgrades[0]).toMatchObject({
-      isBreaking: true,
-      newMajor: 5,
-      updateType: 'major',
-    });
-  });
-
-  it('derives patch metadata after aligning a Vite+ update', async () => {
-    const base = packageJson('0.3.1', '4.0.0');
-    const proposed = packageJson('0.3.2', '4.0.0');
-    const aligned = packageJson('0.3.2', '4.1.11');
-    const updateConfig = config(proposed, 'vite-plus', '0.3.2');
-    updateConfig.upgrades[0].currentVersion = '0.3.1';
-    const files = packageFiles();
-    files.npm![0].deps![0].currentVersion = '0.3.1';
-    files.npm![0].deps![0].lockedVersion = '0.3.1';
-    await mockFiles({ 'package.json': base });
-    mockPlan((request) => {
-      const plan = validPlan(request, aligned) as any;
-      plan.tool.version = '0.3.2';
-      return plan;
-    });
-
-    await reconcile(updateConfig, files);
-
-    expect(updateConfig.upgrades[0]).toMatchObject({
-      isBreaking: true,
-      newMinor: 3,
-      updateType: 'patch',
-    });
   });
 
   it('leaves unrelated upgrade metadata alone when the plan has no Vitest change', async () => {

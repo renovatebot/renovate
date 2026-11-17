@@ -6,6 +6,7 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { SharedConstraints } from '../../../modules/manager/types.ts';
+import * as allVersioning from '../../../modules/versioning/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -21,6 +22,7 @@ import {
   updateSharedConstraints,
 } from '../extract/shared-constraints.ts';
 import { CommitMessage } from '../model/commit-message.ts';
+import { classifyRelease } from '../process/lookup/update-type.ts';
 
 function prettifyVersion(version: string): string {
   if (regEx(/^\d/).test(version)) {
@@ -265,6 +267,29 @@ export function refreshBranchConfig(
       continue;
     }
     changed = true;
+    const versioningApi = allVersioning.get(upgrade.versioning);
+    const { currentVersion, newVersion } = upgrade;
+    if (newVersion && versioningApi.isVersion(newVersion)) {
+      upgrade.newMajor = versioningApi.getMajor(newVersion)!;
+      upgrade.newMinor = versioningApi.getMinor(newVersion)!;
+      upgrade.newPatch = versioningApi.getPatch(newVersion)!;
+      if (currentVersion && versioningApi.isVersion(currentVersion)) {
+        if (versioningApi.equals(currentVersion, newVersion)) {
+          upgrade.updateType = 'pin';
+        } else if (versioningApi.isGreaterThan(currentVersion, newVersion)) {
+          upgrade.updateType = 'rollback';
+        } else {
+          upgrade.updateType = classifyRelease(
+            versioningApi,
+            currentVersion,
+            newVersion,
+          );
+        }
+        upgrade.isBreaking = versioningApi.isBreaking
+          ? versioningApi.isBreaking(currentVersion, newVersion)
+          : upgrade.updateType === 'major';
+      }
+    }
     const previousRisk = updateRisk(previous?.updateType);
     const reconciledRisk = updateRisk(upgrade.updateType);
     const becameBreaking = upgrade.isBreaking && !previous?.isBreaking;

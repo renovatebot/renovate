@@ -71,6 +71,7 @@ describe('workers/repository/updates/generate', () => {
           ...getConfig(),
           major: undefined,
           manager: 'npm',
+          versioning: 'npm',
           branchName: 'renovate/vitest-4.x',
           depName: 'vitest',
           packageName: 'vitest',
@@ -104,7 +105,6 @@ describe('workers/repository/updates/generate', () => {
       Object.assign(config.upgrades[0], {
         newValue: '4.1.11',
         newVersion: '4.1.11',
-        updateType: 'patch',
         commitBodyTable: true,
       });
 
@@ -151,25 +151,33 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it.each`
-      previousType   | updateType       | wasBreaking | isBreaking | automerge
-      ${'major'}     | ${'major'}       | ${true}     | ${true}    | ${true}
-      ${'major'}     | ${'minor'}       | ${true}     | ${false}   | ${true}
-      ${'minor'}     | ${'patch'}       | ${false}    | ${false}   | ${true}
-      ${'patch'}     | ${'pin'}         | ${false}    | ${false}   | ${true}
-      ${'pin'}       | ${'pinDigest'}   | ${false}    | ${false}   | ${true}
-      ${'pinDigest'} | ${'digest'}      | ${false}    | ${false}   | ${true}
-      ${'digest'}    | ${'patch'}       | ${false}    | ${false}   | ${false}
-      ${'patch'}     | ${'minor'}       | ${false}    | ${false}   | ${false}
-      ${'minor'}     | ${'major'}       | ${false}    | ${true}    | ${false}
-      ${'minor'}     | ${'patch'}       | ${false}    | ${true}    | ${false}
-      ${'major'}     | ${'rollback'}    | ${true}     | ${false}   | ${false}
-      ${'major'}     | ${undefined}     | ${true}     | ${false}   | ${false}
-      ${'major'}     | ${'replacement'} | ${true}     | ${false}   | ${false}
-      ${undefined}   | ${'patch'}       | ${false}    | ${false}   | ${false}
-      ${'rollback'}  | ${'patch'}       | ${false}    | ${false}   | ${false}
+      previousType   | currentVersion | newVersion   | updateType       | wasBreaking | isBreaking | automerge
+      ${'major'}     | ${'4.1.0'}     | ${'5.0.0'}   | ${'major'}       | ${true}     | ${true}    | ${true}
+      ${'major'}     | ${'4.0.0'}     | ${'4.1.11'}  | ${'minor'}       | ${true}     | ${false}   | ${true}
+      ${'minor'}     | ${'4.1.0'}     | ${'4.1.11'}  | ${'patch'}       | ${false}    | ${false}   | ${true}
+      ${'patch'}     | ${'4.1.11'}    | ${'4.1.11'}  | ${'pin'}         | ${false}    | ${false}   | ${true}
+      ${'pin'}       | ${'4.1.0'}     | ${undefined} | ${'pinDigest'}   | ${false}    | ${false}   | ${true}
+      ${'pinDigest'} | ${'4.1.0'}     | ${undefined} | ${'digest'}      | ${false}    | ${false}   | ${true}
+      ${'digest'}    | ${'4.1.0'}     | ${'4.1.11'}  | ${'patch'}       | ${false}    | ${false}   | ${false}
+      ${'patch'}     | ${'4.0.0'}     | ${'4.1.11'}  | ${'minor'}       | ${false}    | ${false}   | ${false}
+      ${'minor'}     | ${'4.1.0'}     | ${'5.0.0'}   | ${'major'}       | ${false}    | ${true}    | ${false}
+      ${'minor'}     | ${'0.3.1'}     | ${'0.3.2'}   | ${'patch'}       | ${false}    | ${true}    | ${false}
+      ${'major'}     | ${'5.0.0'}     | ${'4.1.11'}  | ${'rollback'}    | ${true}     | ${true}    | ${false}
+      ${'major'}     | ${'4.1.0'}     | ${undefined} | ${undefined}     | ${true}     | ${false}   | ${false}
+      ${'major'}     | ${'4.1.0'}     | ${undefined} | ${'replacement'} | ${true}     | ${false}   | ${false}
+      ${undefined}   | ${'4.1.0'}     | ${'4.1.11'}  | ${'patch'}       | ${false}    | ${false}   | ${false}
+      ${'rollback'}  | ${'4.1.0'}     | ${'4.1.11'}  | ${'patch'}       | ${false}    | ${false}   | ${false}
     `(
       'compares $previousType to $updateType with breaking=$isBreaking',
-      ({ previousType, updateType, wasBreaking, isBreaking, automerge }) => {
+      ({
+        previousType,
+        currentVersion,
+        newVersion,
+        updateType,
+        wasBreaking,
+        isBreaking,
+        automerge,
+      }) => {
         const upgrade = config.upgrades[0];
         previousTargets.set(upgrade, {
           ...upgrade,
@@ -177,18 +185,135 @@ describe('workers/repository/updates/generate', () => {
           isBreaking: wasBreaking,
         });
         Object.assign(upgrade, {
-          newValue: '4.1.11',
-          newVersion: '4.1.11',
-          updateType,
-          isBreaking,
+          currentVersion,
+          newValue: newVersion ?? '4.1.11',
+          newVersion,
+          updateType: newVersion ? previousType : updateType,
+          isBreaking: newVersion ? wasBreaking : isBreaking,
         });
 
         refreshBranchConfig(config, previousTargets);
 
+        expect(upgrade.updateType).toBe(updateType);
+        expect(upgrade.isBreaking).toBe(isBreaking);
         expect(upgrade.automerge).toBe(automerge);
         expect(config.automerge).toBe(automerge);
       },
     );
+
+    it.each`
+      currentVersion | newVersion  | newMajor | newMinor | newPatch | updateType    | isBreaking
+      ${'4.0.0'}     | ${'4.1.11'} | ${4}     | ${1}     | ${11}    | ${'minor'}    | ${false}
+      ${'4.1.0'}     | ${'4.1.11'} | ${4}     | ${1}     | ${11}    | ${'patch'}    | ${false}
+      ${'4.0.0'}     | ${'5.0.0'}  | ${5}     | ${0}     | ${0}     | ${'major'}    | ${true}
+      ${'0.2.0'}     | ${'0.3.1'}  | ${0}     | ${3}     | ${1}     | ${'minor'}    | ${true}
+      ${'0.3.1'}     | ${'0.3.2'}  | ${0}     | ${3}     | ${2}     | ${'patch'}    | ${true}
+      ${'4.1.11'}    | ${'4.1.11'} | ${4}     | ${1}     | ${11}    | ${'pin'}      | ${false}
+      ${'5.0.0'}     | ${'4.1.11'} | ${4}     | ${1}     | ${11}    | ${'rollback'} | ${true}
+      ${'4.2.0'}     | ${'4.1.11'} | ${4}     | ${1}     | ${11}    | ${'rollback'} | ${false}
+      ${'4.1.12'}    | ${'4.1.11'} | ${4}     | ${1}     | ${11}    | ${'rollback'} | ${false}
+    `(
+      'derives $updateType metadata from $currentVersion to $newVersion',
+      ({
+        currentVersion,
+        newVersion,
+        newMajor,
+        newMinor,
+        newPatch,
+        updateType,
+        isBreaking,
+      }) => {
+        const upgrade = config.upgrades[0];
+        Object.assign(upgrade, {
+          currentValue: `^${currentVersion}`,
+          currentVersion,
+          newValue: newVersion,
+          newVersion,
+        });
+
+        refreshBranchConfig(config, previousTargets);
+
+        const expected = {
+          newValue: newVersion,
+          newVersion,
+          newMajor,
+          newMinor,
+          newPatch,
+          updateType,
+          isBreaking,
+          displayTo: newVersion,
+          prettyNewVersion: `v${newVersion}`,
+          prettyNewMajor: `v${newMajor}`,
+          isMajor: updateType === 'major',
+          isMinor: updateType === 'minor',
+          isPatch: updateType === 'patch',
+          isPin: updateType === 'pin',
+        };
+        expect(upgrade).toMatchObject(expected);
+        expect(config).toMatchObject(expected);
+      },
+    );
+
+    it.each`
+      newVersion    | updateType | isBreaking
+      ${'1.10.0.0'} | ${'major'} | ${true}
+      ${'1.1.1.0'}  | ${'minor'} | ${false}
+    `(
+      'uses pvp classification and breaking fallback for $newVersion',
+      ({ newVersion, updateType, isBreaking }) => {
+        Object.assign(config.upgrades[0], {
+          versioning: 'pvp',
+          currentVersion: '1.1.0.0',
+          newValue: newVersion,
+          newVersion,
+        });
+
+        refreshBranchConfig(config, previousTargets);
+
+        expect(config).toMatchObject({ updateType, isBreaking });
+      },
+    );
+
+    it.each([undefined, 'workspace:*'])(
+      'keeps classification when the current version is %s',
+      (currentVersion) => {
+        Object.assign(config.upgrades[0], {
+          currentVersion,
+          newValue: '4.1.11',
+          newVersion: '4.1.11',
+          updateType: 'replacement',
+          isBreaking: true,
+        });
+
+        refreshBranchConfig(config, previousTargets);
+
+        expect(config).toMatchObject({
+          newMajor: 4,
+          newMinor: 1,
+          newPatch: 11,
+          updateType: 'replacement',
+          isBreaking: true,
+          automerge: false,
+        });
+      },
+    );
+
+    it('preserves target metadata for a non-version target', () => {
+      Object.assign(config.upgrades[0], {
+        newValue: 'workspace:*',
+        newVersion: 'workspace:*',
+        updateType: 'replacement',
+      });
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config).toMatchObject({
+        newMajor: 4,
+        newVersion: 'workspace:*',
+        updateType: 'replacement',
+        automerge: false,
+      });
+    });
 
     it.each(['branch', 'upgrade'] as const)(
       'does not enable disabled %s automerge',
@@ -252,6 +377,7 @@ describe('workers/repository/updates/generate', () => {
           ...getConfig(),
           major: undefined,
           manager: 'npm',
+          versioning: 'npm',
           branchName: 'renovate/vitest-4.x',
           depName: 'vitest',
           newValue,
@@ -280,6 +406,7 @@ describe('workers/repository/updates/generate', () => {
           ...getConfig(),
           major: undefined,
           manager: 'npm',
+          versioning: 'npm',
           branchName: 'renovate/vitest-4.x',
           depName,
           groupName: 'Vitest packages',
@@ -294,10 +421,8 @@ describe('workers/repository/updates/generate', () => {
       );
       Object.assign(config.upgrades[1], {
         newValue: '5.0.0',
+        currentVersion: '4.1.0',
         newVersion: '5.0.0',
-        newMajor: 5,
-        updateType: 'major',
-        isBreaking: true,
       });
 
       refreshBranchConfig(config, previousTargets);

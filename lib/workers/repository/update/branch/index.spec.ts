@@ -1020,6 +1020,7 @@ describe('workers/repository/update/branch/index', () => {
               ...getConfig(),
               major: undefined,
               manager: 'npm',
+              versioning: 'npm',
               branchName: 'renovate/vitest-5.x',
               baseBranch: config.baseBranch,
               depName: 'vitest',
@@ -1066,12 +1067,6 @@ describe('workers/repository/update/branch/index', () => {
             Object.assign(branch.upgrades[0], {
               newValue: '4.1.11',
               newVersion: '4.1.11',
-              newMajor: 4,
-              newMinor: 1,
-              newPatch: 11,
-              displayTo: '4.1.11',
-              updateType: 'patch',
-              isBreaking: false,
             });
             branch.updatedPackageFiles = [
               {
@@ -1171,12 +1166,6 @@ describe('workers/repository/update/branch/index', () => {
           Object.assign(branch.upgrades[0], {
             newValue: '4.1.11',
             newVersion: '4.1.11',
-            newMajor: 4,
-            newMinor: 1,
-            newPatch: 11,
-            displayTo: '4.1.11',
-            updateType: 'patch',
-            isBreaking: false,
           });
           branch.updatedPackageFiles = [
             {
@@ -1242,7 +1231,6 @@ describe('workers/repository/update/branch/index', () => {
             Object.assign(branch.upgrades[0], {
               newVersion: '4.1.11',
               newValue: '4.1.11',
-              updateType: 'patch',
             });
             return Promise.resolve({
               ...updatedPackageFiles,
@@ -1294,11 +1282,6 @@ describe('workers/repository/update/branch/index', () => {
             Object.assign(branch.upgrades[0], {
               newValue: '4.1.11',
               newVersion: '4.1.11',
-              newMajor: 4,
-              newMinor: 1,
-              newPatch: 11,
-              updateType: 'patch',
-              isBreaking: false,
             });
             branch.updatedPackageFiles = [
               {
@@ -1425,7 +1408,6 @@ describe('workers/repository/update/branch/index', () => {
               Object.assign(branch.upgrades[0], {
                 newValue: '4.1.11',
                 newVersion: '4.1.11',
-                updateType: 'patch',
               });
               return Promise.resolve({
                 artifactErrors: [],
@@ -1664,6 +1646,7 @@ describe('workers/repository/update/branch/index', () => {
               ...getConfig(),
               major: undefined,
               manager: 'npm',
+              versioning: 'npm',
               branchName: 'renovate/vitest-group',
               baseBranch: 'base-branch',
               groupName: 'Vitest packages',
