@@ -99,6 +99,29 @@ function renderRelocationNode(
   });
 }
 
+function renderGradlePluginMarkerDependencies(
+  xml: XmlWriter,
+  project: XmlDocument,
+): void {
+  const artifactId = project.valueWithPath('artifactId');
+  if (!artifactId?.endsWith('.gradle.plugin')) {
+    return;
+  }
+
+  const dependencies = coerceArray(
+    project.childNamed('dependencies')?.childrenNamed('dependency'),
+  );
+  xml.node('dependencies', () => {
+    for (const dependency of dependencies) {
+      xml.node('dependency', () => {
+        xml.value('groupId', dependency.valueWithPath('groupId'));
+        xml.value('artifactId', dependency.valueWithPath('artifactId'));
+        xml.value('version', dependency.valueWithPath('version'));
+      });
+    }
+  });
+}
+
 function trimMetadataXml(metadata: XmlDocument, input: string): string {
   const version = metadata.descendantWithPath('version')?.val;
   const latest = metadata.descendantWithPath('versioning.latest')?.val;
@@ -162,6 +185,7 @@ function trimPomXml(project: XmlDocument, input: string): string {
       xml.value('artifactId', parent?.valueWithPath('artifactId'));
       xml.value('version', parent?.valueWithPath('version'));
     });
+    renderGradlePluginMarkerDependencies(xml, project);
   });
 
   if (!xml.hasContent()) {
