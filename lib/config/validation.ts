@@ -291,6 +291,8 @@ export async function validateConfig(
   parentPath?: string,
   // the name of the option that `config` is a value of, for when it can't be derived from `parentPath` (i.e. the name of a `customDatasources` entry is the user's choice)
   parentOptionName?: string,
+  // the path to report `config` at, if the `parentPath` is different to how we want to display it (i.e. used with `force`)
+  parentDisplayPath?: string,
 ): Promise<ValidationResult> {
   return instrument(
     `validateConfig(${configType}, ${JSON.stringify(parentPath)})`,
@@ -300,8 +302,10 @@ export async function validateConfig(
       let errors: ValidationMessage[] = [];
       let warnings: ValidationMessage[] = [];
 
+      const displayPath = parentDisplayPath ?? parentPath;
+
       for (const [key, val] of Object.entries(config)) {
-        const currentPath = parentPath ? `${parentPath}.${key}` : key;
+        const currentPath = displayPath ? `${displayPath}.${key}` : key;
         /* v8 ignore next -- TODO: add test */
         if (key === '__proto__') {
           errors.push({
@@ -318,7 +322,7 @@ export async function validateConfig(
         ) {
           errors.push({
             topic: ConfigValidationTopic.Error,
-            message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
+            message: `The "${key}" object can only be configured at the top level of a config but was found inside "${displayPath}"`,
           });
         }
 
@@ -402,15 +406,15 @@ export async function validateConfig(
             const { customType } = config as Partial<CustomManager>;
             const parent =
               parentName === 'customManagers' && isString(customType)
-                ? parentPath?.replace('customManagers', `custom.${customType}`)
-                : parentPath;
+                ? displayPath?.replace('customManagers', `custom.${customType}`)
+                : displayPath;
             const usedIn =
               parentName === '.'
                 ? 'at the top level of a config'
                 : `in "${parent}"`;
             const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
             warnings.push({
-              topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
+              topic: `${displayPath ? `${displayPath}.` : ''}${key}`,
               message,
             });
           }
