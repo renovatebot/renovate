@@ -217,12 +217,21 @@ export class ContainerbaseDatasource extends Datasource {
       sourceUrl: body.sourceUrl,
       homepage: body.homepage,
       releases: versions.map(
-        ({ version, prerelease, releaseTimestamp, constraints }) => {
+        ({
+          version,
+          prerelease,
+          deprecated,
+          releaseTimestamp,
+          constraints,
+        }) => {
           const release: Release = {
             version,
             isStable: prerelease !== true,
             releaseTimestamp: asTimestamp(releaseTimestamp),
           };
+          if (deprecated) {
+            release.isDeprecated = true;
+          }
           const releaseConstraints = toConstraints(
             constraints,
             minCb.get(version),

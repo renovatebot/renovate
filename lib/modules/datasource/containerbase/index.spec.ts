@@ -56,6 +56,7 @@ describe('modules/datasource/containerbase/index', () => {
               lts: true,
               releaseTimestamp: '2026-09-23T00:00:00.000Z',
             },
+            { version: '24.20.0', deprecated: true },
             { version: '0.10.42' },
             // an invalid entry is skipped
             { invalid: true },
@@ -70,6 +71,7 @@ describe('modules/datasource/containerbase/index', () => {
         homepage: 'https://nodejs.org',
         releases: [
           { version: '0.10.42', isStable: true },
+          { version: '24.20.0', isStable: true, isDeprecated: true },
           {
             version: '24.21.0',
             isStable: true,
