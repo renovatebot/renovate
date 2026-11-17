@@ -23,7 +23,6 @@ import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
 import { isHttpUrl } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
-import { isFreshRelease } from './common.ts';
 import type { ChangeLogSource } from './source.ts';
 import type {
   ChangeLogFile,
@@ -32,11 +31,6 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
-
-/**
- * Cache time of the compare-only fallback for fresh releases.
- */
-const freshFallbackCacheMinutes = 5;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
@@ -486,18 +480,36 @@ export async function getReleaseNotesMd(
   return null;
 }
 
+function toDateTime(releaseDate?: string | Date | null): DateTime {
+  return isDate(releaseDate)
+    ? DateTime.fromJSDate(releaseDate)
+    : DateTime.fromISO(releaseDate!);
+}
+
+/**
+ * Whether the release was published less than an hour ago.
+ */
+export function isFreshRelease(releaseDate?: string | Date | null): boolean {
+  const dt = toDateTime(releaseDate);
+  return dt.isValid && DateTime.local().diff(dt, 'hours').hours < 1;
+}
+
 /**
  * Determine how long to cache release notes based on when the version was released.
  *
  * It's not uncommon for release notes to be updated shortly after the release itself,
  * so only cache for about an hour when the release is less than a week old. Otherwise,
- * cache for days.
+ * cache for days. A compare-only fallback of a fresh release is cached for 5 minutes.
  */
-export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
-  const dt = isDate(releaseDate)
-    ? DateTime.fromJSDate(releaseDate)
-    : DateTime.fromISO(releaseDate!);
+export function releaseNotesCacheMinutes(
+  releaseDate?: string | Date | null,
+  compareOnly = false,
+): number {
+  if (compareOnly && isFreshRelease(releaseDate)) {
+    return 5;
+  }
 
+  const dt = toDateTime(releaseDate);
   const now = DateTime.local();
 
   if (!dt.isValid || now.diff(dt, 'days').days < 7) {
@@ -561,16 +573,15 @@ export async function addReleaseNotes(
             );
           }
 
-          let cacheMinutes = releaseNotesCacheMinutes(v.date);
+          let compareOnly = false;
           // If there is no release notes, at least try to show the compare URL
           if (!releaseNotes && v.compare.url) {
             releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
-            if (isFreshRelease(v.date)) {
-              cacheMinutes = freshFallbackCacheMinutes;
-            }
+            compareOnly = true;
           }
 
           // only write on a miss: writing a hit back would refresh its TTL, so a cached compare-only fallback would never be retried
+          const cacheMinutes = releaseNotesCacheMinutes(v.date, compareOnly);
           await packageCache.set(
             cacheNamespace,
             cacheKey,

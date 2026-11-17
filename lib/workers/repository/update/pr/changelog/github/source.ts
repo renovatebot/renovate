@@ -6,10 +6,8 @@ import type {
   GithubGitTree,
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github/index.ts';
-import {
-  queryReleases,
-  queryTags,
-} from '../../../../../../util/github/graphql/index.ts';
+import { queryReleases } from '../../../../../../util/github/graphql/index.ts';
+import type { GithubRestRelease } from '../../../../../../util/github/types.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../../../../util/http/cache/memory-http-cache-provider.ts';
 import { GithubHttp } from '../../../../../../util/http/github.ts';
@@ -168,38 +166,11 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     return { changelogFile, changelogMd };
   }
 
-  override getReleaseList(
+  override async getReleaseList(
     project: ChangeLogProject,
     _release: ChangeLogRelease,
   ): Promise<ChangeLogNotes[]> {
     logger.trace('github.getReleaseList()');
-    return this.fetchReleaseList(project, false);
-  }
-
-  override getRefreshedReleaseList(
-    project: ChangeLogProject,
-  ): Promise<ChangeLogNotes[]> {
-    logger.trace('github.getRefreshedReleaseList()');
-    return this.fetchReleaseList(project, true);
-  }
-
-  override async getRefreshedTags(
-    endpoint: string,
-    repository: string,
-  ): Promise<string[]> {
-    logger.trace('github.getRefreshedTags()');
-    const tags = await queryTags(
-      { registryUrl: endpoint, packageName: repository },
-      this.http,
-      { refresh: true },
-    );
-    return tags.map(({ version }) => version);
-  }
-
-  private async fetchReleaseList(
-    project: ChangeLogProject,
-    refresh: boolean,
-  ): Promise<ChangeLogNotes[]> {
     const apiBaseUrl = project.apiBaseUrl;
     const repository = project.repository;
     const notesSourceUrl = joinUrlParts(
@@ -214,7 +185,6 @@ export class GitHubChangeLogSource extends ChangeLogSource {
         packageName: repository,
       },
       this.http,
-      { refresh },
     );
 
     const result = releases.map(
@@ -228,5 +198,44 @@ export class GitHubChangeLogSource extends ChangeLogSource {
       }),
     );
     return result;
+  }
+
+  override async getRefreshedReleaseList(
+    project: ChangeLogProject,
+  ): Promise<ChangeLogNotes[]> {
+    logger.trace('github.getRefreshedReleaseList()');
+    const notesSourceUrl = joinUrlParts(
+      project.apiBaseUrl,
+      'repos',
+      project.repository,
+      'releases',
+    );
+    const res = await this.http.getJsonUnchecked<GithubRestRelease[]>(
+      `${notesSourceUrl}?per_page=100`,
+      { memCache: false },
+    );
+    return res.body
+      .filter(({ draft }) => !draft)
+      .map(({ html_url: url, id: releaseId, tag_name: tag, name, body }) => ({
+        url,
+        notesSourceUrl,
+        id: releaseId,
+        tag,
+        name,
+        body,
+      }));
+  }
+
+  override async getRefreshedTags(
+    endpoint: string,
+    repository: string,
+  ): Promise<string[]> {
+    logger.trace('github.getRefreshedTags()');
+    const url = joinUrlParts(endpoint, 'repos', repository, 'tags');
+    const { body } = await this.http.getJsonUnchecked<{ name: string }[]>(
+      `${url}?per_page=100`,
+      { memCache: false },
+    );
+    return body.map(({ name }) => name);
   }
 }

@@ -11,6 +11,7 @@ import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
@@ -23,8 +24,8 @@ import {
   trimSlashes,
 } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
-import { isFreshRelease, slugifyUrl } from './common.ts';
-import { addReleaseNotes } from './release-notes.ts';
+import { slugifyUrl } from './common.ts';
+import { addReleaseNotes, isFreshRelease } from './release-notes.ts';
 import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
@@ -86,9 +87,8 @@ export abstract class ChangeLogSource {
   }
 
   /**
-   * Fetch the platform's list of releases again, including releases published
-   * after the cached list was fetched. Returns `null` when the platform does
-   * not support it.
+   * Fetch the first page of the platform's releases, bypassing all caches.
+   * Returns `null` when the platform does not support it.
    */
   getRefreshedReleaseList(
     _project: ChangeLogProject,
@@ -97,8 +97,8 @@ export abstract class ChangeLogSource {
   }
 
   /**
-   * Fetch the repository's tags again, including tags created after the cached
-   * list was fetched. Returns `null` when the platform does not support it.
+   * Fetch the first page of the repository's tag names, bypassing all caches.
+   * Returns `null` when the platform does not support it.
    */
   getRefreshedTags(
     _endpoint: string,
@@ -248,7 +248,7 @@ export abstract class ChangeLogSource {
               !this.getRef(versioningApi, packageName, depName, next, tags)
             ) {
               const refreshedTags = await getRefreshedTags();
-              tags = refreshedTags ?? tags;
+              tags = [...coerceArray(refreshedTags), ...tags];
             }
             const prevHead = this.getRef(
               versioningApi,

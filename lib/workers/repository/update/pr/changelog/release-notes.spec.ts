@@ -18,6 +18,7 @@ import {
   getReleaseList as getReleaseListRaw,
   getReleaseNotesMd as getReleaseNotesMdRaw,
   getReleaseNotes as getReleaseNotesRaw,
+  isFreshRelease,
   massageBody,
   massageName,
   releaseNotesCacheMinutes,
@@ -257,6 +258,47 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
       expect(releaseNotesCacheMinutes(date as never)).toBe(55);
     });
+
+    it.each`
+      date                          | compareOnly | minutes
+      ${now.minus({ minutes: 30 })} | ${true}     | ${5}
+      ${now.minus({ minutes: 30 })} | ${false}    | ${55}
+      ${now.minus({ hours: 2 })}    | ${true}     | ${55}
+      ${now.minus({ years: 1 })}    | ${true}     | ${14495}
+    `(
+      'returns $minutes for compareOnly=$compareOnly',
+      ({ date, compareOnly, minutes }) => {
+        expect(releaseNotesCacheMinutes(date.toISO(), compareOnly)).toBe(
+          minutes,
+        );
+      },
+    );
+  });
+
+  describe('isFreshRelease()', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ now: new Date('2026-10-19T12:00:00Z') });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it.each`
+      releaseDate                         | expected
+      ${'2026-10-19T11:30:00Z'}           | ${true}
+      ${new Date('2026-10-19T11:30:00Z')} | ${true}
+      ${'2026-10-19T11:00:00Z'}           | ${false}
+      ${'2026-10-18T11:30:00Z'}           | ${false}
+      ${'not a date'}                     | ${false}
+      ${undefined}                        | ${false}
+      ${null}                             | ${false}
+    `(
+      'isFreshRelease($releaseDate) === $expected',
+      ({ releaseDate, expected }) => {
+        expect(isFreshRelease(releaseDate)).toBe(expected);
+      },
+    );
   });
 
   describe('massageName()', () => {
@@ -530,6 +572,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     it('caches the compare url briefly for a fresh release', async () => {
       const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
       githubReleasesMock.mockResolvedValue([]);
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/react/react-native/releases?per_page=100')
+        .reply(200, []);
 
       const input = {
         project: partial<ChangeLogProject>({
@@ -549,7 +595,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       await addReleaseNotes(input, partial<BranchUpgradeConfig>());
 
-      expect(githubReleasesMock).toHaveBeenCalledTimes(2);
       expect(packageCacheSetSpy).toHaveBeenCalledExactlyOnceWith(
         'changelog-github-notes@v2',
         'react/react-native::1.0.0:',
@@ -1001,16 +1046,20 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
 
       it('refetches the release list when the release is missing', async () => {
-        githubReleasesMock.mockResolvedValueOnce([]).mockResolvedValueOnce([
-          {
-            version: '1.0.1',
-            releaseTimestamp: DateTime.now().toISO() as Timestamp,
-            id: 2,
-            url: 'https://github.com/some/other-repository/releases/1.0.1',
-            name: 'some/dep',
-            description: 'some body',
-          },
-        ]);
+        githubReleasesMock.mockResolvedValueOnce([]);
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/some/other-repository/releases?per_page=100')
+          .reply(200, [
+            {
+              id: 2,
+              tag_name: '1.0.1',
+              html_url:
+                'https://github.com/some/other-repository/releases/1.0.1',
+              name: 'some/dep',
+              body: 'some body',
+            },
+          ]);
 
         const res = await getReleaseNotes(
           {
@@ -1026,20 +1075,14 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           tag: '1.0.1',
           url: 'https://github.com/some/other-repository/releases/1.0.1',
         });
-        expect(githubReleasesMock).toHaveBeenLastCalledWith(
-          {
-            registryUrl: 'https://api.github.com/',
-            packageName: 'some/other-repository',
-          },
-          expect.anything(),
-          { refresh: true },
-        );
       });
 
       it('returns null when refetching the release list fails', async () => {
-        githubReleasesMock
-          .mockResolvedValueOnce([])
-          .mockRejectedValueOnce(new Error('unknown'));
+        githubReleasesMock.mockResolvedValueOnce([]);
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/some/other-repository/releases?per_page=100')
+          .reply(404);
 
         const res = await getReleaseNotes(
           {

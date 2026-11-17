@@ -396,17 +396,13 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
       });
 
       it('refetches tags when the tag of a fresh release is missing', async () => {
-        const githubTagsMock = vi.spyOn(githubGraphql, 'queryTags');
-        githubTagsMock
-          .mockResolvedValueOnce(
-            partial<GithubTagItem>([{ version: 'v1.0.0' }]),
-          )
-          .mockResolvedValueOnce(
-            partial<GithubTagItem>([
-              { version: 'v1.0.1' },
-              { version: 'v1.0.0' },
-            ]),
-          );
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue(
+          partial<GithubTagItem>([{ version: 'v1.0.0' }]),
+        );
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/tags?per_page=100')
+          .reply(200, [{ name: 'v1.0.1' }]);
         const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
 
         const res = await getChangeLogJSON({ ...freshUpgrade });
@@ -419,14 +415,6 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
             },
           },
         ]);
-        expect(githubTagsMock).toHaveBeenLastCalledWith(
-          {
-            registryUrl: 'https://api.github.com/',
-            packageName: 'chalk/chalk',
-          },
-          expect.anything(),
-          { refresh: true },
-        );
         expect(packageCacheSetSpy).toHaveBeenCalledWith(
           'changelog-github-release',
           expect.any(String),
@@ -439,15 +427,16 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
         const freshTimestamp = DateTime.now()
           .minus({ minutes: 5 })
           .toISO() as Timestamp;
-        const githubTagsMock = vi
-          .spyOn(githubGraphql, 'queryTags')
-          .mockResolvedValueOnce(
-            partial<GithubTagItem>([
-              { version: 'v1.0.1' },
-              { version: 'v1.0.0' },
-            ]),
-          )
-          .mockRejectedValueOnce(new Error('unknown'));
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue(
+          partial<GithubTagItem>([
+            { version: 'v1.0.1' },
+            { version: 'v1.0.0' },
+          ]),
+        );
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/tags?per_page=100')
+          .reply(404);
 
         const res = await getChangeLogJSON({
           ...freshUpgrade,
@@ -470,11 +459,14 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
             },
           },
         ]);
-        expect(githubTagsMock).toHaveBeenCalledTimes(2);
       });
 
       it('does not cache a fresh release without compare URL', async () => {
         vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue([]);
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/tags?per_page=100')
+          .reply(200, []);
         const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
 
         const res = await getChangeLogJSON({ ...freshUpgrade });
@@ -497,18 +489,25 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
             { version: 'v1.0.0' },
           ]),
         );
-        const githubReleasesMock = vi
-          .spyOn(githubGraphql, 'queryReleases')
-          .mockResolvedValueOnce([])
-          .mockResolvedValueOnce([])
-          .mockResolvedValueOnce([
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/releases?per_page=100')
+          .reply(200, [
             {
-              version: 'v1.0.1',
-              releaseTimestamp: DateTime.now().toISO() as Timestamp,
-              url: 'https://github.com/chalk/chalk/releases/tag/v1.0.1',
+              id: 2,
+              tag_name: 'v1.0.1',
+              draft: true,
+              html_url: 'https://github.com/chalk/chalk/releases/tag/draft',
+              name: 'draft',
+              body: 'draft notes',
+            },
+            {
               id: 1,
+              tag_name: 'v1.0.1',
+              draft: false,
+              html_url: 'https://github.com/chalk/chalk/releases/tag/v1.0.1',
               name: 'v1.0.1',
-              description: 'some notes',
+              body: 'some notes',
             },
           ]);
 
@@ -519,18 +518,14 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
             version: '1.0.1',
             releaseNotes: {
               url: 'https://github.com/chalk/chalk/releases/tag/v1.0.1',
+              notesSourceUrl:
+                'https://api.github.com/repos/chalk/chalk/releases',
+              id: 1,
+              tag: 'v1.0.1',
               body: 'some notes\n',
             },
           },
         ]);
-        expect(githubReleasesMock).toHaveBeenLastCalledWith(
-          {
-            registryUrl: 'https://api.github.com/',
-            packageName: 'chalk/chalk',
-          },
-          expect.anything(),
-          { refresh: true },
-        );
       });
     });
   });

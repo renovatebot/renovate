@@ -21,7 +21,6 @@ import type {
   GithubGraphqlCacheStrategy,
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlPayload,
-  GithubGraphqlQueryOptions,
   GithubGraphqlRepoParams,
   GithubGraphqlRepoResponse,
   GithubPackageConfig,
@@ -39,11 +38,6 @@ import type {
 const pageSizes = [100, 50, 25, 10, 5] as const;
 
 type PageSize = (typeof pageSizes)[number];
-
-/**
- * Minimum time between two refresh fetches of the same package.
- */
-const refreshIntervalMinutes = 5;
 
 /**
  * We know empirically that certain type of GraphQL errors
@@ -71,13 +65,11 @@ export class GithubGraphqlDatasourceFetcher<
     config: GithubPackageConfig,
     http: GithubHttp,
     adapter: GithubGraphqlDatasourceAdapter<T, U>,
-    options: GithubGraphqlQueryOptions = {},
   ): Promise<U[]> {
     const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
       adapter,
-      options,
     );
     const items = await instance.getItems();
     return items;
@@ -99,17 +91,14 @@ export class GithubGraphqlDatasourceFetcher<
     GraphqlItem,
     ResultItem
   >;
-  private readonly refresh: boolean;
 
   constructor(
     packageConfig: GithubPackageConfig,
     http: GithubHttp,
     datasourceAdapter: GithubGraphqlDatasourceAdapter<GraphqlItem, ResultItem>,
-    options: GithubGraphqlQueryOptions = {},
   ) {
     this.http = http;
     this.datasourceAdapter = datasourceAdapter;
-    this.refresh = options.refresh === true;
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
     this.baseUrl = getApiBaseUrl(registryUrl).replace(regEx(/\/v3\/$/), '/'); // Replace for GHE
@@ -266,25 +255,6 @@ export class GithubGraphqlDatasourceFetcher<
     return this._cacheStrategy;
   }
 
-  private transformNodes(nodes: GraphqlItem[]): ResultItem[] {
-    const resultItems: ResultItem[] = [];
-    for (const node of nodes) {
-      const item = this.datasourceAdapter.transform(node);
-      if (!item) {
-        logger.once.info(
-          {
-            packageName: `${this.repoOwner}/${this.repoName}`,
-            baseUrl: this.baseUrl,
-          },
-          `GitHub GraphQL datasource: skipping empty item`,
-        );
-        continue;
-      }
-      resultItems.push(item);
-    }
-    return resultItems;
-  }
-
   /**
    * This method is responsible for data synchronization.
    * It also detects persistence of the package, based on the first page result.
@@ -301,7 +271,21 @@ export class GithubGraphqlDatasourceFetcher<
       }
       const queryResult = await this.doShrinkableQuery();
 
-      const resultItems = this.transformNodes(queryResult.nodes);
+      const resultItems: ResultItem[] = [];
+      for (const node of queryResult.nodes) {
+        const item = this.datasourceAdapter.transform(node);
+        if (!item) {
+          logger.once.info(
+            {
+              packageName: `${this.repoOwner}/${this.repoName}`,
+              baseUrl: this.baseUrl,
+            },
+            `GitHub GraphQL datasource: skipping empty item`,
+          );
+          continue;
+        }
+        resultItems.push(item);
+      }
       itemCount += resultItems.length;
 
       // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
@@ -339,35 +323,6 @@ export class GithubGraphqlDatasourceFetcher<
     return this.cacheStrategy().finalizeAndReturn();
   }
 
-  /**
-   * Fetches the first page of items and merges it into the cached items while
-   * the persistence flag is set and cached items exist, at most once per
-   * `refreshIntervalMinutes`. Otherwise returns the result of the regular query.
-   */
-  private async doRefreshQuery(): Promise<ResultItem[]> {
-    await this.loadPersistenceFlag();
-    if (!this.isPersistent) {
-      return this.doUniqueQuery(false);
-    }
-
-    const ns = this.getCacheNs();
-    const key = buildCacheKey(this.getCacheKey(), 'is-refreshed');
-    const isRefreshed = await packageCache.get<true>(ns, key);
-    if (isRefreshed) {
-      return this.doUniqueQuery(false);
-    }
-
-    const hasItems = await this.cacheStrategy().hasItems();
-    if (!hasItems) {
-      return this.doUniqueQuery(false);
-    }
-    await packageCache.set(ns, key, true, refreshIntervalMinutes);
-
-    const queryResult = await this.doShrinkableQuery();
-    await this.cacheStrategy().merge(this.transformNodes(queryResult.nodes));
-    return this.cacheStrategy().finalizeAndReturn();
-  }
-
   async loadPersistenceFlag(): Promise<void> {
     const ns = this.getCacheNs();
     const key = buildCacheKey(this.getCacheKey(), 'is-persistent');
@@ -382,29 +337,22 @@ export class GithubGraphqlDatasourceFetcher<
 
   /**
    * This method ensures the only one query is executed
-   * to a particular package during single run,
-   * separately for regular and refresh queries.
+   * to a particular package during single run.
    */
-  private doUniqueQuery(refresh: boolean): Promise<ResultItem[]> {
+  private doUniqueQuery(): Promise<ResultItem[]> {
     const cacheKey = buildCacheKey(
-      refresh ? 'github-pending-refresh' : 'github-pending',
+      'github-pending',
       this.getCacheNs(),
       this.getCacheKey(),
     );
     let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
-    if (resultPromise === undefined) {
-      if (refresh) {
-        resultPromise = this.doRefreshQuery();
-      } else {
-        resultPromise = this.doCachedQuery();
-      }
-    }
+    resultPromise ??= this.doCachedQuery();
     memCache.set(cacheKey, resultPromise);
     return resultPromise;
   }
 
   async getItems(): Promise<ResultItem[]> {
-    const res = await this.doUniqueQuery(this.refresh);
+    const res = await this.doUniqueQuery();
     return res;
   }
 }
