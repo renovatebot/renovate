@@ -408,6 +408,10 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
+  const packageFileContents = {
+    ...nonUpdatedFileContents,
+    ...updatedFileContents,
+  };
   const updatedPackageFiles: FileAddition[] = Object.keys(
     updatedFileContents,
   ).map((name) => ({
@@ -445,6 +449,7 @@ export async function getUpdatedPackageFiles(
             config,
             manager,
             packageFile.path,
+            packageFileContents,
           ),
         });
         if (manager === 'mise') {
@@ -517,6 +522,7 @@ export async function getUpdatedPackageFiles(
             config,
             manager,
             packageFile.path,
+            packageFileContents,
           ),
         });
         processUpdateArtifactResults(
@@ -571,6 +577,7 @@ export async function getUpdatedPackageFiles(
               config,
               manager,
               packageFile.path,
+              packageFileContents,
             ),
           });
           processUpdateArtifactResults(
@@ -597,9 +604,10 @@ function patchConfigForArtifactsUpdate(
   config: BranchConfig,
   manager: string,
   packageFileName: string,
+  packageFileContents: Record<string, string>,
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
-  const updatedConfig = { ...config };
+  const updatedConfig = { ...config, packageFileContents };
   delete updatedConfig.lockFiles;
   if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
@@ -660,7 +668,14 @@ function processUpdateArtifactResults(
       }
 
       if (notice) {
-        artifactNotices.push(notice);
+        const alreadyReported = artifactNotices.some(
+          (existing) =>
+            existing.file === notice.file &&
+            existing.message === notice.message,
+        );
+        if (!alreadyReported) {
+          artifactNotices.push(notice);
+        }
       }
     }
   }

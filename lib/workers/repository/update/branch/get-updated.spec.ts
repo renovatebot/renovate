@@ -215,7 +215,9 @@ describe('workers/repository/update/branch/get-updated', () => {
         manager: 'git-submodules',
         branchName: 'some-branch',
       });
-      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+      });
 
       const res = await getUpdatedPackageFiles(config);
 
@@ -277,6 +279,67 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       expect(res.updatedPackageFiles).toEqual([]);
       expect(npm.updateArtifacts).not.toHaveBeenCalled();
+    });
+
+    it('passes merged lookup contents to updated and unchanged artifact calls', async () => {
+      config.upgrades = [
+        {
+          manager: 'npm',
+          packageFile: 'package.json',
+          branchName: 'some-branch',
+        },
+        {
+          manager: 'npm',
+          packageFile: 'packages/test/package.json',
+          branchName: 'some-branch',
+          isLockfileUpdate: true,
+        },
+      ];
+      git.getFile.mockResolvedValue('existing content');
+      npm.updateDependency.mockReturnValue('updated root');
+      npm.updateLockedDependency.mockResolvedValue({ status: 'unsupported' });
+      npm.updateArtifacts.mockResolvedValue(null);
+
+      await getUpdatedPackageFiles(config);
+
+      expect(npm.updateArtifacts).toHaveBeenCalledTimes(2);
+      for (const [call] of npm.updateArtifacts.mock.calls) {
+        expect(call.config).toMatchObject({
+          packageFileContents: {
+            'package.json': 'updated root',
+            'packages/test/package.json': 'existing content',
+          },
+        });
+      }
+    });
+
+    it('collects each compatibility notice once across artifact calls', async () => {
+      config.upgrades = ['package.json', 'packages/test/package.json'].map(
+        (packageFile) => ({
+          manager: 'npm',
+          packageFile,
+          branchName: 'some-branch',
+        }),
+      );
+      git.getFile.mockResolvedValue('existing content');
+      npm.updateDependency.mockReturnValue('updated content');
+      const notice = {
+        file: 'package.json',
+        message: 'Vite+ aligned coverage to 4.1.11 for compatibility.',
+      };
+      const otherFile = { ...notice, file: 'packages/test/package.json' };
+      const otherMessage = { ...notice, message: 'Another alignment' };
+      npm.updateArtifacts
+        .mockResolvedValueOnce([{ notice }])
+        .mockResolvedValueOnce([
+          { notice },
+          { notice: otherFile },
+          { notice: otherMessage },
+        ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.artifactNotices).toEqual([notice, otherFile, otherMessage]);
     });
 
     it('handles lock files', async () => {
@@ -781,6 +844,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         }),
       );
       expect(git.getFile).toHaveBeenCalledTimes(1);
+      for (const [call] of npm.updateArtifacts.mock.calls) {
+        expect(call.config).toMatchObject({
+          packageFileContents: { 'package.json': 'updated content' },
+        });
+      }
     });
 
     it('for lockFileMaintenance passes proper lockFiles', async () => {

@@ -1,21 +1,23 @@
 import { inspect } from 'node:util';
 import { type DirectoryResult, dir } from 'tmp-promise';
-import { logger, partial } from '~test/util.ts';
+import { fakeSha, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memory from '../../../util/cache/memory/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { exec } from '../../../util/exec/index.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
-import { getFile } from '../../../util/git/index.ts';
+import { getBranchCommit, getFile } from '../../../util/git/index.ts';
 import type {
   PackageFile,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 import type { AdditionalPackageFiles } from './post-update/types.ts';
 import type { NpmManagerData } from './types.ts';
 import { reconcileVitePlusVersions } from './vite-plus.ts';
@@ -93,6 +95,7 @@ function config(
 ): TestConfig {
   return {
     packageFileName: 'package.json',
+    baseBranch: 'main',
     newPackageFileContent: updatedContents,
     postUpdateOptions: ['vitePlusSyncVersions'],
     upgrades: [
@@ -176,10 +179,13 @@ function validPlan(
 describe('modules/manager/npm/vite-plus', () => {
   let localDir: DirectoryResult;
   beforeEach(async () => {
+    memory.init();
+    vi.mocked(getBranchCommit).mockReturnValue(fakeSha('base'));
     localDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ binarySource: 'docker', localDir: localDir.path });
   });
   afterEach(async () => {
+    memory.reset();
     await localDir.cleanup();
   });
 
@@ -264,7 +270,7 @@ describe('modules/manager/npm/vite-plus', () => {
   });
 
   it.each([false, true])(
-    'converges across workspace calls with an already aligned second input=%s',
+    'runs the planner once per workspace pass with an already aligned second input=%s',
     async (alreadyAligned) => {
       const leafPath = 'packages/test/package.json';
       const rootInput = packageJson('0.3.1', '4.0.0');
@@ -281,7 +287,13 @@ describe('modules/manager/npm/vite-plus', () => {
       const leafAligned = JSON.stringify({
         devDependencies: { vitest: '4.1.11', react: '19.0.0' },
       });
-      const updateConfig = config(rootInput);
+      const updateConfig = {
+        ...config(rootInput),
+        packageFileContents: {
+          'package.json': rootInput,
+          [leafPath]: leafInput,
+        },
+      };
       const leafUpgrade = {
         ...config('', 'vitest', '5.0.0').upgrades[0],
         packageFile: leafPath,
@@ -326,7 +338,7 @@ describe('modules/manager/npm/vite-plus', () => {
         rootAligned,
       );
       await expect(readLocalFile(leafPath, 'utf8')).resolves.toBe(
-        leafBase.replace('4.0.0', '4.1.11'),
+        alreadyAligned ? leafBase : leafAligned,
       );
       const second = await reconcile(
         {
@@ -337,12 +349,12 @@ describe('modules/manager/npm/vite-plus', () => {
         files,
       );
 
-      expect(execMock).toHaveBeenCalledTimes(2);
+      expect(execMock).toHaveBeenCalledTimes(1);
       const secondRequest = JSON.parse(
-        execMock.mock.calls[1][1]!.input as string,
+        execMock.mock.calls[0][1]!.input as string,
       );
       expect(secondRequest.manifests).toEqual([
-        { path: 'package.json', kind: 'packageJson', contents: rootAligned },
+        { path: 'package.json', kind: 'packageJson', contents: rootInput },
         { path: leafPath, kind: 'packageJson', contents: leafInput },
       ]);
       const finalFiles = new Map(
@@ -360,7 +372,108 @@ describe('modules/manager/npm/vite-plus', () => {
       expect(updateConfig.upgrades).toBe(upgrades);
       expect(updateConfig.upgrades[1]).toBe(leafUpgrade);
       expect(leafUpgrade.newVersion).toBe('4.1.11');
-      expect(getFileMock).not.toHaveBeenCalled();
+      expect(getFileMock).toHaveBeenCalledExactlyOnceWith(
+        'pnpm-workspace.yaml',
+        'main',
+        { throwOnError: true },
+      );
+    },
+  );
+
+  it.each([true, false])(
+    'preserves Corepack handler output across workspace calls, rootFirst=%s',
+    async (rootFirst) => {
+      const leafPath = 'packages/test/package.json';
+      const root = JSON.stringify({
+        packageManager: 'pnpm@11.0.0',
+        devDependencies: {
+          'vite-plus': '0.3.1',
+          '@vitest/coverage-v8': '4.0.0',
+        },
+      });
+      const leaf = JSON.stringify({ devDependencies: { vitest: '5.0.0' } });
+      const files = packageFiles();
+      files.npm!.push({
+        packageFile: leafPath,
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+        deps: [],
+      });
+      const digest = 'abcdef0123456789'.repeat(8);
+      const corepackUpgrade = {
+        depName: 'pnpm',
+        depType: 'packageManager',
+        currentValue: `10.0.0+sha512.${digest}`,
+        newVersion: '11.0.0',
+        newDigest: `sha512-${Buffer.from(digest, 'hex').toString('base64')}`,
+      };
+      const leafUpgrade = {
+        ...config(leaf, 'vitest', '5.0.0').upgrades[0],
+        packageFile: leafPath,
+      };
+      const updateConfig = {
+        ...config(root),
+        packageFiles: { npm: partial<PackageFile>(coerceArray(files.npm)) },
+        packageFileContents: { 'package.json': root, [leafPath]: leaf },
+      };
+      updateConfig.upgrades.push(leafUpgrade);
+      await mockFiles({ 'package.json': root, [leafPath]: leaf });
+      mockPlan((request) => ({
+        schemaVersion: 1,
+        tool: { name: 'vite-plus', version: '0.3.1' },
+        workspace: '.',
+        replacements: request.manifests.flatMap(
+          (manifest: { path: string; kind: string; contents: string }) => {
+            const after = manifest.contents
+              .replaceAll('4.0.0', '4.1.11')
+              .replaceAll('5.0.0', '4.1.11');
+            return after === manifest.contents
+              ? []
+              : [
+                  {
+                    path: manifest.path,
+                    kind: manifest.kind,
+                    before: manifest.contents,
+                    after,
+                  },
+                ];
+          },
+        ),
+      }));
+      const rootCall = {
+        packageFileName: 'package.json',
+        newPackageFileContent: root,
+        updatedDeps: [updateConfig.upgrades[0], corepackUpgrade],
+        config: updateConfig,
+      };
+      const leafCall = {
+        packageFileName: leafPath,
+        newPackageFileContent: leaf,
+        updatedDeps: [leafUpgrade],
+        config: updateConfig,
+      };
+      const calls = rootFirst ? [rootCall, leafCall] : [leafCall, rootCall];
+      const results: UpdateArtifactsResult[] = [];
+
+      for (const call of calls) {
+        results.push(...coerceArray(await updateArtifacts(call)));
+      }
+
+      const finalFiles = new Map(
+        results.flatMap(({ file }) =>
+          file?.type === 'addition' ? [[file.path, file.contents]] : [],
+        ),
+      );
+      expect(JSON.parse(finalFiles.get('package.json')!.toString())).toEqual({
+        packageManager: `pnpm@11.0.0+sha512.${digest}`,
+        devDependencies: {
+          'vite-plus': '0.3.1',
+          '@vitest/coverage-v8': '4.1.11',
+        },
+      });
+      expect(JSON.parse(finalFiles.get(leafPath)!.toString())).toEqual({
+        devDependencies: { vitest: '4.1.11' },
+      });
+      expect(execMock).toHaveBeenCalledTimes(rootFirst ? 1 : 2);
     },
   );
 
@@ -493,7 +606,173 @@ describe('modules/manager/npm/vite-plus', () => {
     expect(getFileMock).toHaveBeenCalledWith(leafPath, 'renovate/vite-plus', {
       throwOnError: true,
     });
-    await expect(readLocalFile('pnpm-workspace.yaml')).resolves.toBeNull();
+    await expect(readLocalFile('pnpm-workspace.yaml', 'utf8')).resolves.toBe(
+      'packages:\n  - packages/*\n',
+    );
+  });
+
+  it('reuses a reconciled workspace plan and reads each fallback manifest once', async () => {
+    const leafPath = 'packages/test/package.json';
+    const untouchedPath = 'packages/untouched/package.json';
+    const root = packageJson('0.3.1', '4.1.11');
+    const leaf = JSON.stringify({ devDependencies: { vitest: '4.1.11' } });
+    const files = packageFiles();
+    for (const packageFile of [leafPath, untouchedPath]) {
+      files.npm!.push({
+        packageFile,
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+        deps: [],
+      });
+    }
+    await mockFiles({
+      'package.json': root,
+      [leafPath]: leaf,
+      [untouchedPath]: '{}',
+    });
+    mockPlan(() => ({
+      schemaVersion: 1,
+      tool: { name: 'vite-plus', version: '0.3.1' },
+      workspace: '.',
+      replacements: [],
+    }));
+    const updateConfig = {
+      ...config(root),
+      branchName: 'renovate/vite-plus',
+      reuseExistingBranch: true,
+      packageFileContents: { 'package.json': root, [leafPath]: leaf },
+    };
+
+    const first = await reconcile(updateConfig, files);
+    const second = await reconcile(
+      {
+        ...updateConfig,
+        packageFileName: leafPath,
+        newPackageFileContent: leaf,
+      },
+      files,
+    );
+
+    expect(first).toEqual([]);
+    expect(second).toEqual([]);
+    expect(execMock).toHaveBeenCalledOnce();
+    expect(getFileMock.mock.calls).toEqual([
+      [untouchedPath, 'renovate/vite-plus', { throwOnError: true }],
+      ['pnpm-workspace.yaml', 'renovate/vite-plus', { throwOnError: true }],
+    ]);
+  });
+
+  it.each([undefined, 'unknown-branch'])(
+    'does not cache git reads without a commit for %s',
+    async (baseBranch) => {
+      const root = packageJson('0.3.1', '4.1.11');
+      await mockFiles({ 'package.json': root });
+      vi.mocked(getBranchCommit).mockReturnValue(null);
+      mockPlan(() => ({
+        schemaVersion: 1,
+        tool: { name: 'vite-plus', version: '0.3.1' },
+        workspace: '.',
+        replacements: [],
+      }));
+      const updateConfig = { ...config(root), baseBranch };
+
+      await reconcile(updateConfig, packageFiles());
+      await reconcile(updateConfig, packageFiles());
+
+      expect(getFileMock).toHaveBeenCalledTimes(2);
+      expect(getFileMock).toHaveBeenLastCalledWith(
+        'pnpm-workspace.yaml',
+        baseBranch,
+        { throwOnError: true },
+      );
+    },
+  );
+
+  it('invalidates git reads when the commit changes and plans when the input changes', async () => {
+    const root = packageJson('0.3.1', '4.1.11');
+    const leafPath = 'packages/test/package.json';
+    const files = packageFiles();
+    files.npm!.push({
+      packageFile: leafPath,
+      managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+      deps: [],
+    });
+    await mockFiles({ 'package.json': root, [leafPath]: '{}' });
+    mockPlan(() => ({
+      schemaVersion: 1,
+      tool: { name: 'vite-plus', version: '0.3.1' },
+      workspace: '.',
+      replacements: [],
+    }));
+    const updateConfig = config(root);
+
+    await reconcile(updateConfig, files);
+    await reconcile(updateConfig, files);
+    vi.mocked(getBranchCommit).mockReturnValue(fakeSha('changed'));
+    getFileMock.mockImplementation((path) =>
+      Promise.resolve(path === leafPath ? '{"name":"changed"}' : null),
+    );
+    await reconcile(updateConfig, files);
+
+    expect(execMock).toHaveBeenCalledTimes(2);
+    expect(getFileMock).toHaveBeenCalledTimes(4);
+    expect(
+      JSON.parse(execMock.mock.calls[1][1]!.input as string).manifests,
+    ).toContainEqual({
+      path: leafPath,
+      kind: 'packageJson',
+      contents: '{"name":"changed"}',
+    });
+  });
+
+  it('does not reuse a plan from another Vite+ version', async () => {
+    const root = packageJson('0.3.1', '4.1.11');
+    await mockFiles({ 'package.json': root });
+    let toolVersion = '0.3.1';
+    mockPlan(() => ({
+      schemaVersion: 1,
+      tool: { name: 'vite-plus', version: toolVersion },
+      workspace: '.',
+      replacements: [],
+    }));
+    const updateConfig = config(root);
+
+    await reconcile(updateConfig, packageFiles());
+    toolVersion = '0.3.2';
+    updateConfig.upgrades[0].newVersion = toolVersion;
+    await reconcile(updateConfig, packageFiles());
+
+    expect(execMock).toHaveBeenCalledTimes(2);
+    expect(execMock.mock.calls[1][1]!.toolConstraints).toContainEqual({
+      toolName: 'vp',
+      constraint: toolVersion,
+    });
+  });
+
+  it('does not cache a failed planner result', async () => {
+    const root = packageJson('0.3.1', '4.1.11');
+    await mockFiles({ 'package.json': root });
+    mockPlan(() => ({
+      schemaVersion: 1,
+      tool: { name: 'vite-plus', version: '0.3.1' },
+      workspace: '.',
+      replacements: [],
+    }));
+    execMock.mockRejectedValueOnce(new Error('planner unavailable'));
+    const updateConfig = { ...config(root), reuseExistingBranch: true };
+
+    const first = await reconcile(updateConfig, packageFiles());
+    const second = await reconcile(updateConfig, packageFiles());
+
+    expect(first).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: 'Vite+ planner execution failed',
+        },
+      },
+    ]);
+    expect(second).toEqual([]);
+    expect(execMock).toHaveBeenCalledTimes(2);
   });
 
   it('reports a failed branch manifest read on a reused branch', async () => {
@@ -1737,18 +2016,24 @@ describe('modules/manager/npm/vite-plus', () => {
       return validPlan(request, aligned);
     });
 
-    const result = await reconcile(config(proposed), files, [
-      { file: { type: 'addition', path: 'package.json', contents: proposed } },
-      {
-        file: {
-          type: 'addition',
-          path: 'package.json',
-          contents: Buffer.from(latest),
+    const result = await reconcile(
+      { ...config(proposed), packageFileContents: { 'package.json': '{}' } },
+      files,
+      [
+        {
+          file: { type: 'addition', path: 'package.json', contents: proposed },
         },
-      },
-      { file: { type: 'addition', path: 'missing.json', contents: null } },
-      { notice: { file: 'package.json', message: 'Handler notice' } },
-    ]);
+        {
+          file: {
+            type: 'addition',
+            path: 'package.json',
+            contents: Buffer.from(latest),
+          },
+        },
+        { file: { type: 'addition', path: 'missing.json', contents: null } },
+        { notice: { file: 'package.json', message: 'Handler notice' } },
+      ],
+    );
 
     expect(result[0]).toEqual({
       file: { type: 'addition', path: 'package.json', contents: aligned },

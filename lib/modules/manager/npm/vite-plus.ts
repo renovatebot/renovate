@@ -7,18 +7,16 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memory from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { parseJsonc } from '../../../util/common.ts';
 import { isDynamicInstall } from '../../../util/exec/containerbase.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ToolConstraint } from '../../../util/exec/types.ts';
-import {
-  deleteLocalFile,
-  readLocalFile,
-  withSystemTempDir,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
-import { getFile } from '../../../util/git/index.ts';
+import { withSystemTempDir, writeLocalFile } from '../../../util/fs/index.ts';
+import { getBranchCommit, getFile } from '../../../util/git/index.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
+import { hash } from '../../../util/hash.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -28,6 +26,7 @@ import type {
   PackageDependency,
   PackageFile,
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
@@ -271,13 +270,42 @@ function resolveVitePlusVersion(
   return [...versions][0];
 }
 
+async function readGitManifest(
+  path: string,
+  config: UpdateArtifactsConfig,
+): Promise<string | null> {
+  const ref = config.reuseExistingBranch
+    ? config.branchName
+    : config.baseBranch;
+  const commitSha = ref ? getBranchCommit(ref) : null;
+  const cacheKey = commitSha
+    ? buildCacheKey('vite-plus', 'manifest', commitSha, path)
+    : undefined;
+  let contents = cacheKey
+    ? memory.get<string | null | undefined>(cacheKey)
+    : undefined;
+  if (contents === undefined) {
+    contents = await getFile(path, ref, { throwOnError: true });
+    if (cacheKey) {
+      memory.set(cacheKey, contents);
+    }
+  }
+  return contents;
+}
+
 async function readManifestSnapshot(
   path: string,
   { kind, extracted }: WorkspaceManifest,
+  latestFiles: ReadonlyMap<string, string | Buffer>,
+  config: UpdateArtifactsConfig,
 ): Promise<ManifestSnapshot | undefined> {
-  const contents = await readLocalFile(path, 'utf8');
+  let contents: string | null | undefined =
+    latestFiles.get(path)?.toString() ?? config.packageFileContents?.[path];
   if (isNullOrUndefined(contents)) {
-    // Extracted manifests exist on disk, so a missing one means the read failed.
+    contents = await readGitManifest(path, config);
+  }
+  if (isNullOrUndefined(contents)) {
+    // Missing extracted manifests indicate a failed read.
     if (extracted) {
       throw new Error(`Cannot read Vite+ manifest ${path}`);
     }
@@ -330,6 +358,8 @@ function getWorkspaceManifests(
 
 async function collectManifestSnapshots(
   workspace: WorkspacePackageFiles,
+  latestFiles: ReadonlyMap<string, string | Buffer>,
+  config: UpdateArtifactsConfig,
 ): Promise<ManifestSnapshot[]> {
   const manifests = getWorkspaceManifests(workspace);
 
@@ -337,7 +367,9 @@ async function collectManifestSnapshots(
     await Promise.all(
       [...manifests.entries()]
         .sort(([left], [right]) => left.localeCompare(right))
-        .map(([path, manifest]) => readManifestSnapshot(path, manifest)),
+        .map(([path, manifest]) =>
+          readManifestSnapshot(path, manifest, latestFiles, config),
+        ),
     )
   ).filter((snapshot): snapshot is ManifestSnapshot => snapshot !== undefined);
 
@@ -817,31 +849,46 @@ async function runPlanner(
     );
   }
 
-  return withSystemTempDir('renovate-vp-', async (workingDirectory) => {
-    const result = await exec(
-      [{ command: ['vp', 'sync-versions', '--json'] }],
-      {
-        cwd: workingDirectory,
-        docker: {},
-        input: request,
-        maxBuffer: MAX_PLAN_BYTES,
-        redactOutput: true,
-        toolConstraints: plannerToolConstraints(vitePlusVersion),
-      },
-    ).catch((error: unknown) => {
-      const isTemporaryError =
-        error instanceof Error && error.message === TEMPORARY_ERROR;
-      if (error instanceof ExternalHostError || isTemporaryError) {
-        throw error;
-      }
-      logger.debug(
-        { workspace: workspace.root, vitePlusVersion },
-        'Vite+ planner execution failed',
-      );
-      throw new Error('Vite+ planner execution failed');
-    });
-    return parseAndValidatePlan(result.stdout, snapshots, vitePlusVersion);
-  });
+  const cacheKey = buildCacheKey(
+    'vite-plus',
+    'plan',
+    hash(JSON.stringify({ vitePlusVersion, request })),
+  );
+  const cachedPlan = memory.get<ValidatedPlan | undefined>(cacheKey);
+  if (cachedPlan) {
+    return cachedPlan;
+  }
+
+  const plan = await withSystemTempDir(
+    'renovate-vp-',
+    async (workingDirectory) => {
+      const result = await exec(
+        [{ command: ['vp', 'sync-versions', '--json'] }],
+        {
+          cwd: workingDirectory,
+          docker: {},
+          input: request,
+          maxBuffer: MAX_PLAN_BYTES,
+          redactOutput: true,
+          toolConstraints: plannerToolConstraints(vitePlusVersion),
+        },
+      ).catch((error: unknown) => {
+        const isTemporaryError =
+          error instanceof Error && error.message === TEMPORARY_ERROR;
+        if (error instanceof ExternalHostError || isTemporaryError) {
+          throw error;
+        }
+        logger.debug(
+          { workspace: workspace.root, vitePlusVersion },
+          'Vite+ planner execution failed',
+        );
+        throw new Error('Vite+ planner execution failed');
+      });
+      return parseAndValidatePlan(result.stdout, snapshots, vitePlusVersion);
+    },
+  );
+  memory.set(cacheKey, plan);
+  return plan;
 }
 
 function latestPackageFile(
@@ -932,25 +979,20 @@ async function reconcileWorkspace(
   for (const { file } of artifacts) {
     if (file?.type === 'addition' && !isNullOrUndefined(file.contents)) {
       latestFiles.set(file.path, file.contents);
-    }
-  }
-  if (config.reuseExistingBranch) {
-    // Start every call from the branch's manifests so the calls agree and unchanged files are not returned.
-    for (const path of getWorkspaceManifests(workspace).keys()) {
-      const contents = await getFile(path, config.branchName, {
-        throwOnError: true,
-      });
-      if (isNullOrUndefined(contents)) {
-        await deleteLocalFile(path);
-      } else {
-        await writeLocalFile(path, contents);
+      if (config.packageFileContents) {
+        // Share preceding handler changes across calls, but never planner replacements.
+        config.packageFileContents[file.path] = file.contents.toString();
       }
     }
   }
   for (const [path, contents] of latestFiles) {
     await writeLocalFile(path, contents);
   }
-  const snapshots = await collectManifestSnapshots(workspace);
+  const snapshots = await collectManifestSnapshots(
+    workspace,
+    latestFiles,
+    config,
+  );
   if (snapshots.length === 0) {
     throw new Error(`No Vite+ manifests found in workspace ${workspace.root}`);
   }

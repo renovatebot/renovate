@@ -110,6 +110,8 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   minimumReleaseAgePackageManagerSync?: boolean;
   /** Extracted package files of the repository, grouped by manager. */
   packageFiles?: Record<string, PackageFile[]>;
+  packageFileContents?: Record<string, string>;
+  baseBranch?: string;
   branchName?: string;
   /** True when the update starts from the existing branch rather than the base branch. */
   reuseExistingBranch?: boolean;
