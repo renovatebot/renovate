@@ -9,8 +9,9 @@ import type {
 import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
-import type { DigestConfig, Release } from '../types.ts';
+import type { DigestConfig } from '../types.ts';
 
 function inferHashAlg(digest: string): string {
   switch (digest.length) {
@@ -22,19 +23,12 @@ function inferHashAlg(digest: string): string {
   }
 }
 
-/** Strips any non-numeric prefix, such as `v`, `v.` or `release-`, from a tag. */
-function tagToVersion(tag: string): string {
-  return tag.replace(regEx(/^\D+(?<digit>\d)/), '$<digit>');
-}
-
-/** Finds the tag of the release matching a tag or an extracted version. */
-function findTag(releases: Release[], value: string): string {
-  if (releases.some((r) => r.version === value)) {
-    return value;
-  }
-  // The first tag with that version wins, so repositories with several tag prefixes sharing versions may resolve the wrong one
-  const release = releases.find((r) => tagToVersion(r.version) === value);
-  return release?.version ?? value;
+/** Returns the SHA-256 that GitHub recorded for the asset, if any. */
+function getRecordedSha256(asset: GithubRestAsset): string | undefined {
+  const prefix = 'sha256:';
+  return asset.digest?.startsWith(prefix)
+    ? asset.digest.slice(prefix.length)
+    : undefined;
 }
 
 export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
@@ -144,6 +138,17 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     release: GithubRestRelease,
     digest: string,
   ): Promise<GithubDigestFile | null> {
+    const recordedAsset = release.assets.find(
+      (a) => getRecordedSha256(a) === digest,
+    );
+    if (recordedAsset) {
+      return {
+        assetName: recordedAsset.name,
+        currentVersion: release.tag_name,
+        currentDigest: digest,
+      };
+    }
+
     const digestFile = await this.findDigestFile(release, digest);
     if (digestFile) {
       return digestFile;
@@ -153,13 +158,18 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     return asset;
   }
 
-  /** Given a digest asset, find the equivalent digest in a different release. */
+  /**
+   * Given a digest asset, find the equivalent digest in a different release.
+   * Asset names are mapped by replacing `currentVersion` with `newVersion`, which default to the release tags.
+   */
   async mapDigestAssetToRelease(
     digestAsset: GithubDigestFile,
     release: GithubRestRelease,
+    currentVersion = digestAsset.currentVersion,
+    newVersion = release.tag_name,
   ): Promise<string | null> {
-    const current = tagToVersion(digestAsset.currentVersion);
-    const next = tagToVersion(release.tag_name);
+    const current = stripVersionPrefix(currentVersion);
+    const next = stripVersionPrefix(newVersion);
 
     if (digestAsset.digestedFileName) {
       const checksumAssetName = digestAsset.assetName.replace(current, next);
@@ -196,6 +206,10 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     }
 
     const algorithm = inferHashAlg(digestAsset.currentDigest);
+    const recordedDigest = getRecordedSha256(asset);
+    if (algorithm === 'sha256' && recordedDigest) {
+      return recordedDigest;
+    }
     const newDigest = await this.downloadAndDigest(asset, algorithm);
     return newDigest;
   }
@@ -203,7 +217,8 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
   /**
    * Attempts to resolve the digest for the specified package.
    *
-   * `currentValue` and `newValue` are release tags, or versions taken from tags by `extractVersion`.
+   * Releases are fetched by `currentGitRef` and `newGitRef`, their tags, falling back to `currentValue` and `newValue`.
+   * `currentValue` and `newValue` are used to map asset names, so they may be versions taken from tags by `extractVersion`.
    * Requires `currentValue` and `currentDigest`.
    *
    * There may be many assets attached to the release. This function will:
@@ -218,6 +233,8 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       currentValue,
       currentDigest,
       registryUrl,
+      currentGitRef,
+      newGitRef,
     }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -236,13 +253,9 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const { releases } = await this.getReleases({
-      packageName: repo,
-      registryUrl,
-    });
     const { body: currentRelease } =
       await this.http.getJsonUnchecked<GithubRestRelease>(
-        `${apiBaseUrl}repos/${repo}/releases/tags/${findTag(releases, currentValue)}`,
+        `${apiBaseUrl}repos/${repo}/releases/tags/${currentGitRef ?? currentValue}`,
       );
     const digestAsset = await this.findDigestAsset(
       currentRelease,
@@ -254,9 +267,14 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     } else {
       const { body: newRelease } =
         await this.http.getJsonUnchecked<GithubRestRelease>(
-          `${apiBaseUrl}repos/${repo}/releases/tags/${findTag(releases, newValue)}`,
+          `${apiBaseUrl}repos/${repo}/releases/tags/${newGitRef ?? newValue}`,
         );
-      newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
+      newDigest = await this.mapDigestAssetToRelease(
+        digestAsset,
+        newRelease,
+        currentValue,
+        newValue,
+      );
     }
     return newDigest;
   }

@@ -30,6 +30,10 @@ export interface DigestConfig {
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
+  /** The `gitRef` of the release `currentValue` belongs to, such as its tag before `extractVersion`. */
+  currentGitRef?: string;
+  /** The `gitRef` of the release the update moves to. */
+  newGitRef?: string;
 }
 
 /**
