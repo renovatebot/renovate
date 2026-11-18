@@ -1049,6 +1049,76 @@ describe('workers/repository/dependency-dashboard', () => {
            - [ ] <!-- retry-branch=branchName5 -->pr5
         `);
       });
+
+      it('groups updates by base branch when groupByBaseBranch is set', async () => {
+        config.dependencyDashboard!.groupByBaseBranch = true;
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          branches,
+          {},
+          { result: 'no-migration' },
+        );
+        const body = platform.ensureIssue.mock.calls[0][0].body;
+        expect(body).toContain(codeBlock`
+          ## Pending Approval
+
+          The following branches are pending approval. To create them, click on a checkbox below.
+
+          ### Category
+
+           - \`main\`
+             - [ ] <!-- approve-branch=branchName0 -->pr0
+             - [ ] <!-- approve-branch=branchName2 -->pr2
+           - \`next\`
+             - [ ] <!-- approve-branch=branchName1 -->pr1
+
+          ### Others
+
+           - \`next\`
+             - [ ] <!-- approve-branch=branchName3 -->pr3
+           - \`main\`
+             - [ ] <!-- approve-branch=branchName4 -->pr4
+
+          ### All
+
+           - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
+          ## Errored
+
+          The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
+
+           - \`next\`
+             - [ ] <!-- retry-branch=branchName5 -->pr5
+        `);
+
+        // checkboxes nested under a base branch are still read back
+        platform.findIssue.mockResolvedValueOnce({
+          title: '',
+          number: 1,
+          body: body
+            .replace(
+              '- [ ] <!-- retry-branch=branchName5 -->',
+              '- [x] <!-- retry-branch=branchName5 -->',
+            )
+            .replace(
+              '- [ ] <!-- approve-all-pending-prs -->',
+              '- [x] <!-- approve-all-pending-prs -->',
+            ),
+        });
+        const conf: RenovateConfig = {
+          dependencyDashboard: { enabled: true },
+        };
+        await dependencyDashboard.readDashboardBody(conf);
+        expect(conf.dependencyDashboardChecks).toEqual({
+          branchName0: 'approve',
+          branchName1: 'approve',
+          branchName2: 'approve',
+          branchName3: 'approve',
+          branchName4: 'approve',
+          branchName5: 'retry',
+          configMigrationCheckboxState: 'no-checkbox',
+        });
+      });
     });
 
     it('checks an issue with 2 PR pr-edited', async () => {

@@ -1045,6 +1045,7 @@ const options: Readonly<RenovateOptions>[] = [
       title: 'Dependency Dashboard',
       header:
         'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
+      groupByBaseBranch: false,
       osvVulnerabilitySummary: 'none',
       reportAbandonment: true,
       pinned: false,
@@ -1091,6 +1092,16 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['dependencyDashboard'],
     supportsTemplating: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'groupByBaseBranch',
+    description:
+      'Set to `true` to group updates by their base branch in the Dependency Dashboard issue.',
+    type: 'boolean',
+    parents: ['dependencyDashboard'],
+    default: false,
     cli: false,
     env: false,
   },
