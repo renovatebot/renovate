@@ -2681,18 +2681,13 @@ async function pushFiles(
   }
 }
 
-export async function commitFiles(
+/**
+ * Recreates a commit created by `git.prepareCommit()` through the REST API and fetches the resulting branch.
+ */
+export async function pushCommitFiles(
   config: CommitFilesConfig,
+  commitResult: CommitResult,
 ): Promise<LongCommitSha | null> {
-  const commitResult = await git.prepareCommit(config); // Commit locally and don't push
-  const { branchName, files } = config;
-  if (!commitResult) {
-    logger.debug(
-      { branchName, files: files.map(({ path }) => path) },
-      `Platform-native commit: unable to prepare for commit`,
-    );
-    return null;
-  }
   // Perform the commits using REST API
   const pushResult = await pushFiles(config, commitResult);
   if (!pushResult) {
@@ -2701,6 +2696,6 @@ export async function commitFiles(
   // Replace locally created branch with the remotely created one
   // and return the remote commit SHA
   await git.resetToCommit(commitResult.parentCommitSha);
-  const commitSha = await git.fetchBranch(branchName);
+  const commitSha = await git.fetchBranch(config.branchName);
   return commitSha;
 }

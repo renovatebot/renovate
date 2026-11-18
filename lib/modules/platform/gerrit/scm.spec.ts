@@ -163,6 +163,89 @@ describe('modules/platform/gerrit/scm', () => {
     });
   });
 
+  describe('prepareCommit()', () => {
+    const commitConfig = {
+      branchName: 'renovate/dependency-1.x',
+      baseBranch: 'main',
+      message: 'commit msg',
+      files: [],
+      prTitle: 'pr title',
+    };
+
+    it('returns the prepared commit of a new change and defers the push', async () => {
+      clientMock.getBranchChange.mockResolvedValueOnce(null);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha,
+        parentCommitSha,
+        files: [],
+      });
+
+      const res = await gerritScm.prepareCommit({ ...commitConfig });
+
+      expect(res?.sha).toBe(commitSha);
+      await expect(res?.push()).resolves.toBe(commitSha);
+      expect(git.pushCommit).not.toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Commit prepared, push deferred to createPr()',
+      );
+    });
+
+    it('pushes the prepared commit of an existing change only on demand', async () => {
+      clientMock.getBranchChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
+          branch: 'main',
+          current_revision: currentRevision,
+          revisions: {
+            [currentRevision]: partial<GerritRevisionInfo>({
+              ref: 'refs/changes/56/123456/2',
+            }),
+          },
+        }),
+      );
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha,
+        parentCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
+
+      const res = await gerritScm.prepareCommit({ ...commitConfig });
+
+      expect(res?.sha).toBe(commitSha);
+      expect(git.pushCommit).not.toHaveBeenCalled();
+      expect(git.setVirtualBranch).not.toHaveBeenCalled();
+
+      await expect(res?.push()).resolves.toBe(commitSha);
+      expect(git.pushCommit).toHaveBeenCalledTimes(1);
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/dependency-1.x',
+        'refs/changes/56/123456/3',
+        commitSha,
+      );
+    });
+
+    it('returns null if the prepared commit of an existing change is not pushed', async () => {
+      clientMock.getBranchChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
+          branch: 'main',
+        }),
+      );
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha,
+        parentCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(false);
+
+      const res = await gerritScm.prepareCommit({ ...commitConfig });
+
+      await expect(res?.push()).resolves.toBeNull();
+      expect(git.setVirtualBranch).not.toHaveBeenCalled();
+    });
+  });
+
   describe('commitAndPush()', () => {
     it('commitAndPush() - empty commit', async () => {
       clientMock.getBranchChange.mockResolvedValueOnce(null);

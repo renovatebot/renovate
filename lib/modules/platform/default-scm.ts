@@ -2,17 +2,34 @@ import type { DateTime } from 'luxon';
 import * as git from '../../util/git/index.ts';
 import type { CommitFilesConfig } from '../../util/git/types.ts';
 import type { LongCommitSha } from '../../util/schema-utils/git.ts';
-import type { PlatformScm } from './types.ts';
+import type { PlatformScm, PreparedCommit } from './types.ts';
 
 export class DefaultGitScm implements PlatformScm {
   branchExists(branchName: string): Promise<boolean> {
     return Promise.resolve(git.branchExists(branchName));
   }
 
-  commitAndPush(
+  async prepareCommit(
+    commitConfig: CommitFilesConfig,
+  ): Promise<PreparedCommit | null> {
+    const commitResult = await git.prepareCommit(commitConfig);
+    if (!commitResult) {
+      return null;
+    }
+    return {
+      sha: commitResult.commitSha,
+      push: () => git.pushPreparedCommit(commitConfig, commitResult),
+    };
+  }
+
+  async commitAndPush(
     commitConfig: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
-    return git.commitFiles(commitConfig);
+    const preparedCommit = await this.prepareCommit(commitConfig);
+    if (!preparedCommit) {
+      return null;
+    }
+    return await preparedCommit.push();
   }
 
   deleteBranch(branchName: string): Promise<void> {

@@ -26,7 +26,7 @@ import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange } from './types.ts';
+import type { CommitFilesConfig, FileChange } from './types.ts';
 import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
@@ -1535,6 +1535,61 @@ describe('util/git/index', { timeout: 30000 }, () => {
           message: 'Create something',
         });
         expect(commit).not.toBeNull();
+      });
+
+      it('pushes a prepared commit and records it as the branch commit', async () => {
+        const commitConfig = {
+          branchName: 'renovate/prepared_branch',
+          files: [
+            {
+              type: 'addition',
+              path: 'some-prepared-file',
+              contents: 'some new-contents',
+            },
+          ],
+          message: 'Create something',
+        } satisfies CommitFilesConfig;
+        const commitResult = await git.prepareCommit(commitConfig);
+        expect(commitResult).not.toBeNull();
+
+        const commitSha = await git.pushPreparedCommit(
+          commitConfig,
+          commitResult!,
+        );
+
+        expect(commitSha).toBe(commitResult!.commitSha);
+        expect(git.getBranchCommit('renovate/prepared_branch')).toBe(commitSha);
+        const remoteSha = await simpleGit(origin.path).revparse([
+          'renovate/prepared_branch',
+        ]);
+        expect(remoteSha.trim()).toBe(commitSha);
+      });
+
+      it('returns null if a prepared commit cannot be pushed', async () => {
+        const commitConfig = {
+          branchName: 'renovate/unpushed_branch',
+          files: [
+            {
+              type: 'addition',
+              path: 'some-unpushed-file',
+              contents: 'some new-contents',
+            },
+          ],
+          message: 'Create something',
+        } satisfies CommitFilesConfig;
+        const commitResult = await git.prepareCommit(commitConfig);
+        expect(commitResult).not.toBeNull();
+        vi.spyOn(SimpleGit.prototype, 'push').mockRejectedValueOnce(
+          new Error('remote: error: cannot lock ref'),
+        );
+
+        const commitSha = await git.pushPreparedCommit(
+          commitConfig,
+          commitResult!,
+        );
+
+        expect(commitSha).toBeNull();
+        expect(git.getBranchCommit('renovate/unpushed_branch')).toBeNull();
       });
 
       it('skips the diff check when force is set', async () => {

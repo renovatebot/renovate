@@ -5,7 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { rawExec } from '../../../util/exec/common.ts';
 import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
-import type { PlatformScm } from '../types.ts';
+import type { PlatformScm, PreparedCommit } from '../types.ts';
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {
@@ -35,6 +35,11 @@ export class LocalFs implements PlatformScm {
   }
   deleteBranch(_branchName: string): Promise<void> {
     return Promise.resolve();
+  }
+  prepareCommit(
+    _commitConfig: CommitFilesConfig,
+  ): Promise<PreparedCommit | null> {
+    return Promise.resolve(null);
   }
   commitAndPush(
     _commitConfig: CommitFilesConfig,

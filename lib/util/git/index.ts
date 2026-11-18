@@ -1599,24 +1599,20 @@ export async function fetchBranch(
   }
 }
 
-export async function commitFiles(
-  commitConfig: CommitFilesConfig,
+/**
+ * Pushes a commit created by `prepareCommit()` to its branch and records it as the branch commit.
+ */
+export async function pushPreparedCommit(
+  { branchName, files }: CommitFilesConfig,
+  { commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
-    const commitResult = await prepareCommit(commitConfig);
-    if (commitResult) {
-      const pushResult = await pushCommit({
-        sourceRef: commitConfig.branchName,
-        files: commitConfig.files,
-      });
-      // v8 ignore else -- TODO: add test #40625
-      if (pushResult) {
-        const { branchName } = commitConfig;
-        const { commitSha } = commitResult;
-        config.branchCommits[branchName] = commitSha;
-        config.branchIsModified[branchName] = false;
-        return commitSha;
-      }
+    const pushResult = await pushCommit({ sourceRef: branchName, files });
+    // v8 ignore else -- TODO: add test #40625
+    if (pushResult) {
+      config.branchCommits[branchName] = commitSha;
+      config.branchIsModified[branchName] = false;
+      return commitSha;
     }
     return null;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
@@ -1625,6 +1621,16 @@ export async function commitFiles(
     }
     throw err;
   }
+}
+
+export async function commitFiles(
+  commitConfig: CommitFilesConfig,
+): Promise<LongCommitSha | null> {
+  const commitResult = await prepareCommit(commitConfig);
+  if (!commitResult) {
+    return null;
+  }
+  return await pushPreparedCommit(commitConfig, commitResult);
 }
 
 export function getUrl({
