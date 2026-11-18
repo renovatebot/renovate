@@ -10,7 +10,12 @@ import { ExecError } from '../../../util/exec/exec-error.ts';
 import { exec } from '../../../util/exec/index.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
-import { getBranchCommit, getFile } from '../../../util/git/index.ts';
+import {
+  getBranchCommit,
+  getFile,
+  getFileFromCommit,
+  getMergeBase,
+} from '../../../util/git/index.ts';
 import type {
   PackageFile,
   UpdateArtifactsConfig,
@@ -642,6 +647,15 @@ describe('modules/manager/npm/vite-plus', () => {
       replacements: [],
     }));
     vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
+    vi.mocked(getMergeBase).mockResolvedValue(fakeSha('fork'));
+    const forkFiles: Record<string, string> = {
+      'package.json': root,
+      [leafPath]: leaf,
+      [untouchedPath]: '{}',
+    };
+    vi.mocked(getFileFromCommit).mockImplementation((path) =>
+      Promise.resolve(forkFiles[path]),
+    );
     const updateConfig = {
       ...config(root),
       branchName: 'renovate/vite-plus',
@@ -665,10 +679,18 @@ describe('modules/manager/npm/vite-plus', () => {
     expect(getFileMock.mock.calls).toEqual([
       [untouchedPath, 'renovate/vite-plus', { throwOnError: true }],
       ['pnpm-workspace.yaml', 'renovate/vite-plus', { throwOnError: true }],
-      ['package.json', 'renovate/vite-plus^', { throwOnError: true }],
-      [leafPath, 'renovate/vite-plus^', { throwOnError: true }],
-      [untouchedPath, 'renovate/vite-plus^', { throwOnError: true }],
     ]);
+    expect(getMergeBase).toHaveBeenCalledExactlyOnceWith(
+      'renovate/vite-plus',
+      'main',
+    );
+    expect(vi.mocked(getFileFromCommit).mock.calls).toEqual(
+      ['package.json', leafPath, untouchedPath].map((path) => [
+        path,
+        fakeSha('fork'),
+        { throwOnError: true },
+      ]),
+    );
   });
 
   it.each`
@@ -682,9 +704,12 @@ describe('modules/manager/npm/vite-plus', () => {
       const aligned = packageJson('0.3.1', '4.1.11');
       const branch = alreadyAligned ? aligned : packageJson('0.3.1', '4.0.0');
       vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
+      vi.mocked(getMergeBase).mockResolvedValue(fakeSha('fork'));
+      vi.mocked(getFileFromCommit).mockImplementation((path) =>
+        Promise.resolve(path === 'package.json' ? base : null),
+      );
       const refFiles: Record<string, string | null> = {
         main: packageJson('0.2.0', '4.1.11'),
-        'renovate/vite-plus^': base,
         'renovate/vite-plus': branch,
       };
       getFileMock.mockImplementation((path, ref) =>
@@ -720,32 +745,80 @@ describe('modules/manager/npm/vite-plus', () => {
     },
   );
 
-  it('ignores base branch changes made after a reused branch', async () => {
-    const parent = packageJson('0.2.0', '4.0.0');
-    const branch = packageJson('0.3.1', '4.0.0');
-    vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
-    const refFiles: Record<string, string> = {
-      main: packageJson('0.2.0', '4.1.11'),
-      'renovate/vite-plus^': parent,
-      'renovate/vite-plus': branch,
-    };
-    getFileMock.mockImplementation((path, ref) =>
-      Promise.resolve(path === 'package.json' ? refFiles[ref!] : null),
-    );
-    mockPlan((request) => ({
-      ...(validPlan(request, branch) as object),
-      replacements: [],
-    }));
-    const updateConfig = {
-      ...config(branch),
-      branchName: 'renovate/vite-plus',
-      reuseExistingBranch: true,
-    };
-    updateConfig.upgrades[0].automerge = true;
+  it.each`
+    forkPoint          | main                              | automerge
+    ${fakeSha('fork')} | ${packageJson('0.2.0', '4.1.11')} | ${true}
+    ${null}            | ${packageJson('0.2.0', '4.1.11')} | ${false}
+    ${null}            | ${packageJson('0.2.0', '4.0.0')}  | ${true}
+  `(
+    'compares a reused branch with its fork point $forkPoint',
+    async ({ forkPoint, main, automerge }) => {
+      const branch = packageJson('0.3.1', '4.0.0');
+      vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
+      vi.mocked(getMergeBase).mockResolvedValue(forkPoint);
+      vi.mocked(getFileFromCommit).mockImplementation((path) =>
+        Promise.resolve(
+          path === 'package.json' ? packageJson('0.2.0', '4.0.0') : null,
+        ),
+      );
+      const refFiles: Record<string, string> = {
+        main,
+        'renovate/vite-plus': branch,
+      };
+      getFileMock.mockImplementation((path, ref) =>
+        Promise.resolve(path === 'package.json' ? refFiles[ref!] : null),
+      );
+      mockPlan((request) => ({
+        ...(validPlan(request, branch) as object),
+        replacements: [],
+      }));
+      const updateConfig = {
+        ...config(branch),
+        branchName: 'renovate/vite-plus',
+        reuseExistingBranch: true,
+      };
+      updateConfig.upgrades[0].automerge = true;
 
-    await expect(reconcile(updateConfig, packageFiles())).resolves.toEqual([]);
-    expect(updateConfig.upgrades[0].automerge).toBeTrue();
-  });
+      await reconcile(updateConfig, packageFiles());
+
+      expect(updateConfig.upgrades[0].automerge).toBe(automerge);
+    },
+  );
+
+  it.each(['branch commit', 'base branch'])(
+    'falls back to the base tip without a %s',
+    async (missing) => {
+      const branch = packageJson('0.3.1', '4.1.11');
+      vi.mocked(getBranchCommit).mockImplementation((ref) =>
+        ref === 'main' ? fakeSha(ref) : null,
+      );
+      const refFiles: Record<string, string> = {
+        main: packageJson('0.2.0', '4.0.0'),
+        'renovate/vite-plus': branch,
+      };
+      getFileMock.mockImplementation((path, ref) =>
+        Promise.resolve(
+          path === 'package.json' ? refFiles[ref ?? 'main'] : null,
+        ),
+      );
+      mockPlan((request) => ({
+        ...(validPlan(request, branch) as object),
+        replacements: [],
+      }));
+      const updateConfig = {
+        ...config(branch),
+        branchName: 'renovate/vite-plus',
+        reuseExistingBranch: true,
+        baseBranch: missing === 'base branch' ? undefined : 'main',
+      };
+      updateConfig.upgrades[0].automerge = true;
+
+      await reconcile(updateConfig, packageFiles());
+
+      expect(getMergeBase).not.toHaveBeenCalled();
+      expect(updateConfig.upgrades[0].automerge).toBeFalse();
+    },
+  );
 
   it.each([undefined, 'unknown-branch'])(
     'does not cache git reads without a commit for %s',

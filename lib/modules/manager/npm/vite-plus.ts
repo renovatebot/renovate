@@ -14,11 +14,17 @@ import { isDynamicInstall } from '../../../util/exec/containerbase.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ToolConstraint } from '../../../util/exec/types.ts';
 import { withSystemTempDir, writeLocalFile } from '../../../util/fs/index.ts';
-import { getBranchCommit, getFile } from '../../../util/git/index.ts';
+import {
+  getBranchCommit,
+  getFile,
+  getFileFromCommit,
+  getMergeBase,
+} from '../../../util/git/index.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type {
@@ -270,31 +276,67 @@ function resolveVitePlusVersion(
   return [...versions][0];
 }
 
-async function readGitManifest(
+async function readCachedManifest(
   path: string,
-  branchName: string | undefined,
-  parent = false,
+  commitSha: LongCommitSha | null,
+  read: () => Promise<string | null>,
 ): Promise<string | null> {
-  const commitSha = branchName ? getBranchCommit(branchName) : null;
   const cacheKey = commitSha
-    ? buildCacheKey(
-        'vite-plus',
-        parent ? 'parent-manifest' : 'manifest',
-        commitSha,
-        path,
-      )
+    ? buildCacheKey('vite-plus', 'manifest', commitSha, path)
     : undefined;
   let contents = cacheKey
     ? memory.get<string | null | undefined>(cacheKey)
     : undefined;
   if (contents === undefined) {
-    const ref = parent ? `${branchName}^` : branchName;
-    contents = await getFile(path, ref, { throwOnError: true });
+    contents = await read();
     if (cacheKey) {
       memory.set(cacheKey, contents);
     }
   }
   return contents;
+}
+
+function readGitManifest(
+  path: string,
+  branchName: string | undefined,
+): Promise<string | null> {
+  return readCachedManifest(
+    path,
+    branchName ? getBranchCommit(branchName) : null,
+    () => getFile(path, branchName, { throwOnError: true }),
+  );
+}
+
+async function getForkPoint({
+  branchName,
+  baseBranch,
+}: UpdateArtifactsConfig): Promise<LongCommitSha | null> {
+  const branchSha = branchName ? getBranchCommit(branchName) : null;
+  const baseSha = baseBranch ? getBranchCommit(baseBranch) : null;
+  if (!branchSha || !baseSha) {
+    return null;
+  }
+  const cacheKey = buildCacheKey('vite-plus', 'fork-point', branchSha, baseSha);
+  let forkPoint = memory.get<LongCommitSha | null | undefined>(cacheKey);
+  if (forkPoint === undefined) {
+    forkPoint = await getMergeBase(branchName!, baseBranch!);
+    memory.set(cacheKey, forkPoint);
+  }
+  return forkPoint;
+}
+
+function readForkPointManifest(
+  path: string,
+  forkPoint: LongCommitSha | null,
+  baseBranch: string | undefined,
+): Promise<string | null> {
+  if (!forkPoint) {
+    // Comparing with the base tip can only add alignments, which disables automerge.
+    return readGitManifest(path, baseBranch);
+  }
+  return readCachedManifest(path, forkPoint, () =>
+    getFileFromCommit(path, forkPoint, { throwOnError: true }),
+  );
 }
 
 async function readManifestSnapshot(
@@ -770,14 +812,19 @@ function matchesUpgrade(
 async function branchRelativeDependencies(
   snapshots: ManifestSnapshot[],
   { plan }: ValidatedPlan,
-  branchName: string | undefined,
+  config: UpdateArtifactsConfig,
 ): Promise<ManifestDependency[]> {
   const replacements = new Map(
     plan.replacements.map(({ path, after }) => [path, after]),
   );
+  const forkPoint = await getForkPoint(config);
   const dependencies = await Promise.all(
     snapshots.map(async (snapshot) => {
-      const base = await readGitManifest(snapshot.path, branchName, true);
+      const base = await readForkPointManifest(
+        snapshot.path,
+        forkPoint,
+        config.baseBranch,
+      );
       return collectManifestDependencies(
         snapshot,
         base === null ? undefined : parseManifest(snapshot.kind, base),
@@ -1002,12 +1049,12 @@ async function reconcileWorkspace(
   updateUpgradeTargets(upgrades, dependencies);
   let alignedDependencies = dependencies;
   if (config.reuseExistingBranch) {
-    // A reused branch already contains the alignment. Like getBranchFiles, compare
-    // the branch's single commit with its parent so later base changes do not count.
+    // A reused branch already contains the alignment, so compare it with its
+    // fork point; later base changes do not count.
     alignedDependencies = await branchRelativeDependencies(
       snapshots,
       validatedPlan,
-      config.branchName,
+      config,
     );
   }
   const alignmentNotices = additionalAlignmentNotices(
