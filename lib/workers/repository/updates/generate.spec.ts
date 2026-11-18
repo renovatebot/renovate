@@ -383,6 +383,16 @@ describe('workers/repository/updates/generate', () => {
       expect(config).toEqual({ ...original, automerge: false });
     });
 
+    it('disables branch automerge when a removed upgrade lost automerge', () => {
+      const removed = { ...config.upgrades[0], depName: 'vitest' };
+      previousTargets.set(removed, { ...removed });
+      removed.automerge = false;
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.automerge).toBeFalse();
+    });
+
     it('preserves a grouped message with no version extra', () => {
       config.groupName = 'Vitest packages';
       config.isGroup = true;

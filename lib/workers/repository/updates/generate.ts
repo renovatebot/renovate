@@ -317,12 +317,14 @@ export function refreshBranchConfig(
     upgrade.prettyNewMajor =
       upgrade.newMajor === undefined ? undefined : `v${upgrade.newMajor}`;
   }
-  const automergeDisabled = config.upgrades.some(
-    (upgrade) => previousTargets.get(upgrade)?.automerge && !upgrade.automerge,
+  // Includes upgrades removed as no-ops, whose artifacts may still carry an alignment.
+  const automergeDisabled = [...previousTargets].some(
+    ([upgrade, previous]) => previous.automerge && !upgrade.automerge,
   );
   if (changed || automergeDisabled) {
     config.automerge =
       Boolean(config.automerge) &&
+      !automergeDisabled &&
       config.upgrades.every((upgrade) => upgrade.automerge);
   }
   if (!changed) {
