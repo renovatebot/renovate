@@ -455,6 +455,15 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             results,
           );
+          // package files can share a lock file, so the next call must start
+          // from the refreshed one
+          const refreshedLockFiles = coerceArray(results)
+            .map(({ file }) => file)
+            .filter((file) => file?.type === 'addition')
+            .filter(({ path }) => path in updatedFileContents);
+          for (const { path, contents } of refreshedLockFiles) {
+            updatedFileContents[path] = contents!.toString();
+          }
         }
         processUpdateArtifactResults(
           results,
