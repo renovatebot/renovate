@@ -456,6 +456,36 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
+    describe('getMergeBase(branchName, baseBranch)', () => {
+      it('returns the commit the branch forked from', async () => {
+        await expect(
+          git.getMergeBase('renovate/future_branch', defaultBranch),
+        ).resolves.toBe(git.getBranchCommit(defaultBranch));
+        await expect(
+          git.getMergeBase('renovate/past_branch', defaultBranch),
+        ).resolves.toBe(git.getBranchCommit('renovate/past_branch'));
+      });
+
+      it('returns null for an unknown branch', async () => {
+        await expect(
+          git.getMergeBase('not_found', defaultBranch),
+        ).resolves.toBeNull();
+      });
+    });
+
+    describe('getFileFromCommit(filePath, commit)', () => {
+      it('reads files at the commit', async () => {
+        const commit = git.getBranchCommit('renovate/past_branch')!;
+
+        await expect(git.getFileFromCommit('past_file', commit)).resolves.toBe(
+          'past',
+        );
+        await expect(
+          git.getFileFromCommit('master_file', commit, { throwOnError: true }),
+        ).resolves.toBeNull();
+      });
+    });
+
     describe('getBranchCommit(branchName)', () => {
       it('should return same value for equal refs', () => {
         const hex = git.getBranchCommit('renovate/equal_branch');

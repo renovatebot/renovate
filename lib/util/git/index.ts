@@ -941,6 +941,29 @@ export function getBranchList(): string[] {
   return Object.keys(coerceObject(config.branchCommits));
 }
 
+export async function getMergeBase(
+  branchName: string,
+  baseBranch: string,
+): Promise<LongCommitSha | null> {
+  await syncGit();
+  try {
+    const mergeBase = await git.raw([
+      'merge-base',
+      `origin/${branchName}`,
+      `origin/${baseBranch}`,
+    ]);
+    return toLongCommitSha(mergeBase.trim());
+  } catch (err) {
+    const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore if -- TODO: add test #40625 */
+    if (errChecked) {
+      throw errChecked;
+    }
+    logger.debug({ err, branchName, baseBranch }, 'No merge base found');
+    return null;
+  }
+}
+
 export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string,
@@ -1343,13 +1366,32 @@ async function getBranchFilesFromRef(
   }
 }
 
-export async function getFile(
+export function getFile(
   filePath: string,
   branchName?: string,
   options: { throwOnError?: boolean } = {},
 ): Promise<string | null> {
+  return getFileFromRef(
+    filePath,
+    `origin/${branchName ?? config.currentBranch}`,
+    options,
+  );
+}
+
+export function getFileFromCommit(
+  filePath: string,
+  commit: LongCommitSha,
+  options: { throwOnError?: boolean } = {},
+): Promise<string | null> {
+  return getFileFromRef(filePath, commit, options);
+}
+
+async function getFileFromRef(
+  filePath: string,
+  ref: string,
+  options: { throwOnError?: boolean },
+): Promise<string | null> {
   await syncGit();
-  const ref = `origin/${branchName ?? config.currentBranch}`;
   try {
     const content = await git.show([`${ref}:${filePath}`]);
 
