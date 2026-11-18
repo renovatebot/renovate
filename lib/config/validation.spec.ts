@@ -3396,9 +3396,9 @@ describe('config/validation', () => {
         ]);
       });
 
-      it('repositoryCache with an unknown field', async () => {
+      it('packageCache with an unknown field', async () => {
         const config = {
-          repositoryCache: { unknown: true },
+          packageCache: { unknown: true },
         };
         const { warnings, errors } = await configValidation.validateConfig(
           'global',
@@ -3408,14 +3408,14 @@ describe('config/validation', () => {
         expect(warnings).toBeEmptyArray();
         expect(errors).toMatchObject([
           {
-            message: 'Invalid configuration option: repositoryCache.unknown',
+            message: 'Invalid configuration option: packageCache.unknown',
           },
         ]);
       });
 
-      it('repositoryCache with a field of the wrong type', async () => {
+      it('packageCache with a field of the wrong type', async () => {
         const config = {
-          repositoryCache: { forceLocal: 'yes' as never },
+          packageCache: { privatePackages: 'yes' as never },
         };
         const { warnings, errors } = await configValidation.validateConfig(
           'global',
@@ -3425,12 +3425,12 @@ describe('config/validation', () => {
         expect(warnings).toMatchObject([
           {
             message:
-              'Configuration option `repositoryCache.forceLocal` should be a boolean. Found: "yes" (string).',
+              'Configuration option `packageCache.privatePackages` should be a boolean. Found: "yes" (string).',
           },
         ]);
       });
 
-      it('repositoryCache with a field of another option', async () => {
+      it('repositoryCache with a field of another object', async () => {
         const config = {
           repositoryCache: { redisUrl: 'redis://localhost' },
         };
@@ -3982,8 +3982,10 @@ describe('config/validation', () => {
           homepage: 'https://github.com/renovatebot/renovate',
         },
         secrets: 'invalid-type',
-        cacheTtlOverride: {
-          someField: false,
+        packageCache: {
+          ttlOverride: {
+            someField: false,
+          },
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -3995,7 +3997,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Configuration option `cacheTtlOverride.someField` should be an integer. Found: false (boolean).',
+            'Configuration option `packageCache.ttlOverride.someField` should be an integer. Found: false (boolean).',
         },
         {
           message: 'Configuration option `secrets` should be a JSON object.',
@@ -4004,7 +4006,8 @@ describe('config/validation', () => {
       ]);
       expect(errors).toMatchObject([
         {
-          message: 'cacheTtlOverride: namespace `someField` does not exist',
+          message:
+            'packageCache.ttlOverride: namespace `someField` does not exist',
         },
       ]);
     });
@@ -4421,12 +4424,14 @@ describe('config/validation', () => {
       });
     });
 
-    describe('cacheTtlOverride', () => {
+    describe('packageCache.ttlOverride', () => {
       it('errors when using an invalid cache namespace', async () => {
         const config: AllConfig = {
-          cacheTtlOverride: {
-            // removed in 40.9.0
-            'datasource-maven:metadata-xml': 123,
+          packageCache: {
+            ttlOverride: {
+              // removed in 40.9.0
+              'datasource-maven:metadata-xml': 123,
+            },
           },
         };
 
@@ -4439,7 +4444,7 @@ describe('config/validation', () => {
         expect(errors).toMatchObject([
           {
             message:
-              'cacheTtlOverride: namespace `datasource-maven:metadata-xml` does not exist',
+              'packageCache.ttlOverride: namespace `datasource-maven:metadata-xml` does not exist',
             topic: 'Configuration Error',
           },
         ]);
@@ -4447,8 +4452,10 @@ describe('config/validation', () => {
 
       it('allows a valid cache namespace', async () => {
         const config: AllConfig = {
-          cacheTtlOverride: {
-            'datasource-docker-hub-tags': 90,
+          packageCache: {
+            ttlOverride: {
+              'datasource-docker-hub-tags': 90,
+            },
           },
         };
 
@@ -4463,12 +4470,14 @@ describe('config/validation', () => {
 
       it('allows wildcards', async () => {
         const config: AllConfig = {
-          cacheTtlOverride: {
-            'datasource-rubygems': 120,
-            'datasource-*': 60,
-            'datasource-{crate,go}': 90,
-            '/^changelog-/': 45,
-            '*': 30,
+          packageCache: {
+            ttlOverride: {
+              'datasource-rubygems': 120,
+              'datasource-*': 60,
+              'datasource-{crate,go}': 90,
+              '/^changelog-/': 45,
+              '*': 30,
+            },
           },
         };
 

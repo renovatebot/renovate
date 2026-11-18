@@ -11,14 +11,14 @@ import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 export interface CacheContext {
   /**
    * Whether the result may be shared through the package cache.
-   * `cachePrivatePackages` allows storage when this is `false`.
+   * `packageCache.privatePackages` allows storage when this is `false`.
    * @default true
    */
   public: boolean;
 
   /**
    * Whether the result should be stored in the cache.
-   * `false` prevents storage even when `cachePrivatePackages` is enabled.
+   * `false` prevents storage even when `packageCache.privatePackages` is enabled.
    * @default true
    */
   cacheable: boolean;
@@ -72,13 +72,13 @@ export async function withCache<T>(
     public: options.public ?? true,
     cacheable: true,
   };
-  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
+  const cachePrivatePackages = GlobalConfig.get('packageCache').privatePackages;
 
   function canUseCache(): boolean {
     if (!ctx.cacheable) {
       return false;
     }
-    return ctx.public || cachePrivatePackages;
+    return ctx.public || !!cachePrivatePackages;
   }
 
   if (!canUseCache()) {

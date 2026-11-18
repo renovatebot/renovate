@@ -468,6 +468,75 @@ describe('workers/global/config/parse/env', () => {
         expect(config.platformAutomerge).toBe(true);
       });
 
+      describe('migrates the flat package cache env vars', () => {
+        it('moves them into packageCache with their old types', async () => {
+          const envParam: NodeJS.ProcessEnv = {
+            RENOVATE_CACHE_HARD_TTL_MINUTES: '60',
+            RENOVATE_CACHE_PRIVATE_PACKAGES: 'true',
+            RENOVATE_CACHE_TTL_OVERRIDE: '{"datasource-npm":30}',
+            RENOVATE_PRESET_CACHE_PERSISTENCE: 'true',
+            RENOVATE_REDIS_PREFIX: 'prefix',
+            RENOVATE_REDIS_URL: 'redis://localhost:6379',
+          };
+
+          await expect(env.getConfig(envParam)).resolves.toEqual({
+            hostRules: [],
+            packageCache: {
+              hardTtlMinutes: 60,
+              privatePackages: true,
+              ttlOverride: { 'datasource-npm': 30 },
+              presetPersistence: true,
+              redisPrefix: 'prefix',
+              redisUrl: 'redis://localhost:6379',
+            },
+          });
+          expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+            {
+              objectName: 'packageCache',
+              oldKeys: [
+                'RENOVATE_CACHE_HARD_TTL_MINUTES',
+                'RENOVATE_CACHE_PRIVATE_PACKAGES',
+                'RENOVATE_CACHE_TTL_OVERRIDE',
+                'RENOVATE_PRESET_CACHE_PERSISTENCE',
+                'RENOVATE_REDIS_PREFIX',
+                'RENOVATE_REDIS_URL',
+              ],
+            },
+            'env config has been migrated into a grouped option',
+          );
+        });
+
+        it('prefers fields set in RENOVATE_PACKAGE_CACHE', async () => {
+          const envParam: NodeJS.ProcessEnv = {
+            RENOVATE_PACKAGE_CACHE: '{"redisUrl":"new"}',
+            RENOVATE_REDIS_URL: 'old',
+            RENOVATE_REDIS_PREFIX: 'prefix',
+          };
+
+          const res = await env.getConfig(envParam);
+
+          expect(res.packageCache).toEqual({
+            redisUrl: 'new',
+            redisPrefix: 'prefix',
+          });
+        });
+
+        it('leaves a RENOVATE_PACKAGE_CACHE which is not an object', async () => {
+          const envParam: NodeJS.ProcessEnv = {
+            RENOVATE_PACKAGE_CACHE: '5',
+            RENOVATE_REDIS_URL: 'url',
+          };
+
+          const res = await env.getConfig(envParam);
+
+          expect(res.packageCache).toBe(5);
+          expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+            { objectName: 'packageCache', oldKeys: ['RENOVATE_REDIS_URL'] },
+            'Could not migrate env config into a grouped option, as it is not an object',
+          );
+        });
+      });
+
       describe('migrates the flat repository cache env vars', () => {
         it('moves them into repositoryCache with their old types', async () => {
           const envParam: NodeJS.ProcessEnv = {

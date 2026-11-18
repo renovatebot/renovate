@@ -21,5 +21,5 @@ Yanked versions are marked as deprecated.
 Credentials for a registry with an `https://` or `http://` URL are taken from host rules for its URL, with `hostType` `julia`.
 An SSH URL is cloned with the SSH configuration of the Renovate host.
 
-A cloned registry may be private, so the releases read from it are kept in the package cache, across repositories, only when [`cachePrivatePackages`](../../../self-hosted-configuration.md#cacheprivatepackages) is set.
+A cloned registry may be private, so the releases read from it are kept in the package cache, across repositories, only when [`packageCache.privatePackages`](../../../self-hosted-configuration.md#packagecacheprivatepackages) is set.
 Otherwise each repository clones the registry again.

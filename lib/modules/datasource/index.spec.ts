@@ -618,7 +618,7 @@ describe('modules/datasource/index', () => {
       });
 
       it('uses a separate cache key per detached URL credentials', async () => {
-        GlobalConfig.set({ cachePrivatePackages: true });
+        GlobalConfig.set({ packageCache: { privatePackages: true } });
         datasources.set(datasource, new DummyDatasource());
 
         hostRules.detachUrlCredentials('https://user:first@reg1.com/', [
@@ -645,7 +645,7 @@ describe('modules/datasource/index', () => {
       });
 
       it('uses a separate cache key for credentials of registryUrls with a path', async () => {
-        GlobalConfig.set({ cachePrivatePackages: true });
+        GlobalConfig.set({ packageCache: { privatePackages: true } });
         datasources.set(
           datasource,
           new DummyDatasource({
@@ -676,7 +676,7 @@ describe('modules/datasource/index', () => {
       `(
         'keeps the cache key for host rule $rule (trusted: $trusted)',
         async ({ rule, trusted }: { rule?: HostRule; trusted: boolean }) => {
-          GlobalConfig.set({ cachePrivatePackages: true });
+          GlobalConfig.set({ packageCache: { privatePackages: true } });
           datasources.set(datasource, new DummyDatasource());
           if (rule) {
             hostRules.add(rule, { trusted });
@@ -1185,7 +1185,7 @@ describe('modules/datasource/index', () => {
           });
 
           it('forces cache via GlobalConfig', async () => {
-            GlobalConfig.set({ cachePrivatePackages: true });
+            GlobalConfig.set({ packageCache: { privatePackages: true } });
             const registries = {
               'https://reg1.com': {
                 isPrivate: true,

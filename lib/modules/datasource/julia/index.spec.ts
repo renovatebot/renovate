@@ -262,16 +262,16 @@ describe('modules/datasource/julia/index', () => {
     });
 
     it.each`
-      cachePrivatePackages | clones
-      ${false}             | ${2}
-      ${true}              | ${1}
+      privatePackages | clones
+      ${false}        | ${2}
+      ${true}         | ${1}
     `(
-      'clones for the next repository unless cachePrivatePackages is set: $cachePrivatePackages',
-      async ({ cachePrivatePackages, clones }) => {
+      'clones for the next repository unless packageCache.privatePackages is set: $privatePackages',
+      async ({ privatePackages, clones }) => {
         GlobalConfig.set({
           cacheDir: upath.join(tmpDir!.path, 'cache'),
           allowCustomJuliaRegistries: true,
-          cachePrivatePackages,
+          packageCache: { privatePackages },
         });
         await packageCache.init({
           cacheDir: upath.join(tmpDir!.path, 'package-cache'),

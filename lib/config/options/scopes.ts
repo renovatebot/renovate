@@ -24,7 +24,10 @@ const managerParents = [
 /**
  * The objects which only exist in the global config, so an option which can be used anywhere in a config can't be used in them.
  */
-const globalOnlyParents: readonly AllowedParents[] = ['repositoryCache'];
+const globalOnlyParents: readonly AllowedParents[] = [
+  'packageCache',
+  'repositoryCache',
+];
 
 const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
   repo: ['.'],

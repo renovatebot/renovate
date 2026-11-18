@@ -117,7 +117,7 @@ async function getRegistryReleases(
   const cacheKey = buildCacheKey(registryUrl, config.packageName);
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
-  const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
+  const cacheForced = GlobalConfig.get('packageCache').privatePackages; // tells if caching is forced via admin config
 
   if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
