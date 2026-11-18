@@ -665,9 +665,9 @@ describe('modules/manager/npm/vite-plus', () => {
     expect(getFileMock.mock.calls).toEqual([
       [untouchedPath, 'renovate/vite-plus', { throwOnError: true }],
       ['pnpm-workspace.yaml', 'renovate/vite-plus', { throwOnError: true }],
-      ['package.json', 'main', { throwOnError: true }],
-      [leafPath, 'main', { throwOnError: true }],
-      [untouchedPath, 'main', { throwOnError: true }],
+      ['package.json', 'renovate/vite-plus^', { throwOnError: true }],
+      [leafPath, 'renovate/vite-plus^', { throwOnError: true }],
+      [untouchedPath, 'renovate/vite-plus^', { throwOnError: true }],
     ]);
   });
 
@@ -683,7 +683,8 @@ describe('modules/manager/npm/vite-plus', () => {
       const branch = alreadyAligned ? aligned : packageJson('0.3.1', '4.0.0');
       vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
       const refFiles: Record<string, string | null> = {
-        main: base,
+        main: packageJson('0.2.0', '4.1.11'),
+        'renovate/vite-plus^': base,
         'renovate/vite-plus': branch,
       };
       getFileMock.mockImplementation((path, ref) =>
@@ -718,6 +719,33 @@ describe('modules/manager/npm/vite-plus', () => {
       expect(updateConfig.upgrades[0].automerge).toBeFalse();
     },
   );
+
+  it('ignores base branch changes made after a reused branch', async () => {
+    const parent = packageJson('0.2.0', '4.0.0');
+    const branch = packageJson('0.3.1', '4.0.0');
+    vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
+    const refFiles: Record<string, string> = {
+      main: packageJson('0.2.0', '4.1.11'),
+      'renovate/vite-plus^': parent,
+      'renovate/vite-plus': branch,
+    };
+    getFileMock.mockImplementation((path, ref) =>
+      Promise.resolve(path === 'package.json' ? refFiles[ref!] : null),
+    );
+    mockPlan((request) => ({
+      ...(validPlan(request, branch) as object),
+      replacements: [],
+    }));
+    const updateConfig = {
+      ...config(branch),
+      branchName: 'renovate/vite-plus',
+      reuseExistingBranch: true,
+    };
+    updateConfig.upgrades[0].automerge = true;
+
+    await expect(reconcile(updateConfig, packageFiles())).resolves.toEqual([]);
+    expect(updateConfig.upgrades[0].automerge).toBeTrue();
+  });
 
   it.each([undefined, 'unknown-branch'])(
     'does not cache git reads without a commit for %s',

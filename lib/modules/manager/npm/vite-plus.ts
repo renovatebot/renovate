@@ -272,16 +272,23 @@ function resolveVitePlusVersion(
 
 async function readGitManifest(
   path: string,
-  ref: string | undefined,
+  branchName: string | undefined,
+  parent = false,
 ): Promise<string | null> {
-  const commitSha = ref ? getBranchCommit(ref) : null;
+  const commitSha = branchName ? getBranchCommit(branchName) : null;
   const cacheKey = commitSha
-    ? buildCacheKey('vite-plus', 'manifest', commitSha, path)
+    ? buildCacheKey(
+        'vite-plus',
+        parent ? 'parent-manifest' : 'manifest',
+        commitSha,
+        path,
+      )
     : undefined;
   let contents = cacheKey
     ? memory.get<string | null | undefined>(cacheKey)
     : undefined;
   if (contents === undefined) {
+    const ref = parent ? `${branchName}^` : branchName;
     contents = await getFile(path, ref, { throwOnError: true });
     if (cacheKey) {
       memory.set(cacheKey, contents);
@@ -760,17 +767,17 @@ function matchesUpgrade(
   );
 }
 
-async function baseRelativeDependencies(
+async function branchRelativeDependencies(
   snapshots: ManifestSnapshot[],
   { plan }: ValidatedPlan,
-  baseBranch: string | undefined,
+  branchName: string | undefined,
 ): Promise<ManifestDependency[]> {
   const replacements = new Map(
     plan.replacements.map(({ path, after }) => [path, after]),
   );
   const dependencies = await Promise.all(
     snapshots.map(async (snapshot) => {
-      const base = await readGitManifest(snapshot.path, baseBranch);
+      const base = await readGitManifest(snapshot.path, branchName, true);
       return collectManifestDependencies(
         snapshot,
         base === null ? undefined : parseManifest(snapshot.kind, base),
@@ -995,11 +1002,12 @@ async function reconcileWorkspace(
   updateUpgradeTargets(upgrades, dependencies);
   let alignedDependencies = dependencies;
   if (config.reuseExistingBranch) {
-    // A reused branch already contains the alignment, so compare it with the base branch.
-    alignedDependencies = await baseRelativeDependencies(
+    // A reused branch already contains the alignment. Like getBranchFiles, compare
+    // the branch's single commit with its parent so later base changes do not count.
+    alignedDependencies = await branchRelativeDependencies(
       snapshots,
       validatedPlan,
-      config.baseBranch,
+      config.branchName,
     );
   }
   const alignmentNotices = additionalAlignmentNotices(
