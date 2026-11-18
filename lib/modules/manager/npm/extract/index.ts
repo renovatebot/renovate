@@ -107,14 +107,16 @@ export async function extractPackageFile(
     packageFile,
     '.yarnrc.yml',
   );
-  const yarnZeroInstall = yarnrcYmlFileName
-    ? await isZeroInstall(yarnrcYmlFileName)
-    : false;
+  let yarnZeroInstall = false;
+  if (yarnrcYmlFileName) {
+    yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+  }
 
   let yarnrcConfig: YarnConfig | null = null;
-  const repoYarnrcYml = yarnrcYmlFileName
-    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
-    : null;
+  let repoYarnrcYml: string | null = null;
+  if (yarnrcYmlFileName) {
+    repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  }
   if (isString(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnrcConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
@@ -123,9 +125,10 @@ export async function extractPackageFile(
     packageFile,
     '.yarnrc',
   );
-  const repoLegacyYarnrc = legacyYarnrcFileName
-    ? await readLocalFile(legacyYarnrcFileName, 'utf8')
-    : null;
+  let repoLegacyYarnrc: string | null = null;
+  if (legacyYarnrcFileName) {
+    repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  }
   if (isString(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnrcConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
@@ -136,9 +139,13 @@ export async function extractPackageFile(
     packageFile,
     'pnpm-workspace.yaml',
   );
-  const repoPnpmWorkspaceYaml = pnpmWorkspaceYamlFileName
-    ? await readLocalFile(pnpmWorkspaceYamlFileName, 'utf8')
-    : null;
+  let repoPnpmWorkspaceYaml: string | null = null;
+  if (pnpmWorkspaceYamlFileName) {
+    repoPnpmWorkspaceYaml = await readLocalFile(
+      pnpmWorkspaceYamlFileName,
+      'utf8',
+    );
+  }
   if (isNonEmptyStringAndNotWhitespace(repoPnpmWorkspaceYaml)) {
     const parsed = await PnpmWorkspaceFile.safeParseAsync(
       repoPnpmWorkspaceYaml,
@@ -173,7 +180,8 @@ export async function extractPackageFile(
         !!dep.currentValue?.startsWith('file:') ||
         !!dep.currentValue?.startsWith('npm:'),
     );
-    if ((hasFancyRefs && !!lockFiles.npmLock) || yarnZeroInstall) {
+    const hasFancyRefsWithNpmLock = hasFancyRefs && !!lockFiles.npmLock;
+    if (hasFancyRefsWithNpmLock || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
@@ -312,6 +320,6 @@ export async function extractAllPackageFiles(
     }
   }
 
-  await postExtract(npmFiles);
+  await postExtract(npmFiles, config);
   return npmFiles;
 }

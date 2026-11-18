@@ -18,11 +18,11 @@ Renovate supports upgrading dependencies in Bundler's Gemfiles and associated `G
 
 When using `"rangeStrategy": "update-lockfile"`, all gems listed in the `Gemfile` will be updated, even if they do not have a version specified.
 
-When using other `rangeStrategy` options, Renovate doesn't update dependencies without a version constraint.
-Example: `gem 'some-gem', '~> 1.2.3'` will update `some-gem` if a new version matching the constraint is available, but `gem 'some-gem'` won't.
+When using other `rangeStrategy` options, Renovate does not update dependencies without a version constraint.
+Example: `gem 'some-gem', '~> 1.2.3'` will update `some-gem` if a new version matching the constraint is available, but `gem 'some-gem'` will not.
 If you always want to have the latest available version, consider specifying `gem 'some-gem', '> 0'`.
 
 ## Enabling
 
-You can install the [Renovate App](https://github.com/apps/renovate) on GitHub.
+You can install the [Mend Renovate app](https://github.com/apps/renovate) on GitHub.
 Or you can check out [Renovate OSS](https://github.com/renovatebot/renovate) to self-host Renovate.

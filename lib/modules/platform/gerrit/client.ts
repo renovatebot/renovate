@@ -241,11 +241,12 @@ class GerritClient {
   ): Promise<boolean> {
     const messagesToSearch = await this.getMessages(changeNumber);
 
-    return messagesToSearch.some(
-      (existingMsg) =>
-        (msgType === undefined || msgType === existingMsg.tag) &&
-        existingMsg.message.includes(newMessage),
-    );
+    return messagesToSearch.some((existingMsg) => {
+      if (msgType !== undefined && msgType !== existingMsg.tag) {
+        return false;
+      }
+      return existingMsg.message.includes(newMessage);
+    });
   }
 
   async addMessageIfNotAlreadyExists(

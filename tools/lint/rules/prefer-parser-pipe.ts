@@ -18,9 +18,9 @@ function getCalleeName(node: ESTree.Node): string | null {
 }
 
 /**
- * True for a `JSON.parse(...)` call expression.
+ * For a `JSON.parse(...)` call expression return true.
  */
-function isJsonParseCall(node: ESTree.Node): boolean {
+function isJsonParse(node: ESTree.Node): boolean {
   return (
     getCalleeName(node) === 'parse' &&
     node.type === 'CallExpression' &&
@@ -30,26 +30,45 @@ function isJsonParseCall(node: ESTree.Node): boolean {
   );
 }
 
+/**
+ * Return true for a direct `ini.parse(...)` call.
+ */
+function isIniParse(node: ESTree.Node): boolean {
+  return (
+    getCalleeName(node) === 'parse' &&
+    node.type === 'CallExpression' &&
+    node.callee.type === 'MemberExpression' &&
+    node.callee.object.type === 'Identifier' &&
+    node.callee.object.name === 'ini'
+  );
+}
+
 export default defineRule({
   meta: {
     type: 'suggestion',
     messages: {
-      preferJsonPipe:
+      preferParserPipe:
         'Use `Json.pipe(Schema)` from schema-utils instead of `Schema.{{method}}(JSON.parse(...))` — it folds the parse and validation into a single schema.',
+      preferIni:
+        'Use `Ini.pipe(Schema)` (or `Ini`) from schema-utils instead of `ini.parse(...)` — it folds the parse and validation into a single schema.',
     },
   },
   createOnce(context) {
     return {
       CallExpression(node) {
+        if (isIniParse(node)) {
+          context.report({ node, messageId: 'preferIni' });
+          return;
+        }
         const method = getCalleeName(node);
         if (method !== 'parse' && method !== 'safeParse') {
           return;
         }
         const [arg] = node.arguments;
-        if (arg && isJsonParseCall(arg)) {
+        if (arg && isJsonParse(arg)) {
           context.report({
             node,
-            messageId: 'preferJsonPipe',
+            messageId: 'preferParserPipe',
             data: { method },
           });
         }

@@ -67,6 +67,14 @@ describe('util/exec/containerbase', () => {
       });
     });
 
+    it('returns config for the renovate tool', () => {
+      expect(getToolConfig('renovate')).toEqual({
+        datasource: 'npm',
+        packageName: 'renovate',
+        versioning: 'npm',
+      });
+    });
+
     it('returns undefined for an unknown tool', () => {
       // @ts-expect-error -- intentionally using invalid tool name
       expect(getToolConfig('unknown-tool')).toBeUndefined();
@@ -200,6 +208,35 @@ describe('util/exec/containerbase', () => {
         await expect(
           resolveConstraint({ toolName: 'python', constraint }),
         ).resolves.toBe(expected);
+      },
+    );
+
+    it.each`
+      toolName    | constraint      | expected
+      ${'jb'}     | ${'0.6.0.1'}    | ${'0.6.0.1'}
+      ${'jb'}     | ${'0.6'}        | ${'0.6.0.2'}
+      ${'erlang'} | ${'27.3.4.19'}  | ${'27.3.4.19'}
+      ${'erlang'} | ${'27'}         | ${'27.3.4.20'}
+      ${'erlang'} | ${'>=27.0 <28'} | ${'27.3.4.20'}
+    `(
+      'supports semver-extended "$toolName" constraint "$constraint" => "$expected"',
+      async ({ toolName, constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '0.6.0.0' },
+            { version: '0.6.0.1' },
+            { version: '0.6.0.2' },
+            { version: '0.7.0.0' },
+            { version: '26.2.5.6' },
+            { version: '27.3.4.19' },
+            { version: '27.3.4.20' },
+            { version: '28.0.0.1' },
+          ],
+        });
+
+        const result = await resolveConstraint({ toolName, constraint });
+
+        expect(result).toBe(expected);
       },
     );
 

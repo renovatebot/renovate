@@ -20,7 +20,7 @@ Then the `registryUrl` should set as `http://example.com/repo/repodata/` or `htt
 
 ## Usage Example
 
-Say you're defining dnf/tdnf/yum packages in a `manifest.json` and you want Renovate to update them.
+Say you are defining dnf/tdnf/yum packages in a `manifest.json` and you want Renovate to update them.
 
 Assuming your `manifest.json` looks like this.
 
@@ -94,7 +94,7 @@ Architecture : x86_64
 
 You can see that `ver` and `rel` (`release`/`revision`) is stored separately.
 The RPM datasource implementation will combine these together as `ver-rel`.
-That's why the version is defined as `1.0.0-1.az3`, if `rel` (like `example-package1`) is available.
+That is why the version is defined as `1.0.0-1.az3`, if `rel` (like `example-package1`) is available.
 Or just `1.1.0` if `rel` (like `example-package2`) is not available.
 
 ## Limitation and Consideration

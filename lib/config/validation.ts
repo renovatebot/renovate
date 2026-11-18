@@ -115,6 +115,13 @@ const tzRe = regEx(/^:timezone\((?<timezone>.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 
+function isRepoRootPath(parentPath: string | undefined): boolean {
+  if (!parentPath) {
+    return false;
+  }
+  return parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath);
+}
+
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
@@ -377,12 +384,12 @@ export async function validateConfig(
               });
             }
           }
-          const parentName =
-            parentOptionName ??
-            (parentPath &&
-            (parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath))
+          let parentName = parentOptionName;
+          if (is.undefined(parentName)) {
+            parentName = isRepoRootPath(parentPath)
               ? '.'
-              : getParentName(parentPath));
+              : getParentName(parentPath);
+          }
           if (
             !isPreset &&
             parentName &&
@@ -780,13 +787,18 @@ export async function validateConfig(
                     }
                   }
                 }
+                const isSelectorKey =
+                  selectors.includes(key) ||
+                  key === 'matchCurrentVersion' ||
+                  key === 'matchCurrentValue';
+                // top level in a preset
+                const isStringPathOrNotPreset =
+                  isString(parentPath) || !isPreset;
                 if (
-                  (selectors.includes(key) ||
-                    key === 'matchCurrentVersion' ||
-                    key === 'matchCurrentValue') &&
+                  isSelectorKey &&
                   // TODO: can be undefined ? #22198
                   !rulesRe.test(parentPath!) && // Inside a packageRule
-                  (isString(parentPath) || !isPreset) // top level in a preset
+                  isStringPathOrNotPreset
                 ) {
                   errors.push({
                     topic: ConfigValidationTopic.Error,
@@ -1393,7 +1405,12 @@ function describeAllowedValues(option: RenovateOptions): string {
     const page = option.globalOnly
       ? 'self-hosted-configuration'
       : 'configuration-options';
-    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${option.name.toLowerCase()}`;
+    // options which can only be used in one parent, like `packageRules`, are documented under it
+    const heading =
+      option.parents?.length === 1
+        ? `${option.parents[0]}${option.name}`
+        : option.name;
+    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${heading.toLowerCase()}`;
   }
   return `allowedValues: ${JSON.stringify(allowedValues)}`;
 }

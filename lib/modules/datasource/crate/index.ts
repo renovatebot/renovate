@@ -11,6 +11,7 @@ import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -229,7 +230,7 @@ export class CrateDatasource extends Datasource {
   }
 
   private static isNotFound(err: unknown): boolean {
-    return err instanceof HttpError && err.response?.statusCode === 404;
+    return err instanceof HttpError && isNotFound(err);
   }
 
   /**

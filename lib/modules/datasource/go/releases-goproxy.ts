@@ -16,6 +16,7 @@ import {
 } from '../../../util/github/graphql/index.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isForbidden, isGone, isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -152,9 +153,10 @@ export class GoProxyDatasource extends Datasource {
       } catch (err) {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
-        const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
-          fallback === '|' ? true : statusCode === 404 || statusCode === 410;
+          fallback === '|'
+            ? true
+            : isNotFound(potentialHttpError) || isGone(potentialHttpError);
         if (!canFallback) {
           logger.debug(
             { err },
@@ -276,10 +278,13 @@ export class GoProxyDatasource extends Datasource {
     for (const release of releases) {
       const version = release.version.replace(incompatibleSuffixRegex, '');
       const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+      if (!releaseTimestamp) {
+        continue;
+      }
+
       if (
-        releaseTimestamp &&
-        (!release.releaseTimestamp ||
-          releaseTimestamp > release.releaseTimestamp)
+        !release.releaseTimestamp ||
+        releaseTimestamp > release.releaseTimestamp
       ) {
         release.releaseTimestamp = releaseTimestamp;
       }
@@ -536,10 +541,11 @@ export class GoProxyDatasource extends Datasource {
       } catch (err) {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
-        const status = potentialHttpError.response?.statusCode;
+        const isNotFoundOrForbidden =
+          isNotFound(potentialHttpError) || isForbidden(potentialHttpError);
         if (
           potentialHttpError instanceof HttpError &&
-          (status === 404 || status === 403) &&
+          isNotFoundOrForbidden &&
           major !== packageMajor
         ) {
           break;

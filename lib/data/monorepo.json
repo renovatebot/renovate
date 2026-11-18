@@ -144,6 +144,7 @@
     "capacitor": "https://github.com/ionic-team/capacitor",
     "cedar": "https://github.com/cedarjs/cedar",
     "chakra-ui": "https://github.com/chakra-ui/chakra-ui",
+    "chat-sdk": "https://github.com/vercel/chat",
     "chromely": "https://github.com/chromelyapps/Chromely",
     "citation-js": "https://github.com/citation-js/citation-js",
     "ckeditor": [
@@ -155,6 +156,8 @@
       "https://github.com/microsoft/ClearScript",
       "https://github.com/Microsoft/ClearScript"
     ],
+    "cloudevents-sdk-csharp": "https://github.com/cloudevents/sdk-csharp",
+    "cloudevents-sdk-java": "https://github.com/cloudevents/sdk-java",
     "commitlint": "https://github.com/conventional-changelog/commitlint",
     "confect": "https://github.com/rjdellecese/confect",
     "conform": "https://github.com/edmundhung/conform",
@@ -393,6 +396,11 @@
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
     "eslint-stylistic": "https://github.com/eslint-stylistic/eslint-stylistic",
+    "excel-dna": [
+      "https://github.com/Excel-DNA/ExcelDna",
+      "https://github.com/Excel-DNA/IntelliSense",
+      "https://github.com/Excel-DNA/Registration"
+    ],
     "expo": "https://github.com/expo/expo",
     "fabric-chaincode-node": "https://github.com/hyperledger/fabric-chaincode-node",
     "fabric8-kubernetes-client": "https://github.com/fabric8io/kubernetes-client",

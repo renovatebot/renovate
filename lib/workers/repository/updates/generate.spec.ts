@@ -3,7 +3,13 @@ import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
+import type {
+  SharedConstraint,
+  SharedConstraints,
+} from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { type ConstraintName, isToolName } from '../../../util/exec/types.ts';
+import { getParentDir } from '../../../util/fs/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchConfig } from './generate.ts';
@@ -26,6 +32,27 @@ beforeEach(() => {
     commitMessageExtra,
   };
 });
+
+function sharedConstraint(
+  packageFile: string,
+  values: Record<string, string | null>,
+  manager = 'tools',
+  depName?: string,
+): SharedConstraints {
+  const constraints: Partial<Record<ConstraintName, SharedConstraint>> = {};
+  for (const [name, value] of Object.entries(values)) {
+    if (isToolName(name)) {
+      constraints[name] = { depName: depName ?? name, value };
+    }
+  }
+  return {
+    manager,
+    packageFile,
+    directory: getParentDir(packageFile),
+    precedence: 0,
+    constraints,
+  };
+}
 
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
@@ -384,6 +411,110 @@ describe('workers/repository/updates/generate', () => {
         poetry: '1.8.0',
       });
     });
+
+    it('sets the shared constraints for the package files next to their own extractedConstraints', () => {
+      const sharedConstraints = [
+        sharedConstraint('tools.toml', {
+          node: '20',
+          pnpm: '9',
+          rust: '1.80.0',
+        }),
+        sharedConstraint('apps/web/tools.toml', { pnpm: '10', rust: null }),
+      ];
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'npm',
+          packageFile: 'apps/web/package.json',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { node: '22', rust: '1.79.0' },
+        },
+        {
+          manager: 'tools',
+          packageFile: 'tools.toml',
+          depName: 'some-tool',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+
+      const res = generateBranchConfig(branch, sharedConstraints);
+
+      expect(res.extractedConstraints).toEqual({ node: '22', rust: '1.79.0' });
+      expect(res.sharedConstraints).toEqual({ node: '20', pnpm: '10' });
+      expect(res.upgrades[0].extractedConstraints).toEqual({
+        node: '22',
+        rust: '1.79.0',
+      });
+      expect(res.upgrades[0].sharedConstraints).toEqual({
+        node: '20',
+        pnpm: '10',
+      });
+      expect(res.upgrades[1]).not.toHaveProperty('sharedConstraints');
+    });
+
+    it.each`
+      manager             | packageFile              | depName   | currentValue | newValue    | consumer   | constraint
+      ${'rust-toolchain'} | ${'rust-toolchain.toml'} | ${'rust'} | ${'1.84.0'}  | ${'1.91.1'} | ${'cargo'} | ${'rust'}
+      ${'mise'}           | ${'mise.toml'}           | ${'node'} | ${'20.11.0'} | ${'22.1.0'} | ${'npm'}   | ${'node'}
+    `(
+      'uses the new $constraint version of a $manager update in the same branch',
+      ({
+        manager,
+        packageFile,
+        depName,
+        currentValue,
+        newValue,
+        consumer,
+        constraint,
+      }) => {
+        const sharedConstraints = [
+          sharedConstraint(
+            packageFile,
+            { [constraint]: currentValue },
+            manager,
+            depName,
+          ),
+        ];
+        const toolUpgrade: BranchUpgradeConfig = {
+          manager,
+          packageFile,
+          depName,
+          branchName: 'some-branch',
+          currentValue,
+          newValue,
+          newVersion: newValue,
+        };
+        const consumerUpgrade: BranchUpgradeConfig = {
+          manager: consumer,
+          packageFile: 'crates/foo/package-file',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+        };
+
+        const grouped = generateBranchConfig(
+          [toolUpgrade, consumerUpgrade],
+          sharedConstraints,
+        );
+        const other = generateBranchConfig(
+          [{ ...consumerUpgrade, branchName: 'other-branch' }],
+          sharedConstraints,
+        );
+
+        expect(grouped.sharedConstraints).toEqual({
+          [constraint]: newValue,
+        });
+        expect(grouped.upgrades[1].sharedConstraints).toEqual({
+          [constraint]: newValue,
+        });
+        expect(other.sharedConstraints).toEqual({
+          [constraint]: currentValue,
+        });
+      },
+    );
 
     it('uses the new value of a tool constraint which the branch updates', () => {
       const branch: BranchUpgradeConfig[] = [

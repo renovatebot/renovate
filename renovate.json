@@ -9,7 +9,7 @@
   "ignorePresets": [":ignoreModulesAndTests"],
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
-  "baseBranchPatterns": ["$default", "/^disable-next$/"],
+  "baseBranchPatterns": ["$default", "next"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -151,6 +151,10 @@
       "matchPackageNames": ["@commander-js/extra-typings", "commander"],
       "matchUpdateTypes": ["major"],
       "groupName": "commander"
+    },
+    {
+      "matchPackageNames": ["tsrs"],
+      "ignoreUnstable": false
     }
   ],
   "customManagers": [

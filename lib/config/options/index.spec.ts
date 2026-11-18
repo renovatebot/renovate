@@ -2,8 +2,10 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { fetchers } from '../../modules/datasource/custom/formats/index.ts';
+import { getDatasourceList } from '../../modules/datasource/index.ts';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
+import { StringOrStringArrayOption } from '../../util/schema-utils/index.ts';
 import { migrateConfig } from '../migration.ts';
 import { getOptions } from './index.ts';
 
@@ -38,7 +40,7 @@ describe('config/options/index', () => {
 
   it('supportedManagers should have valid names', () => {
     const opts = getOptions();
-    const managerList = Array.from(manager.getManagers().keys());
+    const managerList = manager.allManagersList;
 
     opts
       .filter((option) => option.supportedManagers)
@@ -60,6 +62,20 @@ describe('config/options/index', () => {
         expect(option.supportedPlatforms).toBeNonEmptyArray();
         for (const item of option.supportedPlatforms!) {
           expect(platformList).toContain(item);
+        }
+      });
+  });
+
+  it('supportedDatasources should have valid names', () => {
+    const opts = getOptions();
+    const datasourceList = getDatasourceList();
+
+    opts
+      .filter((option) => option.supportedDatasources)
+      .forEach((option) => {
+        expect(option.supportedDatasources).toBeNonEmptyArray();
+        for (const item of option.supportedDatasources!) {
+          expect(datasourceList).toContain(item);
         }
       });
   });
@@ -108,10 +124,7 @@ describe('config/options/index', () => {
 
     for (const option of opts) {
       it(`${option.name} should be of type string or array of strings`, () => {
-        const valid =
-          option.type === 'string' ||
-          (option.type === 'array' && option.subType === 'string');
-        expect(valid).toBeTrue();
+        expect(StringOrStringArrayOption.safeParse(option).success).toBeTrue();
       });
     }
   });
@@ -144,11 +157,7 @@ describe('config/options/index', () => {
         const name = match.groups!.name;
         const option = allOptions.find((o) => o.name === name);
         // Only include string or array-of-string options (not objects like userStrings)
-        if (
-          option &&
-          (option.type === 'string' ||
-            (option.type === 'array' && option.subType === 'string'))
-        ) {
+        if (StringOrStringArrayOption.safeParse(option).success) {
           detectedOptions.add(name);
         }
       }

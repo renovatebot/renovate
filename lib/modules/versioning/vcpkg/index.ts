@@ -179,7 +179,10 @@ function isValid(input: string | undefined | null): boolean {
 function isCompatible(version: string, current?: string): boolean {
   const v = parse(version);
   const c = current ? parse(current) : null;
-  return !!v && (!c || v.scheme === c.scheme);
+  if (!v) {
+    return false;
+  }
+  return !c || v.scheme === c.scheme;
 }
 
 function isStable(version: string): boolean {

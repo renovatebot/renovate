@@ -36,6 +36,7 @@ import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
 import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { isNotFound, isUnauthorized } from '../util/http/status.ts';
 import { getResourceDetectors } from './detectors.ts';
 import { FileSpanExporter } from './file-exporter.ts';
 import type { RenovateSpanOptions } from './types.ts';
@@ -150,7 +151,7 @@ export function init(): void {
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
           request.path.endsWith(`/protection`) &&
-          response.statusCode === 404
+          isNotFound(response)
         ) {
           span.setStatus({ code: SpanStatusCode.OK });
         } else if (
@@ -161,7 +162,7 @@ export function init(): void {
           response instanceof ServerResponse &&
           response.getHeader('www-authenticate') &&
           response.getHeader('docker-distribution-api-version') &&
-          response.statusCode === 401
+          isUnauthorized(response)
         ) {
           // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
           span.setStatus({ code: SpanStatusCode.OK });

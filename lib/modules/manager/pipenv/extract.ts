@@ -116,6 +116,10 @@ function extractFromSection(
   return deps;
 }
 
+function isInvalidRequirementEntry(dep: unknown): boolean {
+  return !isObject(dep) && !isString(dep);
+}
+
 function isPipRequirements(
   section?:
     Record<string, PipRequirement> | Record<string, string> | PipSource[],
@@ -123,7 +127,7 @@ function isPipRequirements(
   return (
     !isArray(section) &&
     isObject(section) &&
-    !Object.values(section).some((dep) => !isObject(dep) && !isString(dep))
+    !Object.values(section).some(isInvalidRequirementEntry)
   );
 }
 
