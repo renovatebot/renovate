@@ -1,6 +1,11 @@
 import { fakeSha, logger, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
 import type { PreparedCommit } from '../../../../modules/platform/types.ts';
+import {
+  addSecretForSanitizing,
+  clearRepoSanitizedSecretsList,
+} from '../../../../util/sanitize.ts';
 import type { BranchConfig } from '../../../types.ts';
 import {
   commitFilesToBranch,
@@ -63,6 +68,25 @@ describe('workers/repository/update/branch/commit', () => {
         message: 'some commit message',
         platformCommit: 'auto',
       });
+    });
+
+    it('rejects if the commit message contains a secret', async () => {
+      addSecretForSanitizing('some-secret');
+      config.commitMessage = 'update some-secret';
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+
+      try {
+        await expect(prepareBranchCommit(config)).rejects.toThrow(
+          CONFIG_SECRETS_EXPOSED,
+        );
+        expect(scm.prepareCommit).not.toHaveBeenCalled();
+      } finally {
+        clearRepoSanitizedSecretsList();
+      }
     });
   });
 

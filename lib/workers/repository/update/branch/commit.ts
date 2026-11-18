@@ -14,7 +14,7 @@ import type { BranchConfig } from '../../../types.ts';
 /**
  * Creates the local commit of the branch's updated files, or returns `null` if there is nothing to commit or in dry-run mode.
  */
-export function prepareBranchCommit(
+export async function prepareBranchCommit(
   config: BranchConfig,
 ): Promise<PreparedCommit | null> {
   let updatedFiles = config.updatedPackageFiles!.concat(
@@ -36,7 +36,7 @@ export function prepareBranchCommit(
   }
   if (!isNonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
-    return Promise.resolve(null);
+    return null;
   }
   const fileLength = new Set(updatedFiles.map((file) => file.path)).size;
   logger.debug(`${fileLength} file(s) to commit`);
@@ -87,11 +87,11 @@ export function prepareBranchCommit(
       { ...logExtra },
       `DRY-RUN: Would commit files to branch ${config.branchName}`,
     );
-    return Promise.resolve(null);
+    return null;
   }
 
   // API will know whether to create new branch or not
-  return scm.prepareCommit(commitFilesConfig);
+  return await scm.prepareCommit(commitFilesConfig);
 }
 
 /**
