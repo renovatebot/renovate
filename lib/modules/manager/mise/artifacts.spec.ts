@@ -547,12 +547,12 @@ describe('modules/manager/mise/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool mise 1.2.3' },
-      { cmd: 'install-tool node 2.3.4' },
-      { cmd: 'install-tool npm 3.4.5' },
-      { cmd: 'install-tool golang 4.5.6' },
-      { cmd: 'install-tool ruby 5.6.7' },
-      { cmd: 'install-tool python 6.7.8' },
-      { cmd: 'install-tool uv 7.8.9' },
+      { cmd: 'install-tool python 2.3.4' },
+      { cmd: 'install-tool uv 3.4.5' },
+      { cmd: 'install-tool node 4.5.6' },
+      { cmd: 'install-tool npm 5.6.7' },
+      { cmd: 'install-tool golang 6.7.8' },
+      { cmd: 'install-tool ruby 7.8.9' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -572,24 +572,24 @@ describe('modules/manager/mise/artifacts', () => {
       config: {
         constraints: {
           mise: '2026.6.12',
+          python: '3.13.5',
+          uv: '0.8.0',
           node: '24.16.0',
           npm: '11.4.2',
           go: '1.24.4',
           ruby: '3.4.3',
-          python: '3.13.5',
-          uv: '0.8.0',
         },
       },
     });
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool mise 2026.6.12' },
+      { cmd: 'install-tool python 3.13.5' },
+      { cmd: 'install-tool uv 0.8.0' },
       { cmd: 'install-tool node 24.16.0' },
       { cmd: 'install-tool npm 11.4.2' },
       { cmd: 'install-tool golang 1.24.4' },
       { cmd: 'install-tool ruby 3.4.3' },
-      { cmd: 'install-tool python 3.13.5' },
-      { cmd: 'install-tool uv 0.8.0' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -609,24 +609,24 @@ describe('modules/manager/mise/artifacts', () => {
       config: {
         extractedConstraints: {
           mise: '2026.6.12',
+          python: '3.13.5',
+          uv: '0.8.0',
           node: '24.16.0',
           npm: '11.4.2',
           go: '1.24.4',
           ruby: '3.4.3',
-          python: '3.13.5',
-          uv: '0.8.0',
         },
       },
     });
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool mise 2026.6.12' },
+      { cmd: 'install-tool python 3.13.5' },
+      { cmd: 'install-tool uv 0.8.0' },
       { cmd: 'install-tool node 24.16.0' },
       { cmd: 'install-tool npm 11.4.2' },
       { cmd: 'install-tool golang 1.24.4' },
       { cmd: 'install-tool ruby 3.4.3' },
-      { cmd: 'install-tool python 3.13.5' },
-      { cmd: 'install-tool uv 0.8.0' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -669,12 +669,12 @@ describe('modules/manager/mise/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool mise 1.0.0' },
+        { cmd: 'install-tool python 1.0.0' },
+        { cmd: 'install-tool uv 1.0.0' },
         { cmd: 'install-tool node 1.0.0' },
         { cmd: 'install-tool npm 1.0.0' },
         { cmd: 'install-tool golang 1.0.0' },
         { cmd: 'install-tool ruby 1.0.0' },
-        { cmd: 'install-tool python 1.0.0' },
-        { cmd: 'install-tool uv 1.0.0' },
         { cmd: trustCmd },
         { cmd: `mise lock ${depName}` },
       ]);

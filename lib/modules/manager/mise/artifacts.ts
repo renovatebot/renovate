@@ -100,15 +100,25 @@ async function getMiseLockToolConstraints(
   miseConstraint: string | undefined,
   safeMode = false,
 ): Promise<ToolConstraint[]> {
-  const miseToolConstraint: ToolConstraint = {
-    toolName: 'mise',
-    constraint: miseConstraint,
-  };
+  const toolConstraints: ToolConstraint[] = [
+    {
+      toolName: 'mise',
+      constraint: miseConstraint,
+    },
+    {
+      toolName: 'python',
+      constraint: await resolveToolConstraint(config, 'python'),
+    },
+    {
+      toolName: 'uv',
+      constraint: await resolveToolConstraint(config, 'uv'),
+    },
+  ];
   if (safeMode) {
-    return [miseToolConstraint];
+    return toolConstraints;
   }
   return [
-    miseToolConstraint,
+    ...toolConstraints,
     {
       toolName: 'node',
       constraint: await resolveToolConstraint(config, 'node'),
@@ -125,14 +135,6 @@ async function getMiseLockToolConstraints(
     {
       toolName: 'ruby',
       constraint: await resolveToolConstraint(config, 'ruby'),
-    },
-    {
-      toolName: 'python',
-      constraint: await resolveToolConstraint(config, 'python'),
-    },
-    {
-      toolName: 'uv',
-      constraint: await resolveToolConstraint(config, 'uv'),
     },
   ];
 }
