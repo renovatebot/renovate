@@ -499,12 +499,12 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
-    const hasRejectedOrBlockingLabels = Object.values(
+    const hasLabelRejectedByAnotherAccountOrBlocking = Object.values(
       coerceObject(change.labels),
     ).some(
       (label) => isRejectedByAnotherAccount(label) || label.blocking === true,
     );
-    if (hasRejectedOrBlockingLabels) {
+    if (hasLabelRejectedByAnotherAccountOrBlocking) {
       return 'red';
     }
     // v8 ignore else -- TODO: add test #40625
