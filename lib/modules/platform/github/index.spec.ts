@@ -5679,10 +5679,10 @@ describe('modules/platform/github/index', () => {
       },
     };
     const disabledPr = { id: 'abcd', autoMergeRequest: null };
-    const cancelled = { cancelled: true };
-    const enabledByOther = { cancelled: false, reason: 'enabled-by-other' };
-    const unconfirmed = { cancelled: false, reason: 'unconfirmed' };
-    const notEnabled = { cancelled: false, reason: 'not-enabled' };
+    const canceled = { canceled: true };
+    const enabledByOther = { canceled: false, reason: 'enabled-by-other' };
+    const unconfirmed = { canceled: false, reason: 'unconfirmed' };
+    const notEnabled = { canceled: false, reason: 'not-enabled' };
 
     async function mockScope(
       autoMergeAllowed = true,
@@ -5796,7 +5796,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toEqual(cancelled);
+      ).resolves.toEqual(canceled);
     });
 
     it.each`
@@ -5831,7 +5831,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge({ number: 123, enabledBy }),
-        ).resolves.toEqual(cancelled);
+        ).resolves.toEqual(canceled);
       },
     );
 
@@ -5869,7 +5869,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge({ number: 123 }),
-      ).resolves.toEqual(cancelled);
+      ).resolves.toEqual(canceled);
     });
 
     it('refuses to cancel without an expected actor', async () => {
@@ -5923,7 +5923,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toEqual(cancelled);
+      ).resolves.toEqual(canceled);
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
       ).resolves.toEqual(notEnabled);
@@ -5984,7 +5984,7 @@ describe('modules/platform/github/index', () => {
       ).resolves.toEqual(notEnabled);
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toEqual(cancelled);
+      ).resolves.toEqual(canceled);
     });
 
     it('cancels requests without a stored message', async () => {
@@ -6012,7 +6012,7 @@ describe('modules/platform/github/index', () => {
 
       await expect(
         github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toEqual(cancelled);
+      ).resolves.toEqual(canceled);
     });
 
     it.each`

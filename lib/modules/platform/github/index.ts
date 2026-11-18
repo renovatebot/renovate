@@ -2290,10 +2290,10 @@ export async function cancelPlatformAutomerge({
 }: CancelPlatformAutomergeConfig): Promise<CancelPlatformAutomergeResult> {
   const pr = await getPrAutoMergeState(prNo);
   if (!pr) {
-    return { cancelled: false, reason: 'unconfirmed' };
+    return { canceled: false, reason: 'unconfirmed' };
   }
   if (pr.autoMergeRequest === null) {
-    return { cancelled: false, reason: 'not-enabled' };
+    return { canceled: false, reason: 'not-enabled' };
   }
   const actor = pr.autoMergeRequest.enabledBy;
   // GraphQL omits the REST login's [bot] suffix. Use actor type to avoid matching a user with the same name.
@@ -2304,7 +2304,7 @@ export async function cancelPlatformAutomerge({
       { prNo },
       'PR auto-merge actor does not match cancellation filter',
     );
-    return { cancelled: false, reason: 'enabled-by-other' };
+    return { canceled: false, reason: 'enabled-by-other' };
   }
 
   const cancellation = await githubApi.requestGraphql<{
@@ -2321,9 +2321,9 @@ export async function cancelPlatformAutomerge({
     // Another actor may have disabled auto-merge after the state query, then this request did not cancel it.
     const current = await getPrAutoMergeState(prNo);
     if (current?.id === pr.id && current.autoMergeRequest === null) {
-      return { cancelled: false, reason: 'not-enabled' };
+      return { canceled: false, reason: 'not-enabled' };
     }
-    return { cancelled: false, reason: 'unconfirmed' };
+    return { canceled: false, reason: 'unconfirmed' };
   }
 
   const disabledPr = GithubPullRequestAutoMergeState.safeParse(
@@ -2335,9 +2335,9 @@ export async function cancelPlatformAutomerge({
     disabledPr.data.autoMergeRequest !== null
   ) {
     logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
-    return { cancelled: false, reason: 'unconfirmed' };
+    return { canceled: false, reason: 'unconfirmed' };
   }
-  return { cancelled: true };
+  return { canceled: true };
 }
 
 export async function reattemptPlatformAutomerge({
