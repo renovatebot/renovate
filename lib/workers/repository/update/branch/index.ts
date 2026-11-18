@@ -97,12 +97,18 @@ async function cancelPlatformAutomergeForPush(
     );
     return undefined;
   }
-  // auto-merge which is not Renovate's own or has the same commit message is left as it is
-  const cancellation = await platform.cancelPlatformAutomerge({
-    number: branchPr.number,
-    platformPrOptions,
-  });
-  return cancellation.canceled ? branchPr.number : undefined;
+  try {
+    // auto-merge which is not Renovate's own or has the same commit message is left as it is
+    const cancellation = await platform.cancelPlatformAutomerge({
+      number: branchPr.number,
+      platformPrOptions,
+    });
+    return cancellation.canceled ? branchPr.number : undefined;
+  } catch (err) {
+    // the request may have been processed before it failed, so it is restored
+    logger.warn({ err }, 'Error canceling platform automerge');
+    return branchPr.number;
+  }
 }
 
 /**

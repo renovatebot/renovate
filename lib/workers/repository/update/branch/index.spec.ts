@@ -4286,6 +4286,23 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
       });
 
+      it('pushes and re-enables platform automerge when canceling it throws', async () => {
+        const cancelErr = new Error('Internal Server Error');
+        platform.cancelPlatformAutomerge.mockRejectedValueOnce(cancelErr);
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'done', commitSha });
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: cancelErr },
+          'Error canceling platform automerge',
+        );
+        expect(commit.pushBranchCommit).toHaveBeenCalledOnce();
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+      });
+
       describe('without a commit', () => {
         beforeEach(() => {
           commit.prepareBranchCommit.mockResolvedValueOnce(null);
