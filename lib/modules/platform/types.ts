@@ -173,7 +173,12 @@ export type CancelPlatformAutomergeResult =
   | { canceled: true }
   | {
       canceled: false;
-      reason: 'enabled-by-other' | 'not-enabled' | 'unchanged' | 'unconfirmed';
+      reason:
+        | 'enabled-by-other'
+        | 'merge-queue'
+        | 'not-enabled'
+        | 'unchanged'
+        | 'unconfirmed';
     };
 export interface EnsureIssueConfig {
   title: string;
@@ -334,7 +339,7 @@ export interface Platform {
   /**
    * Cancels platform auto-merge for the expected actor without scheduling restoration.
    * Returns canceled if this request disabled it, otherwise the reason:
-   * another actor, auto-merge not enabled, unchanged commit message or unconfirmed state.
+   * another actor, a merge queue on the target branch, auto-merge not enabled, unchanged commit message or unconfirmed state.
    * Does not confirm the PR is open or prevent queued merges or re-enablement.
    * Propagates request failures.
    */

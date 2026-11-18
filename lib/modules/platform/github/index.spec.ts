@@ -5688,11 +5688,36 @@ describe('modules/platform/github/index', () => {
     async function mockScope(
       autoMergeAllowed = true,
       renovateUsername?: string,
+      targetBranch = 'master',
     ): Promise<httpMock.Scope> {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo', { autoMergeAllowed });
       await github.initRepo({ repository: 'some/repo', renovateUsername });
+      prListMockOptional(scope, targetBranch);
       return scope;
+    }
+
+    function prListMockOptional(
+      scope: httpMock.Scope,
+      targetBranch: string,
+    ): void {
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .optionally()
+        .reply(200, [
+          {
+            number: 123,
+            node_id: 'abcd',
+            updated_at: '2026-01-01T00:00:00Z',
+            user: { login: 'renovate[bot]' },
+            base: { ref: targetBranch },
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            state: 'open',
+            title: 'Some PR',
+          },
+        ]);
     }
 
     describe('getPrAutoMergeState()', () => {
@@ -6296,6 +6321,82 @@ describe('modules/platform/github/index', () => {
         },
       );
 
+      describe('merge queue', () => {
+        const mergeQueue = { id: 'queue' };
+        const outdatedAutomerge = {
+          commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
+          commitBody: 'Some body',
+          enabledBy: { __typename: 'Bot', login: 'renovate' },
+        };
+
+        it('keeps automerge when the default branch has a merge queue', async () => {
+          const scope = httpMock.scope(githubApiHost);
+          initRepoMock(scope, 'some/repo', { mergeQueue });
+          await github.initRepo({ repository: 'some/repo' });
+          prListMockOptional(scope, 'master');
+          stateReply(scope, outdatedAutomerge);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual({ canceled: false, reason: 'merge-queue' });
+        });
+
+        it('keeps automerge when the target branch has a merge queue', async () => {
+          const scope = await mockScope(true, undefined, 'release');
+          stateReply(scope, outdatedAutomerge);
+          scope
+            .post('/graphql')
+            .reply(200, { data: { repository: { mergeQueue } } });
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual({ canceled: false, reason: 'merge-queue' });
+        });
+
+        it('cancels automerge when the target branch has no merge queue', async () => {
+          const scope = await mockScope(true, undefined, 'release');
+          stateReply(scope, outdatedAutomerge);
+          scope
+            .post('/graphql')
+            .reply(200, { data: { repository: { mergeQueue: null } } });
+          cancellationReply(scope);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual(canceled);
+        });
+
+        it('falls back to the default branch when the PR is not found', async () => {
+          const scope = httpMock.scope(githubApiHost);
+          initRepoMock(scope, 'some/repo', { mergeQueue });
+          await github.initRepo({ repository: 'some/repo' });
+          scope
+            .get(
+              '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+            )
+            .reply(200, [])
+            .get('/repos/some/repo/pulls/123')
+            .reply(404);
+          stateReply(scope, outdatedAutomerge);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual({ canceled: false, reason: 'merge-queue' });
+        });
+      });
+
       describe('re-enabling', () => {
         const enabledResp = {
           data: {
@@ -6319,22 +6420,8 @@ describe('modules/platform/github/index', () => {
           return scope;
         }
 
-        function prMocks(scope: httpMock.Scope): httpMock.Scope {
-          return scope
-            .get(
-              '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-            )
-            .reply(200, [])
-            .get('/repos/some/repo/pulls/123')
-            .reply(200, {
-              number: 123,
-              node_id: 'abcd',
-              head: { repo: { full_name: 'some/repo' } },
-            });
-        }
-
         it('retries once after canceling', async () => {
-          const scope = prMocks(await cancelAutomerge());
+          const scope = await cancelAutomerge();
           scope
             .post('/graphql')
             .reply(200, failedResp)
@@ -6354,7 +6441,7 @@ describe('modules/platform/github/index', () => {
         });
 
         it('warns when re-enabling fails twice', async () => {
-          const scope = prMocks(await cancelAutomerge());
+          const scope = await cancelAutomerge();
           scope
             .post('/graphql')
             .reply(200, failedResp)
@@ -6373,7 +6460,7 @@ describe('modules/platform/github/index', () => {
         });
 
         it('propagates a rate limit during the retry', async () => {
-          const scope = prMocks(await cancelAutomerge());
+          const scope = await cancelAutomerge();
           scope
             .post('/graphql')
             .reply(200, failedResp)
@@ -6392,7 +6479,13 @@ describe('modules/platform/github/index', () => {
 
         it('forgets canceled PRs on initRepo', async () => {
           await cancelAutomerge();
-          const scope = prMocks(await mockScope());
+          const scope = await mockScope();
+          // the PR cache of the first init is synced
+          scope
+            .get(
+              '/repos/some/repo/pulls?per_page=20&state=all&sort=updated&direction=desc&page=1',
+            )
+            .reply(200, []);
           scope.post('/graphql').reply(200, failedResp);
 
           await github.reattemptPlatformAutomerge({

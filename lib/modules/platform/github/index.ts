@@ -2355,6 +2355,14 @@ export async function cancelPlatformAutomerge({
     return { canceled: false, reason: 'enabled-by-other' };
   }
 
+  // a queued PR could otherwise be removed from the merge queue
+  const targetBranch =
+    (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
+  if (await isBranchMergeQueueEnabled(targetBranch)) {
+    logger.debug({ prNo }, 'PR targets a branch with a merge queue');
+    return { canceled: false, reason: 'merge-queue' };
+  }
+
   const cancellation = await githubApi.requestGraphql<{
     disablePullRequestAutoMerge: { pullRequest: unknown };
   }>(disableAutoMergeMutation, {
