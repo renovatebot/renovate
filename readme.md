@@ -118,7 +118,7 @@ We only want maintainers to open Issues.
 
 ### Contributing
 
-To contribute to Renovate or run it from source, please read the contributing guidelines.
+To contribute to Renovate, or run a local copy, please read the contributing guidelines.
 
 - [Guidelines for Contributing](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md)
 - Items that need contribution: [good first issues](https://github.com/renovatebot/renovate/contribute)

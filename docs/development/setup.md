@@ -1,12 +1,14 @@
 # Development setup
 
 You can develop Renovate on a workstation, in a Dev Container, or in a cloud coding workspace. To use the repository's Dev Container, see [VS Code Dev Containers](#vs-code-dev-containers) or [GitHub Codespaces](./remote-development.md#github-codespaces).
+You can improve this documentation by opening a pull request.
+For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
 ## Installation
 
 ### Prerequisites
 
-You need the following tools to develop Renovate from source:
+You need the following dependencies:
 
 - Git `>=2.45.1`
 - Node.js `^24.11.0 || ^26.13.0`
@@ -23,8 +25,8 @@ For building the documentation, you also need:
 
 We recommend [Mise](https://mise.jdx.dev/) to install and manage the tools pinned in [`mise.toml`](../../mise.toml).
 After installing Mise, run `mise install` from the repository root.
-This also installs project dependencies through the `postinstall` hook.
-The pinned tools include [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
+This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
+This includes [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
 
 #### Linux
 
@@ -79,7 +81,8 @@ pnpm build
 
 #### Local Docker
 
-To run the development tools directly with Docker, build the repository's Dev Container image:
+If, for some reason, you cannot run the relevant versions on your local machine, you can run everything from a Docker image.
+To build the correct Docker image:
 
 ```
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
@@ -100,7 +103,7 @@ docker run -it --rm -v "${PWD}:/usr/src/app" -w /usr/src/app renovatebot_local p
 
 ## Fork and Clone
 
-To contribute, fork the repository on GitHub and use a checkout of your fork in your development environment.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork.
 The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
