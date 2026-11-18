@@ -2304,7 +2304,7 @@ function isAutomergeMessageUnchanged(
   return (
     !enabledByRenovate ||
     !commitBody ||
-    (autoMergeRequest.commitBody ?? '') === commitBody
+    autoMergeRequest.commitBody === commitBody
   );
 }
 
