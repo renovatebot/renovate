@@ -13,7 +13,7 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({
       cacheDir: '/tmp/cache',
       platform: 'github',
-      repositoryCache: 'enabled',
+      repositoryCache: { state: 'enabled' },
     });
   });
 
@@ -26,7 +26,7 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({
       cacheDir: '/tmp/cache',
       platform: 'github',
-      repositoryCache: 'disabled',
+      repositoryCache: { state: 'disabled' },
     });
     await initRepoCache(config);
     expect(fs.readCacheFile).not.toHaveBeenCalled();
@@ -46,7 +46,7 @@ describe('util/cache/repository/index', () => {
       cacheDir: '/tmp/cache',
       platform: 'github',
       dryRun: 'full',
-      repositoryCache: 'enabled',
+      repositoryCache: { state: 'enabled' },
     });
     await initRepoCache(config);
     await saveCache();
@@ -58,7 +58,7 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({
       cacheDir: '/tmp/cache',
       platform: 'github',
-      repositoryCache: 'reset',
+      repositoryCache: { state: 'reset' },
     });
     await initRepoCache(config);
     expect(fs.readCacheFile).not.toHaveBeenCalled();

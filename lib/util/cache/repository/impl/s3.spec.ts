@@ -211,7 +211,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('should persists data locally after uploading to s3', async () => {
-    GlobalConfig.set({ repositoryCacheForceLocal: true });
+    GlobalConfig.set({ repositoryCache: { forceLocal: true } });
     const putObjectCommandOutput: PutObjectCommandOutput = {
       $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
     };

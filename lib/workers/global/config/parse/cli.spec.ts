@@ -148,9 +148,62 @@ describe('workers/global/config/parse/cli', () => {
       ${'--dependency-dashboard'}       | ${{ dependencyDashboard: { enabled: true } }}
       ${'--dependency-dashboard=true'}  | ${{ dependencyDashboard: { enabled: true } }}
       ${'--dependency-dashboard=false'} | ${{ dependencyDashboard: { enabled: false } }}
+      ${'--repository-cache=disabled'}  | ${{ repositoryCache: { state: 'disabled' } }}
+      ${'--repository-cache=enabled'}   | ${{ repositoryCache: { state: 'enabled' } }}
+      ${'--repository-cache=reset'}     | ${{ repositoryCache: { state: 'reset' } }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);
+    });
+
+    describe('migrates the flat repository cache flags', () => {
+      it('moves them into repositoryCache with their old types', () => {
+        argv.push(
+          '--repository-cache=enabled',
+          '--repository-cache-type=s3://bucket',
+          '--repository-cache-force-local',
+          '--http-cache-ttl-days=7',
+          '--pr-cache-sync-max-pages=5',
+        );
+
+        expect(cli.getConfig(argv)).toEqual({
+          repositoryCache: {
+            state: 'enabled',
+            type: 's3://bucket',
+            forceLocal: true,
+            httpTtlDays: 7,
+            prSyncMaxPages: 5,
+          },
+        });
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          {
+            objectFlag: '--repository-cache',
+            oldFlags: [
+              '--http-cache-ttl-days',
+              '--pr-cache-sync-max-pages',
+              '--repository-cache-force-local',
+              '--repository-cache-type',
+            ],
+          },
+          'cli config has been migrated into a grouped option',
+        );
+      });
+
+      it('migrates a state passed as a separate argument', () => {
+        argv.push('--repository-cache', 'reset');
+
+        expect(cli.getConfig(argv)).toEqual({
+          repositoryCache: { state: 'reset' },
+        });
+      });
+
+      it('leaves a --repository-cache object alone', () => {
+        argv.push('--repository-cache', '{"state":"enabled"}');
+
+        expect(cli.getConfig(argv)).toEqual({
+          repositoryCache: { state: 'enabled' },
+        });
+      });
     });
 
     describe('migrates the flat Dependency Dashboard flags', () => {

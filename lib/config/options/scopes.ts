@@ -21,6 +21,11 @@ const managerParents = [
   ...CustomManagersListLiteral,
 ] as const;
 
+/**
+ * The objects which only exist in the global config, so an option which can be used anywhere in a config can't be used in them.
+ */
+const globalOnlyParents: readonly AllowedParents[] = ['repositoryCache'];
+
 const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
   repo: ['.'],
   packageRule: ['packageRules'],
@@ -28,7 +33,12 @@ const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
   updateType: UpdateTypesOptions,
   vulnerabilityAlert: ['vulnerabilityAlerts'],
   group: ['group'],
-  any: ['.', ...namedParents, ...managerParents, ...UpdateTypesOptions],
+  any: [
+    '.',
+    ...namedParents.filter((parent) => !globalOnlyParents.includes(parent)),
+    ...managerParents,
+    ...UpdateTypesOptions,
+  ],
 };
 
 /**

@@ -34,7 +34,7 @@ export type RenovateConfigStage =
 export type RenovateSplit =
   'init' | 'onboarding' | 'extract' | 'lookup' | 'update';
 
-export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheState = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type InternalHostAccess = 'allow' | 'warn' | 'block';
@@ -268,9 +268,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
-  prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
-  httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
@@ -279,8 +277,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
   repositoryCache?: RepositoryCacheConfig;
-  repositoryCacheForceLocal?: boolean;
-  repositoryCacheType?: RepositoryCacheType;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
@@ -664,6 +660,7 @@ export const namedParents = [
   'logLevelRemap',
   'packageRules',
   'postUpgradeTasks',
+  'repositoryCache',
   'toolSettings',
   'vulnerabilityAlerts',
 ] as const;
@@ -939,6 +936,14 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface RepositoryCacheConfig {
+  state?: RepositoryCacheState;
+  type?: RepositoryCacheType;
+  forceLocal?: boolean;
+  httpTtlDays?: number;
+  prSyncMaxPages?: number;
 }
 
 export interface DependencyDashboardConfig {

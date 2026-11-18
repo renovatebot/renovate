@@ -12,23 +12,22 @@ export async function initRepoCache(config: RepoCacheConfig): Promise<void> {
   resetCache();
 
   const { repository, repoFingerprint } = config;
-  const repositoryCache = GlobalConfig.get('repositoryCache');
-  const type = GlobalConfig.get('repositoryCacheType');
+  const { state, type } = GlobalConfig.get('repositoryCache');
 
-  if (repositoryCache === 'disabled') {
+  if (state === 'disabled') {
     setCache(new RepoCacheNull());
     return;
   }
 
-  if (repositoryCache === 'enabled') {
-    const cache = CacheFactory.get(repository!, repoFingerprint, type);
+  if (state === 'enabled') {
+    const cache = CacheFactory.get(repository!, repoFingerprint, type!);
     await instrument('load RepoCache', () => cache.load());
     setCache(cache);
     return;
   }
 
-  if (repositoryCache === 'reset') {
-    const cache = CacheFactory.get(repository!, repoFingerprint, type);
+  if (state === 'reset') {
+    const cache = CacheFactory.get(repository!, repoFingerprint, type!);
     await instrument('save RepoCache', () => cache.save());
     setCache(cache);
     return;

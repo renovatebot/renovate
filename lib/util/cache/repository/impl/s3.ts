@@ -66,7 +66,7 @@ export class RepoCacheS3 extends RepoCacheBase {
     };
     try {
       await this.s3Client.send(new PutObjectCommand(s3Params));
-      if (GlobalConfig.get('repositoryCacheForceLocal')) {
+      if (GlobalConfig.get('repositoryCache').forceLocal) {
         const cacheLocalFileName = getLocalCacheFileName(
           this.platform,
           this.repository,
