@@ -2300,10 +2300,10 @@ function isAutomergeMessageUnchanged(
   if (autoMergeRequest.commitHeadline !== commitHeadline) {
     return false;
   }
-  // GitHub stores its default body when none was passed, so the body is only compared for Renovate's own automerge with a body
+  // GitHub stores its default body when none was passed, so the body is only compared for Renovate's own automerge with a non-empty body
   return (
     !enabledByRenovate ||
-    commitBody === undefined ||
+    !commitBody ||
     (autoMergeRequest.commitBody ?? '') === commitBody
   );
 }

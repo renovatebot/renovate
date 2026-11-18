@@ -6222,6 +6222,7 @@ describe('modules/platform/github/index', () => {
         ${'Update dependency foo to v1.0.5'}     | ${'GitHub default body'}
         ${'Update dependency foo to v1.0.5\n\n'} | ${null}
         ${'Update dependency foo to v1.0.5\n\n'} | ${''}
+        ${'Update dependency foo to v1.0.5\n\n'} | ${'GitHub default body'}
       `(
         'keeps Renovate automerge when the body is not compared or empty: $storedBody',
         async ({ automergeCommitMessage, storedBody }) => {
