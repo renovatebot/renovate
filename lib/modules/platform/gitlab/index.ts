@@ -1484,7 +1484,8 @@ export async function ensureComment({
   const massagedTopic = topic
     ? topic
         .replace(regEx(/Pull Request/g), 'Merge Request')
-        .replace(regEx(/PR/g), 'MR')
+        .replace(regEx(/\bPR\b/g), 'MR')
+        .replace(regEx(/\bPRs\b/g), 'MRs')
     : topic;
   const comments = await getComments(number);
   let body: string;
@@ -1497,7 +1498,8 @@ export async function ensureComment({
     body = smartTruncate(
       body
         .replace(regEx(/Pull Request/g), 'Merge Request')
-        .replace(regEx(/PR/g), 'MR'),
+        .replace(regEx(/\bPR\b/g), 'MR')
+        .replace(regEx(/\bPRs\b/g), 'MRs'),
       maxBodyLength(),
     );
     comments.forEach((comment: { body: string; id: number }) => {
