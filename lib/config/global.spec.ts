@@ -54,7 +54,7 @@ describe('config/global', () => {
         state: 'enabled',
         type: 'local',
         forceLocal: false,
-        httpTtlDays: 90,
+        maximumHttpDays: 90,
         prSyncMaxPages: 100,
       });
     });

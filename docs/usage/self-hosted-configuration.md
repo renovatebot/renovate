@@ -1580,14 +1580,14 @@ If set to `true`, Renovate will persist repository cache locally after uploading
 
 This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
 
-### `repositoryCache.httpTtlDays`
+### `repositoryCache.maximumHttpDays`
 
 This option sets the number of days that Renovate will cache HTTP responses.
 The default value is 90 days.
 Value of `0` means no caching.
 
 !!! warning
-  When you set `repositoryCache.httpTtlDays` to `0`, Renovate will remove the cached HTTP data.
+  When you set `repositoryCache.maximumHttpDays` to `0`, Renovate will remove the cached HTTP data.
 
 ### `repositoryCache.prSyncMaxPages`
 
