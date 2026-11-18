@@ -1516,6 +1516,14 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
+    it('reads the default branch when getFile is the first git operation', async () => {
+      await git.initRepo({ url: origin.path });
+
+      await expect(
+        git.getFile('master_file', undefined, { throwOnError: true }),
+      ).resolves.toBe(defaultBranch);
+    });
+
     describe('getBranchFilesFromCommit(sha)', () => {
       it('detects changed files compared to the parent commit', async () => {
         const file: FileChange = {

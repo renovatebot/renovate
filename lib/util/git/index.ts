@@ -1366,11 +1366,12 @@ async function getBranchFilesFromRef(
   }
 }
 
-export function getFile(
+export async function getFile(
   filePath: string,
   branchName?: string,
   options: { throwOnError?: boolean } = {},
 ): Promise<string | null> {
+  await syncGit();
   return getFileFromRef(
     filePath,
     `origin/${branchName ?? config.currentBranch}`,
@@ -1378,11 +1379,12 @@ export function getFile(
   );
 }
 
-export function getFileFromCommit(
+export async function getFileFromCommit(
   filePath: string,
   commit: LongCommitSha,
   options: { throwOnError?: boolean } = {},
 ): Promise<string | null> {
+  await syncGit();
   return getFileFromRef(filePath, commit, options);
 }
 
@@ -1391,7 +1393,6 @@ async function getFileFromRef(
   ref: string,
   options: { throwOnError?: boolean },
 ): Promise<string | null> {
-  await syncGit();
   try {
     const content = await git.show([`${ref}:${filePath}`]);
 
