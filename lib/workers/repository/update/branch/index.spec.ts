@@ -171,7 +171,7 @@ describe('workers/repository/update/branch/index', () => {
         usePlatformAutomerge: true,
       });
       platform.cancelPlatformAutomerge.mockResolvedValue({
-        cancelled: false,
+        canceled: false,
         reason: 'unchanged',
       });
       GlobalConfig.set(adminConfig);
@@ -4161,7 +4161,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('cancels platform automerge before the push', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
 
         await branchWorker.processBranch(config);
@@ -4179,7 +4179,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('pushes and leaves platform automerge of someone else as it is', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: false,
+          canceled: false,
           reason: 'enabled-by-other',
         });
         commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -4199,7 +4199,7 @@ describe('workers/repository/update/branch/index', () => {
         'does not re-enable platform automerge after a $description',
         async ({ error, expected }) => {
           platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-            cancelled: true,
+            canceled: true,
           });
           scm.checkoutBranch
             .mockResolvedValueOnce(commitSha)
@@ -4215,7 +4215,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('re-enables platform automerge when nothing was pushed', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
         commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
@@ -4228,7 +4228,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('does not enable platform automerge which was not enabled', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: false,
+          canceled: false,
           reason: 'not-enabled',
         });
         commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -4240,7 +4240,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('re-enables platform automerge when a later step throws', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
         scm.checkoutBranch
           .mockResolvedValueOnce(commitSha)
@@ -4256,7 +4256,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('does not re-enable platform automerge again when a step after it throws', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
         platform.refreshPr.mockRejectedValueOnce(new Error('refresh failed'));
 
@@ -4266,7 +4266,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
       });
 
-      it('does not re-enable platform automerge on errors when it was not cancelled', async () => {
+      it('does not re-enable platform automerge on errors when it was not canceled', async () => {
         scm.checkoutBranch
           .mockResolvedValueOnce(commitSha)
           .mockRejectedValueOnce(new Error('checkout failed'));
@@ -4278,7 +4278,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('handles the original error when re-enabling throws', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
         const reattemptErr = new Error('unknown');
         platform.reattemptPlatformAutomerge.mockRejectedValueOnce(reattemptErr);
@@ -4302,7 +4302,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('passes a rate limit from re-enabling up after handling the original error', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
         const reattemptErr = new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
         platform.reattemptPlatformAutomerge.mockRejectedValueOnce(reattemptErr);
@@ -4323,7 +4323,7 @@ describe('workers/repository/update/branch/index', () => {
 
       it('passes the original error up when it is passed up itself', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
-          cancelled: true,
+          canceled: true,
         });
         platform.reattemptPlatformAutomerge.mockRejectedValueOnce(
           new Error(PLATFORM_RATE_LIMIT_EXCEEDED),

@@ -168,9 +168,9 @@ export interface CancelPlatformAutomergeConfig {
   platformPrOptions?: PlatformPrOptions;
 }
 export type CancelPlatformAutomergeResult =
-  | { cancelled: true }
+  | { canceled: true }
   | {
-      cancelled: false;
+      canceled: false;
       reason: 'enabled-by-other' | 'not-enabled' | 'unchanged' | 'unconfirmed';
     };
 export interface EnsureIssueConfig {

@@ -76,7 +76,7 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
   // PR whose platform automerge was canceled before the push
-  let automergeCancelledPrNo: number | undefined;
+  let automergeCanceledPrNo: number | undefined;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
@@ -564,16 +564,16 @@ export async function processBranch(
             number: branchPr.number,
             platformPrOptions,
           });
-          if (cancellation.cancelled) {
-            automergeCancelledPrNo = branchPr.number;
+          if (cancellation.canceled) {
+            automergeCanceledPrNo = branchPr.number;
           }
         }
       }
 
       commitSha = await commitFilesToBranch(config);
-      if (!commitSha && automergeCancelledPrNo) {
-        const number = automergeCancelledPrNo;
-        automergeCancelledPrNo = undefined;
+      if (!commitSha && automergeCanceledPrNo) {
+        const number = automergeCanceledPrNo;
+        automergeCanceledPrNo = undefined;
         await platform.reattemptPlatformAutomerge?.({
           number,
           platformPrOptions,
@@ -618,7 +618,7 @@ export async function processBranch(
             `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
           );
         } else {
-          automergeCancelledPrNo = undefined;
+          automergeCanceledPrNo = undefined;
           await platform.reattemptPlatformAutomerge({
             number: branchPr.number,
             platformPrOptions,
@@ -734,10 +734,10 @@ export async function processBranch(
       err?.message === REPOSITORY_CHANGED
     );
     let reattemptRateLimitErr: Error | undefined;
-    if (automergeCancelledPrNo && canReattempt) {
+    if (automergeCanceledPrNo && canReattempt) {
       try {
         await platform.reattemptPlatformAutomerge?.({
-          number: automergeCancelledPrNo,
+          number: automergeCanceledPrNo,
           platformPrOptions: getPlatformPrOptions(config),
         });
       } catch (reattemptErr) {
