@@ -1,6 +1,6 @@
 # Development setup
 
-You can develop Renovate on a workstation, in a Dev Container, or in a cloud coding workspace. To use the repository's Dev Container, see [VS Code Dev Containers](#vs-code-dev-containers) or [GitHub Codespaces](./remote-development.md#github-codespaces).
+Use this guide to set up Renovate on a workstation or in a cloud workspace. You can also use the [Dev Container](#dev-container).
 You can improve this documentation by opening a pull request.
 For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
@@ -16,6 +16,8 @@ You need the following dependencies:
 
 If a prebuilt RE2 binary is unavailable, installation builds it from source. This requires Python and the [native build tools for your platform](https://github.com/nodejs/node-gyp#installation), including `make` and a C/C++ compiler on Unix.
 
+On Linux systems with limited RAM, full Oxlint checks can run out of memory. During setup, check whether swap is active. If it is not, enable a 4 GiB swap file if you can configure swap on the host or VM.
+
 For building the documentation, you also need:
 
 - Python `>=3.11`
@@ -29,8 +31,6 @@ This installs the pinned versions of tools used in the project and triggers the 
 This includes [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
 
 #### Linux
-
-When setting up a Linux runner with limited RAM, check whether swap is active. If not, enable a 4 GiB swap file if the VM permits it. Oxlint can run out of memory on small runners without swap, but it does not necessarily use the full 4 GiB.
 
 You can use the following commands on Ubuntu.
 
@@ -63,9 +63,11 @@ If you already installed a part, skip the corresponding step.
   PS C:\Windows\system32> pnpm --version
   ```
 
-#### VS Code Dev Containers
+#### Dev Container
 
-If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
+To use the repository's Dev Container in [GitHub Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository), create a codespace for the repository. Codespaces uses the configuration in `.devcontainer`.
+
+To open the same container in [VS Code](https://code.visualstudio.com/docs/devcontainers/containers):
 
 - Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
