@@ -181,6 +181,7 @@ describe('workers/global/config/parse/cli', () => {
         });
         expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
           {
+            objectFlag: '--dependency-dashboard',
             oldFlags: [
               '--customize-dashboard',
               '--dependency-dashboard-autoclose',
@@ -192,7 +193,7 @@ describe('workers/global/config/parse/cli', () => {
               '--dependency-dashboard-title',
             ],
           },
-          'cli config has been migrated into --dependency-dashboard',
+          'cli config has been migrated into a grouped option',
         );
       });
 
@@ -224,8 +225,11 @@ describe('workers/global/config/parse/cli', () => {
 
         expect(cli.getConfig(argv)).toEqual({ dependencyDashboard: 5 });
         expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-          { oldFlags: ['--dependency-dashboard-footer'] },
-          'Could not migrate cli config into --dependency-dashboard, as it is not an object',
+          {
+            objectFlag: '--dependency-dashboard',
+            oldFlags: ['--dependency-dashboard-footer'],
+          },
+          'Could not migrate cli config into a grouped option, as it is not an object',
         );
       });
 

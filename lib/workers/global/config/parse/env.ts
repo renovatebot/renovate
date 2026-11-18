@@ -1,6 +1,5 @@
 import { isArray, isPlainObject } from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { flatDependencyDashboardOptions } from '../../../../config/migrations/custom/dependency-dashboard-migration.ts';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig, RenovateOptions } from '../../../../config/types.ts';
@@ -8,6 +7,7 @@ import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
 import { quickStringify } from '../../../../util/stringify.ts';
 import { coersions } from './coersions.ts';
+import { type FlatOptions, flatOptionsByObject } from './flat-options.ts';
 import { migrateAndValidateConfig } from './util.ts';
 
 function normalizePrefixes(
@@ -90,22 +90,22 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 }
 
 /**
- * Moves the env vars of the flat Dependency Dashboard options into `RENOVATE_DEPENDENCY_DASHBOARD`, where fields it already sets take precedence.
+ * Moves the env vars of the flat options into the env var of the object they moved into, where fields it already sets take precedence.
  *
  * e.g. RENOVATE_DEPENDENCY_DASHBOARD_FOOTER -> RENOVATE_DEPENDENCY_DASHBOARD='{"footer":...}'
  */
-function massageDependencyDashboardEnv(
+function massageFlatOptionsEnv(
   env: NodeJS.ProcessEnv,
   inputEnv: NodeJS.ProcessEnv,
+  objectName: string,
+  flatOptions: FlatOptions,
 ): NodeJS.ProcessEnv {
   const result = { ...env };
   const migrated: Record<string, unknown> = {};
   const oldKeys: string[] = [];
   // report the name the user set, which may have their `ENV_PREFIX`
   const prefix = inputEnv.ENV_PREFIX;
-  for (const [oldName, { field, type }] of Object.entries(
-    flatDependencyDashboardOptions,
-  )) {
+  for (const [oldName, { field, type }] of Object.entries(flatOptions)) {
     const oldKey = getEnvName({ name: oldName });
     const val = env[oldKey];
     if (!val) {
@@ -126,7 +126,7 @@ function massageDependencyDashboardEnv(
     return result;
   }
 
-  const key = getEnvName({ name: 'dependencyDashboard' });
+  const key = getEnvName({ name: objectName });
   let existing: unknown = {};
   if (env[key]) {
     try {
@@ -137,16 +137,27 @@ function massageDependencyDashboardEnv(
   }
   if (!isPlainObject(existing)) {
     logger.warn(
-      { oldKeys },
-      'Could not migrate env config into dependencyDashboard, as it is not an object',
+      { objectName, oldKeys },
+      'Could not migrate env config into a grouped option, as it is not an object',
     );
     return result;
   }
   result[key] = quickStringify({ ...migrated, ...existing });
   logger.warn(
-    { oldKeys },
-    'env config has been migrated into dependencyDashboard',
+    { objectName, oldKeys },
+    'env config has been migrated into a grouped option',
   );
+  return result;
+}
+
+function massageFlatEnv(
+  env: NodeJS.ProcessEnv,
+  inputEnv: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  let result = env;
+  for (const [objectName, flatOptions] of Object.entries(flatOptionsByObject)) {
+    result = massageFlatOptionsEnv(result, inputEnv, objectName, flatOptions);
+  }
   return result;
 }
 
@@ -366,7 +377,7 @@ export function prepareEnv(inputEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);
-  return massageDependencyDashboardEnv(env, inputEnv);
+  return massageFlatEnv(env, inputEnv);
 }
 
 export async function parseAndValidateOrExit(

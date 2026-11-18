@@ -493,6 +493,7 @@ describe('workers/global/config/parse/env', () => {
           });
           expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
             {
+              objectName: 'dependencyDashboard',
               oldKeys: [
                 'RENOVATE_CUSTOMIZE_DASHBOARD',
                 'RENOVATE_DEPENDENCY_DASHBOARD_AUTOCLOSE',
@@ -504,7 +505,7 @@ describe('workers/global/config/parse/env', () => {
                 'RENOVATE_DEPENDENCY_DASHBOARD_TITLE',
               ],
             },
-            'env config has been migrated into dependencyDashboard',
+            'env config has been migrated into a grouped option',
           );
         });
 
@@ -525,12 +526,13 @@ describe('workers/global/config/parse/env', () => {
           });
           expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
             {
+              objectName: 'dependencyDashboard',
               oldKeys: [
                 'FOOBAR_DEPENDENCY_DASHBOARD_FOOTER',
                 'RENOVATE_DEPENDENCY_DASHBOARD_TITLE',
               ],
             },
-            'env config has been migrated into dependencyDashboard',
+            'env config has been migrated into a grouped option',
           );
         });
 
@@ -616,8 +618,11 @@ describe('workers/global/config/parse/env', () => {
 
           expect(res.dependencyDashboard).toBe(5);
           expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
-            { oldKeys: ['RENOVATE_DEPENDENCY_DASHBOARD_FOOTER'] },
-            'Could not migrate env config into dependencyDashboard, as it is not an object',
+            {
+              objectName: 'dependencyDashboard',
+              oldKeys: ['RENOVATE_DEPENDENCY_DASHBOARD_FOOTER'],
+            },
+            'Could not migrate env config into a grouped option, as it is not an object',
           );
         });
 
