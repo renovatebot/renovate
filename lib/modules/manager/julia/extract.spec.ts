@@ -1,13 +1,26 @@
 import { codeBlock } from 'common-tags';
+import { fs } from '~test/util.ts';
 import { extractPackageFile } from './extract.ts';
+
+vi.mock('../../../util/fs/index.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../util/fs/index.ts')>()),
+  readLocalDirectory: vi.fn(),
+  readLocalFile: vi.fn(),
+}));
 
 describe('modules/manager/julia/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for invalid TOML', () => {
-      expect(extractPackageFile('not [ valid toml', 'Project.toml')).toBeNull();
+    beforeEach(() => {
+      fs.readLocalDirectory.mockResolvedValue([]);
     });
 
-    it('returns null without a [compat] section', () => {
+    it('returns null for invalid TOML', async () => {
+      await expect(
+        extractPackageFile('not [ valid toml', 'Project.toml'),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null without a [compat] section', async () => {
       const content = codeBlock`
         name = "Foo"
 
@@ -15,19 +28,23 @@ describe('modules/manager/julia/extract', () => {
         Example = "7876af07-990d-54b4-ab0e-23690620f79a"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')).toBeNull();
+      await expect(
+        extractPackageFile(content, 'Project.toml'),
+      ).resolves.toBeNull();
     });
 
-    it('returns null when [compat] has only the julia entry', () => {
+    it('returns null when [compat] has only the julia entry', async () => {
       const content = codeBlock`
         [compat]
         julia = "1.6"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')).toBeNull();
+      await expect(
+        extractPackageFile(content, 'Project.toml'),
+      ).resolves.toBeNull();
     });
 
-    it('extracts compat entries with UUIDs and the package version', () => {
+    it('extracts compat entries with UUIDs and the package version', async () => {
       const content = codeBlock`
         name = "Sample"
         version = "0.1.0"
@@ -42,7 +59,9 @@ describe('modules/manager/julia/extract', () => {
         julia = "1.6"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')).toEqual({
+      await expect(
+        extractPackageFile(content, 'Project.toml'),
+      ).resolves.toEqual({
         packageFileVersion: '0.1.0',
         deps: [
           {
@@ -63,7 +82,7 @@ describe('modules/manager/julia/extract', () => {
       });
     });
 
-    it('takes UUIDs and the depType from [weakdeps] and [extras] too', () => {
+    it('takes UUIDs and the depType from [weakdeps] and [extras] too', async () => {
       const content = codeBlock`
         [weakdeps]
         JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
@@ -76,7 +95,9 @@ describe('modules/manager/julia/extract', () => {
         Aqua = "0.8"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, 'Project.toml'))?.deps,
+      ).toMatchObject([
         {
           depName: 'JSON',
           depType: 'weakdeps',
@@ -90,31 +111,33 @@ describe('modules/manager/julia/extract', () => {
       ]);
     });
 
-    it('skips standard libraries that General does not register', () => {
+    it('skips standard libraries that General does not register', async () => {
       const content = codeBlock`
         [compat]
         LinearAlgebra = "1"
         Statistics = "1"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')?.deps).toEqual([
-        {
-          depName: 'LinearAlgebra',
-          depType: 'compat',
-          currentValue: '1',
-          datasource: 'julia-general-metadata',
-          skipReason: 'unsupported',
-        },
-        {
-          depName: 'Statistics',
-          depType: 'compat',
-          currentValue: '1',
-          datasource: 'julia-general-metadata',
-        },
-      ]);
+      expect((await extractPackageFile(content, 'Project.toml'))?.deps).toEqual(
+        [
+          {
+            depName: 'LinearAlgebra',
+            depType: 'compat',
+            currentValue: '1',
+            datasource: 'julia-general-metadata',
+            skipReason: 'unsupported',
+          },
+          {
+            depName: 'Statistics',
+            depType: 'compat',
+            currentValue: '1',
+            datasource: 'julia-general-metadata',
+          },
+        ],
+      );
     });
 
-    it('omits the UUID when it is malformed', () => {
+    it('omits the UUID when it is malformed', async () => {
       const content = codeBlock`
         [deps]
         Example = "not-a-uuid"
@@ -123,12 +146,12 @@ describe('modules/manager/julia/extract', () => {
         Example = "0.5"
       `;
 
-      const dep = extractPackageFile(content, 'Project.toml')?.deps[0];
+      const dep = (await extractPackageFile(content, 'Project.toml'))?.deps[0];
       expect(dep).toMatchObject({ depName: 'Example', depType: 'deps' });
       expect(dep).not.toHaveProperty('packageName');
     });
 
-    it('takes the depType of an [extras] package from [targets]', () => {
+    it('takes the depType of an [extras] package from [targets]', async () => {
       const content = codeBlock`
         [extras]
         Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
@@ -147,7 +170,9 @@ describe('modules/manager/julia/extract', () => {
         Example = "0.5"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, 'Project.toml'))?.deps,
+      ).toMatchObject([
         { depName: 'Aqua', depType: 'test' },
         { depName: 'Conda', depType: 'build' },
         { depName: 'JSON', depType: 'test' },
@@ -155,7 +180,7 @@ describe('modules/manager/julia/extract', () => {
       ]);
     });
 
-    it('takes the depType from [deps] for a package also in [extras]', () => {
+    it('takes the depType from [deps] for a package also in [extras]', async () => {
       const content = codeBlock`
         [deps]
         Example = "7876af07-990d-54b4-ab0e-23690620f79a"
@@ -167,12 +192,12 @@ describe('modules/manager/julia/extract', () => {
         Example = "0.5"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
-        { depName: 'Example', depType: 'deps' },
-      ]);
+      expect(
+        (await extractPackageFile(content, 'Project.toml'))?.deps,
+      ).toMatchObject([{ depName: 'Example', depType: 'deps' }]);
     });
 
-    it('keeps the dependencies when the package version is not a string', () => {
+    it('keeps the dependencies when the package version is not a string', async () => {
       const content = codeBlock`
         version = 1
 
@@ -183,7 +208,9 @@ describe('modules/manager/julia/extract', () => {
         Example = "0.5"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')).toEqual({
+      await expect(
+        extractPackageFile(content, 'Project.toml'),
+      ).resolves.toEqual({
         deps: [
           {
             depName: 'Example',
@@ -196,7 +223,7 @@ describe('modules/manager/julia/extract', () => {
       });
     });
 
-    it('skips packages that [sources] takes from git or a path', () => {
+    it('skips packages that [sources] takes from git or a path', async () => {
       const content = codeBlock`
         [deps]
         Example = "7876af07-990d-54b4-ab0e-23690620f79a"
@@ -214,17 +241,19 @@ describe('modules/manager/julia/extract', () => {
         Sample = "0.1"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, 'Project.toml'))?.deps,
+      ).toMatchObject([
         { depName: 'Example', skipReason: 'git-dependency' },
         { depName: 'JSON', skipReason: 'path-dependency' },
         { depName: 'Sample' },
       ]);
       expect(
-        extractPackageFile(content, 'Project.toml')?.deps[2],
+        (await extractPackageFile(content, 'Project.toml'))?.deps[2],
       ).not.toHaveProperty('skipReason');
     });
 
-    it('ignores a malformed [sources] section', () => {
+    it('ignores a malformed [sources] section', async () => {
       const content = codeBlock`
         sources = "Example"
 
@@ -232,24 +261,28 @@ describe('modules/manager/julia/extract', () => {
         Example = "0.5"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')?.deps).toEqual([
-        {
-          depName: 'Example',
-          depType: 'compat',
-          currentValue: '0.5',
-          datasource: 'julia-general-metadata',
-        },
-      ]);
+      expect((await extractPackageFile(content, 'Project.toml'))?.deps).toEqual(
+        [
+          {
+            depName: 'Example',
+            depType: 'compat',
+            currentValue: '0.5',
+            datasource: 'julia-general-metadata',
+          },
+        ],
+      );
     });
 
-    it('drops compat values that are not strings', () => {
+    it('drops compat values that are not strings', async () => {
       const content = codeBlock`
         [compat]
         Example = ["0.5", "1"]
         JSON = "1"
       `;
 
-      expect(extractPackageFile(content, 'Project.toml')).toEqual({
+      await expect(
+        extractPackageFile(content, 'Project.toml'),
+      ).resolves.toEqual({
         deps: [
           {
             depName: 'JSON',
@@ -259,6 +292,78 @@ describe('modules/manager/julia/extract', () => {
           },
         ],
       });
+    });
+
+    it('reports the manifests as lock files', async () => {
+      fs.readLocalDirectory.mockResolvedValueOnce([
+        'JuliaProject.toml',
+        'Manifest-v1.13.toml',
+        'Manifest.toml',
+      ]);
+      const content = codeBlock`
+        [compat]
+        JSON = "1"
+      `;
+
+      const result = await extractPackageFile(content, 'pkg/JuliaProject.toml');
+
+      expect(result?.lockFiles).toEqual([
+        'pkg/Manifest-v1.13.toml',
+        'pkg/Manifest.toml',
+      ]);
+      expect(fs.readLocalDirectory).toHaveBeenCalledWith('pkg');
+    });
+
+    it('takes the locked versions from the manifest', async () => {
+      fs.readLocalDirectory.mockResolvedValueOnce([
+        'Project.toml',
+        'Manifest-v1.13.toml',
+        'Manifest.toml',
+      ]);
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        manifest_format = "2.0"
+
+        [[deps.Example]]
+        uuid = "7876af07-990d-54b4-ab0e-23690620f79a"
+        version = "0.5.3"
+      `);
+      const content = codeBlock`
+        [deps]
+        Example = "7876af07-990d-54b4-ab0e-23690620f79a"
+        JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+
+        [compat]
+        Example = "0.5"
+        JSON = "1"
+        Statistics = "1"
+      `;
+
+      const result = await extractPackageFile(content, 'Project.toml');
+
+      expect(fs.readLocalFile).toHaveBeenCalledWith('Manifest.toml', 'utf8');
+      expect(
+        result?.deps.map((dep) => [dep.depName, dep.lockedVersion]),
+      ).toEqual([
+        ['Example', '0.5.3'],
+        ['JSON', undefined],
+        ['Statistics', undefined],
+      ]);
+    });
+
+    it('has no locked versions when the manifest cannot be read', async () => {
+      fs.readLocalDirectory.mockResolvedValueOnce(['Manifest.toml']);
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const content = codeBlock`
+        [deps]
+        Example = "7876af07-990d-54b4-ab0e-23690620f79a"
+
+        [compat]
+        Example = "0.5"
+      `;
+
+      const result = await extractPackageFile(content, 'Project.toml');
+
+      expect(result?.deps[0].lockedVersion).toBeUndefined();
     });
   });
 });

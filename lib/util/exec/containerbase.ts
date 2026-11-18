@@ -148,6 +148,12 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     packageName: 'containerbase/jb-prebuild',
     versioning: 'semver-extended',
   },
+  julia: {
+    datasource: 'github-releases',
+    packageName: 'JuliaLang/julia',
+    extractVersion: '^v(?<version>.+)$',
+    versioning: 'julia',
+  },
   kustomize: {
     datasource: 'github-releases',
     packageName: 'kubernetes-sigs/kustomize',
