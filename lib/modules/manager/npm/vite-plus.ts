@@ -609,9 +609,11 @@ function collectManifestDependencies(
   after: unknown,
   path: readonly string[],
 ): ManifestDependency[] {
-  if (isRecord(before) && isRecord(after)) {
+  // A section missing before the change counts as empty.
+  const beforeIsSection = before === undefined || isRecord(before);
+  if (isRecord(after) && beforeIsSection) {
     return Object.keys(after).flatMap((key) =>
-      collectManifestDependencies(snapshot, before[key], after[key], [
+      collectManifestDependencies(snapshot, before?.[key], after[key], [
         ...path,
         key,
       ]),
@@ -771,7 +773,7 @@ async function baseRelativeDependencies(
       const base = await readGitManifest(snapshot.path, baseBranch);
       return collectManifestDependencies(
         snapshot,
-        base === null ? {} : parseManifest(snapshot.kind, base),
+        base === null ? undefined : parseManifest(snapshot.kind, base),
         parseManifest(
           snapshot.kind,
           replacements.get(snapshot.path) ?? snapshot.contents,

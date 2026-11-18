@@ -671,40 +671,53 @@ describe('modules/manager/npm/vite-plus', () => {
     ]);
   });
 
-  it('disables upgrade automerge for an alignment already on a reused branch', async () => {
-    const base = packageJson('0.2.0', '4.0.0');
-    const branch = packageJson('0.3.1', '4.1.11');
-    vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
-    const branchFiles: Record<string, string> = { main: base };
-    getFileMock.mockImplementation((path, ref) =>
-      Promise.resolve(
-        path === 'package.json' ? (branchFiles[ref!] ?? branch) : null,
-      ),
-    );
-    mockPlan((request) => ({
-      ...(validPlan(request, branch) as object),
-      replacements: [],
-    }));
-    const updateConfig = {
-      ...config(branch),
-      branchName: 'renovate/vite-plus',
-      reuseExistingBranch: true,
-    };
-    updateConfig.upgrades[0].automerge = true;
+  it.each`
+    alreadyAligned | base
+    ${true}        | ${packageJson('0.2.0', '4.0.0')}
+    ${false}       | ${packageJson('0.2.0', '4.0.0')}
+    ${true}        | ${null}
+  `(
+    'disables upgrade automerge for an alignment on a reused branch, already aligned=$alreadyAligned, base=$base',
+    async ({ alreadyAligned, base }) => {
+      const aligned = packageJson('0.3.1', '4.1.11');
+      const branch = alreadyAligned ? aligned : packageJson('0.3.1', '4.0.0');
+      vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
+      const refFiles: Record<string, string | null> = {
+        main: base,
+        'renovate/vite-plus': branch,
+      };
+      getFileMock.mockImplementation((path, ref) =>
+        Promise.resolve(path === 'package.json' ? refFiles[ref!] : null),
+      );
+      mockPlan((request) =>
+        alreadyAligned
+          ? { ...(validPlan(request, aligned) as object), replacements: [] }
+          : validPlan(request, aligned),
+      );
+      const updateConfig = {
+        ...config(branch),
+        branchName: 'renovate/vite-plus',
+        reuseExistingBranch: true,
+      };
+      updateConfig.upgrades[0].automerge = true;
 
-    const results = await reconcile(updateConfig, packageFiles());
+      const results = await reconcile(updateConfig, packageFiles());
 
-    expect(results).toEqual([
-      {
-        notice: {
-          file: 'package.json',
-          message:
-            'Vite+ aligned @vitest/coverage-v8 to 4.1.11 for compatibility.',
+      expect(results.filter(({ file }) => file)).toHaveLength(
+        alreadyAligned ? 0 : 1,
+      );
+      expect(results.filter(({ notice }) => notice)).toEqual([
+        {
+          notice: {
+            file: 'package.json',
+            message:
+              'Vite+ aligned @vitest/coverage-v8 to 4.1.11 for compatibility.',
+          },
         },
-      },
-    ]);
-    expect(updateConfig.upgrades[0].automerge).toBeFalse();
-  });
+      ]);
+      expect(updateConfig.upgrades[0].automerge).toBeFalse();
+    },
+  );
 
   it.each([undefined, 'unknown-branch'])(
     'does not cache git reads without a commit for %s',
