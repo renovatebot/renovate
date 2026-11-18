@@ -32,7 +32,7 @@ For **feature requests**: first search for related requests in the issues and di
 ## Code
 
 If you would like to fix a bug or work on a feature, please fork the repository and create a Pull Request.
-To learn how to setup your local workstation correctly read [docs/development/local-development.md](https://github.com/renovatebot/renovate/blob/main/docs/development/local-development.md).
+See [Development setup](https://github.com/renovatebot/renovate/blob/main/docs/development/setup.md).
 Also skim the [docs/development](https://github.com/renovatebot/renovate/blob/main/docs/development) folder, it has a lot of helpful information on things like adding a new package manager, how Renovate branches work, design decisions and more.
 
 Before you start any Pull Request, it is recommended that you open a [discussion](https://github.com/renovatebot/renovate/discussions) first if you have any doubts about requirements or implementation.

@@ -1,20 +1,8 @@
 # Remote Development
 
-This document gives tips and tricks on how to run Renovate in a remote container to add features or fix bugs.
-You can improve this documentation by opening a pull request.
-For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
+## Working in a hosted Dev Container
 
-## First read the local development docs
-
-Read the [local development docs](./local-development.md) first.
-
-## What is remote development?
-
-When you work locally, you install the tooling and code editor on your computer.
-You are responsible for setting up the environment correctly.
-
-With remote development you use a container that is hosted somewhere else.
-You will use the same code editor and have the same config as all other developers.
+GitHub Codespaces runs the repository's Dev Container on a remote host. For the shared contributor workflow, see [Development setup](./setup.md).
 
 ### Benefits
 
