@@ -4,15 +4,19 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
+import type { PreparedCommit } from '../../../../modules/platform/types.ts';
 import type { CommitFilesConfig } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
 
-export function commitFilesToBranch(
+/**
+ * Creates the local commit of the branch's updated files, or returns `null` if there is nothing to commit or in dry-run mode.
+ */
+export function prepareBranchCommit(
   config: BranchConfig,
-): Promise<LongCommitSha | null> {
+): Promise<PreparedCommit | null> {
   let updatedFiles = config.updatedPackageFiles!.concat(
     config.updatedArtifacts!,
   );
@@ -87,5 +91,27 @@ export function commitFilesToBranch(
   }
 
   // API will know whether to create new branch or not
-  return scm.commitAndPush(commitFilesConfig);
+  return scm.prepareCommit(commitFilesConfig);
+}
+
+/**
+ * Pushes a commit created by `prepareBranchCommit()` and returns the pushed commit SHA, or `null` if nothing was pushed.
+ */
+export function pushBranchCommit(
+  preparedCommit: PreparedCommit,
+): Promise<LongCommitSha | null> {
+  return preparedCommit.push();
+}
+
+/**
+ * Commits the branch's updated files and pushes them, returning the pushed commit SHA or `null`.
+ */
+export async function commitFilesToBranch(
+  config: BranchConfig,
+): Promise<LongCommitSha | null> {
+  const preparedCommit = await prepareBranchCommit(config);
+  if (!preparedCommit) {
+    return null;
+  }
+  return await pushBranchCommit(preparedCommit);
 }
