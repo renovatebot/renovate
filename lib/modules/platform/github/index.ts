@@ -600,6 +600,7 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
     mergeQueueEnabled: {},
+    automergeCanceledPrs: new Set(),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -2384,18 +2385,38 @@ export async function cancelPlatformAutomerge({
     logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
     return { canceled: false, reason: 'unconfirmed' };
   }
+  config.automergeCanceledPrs.add(prNo);
   return { canceled: true };
 }
 
+/**
+ * Enables GitHub-native automerge again, with one delayed retry for automerge canceled in this run.
+ */
 export async function reattemptPlatformAutomerge({
   number,
   platformPrOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
+  const retry = config.automergeCanceledPrs.delete(number);
   try {
     const result = (await getPr(number))!;
     const { node_id } = result;
 
-    await tryPrAutomerge(number, node_id, platformPrOptions);
+    const status = await tryPrAutomerge(number, node_id, platformPrOptions);
+    if (status === 'failed' && retry) {
+      logger.debug(`GitHub-native automerge: retrying...PrNo: ${number}`);
+      await setTimeout(5000);
+      const retryStatus = await tryPrAutomerge(
+        number,
+        node_id,
+        platformPrOptions,
+      );
+      if (retryStatus === 'failed') {
+        logger.warn(
+          { prNumber: number },
+          'GitHub-native automerge: could not re-enable after updating the commit message',
+        );
+      }
+    }
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
   } catch (err) {
