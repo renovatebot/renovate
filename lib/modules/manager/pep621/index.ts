@@ -5,7 +5,9 @@ import type { MinimumReleaseAgeSupport } from '../types.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
+export { getRangeStrategy } from './range.ts';
 export { bumpPackageVersion } from './update.ts';
+export { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['pdm.lock', 'uv.lock'];
