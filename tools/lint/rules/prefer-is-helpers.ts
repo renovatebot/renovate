@@ -110,7 +110,7 @@ function getNullishComparison(
 
 /**
  * `typeof` result literals that map onto an `@sindresorhus/is` helper with
- * behaviour identical to the `typeof` comparison. Types are deliberately
+ * behavior identical to the `typeof` comparison. Types are deliberately
  * excluded when the helper's semantics diverge from a plain `typeof` check:
  *
  * - `'number'` — `isNumber()` also excludes `NaN`.

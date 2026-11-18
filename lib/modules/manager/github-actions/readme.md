@@ -67,7 +67,7 @@ For example, to keep pinning action digests but leave reusable workflow calls on
 !!! warning "This feature is flagged as experimental"
   Experimental features might be changed at any time.
   <br /> <br />
-  Due to GitHub classing this functionality as a "public preview", there may be changes to Renovate's functionality - in a possibly breaking manner - while GitHub work to stabilise the feature.
+  Due to GitHub classing this functionality as a "public preview", there may be changes to Renovate's functionality - in a possibly breaking manner - while GitHub work to stabilize the feature.
 
 Renovate keeps the [GitHub Actions dependency lockfile](https://github.com/github/actions-lockfile) in sync.
 The lockfile is an alternative to inline digest pinning: your workflows keep readable tags like `actions/checkout@v4.3.1`, and `.github/workflows/actions.lock` records the commit each tag resolved to.
@@ -77,12 +77,21 @@ Renovate installs the [`gh-actions-lock`](https://github.com/github/gh-actions-l
 
 ```sh
 gh extension install github/gh-actions-lock --pin <version> --force
-gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions
+gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings
 ```
 
-Renovate opts out of two rewrites that `gh actions-lock` performs by default, as both would change more than the dependency being updated: narrowing a ref like `@v4` to `@v4.2.1`, which would contradict the version in the pull request and defeat a deliberately floating major tag, and migrating same-repo `uses: ./…` references to the `uses: $/…` form.
+Renovate invokes `gh actions-lock` in a way that keeps the diff to the dependency being updated, by re-resolving only the refs which have changed, along with anything new they pull in transitively.
+Every other pin stays as locked, including floating refs (like `@v4`) which have since moved upstream.
+For a `ghActionsLock` constraint below v0.3.0, Renovate passes `--relock` (which also advances moved floating refs) and `--no-migrate-local-actions` instead of `--ignore-local-actions`.
+With `binarySource=global`, Renovate assumes the installed extension is v0.3.0 or later.
 
-You do not need to configure anything: if there's no `actions.lock` file, then there's nothing to update.
+- `--no-interactive`: do not hang, expecting an interactive terminal to answer prompts
+- `--no-onboard`: only update workflows and actions which the lockfile already tracks, so an update pull request does not add unrelated workflows. Onboard them yourself by running `gh actions-lock`. Renovate omits this flag when an update replaces an action with a different one, as the lockfile has to learn about the new action
+- `--no-narrow`: do not narrow a floating ref like `@v4` to `@v4.2.1`, which would contradict the version in the pull request
+- `--ignore-local-actions`: do not migrate same-repo `uses: ./…` references to the `uses: $/…` form, and only warn when such a local action uses remote actions, which the lockfile cannot record
+- `--json=findings`: print the findings as JSON, so that when `gh actions-lock` fails, Renovate reports each error finding on its own line, with the affected workflow and action, instead of the raw output
+
+You do not need to configure anything: if there is no `actions.lock` file, then there is nothing to update.
 Workflows which are not onboarded to the lockfile are skipped.
 Local composite actions are still regenerated, as they can be transitive dependencies of a workflow which _is_ onboarded.
 
@@ -108,12 +117,12 @@ To use a different version, set the `ghActionsLock` constraint:
 ```json
 {
   "constraints": {
-    "ghActionsLock": "v0.1.7"
+    "ghActionsLock": "v0.4.1"
   }
 }
 ```
 
-The version must be a full release tag, like `v0.1.7`.
+The version must be a full release tag, as in the example above.
 
 Because [`constraints`](../../../configuration-options.md#constraints) is mergeable, setting `"constraints": {}` does _not_ remove the pin: set the value to an empty string to always install the latest extension.
 
@@ -147,7 +156,7 @@ You can also control the `gh` CLI version using `constraints.gh`.
 
 Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
 
-When the action reference doesn't look like a version number (i.e., doesn't match `/^v?\d+/`), Renovate routes to the `github-digest` datasource which fetches both tags and branches.
+When the action reference does not look like a version number (i.e., does not match `/^v?\d+/`), Renovate routes to the `github-digest` datasource which fetches both tags and branches.
 Since these refs have no version ordering, only digest pinning updates are supported.
 
 **Routing logic:**
@@ -186,6 +195,26 @@ jobs:
               go-version: '1.23'
 ```
 
+### Docker container actions
+
+For a [Docker container action](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runs-for-docker-container-actions), Renovate extracts the image from `runs.image`:
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/ossf/scorecard-action:v2.5.0'
+```
+
+Renovate can also pin and update the image's digest:
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627'
+```
+
+Renovate ignores a `runs.image` which points at a local `Dockerfile`.
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.
@@ -222,7 +251,7 @@ steps:
     with:
       node-version: '22.0.0'
 
-- uses: astral-sh/setup-uv@v10.2.0
+- uses: astral-sh/setup-uv@v10.3.3
   with:
     version: '0.4.x'
 ```

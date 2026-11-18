@@ -1,9 +1,11 @@
-import { isNumber, isObject } from '@sindresorhus/is';
+import { isObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isRateLimitedOrServerError } from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as p from '../../../util/promises.ts';
 import { parseUrl, replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
@@ -36,21 +38,13 @@ function isDefaultPackagistHost(registryUrl: string): boolean {
 }
 
 function isTransientPackagistError(err: PackagistLookupError): boolean {
-  const { code: errCode, statusCode } = err;
+  const { code: errCode } = err;
 
   if (errCode && ['ECONNRESET', 'ETIMEDOUT'].includes(errCode)) {
     return true;
   }
 
-  if (!isNumber(statusCode)) {
-    return false;
-  }
-
-  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
-    return true;
-  }
-
-  return false;
+  return isRateLimitedOrServerError(err);
 }
 
 export class PackagistDatasource extends Datasource {
@@ -104,7 +98,7 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `getRegistryMeta:${regUrl}`,
+        key: buildCacheKey('getRegistryMeta', regUrl),
       },
       () => this._getRegistryMeta(regUrl),
     );
@@ -143,9 +137,12 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
+        key: buildCacheKey(
+          'getPackagistFile',
+          PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+        ),
         ttlMinutes: 1440,
-        cacheable: !PackagistDatasource.isPrivatePackage(regUrl),
+        public: !PackagistDatasource.isPrivatePackage(regUrl),
       },
       () => this._getPackagistFile(regUrl, regFile),
     );
@@ -208,7 +205,12 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
+        key: buildCacheKey(
+          'packagistV2Lookup',
+          registryUrl,
+          metadataUrl,
+          packageName,
+        ),
         ttlMinutes: 10,
       },
       () => this._packagistV2Lookup(registryUrl, metadataUrl, packageName),

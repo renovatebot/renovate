@@ -71,6 +71,13 @@ const PackageSource = z
   ])
   .catch({ sourceUrl: null, sourceDirectory: null });
 
+const cacheProvider = new PackageHttpCacheProvider({
+  namespace: 'datasource-npm:cache-provider',
+  checkAuthorizationHeader: false, // We don't rely on whether user token is provided or not
+  checkCacheControlHeader: true,
+  writeSchema: CachedPackument,
+});
+
 export async function getDependency(
   http: Http,
   registryUrl: string,
@@ -81,12 +88,6 @@ export async function getDependency(
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
   try {
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: 'datasource-npm:cache-provider',
-      checkAuthorizationHeader: false, // We don't rely on whether user token is provided or not
-      checkCacheControlHeader: true,
-      writeSchema: CachedPackument,
-    });
     const options: HttpOptions = { cacheProvider };
 
     // set abortOnError for registry.npmjs.org if no hostRule with explicit abortOnError exists

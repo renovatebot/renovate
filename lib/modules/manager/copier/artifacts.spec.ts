@@ -204,9 +204,12 @@ describe('modules/manager/copier/artifacts', () => {
             cwd: '/tmp/github/some/repo',
             env: {
               GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_0:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
                 'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
               GIT_CONFIG_KEY_4:

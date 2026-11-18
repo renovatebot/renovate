@@ -1,6 +1,12 @@
-import { isEmptyArray, isEmptyObject, isTruthy } from '@sindresorhus/is';
+import {
+  isEmptyArray,
+  isEmptyObject,
+  isNonEmptyArray,
+  isTruthy,
+} from '@sindresorhus/is';
 import { logger } from '../../logger/index.ts';
 import type { PackageFile } from '../../modules/manager/types.ts';
+import { coerceArray } from '../../util/array.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
 
@@ -34,6 +40,14 @@ export class PackageFiles {
     this.data.clear();
   }
 
+  /** Returns true if any dependency of any base branch failed its lookup. */
+  static hasLookupFailure(): boolean {
+    return [...this.data.values()]
+      .filter(isTruthy)
+      .flatMap((managers) => Object.values(managers).flat())
+      .some((file) => file.deps.some((dep) => dep.lookupFailed));
+  }
+
   /**
    * Truncates the detected dependencies' section until it fits the available space
    * i.e. It has length smaller than maxLength.
@@ -60,11 +74,19 @@ export class PackageFiles {
 
     const data = new Map(clone(Array.from(this.data)));
 
-    // filter all deps with skip reason
+    // drop deps with skip reason, then package files and managers left empty
     for (const managers of [...data.values()].filter(isTruthy)) {
-      for (const files of Object.values(managers).filter(isTruthy)) {
-        for (const file of files.filter((f) => isTruthy(f.deps))) {
-          file.deps = file.deps.filter(isTruthy).filter((d) => !d.skipReason);
+      for (const [manager, files] of Object.entries(managers)) {
+        const listed = coerceArray(files).filter((file) => {
+          file.deps = coerceArray(file.deps)
+            .filter(isTruthy)
+            .filter((d) => !d.skipReason);
+          return isNonEmptyArray(file.deps);
+        });
+        if (isNonEmptyArray(listed)) {
+          managers[manager] = listed;
+        } else {
+          delete managers[manager];
         }
       }
     }
@@ -136,26 +158,37 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
-            if (
-              lock &&
-              (ver || digest) &&
-              dep.updates?.some((update) => update.isLockfileUpdate)
-            ) {
+            const hasVersionOrDigest = isTruthy(ver) || isTruthy(digest);
+            const hasLockfileUpdate = dep.updates?.some(
+              (update) => update.isLockfileUpdate,
+            );
+            if (lock && hasVersionOrDigest && hasLockfileUpdate) {
               version = formatVersionWithLockedVersion(version, lock);
             }
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
+                // A lock file only dep has no value to update, only a version
                 dep.updates?.map((update) => {
-                  const value = update.isLockfileUpdate
+                  const hasOnlyResolvedLockfileVersion =
+                    update.isLockfileUpdate &&
+                    update.newValue === undefined &&
+                    update.newVersion !== undefined;
+                  const hasNoCurrentVersion =
+                    !dep.currentValue && !dep.currentDigest;
+                  if (hasOnlyResolvedLockfileVersion && hasNoCurrentVersion) {
+                    return `\`lock file @ ${update.newVersion}\``;
+                  }
+
+                  const version = update.isLockfileUpdate
                     ? formatVersionWithLockedVersion(
                         update.newValue ??
                           update.newVersion ??
                           'unknown version',
                         update.newVersion,
                       )
-                    : update.newValue;
-                  return `\`${value}\``;
+                    : (update.newValue ?? update.newVersion);
+                  return `\`${version}\``;
                 }),
               ),
             ];

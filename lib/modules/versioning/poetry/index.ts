@@ -152,11 +152,13 @@ function minSatisfyingVersion(
 }
 
 function isSingleVersion(constraint: string): boolean {
-  return (
-    (constraint.trim().startsWith('=') &&
-      isVersion(constraint.trim().substring(1).trim())) ||
-    isVersion(constraint.trim())
-  );
+  if (
+    constraint.trim().startsWith('=') &&
+    isVersion(constraint.trim().substring(1).trim())
+  ) {
+    return true;
+  }
+  return isVersion(constraint.trim());
 }
 
 function handleShort(

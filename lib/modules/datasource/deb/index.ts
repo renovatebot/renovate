@@ -1,5 +1,6 @@
 import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -117,7 +118,7 @@ export class DebDatasource extends Datasource {
   ): Promise<Record<string, PackageDescription[]>> {
     return this.cached(
       {
-        key: `${extractedFile}:${lastTimestamp.getTime()}`,
+        key: buildCacheKey(extractedFile, lastTimestamp.getTime()),
         ttlMinutes: 24 * 60,
       },
       () => this.readExtractedPackageIndex(extractedFile, lastTimestamp),
@@ -197,7 +198,7 @@ export class DebDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

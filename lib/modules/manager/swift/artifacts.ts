@@ -2,9 +2,11 @@ import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { scm } from '../../platform/scm.ts';
 import { api as swiftVersioning } from '../../versioning/swift/index.ts';
 import type {
@@ -45,6 +47,21 @@ function matchPinForDep(
   dep: PackageDependency,
   pins: PackageResolvedPin[],
 ): PackageResolvedPin | null {
+  // SE-0292 registry-form deps: match by identity (== scope.name).
+  // This also catches bridged setups where a registry-form dep maps to a
+  // legacy `kind: "remoteSourceControl"` pin written by older SwiftPM.
+  if (dep.datasource === SwiftPackageRegistryDatasource.id) {
+    const identity = dep.packageName ?? dep.depName;
+    if (!identity) {
+      return null;
+    }
+    // SwiftPM lowercases identities in Package.resolved, so compare case-insensitively.
+    const lowerIdentity = identity.toLowerCase();
+    return (
+      pins.find((pin) => pin.identity.toLowerCase() === lowerIdentity) ?? null
+    );
+  }
+
   let depUrl: string;
 
   if (dep.datasource === GitTagsDatasource.id) {
@@ -236,9 +253,8 @@ export async function updateArtifacts({
         dep.currentValue &&
         swiftVersioning.isSingleVersion(dep.currentValue)
       ) {
-        const fromVersion = (dep.currentVersion ?? dep.currentValue).replace(
-          regEx(/^v/),
-          '',
+        const fromVersion = stripVersionPrefix(
+          dep.currentVersion ?? dep.currentValue,
         );
         if (pin.state.version !== fromVersion) {
           logger.debug(
@@ -253,7 +269,7 @@ export async function updateArtifacts({
         }
       }
 
-      const resolvedVersion = dep.newVersion.replace(regEx(/^v/), '');
+      const resolvedVersion = stripVersionPrefix(dep.newVersion);
 
       // Skip if already up-to-date
       if (pin.state.version === resolvedVersion) {

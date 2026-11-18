@@ -25,7 +25,7 @@
   },
   "22": {
     "cycle": "nodejs22.x",
-    "support": "2027-04-30"
+    "support": "2027-05-30"
   },
   "24": {
     "cycle": "nodejs24.x",
