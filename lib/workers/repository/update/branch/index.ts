@@ -633,6 +633,20 @@ export async function processBranch(
           });
           if (cancellation.cancelled) {
             automergeCancelledPrNo = branchPr.number;
+          } else if (
+            reconciliationDisabledPlatformAutomerge &&
+            ['unconfirmed', 'unchanged'].includes(cancellation.reason)
+          ) {
+            // Renovate's auto-merge could merge content the user's rules did not approve
+            logger.warn(
+              { prNo: branchPr.number },
+              'Cannot confirm platform automerge is disabled after version reconciliation',
+            );
+            return {
+              branchExists,
+              prNo: branchPr.number,
+              result: 'error',
+            };
           }
         }
       }

@@ -1303,13 +1303,27 @@ describe('workers/repository/update/branch/index', () => {
           });
         });
 
-        it.each([
-          'cancelled',
-          'not-enabled',
-          'enabled-by-other',
-          'unconfirmed',
-          'unchanged',
-        ] as const)(
+        it.each(['unconfirmed', 'unchanged'] as const)(
+          'does not push after %s cancellation',
+          async (reason) => {
+            platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+              cancelled: false,
+              reason,
+            });
+
+            const result = await branchWorker.processBranch(config);
+
+            expect(result).toEqual({
+              branchExists: true,
+              prNo: 5,
+              result: 'error',
+            });
+            expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+            expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+          },
+        );
+
+        it.each(['cancelled', 'not-enabled', 'enabled-by-other'] as const)(
           'continues after %s cancellation without restoring disabled automerge',
           async (reason) => {
             platform.cancelPlatformAutomerge.mockResolvedValueOnce(
