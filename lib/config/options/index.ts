@@ -826,7 +826,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.172.2',
+    default: 'ghcr.io/renovatebot/base-image:13.172.3',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1294,6 +1294,14 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'allowCustomCrateGitRegistries',
     description:
       'Set this to `true` to allow cloning custom Cargo `git` registries. This only restricts non-sparse registries.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowCustomJuliaRegistries',
+    description:
+      'Set this to `true` to allow cloning Julia registries other than General.',
     globalOnly: true,
     type: 'boolean',
     default: false,

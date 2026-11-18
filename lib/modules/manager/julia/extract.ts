@@ -1,7 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
-import { JuliaGeneralMetadataDatasource } from '../../datasource/julia-general-metadata/index.ts';
+import { JuliaDatasource } from '../../datasource/julia/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { getLockedVersions } from './locked-version.ts';
 import { JuliaProject } from './schema.ts';
@@ -81,7 +81,7 @@ export async function extractPackageFile(
       depName,
       depType,
       currentValue,
-      datasource: JuliaGeneralMetadataDatasource.id,
+      datasource: JuliaDatasource.id,
     };
     const uuid = section?.uuids[depName];
     if (uuid && uuidRegex.test(uuid)) {
