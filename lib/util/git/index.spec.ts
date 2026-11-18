@@ -76,6 +76,19 @@ async function configureGit(
   await execa('git', ['--git-dir', gitDir, 'config', '--local', key, value]);
 }
 
+/**
+ * Creates a local commit with `prepareCommit()` and pushes it with `pushPreparedCommit()`.
+ */
+async function commitAndPush(
+  commitConfig: CommitFilesConfig,
+): Promise<LongCommitSha | null> {
+  const commitResult = await git.prepareCommit(commitConfig);
+  if (!commitResult) {
+    return null;
+  }
+  return await git.pushPreparedCommit(commitConfig, commitResult);
+}
+
 // Avoids flakiness when cleaning up temp directories
 async function disableGitAutoMaintenance(
   repo: ReturnType<typeof simpleGit>,
@@ -351,7 +364,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
   // Read-only tests: one clone and one `initRepo()` for the whole describe.
   // The module config is reset before each test, so tests may set ignored
   // authors, but must not change the clone, its refs or the working tree
-  // (`commitFiles`, `checkoutBranch`, `initRepo`, local git config).
+  // (`prepareCommit`, `checkoutBranch`, `initRepo`, local git config).
   describe('shared clone', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
@@ -1370,7 +1383,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       it('should return null and log error when git show fails', async () => {
         // Create a valid branch first
         const branchName = 'renovate/test_error_branch';
-        await git.commitFiles({
+        await commitAndPush({
           branchName,
           files: [
             {
@@ -1401,7 +1414,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       it('works if running with a Repo Cache', async () => {
         // Create a branch with a commit so it exists in the remote
         const branchName = 'renovate/cache-test-branch';
-        await git.commitFiles({
+        await commitAndPush({
           branchName,
           files: [
             {
@@ -1441,7 +1454,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           path: 'some-new-file',
           contents: 'some new-contents',
         };
-        await git.commitFiles({
+        await commitAndPush({
           branchName: 'renovate/branch_with_changes',
           files: [
             file,
@@ -1463,7 +1476,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           path: 'some-new-file',
           contents: 'some new-contents',
         };
-        const sha = await git.commitFiles({
+        const sha = await commitAndPush({
           branchName: 'renovate/branch_with_changes',
           files: [
             file,
@@ -1522,21 +1535,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
-    describe('commitFiles({branchName, files, message})', () => {
-      it('creates file', async () => {
-        const file: FileChange = {
-          type: 'addition',
-          path: 'some-new-file',
-          contents: 'some new-contents',
-        };
-        const commit = await git.commitFiles({
-          branchName: 'renovate/past_branch',
-          files: [file],
-          message: 'Create something',
-        });
-        expect(commit).not.toBeNull();
-      });
-
+    describe('prepareCommit() and pushPreparedCommit()', () => {
       it('pushes a prepared commit and records it as the branch commit', async () => {
         const commitConfig = {
           branchName: 'renovate/prepared_branch',
@@ -1614,7 +1613,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           contents: 'past_file',
           isSymlink: true,
         };
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/future_branch',
           files: [file],
           message: 'Create a link',
@@ -1638,7 +1637,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           contents: 'some new-contents',
         };
 
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/branch_with_trailers',
           files: [file],
           message: ['Update something', 'Some commit body'],
@@ -1671,7 +1670,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           contents: 'some new-contents',
         };
 
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/branch_with_string_message_trailers',
           files: [file],
           message: 'Update something',
@@ -1696,7 +1695,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           type: 'deletion',
           path: 'file_to_delete',
         };
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/something',
           files: [file],
           message: 'Delete something',
@@ -1717,7 +1716,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
             contents: 'other updated content',
           },
         ];
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/something',
           files,
           message: 'Update something',
@@ -1744,7 +1743,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           files,
           message: 'Update something',
         };
-        const commitSha = await git.commitFiles(commitConfig);
+        const commitSha = await commitAndPush(commitConfig);
         const remoteSha = await git.fetchBranch(commitConfig.branchName);
         expect(commitSha).toEqual(remoteSha);
       });
@@ -1757,7 +1756,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
             contents: 'some content',
           },
         ];
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/something',
           files,
           message: 'Update something',
@@ -1773,7 +1772,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
             contents: 'future',
           },
         ];
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/future_branch',
           files,
           message: 'No change update',
@@ -1793,7 +1792,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           },
         ];
 
-        await git.commitFiles({
+        await commitAndPush({
           branchName: 'renovate/something',
           files,
           message: 'Pass no-verify',
@@ -1824,7 +1823,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         ];
         setNoVerify(['commit']);
 
-        await git.commitFiles({
+        await commitAndPush({
           branchName: 'renovate/something',
           files,
           message: 'Pass no-verify',
@@ -1855,7 +1854,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         ];
         setNoVerify(['push']);
 
-        await git.commitFiles({
+        await commitAndPush({
           branchName: 'renovate/something',
           files,
           message: 'Pass no-verify',
@@ -1880,7 +1879,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           contents: 'some new-contents',
           isExecutable: true,
         };
-        const commit = await git.commitFiles({
+        const commit = await commitAndPush({
           branchName: 'renovate/past_branch',
           files: [file],
           message: 'Create something',

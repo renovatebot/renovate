@@ -1,7 +1,7 @@
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import type { RenovateConfig } from '~test/util.ts';
-import { git, partial, platform, scm } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -91,7 +91,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       expect(platform.refreshPr).toHaveBeenCalledTimes(0);
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -123,7 +123,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       expect(platform.refreshPr).toHaveBeenCalledTimes(1);
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -180,7 +180,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
 
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
@@ -205,7 +205,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
 
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists',
@@ -234,7 +234,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     it('Dry runs create migration PR', async () => {
@@ -257,7 +257,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     describe('handle closed PR', () => {

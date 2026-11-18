@@ -158,7 +158,6 @@ export class GerritScm extends DefaultGitScm {
           files: commit.files,
           autoApprove: commit.autoApprove,
         });
-        /* v8 ignore else -- should never happen */
         if (pushResult) {
           const currentRef =
             existingChange.revisions![existingChange.current_revision!].ref;

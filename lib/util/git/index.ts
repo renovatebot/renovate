@@ -1608,7 +1608,6 @@ export async function pushPreparedCommit(
 ): Promise<LongCommitSha | null> {
   try {
     const pushResult = await pushCommit({ sourceRef: branchName, files });
-    // v8 ignore else -- TODO: add test #40625
     if (pushResult) {
       config.branchCommits[branchName] = commitSha;
       config.branchIsModified[branchName] = false;
@@ -1621,16 +1620,6 @@ export async function pushPreparedCommit(
     }
     throw err;
   }
-}
-
-export async function commitFiles(
-  commitConfig: CommitFilesConfig,
-): Promise<LongCommitSha | null> {
-  const commitResult = await prepareCommit(commitConfig);
-  if (!commitResult) {
-    return null;
-  }
-  return await pushPreparedCommit(commitConfig, commitResult);
 }
 
 export function getUrl({
