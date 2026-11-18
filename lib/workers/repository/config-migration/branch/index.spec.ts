@@ -91,7 +91,8 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(rebaseMigrationBranch).not.toHaveBeenCalled();
+      expect(createConfigMigrationBranch).not.toHaveBeenCalled();
       expect(platform.refreshPr).toHaveBeenCalledTimes(0);
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -107,14 +108,15 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
       platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(
-        {
-          ...config,
-          configMigration: false,
-          dependencyDashboardChecks: {
-            configMigrationCheckboxState: 'migration-pr-exists',
-          },
+      const migrationConfig: RenovateConfig = {
+        ...config,
+        configMigration: false,
+        dependencyDashboardChecks: {
+          configMigrationCheckboxState: 'migration-pr-exists',
         },
+      };
+      const res = await checkConfigMigrationBranch(
+        migrationConfig,
         migratedData,
       );
       // TODO: types (#22198)
@@ -123,7 +125,11 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(rebaseMigrationBranch).toHaveBeenCalledExactlyOnceWith(
+        migrationConfig,
+        migratedData,
+      );
+      expect(createConfigMigrationBranch).not.toHaveBeenCalled();
       expect(platform.refreshPr).toHaveBeenCalledTimes(1);
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -164,14 +170,15 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('creates migration branch when migration enabled but no pr exists', async () => {
       vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(
-        {
-          ...config,
-          configMigration: true,
-          dependencyDashboardChecks: {
-            configMigrationCheckboxState: 'no-checkbox',
-          },
+      const migrationConfig: RenovateConfig = {
+        ...config,
+        configMigration: true,
+        dependencyDashboardChecks: {
+          configMigrationCheckboxState: 'no-checkbox',
         },
+      };
+      const res = await checkConfigMigrationBranch(
+        migrationConfig,
         migratedData,
       );
       // TODO: types (#22198)
@@ -180,7 +187,11 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(createConfigMigrationBranch).toHaveBeenCalledExactlyOnceWith(
+        migrationConfig,
+        migratedData,
+      );
+      expect(rebaseMigrationBranch).not.toHaveBeenCalled();
 
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
@@ -189,14 +200,15 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.getBranchPr.mockResolvedValue(mock<Pr>());
       platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(
-        {
-          ...config,
-          configMigration: true,
-          dependencyDashboardChecks: {
-            configMigrationCheckboxState: 'migration-pr-exists',
-          },
+      const migrationConfig: RenovateConfig = {
+        ...config,
+        configMigration: true,
+        dependencyDashboardChecks: {
+          configMigrationCheckboxState: 'migration-pr-exists',
         },
+      };
+      const res = await checkConfigMigrationBranch(
+        migrationConfig,
         migratedData,
       );
       // TODO: types (#22198)
@@ -205,7 +217,11 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(rebaseMigrationBranch).toHaveBeenCalledExactlyOnceWith(
+        migrationConfig,
+        migratedData,
+      );
+      expect(createConfigMigrationBranch).not.toHaveBeenCalled();
 
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists',
@@ -218,14 +234,15 @@ describe('workers/repository/config-migration/branch/index', () => {
       });
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(
-        {
-          ...config,
-          configMigration: true,
-          dependencyDashboardChecks: {
-            configMigrationCheckboxState: 'migration-pr-exists',
-          },
+      const migrationConfig: RenovateConfig = {
+        ...config,
+        configMigration: true,
+        dependencyDashboardChecks: {
+          configMigrationCheckboxState: 'migration-pr-exists',
         },
+      };
+      const res = await checkConfigMigrationBranch(
+        migrationConfig,
         migratedData,
       );
       // TODO: types (#22198)
@@ -234,7 +251,11 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(rebaseMigrationBranch).toHaveBeenCalledExactlyOnceWith(
+        migrationConfig,
+        migratedData,
+      );
+      expect(createConfigMigrationBranch).not.toHaveBeenCalled();
     });
 
     it('Dry runs create migration PR', async () => {
@@ -242,13 +263,14 @@ describe('workers/repository/config-migration/branch/index', () => {
         dryRun: 'full',
       });
       vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
-      const res = await checkConfigMigrationBranch(
-        {
-          ...config,
-          dependencyDashboardChecks: {
-            configMigrationCheckboxState: 'checked',
-          },
+      const migrationConfig: RenovateConfig = {
+        ...config,
+        dependencyDashboardChecks: {
+          configMigrationCheckboxState: 'checked',
         },
+      };
+      const res = await checkConfigMigrationBranch(
+        migrationConfig,
         migratedData,
       );
       // TODO: types (#22198)
@@ -257,7 +279,11 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(createConfigMigrationBranch).toHaveBeenCalledExactlyOnceWith(
+        migrationConfig,
+        migratedData,
+      );
+      expect(rebaseMigrationBranch).not.toHaveBeenCalled();
     });
 
     describe('handle closed PR', () => {

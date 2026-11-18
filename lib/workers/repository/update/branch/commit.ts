@@ -40,7 +40,6 @@ export async function prepareBranchCommit(
   }
   const fileLength = new Set(updatedFiles.map((file) => file.path)).size;
   logger.debug(`${fileLength} file(s) to commit`);
-  // istanbul ignore if
   if (
     config.branchName !== sanitize(config.branchName) ||
     config.commitMessage !== sanitize(config.commitMessage) ||
@@ -67,7 +66,6 @@ export async function prepareBranchCommit(
     autoApprove: config.autoApprove,
   };
 
-  // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     const logExtra = {
       ...commitFilesConfig,

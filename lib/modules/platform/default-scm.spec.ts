@@ -57,18 +57,22 @@ describe('modules/platform/default-scm', () => {
     });
 
     it('prepares and pushes the commit', async () => {
-      git.prepareCommit.mockResolvedValueOnce({
+      const commitConfig = partial<CommitFilesConfig>({ branchName: 'branch' });
+      const commitResult = {
         parentCommitSha: fakeSha('parent'),
         commitSha: fakeSha('commit'),
         files: [],
-      });
+      };
+      git.prepareCommit.mockResolvedValueOnce(commitResult);
       git.pushPreparedCommit.mockResolvedValueOnce(fakeSha('commit'));
 
-      const res =
-        await defaultGitScm.commitAndPush(partial<CommitFilesConfig>());
+      const res = await defaultGitScm.commitAndPush(commitConfig);
 
       expect(res).toBe(fakeSha('commit'));
-      expect(git.pushPreparedCommit).toHaveBeenCalledTimes(1);
+      expect(git.pushPreparedCommit).toHaveBeenCalledExactlyOnceWith(
+        commitConfig,
+        commitResult,
+      );
     });
   });
 
