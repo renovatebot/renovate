@@ -600,7 +600,7 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
     mergeQueueEnabled: {},
-    automergeCancelledPrs: new Set(),
+    automergeCanceledPrs: new Set(),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -2385,7 +2385,7 @@ export async function cancelPlatformAutomerge({
     logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
     return { canceled: false, reason: 'unconfirmed' };
   }
-  config.automergeCancelledPrs.add(prNo);
+  config.automergeCanceledPrs.add(prNo);
   return { canceled: true };
 }
 
@@ -2396,7 +2396,7 @@ export async function reattemptPlatformAutomerge({
   number,
   platformPrOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
-  const retry = config.automergeCancelledPrs.delete(number);
+  const retry = config.automergeCanceledPrs.delete(number);
   try {
     const result = (await getPr(number))!;
     const { node_id } = result;

@@ -6331,7 +6331,7 @@ describe('modules/platform/github/index', () => {
             });
         }
 
-        it('retries once after cancelling', async () => {
+        it('retries once after canceling', async () => {
           const scope = prMocks(await cancelAutomerge());
           scope
             .post('/graphql')
@@ -6370,7 +6370,7 @@ describe('modules/platform/github/index', () => {
           );
         });
 
-        it('forgets cancelled PRs on initRepo', async () => {
+        it('forgets canceled PRs on initRepo', async () => {
           await cancelAutomerge();
           const scope = prMocks(await mockScope());
           scope.post('/graphql').reply(200, failedResp);

@@ -138,7 +138,7 @@ export interface LocalRepoConfig {
   hasVulnerabilityAlertsEnabled: boolean;
   mergeQueueEnabled: Record<string, boolean>;
   /** PRs whose automerge was canceled in this run */
-  automergeCancelledPrs: Set<number>;
+  automergeCanceledPrs: Set<number>;
 }
 
 export interface GhRepo {
