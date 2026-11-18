@@ -40,7 +40,7 @@ import {
   rebaseCheck,
   userChangedTargetBranch,
 } from './check-existing.ts';
-import { commitFilesToBranch } from './commit.ts';
+import { prepareBranchCommit, pushBranchCommit } from './commit.ts';
 import { handleBranchError } from './errors.ts';
 import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
@@ -74,8 +74,8 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 /**
- * Cancels platform automerge of the PR before files are pushed.
- * Returns the PR number if this call canceled it.
+ * Cancels platform automerge of the PR which has an outdated commit message.
+ * Returns the PR number if it was or might have been canceled.
  */
 async function cancelPlatformAutomergeForPush(
   config: BranchConfig,
@@ -596,15 +596,19 @@ export async function processBranch(
       config.commitTrailers = compileCommitTrailers(config, config);
 
       // platform auto-merge keeps the commit message it was enabled with,
-      // so it is canceled for the push and re-enabled after the artifact status is set
+      // so it is canceled when the commit message changed and re-enabled after the push and artifact status.
+      // The commit is prepared first, as that fails for a PR in a merge queue.
       const platformPrOptions = getPlatformPrOptions(config);
+      const preparedCommit = await prepareBranchCommit(config);
       const automergeCanceledPrNo = await cancelPlatformAutomergeForPush(
         config,
         branchPr,
         platformPrOptions,
       );
       try {
-        commitSha = await commitFilesToBranch(config);
+        if (preparedCommit) {
+          commitSha = await pushBranchCommit(preparedCommit);
+        }
         // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
         // baseBranch is not checked out at the start of processBranch() due to pull/16246
         await scm.checkoutBranch(config.baseBranch);
