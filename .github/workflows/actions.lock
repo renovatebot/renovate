@@ -20,7 +20,7 @@ workflows:
         - 'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5'
         - 'docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1'
         - 'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a'
         - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
@@ -75,7 +75,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/update-data.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a'
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
     '.github/workflows/ws_scan.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -201,9 +201,9 @@ dependencies:
         repo_id: 1404951382
         uses:
             - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-    'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d':
-        ref: 'v5.2.9'
-        commit: 'sha1-236a21c3b91f5db6d4e174b348674a0f0caac06d'
+    'jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a':
+        ref: 'v5.2.10'
+        commit: 'sha1-90f833d396d0cc3674b631d2d225e306476c303a'
         owner_id: 216188
         repo_id: 738284564
     'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6':
