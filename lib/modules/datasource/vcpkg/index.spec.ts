@@ -23,7 +23,7 @@ const createSimpleGit = vi.mocked(git.createSimpleGit);
 const datasource = VcpkgDatasource.id;
 const registryUrl = 'https://example.com/my-vcpkg-registry';
 const defaultRegistryFiles =
-  'https://raw.githubusercontent.com/microsoft/vcpkg/master';
+  'https://raw.githubusercontent.com/microsoft/vcpkg/HEAD';
 const zlibReleases = [
   { version: '1.3.1' },
   { version: '1.3#1' },

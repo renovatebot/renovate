@@ -19,7 +19,7 @@ import { VcpkgPortVersions } from './schema.ts';
 const defaultRegistryUrl = 'https://github.com/microsoft/vcpkg';
 // The default registry's files, served without a clone.
 const defaultRegistryFilesUrl =
-  'https://raw.githubusercontent.com/microsoft/vcpkg/master';
+  'https://raw.githubusercontent.com/microsoft/vcpkg/HEAD';
 
 type CloneResult =
   | {
