@@ -12,7 +12,10 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment.ts';
-import type { Pr } from '../../../../modules/platform/index.ts';
+import type {
+  PlatformPrOptions,
+  Pr,
+} from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
@@ -70,13 +73,57 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
   }
 }
 
+/**
+ * Cancels platform automerge of the PR before files are pushed.
+ * Returns the PR number if this call canceled it.
+ */
+async function cancelPlatformAutomergeForPush(
+  config: BranchConfig,
+  branchPr: Pr | null,
+  platformPrOptions: PlatformPrOptions,
+): Promise<number | undefined> {
+  if (
+    !branchPr ||
+    !platformPrOptions.usePlatformAutomerge ||
+    !platform.cancelPlatformAutomerge ||
+    !platform.reattemptPlatformAutomerge ||
+    !(config.updatedPackageFiles?.length || config.updatedArtifacts?.length)
+  ) {
+    return undefined;
+  }
+  if (GlobalConfig.get('dryRun')) {
+    logger.info(
+      `DRY-RUN: Would check platform automerge for PR #${branchPr.number}`,
+    );
+    return undefined;
+  }
+  // auto-merge which is not Renovate's own or has the same commit message is left as it is
+  const cancellation = await platform.cancelPlatformAutomerge({
+    number: branchPr.number,
+    platformPrOptions,
+  });
+  return cancellation.canceled ? branchPr.number : undefined;
+}
+
+/**
+ * Re-enables platform automerge of the PR and logs errors.
+ */
+async function restorePlatformAutomerge(
+  number: number,
+  platformPrOptions: PlatformPrOptions,
+): Promise<void> {
+  try {
+    await platform.reattemptPlatformAutomerge!({ number, platformPrOptions });
+  } catch (err) {
+    logger.warn({ err }, 'Error re-enabling platform automerge');
+  }
+}
+
 export async function processBranch(
   branchConfig: BranchConfig,
   forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
-  // PR whose platform automerge was canceled before the push
-  let automergeCanceledPrNo: number | undefined;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
@@ -395,6 +442,7 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
+    let platformAutomergeRestored = false;
     if (!(
       config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
     )) {
@@ -547,47 +595,34 @@ export async function processBranch(
       // compiled after the body, as before, so the trailer context sees the full commit message
       config.commitTrailers = compileCommitTrailers(config, config);
 
-      // platform auto-merge keeps the commit message it was enabled with
+      // platform auto-merge keeps the commit message it was enabled with,
+      // so it is canceled for the push and re-enabled after the artifact status is set
       const platformPrOptions = getPlatformPrOptions(config);
-      if (
-        branchPr &&
-        platformPrOptions.usePlatformAutomerge &&
-        platform.cancelPlatformAutomerge
-      ) {
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            `DRY-RUN: Would check platform automerge for PR #${branchPr.number}`,
-          );
-        } else {
-          // auto-merge which is not Renovate's own is left as it is
-          const cancellation = await platform.cancelPlatformAutomerge({
-            number: branchPr.number,
-            platformPrOptions,
-          });
-          if (cancellation.canceled) {
-            automergeCanceledPrNo = branchPr.number;
-          }
+      const automergeCanceledPrNo = await cancelPlatformAutomergeForPush(
+        config,
+        branchPr,
+        platformPrOptions,
+      );
+      try {
+        commitSha = await commitFilesToBranch(config);
+        // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
+        // baseBranch is not checked out at the start of processBranch() due to pull/16246
+        await scm.checkoutBranch(config.baseBranch);
+        updatesVerified = true;
+
+        // only update artifact status if branch was updated
+        // also do before platform automerge reattempt
+        if (commitSha) {
+          await setArtifactErrorStatus(config);
         }
-      }
-
-      commitSha = await commitFilesToBranch(config);
-      if (!commitSha && automergeCanceledPrNo) {
-        const number = automergeCanceledPrNo;
-        automergeCanceledPrNo = undefined;
-        await platform.reattemptPlatformAutomerge?.({
-          number,
-          platformPrOptions,
-        });
-      }
-      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
-      // baseBranch is not checked out at the start of processBranch() due to pull/16246
-      await scm.checkoutBranch(config.baseBranch);
-      updatesVerified = true;
-
-      // only update artifact status if branch was updated
-      // also do before platform automerge reattempt
-      if (commitSha) {
-        await setArtifactErrorStatus(config);
+      } finally {
+        if (automergeCanceledPrNo) {
+          await restorePlatformAutomerge(
+            automergeCanceledPrNo,
+            platformPrOptions,
+          );
+          platformAutomergeRestored = true;
+        }
       }
 
       // a requested rebase has now been applied, so any comment explaining why we'd skipped it no longer applies
@@ -610,6 +645,7 @@ export async function processBranch(
       const platformPrOptions = getPlatformPrOptions(config);
       if (
         commitSha &&
+        !platformAutomergeRestored &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
@@ -618,7 +654,6 @@ export async function processBranch(
             `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
           );
         } else {
-          automergeCanceledPrNo = undefined;
           await platform.reattemptPlatformAutomerge({
             number: branchPr.number,
             platformPrOptions,
@@ -726,45 +761,12 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    // re-enable platform automerge which was canceled before the push,
-    // unless the repository, branch or PR is gone or the rate limit is hit
-    const canReattempt = !(
-      err?.statusCode === 404 ||
-      err?.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
-      err?.message === REPOSITORY_CHANGED
-    );
-    let reattemptRateLimitErr: Error | undefined;
-    if (automergeCanceledPrNo && canReattempt) {
-      try {
-        await platform.reattemptPlatformAutomerge?.({
-          number: automergeCanceledPrNo,
-          platformPrOptions: getPlatformPrOptions(config),
-        });
-      } catch (reattemptErr) {
-        // keep handling the original error
-        logger.warn(
-          { err: reattemptErr },
-          'Error re-enabling platform automerge',
-        );
-        if (
-          reattemptErr instanceof Error &&
-          reattemptErr.message === PLATFORM_RATE_LIMIT_EXCEEDED
-        ) {
-          reattemptRateLimitErr = reattemptErr;
-        }
-      }
-    }
-    const result = handleBranchError(err, {
+    return handleBranchError(err, {
       branchExists,
       prNo: branchPr?.number,
       commitSha,
       updatesVerified,
     });
-    // the original error was handled without being passed up, so pass up the rate limit hit while re-enabling
-    if (reattemptRateLimitErr) {
-      throw reattemptRateLimitErr;
-    }
-    return result;
   }
   try {
     logger.debug('Ensuring PR');
