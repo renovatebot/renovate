@@ -413,6 +413,7 @@ export async function processBranch(
             newVersion: upgrade.newVersion,
             updateType: upgrade.updateType,
             isBreaking: upgrade.isBreaking,
+            automerge: upgrade.automerge,
           },
         ]),
       );

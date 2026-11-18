@@ -253,7 +253,7 @@ export function refreshBranchConfig(
     BranchUpgradeConfig,
     Pick<
       BranchUpgradeConfig,
-      'newValue' | 'newVersion' | 'updateType' | 'isBreaking'
+      'newValue' | 'newVersion' | 'updateType' | 'isBreaking' | 'automerge'
     >
   >,
 ): void {
@@ -317,12 +317,17 @@ export function refreshBranchConfig(
     upgrade.prettyNewMajor =
       upgrade.newMajor === undefined ? undefined : `v${upgrade.newMajor}`;
   }
+  const automergeDisabled = config.upgrades.some(
+    (upgrade) => previousTargets.get(upgrade)?.automerge && !upgrade.automerge,
+  );
+  if (changed || automergeDisabled) {
+    config.automerge =
+      Boolean(config.automerge) &&
+      config.upgrades.every((upgrade) => upgrade.automerge);
+  }
   if (!changed) {
     return;
   }
-  config.automerge =
-    Boolean(config.automerge) &&
-    config.upgrades.every((upgrade) => upgrade.automerge);
 
   const [firstUpgrade] = config.upgrades;
   Object.assign(config, {

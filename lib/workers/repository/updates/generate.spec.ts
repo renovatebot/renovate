@@ -353,6 +353,7 @@ describe('workers/repository/updates/generate', () => {
       (automerge) => {
         config.automerge = true;
         config.upgrades[0].automerge = automerge;
+        previousTargets.set(config.upgrades[0], { ...config.upgrades[0] });
         const original = structuredClone(config);
 
         refreshBranchConfig(config, previousTargets);
@@ -371,6 +372,15 @@ describe('workers/repository/updates/generate', () => {
       refreshBranchConfig(config, previousTargets);
 
       expect(config.automerge).toBeFalse();
+    });
+
+    it('disables branch automerge when an unchanged upgrade loses automerge', () => {
+      config.upgrades[0].automerge = false;
+      const original = structuredClone(config);
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config).toEqual({ ...original, automerge: false });
     });
 
     it('preserves a grouped message with no version extra', () => {

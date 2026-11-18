@@ -344,6 +344,7 @@ export interface Upgrade<
   T = unknown,
   DepType extends string = string,
 > extends PackageDependency<T, DepType> {
+  automerge?: boolean;
   workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;

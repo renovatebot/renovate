@@ -4422,8 +4422,10 @@ Each workspace supports up to 256 manifests, 1 MiB per manifest, and 16 MiB per 
 Exceeding these limits produces an artifact error.
 Additional compatibility changes appear in artifact notices.
 
-Automerge stays enabled when the reconciled update is no riskier than lookup's update; otherwise Renovate disables it.
+Automerge stays enabled when the reconciled update is no riskier than lookup's update.
+Renovate disables it when the reconciled update is riskier, or when Vite+ changes a dependency the branch does not update.
 Renovate cancels its own platform automerge before pushing.
+If reconciliation disabled automerge and Renovate cannot confirm the cancellation, it skips the push until a later run.
 Automerge enabled by others is left unchanged.
 
 The `group:vitePlus` preset enables this option.

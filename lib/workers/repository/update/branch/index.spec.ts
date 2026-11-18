@@ -1377,6 +1377,35 @@ describe('workers/repository/update/branch/index', () => {
           },
         );
 
+        it('cancels platform automerge when only an alignment disabled automerge', async () => {
+          npmPostExtract.getAdditionalFiles
+            .mockReset()
+            .mockImplementation((branch) => {
+              branch.upgrades[0].automerge = false;
+              return Promise.resolve({
+                artifactErrors: [],
+                updatedArtifacts: [],
+              });
+            });
+          platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+            cancelled: false,
+            reason: 'unconfirmed',
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result.result).toBe('error');
+          expect(
+            platform.cancelPlatformAutomerge,
+          ).toHaveBeenCalledExactlyOnceWith({
+            number: 5,
+            platformPrOptions: expect.objectContaining({
+              usePlatformAutomerge: false,
+            }),
+          });
+          expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+        });
+
         it('does not cancel when platform automerge was already disabled', async () => {
           config.automerge = false;
 

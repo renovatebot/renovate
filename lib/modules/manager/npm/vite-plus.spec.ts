@@ -204,6 +204,7 @@ describe('modules/manager/npm/vite-plus', () => {
     const proposed = packageJson('0.3.1', '4.0.0');
     const aligned = packageJson('0.3.1', '4.1.11');
     const updateConfig = config(proposed);
+    updateConfig.upgrades[0].automerge = true;
     await mockFiles({ 'package.json': base });
     mockPlan((request) => validPlan(request, aligned));
 
@@ -221,6 +222,7 @@ describe('modules/manager/npm/vite-plus', () => {
         },
       },
     ]);
+    expect(updateConfig.upgrades[0].automerge).toBeFalse();
     expect(execMock).toHaveBeenCalledOnce();
     const [commands, options] = execMock.mock.calls[0];
     const execOptions = options!;
@@ -258,6 +260,7 @@ describe('modules/manager/npm/vite-plus', () => {
     const files = packageFiles();
     files.npm![0].deps![0].currentVersion = '0.3.1';
     files.npm![0].deps![0].lockedVersion = '0.3.1';
+    updateConfig.upgrades[0].automerge = true;
     const originalUpgrade = structuredClone(updateConfig.upgrades[0]);
     await mockFiles({ 'package.json': proposed });
     mockPlan((request) => validPlan(request, packageJson('0.3.1', '4.1.11')));
@@ -638,6 +641,7 @@ describe('modules/manager/npm/vite-plus', () => {
       workspace: '.',
       replacements: [],
     }));
+    vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
     const updateConfig = {
       ...config(root),
       branchName: 'renovate/vite-plus',
@@ -661,7 +665,45 @@ describe('modules/manager/npm/vite-plus', () => {
     expect(getFileMock.mock.calls).toEqual([
       [untouchedPath, 'renovate/vite-plus', { throwOnError: true }],
       ['pnpm-workspace.yaml', 'renovate/vite-plus', { throwOnError: true }],
+      ['package.json', 'main', { throwOnError: true }],
+      [leafPath, 'main', { throwOnError: true }],
+      [untouchedPath, 'main', { throwOnError: true }],
     ]);
+  });
+
+  it('disables upgrade automerge for an alignment already on a reused branch', async () => {
+    const base = packageJson('0.2.0', '4.0.0');
+    const branch = packageJson('0.3.1', '4.1.11');
+    vi.mocked(getBranchCommit).mockImplementation((ref) => fakeSha(ref));
+    const branchFiles: Record<string, string> = { main: base };
+    getFileMock.mockImplementation((path, ref) =>
+      Promise.resolve(
+        path === 'package.json' ? (branchFiles[ref!] ?? branch) : null,
+      ),
+    );
+    mockPlan((request) => ({
+      ...(validPlan(request, branch) as object),
+      replacements: [],
+    }));
+    const updateConfig = {
+      ...config(branch),
+      branchName: 'renovate/vite-plus',
+      reuseExistingBranch: true,
+    };
+    updateConfig.upgrades[0].automerge = true;
+
+    const results = await reconcile(updateConfig, packageFiles());
+
+    expect(results).toEqual([
+      {
+        notice: {
+          file: 'package.json',
+          message:
+            'Vite+ aligned @vitest/coverage-v8 to 4.1.11 for compatibility.',
+        },
+      },
+    ]);
+    expect(updateConfig.upgrades[0].automerge).toBeFalse();
   });
 
   it.each([undefined, 'unknown-branch'])(

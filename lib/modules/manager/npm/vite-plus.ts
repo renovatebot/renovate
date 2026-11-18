@@ -272,11 +272,8 @@ function resolveVitePlusVersion(
 
 async function readGitManifest(
   path: string,
-  config: UpdateArtifactsConfig,
+  ref: string | undefined,
 ): Promise<string | null> {
-  const ref = config.reuseExistingBranch
-    ? config.branchName
-    : config.baseBranch;
   const commitSha = ref ? getBranchCommit(ref) : null;
   const cacheKey = commitSha
     ? buildCacheKey('vite-plus', 'manifest', commitSha, path)
@@ -302,7 +299,10 @@ async function readManifestSnapshot(
   let contents: string | null | undefined =
     latestFiles.get(path)?.toString() ?? config.packageFileContents?.[path];
   if (isNullOrUndefined(contents)) {
-    contents = await readGitManifest(path, config);
+    contents = await readGitManifest(
+      path,
+      config.reuseExistingBranch ? config.branchName : config.baseBranch,
+    );
   }
   if (isNullOrUndefined(contents)) {
     // Missing extracted manifests indicate a failed read.
@@ -758,6 +758,31 @@ function matchesUpgrade(
   );
 }
 
+async function baseRelativeDependencies(
+  snapshots: ManifestSnapshot[],
+  { plan }: ValidatedPlan,
+  baseBranch: string | undefined,
+): Promise<ManifestDependency[]> {
+  const replacements = new Map(
+    plan.replacements.map(({ path, after }) => [path, after]),
+  );
+  const dependencies = await Promise.all(
+    snapshots.map(async (snapshot) => {
+      const base = await readGitManifest(snapshot.path, baseBranch);
+      return collectManifestDependencies(
+        snapshot,
+        base === null ? {} : parseManifest(snapshot.kind, base),
+        parseManifest(
+          snapshot.kind,
+          replacements.get(snapshot.path) ?? snapshot.contents,
+        ),
+        [],
+      );
+    }),
+  );
+  return dependencies.flat();
+}
+
 function additionalAlignmentNotices(
   dependencies: ManifestDependency[],
   upgrades: Upgrade<NpmManagerData>[],
@@ -947,11 +972,8 @@ async function reconcileWorkspace(
   if (snapshots.length === 0) {
     throw new Error(`No Vite+ manifests found in workspace ${workspace.root}`);
   }
-  const { plan, dependencies } = await runPlanner(
-    workspace,
-    snapshots,
-    vitePlusVersion,
-  );
+  const validatedPlan = await runPlanner(workspace, snapshots, vitePlusVersion);
+  const { plan, dependencies } = validatedPlan;
   const replacements = new Map<string, FileAddition>();
   if (!config.reuseExistingBranch) {
     // Replace any earlier call's artifact for this file, which was reconciled from older contents.
@@ -969,11 +991,26 @@ async function reconcileWorkspace(
     (file) => ({ file }),
   );
   updateUpgradeTargets(upgrades, dependencies);
-  results.push(
-    ...additionalAlignmentNotices(dependencies, upgrades).map((notice) => ({
-      notice,
-    })),
+  let alignedDependencies = dependencies;
+  if (config.reuseExistingBranch) {
+    // A reused branch already contains the alignment, so compare it with the base branch.
+    alignedDependencies = await baseRelativeDependencies(
+      snapshots,
+      validatedPlan,
+      config.baseBranch,
+    );
+  }
+  const alignmentNotices = additionalAlignmentNotices(
+    alignedDependencies,
+    upgrades,
   );
+  if (alignmentNotices.length) {
+    // Package rules never evaluated these dependencies, so they are not approved for automerge.
+    for (const upgrade of upgrades) {
+      upgrade.automerge = false;
+    }
+  }
+  results.push(...alignmentNotices.map((notice) => ({ notice })));
   logger.debug(
     {
       workspace: workspace.root,
