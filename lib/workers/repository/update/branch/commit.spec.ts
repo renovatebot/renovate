@@ -70,6 +70,24 @@ describe('workers/repository/update/branch/commit', () => {
       });
     });
 
+    it('logs deleted files in dry-run mode without preparing a commit', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.updatedPackageFiles?.push({
+        type: 'deletion',
+        path: 'package-lock.json',
+      });
+
+      await expect(prepareBranchCommit(config)).resolves.toBeNull();
+
+      expect(scm.prepareCommit).not.toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          files: [{ type: 'deletion', path: 'package-lock.json' }],
+        }),
+        'DRY-RUN: Would commit files to branch renovate/some-branch',
+      );
+    });
+
     it('rejects if the commit message contains a secret', async () => {
       addSecretForSanitizing('some-secret');
       config.commitMessage = 'update some-secret';
