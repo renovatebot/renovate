@@ -1,5 +1,4 @@
 import { setTimeout } from 'node:timers/promises';
-import { isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
@@ -14,6 +13,7 @@ import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as git from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { VcpkgDatasource } from './index.ts';
 
@@ -33,12 +33,82 @@ const zlibReleases = [
   { version: '1.2.12' },
 ];
 
+// The commit times that the blame gives each zlib.json version: the newest
+// two versions have their own commits, the others the first one.
+const zlibTimestamps = {
+  '1.3.1': '2026-11-13T16:31:43.000Z',
+  '1.3#1': '2026-11-04T19:58:28.000Z',
+  '1.3': '2021-01-15T00:08:36.000Z',
+  '1.2.13': '2021-01-15T00:08:36.000Z',
+  '2022-09-15': '2021-01-15T00:08:36.000Z',
+  '1.2.12': '2021-01-15T00:08:36.000Z',
+};
+
+function graphqlBlame(text: string): Record<string, unknown> {
+  return {
+    data: {
+      repository: {
+        object: {
+          file: { object: { text } },
+          blame: {
+            ranges: [
+              {
+                startingLine: 1,
+                endingLine: 2,
+                commit: { committedDate: '2021-01-15T00:08:36Z' },
+              },
+              {
+                startingLine: 3,
+                endingLine: 7,
+                commit: { committedDate: '2026-11-13T16:31:43Z' },
+              },
+              {
+                startingLine: 8,
+                endingLine: 12,
+                commit: { committedDate: '2026-11-04T19:58:28Z' },
+              },
+              {
+                startingLine: 13,
+                endingLine: 31,
+                commit: { committedDate: '2021-01-15T00:08:36Z' },
+              },
+            ],
+          },
+        },
+      },
+    },
+  };
+}
+
+// `git blame --line-porcelain` of a versions file, trimmed to the lines that
+// matter: each line's committer time, then the line.
+function porcelainBlame(text: string): string {
+  return text
+    .split('\n')
+    .flatMap((line, index) => {
+      let committerTime = '1610669316';
+      if (line.includes('ffffffff')) {
+        // The oldest version's line has an invalid committer time.
+        committerTime = 'x';
+      } else if (index < 7) {
+        committerTime = '1794587503';
+      } else if (index < 12) {
+        committerTime = '1793822308';
+      }
+      return [`committer-time ${committerTime}`, `\t${line}`];
+    })
+    .join('\n');
+}
+
 function setupGitMocks(
   portName: string,
   firstLetter: string,
   fixtureName: string,
   delayMs?: number,
-): { mockClone: MockedFunction<SimpleGit['clone']> } {
+): {
+  mockClone: MockedFunction<SimpleGit['clone']>;
+  mockRaw: MockedFunction<SimpleGit['raw']>;
+} {
   const mockClone = vi
     .fn()
     .mockName('clone')
@@ -60,9 +130,13 @@ function setupGitMocks(
       },
     );
 
-  const gitMock = partial<SimpleGit>({ clone: mockClone });
+  const mockRaw = vi
+    .fn()
+    .mockName('raw')
+    .mockResolvedValue(porcelainBlame(Fixtures.get(fixtureName)));
+  const gitMock = partial<SimpleGit>({ clone: mockClone, raw: mockRaw });
   createSimpleGit.mockReturnValue(gitMock);
-  return { mockClone };
+  return { mockClone, mockRaw };
 }
 
 function setupEmptyGitMock(): {
@@ -111,6 +185,7 @@ describe('modules/datasource/vcpkg/index', () => {
     await tmpDir?.cleanup();
     tmpDir = null;
     GlobalConfig.reset();
+    hostRules.clear();
   });
 
   describe('default registry', () => {
@@ -127,6 +202,57 @@ describe('modules/datasource/vcpkg/index', () => {
       expect(res?.releases).toEqual(expect.arrayContaining(zlibReleases));
       expect(res?.releases).toHaveLength(zlibReleases.length);
       expect(mockClone).not.toHaveBeenCalled();
+    });
+
+    it('dates the releases with a github.com token', async () => {
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 't',
+      });
+      httpMock
+        .scope(defaultRegistryFiles)
+        .get('/versions/z-/zlib.json')
+        .reply(200, Fixtures.get('zlib.json'));
+      httpMock
+        .scope('https://api.github.com')
+        .post(
+          '/graphql',
+          (body) => body.variables.path === 'versions/z-/zlib.json',
+        )
+        .reply(200, graphqlBlame(Fixtures.get('zlib.json')));
+
+      const res = await getPkgReleases({ datasource, packageName: 'zlib' });
+
+      expect(res?.releases).toEqual(
+        expect.arrayContaining(
+          Object.entries(zlibTimestamps).map(([version, releaseTimestamp]) => ({
+            version,
+            releaseTimestamp,
+          })),
+        ),
+      );
+    });
+
+    it('returns undated releases when GitHub returns no blame', async () => {
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 't',
+      });
+      httpMock
+        .scope(defaultRegistryFiles)
+        .get('/versions/z-/zlib.json')
+        .reply(200, Fixtures.get('zlib.json'));
+      httpMock
+        .scope('https://api.github.com')
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'blame failed' }] });
+
+      const res = await getPkgReleases({ datasource, packageName: 'zlib' });
+
+      expect(res?.releases).toEqual(expect.arrayContaining(zlibReleases));
+      expect(res?.releases).toHaveLength(zlibReleases.length);
     });
 
     it('returns null when the registry has no such port', async () => {
@@ -201,12 +327,52 @@ describe('modules/datasource/vcpkg/index', () => {
         registryUrls: [registryUrl],
       });
 
-      expect(res?.releases).toEqual(expect.arrayContaining(zlibReleases));
+      expect(res?.releases).toEqual(
+        expect.arrayContaining(
+          zlibReleases.map((release) => expect.objectContaining(release)),
+        ),
+      );
       expect(mockClone).toHaveBeenCalledTimes(1);
       expect(createSimpleGit).toHaveBeenCalledWith({
         config: { maxConcurrentProcesses: 1 },
         authentication: { hostTypes: ['vcpkg'], url: registryUrl },
       });
+    });
+
+    it('dates the releases from the clone', async () => {
+      setupGitMocks('zlib', 'z', 'zlib.json');
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'zlib',
+        registryUrls: [registryUrl],
+      });
+
+      expect(res?.releases).toEqual(
+        expect.arrayContaining([
+          ...Object.entries(zlibTimestamps)
+            .filter(([version]) => version !== '1.2.12')
+            .map(([version, releaseTimestamp]) => ({
+              version,
+              releaseTimestamp,
+            })),
+          { version: '1.2.12' },
+        ]),
+      );
+    });
+
+    it('returns undated releases when git blame fails', async () => {
+      const { mockRaw } = setupGitMocks('zlib', 'z', 'zlib.json');
+      mockRaw.mockRejectedValue(new Error('blame failed'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'zlib',
+        registryUrls: [registryUrl],
+      });
+
+      expect(res?.releases).toEqual(expect.arrayContaining(zlibReleases));
+      expect(res?.releases).toHaveLength(zlibReleases.length);
     });
 
     it('clones an ssh registry without host rules', async () => {
@@ -321,71 +487,6 @@ describe('modules/datasource/vcpkg/index', () => {
       expect(res).toBeNull();
       expect(res2).toBeNull();
       expect(mockClone).toHaveBeenCalledTimes(1);
-    });
-
-    it('retries if shallow fails because of a dumb http git repo', async () => {
-      const mockClone = vi
-        .fn()
-        .mockName('clone')
-        .mockImplementation(
-          async (_registryUrl: string, clonePath: string, opts) => {
-            if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
-              return Promise.reject(
-                new Error(
-                  'fatal: dumb http transport does not support shallow capabilities',
-                ),
-              );
-            }
-            const filePath = upath.join(
-              clonePath,
-              'versions',
-              'z-',
-              'zlib.json',
-            );
-            await fs.mkdir(upath.dirname(filePath), { recursive: true });
-            await fs.writeFile(filePath, Fixtures.get('zlib.json'), {
-              encoding: 'utf8',
-            });
-          },
-        );
-      createSimpleGit.mockReturnValue(partial<SimpleGit>({ clone: mockClone }));
-
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'zlib',
-        registryUrls: [registryUrl],
-      });
-
-      expect(mockClone).toHaveBeenCalledTimes(2);
-      expect(res).not.toBeNull();
-    });
-
-    it('retries if shallow fails but retry can also fail', async () => {
-      const mockClone = vi
-        .fn()
-        .mockName('clone')
-        .mockImplementation(
-          (_registryUrl: string, _clonePath: string, opts) => {
-            if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
-              return Promise.reject(
-                new Error(
-                  'fatal: dumb http transport does not support shallow capabilities',
-                ),
-              );
-            }
-            return Promise.reject(new Error('mocked error'));
-          },
-        );
-      createSimpleGit.mockReturnValue(partial<SimpleGit>({ clone: mockClone }));
-
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'zlib',
-        registryUrls: [registryUrl],
-      });
-
-      expect(mockClone).toHaveBeenCalledTimes(2);
-      expect(res).toBeNull();
     });
 
     it('respects the explicit gitTimeout setting', async () => {

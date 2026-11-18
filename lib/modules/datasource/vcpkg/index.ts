@@ -4,22 +4,62 @@ import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
+import {
+  privateCacheDir,
+  readCacheFile,
+  rmCache,
+} from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { findMatchingRule } from '../../../util/http/host-rules.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
 import { isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import { VcpkgPortVersions } from './schema.ts';
+import { VcpkgBlameResponse, VcpkgPortVersions } from './schema.ts';
 
 const defaultRegistryUrl = 'https://github.com/microsoft/vcpkg';
 // The default registry's files, served without a clone.
 const defaultRegistryFilesUrl =
   'https://raw.githubusercontent.com/microsoft/vcpkg/HEAD';
+const githubGraphqlUrl = 'https://api.github.com/graphql';
+
+// The text and the blame of a versions file, from the same commit.
+const blameQuery = `
+query ($path: String!) {
+  repository(owner: "microsoft", name: "vcpkg") {
+    object(expression: "HEAD") {
+      ... on Commit {
+        file(path: $path) {
+          object {
+            ... on Blob {
+              text
+            }
+          }
+        }
+        blame(path: $path) {
+          ranges {
+            startingLine
+            endingLine
+            commit {
+              committedDate
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+// The line of a versions file entry that names its port's tree, which differs
+// for each version.
+const gitTreeLineRegex = regEx(/"git-tree"\s*:\s*"(?<gitTree>[0-9a-f]+)"/);
 
 type CloneResult =
   | {
@@ -44,7 +84,12 @@ export class VcpkgDatasource extends Datasource {
 
   override readonly defaultVersioning = 'vcpkg';
 
-  override readonly releaseTimestampSupport = false;
+  override readonly releaseTimestampSupport = true;
+
+  override readonly releaseTimestampNote =
+    "The release timestamp is the commit time of the commit that added the version to the port's versions file. For the default registry, it is read with the GitHub GraphQL API, which needs a github.com token.";
+
+  private readonly githubHttp = new GithubHttp(VcpkgDatasource.id);
 
   override readonly sourceUrlSupport = 'none';
 
@@ -62,16 +107,30 @@ export class VcpkgDatasource extends Datasource {
 
     const portFile = `versions/${packageName.charAt(0).toLowerCase()}-/${packageName}.json`;
     let portVersions: VcpkgPortVersions | null;
+    let timestamps: Map<string, Timestamp>;
     if (registryUrl === defaultRegistryUrl) {
       portVersions = await this.fetchPortVersions(portFile);
+      if (!portVersions) {
+        return null;
+      }
+      timestamps = await this.fetchVersionTimestamps(portFile);
     } else {
+      const clonePath = await VcpkgDatasource.getClonePath(registryUrl);
+      if (!clonePath) {
+        return null;
+      }
       portVersions = await VcpkgDatasource.readClonedPortVersions(
         registryUrl,
+        clonePath,
         portFile,
       );
-    }
-    if (!portVersions) {
-      return null;
+      if (!portVersions) {
+        return null;
+      }
+      timestamps = await VcpkgDatasource.blameVersionTimestamps(
+        clonePath,
+        portFile,
+      );
     }
 
     const releases: Release[] = portVersions.versions.map((entry) => {
@@ -83,7 +142,8 @@ export class VcpkgDatasource extends Datasource {
         entry['version-string']!;
       const portVersion = entry['port-version'] ?? 0;
       const version = portVersion > 0 ? `${upstream}#${portVersion}` : upstream;
-      return { version };
+      const releaseTimestamp = timestamps.get(entry['git-tree']);
+      return releaseTimestamp ? { version, releaseTimestamp } : { version };
     });
 
     return { releases };
@@ -129,13 +189,59 @@ export class VcpkgDatasource extends Datasource {
   }
 
   /**
-   * Returns the port's versions file from a clone of a custom registry, or
-   * `null` if the registry has no such port or may not be cloned.
+   * Returns when each version of the default registry's port was added, by the
+   * `git-tree` of its entry. Empty without a github.com token, or if GitHub
+   * returns no blame.
    */
-  private static async readClonedPortVersions(
-    registryUrl: string,
+  private async fetchVersionTimestamps(
     portFile: string,
-  ): Promise<VcpkgPortVersions | null> {
+  ): Promise<Map<string, Timestamp>> {
+    const timestamps = new Map<string, Timestamp>();
+    const { token } = findMatchingRule(githubGraphqlUrl, {
+      hostType: VcpkgDatasource.id,
+      readOnly: true,
+    });
+    if (!token) {
+      logger.once.debug(
+        'vcpkg datasource: no github.com token, so no release timestamps for the default registry',
+      );
+      return timestamps;
+    }
+
+    const { body } = await this.githubHttp.postJson(githubGraphqlUrl, {
+      body: { query: blameQuery, variables: { path: portFile } },
+      readOnly: true,
+    });
+    const blame = VcpkgBlameResponse.safeParse(body);
+    if (!blame.success) {
+      logger.debug(
+        { portFile, err: blame.error },
+        'vcpkg datasource: no blame of the versions file from GitHub',
+      );
+      return timestamps;
+    }
+
+    const { text, ranges } = blame.data;
+    const lines = text.split('\n');
+    for (const { startingLine, endingLine, committedDate } of ranges) {
+      // Blame ranges count lines from 1.
+      for (const line of lines.slice(startingLine - 1, endingLine)) {
+        const gitTree = gitTreeLineRegex.exec(line)?.groups?.gitTree;
+        if (gitTree) {
+          timestamps.set(gitTree, committedDate);
+        }
+      }
+    }
+    return timestamps;
+  }
+
+  /**
+   * Returns the path of a custom registry's clone, or `null` if the registry
+   * may not be cloned.
+   */
+  private static async getClonePath(
+    registryUrl: string,
+  ): Promise<string | null> {
     // A repository's config must not make the Renovate host clone any URL,
     // with the host's own credentials, unless the admin allows it.
     if (!GlobalConfig.get('allowCustomVcpkgRegistries')) {
@@ -152,7 +258,18 @@ export class VcpkgDatasource extends Datasource {
       return null;
     }
 
-    const clonePath = await VcpkgDatasource.fetchClonePath(registryUrl, url);
+    return await VcpkgDatasource.fetchClonePath(registryUrl, url);
+  }
+
+  /**
+   * Returns the port's versions file from a clone of a custom registry, or
+   * `null` if the registry has no such port.
+   */
+  private static async readClonedPortVersions(
+    registryUrl: string,
+    clonePath: string,
+    portFile: string,
+  ): Promise<VcpkgPortVersions | null> {
     try {
       const content = await readCacheFile(
         upath.join(clonePath, portFile),
@@ -166,6 +283,52 @@ export class VcpkgDatasource extends Datasource {
       );
       return null;
     }
+  }
+
+  /**
+   * Returns when each version of a cloned registry's port was added, by the
+   * `git-tree` of its entry: the commit time of the commit that added the
+   * entry, following the registry's main line of commits.
+   */
+  private static async blameVersionTimestamps(
+    clonePath: string,
+    portFile: string,
+  ): Promise<Map<string, Timestamp>> {
+    const timestamps = new Map<string, Timestamp>();
+    let blame: string;
+    try {
+      blame = await createSimpleGit({ config: { baseDir: clonePath } }).raw([
+        'blame',
+        '--first-parent',
+        '--line-porcelain',
+        '--',
+        portFile,
+      ]);
+    } catch (err) {
+      logger.debug(
+        { err, portFile },
+        'vcpkg datasource: git blame of the versions file failed',
+      );
+      return timestamps;
+    }
+
+    // `--line-porcelain` gives each line's commit details, then the line.
+    let committerTime = '';
+    for (const line of blame.split('\n')) {
+      if (line.startsWith('committer-time ')) {
+        committerTime = line.slice('committer-time '.length);
+        continue;
+      }
+      const gitTree = gitTreeLineRegex.exec(line)?.groups?.gitTree;
+      if (gitTree) {
+        // `committer-time` is in seconds since the epoch.
+        const timestamp = asTimestamp(parseInt(committerTime, 10) * 1000);
+        if (timestamp) {
+          timestamps.set(gitTree, timestamp);
+        }
+      }
+    }
+    return timestamps;
   }
 
   /**
@@ -256,34 +419,14 @@ export class VcpkgDatasource extends Datasource {
     });
 
     try {
-      await git.clone(registryFetchUrl, clonePath, {
-        '--depth': 1,
-      });
+      // A clone from an earlier run would make `git clone` fail.
+      await rmCache(clonePath);
+      // Not shallow: the history gives the release timestamps.
+      await git.clone(registryFetchUrl, clonePath);
       return { clonePath };
     } catch (err) {
-      if (
-        err.message.includes(
-          'fatal: dumb http transport does not support shallow capabilities',
-        )
-      ) {
-        logger.info(
-          { registryFetchUrl },
-          'failed to shallow clone vcpkg registry, doing full clone',
-        );
-        try {
-          await git.clone(registryFetchUrl, clonePath);
-          return { clonePath };
-        } catch (err) {
-          logger.warn(
-            { err, registryFetchUrl },
-            'failed cloning vcpkg registry',
-          );
-          return { err };
-        }
-      } else {
-        logger.warn({ err, registryFetchUrl }, 'failed cloning vcpkg registry');
-        return { err };
-      }
+      logger.warn({ err, registryFetchUrl }, 'failed cloning vcpkg registry');
+      return { err };
     }
   }
 }

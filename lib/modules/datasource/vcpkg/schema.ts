@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
+import { Timestamp } from '../../../util/timestamp.ts';
 
 const VcpkgPortVersionEntry = z
   .object({
@@ -29,3 +30,37 @@ export const VcpkgPortVersions = z.object({
 });
 
 export type VcpkgPortVersions = z.infer<typeof VcpkgPortVersions>;
+
+/**
+ * The GitHub GraphQL response with the text and the blame of a versions file,
+ * as the text and the line ranges with the commit time of each.
+ */
+export const VcpkgBlameResponse = z
+  .object({
+    data: z.object({
+      repository: z.object({
+        object: z.object({
+          file: z.object({ object: z.object({ text: z.string() }) }),
+          blame: z.object({
+            ranges: z.array(
+              z.object({
+                startingLine: z.number().int(),
+                endingLine: z.number().int(),
+                commit: z.object({ committedDate: Timestamp }),
+              }),
+            ),
+          }),
+        }),
+      }),
+    }),
+  })
+  .transform(({ data: { repository } }) => ({
+    text: repository.object.file.object.text,
+    ranges: repository.object.blame.ranges.map(
+      ({ startingLine, endingLine, commit }) => ({
+        startingLine,
+        endingLine,
+        committedDate: commit.committedDate,
+      }),
+    ),
+  }));
