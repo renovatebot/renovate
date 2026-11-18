@@ -240,6 +240,7 @@ export interface GlobalOnlyConfigLegacy {
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateGitRegistries?: boolean;
+  allowCustomJuliaRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;

@@ -49,14 +49,14 @@ describe('modules/manager/julia/extract', () => {
             depName: 'Example',
             depType: 'deps',
             currentValue: '0.5',
-            datasource: 'julia-general-metadata',
+            datasource: 'julia',
             packageName: 'Example=7876af07-990d-54b4-ab0e-23690620f79a',
           },
           {
             depName: 'JSON',
             depType: 'deps',
             currentValue: '0.21, 1',
-            datasource: 'julia-general-metadata',
+            datasource: 'julia',
             packageName: 'JSON=682c06a0-de6a-54ab-a142-c8b1cf79cde6',
           },
         ],
@@ -102,14 +102,14 @@ describe('modules/manager/julia/extract', () => {
           depName: 'LinearAlgebra',
           depType: 'compat',
           currentValue: '1',
-          datasource: 'julia-general-metadata',
+          datasource: 'julia',
           skipReason: 'unsupported',
         },
         {
           depName: 'Statistics',
           depType: 'compat',
           currentValue: '1',
-          datasource: 'julia-general-metadata',
+          datasource: 'julia',
         },
       ]);
     });
@@ -189,7 +189,7 @@ describe('modules/manager/julia/extract', () => {
             depName: 'Example',
             depType: 'deps',
             currentValue: '0.5',
-            datasource: 'julia-general-metadata',
+            datasource: 'julia',
             packageName: 'Example=7876af07-990d-54b4-ab0e-23690620f79a',
           },
         ],
@@ -237,7 +237,7 @@ describe('modules/manager/julia/extract', () => {
           depName: 'Example',
           depType: 'compat',
           currentValue: '0.5',
-          datasource: 'julia-general-metadata',
+          datasource: 'julia',
         },
       ]);
     });
@@ -255,7 +255,7 @@ describe('modules/manager/julia/extract', () => {
             depName: 'JSON',
             depType: 'compat',
             currentValue: '1',
-            datasource: 'julia-general-metadata',
+            datasource: 'julia',
           },
         ],
       });
