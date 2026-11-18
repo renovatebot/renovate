@@ -388,7 +388,7 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
-  it('updates mise.lock and its sidecars together for a dependency update', async () => {
+  it('includes generated sidecars in targeted artifact updates', async () => {
     const updatedLockFile =
       '[[tools."npm:renovate"]]\nversion = "44.134.1"\naube = { path = ".mise/locks/npm-renovate/44.134.1~aa673d8d", digest = "sha256:new" }\n';
     fs.readLocalFile
@@ -517,6 +517,7 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
+    // Fall back to plain lock when the mise version cannot be detected.
     expect(execSnapshots).toMatchObject([
       { cmd: miseVersionCmd },
       { cmd: trustCmd },
