@@ -2284,10 +2284,43 @@ export async function getPrAutoMergeState(
   return pr.data;
 }
 
+/**
+ * Returns true when the stored automerge commit message matches the new one.
+ * Only the headline is compared for automerge enabled by another actor.
+ */
+function isAutomergeMessageUnchanged(
+  autoMergeRequest: NonNullable<
+    GithubPullRequestAutoMergeState['autoMergeRequest']
+  >,
+  commitHeadline: string,
+  commitBody: string | undefined,
+  enabledByRenovate: boolean,
+): boolean {
+  if (autoMergeRequest.commitHeadline !== commitHeadline) {
+    return false;
+  }
+  // GitHub stores its default body when none was passed, so the body is only compared for Renovate's own automerge with a body
+  return (
+    !enabledByRenovate ||
+    commitBody === undefined ||
+    (autoMergeRequest.commitBody ?? '') === commitBody
+  );
+}
+
 export async function cancelPlatformAutomerge({
   number: prNo,
   enabledBy = config.renovateUsername,
+  platformPrOptions,
 }: CancelPlatformAutomergeConfig): Promise<CancelPlatformAutomergeResult> {
+  const commit = platformPrOptions
+    ? getAutomergeCommit(prNo, platformPrOptions)
+    : undefined;
+  // without a commit headline, GitHub does not use a stored message (rebase merges)
+  if (commit && !commit.commitHeadline) {
+    logger.debug({ prNo }, 'PR auto-merge has no commit message to compare');
+    return { canceled: false, reason: 'unchanged' };
+  }
+
   const pr = await getPrAutoMergeState(prNo);
   if (!pr) {
     return { canceled: false, reason: 'unconfirmed' };
@@ -2299,7 +2332,21 @@ export async function cancelPlatformAutomerge({
   // GraphQL omits the REST login's [bot] suffix. Use actor type to avoid matching a user with the same name.
   const login =
     actor?.__typename === 'Bot' ? `${actor.login}[bot]` : actor?.login;
-  if (!enabledBy || login?.toLowerCase() !== enabledBy.toLowerCase()) {
+  const enabledByRenovate =
+    !!enabledBy && login?.toLowerCase() === enabledBy.toLowerCase();
+  if (
+    commit?.commitHeadline &&
+    isAutomergeMessageUnchanged(
+      pr.autoMergeRequest,
+      commit.commitHeadline,
+      commit.commitBody,
+      enabledByRenovate,
+    )
+  ) {
+    logger.debug({ prNo }, 'PR auto-merge commit message is unchanged');
+    return { canceled: false, reason: 'unchanged' };
+  }
+  if (!enabledByRenovate) {
     logger.debug(
       { prNo },
       'PR auto-merge actor does not match cancellation filter',
