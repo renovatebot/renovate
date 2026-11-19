@@ -19,6 +19,13 @@ export const MergeTrainCarStatus = z
   })
   .transform(({ status }) => status);
 
+/**
+ * https://docs.gitlab.com/api/merge_request_approvals/#retrieve-approval-state-for-a-merge-request
+ */
+export const MergeRequestApprovals = z.object({
+  user_has_approved: z.boolean(),
+});
+
 const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
