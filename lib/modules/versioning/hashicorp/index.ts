@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
 import { getExcludedVersions, getFilteredRange } from '../common.ts';
 import { api as npm } from '../npm/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
@@ -88,11 +89,25 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  if (npmNewVersion) {
-    npmNewVersion = npm2hashicorp(npmNewVersion);
-    if (currentValue.startsWith('v') && !npmNewVersion.startsWith('v')) {
-      npmNewVersion = `v${npmNewVersion}`;
+  if (npmNewVersion?.includes('||')) {
+    // hashicorp constraints have no OR operator
+    const pessimistic = regEx(/^\s*~>\s*v?(?<version>[^\s,]+)\s*$/).exec(
+      currentValue,
+    );
+    if (!pessimistic) {
+      return null;
     }
+    const nextMajor = npm.getMajor(newVersion)! + 1;
+    npmNewVersion = `>= ${pessimistic.groups!.version}, < ${nextMajor}.0.0`;
+  } else if (npmNewVersion) {
+    npmNewVersion = npm2hashicorp(npmNewVersion);
+  }
+  if (
+    npmNewVersion &&
+    currentValue.startsWith('v') &&
+    !npmNewVersion.startsWith('v')
+  ) {
+    npmNewVersion = `v${npmNewVersion}`;
   }
   return npmNewVersion;
 }
