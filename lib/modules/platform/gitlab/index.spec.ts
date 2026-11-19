@@ -2188,6 +2188,24 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
+    it('replaces PR only as a whole word', async () => {
+      const scope = await initRepo();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests/42/notes', {
+          body: '### Edited/Blocked MR\n\nPROMED.Core is in this MR, see other MRs',
+        })
+        .reply(200);
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'Edited/Blocked PR',
+          content: 'PROMED.Core is in this PR, see other PRs',
+        }),
+      ).toResolve();
+    });
+
     it('add updates comment if necessary', async () => {
       const scope = await initRepo();
       scope
