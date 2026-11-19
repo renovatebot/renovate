@@ -28,3 +28,10 @@ export interface PackageDescription {
   Version?: string;
   Homepage?: string;
 }
+
+export type ChecksumAlgorithm = 'sha512' | 'sha256';
+
+export interface Checksum {
+  algorithm: ChecksumAlgorithm;
+  hash: string;
+}

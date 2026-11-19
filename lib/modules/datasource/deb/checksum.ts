@@ -1,40 +1,64 @@
 import { createCacheReadStream } from '../../../util/fs/index.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { Checksum, ChecksumAlgorithm } from './types.ts';
+
+const sectionNames: Record<string, ChecksumAlgorithm> = {
+  SHA512: 'sha512',
+  SHA256: 'sha256',
+};
+
+// strongest algorithm first
+const algorithmPriority: ChecksumAlgorithm[] = ['sha512', 'sha256'];
+
+const sectionRegex = regEx(/^(?<name>[\w-]+):\s*$/);
 
 /**
- * Parses the SHA256 checksum for a specified package path from the InRelease content.
+ * Parses the checksum for a specified package path from the InRelease content.
+ * Uses the SHA512 section if it lists the path, otherwise the SHA256 section.
  *
  * @param inReleaseContent - content of the InRelease file
  * @param packagePath - path of the package file (e.g., 'contrib/binary-amd64/Packages.gz')
- * @returns The SHA256 checksum if found, otherwise undefined
+ * @returns The checksum with its algorithm if found, otherwise null
  */
 export function parseChecksumsFromInRelease(
   inReleaseContent: string,
   packagePath: string,
-): string | null {
-  const lines = inReleaseContent.split(newlineRegex);
-  const regex = regEx(
-    `([a-f0-9]{64})\\s+\\d+\\s+${RegExp.escape(packagePath)}$`,
+): Checksum | null {
+  const entryRegex = regEx(
+    `^\\s+(?<hash>\\S+)\\s+\\d+\\s+${RegExp.escape(packagePath)}$`,
   );
+  const found: Partial<Record<ChecksumAlgorithm, string>> = {};
+  let algorithm: ChecksumAlgorithm | undefined;
 
-  for (const line of lines) {
-    const match = regex.exec(line);
-    if (match) {
-      return match[1];
+  for (const line of inReleaseContent.split(newlineRegex)) {
+    const section = sectionRegex.exec(line);
+    if (section) {
+      algorithm = sectionNames[section.groups!.name];
+      continue;
+    }
+
+    const hash = algorithm && entryRegex.exec(line)?.groups?.hash;
+    if (algorithm && hash) {
+      found[algorithm] ??= hash;
     }
   }
 
-  return null;
+  const best = algorithmPriority.find((a) => found[a]);
+  return best ? { algorithm: best, hash: found[best]! } : null;
 }
 
 /**
- * Computes the SHA256 checksum of a specified file.
+ * Computes the checksum of a specified file with the given algorithm.
  *
  * @param filePath - path of the file
- * @returns resolves to the SHA256 checksum
+ * @param algorithm - hash algorithm to use
+ * @returns resolves to the checksum
  */
-export function computeFileChecksum(filePath: string): Promise<string> {
+export function computeFileChecksum(
+  filePath: string,
+  algorithm: ChecksumAlgorithm = 'sha256',
+): Promise<string> {
   const stream = createCacheReadStream(filePath);
-  return hashStream(stream, 'sha256');
+  return hashStream(stream, algorithm);
 }

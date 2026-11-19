@@ -105,6 +105,23 @@ describe('modules/datasource/deb/packages', () => {
       ).rejects.toThrow(`SHA256 checksum validation failed`);
     });
 
+    it('should throw error when no supported checksum is found', async () => {
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
+        .replyWithFile(200, fixturePackagesArchivePath2);
+      mockFetchInReleaseContent('wrong-hash', 'bullseye', 'contrib', 'amd64');
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
+          new Http('default'),
+        ),
+      ).rejects.toThrow(
+        'No supported checksum found for main/binary-amd64/Packages.gz',
+      );
+    });
+
     it('should throw error for when extracting fails', async () => {
       vi.spyOn(utils, 'extract').mockRejectedValueOnce(new Error());
 
