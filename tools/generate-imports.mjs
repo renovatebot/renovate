@@ -199,6 +199,15 @@ export const managerDefaultConfigs: Record<string, { displayName: string; defaul
   await updateFile('lib/manager-default-configs.generated.ts', content);
 }
 
+async function generateModulesData() {
+  const { getModulesData } = await import('./utils/modules-data.ts');
+
+  await updateFile(
+    'lib/config/modules.generated.json',
+    `${JSON.stringify(await getModulesData(), null, 2)}\n`,
+  );
+}
+
 async function generateVersioningList() {
   const versionings = (
     await fs.readdir('lib/modules/versioning', { withFileTypes: true })
@@ -357,11 +366,12 @@ await (async () => {
     await generateManagerDefaultConfigs();
     await generateVersioningList();
     await generateDatasourceList();
+    await generateModulesData();
     await generateGlobalConfigOptionDefaults();
     await generateTemplatableFields();
     await generateHash();
     await Promise.all(
-      (await glob('lib/**/*.generated.ts'))
+      (await glob('lib/**/*.generated.{ts,json}'))
         .map((f) => upath.join(f))
         .filter((f) => !newFiles.has(f))
         .map(async (file) => {
