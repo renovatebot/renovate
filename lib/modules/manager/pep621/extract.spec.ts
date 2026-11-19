@@ -619,6 +619,91 @@ describe('modules/manager/pep621/extract', () => {
       });
     });
 
+    it('should flag deps which pdm.lock holds at more than one version', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          [metadata]
+          groups = ["default"]
+          strategy = ["inherit_metadata"]
+          lock_version = "4.5.0"
+
+          [[metadata.targets]]
+          requires_python = ">=3.10"
+
+          [[metadata.targets]]
+          requires_python = ">=3.9,<3.10"
+
+          [[package]]
+          name = "numpy"
+          version = "2.2.6"
+          requires_python = ">=3.10"
+
+          [[package]]
+          name = "numpy"
+          version = "2.0.2"
+          requires_python = ">=3.9"
+
+          [[package]]
+          name = "httpx"
+          version = "0.28.1"
+
+          [[package]]
+          name = "httpx"
+          version = "0.28.1"
+          extras = ["socks"]
+
+          [[package]]
+          name = "urllib3"
+          version = "2.5.0"
+
+          [[package]]
+          name = "urllib3"
+          version = "1.26.20"
+
+          [[package]]
+          name = "urllib3"
+          version = "1.26.20"
+          extras = ["socks"]
+        `,
+      );
+      // pdm.lock, then no uv.lock
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('pdm.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-pdm"
+          dependencies = ["numpy>=2.0", "httpx[socks]>=0.28", "urllib3>=1.26"]
+
+          [tool.pdm]
+          distribution = false
+        `,
+        'pyproject.toml',
+      );
+
+      // the version of the last entry is the locked one, as before
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          packageName: 'numpy',
+          lockedVersion: '2.0.2',
+          managerData: { hasMultipleLockedEntries: true },
+        }),
+        // an entry with extras is the same package at the same version
+        expect.not.objectContaining({ managerData: expect.anything() }),
+        expect.objectContaining({
+          packageName: 'urllib3',
+          lockedVersion: '1.26.20',
+          managerData: { hasMultipleLockedEntries: true },
+        }),
+      ]);
+      expect(res?.deps[1]).toMatchObject({
+        packageName: 'httpx',
+        lockedVersion: '0.28.1',
+      });
+    });
+
     it('should resolve lockedVersions from uv.lock', async () => {
       fs.readLocalFile.mockResolvedValue(
         codeBlock`
