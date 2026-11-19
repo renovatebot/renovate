@@ -36,12 +36,14 @@ const GithubGraphqlTag = z.object({
 });
 export type GithubGraphqlTag = z.infer<typeof GithubGraphqlTag>;
 
-const query = prepareQuery(`
+const query = prepareQuery(
+  `
   refs(
     first: $count
     after: $cursor
     orderBy: {field: TAG_COMMIT_DATE, direction: DESC}
     refPrefix: "refs/tags/"
+    query: $query
   ) {
     pageInfo {
       hasNextPage
@@ -73,7 +75,9 @@ const query = prepareQuery(`
         }
       }
     }
-  }`);
+  }`,
+  { withRefQuery: true },
+);
 
 function transform(item: GithubGraphqlTag): GithubTagItem | null {
   const res = GithubGraphqlTag.safeParse(item);

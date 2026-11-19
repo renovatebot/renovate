@@ -4,6 +4,7 @@ import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { fakeSha } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -522,6 +523,43 @@ describe('modules/datasource/go/releases-goproxy', () => {
         sourceUrl: 'https://github.com/kr/pretty',
         tags: { latest: 'v0.3.1' },
       });
+    });
+
+    it('scopes the GitHub tag query by submodule prefix for monorepo subpaths', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/aws/aws-sdk-go-v2/service/s3`)
+        .get('/@v/list')
+        .reply(200, 'v1.100.0 2026-06-10T14:10:43Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.100.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockResolvedValueOnce([
+        {
+          version: 'service/s3/v1.100.0',
+          releaseTimestamp: '2026-07-01T00:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.100.0',
+          hash: fakeSha('s3'),
+        },
+      ]);
+
+      await datasource.getReleases({
+        packageName: 'github.com/aws/aws-sdk-go-v2/service/s3',
+      });
+
+      // The repo path is aws/aws-sdk-go-v2, so the submodule prefix service/s3/
+      // is forwarded as refQuery to scope the server-side refs(query:) lookup.
+      expect(githubQueryTags).toHaveBeenCalledWith(
+        {
+          packageName: 'aws/aws-sdk-go-v2',
+          registryUrl: 'https://github.com',
+          refQuery: 'service/s3/',
+        },
+        expect.anything(),
+      );
     });
 
     it('prefers the GitHub Release timestamp over the GitHub tag timestamp when both exist', async () => {
