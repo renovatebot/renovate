@@ -308,6 +308,26 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeFalse();
     });
 
+    it('keeps the version extra templated for different ranges of one version', () => {
+      const res = generateBranchConfig(
+        ['^4.2.0', '~4.2.0'].map((newValue) => ({
+          ...getConfig(),
+          major: undefined,
+          manager: 'npm',
+          branchName: 'renovate/vitest-4.x',
+          depName: 'vitest',
+          newValue,
+          newVersion: '4.2.0',
+          isRange: true,
+        })),
+      );
+
+      expect(res.commitMessage).toBe('Update dependency vitest to v4.2.0');
+      expect(res.upgrades.map((upgrade) => upgrade.commitMessageExtra)).toEqual(
+        ['to v{{{newVersion}}}', 'to v{{{newVersion}}}'],
+      );
+    });
+
     it('groups multiple upgrades same version', () => {
       const branch: BranchUpgradeConfig[] = [
         {

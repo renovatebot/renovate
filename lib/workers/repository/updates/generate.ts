@@ -337,7 +337,7 @@ export function generateBranchConfig(
 
     // needs to be done for each upgrade, as we reorder them below
     if (newValue.length > 1 && !groupEligible) {
-      upgrade.commitMessageExtra = `to v${toVersions[0]}`;
+      upgrade.commitMessageExtra = 'to v{{{newVersion}}}';
     }
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
