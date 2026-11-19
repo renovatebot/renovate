@@ -472,6 +472,69 @@
       }
     },
     {
+      "files": ["lib/config/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              "nock",
+              "parse-link-header",
+              "path",
+              {
+                "name": "simple-git",
+                "importNames": ["simpleGit"],
+                "message": "Use createSimpleGit instead of simpleGit."
+              },
+              {
+                "name": "zod",
+                "message": "Use zod/v4 instead of the bare zod package."
+              },
+              {
+                "name": "zod/v3",
+                "message": "Use zod/v4 instead of the zod/v3 compatibility shim."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["**/modules/**", "**/util/exec/containerbase.ts"],
+                "allowTypeImports": true,
+                "message": "Read the module data from `lib/config/modules-data.ts` instead."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["lib/config/presets/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              "nock",
+              "parse-link-header",
+              "path",
+              {
+                "name": "simple-git",
+                "importNames": ["simpleGit"],
+                "message": "Use createSimpleGit instead of simpleGit."
+              },
+              {
+                "name": "zod",
+                "message": "Use zod/v4 instead of the bare zod package."
+              },
+              {
+                "name": "zod/v3",
+                "message": "Use zod/v4 instead of the zod/v3 compatibility shim."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": [
         "lib/util/git/index.ts",
         "tools/**/*.mjs",
