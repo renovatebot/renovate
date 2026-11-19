@@ -41,6 +41,7 @@ import type {
   CacheFingerprintMatchResult,
 } from '../../../types.ts';
 import * as _changelog from '../../changelog/index.ts';
+import * as commitBody from '../../model/commit-body.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
@@ -4191,6 +4192,7 @@ describe('workers/repository/update/branch/index', () => {
         const setArtifactErrorStatus = vi
           .spyOn(artifacts, 'setArtifactErrorStatus')
           .mockResolvedValue();
+        const compileCommitBody = vi.spyOn(commitBody, 'compileCommitBody');
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
           canceled: true,
         });
@@ -4206,7 +4208,13 @@ describe('workers/repository/update/branch/index', () => {
         expect(
           platform.reattemptPlatformAutomerge,
         ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        const compiled = compileCommitBody.mock.invocationCallOrder[0];
         const order = [
+          compiled,
+          // the platform options for the new commit message are read after it is compiled
+          prWorker.getPlatformPrOptions.mock.invocationCallOrder.find(
+            (callOrder) => callOrder > compiled,
+          ),
           commit.prepareBranchCommit.mock.invocationCallOrder[0],
           platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
           commit.pushBranchCommit.mock.invocationCallOrder[0],
@@ -4258,7 +4266,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.cancelPlatformAutomerge).toHaveBeenCalledOnce();
       });
 
-      it('pushes when the platform cannot cancel platform automerge', async () => {
+      it('pushes and re-enables by the reattempt after the push when the platform cannot cancel platform automerge', async () => {
         const { cancelPlatformAutomerge } = platform;
         Object.assign(platform, { cancelPlatformAutomerge: undefined });
         onTestFinished(() => {
@@ -4286,7 +4294,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(commit.pushBranchCommit).toHaveBeenCalledOnce();
       });
 
-      it('pushes and leaves platform automerge of someone else as it is', async () => {
+      it('does not restore platform automerge of someone else', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
           canceled: false,
           reason: 'enabled-by-other',
@@ -4299,7 +4307,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
       });
 
-      it('pushes and does not re-enable platform automerge when the commit message is unchanged', async () => {
+      it('re-enables platform automerge only by the reattempt after the push when the commit message is unchanged', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
           canceled: false,
           reason: 'unchanged',
@@ -4312,7 +4320,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
       });
 
-      it('pushes without re-enabling platform automerge when canceling it throws', async () => {
+      it('does not restore platform automerge when canceling it throws', async () => {
         const cancelErr = new Error('Internal Server Error');
         platform.cancelPlatformAutomerge.mockRejectedValueOnce(cancelErr);
         commit.pushBranchCommit.mockResolvedValueOnce(null);
@@ -4431,6 +4439,21 @@ describe('workers/repository/update/branch/index', () => {
           { prNo: 123 },
           'Commit was not pushed, platform automerge stays disabled until the next push',
         );
+      });
+
+      it('restores platform automerge once after a successful push even with artifact errors', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          canceled: true,
+        });
+        vi.spyOn(artifacts, 'setArtifactErrorStatus').mockResolvedValue();
+        config.artifactErrors = [partial<ArtifactError>()];
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ commitSha });
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
       });
 
       it('re-enables platform automerge which might have been canceled', async () => {
