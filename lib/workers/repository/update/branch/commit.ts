@@ -100,16 +100,3 @@ export function pushBranchCommit(
 ): Promise<LongCommitSha | null> {
   return preparedCommit.push();
 }
-
-/**
- * Commits the branch's updated files and pushes them, returning the pushed commit SHA or `null`.
- */
-export async function commitFilesToBranch(
-  config: BranchConfig,
-): Promise<LongCommitSha | null> {
-  const preparedCommit = await prepareBranchCommit(config);
-  if (!preparedCommit) {
-    return null;
-  }
-  return await pushBranchCommit(preparedCommit);
-}
