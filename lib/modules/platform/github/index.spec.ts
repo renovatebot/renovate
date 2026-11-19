@@ -5894,6 +5894,9 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.cancelPlatformAutomerge({ number: 123 }),
       ).resolves.toEqual(canceled);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Canceled auto-merge of PR #123, stored commit headline: Update dependency to v1.2.3, new commit headline: undefined',
+      );
     });
 
     it('refuses to cancel without an expected actor', async () => {
@@ -6277,6 +6280,9 @@ describe('modules/platform/github/index', () => {
               platformPrOptions,
             }),
           ).resolves.toEqual(canceled);
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            `Canceled auto-merge of PR #123, stored commit headline: ${commitHeadline}, new commit headline: ${headline}`,
+          );
         },
       );
 

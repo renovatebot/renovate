@@ -132,6 +132,10 @@ async function restorePlatformAutomerge(
       err instanceof Error &&
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED
     ) {
+      logger.warn(
+        { prNo: number },
+        'Rate limited while re-enabling platform automerge, it stays disabled until the next push',
+      );
       throw err;
     }
     logger.warn({ err }, 'Error re-enabling platform automerge');
@@ -644,7 +648,7 @@ export async function processBranch(
         updateFailed = false;
       } finally {
         if (automergeCanceledPrNo && preparedCommit && !commitSha) {
-          logger.debug(
+          logger.warn(
             { prNo: automergeCanceledPrNo },
             'Commit was not pushed, platform automerge stays disabled until the next push',
           );

@@ -2272,8 +2272,8 @@ export async function getPrAutoMergeState(
   });
   if (res?.errors) {
     logger.debug(
-      { prNo, errors: res.errors },
-      'Failed to fetch PR auto-merge state',
+      { errors: res.errors },
+      `Failed to fetch auto-merge state of PR #${prNo}`,
     );
     return null;
   }
@@ -2282,7 +2282,7 @@ export async function getPrAutoMergeState(
     res?.data?.repository?.pullRequest,
   );
   if (!pr.success) {
-    logger.debug({ prNo }, 'Could not confirm PR auto-merge state');
+    logger.debug(`Could not confirm auto-merge state of PR #${prNo}`);
     return null;
   }
   return pr.data;
@@ -2321,14 +2321,14 @@ async function findAutomergeToCancel({
   platformPrOptions,
 }: CancelPlatformAutomergeConfig): Promise<
   | { result: CancelPlatformAutomergeResult }
-  | { pr: GithubPullRequestAutoMergeState }
+  | { pr: GithubPullRequestAutoMergeState; commitHeadline: string | undefined }
 > {
   const commit = platformPrOptions
     ? getAutomergeCommit(prNo, platformPrOptions)
     : undefined;
   // without a commit headline, GitHub does not use a stored message (rebase merges)
   if (commit && !commit.commitHeadline) {
-    logger.debug({ prNo }, 'PR auto-merge has no commit message to compare');
+    logger.debug(`PR #${prNo} auto-merge has no commit message to compare`);
     return { result: { canceled: false, reason: 'unchanged' } };
   }
   // auto-merge cannot be enabled again when the repository does not allow it
@@ -2358,13 +2358,12 @@ async function findAutomergeToCancel({
       enabledByRenovate,
     )
   ) {
-    logger.debug({ prNo }, 'PR auto-merge commit message is unchanged');
+    logger.debug(`PR #${prNo} auto-merge commit message is unchanged`);
     return { result: { canceled: false, reason: 'unchanged' } };
   }
   if (!enabledByRenovate) {
     logger.debug(
-      { prNo },
-      'PR auto-merge actor does not match cancellation filter',
+      `PR #${prNo} auto-merge actor does not match cancellation filter`,
     );
     return { result: { canceled: false, reason: 'enabled-by-other' } };
   }
@@ -2374,11 +2373,11 @@ async function findAutomergeToCancel({
     const targetBranch =
       (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
     if (await isBranchMergeQueueEnabled(targetBranch)) {
-      logger.debug({ prNo }, 'PR targets a branch with a merge queue');
+      logger.debug(`PR #${prNo} targets a branch with a merge queue`);
       return { result: { canceled: false, reason: 'merge-queue' } };
     }
   }
-  return { pr };
+  return { pr, commitHeadline: commit?.commitHeadline };
 }
 
 /**
@@ -2391,6 +2390,7 @@ async function findAutomergeToCancel({
 async function disableAutomerge(
   prNo: number,
   pr: GithubPullRequestAutoMergeState,
+  commitHeadline: string | undefined,
 ): Promise<CancelPlatformAutomergeResult> {
   config.automergeCanceledPrs.add(prNo);
   let cancellation: GithubGraphqlResponse<{
@@ -2415,8 +2415,8 @@ async function disableAutomerge(
   try {
     if (cancellation?.errors) {
       logger.debug(
-        { prNo, errors: cancellation.errors },
-        'Failed to cancel PR auto-merge',
+        { errors: cancellation.errors },
+        `Failed to cancel auto-merge of PR #${prNo}`,
       );
       // Another actor may have disabled auto-merge after the state query, then this request did not cancel it.
       const current = await getPrAutoMergeState(prNo);
@@ -2437,9 +2437,12 @@ async function disableAutomerge(
       disabledPr.data.id !== pr.id ||
       disabledPr.data.autoMergeRequest !== null
     ) {
-      logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
+      logger.debug(`Could not confirm auto-merge cancellation of PR #${prNo}`);
       return { canceled: false, reason: 'possibly-canceled' };
     }
+    logger.debug(
+      `Canceled auto-merge of PR #${prNo}, stored commit headline: ${pr.autoMergeRequest?.commitHeadline}, new commit headline: ${commitHeadline}`,
+    );
     return { canceled: true };
   } catch (err) {
     logger.warn({ prNo, err }, 'Error confirming PR auto-merge cancellation');
@@ -2467,7 +2470,11 @@ export async function cancelPlatformAutomerge(
   if ('result' in found) {
     return found.result;
   }
-  return await disableAutomerge(prConfig.number, found.pr);
+  return await disableAutomerge(
+    prConfig.number,
+    found.pr,
+    found.commitHeadline,
+  );
 }
 
 /**

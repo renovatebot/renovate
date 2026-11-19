@@ -4412,7 +4412,7 @@ describe('workers/repository/update/branch/index', () => {
         );
 
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
-        expect(logger.debug).toHaveBeenCalledWith(
+        expect(logger.warn).toHaveBeenCalledWith(
           { prNo: 123 },
           'Commit was not pushed, platform automerge stays disabled until the next push',
         );
@@ -4427,7 +4427,7 @@ describe('workers/repository/update/branch/index', () => {
         await branchWorker.processBranch(config);
 
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
-        expect(logger.debug).toHaveBeenCalledWith(
+        expect(logger.warn).toHaveBeenCalledWith(
           { prNo: 123 },
           'Commit was not pushed, platform automerge stays disabled until the next push',
         );
@@ -4553,6 +4553,10 @@ describe('workers/repository/update/branch/index', () => {
         );
 
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
+        expect(logger.warn).toHaveBeenCalledWith(
+          { prNo: 123 },
+          'Rate limited while re-enabling platform automerge, it stays disabled until the next push',
+        );
       });
 
       it('logs errors from re-enabling after a push', async () => {
