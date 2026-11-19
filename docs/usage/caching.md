@@ -133,6 +133,13 @@ It can be configured to be stored in an S3-compatible location using i.e. [`repo
 - [`repositoryCacheForceLocal`](./self-hosted-configuration.md#repositorycacheforcelocal): whether to also persist it to the local filesystem if using `repositoryCacheType=s3://...`
 - [`httpCacheTtlDays`](./self-hosted-configuration.md#httpcachettldays): how many days a cached HTTP response should stay in the Repository Cache for
 
+#### Is there any expected stability on the format of the Repository Cache?
+
+No.
+
+The format of the Repository Cache may change in breaking ways in a minor or patch version of Renovate, as may we change what each field means.
+It is only expected for Renovate itself to interact with the Repository Cache.
+
 ### Package Cache
 
 The Package Cache includes metadata about package releases, their changelogs, and HTTP responses from [Datasources](./modules/datasource/index.md).
@@ -196,6 +203,15 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 - [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache): use SQLite as the Package Cache backend
 - [`RENOVATE_X_SQLITE_BUSY_TIMEOUT`](./self-hosted-experimental.md#renovate_x_sqlite_busy_timeout): when using SQLite, increase the busy timeout
 
+#### Is there any expected stability on the format of the Repository Cache?
+
+Some.
+
+The cache keys **??** - see "Package Cache Namespaces" [above](#what-is-in-it_2) - **??**.
+
+The format of the Repository Cache may change in breaking ways in a minor or patch version of Renovate, as may we change what each field means.
+It is only expected for Renovate itself to interact with the Repository Cache.
+
 ### How do I invalidate the cache?
 
 **??**
@@ -229,10 +245,13 @@ Check the **??** namespaces
 
 Unfortunately "it depends".
 
-It is recommended to start with 2-4GB of memory, and see how this scales, depending on your organisation, **??** and **??**.
+!!! note
+  There are a number of factors that are taken into account when tuning a Package Cache - watch this space for more info.
+
+It is recommended to start with 2-4GB of memory, and see how this scales, depending on your organization, the number of repos you are using.
 
 !!! hint
-  On Mend-hosted Renovate, an AWS ElastiCache `cache.m7g.2xlarge` instance of Redis (OSS) is used, which has ~26GiB of memory, which sees roughly 60% usage at peak.
+  In November 2026, Mend-hosted Renovate uses an AWS ElastiCache `cache.m7g.2xlarge` instance of Redis (OSS), which has ~26GiB of memory, and sees roughly 60% usage at peak.
 
 ### Why does Renovate attempt to categorise what is **public/private data? maybe something else?**?
 
@@ -267,7 +286,10 @@ When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stal
 - The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
 - If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
-### What's happens to package manager caches?
+Note that this is a **??**, not **??**.
+‼️‼️ When using Redis, this is not enforced on Redis' side, and **??**. ‼️‼️
+
+### What happens to package manager caches?
 
 In the case that Renovate executes commands that trigger a package manager to run, for instance `go mod tidy`, then there may be some downloads + caching that the package manager itself may do.
 
@@ -277,11 +299,11 @@ Note that this directory can grow over time (as noted in [#33612](https://github
 
 ### Where are HTTP responses cached?
 
-HTTP responses are cached between **both** the Repository Cache and the Package Cache, as well as some in the In-Memory Cache.
+HTTP responses may be persisted across all 3 of Renovate's caches.
 
-Certain HTTP requests - such as the repository's PRs and the Dependency Dashboard Issue - make more sense to be tied to the Repository Cache, and others - such as HTTP calls to Datasources - make sense to be in the Package Cache.
+Certain HTTP requests - such as the repository's PRs and the Dependency Dashboard Issue - make more sense to be tied to the Repository Cache, while others - such as HTTP calls to Datasources - make sense to be in the Package Cache.
 
-Additionally, some HTTP requests are only stored in the In-Memory Cache, and not persisted between Renovate runs.
+Additionally, some HTTP requests are only stored in the In-Memory Cache, but are not persisted between Renovate runs.
 
 The cache used for HTTP responses is not user-configurable.
 
