@@ -648,6 +648,15 @@ export async function processBranch(
             { prNo: automergeCanceledPrNo },
             'Commit was not pushed, platform automerge stays disabled until the next push',
           );
+        } else if (
+          automergeCanceledPrNo &&
+          updateFailed &&
+          config.artifactErrors?.length
+        ) {
+          logger.warn(
+            { prNo: automergeCanceledPrNo },
+            'Platform automerge stays disabled as the artifact status was not set',
+          );
         } else if (automergeCanceledPrNo) {
           await restorePlatformAutomerge(
             automergeCanceledPrNo,
