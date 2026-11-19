@@ -111,7 +111,11 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   private getCacheKey(): string {
-    return buildCacheKey(this.baseUrl, this.repoOwner, this.repoName);
+    const repoKey = buildCacheKey(this.baseUrl, this.repoOwner, this.repoName);
+    if (this.refQuery === undefined) {
+      return repoKey;
+    }
+    return buildCacheKey(repoKey, `refQuery=${this.refQuery}`);
   }
 
   private getRawQueryOptions(): GithubHttpOptions {
