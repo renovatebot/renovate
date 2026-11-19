@@ -189,7 +189,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
 /**
  * Whether `pdm update` of the version selected by `constraint` supports `--override`.
  */
-function supportsOverride(constraint: string | undefined): boolean {
+function supportsOverride(constraint: string | null | undefined): boolean {
   if (!constraint) {
     return true;
   }
