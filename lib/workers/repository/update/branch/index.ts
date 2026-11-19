@@ -107,6 +107,9 @@ async function cancelPlatformAutomergeForPush(
       ? branchPr.number
       : undefined;
   } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ err }, 'Error canceling platform automerge');
     return undefined;
   }

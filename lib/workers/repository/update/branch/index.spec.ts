@@ -4301,6 +4301,19 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
       });
 
+      it('aborts without pushing when canceling platform automerge hits a rate limit', async () => {
+        platform.cancelPlatformAutomerge.mockRejectedValueOnce(
+          new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+        );
+
+        await expect(branchWorker.processBranch(config)).rejects.toThrow(
+          PLATFORM_RATE_LIMIT_EXCEEDED,
+        );
+
+        expect(commit.pushBranchCommit).not.toHaveBeenCalled();
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+      });
+
       describe('without a commit', () => {
         beforeEach(() => {
           commit.prepareBranchCommit.mockResolvedValueOnce(null);
