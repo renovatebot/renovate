@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -64,7 +65,7 @@ export class OrbDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${OrbDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

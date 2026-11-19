@@ -14,7 +14,7 @@ In an ideal scenario:
 
 By default Renovate _does not_ apply language constraints to upgrades.
 This means Renovate will propose "any" stable upgrade.
-Renovate will _not_ check if the language version you're using actually supports that upgrade.
+Renovate will _not_ check if the language version you are using actually supports that upgrade.
 In certain ecosystems, changes to language constraints are made with a major release, and are documented in the release notes.
 So Renovate's default behavior may be okay in those ecosystems.
 For other ecosystems Renovate's default behavior may seem _wrong_.
@@ -46,13 +46,13 @@ Those library dependencies may have dropped support for Node.js `v18` already.
 
 ## Strict filtering limitations
 
-Let's go back to the Node.js project which has its `engines` field set to `"node": "^18.0.0 || ^20.0.0"`.
+Back to the Node.js project which has its `engines` field set to `"node": "^18.0.0 || ^20.0.0"`.
 
 Now also consider a library which sets its `engines` field to `"node": "^18.12.0 || ^20.9.0"` because the library only supports "LTS releases" of Node.js.
 Strictly speaking, this library is _not_ compatible with the project above, because the project has _wider requirements_ for their Node versions.
 This means Renovate holds back any upgrades for it.
 Should Renovate somehow "think" and _assume_ that this narrower `engines` support is actually OK?
-What if the project _already_ used a current version of this library "in a way that's not officially supported"?
+What if the project _already_ used a current version of this library "in a way that is not officially supported"?
 
 A second problem is that if:
 
@@ -91,7 +91,7 @@ You may need to set constraints in the Renovate config when:
 
 - The package manager of the project does not support constraints declarations, or
 - The project has not declared any constraints, or
-- You want Renovate to use _different_ constraints to what's declared in the _project_
+- You want Renovate to use _different_ constraints to what is declared in the _project_
 
 Renovate will _not_ create "update" PRs to update any of these versions once they become outdated, so you must update those by hand.
 For this reason, setting constraints manually in the Renovate config is _undesirable_.

@@ -1,4 +1,5 @@
 import { pkg } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
 import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
 import getArgv from './__fixtures__/argv.ts';
 import * as cli from './cli.ts';
@@ -130,23 +131,111 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it.each`
-      arg                              | config
-      ${'--endpoints='}                | ${{ hostRules: [] }}
-      ${'--azure-auto-complete=false'} | ${{ platformAutomerge: false }}
-      ${'--azure-auto-complete=true'}  | ${{ platformAutomerge: true }}
-      ${'--azure-auto-complete'}       | ${{ platformAutomerge: true }}
-      ${'--git-lab-automerge=false'}   | ${{ platformAutomerge: false }}
-      ${'--git-lab-automerge=true'}    | ${{ platformAutomerge: true }}
-      ${'--git-lab-automerge'}         | ${{ platformAutomerge: true }}
-      ${'--recreate-closed=false'}     | ${{ recreateWhen: 'auto' }}
-      ${'--recreate-closed=true'}      | ${{ recreateWhen: 'always' }}
-      ${'--recreate-closed'}           | ${{ recreateWhen: 'always' }}
-      ${'--recreate-when=auto'}        | ${{ recreateWhen: 'auto' }}
-      ${'--recreate-when=always'}      | ${{ recreateWhen: 'always' }}
-      ${'--recreate-when=never'}       | ${{ recreateWhen: 'never' }}
+      arg                               | config
+      ${'--endpoints='}                 | ${{ hostRules: [] }}
+      ${'--azure-auto-complete=false'}  | ${{ platformAutomerge: false }}
+      ${'--azure-auto-complete=true'}   | ${{ platformAutomerge: true }}
+      ${'--azure-auto-complete'}        | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge=false'}    | ${{ platformAutomerge: false }}
+      ${'--git-lab-automerge=true'}     | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge'}          | ${{ platformAutomerge: true }}
+      ${'--recreate-closed=false'}      | ${{ recreateWhen: 'auto' }}
+      ${'--recreate-closed=true'}       | ${{ recreateWhen: 'always' }}
+      ${'--recreate-closed'}            | ${{ recreateWhen: 'always' }}
+      ${'--recreate-when=auto'}         | ${{ recreateWhen: 'auto' }}
+      ${'--recreate-when=always'}       | ${{ recreateWhen: 'always' }}
+      ${'--recreate-when=never'}        | ${{ recreateWhen: 'never' }}
+      ${'--dependency-dashboard'}       | ${{ dependencyDashboard: { enabled: true } }}
+      ${'--dependency-dashboard=true'}  | ${{ dependencyDashboard: { enabled: true } }}
+      ${'--dependency-dashboard=false'} | ${{ dependencyDashboard: { enabled: false } }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);
+    });
+
+    describe('migrates the flat Dependency Dashboard flags', () => {
+      it('moves them into dependencyDashboard with their old types', () => {
+        argv.push(
+          '--customize-dashboard={"repoProblemsHeader":"problems"}',
+          '--dependency-dashboard-autoclose',
+          '--dependency-dashboard-footer',
+          'line one\\nline two',
+          '--dependency-dashboard-header=header',
+          '--dependency-dashboard-labels=a,b',
+          '--dependency-dashboard-o-s-v-vulnerability-summary=all',
+          '--dependency-dashboard-report-abandonment=false',
+          '--dependency-dashboard-title=title',
+        );
+
+        expect(cli.getConfig(argv)).toEqual({
+          dependencyDashboard: {
+            customize: { repoProblemsHeader: 'problems' },
+            autoclose: true,
+            footer: 'line one\nline two',
+            header: 'header',
+            labels: ['a', 'b'],
+            osvVulnerabilitySummary: 'all',
+            reportAbandonment: false,
+            title: 'title',
+          },
+        });
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          {
+            oldFlags: [
+              '--customize-dashboard',
+              '--dependency-dashboard-autoclose',
+              '--dependency-dashboard-footer',
+              '--dependency-dashboard-header',
+              '--dependency-dashboard-labels',
+              '--dependency-dashboard-o-s-v-vulnerability-summary',
+              '--dependency-dashboard-report-abandonment',
+              '--dependency-dashboard-title',
+            ],
+          },
+          'cli config has been migrated into --dependency-dashboard',
+        );
+      });
+
+      it('prefers fields set in --dependency-dashboard', () => {
+        argv.push(
+          '--dependency-dashboard={"footer":"new","enabled":true}',
+          '--dependency-dashboard-footer=old',
+          '--dependency-dashboard-title=title',
+        );
+
+        expect(cli.getConfig(argv)).toEqual({
+          dependencyDashboard: { enabled: true, footer: 'new', title: 'title' },
+        });
+      });
+
+      it('keeps a boolean --dependency-dashboard', () => {
+        argv.push('--dependency-dashboard', '--dependency-dashboard-footer=f');
+
+        expect(cli.getConfig(argv)).toEqual({
+          dependencyDashboard: { enabled: true, footer: 'f' },
+        });
+      });
+
+      it('leaves a --dependency-dashboard which is not an object', () => {
+        argv.push(
+          '--dependency-dashboard=5',
+          '--dependency-dashboard-footer=footer',
+        );
+
+        expect(cli.getConfig(argv)).toEqual({ dependencyDashboard: 5 });
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { oldFlags: ['--dependency-dashboard-footer'] },
+          'Could not migrate cli config into --dependency-dashboard, as it is not an object',
+        );
+      });
+
+      it('throws for an invalid old value', () => {
+        argv.push('--dependency-dashboard-autoclose=yes');
+
+        expect(() => cli.getConfig(argv)).toThrow(
+          "Invalid boolean value: expected 'true' or 'false', but got 'yes'",
+        );
+      });
     });
 
     it('parses json object correctly when empty', () => {

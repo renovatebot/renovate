@@ -74,7 +74,7 @@ Then set a high `minimumReleaseAge` for that dependency, for example:
 }
 ```
 
-You'll get a lot of pending updates, which you can see on the Dependency Dashboard.
+You will get a lot of pending updates, which you can see on the Dependency Dashboard.
 
 ## How we use your minimal reproduction
 
@@ -93,7 +93,7 @@ A minimal reproduction helps the Renovate developers:
 You may think:
 
 > Why do you even need a minimal reproduction?
-> I already have the reproduction on my production repository and it's public.
+> I already have the reproduction on my production repository and it is public.
 > Why not use that to debug?
 
 This is because a production repository often has:
@@ -104,7 +104,7 @@ This is because a production repository often has:
 
 Lots of "moving parts" makes it hard to debug, as debug break points can trigger hundreds of times.
 
-When you have lots of custom config for Renovate, it's hard for us to find the root cause of the behavior.
+When you have lots of custom config for Renovate, it is hard for us to find the root cause of the behavior.
 Bugs are often caused by multiple features interacting.
 Reducing the config to a minimum helps us find exactly which config elements are needed to trigger the bug.
 
@@ -112,7 +112,7 @@ Reducing the config to a minimum helps us find exactly which config elements are
 
 Here are our responses to some common objections from users about creating a minimal reproduction.
 
-### "It's too much work to create a minimal reproduction"
+### "It is too much work to create a minimal reproduction"
 
 We know that it can be hard to create a minimal reproduction.
 

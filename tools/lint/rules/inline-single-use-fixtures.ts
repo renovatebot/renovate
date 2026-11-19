@@ -127,19 +127,18 @@ function findEnclosingTestCall(
     current;
     child = current, current = current.parent
   ) {
-    if (
-      current.type !== 'CallExpression' ||
-      !TEST_NAMES.has(getCalleeBaseName(current.callee) ?? '')
-    ) {
+    if (current.type !== 'CallExpression') {
+      continue;
+    }
+    if (!TEST_NAMES.has(getCalleeBaseName(current.callee) ?? '')) {
       continue;
     }
     // The reference must sit inside a function argument (the test
     // callback), not e.g. in the title template or an `.each` table.
-    if (
-      current.arguments.some((arg) => arg === child) &&
-      (child.type === 'ArrowFunctionExpression' ||
-        child.type === 'FunctionExpression')
-    ) {
+    const isFunctionNode =
+      child.type === 'ArrowFunctionExpression' ||
+      child.type === 'FunctionExpression';
+    if (current.arguments.some((arg) => arg === child) && isFunctionNode) {
       return current;
     }
     return null;
@@ -197,7 +196,8 @@ export default defineRule({
         let testCall: ESTree.CallExpression | null = null;
         for (const reference of references) {
           const enclosing = findEnclosingTestCall(reference.identifier);
-          if (!enclosing || (testCall && enclosing !== testCall)) {
+          const isOtherTestCall = testCall !== null && enclosing !== testCall;
+          if (!enclosing || isOtherTestCall) {
             return;
           }
           testCall = enclosing;

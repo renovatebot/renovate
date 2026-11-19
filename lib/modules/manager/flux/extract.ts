@@ -89,6 +89,9 @@ const bitbucketUrlRegex = regEx(
   /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 
+const helmChartLayerMediaType =
+  'application/vnd.cncf.helm.chart.content.v1.tar+gzip';
+
 function resolveGitRepositoryPerSourceTag(
   dep: PackageDependency<FluxManagerData>,
   gitUrl: string,
@@ -316,6 +319,7 @@ function resolveResourceManifest(
             depName,
             currentValue: resource.spec.chart.spec.version,
             datasource: HelmDatasource.id,
+            depType: 'HelmChart',
           };
 
           if (isLocalChartPath(depName)) {
@@ -361,6 +365,7 @@ function resolveResourceManifest(
 
         const dep: PackageDependency<FluxManagerData> = {
           depName: resource.spec.chart,
+          depType: 'HelmChart',
         };
 
         if (resource.spec.sourceRef.kind === 'HelmRepository') {
@@ -415,10 +420,14 @@ function resolveResourceManifest(
       }
       case 'OCIRepository': {
         const container = removeOCIPrefix(resource.spec.url);
+        const depType =
+          resource.spec.layerSelector?.mediaType === helmChartLayerMediaType
+            ? 'HelmChart'
+            : undefined;
         if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
           const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
-            { specifyReplaceString: false, registryAliases },
+            { specifyReplaceString: false, registryAliases, depType },
           );
           // Set currentValue to the tag so the docker datasource can look up the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
@@ -452,12 +461,14 @@ function resolveResourceManifest(
           const dep = getDep(`${container}@${resource.spec.ref.digest}`, {
             specifyReplaceString: false,
             registryAliases,
+            depType,
           });
           deps.push(dep);
         } else if (resource.spec.ref?.tag) {
           const dep = getDep(`${container}:${resource.spec.ref.tag}`, {
             specifyReplaceString: false,
             registryAliases,
+            depType,
           });
           const refTagRange = extractOCIRefTagRange(
             (docs ??= parseAllDocuments(content, { strict: false })),
@@ -484,6 +495,7 @@ function resolveResourceManifest(
           const dep = getDep(container, {
             specifyReplaceString: false,
             registryAliases,
+            depType,
           });
           dep.skipReason = 'unversioned-reference';
           deps.push(dep);

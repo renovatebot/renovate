@@ -5,9 +5,9 @@ import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/expor
 import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
   BatchSpanProcessor,
-  NodeTracerProvider,
+  TracerProvider as SdkTracerProvider,
   SimpleSpanProcessor,
-} from '@opentelemetry/sdk-trace-node';
+} from '@opentelemetry/sdk-trace';
 import { type DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
 import { bunyan } from '../expose.ts';
@@ -21,7 +21,7 @@ import {
   instrument,
 } from './index.ts';
 
-function getOtlpExporter(nodeProvider: NodeTracerProvider): unknown {
+function getOtlpExporter(nodeProvider: SdkTracerProvider): unknown {
   const spanProcessors = (nodeProvider as any)._activeSpanProcessor
     ._spanProcessors as { _exporter: unknown }[];
   // the OTLP exporter is always the last processor registered in these tests
@@ -70,8 +70,8 @@ describe('instrumentation/index', () => {
     expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(delegateProvider).toBeInstanceOf(SdkTracerProvider);
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
@@ -94,8 +94,8 @@ describe('instrumentation/index', () => {
     expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(delegateProvider).toBeInstanceOf(SdkTracerProvider);
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
@@ -121,7 +121,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: expect.arrayContaining([
@@ -140,8 +140,8 @@ describe('instrumentation/index', () => {
     expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(delegateProvider).toBeInstanceOf(SdkTracerProvider);
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
@@ -175,7 +175,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
@@ -206,7 +206,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
@@ -241,7 +241,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterHttp);
   });
 
@@ -254,7 +254,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(
       OTLPTraceExporterProto,
     );
@@ -268,7 +268,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterHttp);
   });
 
@@ -281,8 +281,8 @@ describe('instrumentation/index', () => {
     expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
     const proxyProvider = traceProvider as ProxyTracerProvider;
     const delegateProvider = proxyProvider.getDelegate();
-    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
-    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(delegateProvider).toBeInstanceOf(SdkTracerProvider);
+    const nodeProvider = delegateProvider as SdkTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [

@@ -3,6 +3,16 @@ import { copyResponse, refusedHostMessage } from './util.ts';
 
 describe('util/http/util', () => {
   describe('copyResponse', () => {
+    it('deep copies a Buffer body', () => {
+      const body = Buffer.from('abc');
+
+      const res = copyResponse({ statusCode: 200, headers: {}, body }, true);
+      body[0] = 0x78;
+
+      expect(Buffer.isBuffer(res.body)).toBeTrue();
+      expect(res.body).toEqual(Buffer.from('abc'));
+    });
+
     it('deep copies a Uint8Array body', () => {
       const body = new Uint8Array([1, 2, 3]);
       const res = copyResponse(

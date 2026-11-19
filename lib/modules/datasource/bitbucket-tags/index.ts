@@ -29,19 +29,10 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  static getRegistryURL(registryUrl?: string): string {
-    // fallback to default API endpoint if custom not provided
-    return registryUrl ?? this.defaultRegistryUrls[0];
-  }
-
   static getSourceUrl(packageName: string, registryUrl?: string): string {
-    const url = BitbucketTagsDatasource.getRegistryURL(registryUrl);
+    const url = registryUrl ?? this.defaultRegistryUrls[0];
     const normalizedUrl = ensureTrailingSlash(url);
     return `${normalizedUrl}${packageName}`;
-  }
-
-  protected getRegistryUrl(registryUrl?: string): string {
-    return BitbucketTagsDatasource.getRegistryURL(registryUrl);
   }
 
   protected getSourceUrl(packageName: string, registryUrl?: string): string {

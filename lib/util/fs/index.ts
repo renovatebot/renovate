@@ -34,9 +34,12 @@ export async function readLocalFile(
 ): Promise<string | Buffer | null> {
   const localFileName = ensureLocalPath(fileName);
   try {
-    const fileContent = encoding
-      ? await fs.readFile(localFileName, encoding)
-      : await fs.readFile(localFileName);
+    let fileContent: string | Buffer;
+    if (encoding) {
+      fileContent = await fs.readFile(localFileName, encoding);
+    } else {
+      fileContent = await fs.readFile(localFileName);
+    }
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
 

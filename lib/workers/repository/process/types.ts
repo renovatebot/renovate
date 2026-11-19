@@ -11,6 +11,7 @@ export interface Vulnerability {
   depVersion: string;
   fixedVersion: string | null;
   datasource: string;
+  versioning?: string;
   vulnerability: Osv.Vulnerability;
   affected: Osv.Affected;
 }

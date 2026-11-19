@@ -157,7 +157,7 @@ RUN apk add --no-cache \
 In this case:
 
 - `curl=~8.12.1` is a prefix constraint, so it already accepts every `8.12.1-rN`.
-  Renovate doesn't propose an update while there are only revision-based updates.
+  Renovate does not propose an update while there are only revision-based updates.
   Once `8.13.0` exists, Renovate will provide an update to `curl=~8.13.0`.
 - `jq=1.7.1-r4` is an exact pin, so Renovate raises a PR for a new revision (`jq=1.7.1-r5`) as well as for a new version (`jq=1.8.0-r0`).
 - `bash` has no version at all, so Renovate skips with `skipReason: unsupported-version`

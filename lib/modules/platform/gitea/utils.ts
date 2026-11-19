@@ -21,6 +21,14 @@ export function trimTrailingApiPath(url: string): string {
   return url?.replace(regEx(/api\/v1\/?$/g), '');
 }
 
+function setTokenAuth(url: URL, token: string | undefined): void {
+  if (token) {
+    url.username = token;
+    // a non-empty password makes curl resend the credentials on follow-up requests
+    url.password = 'x-oauth-basic';
+  }
+}
+
 export function getRepoUrl(
   repo: Repo,
   gitUrl: GitUrlOption | undefined,
@@ -46,7 +54,7 @@ export function getRepoUrl(
     if (!url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    url.username = opts.token ?? '';
+    setTokenAuth(url, opts.token);
     url.pathname = `${url.pathname}${repo.full_name}.git`;
     logger.debug(
       { url: url.toString() },
@@ -64,7 +72,7 @@ export function getRepoUrl(
   if (!repoUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  repoUrl.username = opts.token ?? '';
+  setTokenAuth(repoUrl, opts.token);
   return repoUrl.toString();
 }
 

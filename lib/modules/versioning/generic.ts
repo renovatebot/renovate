@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { regEx } from '../../util/regex.ts';
+import { stripVersionPrefix } from '../../util/string.ts';
 import type { GenericVersion, NewValueConfig, VersioningApi } from './types.ts';
 
 export abstract class GenericVersioningApi<
@@ -123,7 +123,7 @@ export abstract class GenericVersioningApi<
     newVersion,
   }: NewValueConfig): string | null {
     if (currentVersion === `v${currentValue}`) {
-      return newVersion.replace(regEx(/^v/), '');
+      return stripVersionPrefix(newVersion);
     }
     return newVersion ?? null;
   }

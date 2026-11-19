@@ -1,13 +1,17 @@
 import { definePlugin } from '@oxlint/plugins';
+import cachedResponseHeaders from './rules/cached-response-headers.ts';
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.ts';
+import consistentHookTimeouts from './rules/consistent-hook-timeouts.ts';
 import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerErrKey from './rules/logger-err-key.ts';
 import loggerStaticMessage from './rules/logger-static-message.ts';
+import noComplexConditionalExpression from './rules/no-complex-conditional-expression.ts';
 import noDevDependencyImport from './rules/no-dev-dependency-import.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
 import noHostRulesMock from './rules/no-host-rules-mock.ts';
+import noNestedLogicalExpressions from './rules/no-nested-logical-expressions.ts';
 import noNewUrl from './rules/no-new-url.ts';
 import noNumberConstructor from './rules/no-number-constructor.ts';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.ts';
@@ -21,13 +25,16 @@ import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.ts';
 import preferFsUtil from './rules/prefer-fs-util.ts';
 import preferIsHelpers from './rules/prefer-is-helpers.ts';
 import preferIsObject from './rules/prefer-is-object.ts';
-import preferJsonPipe from './rules/prefer-json-pipe.ts';
 import preferLuxon from './rules/prefer-luxon.ts';
 import preferNullishUtil from './rules/prefer-nullish-util.ts';
+import preferParserPipe from './rules/prefer-parser-pipe.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
+import preferStripVersionPrefix from './rules/prefer-strip-version-prefix.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
-import requireCacheable from './rules/require-cacheable.ts';
+import preferVersioningHelpers from './rules/prefer-versioning-helpers.ts';
+import requireBuildCacheKey from './rules/require-build-cache-key.ts';
+import requireCachePrivacy from './rules/require-cache-privacy.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
 import testRootDescribe from './rules/test-root-describe.ts';
 import typesLocation from './rules/types-location.ts';
@@ -42,15 +49,19 @@ export default definePlugin({
     name: 'renovate',
   },
   rules: {
+    'cached-response-headers': cachedResponseHeaders,
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
+    'consistent-hook-timeouts': consistentHookTimeouts,
     'enforce-ts-extension': enforceTsExtension,
     'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-err-key': loggerErrKey,
     'logger-static-message': loggerStaticMessage,
+    'no-complex-conditional-expression': noComplexConditionalExpression,
     'no-dev-dependency-import': noDevDependencyImport,
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-host-rules-mock': noHostRulesMock,
+    'no-nested-logical-expressions': noNestedLogicalExpressions,
     'no-new-url': noNewUrl,
     'no-number-constructor': noNumberConstructor,
     'no-redundant-mock-reset': noRedundantMockReset,
@@ -62,15 +73,18 @@ export default definePlugin({
     'prefer-coerce-object': preferCoerceObject,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,
-    'prefer-json-pipe': preferJsonPipe,
     'prefer-luxon': preferLuxon,
     'prefer-is-helpers': preferIsHelpers,
     'prefer-is-object': preferIsObject,
     'prefer-nullish-util': preferNullishUtil,
+    'prefer-parser-pipe': preferParserPipe,
     'prefer-partial-in-specs': preferPartialInSpecs,
     'prefer-resolve-tool-constraint': preferResolveToolConstraint,
+    'prefer-strip-version-prefix': preferStripVersionPrefix,
     'prefer-stub-env': preferStubEnv,
-    'require-cacheable': requireCacheable,
+    'prefer-versioning-helpers': preferVersioningHelpers,
+    'require-build-cache-key': requireBuildCacheKey,
+    'require-cache-privacy': requireCachePrivacy,
     'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,
     'types-location': typesLocation,

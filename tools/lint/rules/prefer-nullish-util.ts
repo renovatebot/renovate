@@ -45,10 +45,14 @@ export default defineRule({
         // happens inside `getCalleeName` and is invisible to the compiler
         const receiver = (node.callee as ESTree.MemberExpression).object;
         // nested standalone: `z.optional(z.nullable(x))`
-        const nested = node.arguments.length === 1 ? node.arguments[0] : null;
+        const candidates =
+          node.arguments.length === 1
+            ? [receiver, node.arguments[0]]
+            : [receiver];
         if (
-          getCalleeName(receiver) === expectedInner ||
-          (nested && getCalleeName(nested) === expectedInner)
+          candidates.some(
+            (candidate) => getCalleeName(candidate) === expectedInner,
+          )
         ) {
           context.report({
             node,
