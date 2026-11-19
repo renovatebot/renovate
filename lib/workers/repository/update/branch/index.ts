@@ -633,7 +633,8 @@ export async function processBranch(
         // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
         // baseBranch is not checked out at the start of processBranch() due to pull/16246
         await scm.checkoutBranch(config.baseBranch);
-        updatesVerified = true;
+        // a prepared commit which was not pushed is not verified, so the next run prepares it again
+        updatesVerified = !preparedCommit || !!commitSha;
 
         // only update artifact status if branch was updated
         // also do before platform automerge reattempt

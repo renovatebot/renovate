@@ -4115,6 +4115,32 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
+    it.each`
+      description                 | prepared          | pushed       | verified
+      ${'was pushed'}             | ${preparedCommit} | ${commitSha} | ${true}
+      ${'was not pushed'}         | ${preparedCommit} | ${null}      | ${false}
+      ${'was not needed to push'} | ${null}           | ${null}      | ${true}
+    `(
+      'sets updatesVerified to $verified when the prepared commit $description',
+      async ({ prepared, pushed, verified }) => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+          updatedPackageFiles: [partial<FileChange>()],
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        scm.branchExists.mockResolvedValue(true);
+        commit.prepareBranchCommit.mockResolvedValueOnce(prepared);
+        commit.pushBranchCommit.mockResolvedValueOnce(pushed);
+
+        await expect(branchWorker.processBranch(config)).resolves.toMatchObject(
+          { updatesVerified: verified },
+        );
+      },
+    );
+
     it('should not reattempt platform automerge without commitSha', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
