@@ -20,7 +20,7 @@ workflows:
         - 'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5'
         - 'docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1'
         - 'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a'
         - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
@@ -45,7 +45,7 @@ workflows:
         - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
     '.github/workflows/dependency-review.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294'
+        - 'actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec'
     '.github/workflows/devcontainer.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca'
@@ -69,13 +69,13 @@ workflows:
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
-        - 'ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e'
+        - 'ossf/scorecard-action@23f22cd43608bae7a1f1fa2603d7314dee9538a5'
     '.github/workflows/undesirable-test-additions.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/update-data.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a'
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
     '.github/workflows/ws_scan.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -95,9 +95,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294':
-        ref: 'v5.0.0'
-        commit: 'sha1-a1d282b36b6f3519aa1f3fc636f609c47dddb294'
+    'actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec':
+        ref: 'v5.0.1'
+        commit: 'sha1-bbc44d14a204704ccc493733616cd1e93a0321ec'
         owner_id: 44036562
         repo_id: 476372928
     'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346':
@@ -201,9 +201,9 @@ dependencies:
         repo_id: 1404951382
         uses:
             - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-    'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d':
-        ref: 'v5.2.9'
-        commit: 'sha1-236a21c3b91f5db6d4e174b348674a0f0caac06d'
+    'jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a':
+        ref: 'v5.2.10'
+        commit: 'sha1-90f833d396d0cc3674b631d2d225e306476c303a'
         owner_id: 216188
         repo_id: 738284564
     'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6':
@@ -216,9 +216,9 @@ dependencies:
         commit: 'sha1-ad984534de44a9489a53aefd81eb77f87c70dc60'
         owner_id: 46869826
         repo_id: 240192823
-    'ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e':
-        ref: 'v2.5.0'
-        commit: 'sha1-fa7117db83c52d787ae5a89f350999701505d78e'
+    'ossf/scorecard-action@23f22cd43608bae7a1f1fa2603d7314dee9538a5':
+        ref: 'v2.6.0'
+        commit: 'sha1-23f22cd43608bae7a1f1fa2603d7314dee9538a5'
         owner_id: 67707773
         repo_id: 421101922
     'pierreraffa/cancel-previous-runs-action@133ec2d94c3dfeb83959ffc3c73640633044bd89':

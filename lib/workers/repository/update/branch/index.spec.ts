@@ -4914,7 +4914,11 @@ describe('workers/repository/update/branch/index', () => {
         ).toBeLessThan(commit.commitFilesToBranch.mock.invocationCallOrder[0]);
         expect(
           platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
       });
 
       it('pushes and leaves platform automerge of someone else as it is', async () => {
@@ -5108,6 +5112,31 @@ describe('workers/repository/update/branch/index', () => {
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );
+    });
+
+    it('reattempts platform automerge with the pushed commit', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 123,
+          state: 'open',
+        }),
+      );
+
+      await branchWorker.processBranch(config);
+
+      expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledWith({
+        number: 123,
+        platformPrOptions: { usePlatformAutomerge: true },
+        sha: commitSha,
+      });
     });
   });
 });

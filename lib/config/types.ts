@@ -240,6 +240,7 @@ export interface GlobalOnlyConfigLegacy {
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateGitRegistries?: boolean;
+  allowCustomJuliaRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
@@ -770,6 +771,11 @@ export interface RenovateOptionBase {
    * Platforms which support this option, leave undefined if all platforms support it.
    */
   supportedPlatforms?: PlatformId[];
+
+  /**
+   * Datasources which support this option, leave undefined if all datasources support it.
+   */
+  supportedDatasources?: string[];
 
   /**
    * Conditions that must be met for this option to be required.

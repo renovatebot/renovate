@@ -156,6 +156,8 @@ export interface UpdatePrConfig {
 export interface ReattemptPlatformAutomergeConfig {
   number: number;
   platformPrOptions?: PlatformPrOptions;
+  /** Commit SHA Renovate just pushed to the PR branch. */
+  sha?: string;
 }
 export interface CancelPlatformAutomergeConfig {
   number: number;
