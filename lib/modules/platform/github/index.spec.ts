@@ -6551,10 +6551,19 @@ describe('modules/platform/github/index', () => {
 
         it('retries once after canceling', async () => {
           const scope = await cancelAutomerge();
+          const enableBody = {
+            query: enableAutoMergeMutation,
+            variables: {
+              pullRequestId: 'abcd',
+              mergeMethod: 'SQUASH',
+              commitHeadline: 'Update dependency foo to v1.0.5 (#123)',
+              commitBody: 'Some body',
+            },
+          };
           scope
-            .post('/graphql')
+            .post('/graphql', enableBody)
             .reply(200, failedResp)
-            .post('/graphql')
+            .post('/graphql', enableBody)
             .reply(200, enabledResp);
 
           await github.reattemptPlatformAutomerge({
