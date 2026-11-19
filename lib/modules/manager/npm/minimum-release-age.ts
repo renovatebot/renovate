@@ -124,8 +124,6 @@ async function pnpmEnforcesMinimumReleaseAge(
     );
     return false;
   }
-  // the user trusts the packages of `minimumReleaseAgeExclude`, and pnpm
-  // enforces the minimum release age for every other package
 
   // Renovate passes the larger of its own value and the pnpm value,
   // otherwise pnpm applies its own value. The pnpm v11 default does not
