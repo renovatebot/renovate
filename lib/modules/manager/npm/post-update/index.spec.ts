@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, git, logger, partial, scm } from '~test/util.ts';
@@ -308,6 +309,62 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(written.packages['packages/app']).toBeDefined();
       expect(written.packages['node_modules/@vue-repro/app']).toBeDefined();
     });
+
+    it.each(['packageManager', 'devEngines.packageManager'])(
+      'keeps transitive npm in the lock file for %s upgrades',
+      async (depType) => {
+        const lockFile = codeBlock`
+          {
+            "name": "npm-package-manager",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {
+              "": {
+                "name": "npm-package-manager",
+                "version": "1.0.0",
+                "devDependencies": { "@semantic-release/npm": "13.0.0" }
+              },
+              "node_modules/@semantic-release/npm": {
+                "version": "13.0.0",
+                "dependencies": { "npm": "11.0.0" }
+              },
+              "node_modules/npm": { "version": "11.0.0" },
+              "node_modules/npm/node_modules/semver": { "version": "7.0.0" }
+            }
+          }
+        `;
+        git.getFile.mockResolvedValueOnce(lockFile);
+
+        await writeExistingFiles(
+          {
+            ...baseConfig,
+            upgrades: [
+              {
+                depName: 'npm',
+                depType,
+                currentVersion: '11.0.0',
+                newVersion: '11.1.0',
+                managerData: { npmLock: 'package-lock.json' },
+              },
+            ],
+          },
+          {
+            npm: [
+              {
+                packageFile: 'package.json',
+                managerData: { npmLock: 'package-lock.json' },
+              },
+            ],
+          },
+        );
+
+        expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+          'package-lock.json',
+          lockFile,
+        );
+      },
+    );
 
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {

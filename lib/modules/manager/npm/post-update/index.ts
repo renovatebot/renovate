@@ -207,7 +207,11 @@ export async function writeExistingFiles(
           }
           const { depName } = upgrade;
           const oldVersion = upgrade.lockedVersion ?? upgrade.currentVersion;
-          if ('packages' in npmLockParsed) {
+          // `packageManager` upgrades don't map to lock file entries
+          const isPackageManagerUpdate =
+            upgrade.depType === 'packageManager' ||
+            upgrade.depType === 'devEngines.packageManager';
+          if ('packages' in npmLockParsed && !isPackageManagerUpdate) {
             for (const packageName of packageNames) {
               if (
                 packageName === `node_modules/${depName}` ||
