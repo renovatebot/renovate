@@ -1,4 +1,4 @@
-// v8 ignore file -- constant namespace list, no executable logic to cover
+// v8 ignore file -- constant namespace list, no executable logic to cover, aside from dynamically determining `cacheTtlOverrideNamespaces`
 import { AllDatasourcesListLiteral } from '../../../datasource-list.generated.ts';
 
 /* IMPORTANT:
