@@ -702,8 +702,9 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
     .replace(regEx(/<\/?(?:summary|details|blockquote)>/g), '');
 }
 
+// Bitbucket drops PR webhooks over ~1.39 MB of PR JSON, which runs up to ~11x the body length
 export function maxBodyLength(): number {
-  return 250000;
+  return 100000;
 }
 
 function logIssuesRemoved(): void {
