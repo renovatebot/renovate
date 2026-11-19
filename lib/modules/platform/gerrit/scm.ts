@@ -72,7 +72,11 @@ export async function pushForReview(options: {
   // `--refmap=` keeps origin/<target> where the run's base is. The push may
   // still succeed without the tip, so a failed fetch must not prevent it.
   try {
-    await git.fetchRevSpec('--refmap=', `refs/heads/${options.targetBranch}`);
+    await git.fetchRevSpec(
+      '--no-tags',
+      '--refmap=',
+      `refs/heads/${options.targetBranch}`,
+    );
   } catch (err) {
     logger.debug({ err }, 'gerrit: failed to fetch target branch before push');
   }

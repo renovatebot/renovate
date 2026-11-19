@@ -51,6 +51,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
       });
       expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        '--no-tags',
         '--refmap=',
         'refs/heads/main',
       );
