@@ -7,13 +7,12 @@ import {
   AllManagersListLiteral,
   CustomManagersListLiteral,
 } from '../../manager-list.generated.ts';
-import { getSupportedToolNames } from '../../util/exec/containerbase.ts';
-import type { ConstraintDefinition } from '../../util/exec/types.ts';
-import {
-  additionalConstraintDefinitions,
-  toolDefinitionDocumentation,
-} from '../../util/exec/types.ts';
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
+import {
+  getAdditionalConstraints,
+  getSupportedToolNames,
+  getToolDescription,
+} from '../modules-data.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import {
   CustomDatasourceFormats,
@@ -30,8 +29,7 @@ function toolConstraintProperties(): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
 
   for (const toolName of getSupportedToolNames()) {
-    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
-    const description = def?.description ?? '';
+    const description = getToolDescription(toolName) ?? '';
 
     const base = `A constraint for the \`${toolName}\` Containerbase tool`;
     properties[toolName] = {
@@ -49,10 +47,7 @@ function toolConstraintProperties(): Record<string, unknown> {
 function additionalConstraintProperties(): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
 
-  for (const {
-    name,
-    description,
-  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+  for (const { name, description } of getAdditionalConstraints()) {
     properties[name] = {
       type: 'string',
       // prioritize contraint definitions, as they're more useful than the generated one
@@ -71,8 +66,7 @@ function installToolProperties(): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
 
   for (const toolName of getSupportedToolNames()) {
-    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
-    const description = def?.description ?? '';
+    const description = getToolDescription(toolName) ?? '';
 
     const base = `A constraint for the \`${toolName}\` Containerbase tool`;
     properties[toolName] = {
