@@ -2365,12 +2365,14 @@ async function findAutomergeToCancel({
     return { result: { canceled: false, reason: 'enabled-by-other' } };
   }
 
-  // PRs targeting a branch with a merge queue keep their message, as the queue uses the PR title
-  const targetBranch =
-    (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
-  if (await isBranchMergeQueueEnabled(targetBranch)) {
-    logger.debug({ prNo }, 'PR targets a branch with a merge queue');
-    return { result: { canceled: false, reason: 'merge-queue' } };
+  // refreshing the commit message is skipped for PRs targeting a branch with a merge queue, as the queue uses the PR title
+  if (commit) {
+    const targetBranch =
+      (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
+    if (await isBranchMergeQueueEnabled(targetBranch)) {
+      logger.debug({ prNo }, 'PR targets a branch with a merge queue');
+      return { result: { canceled: false, reason: 'merge-queue' } };
+    }
   }
   return { pr };
 }

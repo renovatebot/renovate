@@ -5689,24 +5689,21 @@ describe('modules/platform/github/index', () => {
     async function mockScope(
       autoMergeAllowed = true,
       renovateUsername?: string,
-      targetBranch = 'master',
     ): Promise<httpMock.Scope> {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo', { autoMergeAllowed });
       await github.initRepo({ repository: 'some/repo', renovateUsername });
-      prListMockOptional(scope, targetBranch);
       return scope;
     }
 
-    function prListMockOptional(
+    function targetPrListMock(
       scope: httpMock.Scope,
-      targetBranch: string,
+      targetBranch = 'master',
     ): void {
       scope
         .get(
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
-        .optionally()
         .reply(200, [
           {
             number: 123,
@@ -6175,6 +6172,8 @@ describe('modules/platform/github/index', () => {
 
     it('propagates a rate limit of the cancellation and forgets the PR', async () => {
       const scope = await mockScope();
+      // for the re-enabling
+      targetPrListMock(scope);
       scope
         .post('/graphql', autoMergeQueryBody)
         .reply(200, { data: { repository: { pullRequest: enabledPr } } })
@@ -6264,6 +6263,7 @@ describe('modules/platform/github/index', () => {
         'cancels Renovate automerge with another message ($commitHeadline, $commitBody)',
         async ({ commitHeadline, commitBody }) => {
           const scope = await mockScope();
+          targetPrListMock(scope);
           stateReply(scope, {
             commitHeadline,
             commitBody,
@@ -6387,7 +6387,7 @@ describe('modules/platform/github/index', () => {
           const scope = httpMock.scope(githubApiHost);
           initRepoMock(scope, 'some/repo', { mergeQueue });
           await github.initRepo({ repository: 'some/repo' });
-          prListMockOptional(scope, 'master');
+          targetPrListMock(scope);
           stateReply(scope, outdatedAutomerge);
 
           await expect(
@@ -6398,8 +6398,22 @@ describe('modules/platform/github/index', () => {
           ).resolves.toEqual({ canceled: false, reason: 'merge-queue' });
         });
 
+        it('cancels automerge without a new message even if the default branch has a merge queue', async () => {
+          const scope = httpMock.scope(githubApiHost);
+          initRepoMock(scope, 'some/repo', { mergeQueue });
+          await github.initRepo({ repository: 'some/repo' });
+          // no PR lookup: the merge queue is only checked when refreshing the message
+          stateReply(scope, outdatedAutomerge);
+          cancellationReply(scope);
+
+          await expect(
+            github.cancelPlatformAutomerge(cancellationConfig),
+          ).resolves.toEqual(canceled);
+        });
+
         it('keeps automerge when the target branch has a merge queue', async () => {
-          const scope = await mockScope(true, undefined, 'release');
+          const scope = await mockScope();
+          targetPrListMock(scope, 'release');
           stateReply(scope, outdatedAutomerge);
           scope
             .post('/graphql')
@@ -6414,7 +6428,8 @@ describe('modules/platform/github/index', () => {
         });
 
         it('cancels automerge when the target branch has no merge queue', async () => {
-          const scope = await mockScope(true, undefined, 'release');
+          const scope = await mockScope();
+          targetPrListMock(scope, 'release');
           stateReply(scope, outdatedAutomerge);
           scope
             .post('/graphql')
@@ -6478,7 +6493,8 @@ describe('modules/platform/github/index', () => {
         });
 
         it('propagates a rate limit of the merge queue lookup', async () => {
-          const scope = await mockScope(true, undefined, 'release');
+          const scope = await mockScope();
+          targetPrListMock(scope, 'release');
           stateReply(scope, outdatedAutomerge);
           scope.post('/graphql').reply(200, graphqlRateLimitResponse);
 
@@ -6501,6 +6517,7 @@ describe('modules/platform/github/index', () => {
 
         async function cancelAutomerge(): Promise<httpMock.Scope> {
           const scope = await mockScope();
+          targetPrListMock(scope);
           stateReply(scope, {
             commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
             commitBody: 'Some body',
@@ -6573,6 +6590,7 @@ describe('modules/platform/github/index', () => {
 
         it('retries once after a possibly canceled request', async () => {
           const scope = await mockScope();
+          targetPrListMock(scope);
           stateReply(scope, {
             commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
             commitBody: 'Some body',
@@ -6602,6 +6620,7 @@ describe('modules/platform/github/index', () => {
 
         it('does not retry after a failed cancellation of automerge which is still enabled', async () => {
           const scope = await mockScope();
+          targetPrListMock(scope);
           stateReply(scope, {
             commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
             commitBody: 'Some body',
