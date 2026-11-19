@@ -74,9 +74,9 @@ _The above AI Assistance Notice is largely copy/pasted from the Ghostty project 
 
 ### Tests
 
-Pull Requests can only be merged once all status checks are green, which means `pnpm test` passes, and coverage is 100%.
+Pull requests can only be merged once all status checks are green, including 100% code coverage check. The `pnpm test` command resembles CI most accurately, but is resource-intensive and takes too long to finish.
 
-Use these commands to help run your tests:
+The `pnpm check` command does the checks of current code changes. It selects all the relevant tests to run, so you can iterate quickly. If it doesn't meet your needs (usually debugging the code coverage), use these commands to help run your tests:
 
 - To run a single test folder, specify the path
 
@@ -106,23 +106,6 @@ And some options:
 
 - `--verbose=false` to avoid the test list
 - `--coverage=false` to avoid collecting coverage, faster for the part you need the test to pass
-
-### Quick Local CI Check
-
-For a local check that mirrors CI:
-
-```bash
-pnpm check
-```
-
-You can scope checks to specific files or directories for faster iteration:
-
-```bash
-pnpm check lib/util/http
-pnpm check lib/util/hash.ts
-```
-
-Use `--fix` to auto-fix (oxlint, biome, prettier) and `--no-test` to skip tests.
 
 ## Do not force push to your pull request branch
 

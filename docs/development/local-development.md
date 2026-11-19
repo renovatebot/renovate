@@ -152,26 +152,6 @@ If your token is set up correctly, you should find that Renovate created a "Conf
 
 If this is working then in future you can create other test repos to verify your code changes against.
 
-## Tests
-
-You can run `pnpm test` locally to test your code.
-We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs lint checks (`oxlint`, `biome`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
-
-Refactor PRs should ideally not change or remove tests (adding tests is OK).
-
-### Quick Local CI
-
-For fast iteration during development, use `pnpm check`, which runs lint and tests in parallel:
-
-```bash
-pnpm check
-pnpm check lib/util/http        # scope to a directory
-pnpm check lib/util/hash.ts     # scope to a file
-pnpm check --fix lib/util/http  # auto-fix only
-pnpm check --coverage-dir tmp/coverage lib/util/http  # write the coverage report to another directory (default: coverage)
-```
-
 ### Vitest
 
 Run the Vitest unit tests with the `pnpm vitest` command.

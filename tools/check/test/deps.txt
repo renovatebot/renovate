@@ -1,0 +1,664 @@
+# Automatic: foo.ts -> foo.spec.ts and foo.mjs -> foo.spec.mjs in the same directory.
+#
+# A .ts, .mjs, or .proto source change also selects all specs under its own
+# manager, datasource, versioning, or platform, including subdirectories.
+#
+# Everything else must be specified in this file.
+
+@manager = lib/modules/manager
+@versioning = lib/modules/versioning
+@datasource = lib/modules/datasource
+@platform = lib/modules/platform
+@config = lib/config
+@repo = lib/workers/repository
+@util = lib/util
+
+[/]
+package.json ->
+  test/other/validate-docker.spec.ts
+  tools/lint/rules/no-dev-dependency-import.spec.ts
+tsdown.config.mts -> test/other/validate-config-files.spec.ts
+
+[.github]
+**/*.{yml,yaml} -> /test/other/validate-workflows.spec.ts
+
+[data]
+debian-distro-info.json -> @versioning/debian/common.spec.ts
+kubernetes-api.json5 -> @datasource/kubernetes-api/index.spec.ts
+lambda-node-js-schedule.json -> @versioning/lambda-node/index.spec.ts
+ubuntu-distro-info.json -> @versioning/distro.spec.ts
+
+[docs/usage]
+configuration-options.md, self-hosted-configuration.md -> /tools/docs/test/schema.spec.ts
+{configuration-options,self-hosted-configuration,self-hosted-experimental,templates,key-concepts/minimum-release-age}.md ->
+  /test/docs/documentation.spec.ts
+
+[lib]
+expose.ts -> instrumentation/{index,reporting}.spec.ts
+proxy.ts -> util/http/host-rules.spec.ts
+instrumentation/types.ts -> @datasource/span-processor.spec.ts
+
+[lib/*, !lib/logger]
+utils.ts -> index.spec.ts
+
+[@config]
+decrypt.ts -> decrypt/{bcpgp,openpgp}.spec.ts
+migrated-content.ts -> @repo/config-migration/branch/migrated-data.spec.ts
+schema.ts -> decrypt.spec.ts
+secrets.ts -> ../workers/global/config/parse/index.spec.ts
+types.ts -> validation.spec.ts
+migrations/index.ts -> migration.spec.ts
+options/{index,scopes}.ts -> /test/docs/documentation.spec.ts, /tools/docs/test/schema.spec.ts
+
+[@config/__fixtures__]
+private-pgp.pem -> ../decrypt/{bcpgp,openpgp}.spec.ts
+
+[@config/migrations/base]
+*-property-migration.ts -> ../migrations-service.spec.ts
+
+[@config/migrations/custom]
+*-migration.ts -> ../migrations-service.spec.ts
+automerge-{major,minor,patch,type}-migration.ts,
+  {ignore-npmrc-file,node,package-name,package-pattern,path-rules}-migration.ts,
+  {azure-gitlab-automerge,base-branch,binary-source,branch-name}-migration.ts,
+  {compatibility,dependency-dashboard,enabled-managers,extends}-migration.ts,
+  {branch-prefix,go-mod-tidy,host-rules,ignore-node-modules}-migration.ts,
+  {rebase-stale-prs,renovate-fork,required-status-checks,schedule}-migration.ts,
+  {rebase-conflicted-prs,semantic-prefix,separate-major-release}-migration.ts,
+  {suppress-notifications,trust-level,update-lock-files}-migration.ts,
+  upgrade-in-range-migration.ts -> ../../migration.spec.ts
+automerge-migration.ts -> ../../migrate-validate.spec.ts, ../../presets/index.spec.ts
+
+[@config/options]
+env.ts -> /lib/workers/global/config/parse/env.spec.ts
+index.ts -> ../defaults.spec.ts
+
+[@config/presets]
+common.ts -> ../migrations/custom/extends-migration.spec.ts
+parse.ts, relative.ts -> index.spec.ts
+util.ts -> local/index.spec.ts
+__fixtures__/renovate-config-ikatyang.json -> index.spec.ts
+gitea/common.ts -> forgejo/index.spec.ts
+local/index.ts -> /lib/workers/global/config/parse/index.spec.ts
+
+[@config/presets/*]
+common.ts -> *
+
+[@config/presets/internal]
+*.preset.ts -> index.spec.ts, /tools/docs/test/schema.spec.ts
+auto-generate-replacements.ts -> /tools/docs/test/schema.spec.ts
+config.preset.ts -> /lib/config-validator.spec.ts
+custom-managers.preset.ts -> custom-managers.spec.ts
+{default,helpers,monorepos,packages}.preset.ts, index.ts -> ../index.spec.ts
+group.preset.ts -> group.spec.ts
+merge-confidence.preset.ts -> @repo/process/lookup/index.spec.ts
+monorepos.preset.ts -> monorepos.spec.ts
+schedule.preset.ts -> schedule.spec.ts
+workarounds.preset.ts -> workarounds.spec.ts
+
+[@config/validation-helpers]
+match-base-branches.ts, regex-glob-matchers.ts -> ../validation.spec.ts
+types.ts -> match-base-branches.spec.ts
+
+[lib/constants]
+error-messages.ts -> @repo/result.spec.ts
+index.ts, platforms.ts -> @platform/index.spec.ts
+platforms.ts -> platform.spec.ts
+
+[lib/data]
+*-urls.json -> *, @datasource/metadata.spec.ts
+*.json, !java-version-lts.json, !mise-registry.json, !node-js-schedule.json ->
+  *
+  /test/other/validate-schemas.spec.ts
+java-version-lts.json -> @manager/mise/extract.spec.ts
+mise-registry.json -> @manager/mise/index.spec.ts
+monorepo.json -> @config/presets/index.spec.ts, @config/presets/internal/monorepos.spec.ts
+node-js-schedule.json -> @versioning/node/index.spec.ts
+replacements.json -> @config/presets/internal/replacements.preset.spec.ts
+
+[lib/logger]
+bunyan.ts, problem-stream.ts, with-sanitizer.ts -> index.spec.ts
+
+[lib/modules/*, !lib/modules/datasource]
+api.ts -> index.spec.ts
+
+[@datasource]
+api.ts -> common.spec.ts, index.spec.ts, /test/other/sync-module-labels.spec.ts
+index.ts -> /test/other/sync-module-labels.spec.ts
+datasource.ts -> buildpacks-registry/index.spec.ts
+git-host-tags.ts -> {azure,gitea}-tags/index.spec.ts
+metadata-manual.ts -> metadata.spec.ts
+metadata.ts -> index.spec.ts
+postprocess-release.ts -> @repo/process/lookup/filter-checks.spec.ts
+span-processor.ts -> /lib/instrumentation/index.spec.ts
+util.ts -> nuget/index.spec.ts, pypi/host-rules.spec.ts, utils.spec.ts
+endoflife-date/schema.ts -> python-version/index.spec.ts
+gitea-releases/index.ts -> forgejo-releases/index.spec.ts
+github-runners/index.ts -> @manager/github-actions/extract.spec.ts
+gitlab-packages/common.ts -> /lib/constants/platform.spec.ts
+kubernetes-api/index.ts -> @manager/kubernetes/extract.spec.ts
+maven/index.ts -> clojure/index.spec.ts
+sbt-package/util.ts -> sbt-plugin/index.spec.ts
+terraform-module/utils.ts -> terraform-provider/index.spec.ts
+
+[@datasource/*]
+index.ts -> ../index.spec.ts
+
+[@datasource/*, !@datasource/{conda,deb,go,helm,maven,packagist}]
+__fixtures__/** -> index.spec.ts
+
+[@datasource/github-digest]
+index.ts -> /test/other/sync-module-labels.spec.ts
+
+[@datasource/bazel/__fixtures__]
+metadata-with-yanked-versions.json -> ../schema.spec.ts
+
+[@datasource/conda]
+__fixtures__/pytest.json -> index.spec.ts
+
+[@datasource/custom/formats]
+index.ts -> /lib/config/options/index.spec.ts
+
+[@datasource/deb]
+index.spec.ts -> packages.spec.ts
+
+[@datasource/deb/__fixtures__]
+*, !InRelease -> ../index.spec.ts
+InRelease -> ../checksum.spec.ts
+
+[@datasource/git-refs/__fixtures__]
+ls-remote-1.txt -> ../../git-tags/index.spec.ts
+
+[@datasource/gitea-tags]
+base.ts -> ../forgejo-tags/index.spec.ts
+util.ts -> ../gitea-releases/index.spec.ts
+
+[@datasource/github-release-attachments/test]
+index.ts -> ../digest.spec.ts
+
+[@datasource/go]
+env.ts -> @manager/gomod/artifacts.spec.ts
+
+[@datasource/go/__fixtures__]
+*.html, !go-get-digest.html, !go-get-git-digest.html -> ../base.spec.ts
+go-get-{git-digest,github}.html -> ../index.spec.ts
+go-kit.list.txt -> ../releases-goproxy.spec.ts
+
+[@datasource/helm/__fixtures__]
+*, !sample.yaml -> ../index.spec.ts
+sample.yaml -> ../schema.spec.ts
+
+[@datasource/maven/__fixtures__]
+metadata-*, !metadata-s3.xml -> ../index.spec.ts
+metadata-{extra,invalid}.xml, metadata.xml, pom.scm-prefix.xml -> ../../clojure/index.spec.ts
+metadata-s3.xml -> ../s3.spec.ts
+metadata.xml -> ../schema.spec.ts
+pom.scm-prefix.xml -> ../index.spec.ts
+pom.xml -> ../cache.spec.ts
+
+[@datasource/maven/__fixtures__/*]
+pom.xml -> ../../index.spec.ts
+
+[@datasource/maven/__fixtures__/*,
+  !@datasource/maven/__fixtures__/{child-empty,parent-scm-homepage}]
+* -> ../../index.spec.ts
+
+[@datasource/npm]
+schema.ts -> @config/presets/npm/index.spec.ts
+
+[@datasource/packagist/__fixtures__]
+* -> ../index.spec.ts
+
+[@manager]
+{api,index}.ts -> /test/other/sync-module-labels.spec.ts
+npmrc.ts -> @repo/process/extract-update.spec.ts
+ansible/index.ts -> @repo/extract/index.spec.ts
+bitbucket-pipelines/util.ts -> @repo/update/branch/auto-replace.spec.ts
+kubernetes/schema.ts -> flux/extract.spec.ts
+pep621/utils.ts -> pep723/utils.spec.ts
+
+[@manager/*, !@manager/{bazel,bundler,git-submodules,gitlabci,gitlabci-include,gradle},
+  !@manager/{gradle-wrapper,helmv3,html,maven,meteor,nuget,paket,pip-compile},
+  !@manager/{pip_setup,pipenv,poetry,puppet,swift,travis,vendir}]
+__fixtures__/* -> extract.spec.ts
+
+[@manager/*, @manager/custom/*, !@manager/custom, !@manager/__*, !@manager/custom/__*]
+index.ts -> @manager/index.spec.ts
+readme.md -> @manager/metadata.spec.ts
+
+[@manager/{ansible,azure-pipelines,batect,bazel-module,dockerfile,mix,nvm}]
+extract.ts -> @repo/update/branch/auto-replace.spec.ts
+
+[@manager/{cake,swift}]
+__fixtures__/* -> index.spec.ts
+
+[@manager/{gomod,homebrew}]
+__fixtures__/** -> update.spec.ts
+
+[@manager/ant]
+index.ts -> /tools/docs/test/schema.spec.ts
+
+[@manager/batect/__fixtures__]
+** -> ../extract.spec.ts
+
+[@manager/bazel/__fixtures__]
+*, !container_pull -> ../extract.spec.ts
+
+[@manager/bazel-module]
+rules.ts -> @repo/update/branch/auto-replace.spec.ts
+
+[@manager/bazel-module/__fixtures__/extract/multiple-bazelrcs]
+*.bazelrc, MODULE.bazel -> ../../../extract.spec.ts
+
+[@manager/bazel-module/parser]
+index.ts -> @repo/update/branch/auto-replace.spec.ts
+
+[@manager/bundler/__fixtures__]
+*, !Gemfile.gitlab-foss.lock, !Gemfile.mastodon.lock, !Gemfile.rails.lock, !Gemfile.rubyci.lock,
+  !Gemfile.webpacker.lock -> ../extract.spec.ts
+*.lock -> ../locked-version.spec.ts
+Gemfile.rubyci.lock -> ../update-locked.spec.ts
+
+[@manager/cargo/__fixtures__/lockfile-parsing]
+* -> ../../locked-version.spec.ts
+Cargo.v1.lock -> ../../update-locked.spec.ts
+
+[@manager/cargo/__fixtures__/lockfile-update]
+* -> ../../extract.spec.ts
+*.lock, !Cargo.2.lock -> ../../locked-version.spec.ts
+
+[@manager/composer/__fixtures__]
+composer5.lock -> ../update-locked.spec.ts
+
+[@manager/custom]
+utils.ts -> /test/other/validate-templatable-fields.spec.ts
+api.ts -> index.spec.ts, ../index.spec.ts
+{api,index}.ts -> /test/other/sync-module-labels.spec.ts
+utils.ts -> regex/utils.spec.ts
+
+[@manager/custom/regex]
+index.ts, strategies.ts -> @repo/update/branch/auto-replace.spec.ts
+__fixtures__/* -> index.spec.ts
+
+[@manager/deps-edn/__fixtures__]
+deps.edn -> ../parser.spec.ts
+
+[@manager/dockerfile]
+extract.ts -> ../bitbucket-pipelines/extract.spec.ts
+
+[@manager/git-submodules]
+update.ts -> @repo/update/branch/get-updated.spec.ts
+
+[@manager/git-submodules/__fixtures__]
+*, !.gitmodules.5, !.gitmodules.6 -> ../extract.spec.ts
+
+[@manager/github-actions]
+artifacts.ts -> @repo/update/branch/index.spec.ts
+
+[@manager/gitlabci/__fixtures__]
+*, !gitlab-ci.reference.yaml -> ../extract.spec.ts
+
+[@manager/gitlabci-include/__fixtures__]
+*.yaml -> ../extract.spec.ts
+
+[@manager/gomod/__fixtures__/{1,2}]
+go-mod -> ../../extract.spec.ts
+
+[@manager/gradle/__fixtures__]
+build.gradle.example1 -> ../parser.spec.ts
+libs.versions.toml -> ../extract.spec.ts
+
+[@manager/gradle-wrapper/__fixtures__]
+*, !gradle-wrapper-sum.properties -> ../extract.spec.ts
+
+[@manager/gradle-wrapper/__fixtures__/expectedFiles/gradle/wrapper]
+gradle-wrapper.properties -> ../../../../artifacts.spec.ts
+
+[@manager/helm-values]
+extract.ts, util.ts -> ../flux/extract.spec.ts
+
+[@manager/helmv3]
+oci.ts ->
+  ../{argocd,fleet,flux,helmfile,helmsman,kustomize,sveltos,terraform}/extract.spec.ts
+  ../vendir/extract.spec.ts
+utils.ts -> ../helm-requirements/extract.spec.ts
+__fixtures__/* -> artifacts.spec.ts
+
+[@manager/html/__fixtures__]
+*.html -> ../extract.spec.ts
+
+[@manager/maven/__fixtures__]
+*, !grouping.pom.xml, !prerelease.pom.xml, !simple.pom.xml -> ../extract.spec.ts
+{child,grouping,parent,simple}.pom.xml -> ../index.spec.ts
+{full_cnb,minimum,minimum_snapshot,prerelease,simple}.pom.xml -> ../update.spec.ts
+
+[@manager/meteor/__fixtures__]
+package-1.js -> ../extract.spec.ts
+
+[@manager/npm]
+dep-types.ts -> ../index.spec.ts
+
+[@manager/npm/__fixtures__]
+* -> ../extract/index.spec.ts
+**/*.lock -> ../extract/yarn.spec.ts
+**/*.yaml -> ../extract/pnpm.spec.ts
+lockfile-parsing/package-lock.json -> ../utils.spec.ts
+outputs/* -> ../update/dependency/index.spec.ts
+
+[@manager/npm/__fixtures__/*, !@manager/npm/__fixtures__/lockfile-parsing]
+package-lock.json -> ../../extract/npm.spec.ts
+
+[@manager/npm/__fixtures__/inputs]
+{01-glob,01,02,workspaces}.json -> ../../extract/index.spec.ts
+{01-package-manager,patch1,patch2}.json -> ../../update/dependency/index.spec.ts
+
+[@manager/npm/post-update/__fixtures__]
+parent/package.json -> ../pnpm.spec.ts
+
+[@manager/npm/post-update/__fixtures__/update-lockfile-massage-1]
+package-lock.json -> ../../npm.spec.ts
+
+[@manager/npm/update/locked-dependency/common/__fixtures__]
+express.json -> ../parent-version.spec.ts
+
+[@manager/npm/update/locked-dependency/package-lock/__fixtures__]
+bundled.package-lock.json, package-lock-v1.json -> ../get-locked.spec.ts
+{mime,package-lock-v2,send,serve-static,type-is}.json -> ../../index.spec.ts
+package.json -> ../dep-constraints.spec.ts
+
+[@manager/npm/update/locked-dependency/yarn-lock/__fixtures__]
+*.yarn.lock, !2.yarn.lock -> ../get-locked.spec.ts
+2.yarn.lock -> ../replace.spec.ts
+yarn2.lock -> ../index.spec.ts
+
+[@manager/nuget/__fixtures__]
+*, !.gitignore -> ../extract.spec.ts
+**/*.config, **/global.json -> ../extract.spec.ts
+{single-project-file,two-no-reference,two-one-reference*,three-two-*,circular-reference}/**/*.{csproj,props} ->
+  ../package-tree.spec.ts
+msbuild-sdk-files/global.1.json -> ../extract.spec.ts
+with-centralized-package-versions/Directory.Packages.props -> ../extract.spec.ts
+with-pascal-case-config-file/NuGet.Config -> ../extract.spec.ts
+
+[@manager/nuget/__fixtures__/*]
+with-* -> ../../extract.spec.ts
+
+[@manager/nuget/__fixtures__/*, !@manager/nuget/__fixtures__/two-no-reference]
+*.csproj -> ../../extract.spec.ts
+
+[@manager/nuget/__fixtures__/multiple-package-files/*]
+* -> ../../../extract.spec.ts
+
+[@manager/pip-compile/__fixtures__]
+*, !requirementsWithExploitingArguments.txt, !requirementsWithHashes.txt -> ../artifacts.spec.ts
+requirementsWithHashes.txt -> ../extract.spec.ts
+
+[@manager/pip_setup/__fixtures__]
+setup.py -> ../extract.spec.ts
+
+[@manager/pipenv/__fixtures__]
+*, !Pipfile6, !Pipfile7 -> ../extract.spec.ts
+Pipfile6, Pipfile7 -> ../artifacts.spec.ts
+
+[@manager/pixi]
+lockfile.ts -> ../pep621/processors/pixi.spec.ts
+
+[@manager/poetry/__fixtures__]
+poetry12.lock, poetry142.lock, pyproject.10.toml -> ../artifacts.spec.ts
+pyproject.*, !pyproject.10.toml -> ../extract.spec.ts
+pyproject.11.toml.lock -> ../update-locked.spec.ts
+
+[@manager/puppet/__fixtures__]
+*, !Puppetfile.git_tag -> ../puppetfile-parser.spec.ts
+*, !Puppetfile.with_comments -> ../extract.spec.ts
+
+[@manager/terraform/hcl/__fixtures__]
+* -> ../index.spec.ts
+
+[@manager/terraform/lockfile]
+__fixtures__/* -> hash.spec.ts
+
+[@manager/travis/__fixtures__]
+*, !travis.yml -> ../extract.spec.ts
+
+[@manager/vendir/__fixtures__]
+*-contents.yaml -> ../extract.spec.ts
+*.lock, vendir.yml -> ../artifacts.spec.ts
+
+[@platform]
+index.ts -> @config/options/index.spec.ts
+pr-body.ts -> @repo/update/pr/index.spec.ts
+types.ts -> !types.spec.ts
+util.ts -> azure/index.spec.ts, github/index.spec.ts
+gitea/index.ts -> forgejo/index.spec.ts
+utils/pr-body.ts -> github/index.spec.ts
+
+[@platform/gitlab]
+code-owners.ts -> @repo/update/pr/code-owners.spec.ts
+files.ts -> @config/presets/gitlab/index.spec.ts
+
+[@platform/utils/__fixtures__]
+issue-body.txt -> ../read-only-issue-body.spec.ts
+pr-body.txt -> ../pr-body.spec.ts
+
+[@versioning]
+api.ts -> @util/exec/containerbase.spec.ts, @util/package-rules/current-version.spec.ts
+common.ts -> hashicorp/index.spec.ts
+distro.ts -> debian/index.spec.ts
+generic-range.ts -> regex/index.spec.ts
+generic.ts -> glasskube/index.spec.ts
+index.ts -> @repo/process/lookup/index.spec.ts
+schema.ts -> index.spec.ts
+apk/index.ts -> @manager/dockerfile/apk.spec.ts
+cargo/index.ts -> @manager/cargo/extract.spec.ts
+composer/index.ts -> @manager/composer/update-locked.spec.ts
+deb/index.ts -> @manager/dockerfile/deb.spec.ts
+deno/index.ts -> @manager/deno/schema.spec.ts
+devbox/index.ts -> @manager/devbox/extract.spec.ts
+gomod/index.ts -> @manager/gomod/line-parser.spec.ts
+hex/index.ts -> @manager/gleam/extract.spec.ts
+loose/index.ts -> @repo/process/lookup/update-type.spec.ts
+pep440/index.ts -> poetry/index.spec.ts
+same-major/index.ts -> @util/package-rules/current-version.spec.ts
+semver-partial/index.ts -> @repo/update/branch/bump-versions.spec.ts
+semver/common.ts -> npm/index.spec.ts
+swift/index.ts -> @manager/swift/artifacts.spec.ts
+unity3d-packages/index.ts -> @datasource/unity3d-packages/index.spec.ts
+
+[@versioning/*]
+readme.md, index.ts -> ../versioning-metadata.spec.ts
+
+[@versioning/{aws-machine-image,debian,docker,github-actions}]
+index.ts -> @repo/process/lookup/index.spec.ts
+
+[@versioning/gradle]
+compare.ts, index.ts -> @manager/gradle/extract.spec.ts
+
+[@versioning/nuget]
+version.ts -> @datasource/nuget/common.spec.ts
+
+[@versioning/rust-release-channel]
+index.ts, parse.ts -> @manager/rust-toolchain/extract.spec.ts
+
+[@versioning/semver-extended]
+index.ts -> @util/exec/containerbase.spec.ts
+
+[lib/types/errors]
+external-host-error.ts -> @datasource/maven/util.spec.ts
+
+[@util]
+array.ts -> git/exec.spec.ts
+assign-keys.ts -> @datasource/rubygems/metadata-cache.spec.ts
+assign-keys.ts, date.ts -> @repo/process/lookup/index.spec.ts
+clone.ts -> @repo/dependency-dashboard.spec.ts
+coerce.ts -> @platform/github/index.spec.ts
+common.ts ->
+  ../workers/global/config/parse/util.spec.ts
+  @repo/update/pr/participants.spec.ts
+  git/url.spec.ts
+compress.ts -> @datasource/rpm/index.spec.ts
+date.ts ->
+  @repo/{onboarding,update}/pr/index.spec.ts
+  @repo/onboarding/branch/check.spec.ts
+  @repo/update/branch/status-checks.spec.ts
+env.ts -> http/gitlab.spec.ts
+filter-map.ts -> @datasource/common.spec.ts
+fingerprint.ts -> @repo/process/write.spec.ts
+ignore.ts -> @manager/asdf/extract.spec.ts
+modules.ts -> @manager/index.spec.ts, @platform/index.spec.ts
+stringify.ts -> clone.spec.ts
+fs/util.ts -> @manager/gomod/package-tree.spec.ts
+json-writer/index.ts -> @repo/onboarding/branch/config.spec.ts
+
+[@util/cache]
+sanitize-key.ts -> ../http/cache/repository-http-cache-provider.spec.ts, package/index.spec.ts
+memory/index.ts -> package/index.spec.ts
+
+[@util/cache/package]
+codec.ts, legacy.ts -> impl/file.spec.ts
+key.ts -> ../../http/cache/package-http-cache-provider.spec.ts
+legacy.ts -> impl/sqlite.spec.ts
+namespaces.ts -> @config/validation.spec.ts, /tools/docs/test/schema.spec.ts
+ttl.ts -> with-cache.spec.ts
+
+[@util/cache/package/impl]
+base.ts -> *
+
+[@util/cache/repository]
+common.ts -> impl/s3.spec.ts
+common.ts, schema.ts -> impl/local.spec.ts
+index.ts -> ../../git/semantic.spec.ts
+init.ts -> index.spec.ts
+
+[@util/cache/repository/impl]
+base.ts -> local.spec.ts
+cache-factory.ts -> *
+null.ts -> ../index.spec.ts, @util/git/semantic.spec.ts
+
+[@util/exec]
+env.ts, hermit.ts, utils.ts -> index.spec.ts
+exec-error.ts -> common.spec.ts, common.integration.spec.ts
+types.ts -> @config/validation.spec.ts
+
+[@util/git]
+author.ts -> @platform/github/index.spec.ts
+author.ts, commit-trailers.ts, instrument.ts, types.ts -> index.spec.ts
+error.ts -> errors.spec.ts
+
+[@util/github/graphql/cache-strategies]
+abstract-cache-strategy.ts -> memory-cache-strategy.spec.ts
+
+[@util/github/graphql/query-adapters]
+*-adapter.ts, !releases-query-adapter.ts -> ../index.spec.ts
+
+[@util/http]
+http.ts, legacy.ts -> index.spec.ts
+keep-alive.ts, types.ts -> got.spec.ts
+rate-limits.ts -> rate-limit.spec.ts
+
+[@util/http/cache]
+abstract-http-cache-provider.ts, persisted-headers.ts -> package-http-cache-provider.spec.ts
+persisted-headers.ts ->
+  ../../cache/repository/http-cache.spec.ts
+  /tools/lint/rules/cached-response-headers.spec.ts
+
+[@util/json-writer/__fixtures__]
+* -> ../editor-config.spec.ts
+
+[@util/merge-confidence]
+*, !types.ts -> *
+
+[@util/package-rules]
+base-branches.ts, categories.ts, datasources.ts, dep-types.ts, matchers.ts, merge-confidence.ts,
+  registryurls.ts, sourceurls.ts, update-types.ts -> index.spec.ts
+
+[lib/workers/global/config/parse]
+coersions.ts -> env.spec.ts
+util.ts -> file.spec.ts
+
+[lib/workers/global/config/parse/__fixtures__]
+*, !additional-config.js, !argv.ts, !config-cjs.js, !config-cjs.ts, !config.cts, !config.mts,
+  !config.ts, !private.pem -> ../additional-config-file.spec.ts
+.renovaterc, config-*, config.*, config2.js -> ../file.spec.ts
+additional-config.js -> ../index.spec.ts
+argv.ts -> ../cli.spec.ts
+
+[@repo]
+package-files.ts -> dependency-dashboard.spec.ts
+__fixtures__/* -> dependency-dashboard.spec.ts
+
+[@repo/config-migration]
+common.ts -> branch/create.spec.ts
+
+[@repo/config-migration/branch/__fixtures__]
+*, !renovate.json5 -> ../migrated-data.spec.ts
+migrated-data-formatted.json -> ../rebase.spec.ts
+
+[@repo/config-migration/pr/__fixtures__]
+migrated-data.json -> ../index.spec.ts
+
+[@repo/finalize/__fixtures__]
+pr-list.json -> ../repository-statistics.spec.ts
+
+[@repo/model]
+commit-message.ts -> custom-commit-message.spec.ts
+
+[@repo/onboarding]
+common.ts -> pr/index.spec.ts
+
+[@repo/onboarding/branch]
+commit-message.ts -> create.spec.ts
+
+[@repo/process]
+fetch.ts -> lockfile-only-vulnerability.integration.spec.ts
+
+[@repo/process/lookup]
+digest.ts -> index.spec.ts
+filter-checks.ts -> /test/docs/documentation.spec.ts
+
+[@repo/process/lookup/__fixtures__]
+*, !vue-test-utils.json -> ../index.spec.ts
+
+[@repo/update/pr]
+ensure-config-pr.ts -> ../../config-migration/pr/index.spec.ts
+pr-fingerprint.ts -> index.spec.ts
+
+[@repo/update/pr/changelog]
+api.ts -> {forgejo,github,gitlab}/source.spec.ts
+gitea/source.ts -> forgejo/source.spec.ts
+
+[@repo/update/pr/changelog/__fixtures__]
+* -> ../release-notes.spec.ts
+jest.md -> ../{bitbucket-server,bitbucket}/source.spec.ts
+
+[test]
+exec-util.ts -> @util/exec/docker/index.spec.ts
+fixtures.ts -> @manager/mise/extract.spec.ts
+jwt-util.ts -> @util/http/jwt.spec.ts
+util.ts -> @manager/terraform/lockfile/hash.spec.ts
+
+[tools/agents/hooks/utils]
+schemas.ts -> ../{cwdchanged,pretooluse}-check.spec.ts
+
+[tools]
+generate-imports.mjs -> /test/other/validate-templatable-fields.spec.ts
+
+[tools/docker]
+Dockerfile -> /test/other/validate-docker.spec.ts
+
+[tools/docs]
+schema.ts -> test/schema.spec.ts
+utils.ts -> test/utils.spec.ts
+
+[tools/lint/utils]
+logger.ts -> ../rules/logger-static-message.spec.ts
+property-name.ts -> ../rules/require-cache-privacy.spec.ts
+
+[tools/schemas]
+schema.ts, *.json -> /test/other/validate-schemas.spec.ts
+
+[tools/utils]
+sync-module-labels.ts -> /test/other/sync-module-labels.spec.ts
+
+[@util/template]
+index.ts -> /test/docs/documentation.spec.ts, /test/other/validate-templatable-fields.spec.ts
