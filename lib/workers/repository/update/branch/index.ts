@@ -75,7 +75,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 
 /**
  * Cancels platform automerge of the PR which has an outdated commit message.
- * Returns the PR number if it was or might have been canceled.
+ * Returns the PR number if it was or might have been canceled by the platform.
  */
 async function cancelPlatformAutomergeForPush(
   config: BranchConfig,
@@ -103,11 +103,12 @@ async function cancelPlatformAutomergeForPush(
       number: branchPr.number,
       platformPrOptions,
     });
-    return cancellation.canceled ? branchPr.number : undefined;
+    return cancellation.canceled || cancellation.reason === 'possibly-canceled'
+      ? branchPr.number
+      : undefined;
   } catch (err) {
-    // the request may have been processed before it failed, so it is restored
     logger.warn({ err }, 'Error canceling platform automerge');
-    return branchPr.number;
+    return undefined;
   }
 }
 
@@ -626,7 +627,12 @@ export async function processBranch(
           await setArtifactErrorStatus(config);
         }
       } finally {
-        if (automergeCanceledPrNo) {
+        if (automergeCanceledPrNo && preparedCommit && !commitSha) {
+          logger.debug(
+            { prNo: automergeCanceledPrNo },
+            'Commit was not pushed, platform automerge stays disabled until the next push',
+          );
+        } else if (automergeCanceledPrNo) {
           await restorePlatformAutomerge(
             automergeCanceledPrNo,
             platformPrOptions,

@@ -4286,21 +4286,19 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
       });
 
-      it('pushes and re-enables platform automerge when canceling it throws', async () => {
+      it('pushes without re-enabling platform automerge when canceling it throws', async () => {
         const cancelErr = new Error('Internal Server Error');
         platform.cancelPlatformAutomerge.mockRejectedValueOnce(cancelErr);
+        commit.pushBranchCommit.mockResolvedValueOnce(null);
 
-        const res = await branchWorker.processBranch(config);
+        await branchWorker.processBranch(config);
 
-        expect(res).toMatchObject({ result: 'done', commitSha });
         expect(logger.warn).toHaveBeenCalledWith(
           { err: cancelErr },
           'Error canceling platform automerge',
         );
         expect(commit.pushBranchCommit).toHaveBeenCalledOnce();
-        expect(
-          platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
       });
 
       describe('without a commit', () => {
@@ -4362,7 +4360,7 @@ describe('workers/repository/update/branch/index', () => {
         },
       );
 
-      it('re-enables platform automerge when the push throws', async () => {
+      it('leaves platform automerge disabled when the push throws', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
           canceled: true,
         });
@@ -4374,12 +4372,14 @@ describe('workers/repository/update/branch/index', () => {
           REPOSITORY_CHANGED,
         );
 
-        expect(
-          platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          { prNo: 123 },
+          'Commit was not pushed, platform automerge stays disabled until the next push',
+        );
       });
 
-      it('re-enables platform automerge when nothing was pushed', async () => {
+      it('leaves platform automerge disabled when nothing was pushed', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
           canceled: true,
         });
@@ -4387,6 +4387,22 @@ describe('workers/repository/update/branch/index', () => {
 
         await branchWorker.processBranch(config);
 
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          { prNo: 123 },
+          'Commit was not pushed, platform automerge stays disabled until the next push',
+        );
+      });
+
+      it('re-enables platform automerge which might have been canceled', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          canceled: false,
+          reason: 'possibly-canceled',
+        });
+
+        await branchWorker.processBranch(config);
+
+        expect(commit.pushBranchCommit).toHaveBeenCalledOnce();
         expect(
           platform.reattemptPlatformAutomerge,
         ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
