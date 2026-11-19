@@ -2,7 +2,7 @@
 
 As a tool for updating dependencies, Renovate needs to interact with many different [Datasources](./modules/datasource/index.md) to determine what update(s) are available for a given repository, requiring a large amount of outbound HTTP traffic.
 
-To avoid unnecessary stress on upstream services, [like Maven Central](https://www.sonatype.com/blog/maven-central-and-the-tragedy-of-the-commons), as well as making Renovate runs more efficient, Renovate works to heavily cache external HTTP requests where possible.
+To avoid unnecessary stress on upstream services, [like Maven Central](https://www.sonatype.com/blog/maven-central-and-the-tragedy-of-the-commons), as well as making each run of Renovate more efficient, Renovate works to heavily cache external HTTP requests where possible.
 
 ## Factors affecting caching
 
@@ -43,7 +43,7 @@ Secondly, Renovate does not intentionally cache data that should be private.
 If it believes it is interacting with a private repository and/or a private package, Renovate will not cache the data in a persistent layer (but it may be available in the In-Memory Cache).
 See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details.
 
-Finally, if you're running Renovate across many hosts (for instance across a Kubernetes cluster or on your automated build platform like GitLab CI), [we strongly recommend](#recommended-performance-improvements) using a persistent Package Cache, and ideally a persistent Repository Cache, too.
+Finally, if you are running Renovate across many hosts (for instance across a Kubernetes cluster or on your automated build platform like GitLab CI), [we strongly recommend](#recommended-performance-improvements) using a persistent Package Cache, and ideally a persistent Repository Cache, too.
 
 ## Cache types
 
@@ -140,6 +140,10 @@ No.
 The format of the Repository Cache may change in breaking ways in a minor or patch version of Renovate, as may we change what each field means.
 It is only expected for Renovate itself to interact with the Repository Cache.
 
+#### How do I invalidate the cache?
+
+**??**
+
 ### Package Cache
 
 The Package Cache includes metadata about package releases, their changelogs, and HTTP responses from [Datasources](./modules/datasource/index.md).
@@ -203,6 +207,10 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 - [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache): use SQLite as the Package Cache backend
 - [`RENOVATE_X_SQLITE_BUSY_TIMEOUT`](./self-hosted-experimental.md#renovate_x_sqlite_busy_timeout): when using SQLite, increase the busy timeout
 
+#### How do I invalidate the cache?
+
+**??**
+
 #### Is there any expected stability on the format of the Repository Cache?
 
 Some.
@@ -211,10 +219,6 @@ The cache keys **??** - see "Package Cache Namespaces" [above](#what-is-in-it_2)
 
 The format of the Repository Cache may change in breaking ways in a minor or patch version of Renovate, as may we change what each field means.
 It is only expected for Renovate itself to interact with the Repository Cache.
-
-### How do I invalidate the cache?
-
-**??**
 
 ## Other related configuration options
 
@@ -287,7 +291,7 @@ When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stal
 - If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
 Note that this is a **??**, not **??**.
-‼️‼️ When using Redis, this is not enforced on Redis' side, and **??**. ‼️‼️
+‼️‼️ When using Redis, this is not enforced on Redis' side, and **??**. https://renovatebot.slack.com/archives/CAFH752JU/p1795090102134079 ‼️‼️
 
 ### What happens to package manager caches?
 
@@ -351,7 +355,7 @@ For the Repository Cache, a self-hosted administrator can use [`repositoryCache=
 
 <!-- prettier-ignore -->
 !!! tip
-  If resetting the cache for a specific repo, it's worthwhile making sure you target only a specific repository, for instance using the [`repositories`](./self-hosted-configuration.md#repositories) configuration option.
+  If resetting the cache for a specific repo, it is worthwhile making sure you target only a specific repository, for instance using the [`repositories`](./self-hosted-configuration.md#repositories) configuration option.
 
 The Repository Cache can also be reset by deleting the `cache.json` file from the S3-compatible backend.
 When Renovate does not see it present, it will recreate it.
