@@ -49,7 +49,10 @@ import type {
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
-import type { GithubHttpOptions } from '../../../util/http/github.ts';
+import type {
+  GithubGraphqlResponse,
+  GithubHttpOptions,
+} from '../../../util/http/github.ts';
 import * as githubHttp from '../../../util/http/github.ts';
 import {
   isForbidden,
@@ -2381,13 +2384,26 @@ async function disableAutomerge(
   pr: GithubPullRequestAutoMergeState,
 ): Promise<CancelPlatformAutomergeResult> {
   config.automergeCanceledPrs.add(prNo);
+  let cancellation: GithubGraphqlResponse<{
+    disablePullRequestAutoMerge: { pullRequest: unknown };
+  }> | null;
   try {
-    const cancellation = await githubApi.requestGraphql<{
+    cancellation = await githubApi.requestGraphql<{
       disablePullRequestAutoMerge: { pullRequest: unknown };
     }>(disableAutoMergeMutation, {
       variables: { pullRequestId: pr.id },
       count: 1,
     });
+  } catch (err) {
+    // a rate limited request did not run
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      config.automergeCanceledPrs.delete(prNo);
+      throw err;
+    }
+    logger.warn({ prNo, err }, 'Error canceling PR auto-merge');
+    return { canceled: false, reason: 'possibly-canceled' };
+  }
+  try {
     if (cancellation?.errors) {
       logger.debug(
         { prNo, errors: cancellation.errors },
@@ -2417,7 +2433,7 @@ async function disableAutomerge(
     }
     return { canceled: true };
   } catch (err) {
-    logger.warn({ prNo, err }, 'Error canceling PR auto-merge');
+    logger.warn({ prNo, err }, 'Error confirming PR auto-merge cancellation');
     return { canceled: false, reason: 'possibly-canceled' };
   }
 }

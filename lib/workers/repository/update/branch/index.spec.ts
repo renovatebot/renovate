@@ -4495,11 +4495,26 @@ describe('workers/repository/update/branch/index', () => {
         );
       });
 
+      it('propagates rate limits from re-enabling after a push', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          canceled: true,
+        });
+        platform.reattemptPlatformAutomerge.mockRejectedValueOnce(
+          new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+        );
+
+        await expect(branchWorker.processBranch(config)).rejects.toThrow(
+          PLATFORM_RATE_LIMIT_EXCEEDED,
+        );
+
+        expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
+      });
+
       it('logs errors from re-enabling after a push', async () => {
         platform.cancelPlatformAutomerge.mockResolvedValueOnce({
           canceled: true,
         });
-        const reattemptErr = new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+        const reattemptErr = new Error('unknown');
         platform.reattemptPlatformAutomerge.mockRejectedValueOnce(reattemptErr);
 
         const res = await branchWorker.processBranch(config);

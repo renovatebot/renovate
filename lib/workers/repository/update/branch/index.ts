@@ -117,14 +117,23 @@ async function cancelPlatformAutomergeForPush(
 
 /**
  * Re-enables platform automerge of the PR and logs errors.
+ * Rate limit errors are only rethrown with `propagateRateLimit`.
  */
 async function restorePlatformAutomerge(
   number: number,
   platformPrOptions: PlatformPrOptions,
+  propagateRateLimit: boolean,
 ): Promise<void> {
   try {
     await platform.reattemptPlatformAutomerge!({ number, platformPrOptions });
   } catch (err) {
+    if (
+      propagateRateLimit &&
+      err instanceof Error &&
+      err.message === PLATFORM_RATE_LIMIT_EXCEEDED
+    ) {
+      throw err;
+    }
     logger.warn({ err }, 'Error re-enabling platform automerge');
   }
 }
@@ -615,6 +624,8 @@ export async function processBranch(
         branchPr,
         platformPrOptions,
       );
+      // keeps the error of the update as the one which propagates
+      let updateFailed = true;
       try {
         if (preparedCommit) {
           commitSha = await pushBranchCommit(preparedCommit);
@@ -629,6 +640,7 @@ export async function processBranch(
         if (commitSha) {
           await setArtifactErrorStatus(config);
         }
+        updateFailed = false;
       } finally {
         if (automergeCanceledPrNo && preparedCommit && !commitSha) {
           logger.debug(
@@ -639,6 +651,7 @@ export async function processBranch(
           await restorePlatformAutomerge(
             automergeCanceledPrNo,
             platformPrOptions,
+            !updateFailed,
           );
           platformAutomergeRestored = true;
         }

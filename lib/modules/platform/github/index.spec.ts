@@ -6156,29 +6156,62 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it.each`
-      description           | reply
-      ${'rate-limit error'} | ${[200, graphqlRateLimitResponse]}
-      ${'transport error'}  | ${[500]}
-    `(
-      'reports a $description of the cancellation as possibly canceled',
-      async ({ reply }) => {
-        const scope = await mockScope();
-        scope
-          .post('/graphql', autoMergeQueryBody)
-          .reply(200, { data: { repository: { pullRequest: enabledPr } } })
-          .post('/graphql', cancellationBody)
-          .reply(...reply);
+    it('reports a transport error of the cancellation as possibly canceled', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', cancellationBody)
+        .reply(500);
 
-        await expect(
-          github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toEqual(possiblyCanceled);
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { prNo: 123, err: expect.any(Error) },
-          'Error canceling PR auto-merge',
-        );
-      },
-    );
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toEqual(possiblyCanceled);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { prNo: 123, err: expect.any(Error) },
+        'Error canceling PR auto-merge',
+      );
+    });
+
+    it('propagates a rate limit of the cancellation and forgets the PR', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', cancellationBody)
+        .reply(200, graphqlRateLimitResponse)
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'Something went wrong' }] });
+
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      // not retried, as the PR is not marked as canceled
+      await github.reattemptPlatformAutomerge({
+        number: 123,
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(timers.setTimeout).not.toHaveBeenCalled();
+    });
+
+    it('reports a rate limit of the state lookup after a failed cancellation as possibly canceled', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', cancellationBody)
+        .reply(200, {
+          data: { disablePullRequestAutoMerge: { pullRequest: null } },
+          errors: [{ message: 'Failed to cancel auto-merge' }],
+        })
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toEqual(possiblyCanceled);
+    });
 
     it('reports a failing state lookup after a failed cancellation as possibly canceled', async () => {
       const scope = await mockScope();
