@@ -2430,6 +2430,9 @@ export async function cancelPlatformAutomerge(
     found = await findAutomergeToCancel(prConfig);
   } catch (err) {
     // nothing was disabled yet
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn(
       { prNo: prConfig.number, err },
       'Error checking PR auto-merge before canceling',

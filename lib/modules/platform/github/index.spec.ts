@@ -6132,25 +6132,29 @@ describe('modules/platform/github/index', () => {
       },
     );
 
-    it.each`
-      description           | reply
-      ${'rate-limit error'} | ${[200, graphqlRateLimitResponse]}
-      ${'transport error'}  | ${[500]}
-    `(
-      'reports a $description before the cancellation as unconfirmed',
-      async ({ reply }) => {
-        const scope = await mockScope();
-        scope.post('/graphql', autoMergeQueryBody).reply(...reply);
+    it('propagates rate-limit errors before the cancellation', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, graphqlRateLimitResponse);
 
-        await expect(
-          github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toEqual(unconfirmed);
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { prNo: 123, err: expect.any(Error) },
-          'Error checking PR auto-merge before canceling',
-        );
-      },
-    );
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
+    it('reports a transport error before the cancellation as unconfirmed', async () => {
+      const scope = await mockScope();
+      scope.post('/graphql', autoMergeQueryBody).reply(500);
+
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toEqual(unconfirmed);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { prNo: 123, err: expect.any(Error) },
+        'Error checking PR auto-merge before canceling',
+      );
+    });
 
     it.each`
       description           | reply
@@ -6440,7 +6444,7 @@ describe('modules/platform/github/index', () => {
           ).resolves.toEqual(unconfirmed);
         });
 
-        it('reports a rate limit of the merge queue lookup as unconfirmed', async () => {
+        it('propagates a rate limit of the merge queue lookup', async () => {
           const scope = await mockScope(true, undefined, 'release');
           stateReply(scope, outdatedAutomerge);
           scope.post('/graphql').reply(200, graphqlRateLimitResponse);
@@ -6450,7 +6454,7 @@ describe('modules/platform/github/index', () => {
               ...cancellationConfig,
               platformPrOptions,
             }),
-          ).resolves.toEqual(unconfirmed);
+          ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
         });
       });
 
