@@ -4709,15 +4709,13 @@ These updates have all been created already. To force a retry/rebase of any, cli
     });
 
     it('expands a role handle into members holding exactly that role', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/members')
-        .reply(200, [
-          { username: 'dev-one', access_level: 30 },
-          { username: 'maintainer', access_level: 40 },
-          { username: 'dev-two', access_level: 30 },
-          { username: 'owner', access_level: 50 },
-        ]);
+      const scope = await initRepo({ repository: 'some/repo' });
+      scope.get('/api/v4/projects/some%2Frepo/members').reply(200, [
+        { username: 'dev-one', access_level: 30 },
+        { username: 'maintainer', access_level: 40 },
+        { username: 'dev-two', access_level: 30 },
+        { username: 'owner', access_level: 50 },
+      ]);
       await expect(
         gitlab.expandGroupMembers?.(['@@developer']),
       ).resolves.toEqual(['dev-one', 'dev-two']);

@@ -51,10 +51,9 @@ export async function getMemberUsernames(group: string): Promise<string[]> {
 }
 
 async function getProjectMembers(repo: string): Promise<GitLabProjectMember[]> {
-  const repoEncoded = encodeURIComponent(repo);
   return (
     await gitlabApi.getJson(
-      `projects/${repoEncoded}/members`,
+      `projects/${repo}/members`,
       { paginate: true },
       GitLabProjectMembers,
     )
