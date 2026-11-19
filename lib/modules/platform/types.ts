@@ -169,6 +169,16 @@ export interface CancelPlatformAutomergeConfig {
   /** Options with the new commit message; auto-merge with the same message is kept */
   platformPrOptions?: PlatformPrOptions;
 }
+/**
+ * Result of canceling platform auto-merge.
+ * The reasons for not canceling are:
+ * - `enabled-by-other`: another actor enabled it
+ * - `merge-queue`: the PR's target branch has a merge queue, which uses the PR title, so the commit message is kept
+ * - `not-enabled`: it is not enabled
+ * - `possibly-canceled`: the request was sent, but it is not known whether it disabled it
+ * - `unchanged`: the commit message is unchanged
+ * - `unconfirmed`: its state could not be determined, nothing was disabled
+ */
 export type CancelPlatformAutomergeResult =
   | { canceled: true }
   | {
@@ -177,6 +187,7 @@ export type CancelPlatformAutomergeResult =
         | 'enabled-by-other'
         | 'merge-queue'
         | 'not-enabled'
+        | 'possibly-canceled'
         | 'unchanged'
         | 'unconfirmed';
     };
@@ -339,9 +350,9 @@ export interface Platform {
   /**
    * Cancels platform auto-merge for the expected actor without scheduling restoration.
    * Returns canceled if this request disabled it, otherwise the reason:
-   * another actor, a merge queue on the target branch, auto-merge not enabled, unchanged commit message or unconfirmed state.
+   * another actor, a merge queue on the target branch, auto-merge not enabled, possibly canceled, unchanged commit message or unconfirmed state.
    * Does not confirm the PR is open or prevent queued merges or re-enablement.
-   * Propagates request failures.
+   * Request failures are reported as a reason, not thrown.
    */
   cancelPlatformAutomerge?(
     prConfig: CancelPlatformAutomergeConfig,

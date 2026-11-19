@@ -2308,26 +2308,33 @@ function isAutomergeMessageUnchanged(
   );
 }
 
-export async function cancelPlatformAutomerge({
+/**
+ * Looks up whether the PR's auto-merge has to be canceled.
+ * Returns the PR state to cancel, or the result when it must not be canceled.
+ */
+async function findAutomergeToCancel({
   number: prNo,
   enabledBy = config.renovateUsername,
   platformPrOptions,
-}: CancelPlatformAutomergeConfig): Promise<CancelPlatformAutomergeResult> {
+}: CancelPlatformAutomergeConfig): Promise<
+  | { result: CancelPlatformAutomergeResult }
+  | { pr: GithubPullRequestAutoMergeState }
+> {
   const commit = platformPrOptions
     ? getAutomergeCommit(prNo, platformPrOptions)
     : undefined;
   // without a commit headline, GitHub does not use a stored message (rebase merges)
   if (commit && !commit.commitHeadline) {
     logger.debug({ prNo }, 'PR auto-merge has no commit message to compare');
-    return { canceled: false, reason: 'unchanged' };
+    return { result: { canceled: false, reason: 'unchanged' } };
   }
 
   const pr = await getPrAutoMergeState(prNo);
   if (!pr) {
-    return { canceled: false, reason: 'unconfirmed' };
+    return { result: { canceled: false, reason: 'unconfirmed' } };
   }
   if (pr.autoMergeRequest === null) {
-    return { canceled: false, reason: 'not-enabled' };
+    return { result: { canceled: false, reason: 'not-enabled' } };
   }
   const actor = pr.autoMergeRequest.enabledBy;
   // GraphQL omits the REST login's [bot] suffix. Use actor type to avoid matching a user with the same name.
@@ -2345,56 +2352,94 @@ export async function cancelPlatformAutomerge({
     )
   ) {
     logger.debug({ prNo }, 'PR auto-merge commit message is unchanged');
-    return { canceled: false, reason: 'unchanged' };
+    return { result: { canceled: false, reason: 'unchanged' } };
   }
   if (!enabledByRenovate) {
     logger.debug(
       { prNo },
       'PR auto-merge actor does not match cancellation filter',
     );
-    return { canceled: false, reason: 'enabled-by-other' };
+    return { result: { canceled: false, reason: 'enabled-by-other' } };
   }
 
-  // a queued PR could otherwise be removed from the merge queue
+  // PRs targeting a branch with a merge queue keep their message, as the queue uses the PR title
   const targetBranch =
     (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
   if (await isBranchMergeQueueEnabled(targetBranch)) {
     logger.debug({ prNo }, 'PR targets a branch with a merge queue');
-    return { canceled: false, reason: 'merge-queue' };
+    return { result: { canceled: false, reason: 'merge-queue' } };
   }
+  return { pr };
+}
 
-  const cancellation = await githubApi.requestGraphql<{
-    disablePullRequestAutoMerge: { pullRequest: unknown };
-  }>(disableAutoMergeMutation, {
-    variables: { pullRequestId: pr.id },
-    count: 1,
-  });
-  if (cancellation?.errors) {
-    logger.debug(
-      { prNo, errors: cancellation.errors },
-      'Failed to cancel PR auto-merge',
-    );
-    // Another actor may have disabled auto-merge after the state query, then this request did not cancel it.
-    const current = await getPrAutoMergeState(prNo);
-    if (current?.id === pr.id && current.autoMergeRequest === null) {
-      return { canceled: false, reason: 'not-enabled' };
-    }
-    return { canceled: false, reason: 'unconfirmed' };
-  }
-
-  const disabledPr = GithubPullRequestAutoMergeState.safeParse(
-    cancellation?.data?.disablePullRequestAutoMerge?.pullRequest,
-  );
-  if (
-    !disabledPr.success ||
-    disabledPr.data.id !== pr.id ||
-    disabledPr.data.autoMergeRequest !== null
-  ) {
-    logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
-    return { canceled: false, reason: 'unconfirmed' };
-  }
+/**
+ * Sends the request which disables the PR's auto-merge.
+ * Every outcome which does not rule out that the request disabled it is `possibly-canceled`.
+ */
+async function disableAutomerge(
+  prNo: number,
+  pr: GithubPullRequestAutoMergeState,
+): Promise<CancelPlatformAutomergeResult> {
   config.automergeCanceledPrs.add(prNo);
-  return { canceled: true };
+  try {
+    const cancellation = await githubApi.requestGraphql<{
+      disablePullRequestAutoMerge: { pullRequest: unknown };
+    }>(disableAutoMergeMutation, {
+      variables: { pullRequestId: pr.id },
+      count: 1,
+    });
+    if (cancellation?.errors) {
+      logger.debug(
+        { prNo, errors: cancellation.errors },
+        'Failed to cancel PR auto-merge',
+      );
+      // Another actor may have disabled auto-merge after the state query, then this request did not cancel it.
+      const current = await getPrAutoMergeState(prNo);
+      if (current?.id === pr.id) {
+        config.automergeCanceledPrs.delete(prNo);
+        return current.autoMergeRequest === null
+          ? { canceled: false, reason: 'not-enabled' }
+          : { canceled: false, reason: 'unconfirmed' };
+      }
+      return { canceled: false, reason: 'possibly-canceled' };
+    }
+
+    const disabledPr = GithubPullRequestAutoMergeState.safeParse(
+      cancellation?.data?.disablePullRequestAutoMerge?.pullRequest,
+    );
+    if (
+      !disabledPr.success ||
+      disabledPr.data.id !== pr.id ||
+      disabledPr.data.autoMergeRequest !== null
+    ) {
+      logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
+      return { canceled: false, reason: 'possibly-canceled' };
+    }
+    return { canceled: true };
+  } catch (err) {
+    logger.warn({ prNo, err }, 'Error canceling PR auto-merge');
+    return { canceled: false, reason: 'possibly-canceled' };
+  }
+}
+
+export async function cancelPlatformAutomerge(
+  prConfig: CancelPlatformAutomergeConfig,
+): Promise<CancelPlatformAutomergeResult> {
+  let found: Awaited<ReturnType<typeof findAutomergeToCancel>>;
+  try {
+    found = await findAutomergeToCancel(prConfig);
+  } catch (err) {
+    // nothing was disabled yet
+    logger.warn(
+      { prNo: prConfig.number, err },
+      'Error checking PR auto-merge before canceling',
+    );
+    return { canceled: false, reason: 'unconfirmed' };
+  }
+  if ('result' in found) {
+    return found.result;
+  }
+  return await disableAutomerge(prConfig.number, found.pr);
 }
 
 /**

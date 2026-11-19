@@ -5684,6 +5684,7 @@ describe('modules/platform/github/index', () => {
     const enabledByOther = { canceled: false, reason: 'enabled-by-other' };
     const unconfirmed = { canceled: false, reason: 'unconfirmed' };
     const notEnabled = { canceled: false, reason: 'not-enabled' };
+    const possiblyCanceled = { canceled: false, reason: 'possibly-canceled' };
 
     async function mockScope(
       autoMergeAllowed = true,
@@ -6077,7 +6078,7 @@ describe('modules/platform/github/index', () => {
       ${{ data: { disablePullRequestAutoMerge: { pullRequest: { id: 'wrong-pr', autoMergeRequest: null } } } }}
       ${{ data: { disablePullRequestAutoMerge: { pullRequest: enabledPr } } }}
     `(
-      'rejects an unconfirmed cancellation: $response',
+      'reports an unconfirmed cancellation as possibly canceled: $response',
       async ({ response }) => {
         const scope = await mockScope();
         scope
@@ -6088,7 +6089,7 @@ describe('modules/platform/github/index', () => {
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).resolves.toEqual(unconfirmed);
+        ).resolves.toEqual(possiblyCanceled);
       },
     );
 
@@ -6107,8 +6108,8 @@ describe('modules/platform/github/index', () => {
     it.each`
       currentPr                         | expected
       ${enabledPr}                      | ${unconfirmed}
-      ${null}                           | ${unconfirmed}
-      ${{ ...disabledPr, id: 'other' }} | ${unconfirmed}
+      ${null}                           | ${possiblyCanceled}
+      ${{ ...disabledPr, id: 'other' }} | ${possiblyCanceled}
       ${disabledPr}                     | ${notEnabled}
     `(
       'checks the state again after a failed cancellation: $expected',
@@ -6132,50 +6133,66 @@ describe('modules/platform/github/index', () => {
     );
 
     it.each`
-      mutation
-      ${false}
-      ${true}
+      description           | reply
+      ${'rate-limit error'} | ${[200, graphqlRateLimitResponse]}
+      ${'transport error'}  | ${[500]}
     `(
-      'propagates rate-limit errors, mutation: $mutation',
-      async ({ mutation }) => {
+      'reports a $description before the cancellation as unconfirmed',
+      async ({ reply }) => {
         const scope = await mockScope();
-        if (mutation) {
-          scope.post('/graphql', autoMergeQueryBody).reply(200, {
-            data: { repository: { pullRequest: enabledPr } },
-          });
-        }
-        scope
-          .post('/graphql', mutation ? cancellationBody : autoMergeQueryBody)
-          .reply(200, graphqlRateLimitResponse);
+        scope.post('/graphql', autoMergeQueryBody).reply(...reply);
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+        ).resolves.toEqual(unconfirmed);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { prNo: 123, err: expect.any(Error) },
+          'Error checking PR auto-merge before canceling',
+        );
       },
     );
 
     it.each`
-      mutation
-      ${false}
-      ${true}
+      description           | reply
+      ${'rate-limit error'} | ${[200, graphqlRateLimitResponse]}
+      ${'transport error'}  | ${[500]}
     `(
-      'propagates transport failures, mutation: $mutation',
-      async ({ mutation }) => {
+      'reports a $description of the cancellation as possibly canceled',
+      async ({ reply }) => {
         const scope = await mockScope();
-        if (mutation) {
-          scope.post('/graphql', autoMergeQueryBody).reply(200, {
-            data: { repository: { pullRequest: enabledPr } },
-          });
-        }
         scope
-          .post('/graphql', mutation ? cancellationBody : autoMergeQueryBody)
-          .reply(500);
+          .post('/graphql', autoMergeQueryBody)
+          .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+          .post('/graphql', cancellationBody)
+          .reply(...reply);
 
         await expect(
           github.cancelPlatformAutomerge(cancellationConfig),
-        ).rejects.toBeInstanceOf(ExternalHostError);
+        ).resolves.toEqual(possiblyCanceled);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { prNo: 123, err: expect.any(Error) },
+          'Error canceling PR auto-merge',
+        );
       },
     );
+
+    it('reports a failing state lookup after a failed cancellation as possibly canceled', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', cancellationBody)
+        .reply(200, {
+          data: { disablePullRequestAutoMerge: { pullRequest: null } },
+          errors: [{ message: 'Failed to cancel auto-merge' }],
+        })
+        .post('/graphql', autoMergeQueryBody)
+        .reply(500);
+
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toEqual(possiblyCanceled);
+    });
 
     describe('with the new commit message', () => {
       const platformPrOptions = {
@@ -6397,6 +6414,46 @@ describe('modules/platform/github/index', () => {
         });
       });
 
+      describe('failing lookups before the cancellation', () => {
+        const outdatedAutomerge = {
+          commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
+          commitBody: 'Some body',
+          enabledBy: { __typename: 'Bot', login: 'renovate' },
+        };
+
+        it('reports a failing PR lookup as unconfirmed', async () => {
+          const scope = httpMock.scope(githubApiHost);
+          initRepoMock(scope, 'some/repo');
+          await github.initRepo({ repository: 'some/repo' });
+          scope
+            .get(
+              '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+            )
+            .reply(500);
+          stateReply(scope, outdatedAutomerge);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual(unconfirmed);
+        });
+
+        it('reports a rate limit of the merge queue lookup as unconfirmed', async () => {
+          const scope = await mockScope(true, undefined, 'release');
+          stateReply(scope, outdatedAutomerge);
+          scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual(unconfirmed);
+        });
+      });
+
       describe('re-enabling', () => {
         const enabledResp = {
           data: {
@@ -6475,6 +6532,67 @@ describe('modules/platform/github/index', () => {
           ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
 
           expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(5000);
+        });
+
+        it('retries once after a possibly canceled request', async () => {
+          const scope = await mockScope();
+          stateReply(scope, {
+            commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
+            commitBody: 'Some body',
+            enabledBy: { __typename: 'Bot', login: 'renovate' },
+          });
+          scope
+            .post('/graphql', cancellationBody)
+            .reply(500)
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql')
+            .reply(200, enabledResp);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual(possiblyCanceled);
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(5000);
+        });
+
+        it('does not retry after a failed cancellation of automerge which is still enabled', async () => {
+          const scope = await mockScope();
+          stateReply(scope, {
+            commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
+            commitBody: 'Some body',
+            enabledBy: { __typename: 'Bot', login: 'renovate' },
+          });
+          scope
+            .post('/graphql', cancellationBody)
+            .reply(200, {
+              data: { disablePullRequestAutoMerge: { pullRequest: null } },
+              errors: [{ message: 'Failed to cancel auto-merge' }],
+            })
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+            .post('/graphql')
+            .reply(200, failedResp);
+
+          await expect(
+            github.cancelPlatformAutomerge({
+              ...cancellationConfig,
+              platformPrOptions,
+            }),
+          ).resolves.toEqual(unconfirmed);
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).not.toHaveBeenCalled();
         });
 
         it('forgets canceled PRs on initRepo', async () => {
