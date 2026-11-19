@@ -350,9 +350,9 @@ export interface Platform {
   /**
    * Cancels platform auto-merge for the expected actor without scheduling restoration.
    * Returns canceled if this request disabled it, otherwise the reason:
-   * another actor, a merge queue on the target branch, auto-merge not enabled, possibly canceled, unchanged commit message or unconfirmed state.
+   * another actor, a merge queue on the target branch (when refreshing the commit message), auto-merge not enabled, possibly canceled, unchanged commit message or unconfirmed state.
    * Does not confirm the PR is open or prevent queued merges or re-enablement.
-   * Request failures are reported as a reason, not thrown.
+   * Rate limit errors are rethrown, other request failures are reported as a reason.
    */
   cancelPlatformAutomerge?(
     prConfig: CancelPlatformAutomergeConfig,
