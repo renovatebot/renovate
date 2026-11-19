@@ -45,7 +45,7 @@ const trustSubdirCmd = 'mise trust mise.toml';
 const updateMultipleToolsCmd = 'mise lock node python';
 const lockfileMaintenanceCmd = 'mise lock';
 const miseVersionCmd = 'mise version';
-// `mise version` output for a release that supports safe mode / `mise lock --bump`
+// `mise version` output for a release that supports safe mode
 const safeMiseVersionOutput = {
   stdout: '2026.7.12 linux-x64 (2026-07-23)',
   stderr: '',
@@ -467,15 +467,15 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    // version probe returns nothing here, so no --bump
+    // Lock file maintenance uses a plain lock command.
     expect(execSnapshots).toMatchObject([
-      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: lockfileMaintenanceCmd },
     ]);
   });
 
-  it('runs mise lock --bump for lockFileMaintenance when mise supports it', async () => {
+  it('does not bump tool versions during lockFileMaintenance when mise supports it', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
       .mockResolvedValueOnce('existing content');
@@ -490,8 +490,7 @@ describe('modules/manager/mise/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: miseVersionCmd },
-      { cmd: trustCmd },
-      { cmd: 'mise lock --bump' },
+      { cmd: lockfileMaintenanceCmd },
     ]);
   });
 
@@ -815,7 +814,6 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: miseVersionCmd },
       { cmd: trustLocalCmd },
       { cmd: 'mise lock --local' },
     ]);
