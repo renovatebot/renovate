@@ -14,14 +14,11 @@ import type { PlatformId } from '../constants/index.ts';
 import { instrument } from '../instrumentation/index.ts';
 import { logger } from '../logger/index.ts';
 import { AllManagersListLiteral } from '../manager-list.generated.ts';
-import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
 import { coerceArray } from '../util/array.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { clone } from '../util/clone.ts';
-import { getToolConfig } from '../util/exec/containerbase.ts';
-import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
@@ -45,6 +42,12 @@ import {
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
+import {
+  getToolConfig,
+  isConstraintName,
+  isCustomManager,
+  isToolName,
+} from './modules-data.ts';
 import { getOptions } from './options/index.ts';
 import {
   describeAllowedLocations,

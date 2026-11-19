@@ -187,7 +187,7 @@ export async function flattenUpdates(
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
-            updateConfig = await applyDatasourceDefaultConfig(updateConfig);
+            updateConfig = applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,
               'datasource-merge',

@@ -96,7 +96,7 @@ async function lookup(
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   mergeExtractedConstraints(depConfig, dep, packageFileConfig);
-  depConfig = await applyDatasourceDefaultConfig(depConfig);
+  depConfig = applyDatasourceDefaultConfig(depConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
 

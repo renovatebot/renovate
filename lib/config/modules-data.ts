@@ -71,6 +71,13 @@ export function isCustomManager(manager: string): boolean {
   return data.managers[manager]?.custom ?? false;
 }
 
+/**
+ * The names of all managers, including the custom ones.
+ */
+export function getManagerNames(): string[] {
+  return Object.keys(data.managers);
+}
+
 export function getManagerCategories(manager: string): Category[] | undefined {
   return data.managers[manager]?.categories;
 }
