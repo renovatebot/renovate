@@ -174,8 +174,8 @@ export interface CancelPlatformAutomergeConfig {
  * The reasons for not canceling are:
  * - `enabled-by-other`: another actor enabled it
  * - `merge-queue`: the PR's target branch has a merge queue, which uses the PR title, so the commit message is kept
- * - `not-enabled`: it is not enabled
- * - `possibly-canceled`: the request was sent, but it is not known whether it disabled it
+ * - `not-enabled`: it is not enabled, also when the state query after an error response of the disable request shows it off
+ * - `possibly-canceled`: the outcome of the disable request is unknown, as it threw (not a rate limit), the state query after its error response failed or the response could not be confirmed
  * - `unchanged`: the commit message is unchanged
  * - `unconfirmed`: its state could not be determined, nothing was disabled
  */

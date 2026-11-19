@@ -2377,7 +2377,10 @@ async function findAutomergeToCancel({
 
 /**
  * Sends the request which disables the PR's auto-merge.
- * Every outcome which does not rule out that the request disabled it is `possibly-canceled`.
+ * Returns `canceled` when the response confirms it is disabled.
+ * When the response has errors, the state is queried again: it returns `not-enabled` if auto-merge is off and nothing is restored, `unconfirmed` if it is still enabled.
+ * It returns `possibly-canceled` only when the outcome is unknown: the request threw (not a rate limit), the state query failed or the response could not be confirmed.
+ * A rate limited request is rethrown.
  */
 async function disableAutomerge(
   prNo: number,
