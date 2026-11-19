@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { Datasource } from '../datasource.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
@@ -58,6 +59,27 @@ function filterByPrefix(packageName: string, releases: Release[]): Release[] {
   return releases.filter((release) => release.version.startsWith('v'));
 }
 
+/**
+ * Returns the tag prefix (e.g. `service/s3/`) of a Go module located in a subdirectory of its GitHub repository, or `null` for a module at the repository root.
+ */
+function getGithubSubmoduleRefQuery(
+  packageName: string,
+  source: GetReleasesConfig,
+): string | null {
+  const host = parseUrl(source.registryUrl)?.host;
+  if (!host) {
+    return null;
+  }
+
+  const modulePath = packageName.replace(regEx(/\/v\d+$/), '');
+  const repoPath = `${host}/${source.packageName}/`;
+  if (!modulePath.startsWith(repoPath)) {
+    return null;
+  }
+
+  return `${modulePath.slice(repoPath.length)}/`;
+}
+
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
@@ -74,6 +96,34 @@ export class GoDirectDatasource extends Datasource {
     this.github = new GithubTagsDatasource();
     this.gitlab = new GitlabTagsDatasource();
     this.bitbucket = new BitbucketTagsDatasource();
+  }
+
+  /**
+   * Fetches the GitHub tags of the repository hosting `packageName`.
+   *
+   * For a module in a repository subdirectory, the tags are first queried scoped to the subdirectory prefix, falling back to all tags when the scoped query yields no matching tag.
+   */
+  private async getGithubReleases(
+    packageName: string,
+    source: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    const refQuery = getGithubSubmoduleRefQuery(packageName, source);
+    if (!refQuery) {
+      return this.github.getReleases(source);
+    }
+
+    const scoped = await this.github.getReleases({ ...source, refQuery });
+    const hasPrefixedTag = scoped?.releases.some((release) =>
+      release.version.startsWith(refQuery),
+    );
+    if (hasPrefixedTag) {
+      return scoped;
+    }
+
+    logger.debug(
+      `No ${refQuery} tags found for ${packageName}, falling back to all tags`,
+    );
+    return this.github.getReleases(source);
   }
 
   /**
@@ -119,7 +169,7 @@ export class GoDirectDatasource extends Datasource {
         break;
       }
       case GithubTagsDatasource.id: {
-        res = await this.github.getReleases(source);
+        res = await this.getGithubReleases(packageName, source);
         break;
       }
       case GitlabTagsDatasource.id: {
