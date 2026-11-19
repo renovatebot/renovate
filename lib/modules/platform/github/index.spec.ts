@@ -6356,6 +6356,18 @@ describe('modules/platform/github/index', () => {
         ).resolves.toEqual(enabledByOther);
       });
 
+      it('keeps automerge without a request when the repository does not allow it', async () => {
+        // no HTTP mocks: the auto-merge state must not be queried
+        await mockScope(false);
+
+        await expect(
+          github.cancelPlatformAutomerge({
+            ...cancellationConfig,
+            platformPrOptions,
+          }),
+        ).resolves.toEqual(notEnabled);
+      });
+
       it.each`
         description         | options
         ${'a rebase merge'} | ${{ ...platformPrOptions, automergeStrategy: 'rebase' }}

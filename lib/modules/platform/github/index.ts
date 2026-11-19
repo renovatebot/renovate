@@ -2331,6 +2331,10 @@ async function findAutomergeToCancel({
     logger.debug({ prNo }, 'PR auto-merge has no commit message to compare');
     return { result: { canceled: false, reason: 'unchanged' } };
   }
+  // auto-merge cannot be enabled again when the repository does not allow it
+  if (platformPrOptions && !isAutomergeAvailable(prNo)) {
+    return { result: { canceled: false, reason: 'not-enabled' } };
+  }
 
   const pr = await getPrAutoMergeState(prNo);
   if (!pr) {
