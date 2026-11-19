@@ -4,8 +4,6 @@ As a tool for updating dependencies, Renovate needs to interact with many differ
 
 To avoid unnecessary stress on upstream services, [like Maven Central](https://www.sonatype.com/blog/maven-central-and-the-tragedy-of-the-commons), as well as making Renovate runs more efficient, Renovate works to heavily cache external HTTP requests where possible.
 
-When Renovate encounters `Cache-Control` headers, it will abide by them, as well as perform conditional HTTP requests when `ETag` HTTP headers are received.
-
 ## Factors affecting caching
 
 Renovate will conditionally cache data based on a few factors.
@@ -47,11 +45,15 @@ See [What happens to HTTP calls that require authentication?](#what-happens-to-h
 
 Finally, if you're running Renovate across many hosts (for instance across a Kubernetes cluster or on your automated build platform like GitLab CI), [we strongly recommend](#recommended-performance-improvements) using a persistent Package Cache, and ideally a persistent Repository Cache, too.
 
-### How do I invalidate the cache?
-
-**??**
-
 ## Cache types
+
+Renovate has three caches of its own:
+
+| Cache                                 | Backend                | Persists between runs | Configurable |
+| ------------------------------------- | ---------------------- | --------------------- | ------------ |
+| [In-Memory Cache](#in-memory-cache)   | Memory                 | no                    | no           |
+| [Package Cache](#package-cache)       | Redis, SQLite, or file | with a backend        | yes          |
+| [Repository Cache](#repository-cache) | File or S3             | when enabled          | yes          |
 
 Renovate uses 3 types of cache:
 
@@ -346,3 +348,9 @@ If specifying [`redisUrl`](./self-hosted-configuration.md#redisurl) to use Redis
 - [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes)
 - `prCacheSyncMaxPages`
 - persistRepoData
+
+---
+
+```
+When Renovate encounters `Cache-Control` headers, it will abide by them, as well as perform conditional HTTP requests when `ETag` HTTP headers are received.
+```
