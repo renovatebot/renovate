@@ -138,7 +138,10 @@ async function restorePlatformAutomerge(
       );
       throw err;
     }
-    logger.warn({ err }, 'Error re-enabling platform automerge');
+    logger.warn(
+      { err, prNo: number },
+      'Error re-enabling platform automerge, it stays disabled until the next push',
+    );
   }
 }
 

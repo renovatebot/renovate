@@ -6584,7 +6584,57 @@ describe('modules/platform/github/index', () => {
 
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { prNumber: 123 },
-            'GitHub-native automerge: could not re-enable after updating the commit message',
+            'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+          );
+        });
+
+        it('warns when the PR cannot be loaded for re-enabling after canceling', async () => {
+          const scope = await mockScope();
+          stateReply(scope, {
+            commitHeadline: 'Update dependency foo to v1.0.4 (#123)',
+            commitBody: 'Some body',
+            enabledBy: { __typename: 'Bot', login: 'renovate' },
+          });
+          cancellationReply(scope);
+          // without options, the PR is not looked up when canceling
+          await github.cancelPlatformAutomerge(cancellationConfig);
+          scope
+            .get(
+              '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+            )
+            .reply(200, [])
+            .get('/repos/some/repo/pulls/123')
+            .reply(404);
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(logger.logger.warn).toHaveBeenCalledWith(
+            { prNumber: 123 },
+            'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+          );
+        });
+
+        it('does not warn about staying disabled when automerge was not canceled', async () => {
+          const scope = await mockScope();
+          scope
+            .get(
+              '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+            )
+            .reply(200, [])
+            .get('/repos/some/repo/pulls/123')
+            .reply(404);
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(logger.logger.warn).not.toHaveBeenCalledWith(
+            { prNumber: 123 },
+            expect.stringContaining('stays disabled'),
           );
         });
 

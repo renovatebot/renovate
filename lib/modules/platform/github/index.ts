@@ -2501,7 +2501,7 @@ export async function reattemptPlatformAutomerge({
       if (retryStatus === 'failed') {
         logger.warn(
           { prNumber: number },
-          'GitHub-native automerge: could not re-enable after updating the commit message',
+          'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
         );
       }
     }
@@ -2512,6 +2512,12 @@ export async function reattemptPlatformAutomerge({
       throw err;
     }
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
+    if (retry) {
+      logger.warn(
+        { prNumber: number },
+        'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+      );
+    }
   }
 }
 

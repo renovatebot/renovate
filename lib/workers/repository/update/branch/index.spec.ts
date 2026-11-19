@@ -4531,8 +4531,8 @@ describe('workers/repository/update/branch/index', () => {
 
         expect(res).toMatchObject({ result: 'error', prNo: 123 });
         expect(logger.warn).toHaveBeenCalledWith(
-          { err: reattemptErr },
-          'Error re-enabling platform automerge',
+          { err: reattemptErr, prNo: 123 },
+          'Error re-enabling platform automerge, it stays disabled until the next push',
         );
         expect(logger.warn).toHaveBeenCalledWith(
           { err: checkoutErr },
@@ -4570,8 +4570,8 @@ describe('workers/repository/update/branch/index', () => {
 
         expect(res).toMatchObject({ result: 'done', commitSha });
         expect(logger.warn).toHaveBeenCalledWith(
-          { err: reattemptErr },
-          'Error re-enabling platform automerge',
+          { err: reattemptErr, prNo: 123 },
+          'Error re-enabling platform automerge, it stays disabled until the next push',
         );
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
       });
