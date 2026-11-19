@@ -26,9 +26,9 @@ env RENOVATE_TOKEN=...
   containerbase/base
 ```
 
-In this case, the In-Memory Cache Renovate holds will be lost each time the Renovate process exits.
+In this case, the [In-Memory Cache](#in-memory-cache) Renovate holds will be lost each time the Renovate process exits.
 
-However, if you run multiple repositories in a single Renovate process:
+Compare this to the case that you run multiple repositories in a single Renovate process:
 
 ```sh
 # newlines for readability purposes only
@@ -37,13 +37,19 @@ env RENOVATE_TOKEN=...
   renovatebot/renovate containerbase/base
 ```
 
-In this case, the In-Memory Cache will be shared between all repositories being processed.
+In this example, the In-Memory Cache will be shared between all repositories being processed.
 
-In both cases, the Renovate runs execute on the same host (whether it's a VM, container or your personal laptop) and so the on-disk caches (if configured) will be shared between Renovate runs.
+In both cases, the Renovate runs execute on the same host (whether it is a VM, container or your personal laptop) and so the on-disk caches (**if configured - it's the default??**) will be shared between Renovate runs.
 
-Secondly, Renovate will conditionally cache based on whether it detects it is interacting with a private repository and/or a private package. See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details.
+Secondly, Renovate does not intentionally cache data that should be private.
+If it believes it is interacting with a private repository and/or a private package, Renovate will not cache the data in a persistent layer (but it may be available in the In-Memory Cache).
+See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details.
 
-Finally, if you're running Renovate across many hosts (for instance across a Kubernetes cluster or on your automated build platform like GitLab CI), [we recommend](#recommended-performance-improvements) using a persistent Package Cache, and ideally a persistent Repository Cache, too.
+Finally, if you're running Renovate across many hosts (for instance across a Kubernetes cluster or on your automated build platform like GitLab CI), [we strongly recommend](#recommended-performance-improvements) using a persistent Package Cache, and ideally a persistent Repository Cache, too.
+
+### How do I invalidate the cache?
+
+**??**
 
 ## Cache types
 
@@ -54,11 +60,10 @@ Renovate uses 3 types of cache:
 The In-Memory Cache includes any short-lived data which is worth caching within a given Renovate run (for a single repo or against multiple), but is not worth persisting for more long-term access.
 
 <!-- markdownlint-disable MD024 -->
-<!-- markdownlint-disable MD024 -->
 
 #### What is in it?
 
-Renovate stores a mix of different types of data in the In-Memory Cache, for instance when retrieving HTTP-/npm-based config presets, getting the public key for a Hex registry or for listing status checks on a GitHub branch.
+Renovate stores a mix of different types of data in the In-Memory Cache, for instance when retrieving HTTP-/npm-based config presets, getting the public key for a Hex registry or for **listing status checks on a GitHub branch**.
 
 <!-- markdownlint-disable MD024 -->
 
@@ -96,7 +101,7 @@ This cache includes (among other information):
 <!-- prettier-ignore -->
 - `configFileName`: this repository's filename i.e. `renovate.json5`
 - `branches`: information about the branches Renovate is currently managing, and:
-    - whether they're associated with a PR
+    - whether they are associated with a PR
     - what update(s) are in the given branch
     - whether the branch is conflicted/behind the base branch or if it's been modified by someone other than Renovate
 - `onboardingBranchCache`, `reconfigureBranchCache`: cache for the state of the onboarding/reconfigure branches
@@ -179,15 +184,19 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 
 #### Which options configure it?
 
-- [`redisUrl`](./self-hosted-configuration.md#redisurl): when configured, use Redis for the Package Cache
-- [`redisPrefix`](./self-hosted-configuration.md#redisprefix): a prefix for the key names in Redis
-- [`presetCachePersistence`](./self-hosted-configuration.md#presetcachepersistence): whether to cache remote presets in the Package Cache
-- [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride): overrides for the expiry/TTL of specified datasource cache entries
-- [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes): maximum duration to keep datasource cache entries
-- [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages): cache private packages (See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details)
+- [`packageCache` object](./self-hosted-configuration.md#packagecache):
+  - [`hardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes): maximum duration to keep datasource cache entries
+  - [`presetPersistence`](./self-hosted-configuration.md#presetcachepersistence): whether to cache remote presets in the Package Cache
+  - [`privatePackages`](./self-hosted-configuration.md#cacheprivatepackages): cache private packages (See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details)
+  - [`redisPrefix`](./self-hosted-configuration.md#redisprefix): a prefix for the key names in Redis
+  - [`redisUrl`](./self-hosted-configuration.md#redisurl): when configured, use Redis for the Package Cache
+  - [`ttlOverride`](./self-hosted-configuration.md#cachettloverride): overrides for the expiry/TTL of specified datasource cache entries
 - [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache): use SQLite as the Package Cache backend
 - [`RENOVATE_X_SQLITE_BUSY_TIMEOUT`](./self-hosted-experimental.md#renovate_x_sqlite_busy_timeout): when using SQLite, increase the busy timeout
-- [`prCacheSyncMaxPages`](./self-hosted-configuration.md#prcachesyncmaxpages): maximum number of pages to fetch when syncing the pull request cache
+
+### How do I invalidate the cache?
+
+**??**
 
 ## Other related configuration options
 
@@ -202,17 +211,28 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 1. **Strongly recommended**: Set the Package Cache to use Redis, or the `cacheDir` to a persistent volume shared across runs
 1. Preferably: Set the Repository Cache to use an S3-compatible backend
 
+## Clearing the cahce **??**
+
+**??** Renovate does some - but it's in caharge of doing so
+
+Redis doesn't automagically clear it
+
+So you may sometimes want/need to**??**
+
+Check the **??** namespaces
+
 ## FAQs
 
 ### How much memory should I use for my Package Cache?
 
 Unfortunately "it depends".
 
-<!-- prettier-ignore -->
-!!! warning
-  TODO: Jamie add more details about Mend's usage once confirmed **??**
+It is recommended to start with 2-4GB of memory, and see how this scales, depending on your organisation, **??** and **??**.
 
-### Why does Renovate attempt to categorise **??**?
+!!! hint
+  On Mend-hosted Renovate, an AWS ElastiCache `cache.m7g.2xlarge` instance of Redis (OSS) is used, which has ~26GiB of memory, which sees roughly 60% usage at peak.
+
+### Why does Renovate attempt to categorise what is **public/private data? maybe something else?**?
 
 In cases where **??**, this can **??**.
 
@@ -249,13 +269,13 @@ When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stal
 
 In the case that Renovate executes commands that trigger a package manager to run, for instance `go mod tidy`, then there may be some downloads + caching that the package manager itself may do.
 
-Where possible, Renovate will centralise these cache locations under [`cacheDir`](./self-hosted-configuration.md#cachedir), i.e. in `$cacheDir/others`.
+Where possible, Renovate will centralize these cache locations under [`cacheDir`](./self-hosted-configuration.md#cachedir), i.e. in `$cacheDir/others/go` and `$cacheDir/others/yarn`.
 
 Note that this directory can grow over time (as noted in [#33612](https://github.com/renovatebot/renovate/discussions/33612)), so should be periodically cleaned up, if you are running long-lived hosts and/or persistently caching the `cacheDir`.
 
 ### Where are HTTP responses cached?
 
-HTTP responses are cached between **both** the Repository Cache and the Package Cache.
+HTTP responses are cached between **both** the Repository Cache and the Package Cache, as well as some in the In-Memory Cache.
 
 Certain HTTP requests - such as the repository's PRs and the Dependency Dashboard Issue - make more sense to be tied to the Repository Cache, and others - such as HTTP calls to Datasources - make sense to be in the Package Cache.
 
@@ -315,6 +335,8 @@ When Renovate does not see it present, it will recreate it.
 To invalidate an entry in the Package Cache is more involved, and requires configuring [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) for the specific namespace(s) and key(s) that you wish to invalidate, then running Renovate.
 
 If specifying [`redisUrl`](./self-hosted-configuration.md#redisurl) to use Redis for the Package Cache, connecting to the Redis server and deleting the keys is also a valid option.
+
+###
 
 ---
 
