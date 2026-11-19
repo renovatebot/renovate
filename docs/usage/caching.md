@@ -1,3 +1,5 @@
+# Caching
+
 As a tool for updating dependencies, Renovate needs to interact with many different [Datasources](./modules/datasource/index.md) to determine what update(s) are available for a given repository, requiring a large amount of outbound HTTP traffic.
 
 To avoid unnecessary stress on upstream services, [like Maven Central](https://www.sonatype.com/blog/maven-central-and-the-tragedy-of-the-commons), as well as making Renovate runs more efficient, Renovate works to heavily cache external HTTP requests where possible.
@@ -80,9 +82,9 @@ The Repository Cache is primarily aimed at reducing the work that Renovate needs
 
 <!-- prettier-ignore -->
 !!! note
-    This only contains **metadata** about the repository, not the repository itself.
-    <br>
-    This includes similar data to what Renovate logs at `DEBUG` log level.
+  This only contains **metadata** about the repository, not the repository itself.
+  <br>
+  This includes similar data to what Renovate logs at `DEBUG` log level.
 
 <!-- markdownlint-disable MD024 -->
 
@@ -132,9 +134,9 @@ The Package Cache is primarily aimed at improving quality-of-life for upstream p
 
 <!-- prettier-ignore -->
 !!! tip
-    The Package Cache is one of the most important areas to configure as a self-hosted Administrator.
-    <br>
-    Not only does this reduce the time taken for Renovate to run, but it also helps reduce the burden on public package registries.
+  The Package Cache is one of the most important areas to configure as a self-hosted Administrator.
+  <br>
+  Not only does this reduce the time taken for Renovate to run, but it also helps reduce the burden on public package registries.
 
 <!-- markdownlint-disable MD024 -->
 
@@ -195,7 +197,7 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 
 <!-- prettier-ignore -->
 !!! tip
-    Following these recommendations not only improve the performance for your own Renovate deployment, but make it less heavy on the registries you rely upon.
+  Following these recommendations not only improve the performance for your own Renovate deployment, but make it less heavy on the registries you rely upon.
 
 1. **Strongly recommended**: Set the Package Cache to use Redis, or the `cacheDir` to a persistent volume shared across runs
 1. Preferably: Set the Repository Cache to use an S3-compatible backend
@@ -208,7 +210,7 @@ Unfortunately "it depends".
 
 <!-- prettier-ignore -->
 !!! warning
-    TODO: Jamie add more details about Mend's usage once confirmed **??**
+  TODO: Jamie add more details about Mend's usage once confirmed **??**
 
 ### Why does Renovate attempt to categorise **??**?
 
@@ -305,7 +307,7 @@ For the Repository Cache, a self-hosted administrator can use [`repositoryCache=
 
 <!-- prettier-ignore -->
 !!! tip
-    If resetting the cache for a specific repo, it's worthwhile making sure you target only a specific repository, for instance using the [`repositories`](./self-hosted-configuration.md#repositories) configuration option.
+  If resetting the cache for a specific repo, it's worthwhile making sure you target only a specific repository, for instance using the [`repositories`](./self-hosted-configuration.md#repositories) configuration option.
 
 The Repository Cache can also be reset by deleting the `cache.json` file from the S3-compatible backend.
 When Renovate does not see it present, it will recreate it.
