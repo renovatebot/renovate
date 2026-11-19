@@ -72,7 +72,7 @@ export interface GithubPackageConfig {
    * `refs(query: ...)` argument. Lets a caller scope a tag lookup to a subset
    * of refs (e.g. a Go monorepo submodule prefix such as `config/`) so GitHub
    * does not traverse the repository's entire tag set. Only the tags adapter
-   * honours it; when unset the query is unchanged.
+   * honors it; when unset the query is unchanged.
    */
   refQuery?: string | undefined;
 }
