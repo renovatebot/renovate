@@ -1537,6 +1537,21 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(commit).not.toBeNull();
       });
 
+      it('skips the diff check when force is set', async () => {
+        const file: FileChange = {
+          type: 'addition',
+          path: 'some-forced-file',
+          contents: 'some new-contents',
+        };
+        const commit = await git.prepareCommit({
+          branchName: 'renovate/past_branch',
+          files: [file],
+          message: 'Create something',
+          force: true,
+        });
+        expect(commit).not.toBeNull();
+      });
+
       it('link file', async () => {
         const file: FileChange = {
           type: 'addition',
@@ -1923,6 +1938,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
           'past message',
         ]);
         expect(msg).toContain('past message2');
+      });
+
+      it('should keep a given currentBranch when fetching an existing checkout', async () => {
+        await git.initRepo({
+          url: origin.path,
+          currentBranch: defaultBranch,
+        });
+
+        await expect(git.syncGit()).resolves.toBeUndefined();
+        await expect(git.getCommitMessages()).resolves.toEqual([
+          'master message',
+          'past message',
+        ]);
       });
 
       it('should set branch prefix', async () => {

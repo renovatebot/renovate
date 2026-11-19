@@ -126,6 +126,8 @@ export interface RenovateSharedConfig {
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
+  minimumReleaseAgePackageManager?: Nullish<string>;
+  minimumReleaseAgePackageManagerSync?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -238,6 +240,7 @@ export interface GlobalOnlyConfigLegacy {
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateGitRegistries?: boolean;
+  allowCustomJuliaRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
@@ -427,16 +430,9 @@ export interface RenovateConfig
 
   fileList?: string[];
   configWarningReuseIssue?: boolean;
-  dependencyDashboard?: boolean;
-  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboard?: DependencyDashboardConfig;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardHeader?: string;
-  dependencyDashboardFooter?: string;
-  dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
-  dependencyDashboardReportAbandonment?: boolean;
   mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
@@ -487,8 +483,6 @@ export interface RenovateConfig
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
-
-  customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
@@ -664,6 +658,7 @@ export const namedParents = [
   'bumpVersions',
   'customDatasources',
   'customManagers',
+  'dependencyDashboard',
   'group',
   'hostRules',
   'logLevelRemap',
@@ -776,6 +771,11 @@ export interface RenovateOptionBase {
    * Platforms which support this option, leave undefined if all platforms support it.
    */
   supportedPlatforms?: PlatformId[];
+
+  /**
+   * Datasources which support this option, leave undefined if all datasources support it.
+   */
+  supportedDatasources?: string[];
 
   /**
    * Conditions that must be met for this option to be required.
@@ -939,6 +939,19 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface DependencyDashboardConfig {
+  enabled?: boolean;
+  autoclose?: boolean;
+  title?: string;
+  header?: string;
+  footer?: string;
+  labels?: string[];
+  osvVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  reportAbandonment?: boolean;
+  pinned?: boolean;
+  customize?: Record<string, string>;
 }
 
 export interface BumpVersionConfig {

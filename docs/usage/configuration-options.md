@@ -542,6 +542,7 @@ Currently, this config option only works with these managers:
 
 - `cargo`
 - `helmv3`
+- `julia`
 - `npm`
 - `nuget`
 - `maven`
@@ -1493,14 +1494,6 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
-## `customizeDashboard`
-
-You may use the `customizeDashboard` object to customize the Dependency Dashboard.
-
-Supported fields:
-
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
-
 ## `defaultRegistryUrls`
 
 Override a datasource's default registries with this config option.
@@ -1518,7 +1511,7 @@ Compare that to `registryUrls`, which are a way to _override_ registries.
 
 Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:recommended` preset.
 
-To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard.enabled` to `false`.
 
 ```json
 {
@@ -1526,7 +1519,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 }
 ```
 
-Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
+Configuring `dependencyDashboard.enabled` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
 This issue has a list of all PRs pending, open, closed (unmerged) or in error.
 The goal of this issue is to give visibility into all updates that Renovate is managing.
 
@@ -1542,6 +1535,77 @@ Examples of what having a Dependency Dashboard will allow you to do:
   Renovate still creates and manages PRs, and still follows your schedules and rate limits.
   The Dependency Dashboard gives you extra visibility and control over your updates.
 
+The `dependencyDashboard` object configures the Dependency Dashboard issue itself:
+
+```json
+{
+  "dependencyDashboard": {
+    "enabled": true,
+    "title": "Renovate Dashboard",
+    "labels": ["dependencies"]
+  }
+}
+```
+
+Set `labels` within `dependencyDashboard` to always apply these labels on the Dependency Dashboard issue.
+The labels support templating, in the same way as `dependencyDashboard.header` and `dependencyDashboard.footer`.
+The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
+It is pointless to edit the labels, as Renovate restores the labels on each run.
+
+!!! note
+  Before the `dependencyDashboard` object was introduced, these settings were separate options, such as `dependencyDashboardTitle`, `dependencyDashboardLabels` and `customizeDashboard`.
+  Renovate migrates them into the `dependencyDashboard` object.
+  Their environment variables and CLI flags, such as `RENOVATE_DEPENDENCY_DASHBOARD_FOOTER` and `--dependency-dashboard-footer`, are also migrated into `RENOVATE_DEPENDENCY_DASHBOARD` and `--dependency-dashboard`, but fields set in those take precedence.
+  `dependencyDashboardApproval` and `dependencyDashboardCategory` remain separate options, as they apply to updates rather than to the Dependency Dashboard issue.
+
+### `dependencyDashboard.autoclose`
+
+You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
+
+### `dependencyDashboard.customize`
+
+You may use the `customize` object to customize sections in the Dependency Dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
+
+### `dependencyDashboard.footer`
+
+### `dependencyDashboard.header`
+
+### `dependencyDashboard.osvVulnerabilitySummary`
+
+Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
+You can choose from:
+
+- `none` (default) do not list any CVEs
+- `unresolved` list CVEs that have no fixes
+- `all` list all CVEs
+
+You will only get OSV-based vulnerability alerts for direct dependencies.
+
+This feature is independent of the `osvVulnerabilityAlerts` option.
+
+The source of these CVEs is [OSV.dev](https://osv.dev/).
+
+### `dependencyDashboard.pinned`
+
+If there are already the maximum number of Issues pinned, Renovate will leave the Dependency Dashboard unpinned.
+
+### `dependencyDashboard.reportAbandonment`
+
+Controls whether abandoned packages are reported in the Dependency Dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the Dependency Dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
+
+Set this to `false` if you prefer not to see abandoned packages in your Dependency Dashboard.
+
+### `dependencyDashboard.title`
+
+Configure this option if you prefer a different title for the Dependency Dashboard.
+
 ## `dependencyDashboardApproval`
 
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
@@ -1550,7 +1614,7 @@ By setting `dependencyDashboardApproval` to `true` in config (including within `
 You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 !!! tip
-  When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
+  When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard.enabled` explicitly.
 
 You can configure Renovate to wait for approval for:
 
@@ -1590,10 +1654,6 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 }
 ```
 
-## `dependencyDashboardAutoclose`
-
-You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
-
 ## `dependencyDashboardCategory`
 
 You can use this to categorize updates on the Dependency Dashboard.
@@ -1620,44 +1680,6 @@ If there are categories in that section, the action will be put in an extra "All
 This is to explicitly clarify that the action applies to all updates in the section, not to just a specific category.
 
 The Dependency Dashboard categories are only used to visually organize updates within the Dependency Dashboard issue. They do not impact grouping of updates into a single update like how e.g. `branchName` and `groupName` do.
-
-## `dependencyDashboardFooter`
-
-## `dependencyDashboardHeader`
-
-## `dependencyDashboardLabels`
-
-The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
-It is pointless to edit the labels, as Renovate restores the labels on each run.
-
-## `dependencyDashboardOSVVulnerabilitySummary`
-
-Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
-You can choose from:
-
-- `none` (default) do not list any CVEs
-- `unresolved` list CVEs that have no fixes
-- `all` list all CVEs
-
-You will only get OSV-based vulnerability alerts for direct dependencies.
-The only exception today is the `pep621` manager, for `uv` projects.
-
-This feature is independent of the `osvVulnerabilityAlerts` option.
-
-The source of these CVEs is [OSV.dev](https://osv.dev/).
-
-## `dependencyDashboardReportAbandonment`
-
-Controls whether abandoned packages are reported in the dependency dashboard.
-
-When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
-This helps you identify dependencies that may need attention due to lack of maintenance.
-
-Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
-
-## `dependencyDashboardTitle`
-
-Configure this option if you prefer a different title for the Dependency Dashboard.
 
 ## `description`
 
@@ -3019,7 +3041,7 @@ Examples of how you can use `minimumReleaseAge`:
 #### Suppress branch/PR creation for X days
 
 If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
-We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
+We recommend you set `dependencyDashboard.enabled=true`, so you can see these pending PRs.
 
 !!! warning
   `prCreation="not-pending"` only opens the PR once branch checks complete.
@@ -3086,6 +3108,52 @@ For example, with the following configuration Renovate waits 3 days plus 1 hour 
 ```
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
+## `minimumReleaseAgePackageManager`
+
+Use this option to set a lower bound for the minimum release age which Renovate passes to package managers.
+Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimumReleaseAge`](#minimumreleaseage) of the repository or manager config.
+For lock file maintenance, Renovate compares it with the `minimumReleaseAge` of [`lockFileMaintenance`](#lockfilemaintenance) instead.
+This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minimumreleaseagepackagemanagersync) is `true`.
+
+Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
+
+This option does not change when Renovate raises an update.
+You can only set it at the top level of a config or in a manager's config, not in `packageRules`, because the package manager applies one value to the whole lock file.
+Security updates pass no minimum release age to the package manager.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "poetry": {
+    "minimumReleaseAgePackageManager": "7 days"
+  }
+}
+```
+
+A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch, but not over the minimum release age configured in the package manager itself.
+
+## `minimumReleaseAgePackageManagerSync`
+
+This is a feature flag to opt early into the new `minimumReleaseAge` behavior, which aligns the minimum release age of Renovate with the minimum release age of your package managers.
+The behavior is experimental and may change while the integration with each package manager is completed.
+You can set it at the top level of a config or in a manager's config, not in `packageRules`.
+
+With `minimumReleaseAgePackageManagerSync=true`, Renovate:
+
+- applies the minimum release age which a manager reads from the configuration of your package manager, if it is larger than [`minimumReleaseAge`](#minimumreleaseage)
+- does not hold back lock file maintenance if the package manager enforces the minimum release age itself
+- applies [`minimumReleaseAgePackageManager`](#minimumreleaseagepackagemanager)
+
+Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
+
+The [table of package managers](./key-concepts/minimum-release-age.md#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both) lists which managers integrate with the minimum release age of their package manager, and what they read and pass with this option.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true
+}
+```
 
 ## `minor`
 
@@ -4417,6 +4485,8 @@ Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
 
+If multiple updates on the branch have different `postUpgradeTasks` with `executionMode=branch`, for instance when different `packageRules` match different files in the branch, each distinct set of tasks is executed once, in the order the updates appear in the branch.
+
 ### `postUpgradeTasks.fileFilters`
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -4465,6 +4535,32 @@ For example:
 
 !!! note
   The tool objects inside `installTools` currently do not expose any additional configurability.
+
+In the Renovate Docker image, `renovate-config-validator` runs the installed version when the `renovate` tool is installed, instead of the bundled one.
+The installed version comes from the matching `renovate` entry in [`constraints`](#constraints).
+Once installed, every later `renovate-config-validator` call in the same container, also for other repositories, uses that version.
+
+The `renovate` tool needs the Containerbase `node` tool.
+The full Renovate image has it, the slim image does not, so list `node` before `renovate`, as tools install in the order they are listed.
+
+```json title="Validating the config with the installed Renovate version"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["renovate"],
+      "postUpgradeTasks": {
+        "commands": [
+          "renovate-config-validator --no-global --strict --migrate renovate.json"
+        ],
+        "installTools": {
+          "node": {},
+          "renovate": {}
+        }
+      }
+    }
+  ]
+}
+```
 
 ### `postUpgradeTasks.workingDirTemplate`
 
@@ -4806,7 +4902,9 @@ This feature works with the following managers:
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmsman`](modules/manager/helmsman/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
+- [`jsonata`](modules/manager/jsonata/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`regex`](modules/manager/regex/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
 

@@ -54,6 +54,23 @@ ruleTester.run('require-regex-util', rule, {
       filename: libFile,
       errors: [{ messageId: 'requireRegexUtil' }],
     },
+    // RegExp() without `new`
+    {
+      code: `const re = RegExp('foo');`,
+      filename: libFile,
+      errors: [{ messageId: 'requireRegexUtil' }],
+    },
+    // RegExp accessed via a global object
+    {
+      code: `const re = new globalThis.RegExp('foo');`,
+      filename: libFile,
+      errors: [{ messageId: 'requireRegexUtil' }],
+    },
+    {
+      code: `const re = window.RegExp('foo');`,
+      filename: libFile,
+      errors: [{ messageId: 'requireRegexUtil' }],
+    },
     {
       code: `const re = /foo/;`,
       filename: libFile,

@@ -44,6 +44,25 @@ $ npx --yes --package renovate -- renovate-config-validator --strict
        },
 ```
 
+### Apply config migrations
+
+You can pass the `--migrate` flag to make the validator write any needed [config migration](./config-migration.md) back to the config file(s):
+
+```console title="Apply config migrations"
+$ npx --yes --package renovate -- renovate-config-validator --migrate
+ INFO: Validating renovate.json
+ WARN: Config migration necessary
+ ...
+ INFO: Applied config migration to renovate.json
+ INFO: Config validated successfully against 1 file(s)
+```
+
+The validator can only migrate JSON, JSONC and JSON5 config files, including `.renovaterc`.
+It keeps comments in JSON and JSONC files, but loses comments in JSON5 files.
+It does not change JavaScript, TypeScript or YAML config files, or the `renovate` config in a `package.json`.
+
+If you pass both `--strict` and `--migrate`, then a migration that the validator applies does not make the command fail.
+
 ### Pass file to check as CLI arguments
 
 You can pass the file you want to check to the `renovate-config-validator` program with a CLI argument.

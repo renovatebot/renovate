@@ -464,6 +464,40 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(packageCacheSetSpy).not.toHaveBeenCalled();
     });
 
+    it('uses changelog file notes without fetching releases', async () => {
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/angular/angular.js')
+        .reply(200)
+        .get('/repos/angular/angular.js/git/trees/HEAD')
+        .reply(200, githubTreeResponse)
+        .get('/repos/angular/angular.js/git/blobs/abcd')
+        .reply(200, {
+          content: toBase64(angularJsChangelogMd),
+        });
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          ...githubProject,
+          repository: 'angular/angular.js',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.6.9',
+            gitRef: '1.6.9',
+            compare: { url: '' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const res = await addReleaseNotes(input, partial<BranchUpgradeConfig>());
+
+      expect(res?.versions?.[0]?.releaseNotes?.url).toBe(
+        'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
+      );
+      expect(githubReleasesMock).not.toHaveBeenCalled();
+    });
+
     it('caches the compare url when no release notes are found', async () => {
       const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
       githubReleasesMock.mockResolvedValueOnce([]);

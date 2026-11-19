@@ -1,4 +1,10 @@
-import { PoetryPyProject, PoetrySection, PoetrySources } from './schema.ts';
+import { codeBlock } from 'common-tags';
+import {
+  PoetryMinReleaseAgeConfig,
+  PoetryPyProject,
+  PoetrySection,
+  PoetrySources,
+} from './schema.ts';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
@@ -413,6 +419,19 @@ build-backend = "poetry.masonry.api"
 `;
       const result = PoetryPyProject.parse(input);
       expect(result.poetryRequirement).toBeUndefined();
+    });
+  });
+
+  describe('PoetryMinReleaseAgeConfig', () => {
+    it('keeps a non-integer solver.min-release-age', () => {
+      const input = codeBlock`
+        [solver]
+        min-release-age = 2.5
+      `;
+
+      const result = PoetryMinReleaseAgeConfig.parse(input);
+
+      expect(result).toEqual({ days: 2.5, exclude: [] });
     });
   });
 });
