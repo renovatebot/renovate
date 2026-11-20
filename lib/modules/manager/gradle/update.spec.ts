@@ -1,8 +1,48 @@
 import { codeBlock } from 'common-tags';
+import { parseCatalog } from './extract/catalog.ts';
 import { updateDependency } from './index.ts';
 import { parseGradle } from './parser.ts';
 
 describe('modules/manager/gradle/update', () => {
+  it.each`
+    section        | declaration
+    ${'libraries'} | ${'demo = "org.example:demo:1.0.0"'}
+    ${'libraries'} | ${'demo = { module = "org.example:demo", version = "1.0.0" }'}
+    ${'libraries'} | ${'demo = { module = "org.example:demo", version = { strictly = "1.0.0" } }'}
+    ${'plugins'}   | ${'demo = "org.example.demo:1.0.0"'}
+    ${'plugins'}   | ${'demo = { id = "org.example.demo", version = "1.0.0" }'}
+    ${'versions'}  | ${'demo = "1.0.0"'}
+  `(
+    'ignores commented catalog declarations: $declaration',
+    ({ section, declaration }) => {
+      const suffix =
+        section === 'versions'
+          ? '\n[libraries]\ndemo = { module = "org.example:demo", version.ref = "demo" }'
+          : '';
+      const fileContent = `${codeBlock`
+        [${section}]
+        # ${declaration}
+        ${declaration}
+      `}${suffix}`;
+      const packageFile = 'gradle/libs.versions.toml';
+      const { deps } = parseCatalog(packageFile, fileContent);
+
+      const result = updateDependency({
+        fileContent,
+        packageFile,
+        upgrade: { ...deps[0], newValue: '2.0.0' },
+      });
+
+      expect(result).toBe(
+        `${codeBlock`
+          [${section}]
+          # ${declaration}
+          ${declaration.replace('1.0.0', '2.0.0')}
+        `}${suffix}`,
+      );
+    },
+  );
+
   it('replaces', () => {
     expect(
       updateDependency({
