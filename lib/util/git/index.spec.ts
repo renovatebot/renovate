@@ -765,16 +765,20 @@ describe('util/git/index', { timeout: 30000 }, () => {
         ).resolves.toBeNull();
       });
 
-      it('propagates read failures for existing files and permits retry', async () => {
+      it('tells a failed read from a missing file only with throwOnError', async () => {
         const error = new Error('spawn git EAGAIN');
-        vi.spyOn(SimpleGit.prototype, 'show').mockRejectedValueOnce(error);
+        vi.spyOn(SimpleGit.prototype, 'show').mockRejectedValue(error);
+
+        // by default, a file that exists but cannot be read looks missing
+        await expect(git.getFile('master_file')).resolves.toBeNull();
+        await expect(git.getFile('some-missing-path')).resolves.toBeNull();
 
         await expect(
-          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+          git.getFile('master_file', undefined, { throwOnError: true }),
         ).rejects.toBe(error);
         await expect(
-          git.getFile('master_file', defaultBranch, { throwOnError: true }),
-        ).resolves.toBe(defaultBranch);
+          git.getFile('some-missing-path', undefined, { throwOnError: true }),
+        ).resolves.toBeNull();
       });
 
       it('propagates failures to verify whether a file exists', async () => {
