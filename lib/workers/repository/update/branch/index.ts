@@ -225,6 +225,7 @@ export async function processBranch(
         result: 'commit-hourly-limit-reached',
       };
     }
+    let branchIsModified = false;
     if (branchExists) {
       // check if branch is labeled to stop
       config.stopUpdating = branchPr?.labels?.includes(
@@ -282,7 +283,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(
+      branchIsModified = await scm.isBranchModified(
         config.branchName,
         config.baseBranch,
       );
@@ -375,6 +376,7 @@ export async function processBranch(
       config,
       branchPr,
       branchExists,
+      branchIsModified,
       dependencyDashboardCheck,
       forceRebase,
     });

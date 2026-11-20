@@ -211,6 +211,8 @@ export interface BranchConfig
   isConflicted?: boolean;
   commitFingerprint?: string;
   cacheFingerprintMatch?: CacheFingerprintMatchResult;
+  /** fingerprint of the upgrades alone, which is kept in the PR so it survives a lost repository cache */
+  upgradesFingerprint?: string;
   prNotPendingHours?: number;
 }
 
