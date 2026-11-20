@@ -16,7 +16,10 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'update-lockfile',
 ];
 
-function hex2npm(input: string): string {
+/**
+ * Converts a Hex version requirement to an npm range.
+ */
+export function hex2npm(input: string): string {
   return input
     .replace(regEx(/~>\s*(?<version>\d+\.\d+)$/), '^$<version>')
     .replace(regEx(/~>\s*(?<version>\d+\.\d+\.\d+)/), '~$<version>')

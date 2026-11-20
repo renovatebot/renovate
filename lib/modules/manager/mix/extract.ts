@@ -1,3 +1,4 @@
+import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import {
   findLocalSiblingOrParent,
@@ -7,6 +8,8 @@ import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
+import { hex2npm } from '../../versioning/hex/index.ts';
+import { api as semverExtended } from '../../versioning/semver-extended/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
@@ -25,6 +28,33 @@ const lockedVersionRegExp = regEx(
 const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
 const onlyValueRegexp = regEx(/only:\s*(?<only>\[[^\]]*\]|:\w+)/);
 const onlyEnvironmentsRegexp = regEx(/:(?<env>\w+)/gm);
+const projectSectionRegExp = regEx(/def\s+project\b/);
+const nextDefinitionRegExp = regEx(/\n\s*defp?\s/);
+const elixirRequirementRegExp = regEx(/\belixir:\s*"(?<requirement>[^"]+)"/);
+
+/**
+ * Returns the `elixir` requirement of the `project/0` keyword list as a range, if it can be converted.
+ */
+function extractElixirConstraint(content: string): string | null {
+  const start = projectSectionRegExp.exec(content)?.index;
+  if (start === undefined) {
+    return null;
+  }
+  const projectSection = content.slice(start);
+  const end = nextDefinitionRegExp.exec(projectSection)?.index;
+  const requirement = elixirRequirementRegExp.exec(projectSection.slice(0, end))
+    ?.groups?.requirement;
+  if (!requirement) {
+    return null;
+  }
+
+  const range = semver.validRange(hex2npm(requirement));
+  if (!range || !semverExtended.isValid(range)) {
+    logger.debug(`Skipping unsupported elixir requirement ${requirement}`);
+    return null;
+  }
+  return range;
+}
 
 export async function extractPackageFile(
   content: string,
@@ -118,8 +148,13 @@ export async function extractPackageFile(
   if (depsArray.length === 0) {
     return null;
   }
-  return {
+  const packageFileContent: PackageFileContent = {
     deps: depsArray,
     lockFiles: lockFileContent ? [lockFileName] : undefined,
   };
+  const elixirConstraint = extractElixirConstraint(contentArr.join('\n'));
+  if (elixirConstraint) {
+    packageFileContent.extractedConstraints = { elixir: elixirConstraint };
+  }
+  return packageFileContent;
 }
