@@ -20,6 +20,14 @@ describe('modules/manager/pep723/utils', () => {
       expect(res).toEqual({
         deps: [
           {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
+          {
             currentValue: '==2.32.3',
             currentVersion: '2.32.3',
             datasource: 'pypi',
@@ -55,6 +63,14 @@ describe('modules/manager/pep723/utils', () => {
 
       expect(res).toEqual({
         deps: [
+          {
+            commitMessageTopic: 'Python',
+            currentValue: '==3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
           {
             currentValue: '==2.32.3',
             currentVersion: '2.32.3',
@@ -94,11 +110,36 @@ describe('modules/manager/pep723/utils', () => {
       });
     });
 
-    it('should return null on missing dependencies', () => {
+    it('should extract only the python constraint on missing dependencies', () => {
       const res = extractPep723(
         codeBlock`
           # /// script
           # requires-python = ">=3.11"
+          # ///
+        `,
+        'foo.py',
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
+        ],
+        extractedConstraints: { python: '>=3.11' },
+      });
+    });
+
+    it('should return null on missing dependencies and python constraint', () => {
+      const res = extractPep723(
+        codeBlock`
+          # /// script
+          # dependencies = []
           # ///
         `,
         'foo.py',
