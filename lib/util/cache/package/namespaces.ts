@@ -111,6 +111,7 @@ export const packageCacheNamespaces = [
   'datasource-unity3d-packages',
   'github-branches-datasource-v1',
   'github-releases-datasource-v2',
+  'github-repository-archived',
   'github-tags-datasource-v2',
   'merge-confidence',
   'preset',

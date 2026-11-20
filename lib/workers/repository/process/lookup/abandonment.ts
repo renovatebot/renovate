@@ -1,9 +1,11 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../../../logger/index.ts';
 import type { ReleaseResult } from '../../../../modules/datasource/types.ts';
+import { detectPlatform } from '../../../../util/common.ts';
+import { isRepositoryArchived } from '../../../../util/github/repository.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import { AbandonedPackageStats } from '../../../../util/stats.ts';
-import type { LookupUpdateConfig } from './types.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
 export function calculateAbandonment(
   releaseResult: ReleaseResult,
@@ -70,4 +72,15 @@ export function calculateAbandonment(
   }
 
   return releaseResult;
+}
+
+export async function checkArchivedSource(res: UpdateResult): Promise<void> {
+  const { isAbandoned, sourceUrl } = res;
+  if (!isAbandoned || !sourceUrl || detectPlatform(sourceUrl) !== 'github') {
+    return;
+  }
+
+  if (await isRepositoryArchived(sourceUrl)) {
+    res.isSourceArchived = true;
+  }
 }

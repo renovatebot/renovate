@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon';
 import type { ReleaseResult } from '../../../../modules/datasource/types.ts';
+import * as githubRepository from '../../../../util/github/repository.ts';
 import { asTimestamp } from '../../../../util/timestamp.ts';
-import { calculateAbandonment } from './abandonment.ts';
-import type { LookupUpdateConfig } from './types.ts';
+import { calculateAbandonment, checkArchivedSource } from './abandonment.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
 describe('workers/repository/process/lookup/abandonment', () => {
   describe('calculateAbandonment', () => {
@@ -131,5 +132,56 @@ describe('workers/repository/process/lookup/abandonment', () => {
 
       expect(result.isAbandoned).toBe(true);
     });
+  });
+
+  describe('checkArchivedSource', () => {
+    const isRepositoryArchived = vi.spyOn(
+      githubRepository,
+      'isRepositoryArchived',
+    );
+
+    function lookupResult(
+      sourceUrl?: string,
+      isAbandoned = true,
+    ): UpdateResult {
+      return { updates: [], warnings: [], isAbandoned, sourceUrl };
+    }
+
+    it.each`
+      description                  | sourceUrl                          | isAbandoned
+      ${'is not abandoned'}        | ${'https://github.com/owner/repo'} | ${false}
+      ${'has no source URL'}       | ${undefined}                       | ${true}
+      ${'is not hosted on GitHub'} | ${'https://gitlab.com/owner/repo'} | ${true}
+    `(
+      'does not check a package that $description',
+      async ({ sourceUrl, isAbandoned }) => {
+        const res = lookupResult(sourceUrl, isAbandoned);
+
+        await checkArchivedSource(res);
+
+        expect(res.isSourceArchived).toBeUndefined();
+        expect(isRepositoryArchived).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each`
+      sourceUrl                                  | archived | isSourceArchived
+      ${'https://github.com/owner/repo'}         | ${true}  | ${true}
+      ${'https://github.example.com/owner/repo'} | ${true}  | ${true}
+      ${'https://github.com/owner/repo'}         | ${false} | ${undefined}
+      ${'https://github.com/owner/repo'}         | ${null}  | ${undefined}
+    `(
+      'marks $sourceUrl as $isSourceArchived when GitHub answers $archived',
+      async ({ sourceUrl, archived, isSourceArchived }) => {
+        isRepositoryArchived.mockResolvedValueOnce(archived);
+
+        const res = lookupResult(sourceUrl);
+
+        await checkArchivedSource(res);
+
+        expect(res.isSourceArchived).toBe(isSourceArchived);
+        expect(isRepositoryArchived).toHaveBeenCalledWith(sourceUrl);
+      },
+    );
   });
 });
