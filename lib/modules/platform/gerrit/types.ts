@@ -2,7 +2,6 @@ import type { FindPRConfig, Pr } from '../types.ts';
 import type { GerritChange } from './schema.ts';
 
 export interface GerritFindPRConfig extends FindPRConfig {
-  label?: string;
   requestDetails?: GerritRequestDetail[];
   /**
    * Whether only one change is needed.

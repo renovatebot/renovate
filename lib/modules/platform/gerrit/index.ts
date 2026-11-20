@@ -159,23 +159,6 @@ export async function initRepo({
     labels: coerceObject(projectInfo.labels),
   };
 
-  // Abandon all changes voted with Code-Review -2
-  // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
-  const rejectedChanges = await client.findChanges(repository, {
-    branchName: '',
-    state: 'open',
-    label: '-2',
-  });
-  for (const change of rejectedChanges) {
-    await client.abandonChange(
-      change._number,
-      'This change has been abandoned as it was voted with Code-Review -2.',
-    );
-    logger.info(
-      `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
-    );
-  }
-
   // Collect open Gerrit changes to initialize as virtual branches.
   // This allows DefaultGitScm to treat them as regular Git branches.
   const openChanges = await client.findChanges(repository, {
@@ -656,14 +639,8 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
   return (
     smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
       .replace('Branch creation', 'Change creation')
-      .replace(
-        'close this Pull Request unmerged',
-        'abandon or vote this change with Code-Review -2',
-      )
-      .replace(
-        'Close this PR',
-        'Abandon or vote this change with Code-Review -2',
-      )
+      .replace('close this Pull Request unmerged', 'abandon this change')
+      .replace('Close this PR', 'Abandon this change')
       .replace(
         'you tick the rebase/retry checkbox',
         `you add the _${rebaseLabel}_ hashtag to this change`,

@@ -169,7 +169,6 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - active', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
       await expect(
         gerrit.initRepo({ repository: 'test/repo' }),
@@ -186,7 +185,6 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - passes cloneSubmodules', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
       await gerrit.initRepo({
@@ -205,7 +203,6 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - uses username in ssh clone url', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
       await gerrit.initRepo({
@@ -219,33 +216,24 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
-    it('initRepo() - abandon rejected changes', async () => {
+    it('initRepo() - keeps changes voted Code-Review -2 open', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce({
         ...projectInfo,
         labels: { 'Code-Review': codeReviewLabel },
       });
-      clientMock.findChanges.mockResolvedValueOnce([
-        partial<GerritChange>({ _number: 1 }),
-        partial<GerritChange>({ _number: 2 }),
-      ]);
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
       await gerrit.initRepo({ repository: 'test/repo' });
 
-      expect(clientMock.findChanges.mock.calls[0]).toEqual([
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        { branchName: '', label: '-2', state: 'open' },
-      ]);
-      expect(clientMock.abandonChange.mock.calls).toEqual([
-        [
-          1,
-          'This change has been abandoned as it was voted with Code-Review -2.',
-        ],
-        [
-          2,
-          'This change has been abandoned as it was voted with Code-Review -2.',
-        ],
-      ]);
+        {
+          branchName: '',
+          state: 'open',
+          requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+        },
+      );
+      expect(clientMock.abandonChange).not.toHaveBeenCalled();
     });
 
     it('initRepo() - initialize branches from open changes', async () => {
@@ -254,7 +242,6 @@ describe('modules/platform/gerrit/index', () => {
       const sha3 = fakeSha('dep-3');
 
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([
         partial<GerritChange>({
           _number: 12345,
@@ -293,7 +280,7 @@ describe('modules/platform/gerrit/index', () => {
 
       await gerrit.initRepo({ repository: 'test/repo' });
 
-      expect(clientMock.findChanges.mock.calls[1]).toEqual([
+      expect(clientMock.findChanges.mock.calls[0]).toEqual([
         'test/repo',
         {
           branchName: '',
@@ -1406,8 +1393,8 @@ describe('modules/platform/gerrit/index', () => {
         Change creation
         Disabled because a matching change was automerged previously
         Whenever change becomes conflicted
-        abandon or vote this change with Code-Review -2
-        Abandon or vote this change with Code-Review -2
+        abandon this change
+        Abandon this change
         you add the _rebase_ hashtag to this change
         adding the _rebase_ hashtag to this change
         `);

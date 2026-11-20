@@ -376,9 +376,6 @@ class GerritClient {
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);
     }
-    if (searchConfig.label) {
-      filters.push(`label:Code-Review=${searchConfig.label}`);
-    }
     if (searchConfig.prTitle) {
       // Quotes in the search operators must be escaped with a backslash:
       //   https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
