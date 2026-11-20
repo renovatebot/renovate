@@ -372,18 +372,36 @@ function pinnedUpgrade(dep: Upgrade<Pep621ManagerData>): string {
     : dep.packageName!;
 }
 
+/**
+ * The `--upgrade-package` argument for a direct dependency: pinned to the
+ * looked up version on a lock-file-only update of a PyPI package which the
+ * lock file holds once, else `name`.
+ */
+function directUpgrade(dep: Upgrade<Pep621ManagerData>, name: string): string {
+  // The range in `pyproject.toml` still allows newer versions than the one
+  // looked up, so an unpinned upgrade would resolve to the newest of them.
+  if (
+    dep.isLockfileUpdate &&
+    dep.datasource === PypiDatasource.id &&
+    !dep.managerData?.hasMultipleLockedEntries
+  ) {
+    return pinnedUpgrade(dep);
+  }
+  return name;
+}
+
 function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
   const deps: string[] = [];
 
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        deps.push(dep.depName!);
+        deps.push(directUpgrade(dep, dep.depName!));
         break;
       }
       case depTypes.uvDevDependencies:
       case depTypes.uvSources: {
-        deps.push(dep.depName!);
+        deps.push(directUpgrade(dep, dep.depName!));
         break;
       }
       case depTypes.uvTransitiveDependencies: {
@@ -403,7 +421,7 @@ function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
         }
         break;
       default: {
-        deps.push(dep.packageName!);
+        deps.push(directUpgrade(dep, dep.packageName!));
       }
     }
   }

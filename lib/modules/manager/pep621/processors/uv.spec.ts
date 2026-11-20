@@ -1047,6 +1047,148 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
     });
 
+    it('pins the upgrade of a lock-file-only update to the new version', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        {
+          packageName: 'attrs',
+          depName: 'attrs',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          currentValue: '>=23.1.0',
+          newValue: '>=23.1.0',
+          newVersion: '23.2.0',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'dep2',
+          depName: 'Dep2',
+          depType: depTypes.optionalDependencies,
+          datasource: PypiDatasource.id,
+          newVersion: '2.0.0',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'dep3',
+          depName: 'Dep3',
+          depType: depTypes.uvDevDependencies,
+          datasource: PypiDatasource.id,
+          newVersion: '3.0.0',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'dep4',
+          depName: 'Dep4',
+          depType: depTypes.uvSources,
+          datasource: PypiDatasource.id,
+          newVersion: '4.0.0',
+          isLockfileUpdate: true,
+        },
+        // a git source has no version to pin
+        {
+          packageName: 'dep5',
+          depName: 'Dep5',
+          depType: depTypes.uvSources,
+          datasource: GitTagsDatasource.id,
+          newVersion: 'v5.0.0',
+          isLockfileUpdate: true,
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package attrs==23.2.0 --upgrade-package dep2==2.0.0 --upgrade-package dep3==3.0.0 --upgrade-package dep4==4.0.0 --upgrade-package Dep5',
+        },
+      ]);
+    });
+
+    it('does not pin the upgrade of a range update', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      // uv resolves the dependency within the new range
+      const updatedDeps = [
+        {
+          packageName: 'attrs',
+          depName: 'attrs',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          currentValue: '>=23.1.0',
+          newValue: '>=23.2.0',
+          newVersion: '23.2.0',
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package attrs',
+        },
+      ]);
+    });
+
+    it('does not pin the upgrade of a lock-file-only update locked at several versions', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        {
+          packageName: 'attrs',
+          depName: 'attrs',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          currentValue: '>=23.1.0',
+          newValue: '>=23.1.0',
+          newVersion: '23.2.0',
+          isLockfileUpdate: true,
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package attrs',
+        },
+      ]);
+    });
+
     it('performs update on private package registry', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
