@@ -39,6 +39,7 @@ import { client } from './client.ts';
 import { GerritPrCache } from './pr-cache.ts';
 import type {
   GerritChange,
+  GerritLabelInfo,
   GerritLabels,
   GerritProjectInfo,
 } from './schema.ts';
@@ -490,7 +491,7 @@ export async function getBranchStatus(
       state: 'open',
       branchName,
       singleChange: true,
-      requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
+      requestDetails: ['LABELS', 'DETAILED_ACCOUNTS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
   if (change) {
@@ -498,10 +499,12 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
-    const hasBlockingLabels = Object.values(coerceObject(change.labels)).some(
-      (label) => label.blocking,
+    const hasLabelRejectedByAnotherAccountOrBlocking = Object.values(
+      coerceObject(change.labels),
+    ).some(
+      (label) => isRejectedByAnotherAccount(label) || label.blocking === true,
     );
-    if (hasBlockingLabels) {
+    if (hasLabelRejectedByAnotherAccountOrBlocking) {
       return 'red';
     }
     // v8 ignore else -- TODO: add test #40625
@@ -510,6 +513,13 @@ export async function getBranchStatus(
     }
   }
   return 'yellow';
+}
+
+function isRejectedByAnotherAccount(label: GerritLabelInfo): boolean {
+  return (
+    label.rejected !== undefined &&
+    label.rejected.username !== config.gerritUsername
+  );
 }
 
 /**
