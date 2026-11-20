@@ -4422,7 +4422,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith(
           { prNo: 123 },
-          'Commit was not pushed, platform automerge stays disabled until the next push',
+          "Commit was not pushed, platform automerge stays disabled until Renovate's next push",
         );
       });
 
@@ -4437,7 +4437,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith(
           { prNo: 123 },
-          'Commit was not pushed, platform automerge stays disabled until the next push',
+          "Commit was not pushed, platform automerge stays disabled until Renovate's next push",
         );
       });
 
@@ -4577,7 +4577,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(res).toMatchObject({ result: 'error', prNo: 123 });
         expect(logger.warn).toHaveBeenCalledWith(
           { err: reattemptErr, prNo: 123 },
-          'Error re-enabling platform automerge, it stays disabled until the next push',
+          "Error re-enabling platform automerge, it stays disabled until Renovate's next push",
         );
         expect(logger.warn).toHaveBeenCalledWith(
           { err: checkoutErr },
@@ -4600,7 +4600,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
         expect(logger.warn).toHaveBeenCalledWith(
           { prNo: 123 },
-          'Rate limited while re-enabling platform automerge, it stays disabled until the next push',
+          "Rate limited while re-enabling platform automerge, it stays disabled until Renovate's next push",
         );
       });
 
@@ -4616,7 +4616,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(res).toMatchObject({ result: 'done', commitSha });
         expect(logger.warn).toHaveBeenCalledWith(
           { err: reattemptErr, prNo: 123 },
-          'Error re-enabling platform automerge, it stays disabled until the next push',
+          "Error re-enabling platform automerge, it stays disabled until Renovate's next push",
         );
         expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
       });

@@ -6593,7 +6593,7 @@ describe('modules/platform/github/index', () => {
 
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { prNumber: 123 },
-            'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+            "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
           );
         });
 
@@ -6622,7 +6622,7 @@ describe('modules/platform/github/index', () => {
 
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { prNumber: 123 },
-            'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+            "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
           );
         });
 

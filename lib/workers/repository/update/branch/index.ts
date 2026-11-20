@@ -134,13 +134,13 @@ async function restorePlatformAutomerge(
     ) {
       logger.warn(
         { prNo: number },
-        'Rate limited while re-enabling platform automerge, it stays disabled until the next push',
+        "Rate limited while re-enabling platform automerge, it stays disabled until Renovate's next push",
       );
       throw err;
     }
     logger.warn(
       { err, prNo: number },
-      'Error re-enabling platform automerge, it stays disabled until the next push',
+      "Error re-enabling platform automerge, it stays disabled until Renovate's next push",
     );
   }
 }
@@ -653,7 +653,7 @@ export async function processBranch(
         if (automergeCanceledPrNo && preparedCommit && !commitSha) {
           logger.warn(
             { prNo: automergeCanceledPrNo },
-            'Commit was not pushed, platform automerge stays disabled until the next push',
+            "Commit was not pushed, platform automerge stays disabled until Renovate's next push",
           );
         } else if (
           automergeCanceledPrNo &&

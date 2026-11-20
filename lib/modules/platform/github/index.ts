@@ -2501,7 +2501,7 @@ export async function reattemptPlatformAutomerge({
       if (retryStatus === 'failed') {
         logger.warn(
           { prNumber: number },
-          'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+          "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
         );
       }
     }
@@ -2515,7 +2515,7 @@ export async function reattemptPlatformAutomerge({
     if (retry) {
       logger.warn(
         { prNumber: number },
-        'GitHub-native automerge: could not re-enable, it stays disabled until the next push',
+        "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
       );
     }
   }
