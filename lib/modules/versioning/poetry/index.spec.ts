@@ -217,6 +217,28 @@ describe('modules/versioning/poetry/index', () => {
     },
   );
 
+  it('keeps an in-range short constraint when updating the lockfile', () => {
+    expect(
+      versioning.getNewValue({
+        currentValue: '^3.60',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '3.91',
+        newVersion: '3.92',
+      }),
+    ).toBe('^3.60');
+  });
+
+  it('replaces an out-of-range short constraint when updating the lockfile', () => {
+    expect(
+      versioning.getNewValue({
+        currentValue: '^3.60',
+        rangeStrategy: 'update-lockfile',
+        currentVersion: '3.91',
+        newVersion: '4.11',
+      }),
+    ).toBe('^4.11');
+  });
+
   it.each`
     currentValue          | rangeStrategy | currentVersion     | newVersion         | expected
     ${'1.0.0'}            | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'1.1.0'}
