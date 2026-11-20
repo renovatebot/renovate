@@ -619,6 +619,7 @@ export interface PackageRule
   sourceDirectory?: string;
   vulnerabilitySeverity?: string;
   vulnerabilityFixVersion?: string;
+  vulnerabilityFixVersions?: string[];
 }
 
 export interface ValidationMessage {
