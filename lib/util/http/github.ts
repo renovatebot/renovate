@@ -452,7 +452,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
   /**
    * Public data of an organization with an IP allow list can be read anonymously, even though a token from a disallowed address is refused.
    * Only read-only requests are repeated, and only when GitHub explicitly names the IP allow list.
-   * The GraphQL API can't be used without a token, so its requests are never repeated.
+   * The GraphQL API cannot be used without a token, so its requests are never repeated.
    */
   protected override shouldRetryWithoutAuth(
     url: URL,

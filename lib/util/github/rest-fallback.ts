@@ -105,7 +105,7 @@ function ipAllowListKey({
 }
 
 /**
- * Looks up with `graphql`, and with `rest` if an IP allow list refused the token, because the GraphQL API can't be used without one.
+ * Looks up with `graphql`, and with `rest` if an IP allow list refused the token, because the GraphQL API cannot be used without one.
  *
  * Once an organization refused the token, `rest` is used first for its other repositories, which saves a GraphQL request which would be refused.
  * If `rest` fails too, for example because the unauthenticated rate limit is exhausted, the GraphQL error is thrown.

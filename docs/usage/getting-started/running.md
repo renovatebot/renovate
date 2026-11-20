@@ -265,7 +265,7 @@ GitHub refuses a token that is used from an address outside of the allow list, e
 If GitHub names the IP allow list in its refusal, Renovate reads the public data without a token:
 
 - Renovate repeats a refused read-only REST request once without credentials.
-- GitHub's GraphQL API can't be used without a token, so Renovate reads the tags and releases of the repository with the REST API instead.
+- GitHub's GraphQL API cannot be used without a token, so Renovate reads the tags and releases of the repository with the REST API instead.
   The REST API does not tell when a tag was created, so such a tag has no release timestamp unless it also has a release.
 
 Renovate still reports the original error if the repository is private, or if the request without credentials fails.

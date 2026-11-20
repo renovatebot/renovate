@@ -16,7 +16,7 @@ import type {
 } from './types.ts';
 
 /**
- * Uses the REST API without a token if an IP allow list refuses the token, because the GraphQL API can't be used without one.
+ * Uses the REST API without a token if an IP allow list refuses the token, because the GraphQL API cannot be used without one.
  */
 export function queryTags(
   config: GithubPackageConfig,
@@ -30,7 +30,7 @@ export function queryTags(
 }
 
 /**
- * Uses the REST API without a token if an IP allow list refuses the token, because the GraphQL API can't be used without one.
+ * Uses the REST API without a token if an IP allow list refuses the token, because the GraphQL API cannot be used without one.
  */
 export function queryReleases(
   config: GithubPackageConfig,

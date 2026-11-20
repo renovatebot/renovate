@@ -9,7 +9,7 @@ const ipAllowListDenial = 'has an IP allow list enabled';
 /**
  * A GraphQL request which GitHub refused because of an IP allow list.
  *
- * GitHub answers such a request with `200` and an error, and the GraphQL API can't be used without a token, so only the REST API can be used instead.
+ * GitHub answers such a request with `200` and an error, and the GraphQL API cannot be used without a token, so only the REST API can be used instead.
  */
 export class GithubIpAllowListError extends Error {
   constructor(message: string) {

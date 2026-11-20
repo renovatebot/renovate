@@ -88,8 +88,8 @@ export interface GithubTagItem extends GithubDatasourceItem {
 }
 
 /**
- * A tag found by the GraphQL API, or by the REST API when the GraphQL API can't be used.
- * The REST API doesn't tell when a tag was created.
+ * A tag found by the GraphQL API, or by the REST API when the GraphQL API cannot be used.
+ * The REST API does not tell when a tag was created.
  */
 export type GithubTagLookupItem = Omit<GithubTagItem, 'releaseTimestamp'> &
   Partial<Pick<GithubTagItem, 'releaseTimestamp'>>;
