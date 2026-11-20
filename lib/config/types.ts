@@ -241,6 +241,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateGitRegistries?: boolean;
   allowCustomJuliaRegistries?: boolean;
+  allowCustomVcpkgRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
