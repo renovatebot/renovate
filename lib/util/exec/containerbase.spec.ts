@@ -603,6 +603,27 @@ describe('util/exec/containerbase', () => {
       });
     });
 
+    it('sets no versioning for resolved constraints without a tool config', async () => {
+      await expect(
+        resolveConstraint(
+          { toolName: 'composer' },
+          { ghActionsLock: 'v0.1.7', apko: '1.5.1' },
+        ),
+      ).resolves.toBe('2.1.0');
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'containerbase',
+        packageName: 'composer?system=true',
+        versioning: 'composer',
+        constraintsFiltering: 'strict',
+        constraints: {
+          ghActionsLock: 'v0.1.7',
+          apko: '1.5.1',
+          containerbase: containerbase.version,
+        },
+        constraintsVersioning: {},
+      });
+    });
+
     it('repeats install commands when not memoizing', async () => {
       const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
       await generateInstallCommands(toolConstraints);
