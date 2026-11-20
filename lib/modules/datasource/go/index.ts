@@ -1,19 +1,12 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
-import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { Datasource } from '../datasource.ts';
-import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
-import { GitTagsDatasource } from '../git-tags/index.ts';
-import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
-import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -22,8 +15,8 @@ import type {
 import { BaseGoDatasource } from './base.ts';
 import { isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
-import { GoDirectDatasource } from './releases-direct.ts';
-import { GoProxyDatasource } from './releases-goproxy.ts';
+import { getGoproxyReleases, getReleasesCacheKey } from './releases-goproxy.ts';
+import { getGoTagDatasource } from './tag-datasources.ts';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
@@ -49,30 +42,14 @@ export class GoDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
 
-  readonly goproxy = new GoProxyDatasource();
-  readonly direct = new GoDirectDatasource();
-
-  private _getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    return this.goproxy.getReleases(config);
-  }
-
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const constraintsFilteringKey =
-      config.constraintsFiltering === 'none' ? '' : config.constraintsFiltering;
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GoDatasource.id}`,
-        key: buildCacheKey(
-          'getReleases',
-          config.packageName,
-          constraintsFilteringKey,
-        ),
+        key: getReleasesCacheKey(config),
         public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => getGoproxyReleases(config),
     );
   }
 
@@ -109,39 +86,21 @@ export class GoDatasource extends Datasource {
         ? newValue
         : undefined;
 
-    switch (source.datasource) {
-      case ForgejoTagsDatasource.id: {
-        return this.direct.forgejo.getDigest(source, tag);
-      }
-      case GitTagsDatasource.id: {
-        return this.direct.git.getDigest(source, tag);
-      }
-      case GiteaTagsDatasource.id: {
-        return this.direct.gitea.getDigest(source, tag);
-      }
-      case GithubTagsDatasource.id: {
-        return this.direct.github.getDigest(source, tag);
-      }
-      case BitbucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest(source, tag);
-      }
-      case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest(source, tag);
-      }
-      /* v8 ignore next: can never happen, makes lint happy */
-      default: {
-        return null;
-      }
+    const tagDatasource = await getGoTagDatasource(source.datasource);
+    /* v8 ignore next: can never happen, makes lint happy */
+    if (!tagDatasource) {
+      return null;
     }
+
+    return tagDatasource.getDigest(source, tag);
   }
 
   override getDigest(
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GoDatasource.id}`,
         key: buildCacheKey('getDigest', config.packageName, newValue),
         public: isPublicGoPackage(config.packageName),
         fallback: true,

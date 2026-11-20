@@ -3,6 +3,7 @@ import { ZodError, z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { HttpError } from '../../util/http/index.ts';
 import type { HttpOptions } from '../../util/http/types.ts';
@@ -27,6 +28,10 @@ class TestDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
     return Promise.resolve(null);
+  }
+
+  throwError(err: Error): never {
+    this.handleGenericErrors(err);
   }
 }
 
@@ -84,6 +89,13 @@ describe('modules/datasource/datasource', () => {
     await expect(
       testDatasource.getReleases(partial<GetReleasesConfig>()),
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+  });
+
+  it('rethrows an external host error unchanged', () => {
+    const testDatasource = new TestDatasource();
+    const err = new ExternalHostError(new Error('original'));
+
+    expect(() => testDatasource.throwError(err)).toThrow(err);
   });
 
   it('should throw on statusCode >=500 && <600', async () => {
