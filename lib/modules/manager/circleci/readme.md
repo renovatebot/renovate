@@ -1,4 +1,8 @@
-The `circleci` manager extracts both `docker` as well as `orb` datasources from CircleCI config files.
+The `circleci` manager extracts `docker`, `orb` and `github-releases` datasources from CircleCI config files.
+
+[Functions](https://circleci.com/docs/functions/functions-intro/) are read from the top-level `functions:` block, for example `setup-go: github.com/circleci-functions/setup-go@v0.7.0`.
+A function is released as a GitHub release of the repository it is named after, so Renovate looks it up with the `github-releases` datasource.
+CircleCI only accepts exact function versions, so Renovate updates the exact version.
 
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
 

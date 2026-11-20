@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { OrbDatasource } from '../../datasource/orb/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -15,6 +16,10 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)\\.circleci/.+\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [DockerDatasource.id, OrbDatasource.id];
+export const supportedDatasources = [
+  DockerDatasource.id,
+  GithubReleasesDatasource.id,
+  OrbDatasource.id,
+];
 
 export { knownDepTypes } from './dep-types.ts';
