@@ -472,6 +472,118 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toBeNull();
     });
 
+    it('updates a dependency whose line number shifted', () => {
+      const fileContent = codeBlock`
+        module example.com/demo
+
+        go 1.22
+
+        require github.com/davecgh/go-spew v1.1.1
+        require github.com/pkg/errors v0.9.1
+        require github.com/spf13/cobra v1.8.0 // indirect
+      `;
+      const upgrade = {
+        depName: 'github.com/spf13/cobra',
+        managerData: { lineNumber: 5 },
+        newValue: 'v1.9.0',
+        depType: 'require',
+      };
+
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+
+      expect(res).toContain(
+        'require github.com/spf13/cobra v1.9.0 // indirect',
+      );
+      expect(res).toContain('require github.com/pkg/errors v0.9.1');
+    });
+
+    it('updates a dependency in a require block whose line number shifted', () => {
+      const fileContent = codeBlock`
+        module example.com/demo
+
+        go 1.22
+
+        require github.com/davecgh/go-spew v1.1.1
+
+        require (
+        	github.com/pkg/errors v0.9.1
+        	github.com/spf13/cobra v1.8.0
+        )
+      `;
+      const upgrade = {
+        depName: 'github.com/spf13/cobra',
+        managerData: { lineNumber: 7, multiLine: true },
+        newValue: 'v1.9.0',
+        depType: 'require',
+      };
+
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+
+      expect(res).toContain('\tgithub.com/spf13/cobra v1.9.0');
+      expect(res).toContain('\tgithub.com/pkg/errors v0.9.1');
+    });
+
+    it('updates a dependency whose line number no longer exists', () => {
+      const fileContent = codeBlock`
+        module example.com/demo
+
+        go 1.22
+
+        require github.com/pkg/errors v0.9.1
+      `;
+      const upgrade = {
+        depName: 'github.com/pkg/errors',
+        managerData: { lineNumber: 9 },
+        newValue: 'v0.10.0',
+        depType: 'require',
+      };
+
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+
+      expect(res).toContain('require github.com/pkg/errors v0.10.0');
+    });
+
+    it('ignores exclude blocks when searching for the dependency line', () => {
+      const fileContent = codeBlock`
+        module example.com/demo
+
+        go 1.22
+
+        exclude (
+        	github.com/spf13/cobra v1.8.0
+        )
+
+        require github.com/spf13/cobra v1.8.0
+      `;
+      const upgrade = {
+        depName: 'github.com/spf13/cobra',
+        managerData: { lineNumber: 9 },
+        newValue: 'v1.9.0',
+        depType: 'require',
+      };
+
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+
+      expect(res).toContain('\tgithub.com/spf13/cobra v1.8.0');
+      expect(res).toContain('require github.com/spf13/cobra v1.9.0');
+    });
+
     it('handles +incompatible tag', () => {
       const upgrade = {
         depName: 'github.com/Azure/azure-sdk-for-go',
