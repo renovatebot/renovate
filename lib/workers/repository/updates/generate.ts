@@ -269,12 +269,13 @@ export function refreshBranchConfig(
     changed = true;
     const versioningApi = allVersioning.get(upgrade.versioning);
     const { currentVersion, newVersion } = upgrade;
-    let unclassified = false;
+    let unclassified = true;
     if (newVersion && versioningApi.isVersion(newVersion)) {
       upgrade.newMajor = versioningApi.getMajor(newVersion)!;
       upgrade.newMinor = versioningApi.getMinor(newVersion)!;
       upgrade.newPatch = versioningApi.getPatch(newVersion)!;
       if (currentVersion && versioningApi.isVersion(currentVersion)) {
+        unclassified = false;
         if (versioningApi.equals(currentVersion, newVersion)) {
           upgrade.updateType = 'pin';
         } else if (versioningApi.isGreaterThan(currentVersion, newVersion)) {
@@ -289,14 +290,12 @@ export function refreshBranchConfig(
         upgrade.isBreaking = versioningApi.isBreaking
           ? versioningApi.isBreaking(currentVersion, newVersion)
           : upgrade.updateType === 'major';
-      } else {
-        unclassified = true;
       }
     }
     const previousRisk = updateRisk(previous?.updateType);
     const reconciledRisk = updateRisk(upgrade.updateType);
     const becameBreaking = upgrade.isBreaking && !previous?.isBreaking;
-    // without a current version, updateType is still lookup's and does not describe the new target
+    // without valid current and new versions, updateType is still lookup's and does not describe the new target
     if (
       unclassified ||
       previousRisk === undefined ||
@@ -306,7 +305,15 @@ export function refreshBranchConfig(
     ) {
       upgrade.automerge = false;
     }
-    upgrade.displayTo = upgrade.newValue;
+    if (upgrade.isLockfileUpdate) {
+      upgrade.displayTo = upgrade.newVersion;
+    } else if (
+      !upgrade.isDigest &&
+      !upgrade.isPinDigest &&
+      !upgrade.isLockFileMaintenance
+    ) {
+      upgrade.displayTo = upgrade.newValue;
+    }
     upgrade.isMajor = upgrade.updateType === 'major';
     upgrade.isMinor = upgrade.updateType === 'minor';
     upgrade.isPatch = upgrade.updateType === 'patch';

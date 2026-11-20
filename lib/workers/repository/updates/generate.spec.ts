@@ -146,7 +146,7 @@ describe('workers/repository/updates/generate', () => {
         updateType: 'pin',
         prettyNewVersion: undefined,
         prettyNewMajor: undefined,
-        automerge: true,
+        automerge: false,
       });
     });
 
@@ -156,8 +156,8 @@ describe('workers/repository/updates/generate', () => {
       ${'major'}     | ${'4.0.0'}     | ${'4.1.11'}  | ${'minor'}       | ${true}     | ${false}   | ${true}
       ${'minor'}     | ${'4.1.0'}     | ${'4.1.11'}  | ${'patch'}       | ${false}    | ${false}   | ${true}
       ${'patch'}     | ${'4.1.11'}    | ${'4.1.11'}  | ${'pin'}         | ${false}    | ${false}   | ${true}
-      ${'pin'}       | ${'4.1.0'}     | ${undefined} | ${'pinDigest'}   | ${false}    | ${false}   | ${true}
-      ${'pinDigest'} | ${'4.1.0'}     | ${undefined} | ${'digest'}      | ${false}    | ${false}   | ${true}
+      ${'pin'}       | ${'4.1.0'}     | ${undefined} | ${'pinDigest'}   | ${false}    | ${false}   | ${false}
+      ${'pinDigest'} | ${'4.1.0'}     | ${undefined} | ${'digest'}      | ${false}    | ${false}   | ${false}
       ${'digest'}    | ${'4.1.0'}     | ${'4.1.11'}  | ${'patch'}       | ${false}    | ${false}   | ${false}
       ${'patch'}     | ${'4.0.0'}     | ${'4.1.11'}  | ${'minor'}       | ${false}    | ${false}   | ${false}
       ${'minor'}     | ${'4.1.0'}     | ${'5.0.0'}   | ${'major'}       | ${false}    | ${true}    | ${false}
@@ -330,6 +330,50 @@ describe('workers/repository/updates/generate', () => {
       });
       expect(config.automerge).toBeFalse();
     });
+
+    it('disables automerge for a changed target that is not a version', () => {
+      Object.assign(config.upgrades[0], {
+        newValue: 'workspace:*',
+        newVersion: undefined,
+      });
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.upgrades[0]).toMatchObject({
+        updateType: 'minor',
+        automerge: false,
+      });
+      expect(config.automerge).toBeFalse();
+    });
+
+    it('displays the new version of a lock file update', () => {
+      Object.assign(config.upgrades[0], {
+        currentValue: '^4.1.0',
+        newValue: '^4.1.0',
+        newVersion: '4.1.3',
+        isLockfileUpdate: true,
+      });
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.upgrades[0].displayTo).toBe('4.1.3');
+    });
+
+    it.each(['isDigest', 'isPinDigest', 'isLockFileMaintenance'] as const)(
+      'keeps the display target with %s',
+      (flag) => {
+        Object.assign(config.upgrades[0], {
+          [flag]: true,
+          displayTo: 'abcdef1',
+          newValue: '4.1.11',
+          newVersion: '4.1.11',
+        });
+
+        refreshBranchConfig(config, previousTargets);
+
+        expect(config.upgrades[0].displayTo).toBe('abcdef1');
+      },
+    );
 
     it.each(['branch', 'upgrade'] as const)(
       'does not enable disabled %s automerge',
