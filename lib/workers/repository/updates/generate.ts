@@ -247,6 +247,35 @@ function updateRisk(
   }
 }
 
+// Sorted by priority, from low to high
+const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
+
+function combineSemanticCommits(config: BranchConfig): void {
+  // Enable `semanticCommits` if one of the branches has it enabled
+  if (
+    config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
+  ) {
+    config.semanticCommits = 'enabled';
+    // Calculate the highest priority `semanticCommitType`
+    let highestIndex = -1;
+    for (const upgrade of config.upgrades) {
+      if (upgrade.semanticCommits === 'enabled' && upgrade.semanticCommitType) {
+        const priorityIndex = semanticCommitTypeByPriority.indexOf(
+          upgrade.semanticCommitType,
+        );
+
+        if (priorityIndex > highestIndex) {
+          highestIndex = priorityIndex;
+        }
+      }
+    }
+
+    if (highestIndex > -1) {
+      config.semanticCommitType = semanticCommitTypeByPriority[highestIndex];
+    }
+  }
+}
+
 export function refreshBranchConfig(
   config: BranchConfig,
   previousTargets: ReadonlyMap<
@@ -353,6 +382,7 @@ export function refreshBranchConfig(
         .filter(isNonEmptyString),
     );
     config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
+    combineSemanticCommits(config);
     let releaseTimestamp: Timestamp | undefined;
     for (const upgrade of config.upgrades) {
       if (!upgrade.releaseTimestamp) {
@@ -424,9 +454,6 @@ export function refreshBranchConfig(
   compilePrTitle(config, commitMessage);
   appendCommitBodyTable(config);
 }
-
-// Sorted by priority, from low to high
-const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
@@ -638,29 +665,7 @@ export function generateBranchConfig(
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
 
-  // Enable `semanticCommits` if one of the branches has it enabled
-  if (
-    config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
-  ) {
-    config.semanticCommits = 'enabled';
-    // Calculate the highest priority `semanticCommitType`
-    let highestIndex = -1;
-    for (const upgrade of config.upgrades) {
-      if (upgrade.semanticCommits === 'enabled' && upgrade.semanticCommitType) {
-        const priorityIndex = semanticCommitTypeByPriority.indexOf(
-          upgrade.semanticCommitType,
-        );
-
-        if (priorityIndex > highestIndex) {
-          highestIndex = priorityIndex;
-        }
-      }
-    }
-
-    if (highestIndex > -1) {
-      config.semanticCommitType = semanticCommitTypeByPriority[highestIndex];
-    }
-  }
+  combineSemanticCommits(config);
 
   // Use templates to generate strings
   const commitMessage = compileCommitMessage(config);

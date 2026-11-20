@@ -504,6 +504,42 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
+    it('recomputes the semantic commit type from the remaining upgrades', () => {
+      config = generateBranchConfig(
+        [
+          { depName: 'react', semanticCommitType: 'fix' },
+          { depName: 'vitest', semanticCommitType: 'chore' },
+        ].map((upgrade) => ({
+          ...getConfig(),
+          major: undefined,
+          manager: 'npm',
+          versioning: 'npm',
+          branchName: 'renovate/vitest-4.x',
+          currentValue: '4.1.0',
+          currentVersion: '4.1.0',
+          newValue: '4.2.0',
+          newVersion: '4.2.0',
+          updateType: 'minor' as const,
+          semanticCommits: 'enabled' as const,
+          semanticCommitScope: 'deps',
+          ...upgrade,
+        })),
+      );
+      previousTargets = new Map(
+        config.upgrades.map((upgrade) => [upgrade, { ...upgrade }]),
+      );
+      expect(config.prTitle).toStartWith('fix(deps): ');
+      config.upgrades = config.upgrades.filter(
+        (upgrade) => upgrade.depName !== 'react',
+      );
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.semanticCommitType).toBe('chore');
+      expect(config.commitMessage).toStartWith('chore(deps): ');
+      expect(config.prTitle).toStartWith('chore(deps): ');
+    });
+
     it('preserves a grouped message with no version extra', () => {
       config.groupName = 'Vitest packages';
       config.isGroup = true;
