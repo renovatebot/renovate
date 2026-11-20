@@ -34,7 +34,7 @@ export interface MavenFetchSuccess<T = string> {
 export type MavenFetchError =
   | { type: 'invalid-url' }
   | { type: 'host-disabled' }
-  | { type: 'not-found' }
+  | { type: 'not-found'; isMirror?: true }
   | { type: 'host-error' }
   | { type: 'permission-issue' }
   | { type: 'temporary-error' }

@@ -5,6 +5,7 @@ import is, {
   isNonEmptyArray,
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
   isObject,
   isPlainObject,
   isString,
@@ -33,7 +34,12 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match.ts';
 import * as template from '../util/template/index.ts';
-import { parseUrl } from '../util/url.ts';
+import { isHttpUrl, isHttpUrlPrefix, parseUrl } from '../util/url.ts';
+import {
+  isChainedUrlReplacement,
+  isShadowedUrlReplacement,
+  isValidUrlReplacement,
+} from '../util/url-replacements.ts';
 import {
   AllVersioningsListLiteral,
   type VersioningName,
@@ -158,6 +164,19 @@ function isRegexOrGlobOption(key: string): boolean {
 
 function isGlobalOption(key: string): boolean {
   return optionGlobals.has(key);
+}
+
+/**
+ * Returns whether `key` is an option of `urlReplacements` used outside of a `urlReplacements` entry.
+ */
+function isMisplacedUrlReplacementOption(
+  key: string,
+  parentPath: string | undefined,
+): boolean {
+  return (
+    !!optionParents[key]?.includes('urlReplacements') &&
+    getParentName(parentPath) !== 'urlReplacements'
+  );
 }
 
 function initOptions(): void {
@@ -324,6 +343,15 @@ export async function validateConfig(
 
         if (isGlobalOption(key)) {
           if (configType === 'global') {
+            if (isMisplacedUrlReplacementOption(key, parentPath)) {
+              const usedIn = parentPath
+                ? `in "${parentPath}"`
+                : 'at the top level of a config';
+              errors.push({
+                topic: ConfigValidationTopic.Error,
+                message: `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`,
+              });
+            }
             await validateGlobalConfig(
               key,
               val,
@@ -1203,6 +1231,18 @@ async function validateGlobalConfig(
             message: `reportType '${val}' requires a configured reportPath`,
           });
         }
+
+        const isUrlPrefixOption = [
+          'matchUrlPrefix',
+          'replaceUrlPrefix',
+        ].includes(key);
+        // a value with secrets or variables cannot be checked until they are applied
+        if (isUrlPrefixOption && !val.includes('{{') && !isHttpUrlPrefix(val)) {
+          errors.push({
+            topic: ConfigValidationTopic.Error,
+            message: getUrlPrefixMessage(val, currentPath),
+          });
+        }
       } else {
         warnings.push({
           topic: ConfigValidationTopic.Error,
@@ -1225,6 +1265,11 @@ async function validateGlobalConfig(
       if (isArray(val) && key !== 'repositories') {
         validateStringArray(key, val, currentPath, errors);
         for (const [subIndex, subval] of val.entries()) {
+          if (key === 'urlReplacements') {
+            errors.push(
+              ...validateUrlReplacement(subval, `${currentPath}[${subIndex}]`),
+            );
+          }
           if (isObject(subval)) {
             const subValidation = await validateConfig(
               'global',
@@ -1235,6 +1280,10 @@ async function validateGlobalConfig(
             warnings.push(...subValidation.warnings);
             errors.push(...subValidation.errors);
           }
+        }
+        if (key === 'urlReplacements') {
+          errors.push(...validateUrlReplacementChains(val, currentPath!));
+          warnings.push(...validateShadowedUrlReplacements(val, currentPath!));
         }
 
         if (isRegexOrGlobOption(key)) {
@@ -1253,6 +1302,14 @@ async function validateGlobalConfig(
                 topic: ConfigValidationTopic.Error,
                 message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
               });
+            }
+            for (const option of GlobalConfig.NON_REPOSITORY_OPTIONS) {
+              if (option in subval) {
+                errors.push({
+                  topic: ConfigValidationTopic.Error,
+                  message: `${currentPath}[${subIndex}]: \`${option}\` can't be set in a repository object entry, only in the global config`,
+                });
+              }
             }
             const { repository: _, ...repoEntryConfig } = subval;
             // Each repository object entry is validated as its own global config, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
@@ -1372,6 +1429,111 @@ function getPossibleConfigFileNames({
   }
 
   return filenames;
+}
+
+/**
+ * Returns the names of the username, password, query and fragment parts which `url` has.
+ */
+function getDisallowedUrlParts(url: URL): string[] {
+  const parts: [string, string][] = [
+    ['username', url.username],
+    ['password', url.password],
+    ['query', url.search],
+    ['fragment', url.hash],
+  ];
+  return parts.filter(([, value]) => value !== '').map(([name]) => name);
+}
+
+/**
+ * Returns the error message for the invalid url prefix `val`, which names what the prefix must not contain, or the normalized prefix when only the normalization is missing.
+ */
+function getUrlPrefixMessage(
+  val: string,
+  currentPath: string | undefined,
+): string {
+  const url = parseUrl(val);
+  const disallowedParts = isHttpUrl(url) ? getDisallowedUrlParts(url!) : [];
+  if (disallowedParts.length) {
+    const found = disallowedParts.map((part) => `a ${part}`).join(' and ');
+    return `Configuration option \`${currentPath}\` must not contain ${found}.`;
+  }
+  const normalized = url?.href;
+  if (val.endsWith('/') && isHttpUrlPrefix(normalized)) {
+    return `Configuration option \`${currentPath}\` must be normalized, use \`${normalized}\` instead.`;
+  }
+  return `Configuration option \`${currentPath}\` must be an absolute http or https URL ending with \`/\`.`;
+}
+
+/**
+ * Checks that no valid `urlReplacements` entry rewrites the `replaceUrlPrefix` of another one.
+ */
+function validateUrlReplacementChains(
+  val: unknown[],
+  currentPath: string,
+): ValidationMessage[] {
+  const rules = val.flatMap((rule) =>
+    isPlainObject(rule) && isValidUrlReplacement(rule) ? [rule] : [],
+  );
+  return rules
+    .filter((rule) => isChainedUrlReplacement(rule, rules))
+    .map((rule) => ({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}[${val.indexOf(rule)}].replaceUrlPrefix\` overlaps the \`matchUrlPrefix\` of another rule, but a rewritten URL cannot be rewritten again.`,
+    }));
+}
+
+/**
+ * Checks that the `matchUrlPrefix` of no valid `urlReplacements` entry starts with the `matchUrlPrefix` of an earlier one.
+ */
+function validateShadowedUrlReplacements(
+  val: unknown[],
+  currentPath: string,
+): ValidationMessage[] {
+  const rules = val.flatMap((rule) =>
+    isPlainObject(rule) && isValidUrlReplacement(rule) ? [rule] : [],
+  );
+  return rules
+    .filter((rule, index) =>
+      isShadowedUrlReplacement(rule, rules.slice(0, index)),
+    )
+    .map((rule) => ({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}[${val.indexOf(rule)}].matchUrlPrefix\` starts with the \`matchUrlPrefix\` of an earlier rule, so this rule never applies.`,
+    }));
+}
+
+/**
+ * Checks that a `urlReplacements` entry is an object with both `matchUrlPrefix` and `replaceUrlPrefix`.
+ */
+function validateUrlReplacement(
+  val: unknown,
+  currentPath: string,
+): ValidationMessage[] {
+  if (!isPlainObject(val)) {
+    return [
+      {
+        topic: ConfigValidationTopic.Error,
+        message: `Configuration option \`${currentPath}\` should be a JSON object.`,
+      },
+    ];
+  }
+  const prefixNames = ['matchUrlPrefix', 'replaceUrlPrefix'];
+  const messages: ValidationMessage[] = prefixNames
+    .filter((name) => isNullOrUndefined(val[name]))
+    .map((name) => ({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}\` requires \`${name}\`.`,
+    }));
+  // the nested validation only warns about values which are not strings
+  messages.push(
+    ...prefixNames
+      .filter((name) => !isNullOrUndefined(val[name]) && !isString(val[name]))
+      .map((name) => ({
+        topic: ConfigValidationTopic.Error,
+        message: `Configuration option \`${currentPath}.${name}\` must be a string.`,
+      })),
+  );
+  return messages;
 }
 
 function validateStringArray(

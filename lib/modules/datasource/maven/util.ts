@@ -8,6 +8,7 @@ import {
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import {
@@ -18,6 +19,10 @@ import {
   isUnauthorized,
 } from '../../../util/http/status.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import {
+  getUrlReplacement,
+  isUrlReplacedError,
+} from '../../../util/http/url-replacements.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -96,15 +101,51 @@ function selectCacheProvider(url: string): PackageHttpCacheProvider {
 const METADATA_NOT_FOUND_NAMESPACE =
   'datasource-maven:metadata-not-found' as const;
 const METADATA_NOT_FOUND_TTL_MINUTES = 60 * 12; // 12 hours
+export const MIRROR_NOT_FOUND_TTL_MINUTES = 15;
 
 /** introduces jitter to make sure that a given repo's cache expiring doesn't lead to many requests leading to high traffic and/or rate limits */
-function getMetadataNotFoundTtl(): number {
+function getMetadataNotFoundTtl(isMirror: boolean): number {
+  if (isMirror) {
+    return MIRROR_NOT_FOUND_TTL_MINUTES;
+  }
   const jitter = Math.floor(Math.random() * 60 * 2); // 0–120 minutes
   return METADATA_NOT_FOUND_TTL_MINUTES + jitter;
 }
 
 function isMetadataUrl(url: string): boolean {
   return url.endsWith('/maven-metadata.xml');
+}
+
+/**
+ * Returns the not-found cache key of a metadata URL, which is marked as a mirror URL when `urlReplacements` rewrite it, or `undefined` for other URLs.
+ */
+function getNotFoundCacheKey(
+  url: string,
+  hostType: string,
+): string | undefined {
+  if (!isMetadataUrl(url)) {
+    return undefined;
+  }
+  const mirrorUrl = getUrlReplacement(url, hostType);
+  if (mirrorUrl) {
+    return buildCacheKey('mirror', mirrorUrl);
+  }
+  return url;
+}
+
+interface FailedUrlMeta {
+  failedUrl: string;
+  mirror?: true;
+}
+
+/**
+ * Returns the log metadata of a failed request to `url`, with the requested mirror URL and `mirror: true` when `urlReplacements` rewrote the request.
+ */
+function getFailedUrlMeta(err: HttpError, url: string): FailedUrlMeta {
+  if (!isUrlReplacedError(err)) {
+    return { failedUrl: url };
+  }
+  return { failedUrl: err.options.url?.toString() ?? url, mirror: true };
 }
 
 const defaultRegistryUrls = [...MAVEN_CENTRAL_URLS, CLOJARS_REPO].map(
@@ -128,11 +169,13 @@ export async function downloadHttpProtocol(
   opts: HttpOptions = {},
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
+  // responses of a mirror are cached apart from those of the original host
+  const notFoundCacheKey = getNotFoundCacheKey(url, http.hostType);
 
-  if (isMetadataUrl(url)) {
+  if (notFoundCacheKey) {
     const cacheHasNotFoundResponse = await packageCache.get<true>(
       METADATA_NOT_FOUND_NAMESPACE,
-      url,
+      notFoundCacheKey,
     );
     if (cacheHasNotFoundResponse) {
       logger.trace(
@@ -173,13 +216,17 @@ export async function downloadHttpProtocol(
 
       if (isNotFoundError(err)) {
         logger.trace({ failedUrl }, `Url not found`);
-        if (isMetadataUrl(failedUrl)) {
+        const isMirror = isUrlReplacedError(err);
+        if (notFoundCacheKey) {
           await packageCache.set(
             METADATA_NOT_FOUND_NAMESPACE,
-            failedUrl,
+            notFoundCacheKey,
             true,
-            getMetadataNotFoundTtl(),
+            getMetadataNotFoundTtl(isMirror),
           );
+        }
+        if (isMirror) {
+          return Result.err({ type: 'not-found', isMirror });
         }
         return Result.err({ type: 'not-found' });
       }
@@ -189,26 +236,34 @@ export async function downloadHttpProtocol(
         return Result.err({ type: 'host-error' });
       }
 
+      const failedUrlMeta = getFailedUrlMeta(err, url);
       if (isPermissionsIssue(err)) {
-        logger.debug(
-          `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
-        );
+        if (failedUrlMeta.mirror) {
+          logger.debug(
+            failedUrlMeta,
+            'Dependency lookup unauthorized by the urlReplacements mirror',
+          );
+        } else {
+          logger.debug(
+            `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
+          );
+        }
         return Result.err({ type: 'permission-issue' });
       }
 
       if (isTemporaryError(err)) {
-        logger.debug({ failedUrl, err }, 'Temporary error');
+        logger.debug({ ...failedUrlMeta, err }, 'Temporary error');
 
         if (isMavenCentral(url)) {
           if (isRateLimited(err)) {
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
-                { failedUrl },
+                failedUrlMeta,
                 'Maven Central rate limiting detected despite Redis caching.',
               );
             } else {
               logger.once.warn(
-                { failedUrl },
+                failedUrlMeta,
                 'Maven Central rate limiting detected. Persistent caching required.',
               );
             }

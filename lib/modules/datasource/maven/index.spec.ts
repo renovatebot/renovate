@@ -7,7 +7,9 @@ import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { id as versioning } from '../../versioning/maven/index.ts';
 import type { Release, ReleaseResult } from '../index.ts';
@@ -1012,6 +1014,145 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toBeNull();
     });
 
+    describe('with urlReplacements', () => {
+      beforeEach(() => {
+        GlobalConfig.set({
+          urlReplacements: [
+            {
+              matchUrlPrefix: `${MAVEN_REPO}/`,
+              replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+            },
+          ],
+        });
+      });
+
+      afterEach(() => {
+        GlobalConfig.reset();
+      });
+
+      it('caches the rejection of a 404 of the mirror for 15 minutes', async () => {
+        const setSpy = vi.spyOn(packageCache, 'set');
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo/bar/1.2.3/bar-1.2.3.pom')
+          .reply(404);
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+          { version: '1.2.3' },
+        );
+
+        expect(res).toBeNull();
+        expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:postprocess-reject',
+          `postprocessRelease:mirror:https://mirror.example.com/maven-public/:${MAVEN_REPO}:foo:bar::1.2.3`,
+          'reject',
+          15,
+        );
+      });
+
+      it('reads the rejection under the mirror key', async () => {
+        const getSpy = vi
+          .spyOn(packageCache, 'get')
+          .mockResolvedValueOnce('reject');
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+          { version: '1.2.3' },
+        );
+
+        expect(res).toBeNull();
+        expect(getSpy).toHaveBeenCalledExactlyOnceWith(
+          'datasource-maven:postprocess-reject',
+          `postprocessRelease:mirror:https://mirror.example.com/maven-public/:${MAVEN_REPO}:foo:bar::1.2.3`,
+        );
+      });
+
+      it('keeps the plain rejection cache key for the mirror used directly as registry', async () => {
+        const setSpy = vi.spyOn(packageCache, 'set');
+        const registryUrl = 'https://mirror.example.com/maven-public';
+        httpMock
+          .scope(registryUrl)
+          .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+          .reply(404);
+
+        await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl },
+          { version: '1.2.3' },
+        );
+
+        expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:postprocess-reject',
+          `postprocessRelease:${registryUrl}:foo:bar::1.2.3`,
+          'reject',
+          24 * 60,
+        );
+      });
+
+      it('includes the mirror url of a rule below the registry in the rejection cache key', async () => {
+        GlobalConfig.set({
+          urlReplacements: [
+            {
+              matchUrlPrefix: `${MAVEN_REPO}/org/apache/`,
+              replaceUrlPrefix: 'https://mirror.example.com/maven-apache/',
+            },
+          ],
+        });
+        const getSpy = vi.spyOn(packageCache, 'get');
+        httpMock
+          .scope(MAVEN_REPO)
+          .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+          .reply(404);
+
+        await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+          { version: '1.2.3' },
+        );
+
+        expect(getSpy).toHaveBeenCalledWith(
+          'datasource-maven:postprocess-reject',
+          `postprocessRelease:mirror:https://mirror.example.com/maven-apache/:${MAVEN_REPO}:foo:bar::1.2.3`,
+        );
+      });
+
+      it('caches the rejection of a 404 of the original host for 24 hours', async () => {
+        const setSpy = vi.spyOn(packageCache, 'set');
+        hostRules.add({ matchHost: 'repo.maven.apache.org', token: 'secret' });
+        httpMock
+          .scope(MAVEN_REPO)
+          .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+          .reply(404);
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+          { version: '1.2.3' },
+        );
+
+        expect(res).toBeNull();
+        expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:postprocess-reject',
+          `postprocessRelease:${MAVEN_REPO}:foo:bar::1.2.3`,
+          'reject',
+          24 * 60,
+        );
+      });
+    });
+
+    it('keeps the rejection cache key without urlReplacements', async () => {
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock.scope(MAVEN_REPO).get('/foo/bar/1.2.3/bar-1.2.3.pom').reply(404);
+
+      await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-maven:postprocess-reject',
+        `postprocessRelease:${MAVEN_REPO}:foo:bar::1.2.3`,
+      );
+    });
+
     it('returns original value for unknown error', async () => {
       httpMock
         .scope(MAVEN_REPO)
@@ -1211,6 +1352,203 @@ describe('modules/datasource/maven/index', () => {
 
         expect(res).toBe(releaseOrig);
       });
+    });
+  });
+
+  describe('releases cache key with urlReplacements', () => {
+    const urlReplacements = [
+      {
+        matchUrlPrefix: `${baseUrl}/`,
+        replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+      },
+    ];
+
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('includes the mirror url when the registry is rewritten', async () => {
+      GlobalConfig.set({ urlReplacements });
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/org/example/package/maven-metadata.xml')
+        .reply(404);
+
+      await get();
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `mirror:https://mirror.example.com/maven-public/:${baseUrl}:org.example:package`,
+      );
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-maven:metadata-not-found',
+        'mirror:https://mirror.example.com/maven-public/org/example/package/maven-metadata.xml',
+      );
+    });
+
+    it('caches a successful lookup through the mirror with the original registry url', async () => {
+      GlobalConfig.set({ urlReplacements });
+      const setSpy = vi.spyOn(packageCache, 'set');
+      mockGenericPackage({ base: 'https://mirror.example.com/maven-public' });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        registryUrl: baseUrl,
+        homepage: 'https://package.example.org/about',
+      });
+      expect(res?.isPrivate).toBeUndefined();
+      expect(setSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `mirror:https://mirror.example.com/maven-public/:${baseUrl}:org.example:package`,
+        expect.objectContaining({ registryUrl: baseUrl }),
+        15,
+      );
+    });
+
+    it('fetches snapshot metadata and the pom through the mirror', async () => {
+      GlobalConfig.set({ urlReplacements });
+      mockGenericPackage({
+        base: 'https://mirror.example.com/maven-public',
+        meta: Fixtures.get('metadata-snapshot-only.xml'),
+        latest: '1.0.3-SNAPSHOT',
+        snapshots: [
+          {
+            version: '1.0.3-SNAPSHOT',
+            meta: Fixtures.get('metadata-snapshot-version.xml'),
+          },
+        ],
+      });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        homepage: 'https://package.example.org/about',
+        registryUrl: baseUrl,
+        releases: [{ version: '1.0.3-SNAPSHOT' }],
+      });
+    });
+
+    it.each`
+      status
+      ${429}
+      ${503}
+    `(
+      'throws EXTERNAL_HOST_ERROR for a $status of a Maven Central mirror',
+      async ({ status }) => {
+        GlobalConfig.set({ urlReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/org/example/package/maven-metadata.xml')
+          .reply(status);
+
+        await expect(get()).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      },
+    );
+
+    it('includes the mirror url of a rule below the registry', async () => {
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix: `${baseUrl}/org/apache/`,
+            replaceUrlPrefix: 'https://mirror.example.com/maven-apache/',
+          },
+        ],
+      });
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock
+        .scope(baseUrl)
+        .get('/org/example/package/maven-metadata.xml')
+        .reply(404);
+
+      await get();
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `mirror:https://mirror.example.com/maven-apache/:${baseUrl}:org.example:package`,
+      );
+    });
+
+    it('includes the mirror url for a registry url which is not normalized', async () => {
+      GlobalConfig.set({ urlReplacements });
+      const registryUrl = 'https://Repo.Maven.Apache.org:443/maven2';
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/org/example/package/maven-metadata.xml')
+        .reply(404);
+
+      await get('org.example:package', registryUrl);
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `mirror:https://mirror.example.com/maven-public/:${registryUrl}:org.example:package`,
+      );
+    });
+
+    it('includes the mirror url for an artifactregistry registry', async () => {
+      GlobalConfig.set({
+        urlReplacements: [
+          {
+            matchUrlPrefix: `${baseUrlARHttps}/`,
+            replaceUrlPrefix: 'https://mirror.example.com/maven-ar/',
+          },
+        ],
+      });
+      hostRules.clear();
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-ar/org/example/package/maven-metadata.xml')
+        .reply(404);
+
+      await get('org.example:package', baseUrlAR);
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `mirror:https://mirror.example.com/maven-ar/:${baseUrlAR}:org.example:package`,
+      );
+    });
+
+    it('keeps the cache keys when the original host has credentials', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({ matchHost: 'repo.maven.apache.org', token: 'secret' });
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock
+        .scope(baseUrl)
+        .get('/org/example/package/maven-metadata.xml')
+        .reply(404);
+
+      await get();
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `${baseUrl}:org.example:package`,
+      );
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-maven:metadata-not-found',
+        `${baseUrl}/org/example/package/maven-metadata.xml`,
+      );
+    });
+
+    it('keeps the cache keys without urlReplacements', async () => {
+      const getSpy = vi.spyOn(packageCache, 'get');
+      httpMock
+        .scope(baseUrl)
+        .get('/org/example/package/maven-metadata.xml')
+        .reply(404);
+
+      await get();
+
+      expect(getSpy).toHaveBeenCalledWith(
+        'datasource-releases-maven',
+        `${baseUrl}:org.example:package`,
+      );
+      expect(getSpy).not.toHaveBeenCalledWith(
+        expect.any(String),
+        expect.stringContaining('mirror.example.com'),
+      );
     });
   });
 });
