@@ -41,6 +41,11 @@ This is what allows `Renovate` to determine the `sourceUrl`, that it then uses t
   This also works for private repositories.
   It can leverage the same `token` that you had to configure in order to be able to reach the private Artifactory.
 
+!!! note
+  The Gradle Plugin Portal publishes plugin marker POMs without the `scm` section.
+  If a plugin marker POM lacks the `scm` section, Renovate reads the POM of the plugin artifact that the marker depends on.
+  So if you publish a Gradle plugin, configure the `scm` section in the POM of the plugin artifact.
+
 #### Specifying your project homepage
 
 When opening a Pull Request `Renovate` uses the top level `url` property to determine the homepage of your project and shows it inside the Pull Request.

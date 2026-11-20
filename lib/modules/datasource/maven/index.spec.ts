@@ -1000,6 +1000,137 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
+  describe('fetching Gradle plugin implementation info', () => {
+    const marker = 'org.example:org.example.gradle.plugin';
+    const markerMeta = codeBlock`
+      <metadata>
+        <groupId>org.example</groupId>
+        <artifactId>org.example.gradle.plugin</artifactId>
+        <versioning>
+          <versions>
+            <version>1.0.0</version>
+          </versions>
+        </versioning>
+      </metadata>
+    `;
+    const implementationDependency = codeBlock`
+      <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>example-gradle-plugin</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+    `;
+
+    it('gets source and homepage from the implementation POM', async () => {
+      mockGenericPackage({
+        dep: marker,
+        base: baseUrlCustom,
+        meta: markerMeta,
+        pom: codeBlock`
+          <project>
+            <groupId>org.example</groupId>
+            <artifactId>org.example.gradle.plugin</artifactId>
+            <version>1.0.0</version>
+            <packaging>pom</packaging>
+            <dependencies>
+              ${implementationDependency}
+            </dependencies>
+          </project>
+        `,
+        latest: '1.0.0',
+      });
+      mockGenericPackage({
+        dep: 'org.example:example-gradle-plugin',
+        base: baseUrlCustom,
+        meta: null,
+        pom: codeBlock`
+          <project>
+            <url>https://example.com</url>
+            <scm>
+              <url>https://github.com/example/example-gradle-plugin</url>
+            </scm>
+          </project>
+        `,
+        latest: '1.0.0',
+      });
+
+      const res = await get(marker, baseUrlCustom);
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/example/example-gradle-plugin',
+        homepage: 'https://example.com',
+        packageScope: 'org.example',
+      });
+    });
+
+    it('does not fetch the implementation POM when the marker has source and homepage', async () => {
+      mockGenericPackage({
+        dep: marker,
+        base: baseUrlCustom,
+        meta: markerMeta,
+        pom: codeBlock`
+          <project>
+            <url>https://marker.example.com</url>
+            <scm>
+              <url>https://github.com/example/marker</url>
+            </scm>
+            <dependencies>
+              ${implementationDependency}
+            </dependencies>
+          </project>
+        `,
+        latest: '1.0.0',
+      });
+
+      const res = await get(marker, baseUrlCustom);
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/example/marker',
+        homepage: 'https://marker.example.com',
+      });
+    });
+
+    it.each`
+      case                      | dependencies
+      ${'has no dependencies'}  | ${''}
+      ${'has two dependencies'} | ${`<dependencies>${implementationDependency}${implementationDependency}</dependencies>`}
+    `(
+      'does not fetch the implementation POM when the marker $case',
+      async ({ dependencies }) => {
+        mockGenericPackage({
+          dep: marker,
+          base: baseUrlCustom,
+          meta: markerMeta,
+          pom: `<project>${dependencies}</project>`,
+          latest: '1.0.0',
+        });
+
+        const res = await get(marker, baseUrlCustom);
+
+        expect(res).not.toHaveProperty('sourceUrl');
+        expect(res).not.toHaveProperty('homepage');
+      },
+    );
+
+    it('does not fetch the implementation POM for a regular artifact', async () => {
+      mockGenericPackage({
+        meta: markerMeta,
+        pom: codeBlock`
+          <project>
+            <dependencies>
+              ${implementationDependency}
+            </dependencies>
+          </project>
+        `,
+        latest: '1.0.0',
+      });
+
+      const res = await get();
+
+      expect(res).not.toHaveProperty('sourceUrl');
+    });
+  });
+
   describe('post-fetch release validation', () => {
     it('returns null for 404', async () => {
       httpMock.scope(MAVEN_REPO).get('/foo/bar/1.2.3/bar-1.2.3.pom').reply(404);

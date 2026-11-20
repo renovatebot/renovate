@@ -96,6 +96,62 @@ describe('modules/datasource/maven/schema', () => {
     `);
   });
 
+  it('keeps dependencies of Gradle plugin marker pom files', () => {
+    const input = codeBlock`
+      <project>
+        <groupId>org.example</groupId>
+        <artifactId>org.example.gradle.plugin</artifactId>
+        <version>1.0.0</version>
+        <packaging>pom</packaging>
+        <dependencies>
+          <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>example-gradle-plugin</artifactId>
+            <version>1.0.0</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
+      </project>
+    `;
+
+    expect(CachedMavenXml.parse(input)).toEqual(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project>
+        <groupId>org.example</groupId>
+        <dependencies>
+          <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>example-gradle-plugin</artifactId>
+            <version>1.0.0</version>
+          </dependency>
+        </dependencies>
+      </project>
+    `);
+  });
+
+  it('drops dependencies of other pom files', () => {
+    const input = codeBlock`
+      <project>
+        <groupId>org.example</groupId>
+        <artifactId>package</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>other</artifactId>
+            <version>1.0.0</version>
+          </dependency>
+        </dependencies>
+      </project>
+    `;
+
+    expect(CachedMavenXml.parse(input)).toEqual(codeBlock`
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project>
+        <groupId>org.example</groupId>
+      </project>
+    `);
+  });
+
   it('preserves empty relocation tags', () => {
     const input = codeBlock`
       <project>
