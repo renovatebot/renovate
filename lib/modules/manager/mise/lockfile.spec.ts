@@ -92,6 +92,42 @@ describe('modules/manager/mise/lockfile', () => {
       expect(getLockedVersion(lockFileData, 'python')).toBe('3.10.17');
     });
 
+    it('selects the entry with a matching specifier', () => {
+      const javaLockFileData: MiseLockFile = {
+        tools: {
+          java: [
+            {
+              version: 'temurin-25.0.4+101.0.LTS',
+              specifiers: ['temurin-25'],
+            },
+            {
+              version: 'oracle-graalvm-25.0.4.1.1',
+              specifiers: ['oracle-graalvm-25'],
+            },
+          ],
+        },
+      };
+
+      expect(
+        getLockedVersion(javaLockFileData, 'java', 'oracle-graalvm-25'),
+      ).toBe('oracle-graalvm-25.0.4.1.1');
+    });
+
+    it('matches a resolved version prefix for older lock files', () => {
+      const javaLockFileData: MiseLockFile = {
+        tools: {
+          java: [
+            { version: 'temurin-25.0.4+101.0.LTS' },
+            { version: 'oracle-graalvm-25.0.4.1.1' },
+          ],
+        },
+      };
+
+      expect(
+        getLockedVersion(javaLockFileData, 'java', 'oracle-graalvm-25'),
+      ).toBe('oracle-graalvm-25.0.4.1.1');
+    });
+
     it('handles tools with bracket options in name', () => {
       // depName from extraction has brackets stripped by regex,
       // so we test the full backend-qualified name
