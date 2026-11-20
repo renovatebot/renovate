@@ -3,7 +3,7 @@ import { GithubReleasesDatasource } from '../../../../datasource/github-releases
 import * as hashicorp from '../../../../versioning/hashicorp/index.ts';
 import type { PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
-import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { TerraformDefinitionFile } from '../../hcl/schema.ts';
 
 export class TerraformVersionExtractor extends DependencyExtractor {
   getCheckList(): string[] {
