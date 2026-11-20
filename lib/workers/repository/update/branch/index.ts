@@ -449,10 +449,21 @@ export async function processBranch(
           upgrade.currentVersion !== undefined &&
           upgrade.newVersion !== undefined &&
           upgrade.newVersion !== upgrade.currentVersion;
+        // as in lookup, currentDigest may be a prefix of the same newDigest
+        const sameDigest = upgrade.currentDigest
+          ? upgrade.newDigest?.startsWith(upgrade.currentDigest)
+          : false;
+        const digestChanged = !!upgrade.newDigest && !sameDigest;
+        const renamed =
+          upgrade.newName !== undefined &&
+          upgrade.newName !== upgrade.packageName;
         return (
           !targetChanged ||
           upgrade.newValue !== upgrade.currentValue ||
-          versionChanged
+          versionChanged ||
+          digestChanged ||
+          renamed ||
+          upgrade.isReplacement === true
         );
       });
       if (!config.upgrades.length) {
