@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
-import type { StaticTooling } from '../asdf/types.ts';
+import { getSiblingFileName } from '../../../util/fs/index.ts';
+import { ProtoPluginDatasource } from '../../datasource/proto-plugin/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { ProtoToolsFile } from './schema.ts';
 import { protoTooling } from './upgradeable-tooling.ts';
@@ -24,46 +25,70 @@ export function extractPackageFile(
     return null;
   }
 
-  const { versions } = parsed.data;
-  const deps: PackageDependency[] = [];
-
-  for (const [toolName, version] of Object.entries(versions)) {
-    deps.push(createDependency(toolName, version));
-  }
+  const { versions, plugins } = parsed.data;
+  const deps = Object.entries(versions).map(([toolName, version]) => ({
+    depName: toolName,
+    currentValue: version,
+    ...toolConfig(toolName, version, plugins[toolName], packageFile),
+  }));
 
   return deps.length ? { deps } : null;
 }
 
-function createDependency(name: string, version: string): PackageDependency {
+function toolConfig(
+  name: string,
+  version: string,
+  locator: string | undefined,
+  packageFile: string,
+): Partial<PackageDependency> {
   if (versionAliases.has(version)) {
-    return {
-      depName: name,
-      currentValue: version,
-      skipReason: 'unsupported-version',
-    };
+    return { skipReason: 'unsupported-version' };
   }
 
-  const config = getToolConfig(name);
-  if (!config) {
-    return {
-      depName: name,
-      currentValue: version,
-      skipReason: 'unsupported-datasource',
-    };
+  const builtin = protoTooling[name]?.config;
+  if (builtin) {
+    return builtin;
   }
 
-  return {
-    depName: name,
-    currentValue: version,
-    ...config,
-  };
+  // The proto-plugin datasource reads the plugin at lookup time, so extraction
+  // stays free of I/O.
+  return locator
+    ? pluginConfig(locator, packageFile)
+    : { skipReason: 'unsupported-datasource' };
 }
 
-function getToolConfig(toolName: string): StaticTooling | null {
-  const toolDefinition = protoTooling[toolName];
-  if (!toolDefinition) {
-    return null;
+function pluginConfig(
+  locator: string,
+  packageFile: string,
+): Partial<PackageDependency> {
+  // Only TOML plugins are read; JSON, YAML and WASM plugins are skipped.
+  if (!locator.endsWith('.toml')) {
+    return { skipReason: 'unsupported-datasource' };
   }
 
-  return toolDefinition.config;
+  // proto pins are bare while git tags are commonly `v`-prefixed.
+  const extractVersion = '^v?(?<version>.+)';
+
+  if (locator.startsWith('https://')) {
+    return {
+      datasource: ProtoPluginDatasource.id,
+      packageName: locator,
+      extractVersion,
+    };
+  }
+
+  if (locator.startsWith('file://')) {
+    const path = locator.slice('file://'.length);
+    // An absolute path points outside the repository.
+    if (path.startsWith('/')) {
+      return { skipReason: 'unsupported-url' };
+    }
+    return {
+      datasource: ProtoPluginDatasource.id,
+      packageName: getSiblingFileName(packageFile, path),
+      extractVersion,
+    };
+  }
+
+  return { skipReason: 'unsupported-datasource' };
 }
