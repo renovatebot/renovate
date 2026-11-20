@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import * as memCache from '../cache/memory/index.ts';
 import type { GithubHttp } from '../http/github.ts';
@@ -106,6 +107,7 @@ function ipAllowListKey({
 
 /**
  * Looks up with `graphql`, and with `rest` if an IP allow list refused the token, because the GraphQL API cannot be used without one.
+ * Only `graphql` is used unless `githubIpAllowListFallback` is enabled.
  *
  * Once an organization refused the token, `rest` is used first for its other repositories, which saves a GraphQL request which would be refused.
  * If `rest` fails too, for example because the unauthenticated rate limit is exhausted, the GraphQL error is thrown.
@@ -115,6 +117,10 @@ export async function withIpAllowListFallback<T>(
   graphql: () => Promise<T>,
   rest: () => Promise<T>,
 ): Promise<T> {
+  if (!GlobalConfig.get('githubIpAllowListFallback')) {
+    return graphql();
+  }
+
   const { packageName, registryUrl } = config;
   const key = ipAllowListKey(config);
   let restFailed = false;

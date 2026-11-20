@@ -791,6 +791,7 @@ describe('util/http/github', () => {
 
     beforeEach(() => {
       hostRules.add({ hostType: 'github', token: 'abc' });
+      GlobalConfig.set({ githubIpAllowListFallback: true });
     });
 
     function denyToken(
@@ -825,6 +826,16 @@ describe('util/http/github', () => {
         const res = await githubApi.getJsonUnchecked('/repos/some/repo/tags');
 
         expect(res.body).toEqual([{ name: 'v1.0.0' }]);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not retry a refused read unless enabled', async () => {
+        GlobalConfig.set({ githubIpAllowListFallback: false });
+        denyToken();
+
+        await expect(
+          githubApi.getJsonUnchecked('/repos/some/repo/tags'),
+        ).rejects.toThrow(ipAllowListError);
         expect(httpMock.allUsed()).toBeTrue();
       });
 

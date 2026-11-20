@@ -262,7 +262,8 @@ It is also OK to configure the same as a host rule instead, if you prefer that.
 Some GitHub organizations use an IP allow list.
 GitHub refuses a token that is used from an address outside of the allow list, even if the repository is public and can be read without a token.
 
-If GitHub names the IP allow list in its refusal, Renovate reads the public data without a token:
+By default, Renovate reports the refusal as an error.
+If you set the self-hosted configuration option [`githubIpAllowListFallback`](../self-hosted-configuration.md#githubipallowlistfallback) to `true`, and GitHub names the IP allow list in its refusal, Renovate reads the public data without a token:
 
 - Renovate repeats a refused read-only REST request once without credentials.
 - GitHub's GraphQL API cannot be used without a token, so Renovate reads the tags and releases of the repository with the REST API instead.

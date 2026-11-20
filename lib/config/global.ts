@@ -40,6 +40,7 @@ export class GlobalConfig {
     'executionTimeout',
     'exposeAllEnv',
     'gitTimeout',
+    'githubIpAllowListFallback',
     'githubTokenWarn',
     'goEnvFromHostRules',
     'httpCacheTtlDays',

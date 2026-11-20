@@ -1,5 +1,6 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../../cache/memory/index.ts';
 import { GithubHttp } from '../../http/github.ts';
 import { GithubIpAllowListError } from '../ip-allow-list.ts';
@@ -127,11 +128,13 @@ describe('util/github/graphql/index', () => {
 
     beforeEach(() => {
       hostRules.add({ hostType: 'github', token: 'abc' });
+      GlobalConfig.set({ githubIpAllowListFallback: true });
       memCache.init();
     });
 
     afterEach(() => {
       memCache.reset();
+      GlobalConfig.reset();
     });
 
     function refuseGraphql(registryApi = api, path = '/graphql'): void {
@@ -143,6 +146,30 @@ describe('util/github/graphql/index', () => {
           errors: [{ type: 'FORBIDDEN', message }],
         });
     }
+
+    describe('when githubIpAllowListFallback is not enabled', () => {
+      beforeEach(() => {
+        GlobalConfig.set({ githubIpAllowListFallback: false });
+      });
+
+      it('throws the refusal of queryTags without reading REST', async () => {
+        refuseGraphql();
+
+        await expect(
+          queryTags({ packageName: 'foo/bar' }, http),
+        ).rejects.toThrow(GithubIpAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('throws the refusal of queryReleases without reading REST', async () => {
+        refuseGraphql();
+
+        await expect(
+          queryReleases({ packageName: 'foo/bar' }, http),
+        ).rejects.toThrow(GithubIpAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+    });
 
     describe('queryTags', () => {
       it('reads the tags without a token', async () => {
