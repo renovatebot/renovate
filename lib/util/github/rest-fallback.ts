@@ -4,12 +4,12 @@ import * as memCache from '../cache/memory/index.ts';
 import type { GithubHttp } from '../http/github.ts';
 import { LooseArray } from '../schema-utils/index.ts';
 import { Timestamp } from '../timestamp.ts';
-import { isIpAllowListDenial } from './ip-allow-list.ts';
 import type {
   GithubPackageConfig,
   GithubReleaseItem,
   GithubTagLookupItem,
 } from './graphql/types.ts';
+import { isIpAllowListDenial } from './ip-allow-list.ts';
 import { getApiBaseUrl } from './url.ts';
 
 const RestTags = LooseArray(
