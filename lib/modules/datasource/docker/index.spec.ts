@@ -3775,6 +3775,43 @@ describe('modules/datasource/docker/index', () => {
       ]);
     });
 
+    it('returns undefined for a templated registry', async () => {
+      const ds = new DockerDatasource();
+      logger.logger.warn.mockClear();
+
+      await expect(
+        ds.getTags('https://{{ .Values.registry }}', 'nginx'),
+      ).resolves.toBeUndefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryHost: 'https://{{ .Values.registry }}',
+          dockerRepository: 'nginx',
+        }),
+        'Invalid URL',
+      );
+    });
+
+    it('returns null for a templated registry through getPkgReleases', async () => {
+      logger.logger.warn.mockClear();
+      logger.logger.error.mockClear();
+
+      await expect(
+        getPkgReleases({
+          datasource: DockerDatasource.id,
+          packageName: 'nginx',
+          registryUrls: ['https://{{ .Values.registry }}'],
+        }),
+      ).resolves.toBeNull();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryHost: 'https://{{ .Values.registry }}',
+        }),
+        'Invalid URL',
+      );
+      expect(logger.logger.error).not.toHaveBeenCalled();
+    });
+
     it('does not cache tags for a private registry', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
