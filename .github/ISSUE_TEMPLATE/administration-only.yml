@@ -1,18 +1,16 @@
-name: Direct Issue creation is not allowed
-description: As a user of Renovate, please create a Discussion first - do not use this template to create an Issue!
+name: Direct Issue creation is for team members only
+description: Please do not create an Issue if you're not one of the team — start a Discussion first!
 labels: ['priority-3-medium', 'needs-discussion']
 body:
   - type: markdown
     attributes:
-      value: '# This form is for Renovate administrators only.'
+      value: '# This form is for core team members only.'
 
   - type: markdown
     attributes:
       value: |
         > [!CAUTION]
-        > <h2>**Stop!** This form is for the Renovate administrators only.</h2>
-        >
-        > If you're a user of Renovate, please create a GitHub Discussion.
+        > While all repository collaborators have technical access to this form, direct Issue creation is reserved strictly for core team members.
         >
         > Please go back a step and select _Start a discussion_ instead of Issue.
         >
@@ -28,7 +26,7 @@ body:
 
   - type: markdown
     attributes:
-      value: '# Reminder for administrators:'
+      value: '# Reminder for team members:'
 
   - type: markdown
     attributes:
