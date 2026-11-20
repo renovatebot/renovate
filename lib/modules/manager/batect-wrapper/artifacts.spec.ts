@@ -15,12 +15,11 @@ function artifactForPath(
     updatedDeps: [
       {
         depName: 'batect/batect',
+        newVersion,
       },
     ],
     newPackageFileContent: 'not used',
-    config: {
-      newVersion,
-    },
+    config: {},
   };
 }
 
@@ -89,6 +88,33 @@ describe('modules/manager/batect-wrapper/artifacts', () => {
           file: {
             type: 'addition',
             path: 'some/sub/dir/batect.cmd',
+            contents: newWindowsWrapperContent,
+          },
+        },
+      ]);
+    });
+
+    it('uses the first updated dependency', async () => {
+      const artifact = artifactForPath('batect');
+      artifact.updatedDeps.push({
+        depName: 'batect/batect-other',
+        newVersion: '3.4.5',
+      });
+
+      const result = await updateArtifacts(artifact);
+
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'batect',
+            contents: newUnixWrapperContent,
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'batect.cmd',
             contents: newWindowsWrapperContent,
           },
         },
