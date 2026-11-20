@@ -3,10 +3,7 @@ import {
   isNonEmptyStringAndNotWhitespace,
 } from '@sindresorhus/is';
 import { logger } from '../../logger/index.ts';
-import {
-  type ConstraintName,
-  isAdditionalConstraintName,
-} from '../../util/exec/types.ts';
+import { type ConstraintName } from '../../util/exec/types.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { regEx } from '../../util/regex.ts';
 import * as allVersioning from '../versioning/index.ts';
@@ -270,10 +267,7 @@ export function applyConstraintsFiltering<
       configConstraints,
     ) as [ConstraintName, string][]) {
       let constraintVersioningName = versioningName;
-      if (
-        isAdditionalConstraintName(name) &&
-        config.constraintsVersioning?.[name]
-      ) {
+      if (config.constraintsVersioning?.[name]) {
         const val = config.constraintsVersioning[name];
         logger.once.debug(
           { packageName: config.packageName, release },

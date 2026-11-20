@@ -6,6 +6,7 @@ import {
 } from '../../../util/toml.ts';
 import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
+import * as pythonVersioning from '../../versioning/python/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -95,6 +96,9 @@ export async function extractPackageFile(
   return processedDeps.length || lockFiles.length
     ? {
         extractedConstraints,
+        ...(pythonConstraint && {
+          constraintsVersioning: { python: pythonVersioning.id },
+        }),
         deps: processedDeps,
         packageFileVersion,
         lockFiles,

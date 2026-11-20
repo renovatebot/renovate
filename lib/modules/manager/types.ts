@@ -130,7 +130,7 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
-  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  constraintsVersioning?: Partial<Record<ConstraintName, string>>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
