@@ -3,12 +3,14 @@ import './legacy.ts';
 
 import { isNumber } from '@sindresorhus/is';
 import type { OptionsInit } from 'got';
-import got, { RequestError } from 'got';
+import got, { HTTPError, RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
 import { logger } from '../../logger/index.ts';
 import { coerceNumber } from '../number.ts';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats.ts';
 import { coerceString } from '../string.ts';
+import { getRetryAfter } from './retry-after.ts';
+import { isRateLimited } from './status.ts';
 import {
   type GotBufferOptions,
   GotExtraOptionKeys,
@@ -45,6 +47,12 @@ export async function fetch(
     const resp = await got(url, { ...options } as GotBufferOptions);
     statusCode = resp.statusCode;
     duration = coerceNumber(resp.timings?.phases.total, 0);
+    if (options.throwHttpErrors === false && isRateLimited(resp)) {
+      const error = new HTTPError(resp);
+      if (getRetryAfter(error) !== null) {
+        throw error;
+      }
+    }
     return resp;
   } catch (error) {
     // v8 ignore else -- TODO: add test #40625

@@ -1,7 +1,7 @@
 import dnsPromises from 'node:dns/promises';
 import { ZodError, z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
@@ -14,6 +14,7 @@ import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from './cache/memory-http-cache-provider.ts';
+import type { HttpCacheProvider } from './cache/types.ts';
 import { applyDefaultHeaders } from './http.ts';
 import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
@@ -180,6 +181,93 @@ describe('util/http/index', () => {
       EXTERNAL_HOST_ERROR,
     );
     expect(httpMock.allUsed()).toBeTrue();
+  });
+
+  describe('Retry-After with suppressed HTTP errors', () => {
+    it.each`
+      status | retryAfter   | requests
+      ${429} | ${'0'}       | ${3}
+      ${429} | ${'61'}      | ${1}
+      ${429} | ${'invalid'} | ${1}
+      ${429} | ${undefined} | ${1}
+      ${401} | ${'0'}       | ${1}
+      ${403} | ${'0'}       | ${1}
+      ${404} | ${'0'}       | ${1}
+      ${405} | ${'0'}       | ${1}
+    `(
+      'returns the final $status response with Retry-After $retryAfter',
+      async ({ status, retryAfter, requests }) => {
+        hostRules.add({ matchHost: 'renovate.com', abortOnError: true });
+        const headers: httpMock.ReplyHeaders =
+          retryAfter === undefined ? {} : { 'retry-after': retryAfter };
+        httpMock
+          .scope(baseUrl)
+          .get('/test')
+          .times(requests)
+          .reply(status, 'fresh response', {
+            ...headers,
+            'www-authenticate': 'Bearer realm="https://renovate.com/token"',
+          });
+
+        const response = await http.get(`${baseUrl}/test`, {
+          throwHttpErrors: false,
+        });
+
+        expect(response).toMatchObject({
+          statusCode: status,
+          body: 'fresh response',
+        });
+        expect(response.headers['retry-after']).toBe(retryAfter);
+        expect(response.headers['www-authenticate']).toBe(
+          'Bearer realm="https://renovate.com/token"',
+        );
+      },
+    );
+
+    it('returns the final response without falling back to stale cache', async () => {
+      const bypassServer = vi
+        .fn()
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue(
+          partial<HttpResponse>({ statusCode: 200, body: 'stale response' }),
+        );
+      const cacheProvider = partial<HttpCacheProvider>({
+        bypassServer,
+        setCacheHeaders: vi.fn(),
+        wrapServerResponse: vi.fn((_method, _url, response) =>
+          Promise.resolve(response),
+        ),
+      });
+      httpMock
+        .scope(baseUrl)
+        .get('/test')
+        .times(3)
+        .reply(429, 'fresh response', { 'retry-after': '0' });
+
+      const response = await http.get(`${baseUrl}/test`, {
+        throwHttpErrors: false,
+        cacheProvider,
+      });
+
+      expect(response).toMatchObject({
+        statusCode: 429,
+        body: 'fresh response',
+      });
+      expect(bypassServer).toHaveBeenCalledTimes(1);
+      expect(cacheProvider.wrapServerResponse).toHaveBeenCalledTimes(1);
+    });
+
+    it('still rejects after exhausting retries when HTTP errors are not suppressed', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/test')
+        .times(3)
+        .reply(429, 'fresh response', { 'retry-after': '0' });
+
+      await expect(http.get(`${baseUrl}/test`)).rejects.toMatchObject({
+        response: { statusCode: 429, headers: { 'retry-after': '0' } },
+      });
+    });
   });
 
   it('disables hosts', async () => {

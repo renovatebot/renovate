@@ -351,6 +351,101 @@ describe('modules/datasource/docker/common', () => {
       },
     );
 
+    it.each`
+      path                            | body
+      ${'/v2/'}                       | ${''}
+      ${'/v2/repo/tags/list?n=10000'} | ${{}}
+    `(
+      'retries a rate-limited auth probe at $path before negotiating a token',
+      async ({ path, body }) => {
+        httpMock
+          .scope('https://my.local.registry')
+          .get(path, undefined, { badheaders: ['authorization'] })
+          .reply(429, body, { 'retry-after': '1' })
+          .get(path, undefined, { badheaders: ['authorization'] })
+          .reply(401, body, {
+            'www-authenticate':
+              'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry"',
+          })
+          .get(
+            '/oauth2/token?service=my.local.registry&scope=repository:repo:pull',
+          )
+          .reply(200, { token: 'abc' });
+
+        const headers = await getAuthHeaders(
+          http,
+          'https://my.local.registry',
+          'repo',
+          `https://my.local.registry${path}`,
+        );
+
+        expect(headers).toEqual({ authorization: 'Bearer abc' });
+      },
+    );
+
+    it('gives up after two retries of a rate-limited auth probe', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/')
+        .times(3)
+        .reply(429, '', { 'retry-after': '0' });
+
+      await expect(
+        getAuthHeaders(http, 'https://my.local.registry', 'repo'),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('does not retry an auth probe beyond maxRetryAfter', async () => {
+      hostRules.add({ matchHost: 'my.local.registry', maxRetryAfter: 0 });
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/')
+        .reply(429, '', { 'retry-after': '1' });
+
+      await expect(
+        getAuthHeaders(http, 'https://my.local.registry', 'repo'),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('keeps network failures in the existing token error handling', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/')
+        .replyWithError('network failure');
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+      );
+
+      expect(headers).toBeUndefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ err: expect.any(Error) }),
+        'Error obtaining docker token',
+      );
+    });
+
+    it('keeps invalid JSON in the existing token error handling', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=10000')
+        .reply(200, 'not JSON');
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+        'https://my.local.registry/v2/repo/tags/list?n=10000',
+      );
+
+      expect(headers).toBeUndefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ err: expect.any(Error) }),
+        'Error obtaining docker token',
+      );
+    });
+
     it('returns undefined and logs the status code when the auth probe response is invalid', async () => {
       httpMock.scope('https://my.local.registry').get('/v2/').reply(403, '');
 
