@@ -32,6 +32,12 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     versioning: 'semver',
     extractVersion: '^v(?<version>.*)$',
   },
+  aube: {
+    datasource: 'github-releases',
+    packageName: 'aubepkg/aube',
+    extractVersion: '^v(?<version>.*)$',
+    versioning: 'npm',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
