@@ -144,13 +144,13 @@ function getNewValue({
   return newVersion;
 }
 
-function isBreaking(version: string, current: string): boolean {
+function isBreaking(current: string, version: string): boolean {
   const coercedVersion = coerce(version)?.toString();
   const coercedCurrent = coerce(current)?.toString();
   return !!(
     coercedVersion &&
     coercedCurrent &&
-    semverIsBreaking(coercedVersion, coercedCurrent)
+    semverIsBreaking(coercedCurrent, coercedVersion)
   );
 }
 
