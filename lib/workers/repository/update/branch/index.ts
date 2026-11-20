@@ -482,6 +482,7 @@ export async function processBranch(
           result: 'no-work',
         };
       }
+      refreshBranchConfig(config, previousTargets);
       if (
         !branchExists &&
         config.minimumGroupSize &&
@@ -496,7 +497,6 @@ export async function processBranch(
           result: 'minimum-group-size-not-met',
         };
       }
-      refreshBranchConfig(config, previousTargets);
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );

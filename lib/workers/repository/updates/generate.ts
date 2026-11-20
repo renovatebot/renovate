@@ -257,7 +257,8 @@ export function refreshBranchConfig(
     >
   >,
 ): void {
-  let changed = previousTargets.size !== config.upgrades.length;
+  const upgradesRemoved = previousTargets.size !== config.upgrades.length;
+  let changed = upgradesRemoved;
   for (const upgrade of config.upgrades) {
     const previous = previousTargets.get(upgrade);
     if (
@@ -336,6 +337,36 @@ export function refreshBranchConfig(
   }
   if (!changed) {
     return;
+  }
+
+  if (upgradesRemoved) {
+    // generateBranchConfig combines these from all upgrades, including the removed ones
+    config.labels = uniq(
+      config.upgrades.flatMap((upgrade) => coerceArray(upgrade.labels)),
+    );
+    config.addLabels = uniq(
+      config.upgrades.flatMap((upgrade) => coerceArray(upgrade.addLabels)),
+    );
+    config.additionalReviewers = uniq(
+      config.upgrades
+        .flatMap((upgrade) => coerceArray(upgrade.additionalReviewers))
+        .filter(isNonEmptyString),
+    );
+    config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
+    let releaseTimestamp: Timestamp | undefined;
+    for (const upgrade of config.upgrades) {
+      if (!upgrade.releaseTimestamp) {
+        continue;
+      }
+      if (
+        !releaseTimestamp ||
+        DateTime.fromISO(upgrade.releaseTimestamp) >
+          DateTime.fromISO(releaseTimestamp)
+      ) {
+        releaseTimestamp = upgrade.releaseTimestamp;
+      }
+    }
+    config.releaseTimestamp = releaseTimestamp;
   }
 
   const [firstUpgrade] = config.upgrades;

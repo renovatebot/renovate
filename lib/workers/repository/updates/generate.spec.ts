@@ -437,6 +437,73 @@ describe('workers/repository/updates/generate', () => {
       expect(config.automerge).toBeFalse();
     });
 
+    it('combines branch fields from the remaining upgrades only', () => {
+      config = generateBranchConfig(
+        [
+          {
+            depName: '@vitest/coverage-v8',
+            labels: ['coverage'],
+            addLabels: ['coverage-added'],
+            additionalReviewers: ['coverage-team'],
+            minimumGroupSize: 3,
+            releaseTimestamp: '2026-11-20T10:00:00.000Z' as Timestamp,
+          },
+          {
+            depName: 'oxlint',
+            releaseTimestamp: '2026-11-17T10:00:00.000Z' as Timestamp,
+          },
+          { depName: 'vite' },
+          {
+            depName: 'vite-plus',
+            labels: ['vitest'],
+            minimumGroupSize: 2,
+            releaseTimestamp: '2026-11-19T10:00:00.000Z' as Timestamp,
+          },
+          {
+            depName: 'vitest',
+            labels: ['vitest'],
+            addLabels: ['vitest-added'],
+            additionalReviewers: ['vitest-team'],
+            minimumGroupSize: 2,
+            releaseTimestamp: '2026-11-18T10:00:00.000Z' as Timestamp,
+          },
+        ].map((upgrade) => ({
+          ...getConfig(),
+          major: undefined,
+          manager: 'npm',
+          versioning: 'npm',
+          branchName: 'renovate/vitest-4.x',
+          currentValue: '4.1.0',
+          currentVersion: '4.1.0',
+          newValue: '4.2.0',
+          newVersion: '4.2.0',
+          updateType: 'minor' as const,
+          ...upgrade,
+        })),
+      );
+      previousTargets = new Map(
+        config.upgrades.map((upgrade) => [upgrade, { ...upgrade }]),
+      );
+      expect(config).toMatchObject({
+        labels: ['coverage', 'vitest'],
+        minimumGroupSize: 3,
+        releaseTimestamp: '2026-11-20T10:00:00.000Z',
+      });
+      config.upgrades = config.upgrades.filter(
+        (upgrade) => upgrade.depName !== '@vitest/coverage-v8',
+      );
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config).toMatchObject({
+        labels: ['vitest'],
+        addLabels: ['vitest-added'],
+        additionalReviewers: ['vitest-team'],
+        minimumGroupSize: 2,
+        releaseTimestamp: '2026-11-19T10:00:00.000Z',
+      });
+    });
+
     it('preserves a grouped message with no version extra', () => {
       config.groupName = 'Vitest packages';
       config.isGroup = true;
