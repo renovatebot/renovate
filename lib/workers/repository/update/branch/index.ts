@@ -488,6 +488,12 @@ export async function processBranch(
           result: 'no-work',
         };
       }
+      const usedPlatformAutomerge =
+        getPlatformPrOptions(config).usePlatformAutomerge;
+      refreshBranchConfig(config, previousTargets);
+      reconciliationDisabledPlatformAutomerge =
+        !!usedPlatformAutomerge &&
+        !getPlatformPrOptions(config).usePlatformAutomerge;
       if (
         !branchExists &&
         config.minimumGroupSize &&
@@ -502,12 +508,6 @@ export async function processBranch(
           result: 'minimum-group-size-not-met',
         };
       }
-      const usedPlatformAutomerge =
-        getPlatformPrOptions(config).usePlatformAutomerge;
-      refreshBranchConfig(config, previousTargets);
-      reconciliationDisabledPlatformAutomerge =
-        !!usedPlatformAutomerge &&
-        !getPlatformPrOptions(config).usePlatformAutomerge;
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );

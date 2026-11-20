@@ -1504,6 +1504,7 @@ describe('workers/repository/update/branch/index', () => {
           expectedCommits,
         }) => {
           config.minimumGroupSize = 2;
+          config.upgrades[0].minimumGroupSize = 2;
           config.upgrades.push({
             ...config.upgrades[0],
             depName: '@vitest/coverage-v8',
@@ -1533,6 +1534,43 @@ describe('workers/repository/update/branch/index', () => {
           expect(prWorker.ensurePr).toHaveBeenCalledTimes(expectedCommits);
         },
       );
+
+      it('checks minimumGroupSize against the remaining upgrades', async () => {
+        config.minimumGroupSize = 3;
+        config.upgrades[0].minimumGroupSize = 2;
+        config.upgrades.push(
+          {
+            ...config.upgrades[0],
+            depName: '@vitest/coverage-v8',
+            packageName: '@vitest/coverage-v8',
+          },
+          {
+            ...config.upgrades[0],
+            depName: '@vitest/ui',
+            packageName: '@vitest/ui',
+            minimumGroupSize: 3,
+          },
+        );
+        scm.branchExists.mockResolvedValue(false);
+        npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+          branch.upgrades[2].newValue = branch.upgrades[2].currentValue!;
+          branch.upgrades[2].newVersion = branch.upgrades[2].currentVersion;
+          return Promise.resolve({ artifactErrors: [], updatedArtifacts: [] });
+        });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('pr-created');
+        expect(prWorker.ensurePr).toHaveBeenCalledWith(
+          expect.objectContaining({
+            minimumGroupSize: 2,
+            upgrades: [
+              expect.objectContaining({ depName: 'vitest' }),
+              expect.objectContaining({ depName: '@vitest/coverage-v8' }),
+            ],
+          }),
+        );
+      });
 
       it.each`
         change                  | fields                                                         | expectedResult
