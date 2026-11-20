@@ -1291,6 +1291,31 @@ describe('workers/repository/update/branch/index', () => {
         },
       );
 
+      it.each`
+        change                  | fields                                                         | expectedResult
+        ${'a new digest'}       | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:bbb' }}    | ${'pr-created'}
+        ${'a new package name'} | ${{ newName: '@vitest/core' }}                                 | ${'pr-created'}
+        ${'a replacement'}      | ${{ isReplacement: true }}                                     | ${'pr-created'}
+        ${'the current digest'} | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:aaabbb' }} | ${'no-work'}
+      `(
+        'checks $change when a target returns to its current value',
+        async ({ fields, expectedResult }) => {
+          Object.assign(config.upgrades[0], fields);
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+            branch.upgrades[0].newValue = branch.upgrades[0].currentValue!;
+            branch.upgrades[0].newVersion = branch.upgrades[0].currentVersion;
+            return Promise.resolve({
+              artifactErrors: [],
+              updatedArtifacts: [],
+            });
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result.result).toBe(expectedResult);
+        },
+      );
+
       it.each([false, true])(
         'returns no work when artifact updates remove all upgrades, branchExists=%s',
         async (branchExists) => {
