@@ -1,17 +1,27 @@
-import { isNullOrUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
 import type { DependencyExtractor } from './base.ts';
+import { ModuleExtractor } from './extractors/others/modules.ts';
 import { resourceExtractors } from './extractors.ts';
 import * as hcl from './hcl/index.ts';
 import {
   checkFileContainsDependency,
   extractLocksForPackageFile,
+  readSiblingHclFiles,
 } from './util.ts';
+
+// a `locals`/`variable` declaration may be used by modules of other files
+const declarationRegex = regEx(/^\s*(?:locals|variable)\b/m);
 
 export async function extractPackageFile(
   content: string,
@@ -25,6 +35,15 @@ export async function extractPackageFile(
     if (checkFileContainsDependency(content, extractor.getCheckList())) {
       passedExtractors.push(extractor);
     }
+  }
+
+  if (
+    declarationRegex.test(content) &&
+    !passedExtractors.some((extractor) => extractor instanceof ModuleExtractor)
+  ) {
+    passedExtractors.push(
+      resourceExtractors.find((e) => e instanceof ModuleExtractor)!,
+    );
   }
 
   if (!passedExtractors.length) {
@@ -50,8 +69,13 @@ export async function extractPackageFile(
 
   const locks = await extractLocksForPackageFile(packageFile);
 
+  const siblings =
+    isNonEmptyArray(hclMap.locals) || isNonEmptyObject(hclMap.variable)
+      ? await readSiblingHclFiles(packageFile)
+      : [];
+
   for (const extractor of passedExtractors) {
-    const deps = extractor.extract(hclMap, locks, config);
+    const deps = extractor.extract(hclMap, locks, config, siblings);
     dependencies.push(...deps);
   }
 
