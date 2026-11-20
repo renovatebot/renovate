@@ -121,15 +121,25 @@ export async function applyMinimumReleaseAgeToDigestUpdate(
   }
 }
 
+function findGitRef(
+  dependency: ReleaseResult | null,
+  version: string | undefined,
+): string | undefined {
+  return dependency?.releases.find((r) => r.version === version)?.gitRef;
+}
+
 function getDigestInputConfig(
   config: LookupUpdateConfig,
   res: UpdateResult,
+  dependency: ReleaseResult | null,
   update: LookupUpdate,
 ): GetDigestInputConfig {
   const getDigestConfig: GetDigestInputConfig = {
     ...config,
     registryUrl: update.registryUrl ?? res.registryUrl,
     lookupName: res.lookupName,
+    currentGitRef: findGitRef(dependency, res.currentVersion),
+    newGitRef: findGitRef(dependency, update.newVersion ?? res.currentVersion),
   };
 
   // #20304 only pass it for replacement updates, otherwise we get wrong or invalid digest
@@ -144,6 +154,8 @@ function getDigestInputConfig(
   ) {
     delete getDigestConfig.lookupName;
     delete getDigestConfig.currentDigest;
+    delete getDigestConfig.currentGitRef;
+    delete getDigestConfig.newGitRef;
     getDigestConfig.replacementName = update.newName;
   }
 
@@ -170,7 +182,7 @@ async function resolveUpdateDigest(
 
   if (isNullOrUndefined(update.newDigest)) {
     update.newDigest = await getDigest(
-      getDigestInputConfig(config, res, update),
+      getDigestInputConfig(config, res, dependency, update),
       update.newValue,
     );
   }

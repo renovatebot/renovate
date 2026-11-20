@@ -1,5 +1,6 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import { toSha256 } from '../../../util/hash.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GithubReleaseAttachmentsDatasource } from './index.ts';
@@ -140,6 +141,30 @@ describe('modules/datasource/github-release-attachments/index', () => {
         nextValue,
       );
       expect(digest).toEqual(nextDigest);
+    });
+
+    it('fetches releases by tag for versions extracted from tags', async () => {
+      const oldContent = '1'.repeat(10 * 1024);
+      const newContent = '2'.repeat(10 * 1024);
+      releaseMock.withAssets('v.0.9.8.0', {
+        'USBip-0.9.8.0-x64.exe': oldContent,
+      });
+      releaseMock.withAssets('v.0.9.8.1', {
+        'USBip-0.9.8.1-x64.exe': newContent,
+      });
+
+      const digest = await getDigest(
+        {
+          datasource: GithubReleaseAttachmentsDatasource.id,
+          packageName,
+          currentValue: '0.9.8.0',
+          currentDigest: toSha256(oldContent),
+          currentGitRef: 'v.0.9.8.0',
+          newGitRef: 'v.0.9.8.1',
+        },
+        '0.9.8.1',
+      );
+      expect(digest).toEqual(toSha256(newContent));
     });
 
     // This is awkward, but I found returning `null` in this case to not produce an update

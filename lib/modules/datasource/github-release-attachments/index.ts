@@ -23,6 +23,14 @@ function inferHashAlg(digest: string): string {
   }
 }
 
+/** Returns the SHA-256 that GitHub recorded for the asset, if any. */
+function getRecordedSha256(asset: GithubRestAsset): string | undefined {
+  const prefix = 'sha256:';
+  return asset.digest?.startsWith(prefix)
+    ? asset.digest.slice(prefix.length)
+    : undefined;
+}
+
 export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
   static override readonly id = 'github-release-attachments';
 
@@ -130,6 +138,17 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     release: GithubRestRelease,
     digest: string,
   ): Promise<GithubDigestFile | null> {
+    const recordedAsset = release.assets.find(
+      (a) => getRecordedSha256(a) === digest,
+    );
+    if (recordedAsset) {
+      return {
+        assetName: recordedAsset.name,
+        currentVersion: release.tag_name,
+        currentDigest: digest,
+      };
+    }
+
     const digestFile = await this.findDigestFile(release, digest);
     if (digestFile) {
       return digestFile;
@@ -139,13 +158,18 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     return asset;
   }
 
-  /** Given a digest asset, find the equivalent digest in a different release. */
+  /**
+   * Given a digest asset, find the equivalent digest in a different release.
+   * Asset names are mapped by replacing `currentVersion` with `newVersion`, which default to the release tags.
+   */
   async mapDigestAssetToRelease(
     digestAsset: GithubDigestFile,
     release: GithubRestRelease,
+    currentVersion = digestAsset.currentVersion,
+    newVersion = release.tag_name,
   ): Promise<string | null> {
-    const current = stripVersionPrefix(digestAsset.currentVersion);
-    const next = stripVersionPrefix(release.tag_name);
+    const current = stripVersionPrefix(currentVersion);
+    const next = stripVersionPrefix(newVersion);
 
     if (digestAsset.digestedFileName) {
       const checksumAssetName = digestAsset.assetName.replace(current, next);
@@ -182,6 +206,10 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     }
 
     const algorithm = inferHashAlg(digestAsset.currentDigest);
+    const recordedDigest = getRecordedSha256(asset);
+    if (algorithm === 'sha256' && recordedDigest) {
+      return recordedDigest;
+    }
     const newDigest = await this.downloadAndDigest(asset, algorithm);
     return newDigest;
   }
@@ -189,14 +217,16 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
   /**
    * Attempts to resolve the digest for the specified package.
    *
-   * The `newValue` supplied here should be a valid tag for the GitHub release.
+   * Releases are fetched by their tags, `currentGitRef` and `newGitRef`, falling back to `currentValue` and `newValue`.
+   * Asset names are mapped with `currentValue` and `newValue`, which may be versions that `extractVersion` took from the tags.
    * Requires `currentValue` and `currentDigest`.
    *
    * There may be many assets attached to the release. This function will:
    *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
+   *     - Match the SHA-256 that GitHub records for each asset.
    *     - Download small release assets, parse as checksum manifests (e.g. `SHASUMS.txt`).
    *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
-   *  - Map the hashed asset to `newValue` and return the updated digest as a string
+   *  - Map the hashed asset to `newValue` and return the updated digest as a string, preferring the SHA-256 GitHub recorded
    */
   override async getDigest(
     {
@@ -204,6 +234,8 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       currentValue,
       currentDigest,
       registryUrl,
+      currentGitRef,
+      newGitRef,
     }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -224,7 +256,7 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     const apiBaseUrl = getApiBaseUrl(registryUrl);
     const { body: currentRelease } =
       await this.http.getJsonUnchecked<GithubRestRelease>(
-        `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`,
+        `${apiBaseUrl}repos/${repo}/releases/tags/${currentGitRef ?? currentValue}`,
       );
     const digestAsset = await this.findDigestAsset(
       currentRelease,
@@ -236,9 +268,14 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     } else {
       const { body: newRelease } =
         await this.http.getJsonUnchecked<GithubRestRelease>(
-          `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`,
+          `${apiBaseUrl}repos/${repo}/releases/tags/${newGitRef ?? newValue}`,
         );
-      newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
+      newDigest = await this.mapDigestAssetToRelease(
+        digestAsset,
+        newRelease,
+        currentValue,
+        newValue,
+      );
     }
     return newDigest;
   }
