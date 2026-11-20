@@ -82,6 +82,8 @@ export interface ToolConstraintsConfig {
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
+  npmrc?: string;
+  npmrcMerge?: boolean;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
