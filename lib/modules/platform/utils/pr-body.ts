@@ -3,7 +3,7 @@ import { emojify } from '../../../util/emoji.ts';
 import { regEx } from '../../../util/regex.ts';
 
 const re = regEx(
-  `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
+  `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)(?<configHeading>### \\[?Configuration[^\\n]*)(?<postNotes>.*)`,
   's',
 );
 
@@ -34,7 +34,7 @@ export function smartTruncate(input: string, len: number): string {
     );
   }
 
-  const divider = `\n\n</details>\n\n---\n\n### Configuration`;
+  const divider = `\n\n</details>\n\n---\n\n${reMatch.groups.configHeading}`;
   const preNotes = reMatch.groups.preNotes;
   const releaseNotes = reMatch.groups.releaseNotes;
   const postNotes = reMatch.groups.postNotes;
