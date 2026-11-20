@@ -2335,6 +2335,15 @@ async function findAutomergeToCancel({
   if (platformPrOptions && !isAutomergeAvailable(prNo)) {
     return { result: { canceled: false, reason: 'not-enabled' } };
   }
+  // refreshing the commit message is skipped for PRs targeting a branch with a merge queue, as the queue uses the PR title
+  if (commit) {
+    const targetBranch =
+      (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
+    if (await isBranchMergeQueueEnabled(targetBranch)) {
+      logger.debug(`PR #${prNo} targets a branch with a merge queue`);
+      return { result: { canceled: false, reason: 'merge-queue' } };
+    }
+  }
 
   const pr = await getPrAutoMergeState(prNo);
   if (!pr) {
@@ -2366,16 +2375,6 @@ async function findAutomergeToCancel({
       `PR #${prNo} auto-merge actor does not match cancellation filter`,
     );
     return { result: { canceled: false, reason: 'enabled-by-other' } };
-  }
-
-  // refreshing the commit message is skipped for PRs targeting a branch with a merge queue, as the queue uses the PR title
-  if (commit) {
-    const targetBranch =
-      (await getPr(prNo))?.targetBranch ?? config.defaultBranch;
-    if (await isBranchMergeQueueEnabled(targetBranch)) {
-      logger.debug(`PR #${prNo} targets a branch with a merge queue`);
-      return { result: { canceled: false, reason: 'merge-queue' } };
-    }
   }
   return { pr, commitHeadline: commit?.commitHeadline };
 }
