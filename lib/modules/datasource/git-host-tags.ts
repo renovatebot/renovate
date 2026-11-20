@@ -34,10 +34,7 @@ export abstract class GitHostTagsDatasource<
    * Browser URL of the repository `packageName` on `registryUrl`, or on the
    * default registry.
    */
-  protected abstract getSourceUrl(
-    packageName: string,
-    registryUrl?: string,
-  ): string;
+  abstract getSourceUrl(packageName: string, registryUrl?: string): string;
 
   /** Fetches the tags of the repository. */
   protected abstract fetchTags(
@@ -46,10 +43,13 @@ export abstract class GitHostTagsDatasource<
 
   /**
    * Whether data from `registryUrl` may be shared through the package cache.
-   * Accepts the URL returned by {@link GitHostTagsDatasource.getRegistryUrl}.
+   * The lookups may read a private repository, so only a registry which a
+   * subclass knows to be public is shared, unless `cachePrivatePackages` is
+   * set. Accepts the URL returned by
+   * {@link GitHostTagsDatasource.getRegistryUrl}.
    */
   protected isPublic(_registryUrl: string): boolean {
-    return true;
+    return false;
   }
 
   /**

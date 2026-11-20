@@ -55,7 +55,7 @@ export abstract class GiteaDatasource extends GitHostTagsDigestDatasource<GiteaH
     );
   }
 
-  protected getSourceUrl(packageName: string, registryUrl?: string): string {
+  getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, this.getRegistryUrl(registryUrl));
   }
 

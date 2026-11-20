@@ -15,7 +15,7 @@ import type { GetReleasesConfig, GitHostTag } from '../types.ts';
 export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp> {
   static readonly id = 'github-tags';
 
-  protected getSourceUrl(packageName: string, registryUrl?: string): string {
+  getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, registryUrl);
   }
 
