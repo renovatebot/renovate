@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { logger } from '../../logger/index.ts';
+import * as memCache from '../cache/memory/index.ts';
 import type { GithubHttp } from '../http/github.ts';
 import { LooseArray } from '../schema-utils/index.ts';
 import { Timestamp } from '../timestamp.ts';
@@ -93,30 +94,62 @@ export async function fetchRestReleases(
 }
 
 /**
- * Returns the result of `fetch` when `err`, the failure of a GraphQL lookup, is a refusal because of an IP allow list.
- *
- * If `fetch` fails too, for example because the unauthenticated rate limit is exhausted, the original error is thrown.
+ * Key of the owners whose organization refused the token during this repository run.
  */
-export async function recoverFromIpAllowList<T>(
-  err: unknown,
+function ipAllowListKey({
+  packageName,
+  registryUrl,
+}: GithubPackageConfig): string {
+  const [owner] = packageName.split('/');
+  return `github-ip-allow-list:${getApiBaseUrl(registryUrl)}${owner}`;
+}
+
+/**
+ * Looks up with `graphql`, and with `rest` if an IP allow list refused the token, because the GraphQL API can't be used without one.
+ *
+ * Once an organization refused the token, `rest` is used first for its other repositories, which saves a GraphQL request which would be refused.
+ * If `rest` fails too, for example because the unauthenticated rate limit is exhausted, the GraphQL error is thrown.
+ */
+export async function withIpAllowListFallback<T>(
   config: GithubPackageConfig,
-  fetch: () => Promise<T>,
+  graphql: () => Promise<T>,
+  rest: () => Promise<T>,
 ): Promise<T> {
-  if (!isIpAllowListDenial(err)) {
-    throw err;
-  }
   const { packageName, registryUrl } = config;
-  logger.debug(
-    { packageName, registryUrl },
-    'GitHub refused the token because of an IP allow list, using the REST API without a token',
-  );
+  const key = ipAllowListKey(config);
+  let restFailed = false;
+
+  if (memCache.get<boolean>(key)) {
+    try {
+      return await rest();
+    } catch (err) {
+      restFailed = true;
+      logger.debug(
+        { err, packageName },
+        'GitHub REST API without a token failed, using the GraphQL API',
+      );
+    }
+  }
+
   try {
-    return await fetch();
-  } catch (restErr) {
+    return await graphql();
+  } catch (err) {
+    if (restFailed || !isIpAllowListDenial(err)) {
+      throw err;
+    }
+    memCache.set(key, true);
     logger.debug(
-      { err: restErr, packageName },
-      'GitHub REST API without a token failed, using the original error',
+      { packageName, registryUrl },
+      'GitHub refused the token because of an IP allow list, using the REST API without a token',
     );
-    throw err;
+    try {
+      return await rest();
+    } catch (restErr) {
+      logger.debug(
+        { err: restErr, packageName },
+        'GitHub REST API without a token failed, using the original error',
+      );
+      throw err;
+    }
   }
 }

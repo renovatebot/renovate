@@ -1,5 +1,6 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import * as memCache from '../../cache/memory/index.ts';
 import { GithubHttp } from '../../http/github.ts';
 import { GithubIpAllowListError } from '../ip-allow-list.ts';
 import { queryBranches, queryReleases, queryTags } from './index.ts';
@@ -126,6 +127,11 @@ describe('util/github/graphql/index', () => {
 
     beforeEach(() => {
       hostRules.add({ hostType: 'github', token: 'abc' });
+      memCache.init();
+    });
+
+    afterEach(() => {
+      memCache.reset();
     });
 
     function refuseGraphql(registryApi = api, path = '/graphql'): void {
@@ -240,6 +246,114 @@ describe('util/github/graphql/index', () => {
         await expect(
           queryTags({ packageName: 'foo/bar' }, http),
         ).rejects.toThrow('Something else');
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+    });
+
+    describe('after the organization refused the token', () => {
+      const tagsRepo = (name: string): string =>
+        `/repos/foo/${name}/tags?per_page=100`;
+      const tag = [{ name: 'v1.0.0', commit: { sha: 'abc123' } }];
+      const anonymous = { badheaders: ['authorization'] };
+
+      beforeEach(async () => {
+        refuseGraphql();
+        httpMock.scope(api, anonymous).get(tagsRepo('first')).reply(200, tag);
+        await queryTags({ packageName: 'foo/first' }, http);
+      });
+
+      it('reads the tags of other repositories without asking GraphQL', async () => {
+        httpMock.scope(api, anonymous).get(tagsRepo('second')).reply(200, tag);
+
+        const res = await queryTags({ packageName: 'foo/second' }, http);
+
+        expect(res).toEqual([
+          { version: 'v1.0.0', gitRef: 'v1.0.0', hash: 'abc123' },
+        ]);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('reads the releases of other repositories without asking GraphQL', async () => {
+        httpMock
+          .scope(api, anonymous)
+          .get('/repos/foo/second/releases?per_page=100')
+          .reply(200, []);
+
+        const res = await queryReleases({ packageName: 'foo/second' }, http);
+
+        expect(res).toEqual([]);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('still asks GraphQL for the repositories of other owners', async () => {
+        httpMock
+          .scope(api, { reqheaders: { authorization: 'token abc' } })
+          .post('/graphql')
+          .reply(200, {
+            data: {
+              repository: {
+                payload: {
+                  nodes: [
+                    {
+                      version: '1.2.3',
+                      target: {
+                        type: 'Commit',
+                        oid: 'abc123',
+                        releaseTimestamp: '2022-09-24',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          });
+
+        const res = await queryTags({ packageName: 'other/bar' }, http);
+
+        expect(res.map(({ version }) => version)).toEqual(['1.2.3']);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('asks GraphQL if the tags can not be read without a token', async () => {
+        httpMock
+          .scope(api)
+          .get(tagsRepo('second'))
+          .reply(403, { message: 'API rate limit exceeded for 203.0.113.1.' });
+        refuseGraphql();
+
+        await expect(
+          queryTags({ packageName: 'foo/second' }, http),
+        ).rejects.toThrow(message);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('uses GraphQL again if the organization allows the token now', async () => {
+        httpMock.scope(api).get(tagsRepo('second')).reply(404);
+        httpMock
+          .scope(api, { reqheaders: { authorization: 'token abc' } })
+          .post('/graphql')
+          .reply(200, {
+            data: {
+              repository: {
+                payload: {
+                  nodes: [
+                    {
+                      version: '2.0.0',
+                      target: {
+                        type: 'Commit',
+                        oid: 'def456',
+                        releaseTimestamp: '2023-01-01',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          });
+
+        const res = await queryTags({ packageName: 'foo/second' }, http);
+
+        expect(res.map(({ version }) => version)).toEqual(['2.0.0']);
         expect(httpMock.allUsed()).toBeTrue();
       });
     });

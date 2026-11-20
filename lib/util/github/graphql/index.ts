@@ -2,7 +2,7 @@ import type { GithubHttp } from '../../http/github.ts';
 import {
   fetchRestReleases,
   fetchRestTags,
-  recoverFromIpAllowList,
+  withIpAllowListFallback,
 } from '../rest-fallback.ts';
 import { GithubGraphqlDatasourceFetcher } from './datasource-fetcher.ts';
 import { adapter as branchesAdapter } from './query-adapters/branches-query-adapter.ts';
@@ -16,43 +16,31 @@ import type {
 } from './types.ts';
 
 /**
- * Falls back to the REST API without a token if an IP allow list refused the token, because the GraphQL API can't be used without one.
+ * Uses the REST API without a token if an IP allow list refuses the token, because the GraphQL API can't be used without one.
  */
-export async function queryTags(
+export function queryTags(
   config: GithubPackageConfig,
   http: GithubHttp,
 ): Promise<GithubTagLookupItem[]> {
-  try {
-    return await GithubGraphqlDatasourceFetcher.query(
-      config,
-      http,
-      tagsAdapter,
-    );
-  } catch (err) {
-    return await recoverFromIpAllowList(err, config, () =>
-      fetchRestTags(http, config),
-    );
-  }
+  return withIpAllowListFallback(
+    config,
+    () => GithubGraphqlDatasourceFetcher.query(config, http, tagsAdapter),
+    () => fetchRestTags(http, config),
+  );
 }
 
 /**
- * Falls back to the REST API without a token if an IP allow list refused the token, because the GraphQL API can't be used without one.
+ * Uses the REST API without a token if an IP allow list refuses the token, because the GraphQL API can't be used without one.
  */
-export async function queryReleases(
+export function queryReleases(
   config: GithubPackageConfig,
   http: GithubHttp,
 ): Promise<GithubReleaseItem[]> {
-  try {
-    return await GithubGraphqlDatasourceFetcher.query(
-      config,
-      http,
-      releasesAdapter,
-    );
-  } catch (err) {
-    return await recoverFromIpAllowList(err, config, () =>
-      fetchRestReleases(http, config),
-    );
-  }
+  return withIpAllowListFallback(
+    config,
+    () => GithubGraphqlDatasourceFetcher.query(config, http, releasesAdapter),
+    () => fetchRestReleases(http, config),
+  );
 }
 
 export async function queryBranches(
