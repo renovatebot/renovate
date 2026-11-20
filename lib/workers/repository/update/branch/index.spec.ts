@@ -4497,7 +4497,29 @@ describe('workers/repository/update/branch/index', () => {
         expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith(
           { prNo: 123 },
-          'Platform automerge stays disabled as the artifact status was not set',
+          'Platform automerge stays disabled as there were artifact update failures',
+        );
+      });
+
+      it('restores platform automerge without a commit when a step throws with artifact errors', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          canceled: true,
+        });
+        commit.prepareBranchCommit.mockResolvedValueOnce(null);
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(new Error('checkout failed'));
+        config.artifactErrors = [partial<ArtifactError>()];
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'error', prNo: 123 });
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        expect(logger.warn).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.stringContaining('artifact update failures'),
         );
       });
 

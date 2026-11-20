@@ -657,12 +657,13 @@ export async function processBranch(
           );
         } else if (
           automergeCanceledPrNo &&
+          commitSha &&
           updateFailed &&
           config.artifactErrors?.length
         ) {
           logger.warn(
             { prNo: automergeCanceledPrNo },
-            'Platform automerge stays disabled as the artifact status was not set',
+            'Platform automerge stays disabled as there were artifact update failures',
           );
         } else if (automergeCanceledPrNo) {
           await restorePlatformAutomerge(
