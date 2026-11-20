@@ -237,7 +237,6 @@ It is only expected for Renovate itself to interact with the Repository Cache.
 
 ## Recommended performance improvements
 
-<!-- prettier-ignore -->
 !!! tip
   Following these recommendations not only improve the performance for your own Renovate deployment, but make it less heavy on the registries you rely upon.
 
