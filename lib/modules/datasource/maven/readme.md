@@ -1,3 +1,10 @@
+#### Java constraints
+
+When `constraintsFiltering=strict` and the repository has a nonempty Java constraint, Renovate reads each release's POM for a literal `<java.version>` property.
+The resulting Java constraints are evaluated by Renovate's constraints filtering.
+Releases without a usable Java property, including unresolved placeholders, remain eligible for updates.
+Other filtering modes and repositories without a Java constraint do not trigger these additional POM lookups.
+
 #### Maven Central rate limiting and caching
 
 Maven Central, hosted by Sonatype, receives a very large number of requests and has implemented rate limiting measures to manage organizational overconsumption.
