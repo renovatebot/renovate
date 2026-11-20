@@ -1372,6 +1372,11 @@ async function getBranchFilesFromRef(
   }
 }
 
+/**
+ * Reads `filePath` on `branchName`, or on the current branch. Returns `null`
+ * when the file does not exist or git cannot read it. With `throwOnError`, a
+ * failed read of a file that exists throws instead of returning `null`.
+ */
 export async function getFile(
   filePath: string,
   branchName?: string,
