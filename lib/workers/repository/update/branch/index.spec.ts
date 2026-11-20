@@ -1567,7 +1567,7 @@ describe('workers/repository/update/branch/index', () => {
 
           expect(result).toEqual({
             branchExists: false,
-            prNo: branchExists ? 5 : undefined,
+            prNo: undefined,
             result: 'no-work',
           });
           expect(platform.updatePr.mock.calls).toEqual(
@@ -1614,6 +1614,7 @@ describe('workers/repository/update/branch/index', () => {
           .mockReset()
           .mockImplementationOnce((branch) => {
             branch.upgrades[1].newValue = '4.1.0';
+            branch.upgrades[1].newVersion = '4.1.0';
             return Promise.resolve({ ...updatedPackageFiles });
           });
 
@@ -1626,6 +1627,35 @@ describe('workers/repository/update/branch/index', () => {
                 depName: 'vitest',
                 currentValue: '5.0.0',
                 newValue: '5.0.0',
+              }),
+            ],
+          }),
+        );
+      });
+
+      it('keeps a lock file update whose version changed', async () => {
+        Object.assign(config.upgrades[0], {
+          currentValue: '^4.1.0',
+          newValue: '^4.1.0',
+          newVersion: '4.2.0',
+          isLockfileUpdate: true,
+        });
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementationOnce((branch) => {
+            branch.upgrades[0].newVersion = '4.1.3';
+            return Promise.resolve({ ...updatedPackageFiles });
+          });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('pr-created');
+        expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            upgrades: [
+              expect.objectContaining({
+                newValue: '^4.1.0',
+                newVersion: '4.1.3',
               }),
             ],
           }),

@@ -444,11 +444,20 @@ export async function processBranch(
         const targetChanged =
           previous.newValue !== upgrade.newValue ||
           previous.newVersion !== upgrade.newVersion;
-        return !targetChanged || upgrade.newValue !== upgrade.currentValue;
+        // lock file updates keep newValue at currentValue and change only the version
+        const versionChanged =
+          upgrade.newVersion !== undefined &&
+          upgrade.newVersion !== upgrade.currentVersion;
+        return (
+          !targetChanged ||
+          upgrade.newValue !== upgrade.currentValue ||
+          versionChanged
+        );
       });
       if (!config.upgrades.length) {
         logger.debug('No upgrades remain after updating artifacts');
         if (branchExists) {
+          // a static import creates a cycle through finalize/prune.ts and process/index.ts
           const { cleanUpBranches } = await import('../../finalize/prune.ts');
           await cleanUpBranches(
             {
@@ -462,7 +471,8 @@ export async function processBranch(
         }
         return {
           branchExists,
-          prNo: branchPr?.number,
+          // cleanup closes the PR when it deletes the branch
+          prNo: branchExists ? branchPr?.number : undefined,
           result: 'no-work',
         };
       }
