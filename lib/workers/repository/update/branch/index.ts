@@ -327,6 +327,28 @@ export async function processBranch(
         };
       }
       if (config.updateNotScheduled === false && !config.rebaseRequested) {
+        const targetsBaseBranch =
+          !branchPr?.targetBranch ||
+          branchPr.targetBranch === config.baseBranch;
+        if (
+          config.automerge &&
+          branchPr &&
+          isScheduledNow(config, 'automergeSchedule') &&
+          config.cacheFingerprintMatch !== 'no-match' &&
+          targetsBaseBranch
+        ) {
+          logger.debug(
+            'Branch update is not scheduled - checking PR automerge',
+          );
+          const prAutomergeResult = await checkAutoMerge(branchPr, config);
+          if (prAutomergeResult.automerged) {
+            return {
+              branchExists,
+              result: 'automerged',
+              commitSha,
+            };
+          }
+        }
         logger.debug('Skipping branch update as not within schedule');
         return {
           branchExists,
