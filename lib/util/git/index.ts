@@ -1417,21 +1417,31 @@ async function getFileFromRef(
     if (errChecked) {
       throw errChecked;
     }
-    if (options.throwOnError) {
-      const files = await git.raw([
-        'ls-tree',
-        '--name-only',
-        '-z',
-        ref,
-        '--',
-        filePath,
-      ]);
-      if (files) {
-        throw err;
-      }
+    if (!options.throwOnError) {
+      return null;
+    }
+    if (await fileExistsAtRef(ref, filePath)) {
+      throw err;
     }
     return null;
   }
+}
+
+// `git show` fails both when the file is missing and when git itself fails.
+// `ls-tree` lists the path only when the file exists at `ref`.
+async function fileExistsAtRef(
+  ref: string,
+  filePath: string,
+): Promise<boolean> {
+  const files = await git.raw([
+    'ls-tree',
+    '--name-only',
+    '-z',
+    ref,
+    '--',
+    filePath,
+  ]);
+  return !!files;
 }
 
 export async function getFiles(
