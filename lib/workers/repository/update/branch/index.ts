@@ -468,7 +468,7 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    let platformAutomergeRestored = false;
+    let automergeCanceledPrNo: number | undefined;
     if (!(
       config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
     )) {
@@ -626,7 +626,7 @@ export async function processBranch(
       // The commit is prepared first, as that fails for a PR in a merge queue.
       const platformPrOptions = getPlatformPrOptions(config);
       const preparedCommit = await prepareBranchCommit(config);
-      const automergeCanceledPrNo = await cancelPlatformAutomergeForPush(
+      automergeCanceledPrNo = await cancelPlatformAutomergeForPush(
         config,
         branchPr,
         platformPrOptions,
@@ -671,7 +671,6 @@ export async function processBranch(
             platformPrOptions,
             !updateFailed,
           );
-          platformAutomergeRestored = true;
         }
       }
 
@@ -695,7 +694,7 @@ export async function processBranch(
       const platformPrOptions = getPlatformPrOptions(config);
       if (
         commitSha &&
-        !platformAutomergeRestored &&
+        !automergeCanceledPrNo &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
