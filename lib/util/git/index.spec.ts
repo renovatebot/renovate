@@ -14,6 +14,7 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { postUpgradeCommandsExecutor } from '../../workers/repository/update/branch/execute-post-upgrade-commands.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../workers/types.ts';
 import { setCustomEnv } from '../env.ts';
@@ -456,6 +457,55 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
+    describe('getMergeBase(branchName, baseBranch)', () => {
+      it('returns the commit the branch forked from', async () => {
+        await expect(
+          git.getMergeBase('renovate/future_branch', defaultBranch),
+        ).resolves.toBe(git.getBranchCommit(defaultBranch));
+        await expect(
+          git.getMergeBase('renovate/past_branch', defaultBranch),
+        ).resolves.toBe(git.getBranchCommit('renovate/past_branch'));
+      });
+
+      it('returns null for an unknown branch', async () => {
+        await expect(
+          git.getMergeBase('not_found', defaultBranch),
+        ).resolves.toBeNull();
+      });
+
+      it('returns null for branches without shared history', async () => {
+        vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce('');
+
+        await expect(
+          git.getMergeBase('renovate/future_branch', defaultBranch),
+        ).resolves.toBeNull();
+      });
+
+      it('rethrows platform failures', async () => {
+        vi.stubEnv('NODE_ENV', '');
+        vi.spyOn(SimpleGit.prototype, 'raw').mockRejectedValueOnce(
+          new Error('Could not resolve host: example.com'),
+        );
+
+        await expect(
+          git.getMergeBase('renovate/future_branch', defaultBranch),
+        ).rejects.toThrow(ExternalHostError);
+      });
+    });
+
+    describe('getFileFromCommit(filePath, commit)', () => {
+      it('reads files at the commit', async () => {
+        const commit = git.getBranchCommit('renovate/past_branch')!;
+
+        await expect(git.getFileFromCommit('past_file', commit)).resolves.toBe(
+          'past',
+        );
+        await expect(
+          git.getFileFromCommit('master_file', commit, { throwOnError: true }),
+        ).resolves.toBeNull();
+      });
+    });
+
     describe('getBranchCommit(branchName)', () => {
       it('should return same value for equal refs', () => {
         const hex = git.getBranchCommit('renovate/equal_branch');
@@ -705,6 +755,36 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await expect(
           git.getFile('some-path', 'some-branch'),
         ).resolves.toBeNull();
+      });
+
+      it('confirms missing files when errors must propagate', async () => {
+        await expect(
+          git.getFile('some-missing-path', defaultBranch, {
+            throwOnError: true,
+          }),
+        ).resolves.toBeNull();
+      });
+
+      it('propagates read failures for existing files and permits retry', async () => {
+        const error = new Error('spawn git EAGAIN');
+        vi.spyOn(SimpleGit.prototype, 'show').mockRejectedValueOnce(error);
+
+        await expect(
+          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+        ).rejects.toBe(error);
+        await expect(
+          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+        ).resolves.toBe(defaultBranch);
+      });
+
+      it('propagates failures to verify whether a file exists', async () => {
+        const error = new Error('spawn git EAGAIN');
+        vi.spyOn(SimpleGit.prototype, 'show').mockRejectedValueOnce(error);
+        vi.spyOn(SimpleGit.prototype, 'raw').mockRejectedValueOnce(error);
+
+        await expect(
+          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+        ).rejects.toBe(error);
       });
 
       it('logs a warning if hidden Unciode characters are found', async () => {
@@ -1454,6 +1534,14 @@ describe('util/git/index', { timeout: 30000 }, () => {
         );
         expect(branchFiles).toEqual(['some-new-file']);
       });
+    });
+
+    it('reads the default branch when getFile is the first git operation', async () => {
+      await git.initRepo({ url: origin.path });
+
+      await expect(
+        git.getFile('master_file', undefined, { throwOnError: true }),
+      ).resolves.toBe(defaultBranch);
     });
 
     describe('getBranchFilesFromCommit(sha)', () => {
