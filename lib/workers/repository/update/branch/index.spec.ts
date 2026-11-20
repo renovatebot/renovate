@@ -1573,11 +1573,12 @@ describe('workers/repository/update/branch/index', () => {
       });
 
       it.each`
-        change                  | fields                                                         | expectedResult
-        ${'a new digest'}       | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:bbb' }}    | ${'pr-created'}
-        ${'a new package name'} | ${{ newName: '@vitest/core' }}                                 | ${'pr-created'}
-        ${'a replacement'}      | ${{ isReplacement: true }}                                     | ${'pr-created'}
-        ${'the current digest'} | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:aaabbb' }} | ${'no-work'}
+        change                       | fields                                                         | expectedResult
+        ${'a new digest'}            | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:bbb' }}    | ${'pr-created'}
+        ${'a new package name'}      | ${{ newName: '@vitest/core' }}                                 | ${'pr-created'}
+        ${'a replacement'}           | ${{ isReplacement: true }}                                     | ${'pr-created'}
+        ${'the current digest'}      | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:aaabbb' }} | ${'no-work'}
+        ${'an empty current digest'} | ${{ currentDigest: '', newDigest: 'sha256:aaabbb' }}           | ${'no-work'}
       `(
         'checks $change when a target returns to its current value',
         async ({ fields, expectedResult }) => {

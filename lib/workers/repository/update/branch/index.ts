@@ -450,9 +450,10 @@ export async function processBranch(
           upgrade.newVersion !== undefined &&
           upgrade.newVersion !== upgrade.currentVersion;
         // as in lookup, currentDigest may be a prefix of the same newDigest
-        const sameDigest = upgrade.currentDigest
-          ? upgrade.newDigest?.startsWith(upgrade.currentDigest)
-          : false;
+        const sameDigest =
+          upgrade.currentDigest === undefined
+            ? false
+            : upgrade.newDigest?.startsWith(upgrade.currentDigest);
         const digestChanged = !!upgrade.newDigest && !sameDigest;
         const renamed =
           upgrade.newName !== undefined &&
