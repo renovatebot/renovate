@@ -37,7 +37,7 @@ env RENOVATE_TOKEN=...
 
 In this example, the In-Memory Cache will be shared between all repositories being processed.
 
-In both cases, the Renovate runs execute on the same host (whether it is a VM, container or your personal laptop) and so the on-disk caches (**if configured - it's the default??**) will be shared between Renovate runs.
+In both cases, the Renovate runs execute on the same host (whether it is a VM, container or your personal laptop) and so the on-disk caches will be shared between Renovate runs.
 
 Secondly, Renovate does not intentionally cache data that should be private.
 If it believes it is interacting with a private repository and/or a private package, Renovate will not cache the data in a persistent layer (but it may be available in the In-Memory Cache).
@@ -128,10 +128,12 @@ It can be configured to be stored in an S3-compatible location using i.e. [`repo
 
 #### Which options configure it?
 
-- [`repositoryCache`](./self-hosted-configuration.md#repositorycachetype): whether to enable the Repository Cache
-- [`repositoryCacheType`](./self-hosted-configuration.md#repositorycachetype): where the Repository Cache should be stored
-- [`repositoryCacheForceLocal`](./self-hosted-configuration.md#repositorycacheforcelocal): whether to also persist it to the local filesystem if using `repositoryCacheType=s3://...`
-- [`httpCacheTtlDays`](./self-hosted-configuration.md#httpcachettldays): how many days a cached HTTP response should stay in the Repository Cache for
+- the [`repositoryCache` object](./self-hosted-configuration.md#repositorycachetype):
+  - [`repositoryCache.state`](./self-hosted-configuration.md#repositorycachestate): whether to enable the Repository Cache
+  - [`repositoryCache.type`](./self-hosted-configuration.md#repositorycachetype): where the Repository Cache should be stored
+  - [`repositoryCache.maximumHttpDays`](./self-hosted-configuration.md#repositorycachemaximumhttpdays): how many days a cached HTTP response should stay in the Repository Cache for
+  - [`repositoryCache.prSyncMaxPages`](./self-hosted-configuration.md#repositorycacheprsyncmaxpages): how many pages of Pull Requests to sync into the Repository Cache
+  - [`repositoryCache.forceLocal`](./self-hosted-configuration.md#repositorycacheforcelocal): whether to also persist it to the local filesystem if using `repositoryCacheType=s3://...`
 
 #### Is there any expected stability on the format of the Repository Cache?
 
@@ -142,7 +144,19 @@ It is only expected for Renovate itself to interact with the Repository Cache.
 
 #### How do I invalidate the cache?
 
-**??**
+It is not possible for a _user_ to invalidate the Package Cache.
+
+A self-hosted administrator can use the following options to invalidate the cache:
+
+- **Redis:** delete the relevant keys or prefix
+- **Local file:** remove the relevant local package cache storage
+- **SQLite:** remove the relevant database or storage
+
+If you only wish to invalidate the HTTP calls that are cached, you can set [`repositoryCache.maximumHttpDays=0`](./self-hosted-configuration.md#repositorycachemaximumhttpdays).
+
+Although it may **??**, [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) changes freshness; it is not an immediate deletion.
+
+After invalidating the cache, this will be recreated by Renovate on the next run, if `repositoryCache.state=enabled`.
 
 ### Package Cache
 
@@ -233,6 +247,7 @@ It is only expected for Renovate itself to interact with the Repository Cache.
 1. **Strongly recommended**: Set the Package Cache to use Redis, or the `cacheDir` to a persistent volume shared across runs
 1. Preferably: Set the Repository Cache to use an S3-compatible backend
 
+```
 ## Clearing the cahce **??**
 
 **??** Renovate does some - but it's in caharge of doing so
@@ -242,6 +257,37 @@ Redis doesn't automagically clear it
 So you may sometimes want/need to**??**
 
 Check the **??** namespaces
+```
+
+## Related storage locations
+
+There are also **??**
+
+### Package manager caches
+
+In the case that Renovate executes commands that trigger a package manager to run, for instance `go mod tidy`, then there may be some downloads + caching that the package manager itself may do.
+
+Where possible, Renovate will centralize these cache locations under [`cacheDir`](./self-hosted-configuration.md#cachedir), i.e. in `$cacheDir/others/go` and `$cacheDir/others/yarn`.
+
+Note that this directory can grow over time (as noted in [#33612](https://github.com/renovatebot/renovate/discussions/33612)), so should be periodically cleaned up, if you are running long-lived hosts and/or persistently caching the `cacheDir`.
+
+#### How do I invalidate the cache?
+
+You can invalid the cache for package managers by browsing to your [`cacheDir`](./self-hosted-configuration.md#cachedir), and deleting relevant folders under `$cacheDir/others`
+
+We recommend you only do this when Renovate is not running, otherwise it could cause package manager processes to fail in unexpected ways.
+
+After invalidating the cache, this will be re-filled as package managers execute.
+
+### Persistent repo storage
+
+By default, Renovate does not **??**.
+
+When using [`persistRepoData`](./self-hosted-configuration.md#persistrepodata), **??**.
+
+Renovate **??**.
+
+#### How do I invalidate the cache?
 
 ## FAQs
 
@@ -291,15 +337,7 @@ When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stal
 - If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
 Note that this is a **??**, not **??**.
-‼️‼️ When using Redis, this is not enforced on Redis' side, and **??**. https://renovatebot.slack.com/archives/CAFH752JU/p1795090102134079 ‼️‼️
-
-### What happens to package manager caches?
-
-In the case that Renovate executes commands that trigger a package manager to run, for instance `go mod tidy`, then there may be some downloads + caching that the package manager itself may do.
-
-Where possible, Renovate will centralize these cache locations under [`cacheDir`](./self-hosted-configuration.md#cachedir), i.e. in `$cacheDir/others/go` and `$cacheDir/others/yarn`.
-
-Note that this directory can grow over time (as noted in [#33612](https://github.com/renovatebot/renovate/discussions/33612)), so should be periodically cleaned up, if you are running long-lived hosts and/or persistently caching the `cacheDir`.
+‼️‼️ When using Redis, this is enforced on Redis' side, and **??** expiry managed **??**. https://renovatebot.slack.com/archives/CAFH752JU/p1795090102134079 ‼️‼️
 
 ### Where are HTTP responses cached?
 
@@ -347,7 +385,7 @@ It is possible to use [`persistRepoData`](./self-hosted-configuration.md#persist
 
 ### How do I invalidate the cache?
 
-It is not currently possible for a _user_ to invalidate the cache.
+It is not possible for a _user_ to invalidate the Repository Cache.
 
 A self-hosted administrator can use the following options to invalidate the cache:
 

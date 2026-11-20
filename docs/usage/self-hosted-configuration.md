@@ -1202,7 +1202,7 @@ If not, then Renovate skips the repository without cloning it.
 
 <!-- prettier-ignore -->
 !!! tip
-    See the [caching deep-dive](./caching.md#package-cache) for more information about how the Package Cache works.
+  See the [caching deep-dive](./caching.md#package-cache) for more information about how the Package Cache works.
 
 The `packageCache` object configures Renovate's package cache, which stores lookup results (e.g. dependency versions and changelogs) between repositories and runs.
 
@@ -1565,7 +1565,7 @@ module.exports = {
 
 <!-- prettier-ignore -->
 !!! tip
-    See the [caching deep-dive](./caching.md#repository-cache) for more information about how the Repository Cache works.
+  See the [caching deep-dive](./caching.md#repository-cache) for more information about how the Repository Cache works.
 
 The `repositoryCache` object configures the JSON cache which Renovate maintains per-repository to speed up extractions.
 
