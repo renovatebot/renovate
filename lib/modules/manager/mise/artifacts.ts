@@ -155,7 +155,7 @@ export async function updateArtifacts({
   newLockFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const lockFileName = getLockFileName(packageFileName);
+  const lockFileName = await getLockFileName(packageFileName);
   const originalLockFileContent = await readLocalFile(lockFileName, 'utf8');
   const currentLockFileContent = newLockFileContent ?? originalLockFileContent;
   if (!currentLockFileContent) {
