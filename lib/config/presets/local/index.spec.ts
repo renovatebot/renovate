@@ -100,6 +100,24 @@ describe('config/presets/local/index', () => {
       expect(content).toEqual({ resolved: 'preset' });
     });
 
+    it('forwards to onedev', async () => {
+      GlobalConfig.set({
+        platform: 'onedev',
+        endpoint: 'https://onedev.example.com',
+      });
+      const content = await local.getPreset({
+        repo: 'some/repo',
+        presetName: 'default',
+      });
+
+      expect(platform.getRawFile).toHaveBeenCalledExactlyOnceWith(
+        'default.json',
+        'some/repo',
+        undefined,
+      );
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
     it('forwards to custom bitbucket-server', async () => {
       GlobalConfig.set({
         platform: 'bitbucket-server',

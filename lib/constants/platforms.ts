@@ -9,6 +9,7 @@ export const PLATFORM_HOST_TYPES = [
   'github',
   'gitlab',
   'local',
+  'onedev',
   'scm-manager',
 ] as const;
 
