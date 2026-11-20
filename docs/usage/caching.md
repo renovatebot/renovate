@@ -87,7 +87,6 @@ The Repository Cache includes metadata about repositories to reduce the work tha
 
 The Repository Cache is primarily aimed at reducing the work that Renovate needs to be perform each time it executes against a repository, and limiting the API requests it needs to send to the configured Platform.
 
-<!-- prettier-ignore -->
 !!! note
   This only contains **metadata** about the repository, not the repository itself.
   <br>
@@ -100,12 +99,12 @@ The Repository Cache is primarily aimed at reducing the work that Renovate needs
 This cache includes (among other information):
 
 <!-- markdownlint-disable MD007 -->
-<!-- prettier-ignore -->
+
 - `configFileName`: this repository's filename i.e. `renovate.json5`
 - `branches`: information about the branches Renovate is currently managing, and:
-    - whether they are associated with a PR
-    - what update(s) are in the given branch
-    - whether the branch is conflicted/behind the base branch or if it's been modified by someone other than Renovate
+  - whether they are associated with a PR
+  - what update(s) are in the given branch
+  - whether the branch is conflicted/behind the base branch or if it's been modified by someone other than Renovate
 - `onboardingBranchCache`, `reconfigureBranchCache`: cache for the state of the onboarding/reconfigure branches
 - `platform`: specific information for the given Platform, such as a cache of all PRs
 - `httpCache`/`httpCacheHead`: cached repository-specific HTTP responses
@@ -164,7 +163,6 @@ The Package Cache includes metadata about package releases, their changelogs, an
 
 The Package Cache is primarily aimed at improving quality-of-life for upstream providers, such as package registries.
 
-<!-- prettier-ignore -->
 !!! tip
   The Package Cache is one of the most important areas to configure as a self-hosted Administrator.
   <br>
@@ -177,12 +175,12 @@ The Package Cache is primarily aimed at improving quality-of-life for upstream p
 The Package Cache contains:
 
 <!-- markdownlint-disable MD007 -->
-<!-- prettier-ignore -->
+
 - HTTP responses from Datasources
-    - See below for the full list of namespaces
+  - See below for the full list of namespaces
 - GitHub GraphQL data for GitHub releases/tags
-    - If the repo is public, any tags/releases will be stored in the cache
-    - If the repo is private, any tags/releases will be cached in-memory in the Renovate process (and subsequent Renovate runs will need to re-fetch the data)
+  - If the repo is public, any tags/releases will be stored in the cache
+  - If the repo is private, any tags/releases will be cached in-memory in the Renovate process (and subsequent Renovate runs will need to re-fetch the data)
 
 <details markdown>
 
@@ -204,7 +202,6 @@ When using the local filesystem, the [cacache](https://www.npmjs.com/package/cac
 
 When the [`redisUrl`](./self-hosted-configuration.md#redisurl) self-hosted configuration option is set, the Package Cache will be stored in Redis.
 
-<!-- prettier-ignore -->
 Renovate has experimental support for using SQLite as the Package Cache backend, which can be configured using [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache).
 
 <!-- markdownlint-disable MD024 -->
@@ -391,7 +388,6 @@ A self-hosted administrator can use the following options to invalidate the cach
 
 For the Repository Cache, a self-hosted administrator can use [`repositoryCache=reset`](./self-hosted-configuration.md#repositorycache).
 
-<!-- prettier-ignore -->
 !!! tip
   If resetting the cache for a specific repo, it is worthwhile making sure you target only a specific repository, for instance using the [`repositories`](./self-hosted-configuration.md#repositories) configuration option.
 
