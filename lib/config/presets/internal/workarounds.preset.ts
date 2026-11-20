@@ -269,6 +269,22 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
+          'Parse four-part Eclipse Temurin tags (e.g. 17.0.4.1_1) so out-of-band releases are offered.',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['eclipse-temurin'],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(\\.(?<build>\\d+))?(_(?<revision>\\d+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
+          'Parse four-part Eclipse Temurin tags (e.g. 17.0.4.1_1) so out-of-band releases are offered.',
+        matchDatasources: ['docker'],
+        matchDepNames: ['eclipse-temurin'],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(\\.(?<build>\\d+))?(_(?<revision>\\d+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
           'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
         matchCurrentValue: '/^\\d+(-|$)/',
         matchDatasources: ['docker'],
