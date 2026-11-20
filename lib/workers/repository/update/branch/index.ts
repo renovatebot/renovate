@@ -446,6 +446,7 @@ export async function processBranch(
           previous.newVersion !== upgrade.newVersion;
         // lock file updates keep newValue at currentValue and change only the version
         const versionChanged =
+          upgrade.currentVersion !== undefined &&
           upgrade.newVersion !== undefined &&
           upgrade.newVersion !== upgrade.currentVersion;
         return (

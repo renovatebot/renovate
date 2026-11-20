@@ -1633,6 +1633,25 @@ describe('workers/repository/update/branch/index', () => {
         );
       });
 
+      it('drops a no-op target without a current version', async () => {
+        Object.assign(config.upgrades[0], {
+          currentValue: 'latest',
+          currentVersion: undefined,
+        });
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementationOnce((branch) => {
+            branch.upgrades[0].newValue = 'latest';
+            branch.upgrades[0].newVersion = '4.1.0';
+            return Promise.resolve({ ...updatedPackageFiles });
+          });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('no-work');
+        expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+      });
+
       it('keeps a lock file update whose version changed', async () => {
         Object.assign(config.upgrades[0], {
           currentValue: '^4.1.0',
