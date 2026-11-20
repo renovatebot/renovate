@@ -55,7 +55,7 @@ describe('modules/manager/mise/index', () => {
 
   describe('mise registry', () => {
     // mise backends that Renovate doesn't currently support
-    const knownUnsupportedBackends = new Set(['http', 'packslip']);
+    const knownUnsupportedBackends = new Set(['http']);
 
     it('recognises every backend type used in the bundled mise registry data', () => {
       const usedBackends = new Set<string>();

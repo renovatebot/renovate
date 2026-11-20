@@ -30,6 +30,7 @@ import {
   createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
+  createPackslipToolConfig,
   createPipxToolConfig,
   createPypiToolConfig,
   createSpmToolConfig,
@@ -329,6 +330,8 @@ function getToolConfig(
       return createGoToolConfig(toolName);
     case 'npm':
       return createNpmToolConfig(toolName);
+    case 'packslip':
+      return createPackslipToolConfig(toolName, version);
     case 'pipx':
       return createPipxToolConfig(toolName);
     case 'pypi':
