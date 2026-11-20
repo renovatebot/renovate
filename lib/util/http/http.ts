@@ -385,7 +385,7 @@ export abstract class HttpBase<
         return staleResponse;
       }
 
-      if (this.shouldRetryWithoutAuth(options, err)) {
+      if (this.shouldRetryWithoutAuth(resolvedUrl, options, err)) {
         const retryOptions = withoutAuth(httpOptions);
         try {
           return await this.request(requestUrl, retryOptions);
@@ -436,6 +436,7 @@ export abstract class HttpBase<
    * If the repeated request fails too, the original error is handled as usual.
    */
   protected shouldRetryWithoutAuth(
+    _url: URL,
     _options: InternalHttpOptions,
     _err: unknown,
   ): boolean {

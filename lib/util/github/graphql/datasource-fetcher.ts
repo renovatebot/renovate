@@ -13,6 +13,10 @@ import type {
 } from '../../http/github.ts';
 import type { HttpResponse } from '../../http/types.ts';
 import { regEx } from '../../regex.ts';
+import {
+  GithubIpAllowListError,
+  findIpAllowListGraphqlMessage,
+} from '../ip-allow-list.ts';
 import { getApiBaseUrl } from '../url.ts';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
@@ -149,6 +153,10 @@ export class GithubGraphqlDatasourceFetcher<
     const { data, errors } = body;
 
     if (errors?.length) {
+      const ipAllowListMessage = findIpAllowListGraphqlMessage(errors);
+      if (ipAllowListMessage) {
+        return [null, new GithubIpAllowListError(ipAllowListMessage)];
+      }
       if (errors.length === 1) {
         const { message } = errors[0];
         const err = new Error(message);

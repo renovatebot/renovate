@@ -865,18 +865,30 @@ describe('util/http/github', () => {
       });
 
       it('retries a refused read request with a body', async () => {
-        denyToken('/graphql', 'post');
+        denyToken('/search', 'post');
         httpMock
           .scope(githubApiHost, { badheaders: ['authorization'] })
-          .post('/graphql')
-          .reply(200, { data: {} });
+          .post('/search')
+          .reply(200, { items: [] });
 
-        const res = await githubApi.postJson('/graphql', {
-          body: { query: 'query { viewer { login } }' },
+        const res = await githubApi.postJson('/search', {
+          body: { query: 'renovate' },
           readOnly: true,
         });
 
-        expect(res.body).toEqual({ data: {} });
+        expect(res.body).toEqual({ items: [] });
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not retry GraphQL, which needs a token', async () => {
+        denyToken('/graphql', 'post');
+
+        await expect(
+          githubApi.postJson('/graphql', {
+            body: { query: 'query {}' },
+            readOnly: true,
+          }),
+        ).rejects.toThrow(ipAllowListError);
         expect(httpMock.allUsed()).toBeTrue();
       });
 
@@ -946,109 +958,6 @@ describe('util/http/github', () => {
           expect(httpMock.allUsed()).toBeTrue();
         },
       );
-    });
-
-    describe('GraphQL', () => {
-      const forbidden = {
-        type: 'FORBIDDEN',
-        message: ipAllowListMessage,
-        path: ['repository'],
-      };
-      const refused = { data: { repository: null }, errors: [forbidden] };
-      const options = { readOnly: true, body: { query: 'query {}' } };
-
-      function denyGraphql(response: string | object = refused): void {
-        httpMock
-          .scope(githubApiHost, { reqheaders: { authorization: 'token abc' } })
-          .post('/graphql')
-          .reply(200, response);
-      }
-
-      it('retries a read refused in a successful response', async () => {
-        denyGraphql();
-        const data = { data: { repository: { name: 'repo' } } };
-        httpMock
-          .scope(githubApiHost, { badheaders: ['authorization'] })
-          .post('/graphql')
-          .reply(200, data);
-
-        const res = await githubApi.postJson('/graphql', options);
-
-        expect(res.body).toEqual(data);
-        expect(httpMock.allUsed()).toBeTrue();
-      });
-
-      it('keeps the original response when the retry reports errors', async () => {
-        denyGraphql();
-        httpMock
-          .scope(githubApiHost, { badheaders: ['authorization'] })
-          .post('/graphql')
-          .reply(200, {
-            data: { repository: null },
-            errors: [{ type: 'NOT_FOUND', message: 'Could not resolve' }],
-          });
-
-        const res = await githubApi.postJson('/graphql', options);
-
-        expect(res.body).toEqual(refused);
-        expect(httpMock.allUsed()).toBeTrue();
-      });
-
-      it('keeps the original response when the retry fails', async () => {
-        denyGraphql();
-        httpMock
-          .scope(githubApiHost, { badheaders: ['authorization'] })
-          .post('/graphql')
-          .reply(502);
-
-        const res = await githubApi.postJson('/graphql', options);
-
-        expect(res.body).toEqual(refused);
-        expect(httpMock.allUsed()).toBeTrue();
-      });
-
-      it('retries a read without the read-only option', async () => {
-        httpMock
-          .scope(githubApiHost, { reqheaders: { authorization: 'token abc' } })
-          .get('/graphql')
-          .reply(200, refused);
-        httpMock
-          .scope(githubApiHost, { badheaders: ['authorization'] })
-          .get('/graphql')
-          .reply(200, { data: {} });
-
-        const res = await githubApi.getJsonUnchecked('/graphql');
-
-        expect(res.body).toEqual({ data: {} });
-        expect(httpMock.allUsed()).toBeTrue();
-      });
-
-      it.each`
-        description                  | response                                                            | opts
-        ${'a mutation'}              | ${refused}                                                          | ${{ body: { query: 'mutation {}' } }}
-        ${'read-only set to false'}  | ${refused}                                                          | ${{ ...options, readOnly: false }}
-        ${'no authorization'}        | ${refused}                                                          | ${{ ...options, noAuth: true }}
-        ${'a bare message'}          | ${{ errors: [{ message: ipAllowListMessage }] }}                    | ${options}
-        ${'another error type'}      | ${{ errors: [{ type: 'NOT_FOUND', message: ipAllowListMessage }] }} | ${options}
-        ${'another forbidden error'} | ${{ errors: [{ type: 'FORBIDDEN', message: 'Forbidden' }] }}        | ${options}
-        ${'a rate limit'}            | ${{ errors: [forbidden, { type: 'RATE_LIMITED' }] }}                | ${options}
-        ${'no errors'}               | ${{ data: {} }}                                                     | ${options}
-        ${'an invalid errors list'}  | ${{ errors: 'FORBIDDEN' }}                                          | ${options}
-        ${'an invalid error'}        | ${{ errors: ['FORBIDDEN'] }}                                        | ${options}
-        ${'an invalid body'}         | ${[]}                                                               | ${options}
-      `('does not retry $description', async ({ response, opts }) => {
-        const scope = httpMock.scope(githubApiHost);
-        if (opts.noAuth) {
-          scope.post('/graphql').reply(200, response);
-        } else {
-          denyGraphql(response);
-        }
-
-        const res = await githubApi.postJson('/graphql', opts);
-
-        expect(res.body).toEqual(response);
-        expect(httpMock.allUsed()).toBeTrue();
-      });
     });
   });
 

@@ -262,8 +262,13 @@ It is also OK to configure the same as a host rule instead, if you prefer that.
 Some GitHub organizations use an IP allow list.
 GitHub refuses a token that is used from an address outside of the allow list, even if the repository is public and can be read without a token.
 
-If GitHub names the IP allow list in its refusal of a read-only request, Renovate repeats that request once without credentials.
-Renovate still reports the original error if the repository is private, or if the repeated request fails.
+If GitHub names the IP allow list in its refusal, Renovate reads the public data without a token:
+
+- Renovate repeats a refused read-only REST request once without credentials.
+- GitHub's GraphQL API can't be used without a token, so Renovate reads the tags and releases of the repository with the REST API instead.
+  The REST API does not tell when a tag was created, so such a tag has no release timestamp unless it also has a release.
+
+Renovate still reports the original error if the repository is private, or if the request without credentials fails.
 
 Requests without credentials have a much lower hourly rate limit, per IP address, than requests with a token.
 This means that many dependencies in organizations with an IP allow list can exhaust the rate limit.

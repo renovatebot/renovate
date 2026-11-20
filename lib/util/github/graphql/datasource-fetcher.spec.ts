@@ -1,4 +1,3 @@
-import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
@@ -6,6 +5,7 @@ import type { Timestamp } from '../../../util/timestamp.ts';
 import type { GithubGraphqlResponse } from '../../http/github.ts';
 import { GithubHttp } from '../../http/github.ts';
 import { range } from '../../range.ts';
+import { GithubIpAllowListError } from '../ip-allow-list.ts';
 import {
   GithubGraphqlDatasourceFetcher as Datasource,
   GithubGraphqlDatasourceFetcher,
@@ -166,54 +166,40 @@ describe('util/github/graphql/datasource-fetcher', () => {
     });
 
     describe('when an IP allow list refuses the token', () => {
-      const ipAllowListError = {
-        type: 'FORBIDDEN',
-        message:
-          'Although you appear to have the correct authorization credentials, the `foo` organization has an IP allow list enabled, and 203.0.113.1 is not permitted to access this resource.',
-      };
+      const message =
+        'Although you appear to have the correct authorization credentials, the `foo` organization has an IP allow list enabled, and 203.0.113.1 is not permitted to access this resource.';
 
-      beforeEach(() => {
-        hostRules.add({ hostType: 'github', token: 'abc' });
+      it('throws an error which tells that', async () => {
         httpMock
-          .scope('https://api.github.com/', {
-            reqheaders: { authorization: 'token abc' },
-          })
+          .scope('https://api.github.com/')
           .post('/graphql')
           .reply(200, {
             data: { repository: null },
-            errors: [ipAllowListError],
+            errors: [{ type: 'FORBIDDEN', message }],
           });
-      });
 
-      it('queries without authorization', async () => {
-        httpMock
-          .scope('https://api.github.com/', { badheaders: ['authorization'] })
-          .post('/graphql')
-          .reply(
-            200,
-            resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
-          );
-
-        const res = await Datasource.query(
-          { packageName: 'foo/bar' },
-          http,
-          adapter,
+        const res = await catchError(() =>
+          Datasource.query({ packageName: 'foo/bar' }, http, adapter),
         );
 
-        expect(res).toEqual([
-          { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
-        ]);
+        expect(res).toBeInstanceOf(GithubIpAllowListError);
+        expect(res.message).toBe(message);
       });
 
-      it('throws the original error when the repository is not public', async () => {
+      it('throws the original error for another forbidden error', async () => {
         httpMock
-          .scope('https://api.github.com/', { badheaders: ['authorization'] })
+          .scope('https://api.github.com/')
           .post('/graphql')
-          .reply(200, err('Could not resolve to a Repository'));
+          .reply(200, {
+            errors: [{ type: 'FORBIDDEN', message: 'Resource is forbidden' }],
+          });
 
-        await expect(() =>
+        const res = await catchError(() =>
           Datasource.query({ packageName: 'foo/bar' }, http, adapter),
-        ).rejects.toThrow(ipAllowListError.message);
+        );
+
+        expect(res).not.toBeInstanceOf(GithubIpAllowListError);
+        expect(res.message).toBe('Resource is forbidden');
       });
     });
 
