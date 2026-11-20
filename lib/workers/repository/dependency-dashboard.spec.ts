@@ -1826,7 +1826,7 @@ None detected
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           const body = platform.ensureIssue.mock.calls[0][0].body;
           expect(body).toContain(
-            ' - `js-yaml ^4.1.0` → [Updates: `lock file @ 4.1.1`, `^5.0.0`]',
+            ' - `js-yaml ^4.1.0 (locked: 4.1.0)` → [Updates: `^4.1.0 (locked: 4.1.1)`, `^5.0.0`]',
           );
         });
 
@@ -2313,6 +2313,99 @@ None detected
 
         beforeEach(() => {
           PackageFiles.clear();
+        });
+
+        it('shows selectors and resolved versions for lockfile updates', () => {
+          PackageFiles.add('main', {
+            mise: [
+              {
+                packageFile: 'mise.toml',
+                deps: [
+                  {
+                    depName: 'node',
+                    currentValue: 'latest',
+                    lockedVersion: '22.15.0',
+                    updates: [
+                      {
+                        isLockfileUpdate: true,
+                        newValue: 'latest',
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'concrete-node',
+                    currentValue: '22.15.0',
+                    lockedVersion: '22.15.0',
+                    updates: [
+                      {
+                        isLockfileUpdate: true,
+                        newValue: '22.16.0',
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'digest-only-node',
+                    currentDigest: 'sha256:old',
+                    updates: [
+                      {
+                        isLockfileUpdate: true,
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'non-lockfile-node',
+                    currentValue: 'latest',
+                    lockedVersion: '22.15.0',
+                    updates: [
+                      {
+                        newValue: '22.16.0',
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'version-only-node',
+                    currentValue: 'latest',
+                    lockedVersion: '22.15.0',
+                    updates: [
+                      {
+                        isLockfileUpdate: true,
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'unknown-version-node',
+                    currentValue: 'latest',
+                    lockedVersion: '22.15.0',
+                    updates: [{ isLockfileUpdate: true }],
+                  },
+                ],
+              },
+            ],
+          });
+
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `node latest (locked: 22.15.0)` → [Updates: `latest (locked: 22.16.0)`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `concrete-node 22.15.0` → [Updates: `22.16.0`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `digest-only-node sha256:old` → [Updates: `22.16.0`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `non-lockfile-node latest` → [Updates: `22.16.0`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `version-only-node latest (locked: 22.15.0)` → [Updates: `22.16.0`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `unknown-version-node latest (locked: 22.15.0)` → [Updates: `unknown version`]',
+          );
         });
 
         it('does not truncates as there is enough space to fit', () => {
