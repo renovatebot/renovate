@@ -370,6 +370,96 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
     });
 
+    it('chains the refreshed mise lockfile into later artifact updates', async () => {
+      config.upgrades.push(
+        {
+          packageFile: 'conf.d/lint.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          isLockfileUpdate: true,
+          isLockfileOnly: true,
+          depName: 'github:Boshen/cargo-shear',
+          currentVersion: '1.14.0',
+          newVersion: '1.14.1',
+        },
+        {
+          packageFile: 'conf.d/test.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          depName: 'npm:prettier',
+          currentVersion: '3.9.10',
+          newVersion: '3.10.1',
+        },
+      );
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({
+        status: 'updated',
+        files: {
+          'conf.d/lint.toml': 'lint config',
+          'mise.lock': 'lock with shear bump',
+        },
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('test config');
+      mise.updateArtifacts
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'mise.lock',
+              contents: 'lock refreshed for lint',
+            },
+          },
+          {
+            file: {
+              type: 'addition',
+              path: 'mise.sidecar.lock',
+              contents: 'sidecar text',
+            },
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'mise.lock',
+              contents: 'lock refreshed for lint and test',
+            },
+          },
+        ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(mise.updateArtifacts).toHaveBeenCalledTimes(2);
+      expect(mise.updateArtifacts).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          packageFileName: 'conf.d/lint.toml',
+          newLockFileContent: 'lock with shear bump',
+        }),
+      );
+      expect(mise.updateArtifacts).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          packageFileName: 'conf.d/test.toml',
+          newLockFileContent: 'lock refreshed for lint',
+        }),
+      );
+      expect(result.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: 'lock refreshed for lint and test',
+        },
+        {
+          type: 'addition',
+          path: 'mise.sidecar.lock',
+          contents: 'sidecar text',
+        },
+      ]);
+    });
+
     it('retains ordinary lockfile changes when artifact refresh fails', async () => {
       config.upgrades.push({
         packageFile: 'mise.toml',
