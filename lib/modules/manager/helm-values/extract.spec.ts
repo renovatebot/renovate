@@ -324,5 +324,63 @@ describe('modules/manager/helm-values/extract', () => {
         },
       ]);
     });
+
+    it('skips an inline image containing Helm template variables', () => {
+      const content = codeBlock`
+        initContainers:
+          - name: db-migrations
+            image: "{{ .Values.global.image.registry}}/{{ .Values.image.repository }}:{{
+              .Values.image.tag }}"
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          depName:
+            '{{ .Values.global.image.registry}}/{{ .Values.image.repository }}',
+          currentValue: '{{ .Values.image.tag }}',
+          datasource: 'docker',
+          skipReason: 'contains-variable',
+        },
+      ]);
+    });
+
+    it.each`
+      field           | image
+      ${'registry'}   | ${{ registry: '{{ .Values.global.registry }}', repository: 'org/app', tag: '1.0.0' }}
+      ${'repository'} | ${{ registry: 'ghcr.io', repository: '{{ .Values.repo }}', tag: '1.0.0' }}
+      ${'tag'}        | ${{ registry: 'ghcr.io', repository: 'org/app', tag: '{{ .Chart.AppVersion }}' }}
+      ${'version'}    | ${{ registry: 'ghcr.io', repository: 'org/app', version: '{{ .Chart.AppVersion }}' }}
+    `(
+      'skips an image map with a templated $field',
+      ({ image }: { image: Record<string, string> }) => {
+        const content = JSON.stringify({ image });
+        const result = extractPackageFile(content, packageFile, config);
+        expect(result?.deps).toMatchObject([
+          {
+            depName: `${image.registry}/${image.repository}`,
+            currentValue: image.tag ?? image.version,
+            datasource: 'docker',
+            skipReason: 'contains-variable',
+          },
+        ]);
+      },
+    );
+
+    it('skips an inline image with a templated sibling tag key', () => {
+      const content = codeBlock`
+        cli:
+          image: ghcr.io/fluxcd/flux-cli
+          tag: "{{ .Chart.AppVersion }}"
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'ghcr.io/fluxcd/flux-cli',
+          currentValue: '{{ .Chart.AppVersion }}',
+          datasource: 'docker',
+          skipReason: 'contains-variable',
+        },
+      ]);
+    });
   });
 });
