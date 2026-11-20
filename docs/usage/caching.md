@@ -35,7 +35,7 @@ env RENOVATE_TOKEN=...
   renovatebot/renovate containerbase/base
 ```
 
-In this example, the In-Memory Cache will be shared between all repositories being processed.
+In this example, the **In-Memory Cache will be shared between all repositories being processed**.
 
 In both cases, the Renovate runs execute on the same host (whether it is a VM, container or your personal laptop) and so the on-disk caches will be shared between Renovate runs.
 
@@ -59,7 +59,9 @@ Renovate uses 3 types of cache:
 
 ### In-Memory Cache
 
-The In-Memory Cache includes any short-lived data which is worth caching within a given Renovate run (for a single repo or against multiple), but is not worth persisting for more long-term access.
+The In-Memory Cache includes any short-lived data which is worth caching for a Renovate run against a single repo, but is not worth persisting for more long-term access.
+
+When Renovate is running against multiple repos, the In-Memory Cache is cleared before a new repository starts processing.
 
 <!-- markdownlint-disable MD024 -->
 
@@ -81,7 +83,11 @@ As soon as the Renovate process exits, all data is lost.
 
 It is not configurable.
 
-### Repository Cache
+#### How do I invalidate the cache?
+
+It is invalidated as soon as the Renovate process exits.
+
+### Repository CacheAs soon as the Renovate process exits
 
 The Repository Cache includes metadata about repositories to reduce the work that Renovate will need to perform on future runs.
 
@@ -153,7 +159,7 @@ A self-hosted administrator can use the following options to invalidate the cach
 
 If you only wish to invalidate the HTTP calls that are cached, you can set [`repositoryCache.maximumHttpDays=0`](./self-hosted-configuration.md#repositorycachemaximumhttpdays).
 
-Although it may **??**, [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) changes freshness; it is not an immediate deletion.
+Although it may **??**, [`packageCache.ttlOverride`](./configuration-options.md#packagecachettloverride) changes freshness; it is not an immediate deletion.
 
 After invalidating the cache, this will be recreated by Renovate on the next run, if `repositoryCache.state=enabled`.
 
@@ -186,7 +192,7 @@ The Package Cache contains:
 
 <summary>Package Cache Namespaces</summary>
 
-The following namespaces are used (and explained in more detail in the [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) docs):
+The following namespaces are used (and explained in more detail in the [`packageCache.ttlOverride`](./configuration-options.md#packagecachettloverride) docs):
 
 <!-- Autogenerate cache-namespaces -->
 
@@ -200,7 +206,7 @@ By default, the Package Cache is stored in the local filesystem, under the [`cac
 
 When using the local filesystem, the [cacache](https://www.npmjs.com/package/cacache) library is used.
 
-When the [`redisUrl`](./self-hosted-configuration.md#redisurl) self-hosted configuration option is set, the Package Cache will be stored in Redis.
+When the [`packageCache.redisUrl`](./configuration-options.md#packagecacheredisurl) self-hosted configuration option is set, the Package Cache will be stored in Redis.
 
 Renovate has experimental support for using SQLite as the Package Cache backend, which can be configured using [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache).
 
@@ -209,12 +215,14 @@ Renovate has experimental support for using SQLite as the Package Cache backend,
 #### Which options configure it?
 
 - [`packageCache` object](./self-hosted-configuration.md#packagecache):
-  - [`hardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes): maximum duration to keep datasource cache entries
-  - [`presetPersistence`](./self-hosted-configuration.md#presetcachepersistence): whether to cache remote presets in the Package Cache
-  - [`privatePackages`](./self-hosted-configuration.md#cacheprivatepackages): cache private packages (See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details)
-  - [`redisPrefix`](./self-hosted-configuration.md#redisprefix): a prefix for the key names in Redis
-  - [`redisUrl`](./self-hosted-configuration.md#redisurl): when configured, use Redis for the Package Cache
-  - [`ttlOverride`](./self-hosted-configuration.md#cachettloverride): overrides for the expiry/TTL of specified datasource cache entries
+  - [`packageCache.hardTtlMinutes`](./configuration-options.md#packagecachehardttlminutes): maximum duration to keep datasource cache entries
+  - [`packageCache.presetPersistence`](./self-hosted-configuration.md#packagecachepresetpersistence): whether to cache remote presets in the Package Cache
+  - [`packagecachepresetpersistence`](./configuration-options.md#packagecachepresetpersistence): cache private packages (See [What happens to HTTP calls that require authentication?](#what-happens-to-http-calls-that-require-authentication) and [What happens to private packages being retrieved?](#what-happens-to-private-packages-being-retrieved) below for more details)
+
+  - [`packageCache.redisPrefix`](./configuration-options.md#packagecacheredisprefix): a prefix for the key names in Redis
+  - [`packageCache.redisUrl`](./configuration-options.md#packagecacheredisurl): when configured, use Redis for the Package Cache
+  - [`packageCache.ttlOverride`](./configuration-options.md#packagecachettloverride): overrides for the expiry/TTL of specified datasource cache entries
+
 - [`RENOVATE_X_SQLITE_PACKAGE_CACHE`](./self-hosted-experimental.md#renovate_x_sqlite_package_cache): use SQLite as the Package Cache backend
 - [`RENOVATE_X_SQLITE_BUSY_TIMEOUT`](./self-hosted-experimental.md#renovate_x_sqlite_busy_timeout): when using SQLite, increase the busy timeout
 
@@ -395,7 +403,7 @@ When Renovate does not see it present, it will recreate it.
 
 To invalidate an entry in the Package Cache is more involved, and requires configuring [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride) for the specific namespace(s) and key(s) that you wish to invalidate, then running Renovate.
 
-If specifying [`redisUrl`](./self-hosted-configuration.md#redisurl) to use Redis for the Package Cache, connecting to the Redis server and deleting the keys is also a valid option.
+If specifying [`packageCache.redisUrl`](./configuration-options.md#packagecacheredisurl) to use Redis for the Package Cache, connecting to the Redis server and deleting the keys is also a valid option.
 
 ###
 
