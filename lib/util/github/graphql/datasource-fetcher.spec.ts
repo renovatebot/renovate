@@ -1,3 +1,4 @@
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
@@ -162,6 +163,58 @@ describe('util/github/graphql/datasource-fetcher', () => {
       expect(res).toEqual([
         { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
       ]);
+    });
+
+    describe('when an IP allow list refuses the token', () => {
+      const ipAllowListError = {
+        type: 'FORBIDDEN',
+        message:
+          'Although you appear to have the correct authorization credentials, the `foo` organization has an IP allow list enabled, and 203.0.113.1 is not permitted to access this resource.',
+      };
+
+      beforeEach(() => {
+        hostRules.add({ hostType: 'github', token: 'abc' });
+        httpMock
+          .scope('https://api.github.com/', {
+            reqheaders: { authorization: 'token abc' },
+          })
+          .post('/graphql')
+          .reply(200, {
+            data: { repository: null },
+            errors: [ipAllowListError],
+          });
+      });
+
+      it('queries without authorization', async () => {
+        httpMock
+          .scope('https://api.github.com/', { badheaders: ['authorization'] })
+          .post('/graphql')
+          .reply(
+            200,
+            resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+          );
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+        );
+
+        expect(res).toEqual([
+          { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+        ]);
+      });
+
+      it('throws the original error when the repository is not public', async () => {
+        httpMock
+          .scope('https://api.github.com/', { badheaders: ['authorization'] })
+          .post('/graphql')
+          .reply(200, err('Could not resolve to a Repository'));
+
+        await expect(() =>
+          Datasource.query({ packageName: 'foo/bar' }, http, adapter),
+        ).rejects.toThrow(ipAllowListError.message);
+      });
     });
 
     it('throws on unknown errors', async () => {

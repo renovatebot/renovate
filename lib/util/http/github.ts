@@ -1,9 +1,11 @@
 import {
   isArray,
+  isNonEmptyArray,
   isNonEmptyObject,
   isNullOrUndefined,
   isPlainObject,
   isString,
+  isUndefined,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
@@ -31,6 +33,7 @@ import {
   HttpBase,
   type InternalHttpOptions,
   type InternalJsonUnsafeOptions,
+  withoutAuth,
 } from './http.ts';
 import type { GotLegacyError } from './legacy.ts';
 import {
@@ -88,11 +91,52 @@ export type GithubGraphqlResponse<T = unknown> =
  * exhausted its allowance. Both mean "come back later", not "unknown error".
  */
 function isGraphqlRateLimited(
-  errors: { type?: string; code?: string }[] | undefined,
+  errors: { type?: unknown; code?: unknown }[] | undefined,
 ): boolean {
   return !!errors?.some(
     (err) => err.type === 'RATE_LIMITED' || err.code === 'graphql_rate_limit',
   );
+}
+
+/**
+ * GitHub refuses a token whose request does not come from an address allowed by the organization's IP allow list, even for public repositories which can be read anonymously.
+ */
+const ipAllowListDenial = 'has an IP allow list enabled';
+
+function isIpAllowListMessage(message: unknown): boolean {
+  return isString(message) && message.includes(ipAllowListDenial);
+}
+
+/**
+ * Whether `err` is a `403` refusing a token because of an IP allow list.
+ * The body is a string when the response was requested as text.
+ */
+function isIpAllowListError(err: any): boolean {
+  if (!isForbidden(err)) {
+    return false;
+  }
+  const body = err.response?.body;
+  return isIpAllowListMessage(isPlainObject(body) ? body.message : body);
+}
+
+/**
+ * Whether a GraphQL response, which GitHub may answer with `200`, reports a token refused because of an IP allow list.
+ */
+function hasIpAllowListGraphqlError(body: unknown): boolean {
+  if (!isPlainObject(body) || !isArray(body.errors)) {
+    return false;
+  }
+  const errors = body.errors.filter(isPlainObject);
+  if (isGraphqlRateLimited(errors)) {
+    return false;
+  }
+  return errors.some(
+    (err) => err.type === 'FORBIDDEN' && isIpAllowListMessage(err.message),
+  );
+}
+
+function hasGraphqlErrors(body: unknown): boolean {
+  return isPlainObject(body) && isNonEmptyArray(body.errors);
 }
 
 const GithubError = z.object({
@@ -410,7 +454,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     url: URL,
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
-    if (!opts.token) {
+    if (!opts.token && !opts.noAuth) {
       // create a mutable copy of `url`
       const authUrl = parseUrl(url.toString())!;
 
@@ -448,6 +492,19 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     };
   }
 
+  /**
+   * Public data of an organization with an IP allow list can be read anonymously, even though a token from a disallowed address is refused.
+   * Only read-only requests are repeated, and only when GitHub explicitly names the IP allow list.
+   */
+  protected override shouldRetryWithoutAuth(
+    options: InternalHttpOptions,
+    err: unknown,
+  ): boolean {
+    return (
+      options.readOnly === true && !options.noAuth && isIpAllowListError(err)
+    );
+  }
+
   protected override handleError(
     url: string | URL,
     opts: HttpOptions,
@@ -467,7 +524,13 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       url: resolvedUrl,
     };
 
-    const result = await super.requestJsonUnsafe<T>(method, opts);
+    let result = await super.requestJsonUnsafe<T>(method, opts);
+    if (
+      this.isReadOnlyJsonRequest(method, httpOptions) &&
+      hasIpAllowListGraphqlError(result.body)
+    ) {
+      result = await this.retryGraphqlWithoutAuth(method, opts, result);
+    }
     if (httpOptions.paginate) {
       delete httpOptions.cacheProvider;
       httpOptions.memCache = false;
@@ -587,6 +650,42 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       }
     }
     return result;
+  }
+
+  private isReadOnlyJsonRequest(
+    method: HttpMethod,
+    httpOptions: GithubHttpOptions,
+  ): boolean {
+    if (httpOptions.noAuth) {
+      return false;
+    }
+    if (isUndefined(httpOptions.readOnly)) {
+      return ['get', 'head'].includes(method);
+    }
+    return httpOptions.readOnly;
+  }
+
+  /**
+   * GraphQL reports a refused token in a `200` response, so the failure does not reach the generic retry.
+   * Keeps the original response unless the anonymous one is free of errors.
+   */
+  private async retryGraphqlWithoutAuth<T>(
+    method: HttpMethod,
+    options: InternalJsonUnsafeOptions<GithubHttpOptions>,
+    original: HttpResponse<T>,
+  ): Promise<HttpResponse<T>> {
+    try {
+      const anonymous = await super.requestJsonUnsafe<T>(method, {
+        ...options,
+        httpOptions: withoutAuth(coerceObject(options.httpOptions)),
+      });
+      if (!hasGraphqlErrors(anonymous.body)) {
+        return anonymous;
+      }
+    } catch (err) {
+      logger.debug({ err }, 'GraphQL request without authorization failed');
+    }
+    return original;
   }
 
   public async requestGraphql<T = unknown>(
