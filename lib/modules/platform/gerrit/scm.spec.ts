@@ -43,6 +43,44 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
+    it('fetches the target branch before pushing', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await pushForReview({
+        sourceRef: 'renovate/feat',
+        targetBranch: 'main',
+        files: [],
+      });
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        '--no-tags',
+        '--refmap=',
+        'refs/heads/main',
+      );
+      expect(git.fetchRevSpec).toHaveBeenCalledBefore(git.pushCommit);
+    });
+
+    it('pushes even when fetching the target branch fails', async () => {
+      const err = new Error('fetch failed');
+      git.fetchRevSpec.mockRejectedValueOnce(err);
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err },
+        'gerrit: failed to fetch target branch before push',
+      );
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready'],
+      });
+    });
+
     it('adds hashtag push options for each label', async () => {
       git.pushCommit.mockResolvedValueOnce(true);
       await expect(

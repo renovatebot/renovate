@@ -7,6 +7,7 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import { cacheTtlOverrideNamespaces } from '../../lib/util/cache/package/namespaces.ts';
 import {
   getSupportedToolNames,
   getToolConfig,
@@ -275,16 +276,35 @@ function createSingleConfig(
     }
   }
 
+  if (option.name === 'cacheTtlOverride') {
+    /* mirrors the namespace validation, so an editor flags a namespace which no longer exists */
+    temp.propertyNames = {
+      anyOf: [
+        {
+          enum: cacheTtlOverrideNamespaces.filter(
+            (ns) => ns !== '_test-namespace',
+          ),
+        },
+        { type: 'string', pattern: patternMatchRegex },
+      ],
+    };
+  }
+
   if (option.name === 'installTools') {
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const {
-      name,
-      description,
-    } of toolDefinitionDocumentation as readonly ConstraintDefinition[]) {
-      const base = `Install the \`${name}\` Containerbase tool`;
-      temp.properties[name] = {
+    for (const toolName of getSupportedToolNames()) {
+      const toolConfig = getToolConfig(toolName);
+      if (!toolConfig) {
+        continue;
+      }
+
+      const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
+      const description = def?.description ?? '';
+
+      const base = `Install the \`${toolName}\` Containerbase tool`;
+      temp.properties[toolName] = {
         type: 'object',
         description: description ? `${base}. ${description}` : base,
         additionalProperties: false,

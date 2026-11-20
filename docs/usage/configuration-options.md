@@ -542,6 +542,7 @@ Currently, this config option only works with these managers:
 
 - `cargo`
 - `helmv3`
+- `julia`
 - `npm`
 - `nuget`
 - `maven`
@@ -1554,6 +1555,7 @@ It is pointless to edit the labels, as Renovate restores the labels on each run.
 !!! note
   Before the `dependencyDashboard` object was introduced, these settings were separate options, such as `dependencyDashboardTitle`, `dependencyDashboardLabels` and `customizeDashboard`.
   Renovate migrates them into the `dependencyDashboard` object.
+  Their environment variables and CLI flags, such as `RENOVATE_DEPENDENCY_DASHBOARD_FOOTER` and `--dependency-dashboard-footer`, are also migrated into `RENOVATE_DEPENDENCY_DASHBOARD` and `--dependency-dashboard`, but fields set in those take precedence.
   `dependencyDashboardApproval` and `dependencyDashboardCategory` remain separate options, as they apply to updates rather than to the Dependency Dashboard issue.
 
 ### `dependencyDashboard.autoclose`
@@ -3107,6 +3109,30 @@ For example, with the following configuration Renovate waits 3 days plus 1 hour 
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgePackageManager`
+
+Use this option to set a lower bound for the minimum release age which Renovate passes to package managers.
+Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimumReleaseAge`](#minimumreleaseage) of the repository or manager config.
+For lock file maintenance, Renovate compares it with the `minimumReleaseAge` of [`lockFileMaintenance`](#lockfilemaintenance) instead.
+This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minimumreleaseagepackagemanagersync) is `true`.
+
+Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
+
+This option does not change when Renovate raises an update.
+You can only set it at the top level of a config or in a manager's config, not in `packageRules`, because the package manager applies one value to the whole lock file.
+Security updates pass no minimum release age to the package manager.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "poetry": {
+    "minimumReleaseAgePackageManager": "7 days"
+  }
+}
+```
+
+A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch, but not over the minimum release age configured in the package manager itself.
+
 ## `minimumReleaseAgePackageManagerSync`
 
 This is a feature flag to opt early into the new `minimumReleaseAge` behavior, which aligns the minimum release age of Renovate with the minimum release age of your package managers.
@@ -3117,6 +3143,7 @@ With `minimumReleaseAgePackageManagerSync=true`, Renovate:
 
 - applies the minimum release age which a manager reads from the configuration of your package manager, if it is larger than [`minimumReleaseAge`](#minimumreleaseage)
 - does not hold back lock file maintenance if the package manager enforces the minimum release age itself
+- applies [`minimumReleaseAgePackageManager`](#minimumreleaseagepackagemanager)
 
 Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
 
@@ -4458,6 +4485,8 @@ Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
 
+If multiple updates on the branch have different `postUpgradeTasks` with `executionMode=branch`, for instance when different `packageRules` match different files in the branch, each distinct set of tasks is executed once, in the order the updates appear in the branch.
+
 ### `postUpgradeTasks.fileFilters`
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -4506,6 +4535,32 @@ For example:
 
 !!! note
   The tool objects inside `installTools` currently do not expose any additional configurability.
+
+In the Renovate Docker image, `renovate-config-validator` runs the installed version when the `renovate` tool is installed, instead of the bundled one.
+The installed version comes from the matching `renovate` entry in [`constraints`](#constraints).
+Once installed, every later `renovate-config-validator` call in the same container, also for other repositories, uses that version.
+
+The `renovate` tool needs the Containerbase `node` tool.
+The full Renovate image has it, the slim image does not, so list `node` before `renovate`, as tools install in the order they are listed.
+
+```json title="Validating the config with the installed Renovate version"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["renovate"],
+      "postUpgradeTasks": {
+        "commands": [
+          "renovate-config-validator --no-global --strict --migrate renovate.json"
+        ],
+        "installTools": {
+          "node": {},
+          "renovate": {}
+        }
+      }
+    }
+  ]
+}
+```
 
 ### `postUpgradeTasks.workingDirTemplate`
 
