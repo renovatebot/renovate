@@ -251,8 +251,9 @@ describe('util/github/graphql/index', () => {
     });
 
     describe('after the organization refused the token', () => {
-      const tagsRepo = (name: string): string =>
-        `/repos/foo/${name}/tags?per_page=100`;
+      function tagsRepo(name: string): string {
+        return `/repos/foo/${name}/tags?per_page=100`;
+      }
       const tag = [{ name: 'v1.0.0', commit: { sha: 'abc123' } }];
       const anonymous = { badheaders: ['authorization'] };
 
