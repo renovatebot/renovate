@@ -128,7 +128,7 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate configuration migration PRs when needed.',
   },
   dependencyDashboard: {
-    dependencyDashboard: true,
+    dependencyDashboard: { enabled: true },
     description: 'Enable Renovate Dependency Dashboard creation.',
   },
   dependencyDashboardApproval: {
@@ -136,7 +136,7 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate Dependency Dashboard approval workflow.',
   },
   disableDependencyDashboard: {
-    dependencyDashboard: false,
+    dependencyDashboard: { enabled: false },
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
@@ -312,6 +312,8 @@ export const presets: Record<string, Preset> = {
       '**/test/**',
       '**/tests/**',
       '**/__fixtures__/**',
+      '**/.mise/locks/**',
+      '**/.config/mise/locks/**',
     ],
     nuget: {
       ignorePaths: [
@@ -320,6 +322,8 @@ export const presets: Record<string, Preset> = {
         '**/vendor/**',
         '**/examples/**',
         '**/__fixtures__/**',
+        '**/.mise/locks/**',
+        '**/.config/mise/locks/**',
       ],
     },
   },
@@ -390,14 +394,15 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinAllExceptPeerDependencies: {
-    description: 'Pin all dependency versions except `peerDependencies`.',
+    description:
+      'Pin all dependency versions except `engines`, `devEngines` and `peerDependencies`.',
     packageRules: [
       {
         matchPackageNames: ['*'],
         rangeStrategy: 'pin',
       },
       {
-        matchDepTypes: ['engines', 'peerDependencies'],
+        matchDepTypes: ['engines', 'devEngines.*', 'peerDependencies'],
         rangeStrategy: 'auto',
       },
     ],

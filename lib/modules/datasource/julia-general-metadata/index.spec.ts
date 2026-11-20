@@ -5,11 +5,18 @@ import { JuliaGeneralMetadataDatasource } from './index.ts';
 
 const baseUrl = 'https://juliaregistries.github.io/GeneralMetadata.jl/api';
 const datasource = JuliaGeneralMetadataDatasource.id;
+const exampleUuid = '7876af07-990d-54b4-ab0e-23690620f79a';
+const exampleInfo = { name: 'Example', uuid: exampleUuid };
 
 describe('modules/datasource/julia-general-metadata/index', () => {
   describe('getReleases', () => {
     it('returns null for empty body', async () => {
-      httpMock.scope(baseUrl).get('/Example/versions.json').reply(200, {});
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
+        .get('/Example/versions.json')
+        .reply(200, {});
       await expect(
         getPkgReleases({ datasource, packageName: 'Example' }),
       ).resolves.toBeNull();
@@ -18,6 +25,8 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     it('returns null when every version is malformed', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
         .get('/Example/versions.json')
         .reply(200, { '0.1.0': 'not-an-object' });
       await expect(
@@ -28,6 +37,8 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     it('drops a malformed version and keeps the rest', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
         .get('/Example/versions.json')
         .reply(200, {
           '0.5.0': { registered: '2018-08-09T10:04:18' },
@@ -47,14 +58,24 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     });
 
     it('returns null for 404', async () => {
-      httpMock.scope(baseUrl).get('/Example/versions.json').reply(404);
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
+        .get('/Example/versions.json')
+        .reply(404);
       await expect(
         getPkgReleases({ datasource, packageName: 'Example' }),
       ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
-      httpMock.scope(baseUrl).get('/Example/versions.json').reply(502);
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
+        .get('/Example/versions.json')
+        .reply(502);
       await expect(
         getPkgReleases({ datasource, packageName: 'Example' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -63,6 +84,8 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
         .get('/Example/versions.json')
         .replyWithError('some error');
       await expect(
@@ -73,6 +96,8 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     it('returns releases with timestamps and yanked flag', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
         .get('/Example/versions.json')
         .reply(200, {
           '0.5.0': {
@@ -113,6 +138,8 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     it('omits releaseTimestamp when registered cannot be parsed', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
         .get('/Example/versions.json')
         .reply(200, {
           '1.0.0': { registered: 'not-a-real-date', has_artifacts: false },
@@ -124,6 +151,8 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     it('keeps remaining versions usable when one is missing the registered field', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
         .get('/Example/versions.json')
         .reply(200, {
           '1.0.0': { has_artifacts: false },
@@ -137,6 +166,83 @@ describe('modules/datasource/julia-general-metadata/index', () => {
           releaseTimestamp: '2024-01-01T00:00:00.000Z',
         },
       ]);
+    });
+
+    it('returns the repository and its subdirectory as source', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/SnoopCompileCore/info.json')
+        .reply(200, {
+          name: 'SnoopCompileCore',
+          uuid: 'e2b509da-e806-4183-be48-004708413034',
+          repo: 'https://github.com/JuliaDebug/SnoopCompile.jl.git',
+          subdir: 'SnoopCompileCore',
+        })
+        .get('/SnoopCompileCore/versions.json')
+        .reply(200, { '3.0.0': { registered: '2024-03-01T00:00:00' } });
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'SnoopCompileCore',
+      });
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/JuliaDebug/SnoopCompile.jl',
+        sourceDirectory: 'SnoopCompileCore',
+      });
+    });
+
+    it('returns no source when the info has no repository', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      const res = await getPkgReleases({ datasource, packageName: 'Example' });
+      expect(res).not.toHaveProperty('sourceUrl');
+      expect(res).not.toHaveProperty('sourceDirectory');
+    });
+
+    it('returns releases when the UUID matches', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      const res = await getPkgReleases({
+        datasource,
+        packageName: `Example=${exampleUuid.toUpperCase()}`,
+      });
+      expect(res?.releases).toEqual([
+        { version: '0.5.0', releaseTimestamp: '2018-08-09T10:04:18.000Z' },
+      ]);
+    });
+
+    it('returns null when the UUID does not match', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(200, exampleInfo)
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'Example=b89da37c-15e8-11e9-0b03-ab0995a60613',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when General has no package of that name', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(404)
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
+      await expect(
+        getPkgReleases({ datasource, packageName: `Example=${exampleUuid}` }),
+      ).resolves.toBeNull();
     });
   });
 });

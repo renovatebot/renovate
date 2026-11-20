@@ -53,12 +53,6 @@ export async function getTestPatternsForShards(
   for (const name of shardNames) {
     const shard = testShards[name];
     for (const path of shard.matchPaths) {
-      // Specific .spec.ts files pass through directly
-      if (path.endsWith('.spec.ts')) {
-        patterns.push(path);
-        continue;
-      }
-
       const isGlobPattern = path.includes('[') || path.includes('*');
       if (isGlobPattern) {
         const expanded = await glob(path, { nodir: false });

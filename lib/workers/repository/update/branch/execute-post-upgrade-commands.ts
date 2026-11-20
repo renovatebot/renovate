@@ -2,6 +2,7 @@
 
 import crypto from 'node:crypto';
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -32,6 +33,7 @@ import { minimatch } from '../../../../util/minimatch.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
 import { compile } from '../../../../util/template/index.ts';
+import { uniq } from '../../../../util/uniq.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
 export interface PostUpgradeCommandsExecutionResult {
@@ -72,7 +74,9 @@ export async function postUpgradeCommandsExecutor(
   const allowedCommands = GlobalConfig.get('allowedCommands');
 
   for (const upgrade of filteredUpgradeCommands) {
-    addMeta({ dep: upgrade.depName });
+    if (upgrade.depName) {
+      addMeta({ dep: upgrade.depName });
+    }
     logger.trace(
       {
         tasks: upgrade.postUpgradeTasks,
@@ -385,18 +389,26 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
-  const branchUpgradeCommands: BranchUpgradeConfig[] = [
-    {
+  // the branch config only takes its settings from the first upgrade, so also check the other upgrades for `executionMode=branch`, only running identical tasks once
+  const branchPostUpgradeTasks = [config, ...config.upgrades]
+    .map(({ postUpgradeTasks }) => postUpgradeTasks)
+    .filter((tasks) => tasks?.executionMode === 'branch')
+    .filter(
+      (tasks, index, allTasks) =>
+        allTasks.findIndex((other) => dequal(other, tasks)) === index,
+    );
+
+  const branchUpgradeCommands: BranchUpgradeConfig[] =
+    branchPostUpgradeTasks.map((postUpgradeTasks) => ({
       manager: config.manager,
-      depName: config.upgrades.map(({ depName }) => depName).join(' '),
+      depName:
+        uniq(config.upgrades.map(({ depName }) => depName))
+          .filter(isString)
+          .join(' ') || undefined,
       branchName: config.branchName,
       constraints: config.constraints,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
-          : undefined,
-    },
-  ];
+      postUpgradeTasks,
+    }));
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>

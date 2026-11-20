@@ -49,12 +49,29 @@ function headings(repo: string[], global: string[] = []): DocsHeadings {
   return { repo: new Set(repo), global: new Set(global) };
 }
 
-async function compileSchema(
-  opts: { isGlobal?: boolean } = {},
-): Promise<ValidateFunction> {
-  const ajv = new Ajv({ schemaId: '$id', strict: false });
-  addFormats(ajv);
-  return ajv.compile(await buildSchema(opts));
+const compiledSchemas = new Map<boolean, Promise<ValidateFunction>>();
+
+/**
+ * Compiling the full schema takes seconds, so each variant is compiled once and shared by every suite in this file.
+ */
+function compileSchema({
+  isGlobal = false,
+}: { isGlobal?: boolean } = {}): Promise<ValidateFunction> {
+  let compiled = compiledSchemas.get(isGlobal);
+  if (!compiled) {
+    compiled = buildSchema({ isGlobal }).then((schema) => {
+      const ajv = new Ajv({
+        schemaId: '$id',
+        strict: false,
+        inlineRefs: false,
+        code: { optimize: false },
+      });
+      addFormats(ajv);
+      return ajv.compile(schema);
+    });
+    compiledSchemas.set(isGlobal, compiled);
+  }
+  return compiled;
 }
 
 /**
@@ -194,6 +211,9 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
     beforeAll(async () => {
       repoSchema = await compileSchema();
+    }, 30000);
+
+    beforeAll(async () => {
       globalSchema = await compileSchema({ isGlobal: true });
     }, 30000);
 
@@ -276,6 +296,20 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       ).toEqual(['must be equal to one of the allowed values']);
     });
 
+    it('allows every Containerbase tool Renovate supports in installTools', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { renovate: {}, npm: {} } },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { bogusTool: {} } },
+        }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
     it('rejects unknown keys in an option which only has its own children', () => {
       expect(
         schemaErrors(repoSchema, { toolSettings: { jvmMemory: 256 } }),
@@ -288,6 +322,66 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       expect(
         schemaErrors(repoSchema, { postUpgradeTasks: { foo: 'bar' } }),
       ).toEqual(['must NOT have additional properties']);
+    });
+
+    it('allows every Containerbase tool in `installTools`, not only those with extra documentation', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { node: {}, ruby: {} } },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { installTools: { 'not-a-tool': {} } },
+        }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
+    it('only allows cache namespaces which exist, or a pattern', () => {
+      expect(
+        schemaErrors(globalSchema, {
+          cacheTtlOverride: {
+            'datasource-docker-hub-tags': 90,
+            'datasource-maven:metadata-not-found': 60,
+            'datasource-releases-npm': 5,
+            'datasource-*': 60,
+            'datasource-{crate,go}': 90,
+            '/^changelog-/': 45,
+            '*': 30,
+          },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(globalSchema, {
+          // removed in 40.9.0
+          cacheTtlOverride: { 'datasource-maven:metadata-xml': 123 },
+        }),
+      ).toEqual([
+        'must be equal to one of the allowed values',
+        'must match pattern "^!|^/.*/i?$|[*?[\\]{}()]"',
+        'must match a schema in anyOf',
+        'property name must be valid',
+      ]);
+
+      /* only used by our tests, so shouldn't be suggested to anyone */
+      expect(
+        schemaErrors(globalSchema, {
+          cacheTtlOverride: { '_test-namespace': 123 },
+        }),
+      ).toEqual([
+        'must be equal to one of the allowed values',
+        'must match pattern "^!|^/.*/i?$|[*?[\\]{}()]"',
+        'must match a schema in anyOf',
+        'property name must be valid',
+      ]);
+
+      expect(
+        schemaErrors(globalSchema, {
+          cacheTtlOverride: { 'datasource-docker-hub-tags': 'ninety' },
+        }),
+      ).toEqual(['must be number']);
     });
 
     it('validates the children of a map of configs', () => {
@@ -335,7 +429,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       repoSchema = await compileSchema();
     }, 30000);
 
-    it('suggests the managers we know about, without rejecting a pattern', () => {
+    it('allows the managers we know about, or a pattern', () => {
       expect(
         schemaErrors(repoSchema, {
           packageRules: [{ matchManagers: ['npm', 'custom.regex'] }],
@@ -344,9 +438,17 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
       expect(
         schemaErrors(repoSchema, {
-          packageRules: [{ matchManagers: ['/^npm$/', 'not-a-manager'] }],
+          packageRules: [
+            { matchManagers: ['/^npm$/', '!npm', 'custom.*', 'pip{,env}'] },
+          ],
         }),
       ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchManagers: 'regex' }],
+        }),
+      ).toContain('must match exactly one schema in oneOf');
 
       expect(
         schemaErrors(repoSchema, { packageRules: [{ matchManagers: [123] }] }),
@@ -406,6 +508,9 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
     beforeAll(async () => {
       repoSchema = await compileSchema();
+    }, 30000);
+
+    beforeAll(async () => {
       globalSchema = await compileSchema({ isGlobal: true });
     }, 30000);
 

@@ -1346,6 +1346,22 @@ describe('modules/platform/gerrit/index', () => {
       );
     });
 
+    it('getRawFile() - other repo defaults to HEAD', async () => {
+      writeToConfig({
+        repository: 'repo',
+        head: 'master',
+        labels: {},
+      });
+      await expect(
+        gerrit.getRawFile('renovate.json', 'other/repo'),
+      ).resolves.toBe('{}');
+      expect(clientMock.getFile).toHaveBeenCalledExactlyOnceWith(
+        'other/repo',
+        'HEAD',
+        'renovate.json',
+      );
+    });
+
     it('getRawFile() - no repo', async () => {
       writeToConfig({
         repository: undefined,

@@ -1,10 +1,11 @@
+import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as juliaVersioning from '../../versioning/julia/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { JuliaPackageMetadata } from './schema.ts';
+import { JuliaPackageInfo, JuliaPackageMetadata } from './schema.ts';
 
 export class JuliaGeneralMetadataDatasource extends Datasource {
   static readonly id = 'julia-general-metadata';
@@ -27,7 +28,49 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `registered` field in the results.';
 
-  private async _getReleases({
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repo` field of the package info, and the source directory from its `subdir` field.';
+
+  private getVersions(
+    registryUrl: string,
+    name: string,
+  ): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
+        key: buildCacheKey('getVersions', name),
+        public: true,
+        fallback: true,
+      },
+      () =>
+        this.fetchJsonOrNull(
+          joinUrlParts(registryUrl, 'api', name, 'versions.json'),
+          JuliaPackageMetadata,
+        ),
+    );
+  }
+
+  private getInfo(
+    registryUrl: string,
+    name: string,
+  ): Promise<JuliaPackageInfo | null> {
+    return withCache(
+      {
+        namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
+        key: buildCacheKey('getInfo', name),
+        public: true,
+        fallback: true,
+      },
+      () =>
+        this.fetchJsonOrNull(
+          joinUrlParts(registryUrl, 'api', name, 'info.json'),
+          JuliaPackageInfo,
+        ),
+    );
+  }
+
+  async getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -36,20 +79,32 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
       return null;
     }
 
-    const url = joinUrlParts(registryUrl, 'api', packageName, 'versions.json');
+    // `Example=7876af07-990d-54b4-ab0e-23690620f79a` names a package and its
+    // UUID, as Pkg's REPL does. A name is unique only within a registry, so a
+    // package from another registry can have the name of a General package.
+    const [name, uuid] = packageName.split('=');
+    const [info, releases] = await Promise.all([
+      this.getInfo(registryUrl, name),
+      this.getVersions(registryUrl, name),
+    ]);
+    if (uuid && info?.uuid.toLowerCase() !== uuid.toLowerCase()) {
+      logger.debug(
+        { packageName, generalUuid: info?.uuid },
+        'Package is not the General package of that name',
+      );
+      return null;
+    }
+    if (!releases) {
+      return null;
+    }
 
-    return this.fetchJsonOrNull(url, JuliaPackageMetadata);
-  }
-
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
-      {
-        namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
-        key: buildCacheKey('getReleases', config.packageName),
-        public: true,
-        fallback: true,
-      },
-      () => this._getReleases(config),
-    );
+    const result: ReleaseResult = { ...releases };
+    if (info?.repo) {
+      result.sourceUrl = info.repo;
+    }
+    if (info?.subdir) {
+      result.sourceDirectory = info.subdir;
+    }
+    return result;
   }
 }

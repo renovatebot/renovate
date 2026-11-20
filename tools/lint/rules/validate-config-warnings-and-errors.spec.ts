@@ -209,7 +209,7 @@ ruleTester.run('validate-config-warnings-and-errors', rule, {
       `),
       errors: [{ messageId: 'noToHaveLength' }],
     },
-    // computed property access on the binding is not a recognised check
+    // computed property access on the binding is not a recognized check
     {
       code: inTest(`
         const res = validateConfig(config);

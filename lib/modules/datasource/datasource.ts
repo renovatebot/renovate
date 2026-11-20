@@ -28,7 +28,7 @@ import type {
 /**
  * The options accepted by the JSON methods of the http client `H`:
  * `HttpOptions` for the plain client, and the client's own options type for a
- * specialised one such as `GithubHttp`.
+ * specialized one such as `GithubHttp`.
  */
 type JsonOptions<H extends Http> =
   H extends HttpBase<infer Opts, any> ? Opts : HttpOptions;
@@ -46,7 +46,7 @@ export abstract class Datasource<
   protected readonly cacheNamespace: PackageCacheNamespace;
 
   /**
-   * A subclass that narrows `H` to a specialised client (`GithubHttp`,
+   * A subclass that narrows `H` to a specialized client (`GithubHttp`,
    * `GitlabHttp`, ...) must construct that client itself and pass it as
    * `http`, since this constructor can only build the plain `Http` default.
    */
