@@ -74,7 +74,14 @@ function floatingComponentToString(component: number): string {
   return int === 0 ? '*' : `${int}*`;
 }
 
-export function coerceFloatingComponent(component: number | undefined): number {
+export function coerceFloatingComponent(
+  component: number | undefined,
+  currentComponent: number | undefined,
+): number {
+  // A zero floating component represents a whole-component wildcard.
+  if (!currentComponent) {
+    return 0;
+  }
   return component ? Math.floor(component / 10) * 10 : 0;
 }
 
