@@ -633,17 +633,27 @@ function processUpdateArtifactResults(
   artifactNotices: ArtifactNotice[],
 ): void {
   if (isNonEmptyArray(results)) {
+    // several updateArtifacts() calls can return the same file, keep only the latest call's
+    // changes, which may be a deletion followed by an addition of the same path (e.g. a symlink)
+    const seenPaths = new Set<string>();
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        // several updateArtifacts() calls can return the same file, keep only the latest
-        const existingIndex = updatedArtifacts.findIndex(
-          (artifact) => artifact.path === file.path,
-        );
+        const existingIndex = seenPaths.has(file.path)
+          ? -1
+          : updatedArtifacts.findIndex(
+              (artifact) => artifact.path === file.path,
+            );
+        seenPaths.add(file.path);
         if (existingIndex === -1) {
           updatedArtifacts.push(file);
         } else {
           updatedArtifacts[existingIndex] = file;
+          for (let i = updatedArtifacts.length - 1; i > existingIndex; i--) {
+            if (updatedArtifacts[i].path === file.path) {
+              updatedArtifacts.splice(i, 1);
+            }
+          }
         }
       }
 
