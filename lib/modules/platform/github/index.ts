@@ -2477,7 +2477,24 @@ export async function cancelPlatformAutomerge(
 }
 
 /**
+ * Returns true when the PR's auto-merge is enabled.
+ * An unknown state, also after a failed request, counts as not enabled. Rate limits are rethrown.
+ */
+async function isAutomergeEnabled(prNo: number): Promise<boolean> {
+  try {
+    const state = await getPrAutoMergeState(prNo);
+    return !!state?.autoMergeRequest;
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    return false;
+  }
+}
+
+/**
  * Enables GitHub-native automerge again, with one delayed retry for automerge canceled in this run.
+ * The retry and the warning are skipped when the PR's auto-merge is already enabled.
  */
 export async function reattemptPlatformAutomerge({
   number,
@@ -2490,18 +2507,30 @@ export async function reattemptPlatformAutomerge({
 
     const status = await tryPrAutomerge(number, node_id, platformPrOptions);
     if (status === 'failed' && retry) {
-      logger.debug(`GitHub-native automerge: retrying...PrNo: ${number}`);
-      await setTimeout(5000);
-      const retryStatus = await tryPrAutomerge(
-        number,
-        node_id,
-        platformPrOptions,
-      );
-      if (retryStatus === 'failed') {
-        logger.warn(
-          { prNumber: number },
-          "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
+      if (await isAutomergeEnabled(number)) {
+        logger.debug(
+          `GitHub-native automerge: already enabled, not retrying...PrNo: ${number}`,
         );
+      } else {
+        logger.debug(`GitHub-native automerge: retrying...PrNo: ${number}`);
+        await setTimeout(5000);
+        const retryStatus = await tryPrAutomerge(
+          number,
+          node_id,
+          platformPrOptions,
+        );
+        if (retryStatus === 'failed') {
+          if (await isAutomergeEnabled(number)) {
+            logger.debug(
+              `GitHub-native automerge: already enabled after the retry...PrNo: ${number}`,
+            );
+          } else {
+            logger.warn(
+              { prNumber: number },
+              "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
+            );
+          }
+        }
       }
     }
 

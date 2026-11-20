@@ -6526,6 +6526,12 @@ describe('modules/platform/github/index', () => {
           },
         };
         const failedResp = { errors: [{ message: 'Something went wrong' }] };
+        const stateOff = {
+          data: { repository: { pullRequest: disabledPr } },
+        };
+        const stateOn = { data: { repository: { pullRequest: enabledPr } } };
+        const enabledWarning =
+          "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push";
 
         async function cancelAutomerge(): Promise<httpMock.Scope> {
           const scope = await mockScope();
@@ -6557,6 +6563,8 @@ describe('modules/platform/github/index', () => {
           scope
             .post('/graphql', enableBody)
             .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOff)
             .post('/graphql', enableBody)
             .reply(200, enabledResp);
 
@@ -6577,18 +6585,109 @@ describe('modules/platform/github/index', () => {
           scope
             .post('/graphql')
             .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOff)
             .post('/graphql')
-            .replyWithError('unknown error');
+            .replyWithError('unknown error')
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOff);
 
           await github.reattemptPlatformAutomerge({
             number: 123,
             platformPrOptions,
           });
 
+          expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(5000);
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { prNumber: 123 },
-            "GitHub-native automerge: could not re-enable, it stays disabled until Renovate's next push",
+            enabledWarning,
           );
+        });
+
+        it('skips the retry and the warning when automerge is already enabled', async () => {
+          const scope = await cancelAutomerge();
+          scope
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOn);
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).not.toHaveBeenCalled();
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            'GitHub-native automerge: already enabled, not retrying...PrNo: 123',
+          );
+          expect(logger.logger.warn).not.toHaveBeenCalled();
+        });
+
+        it('skips the warning when automerge is enabled after the retry failed', async () => {
+          const scope = await cancelAutomerge();
+          scope
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOff)
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOn);
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(5000);
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            'GitHub-native automerge: already enabled after the retry...PrNo: 123',
+          );
+          expect(logger.logger.warn).not.toHaveBeenCalled();
+        });
+
+        it('retries and warns when the state cannot be queried', async () => {
+          const scope = await cancelAutomerge();
+          scope
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(500)
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, { errors: [{ message: 'Failed to read state' }] });
+
+          await github.reattemptPlatformAutomerge({
+            number: 123,
+            platformPrOptions,
+          });
+
+          expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(5000);
+          expect(logger.logger.warn).toHaveBeenCalledWith(
+            { prNumber: 123 },
+            enabledWarning,
+          );
+        });
+
+        it('propagates a rate limit of the state query before the retry', async () => {
+          const scope = await cancelAutomerge();
+          scope
+            .post('/graphql')
+            .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, graphqlRateLimitResponse);
+
+          await expect(
+            github.reattemptPlatformAutomerge({
+              number: 123,
+              platformPrOptions,
+            }),
+          ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+          expect(timers.setTimeout).not.toHaveBeenCalled();
         });
 
         it('warns when the PR cannot be loaded for re-enabling after canceling', async () => {
@@ -6646,6 +6745,8 @@ describe('modules/platform/github/index', () => {
           scope
             .post('/graphql')
             .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOff)
             .post('/graphql')
             .reply(200, graphqlRateLimitResponse);
 
@@ -6672,6 +6773,8 @@ describe('modules/platform/github/index', () => {
             .reply(500)
             .post('/graphql')
             .reply(200, failedResp)
+            .post('/graphql', autoMergeQueryBody)
+            .reply(200, stateOff)
             .post('/graphql')
             .reply(200, enabledResp);
 
