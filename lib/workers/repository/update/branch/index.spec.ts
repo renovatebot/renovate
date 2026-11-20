@@ -4207,7 +4207,11 @@ describe('workers/repository/update/branch/index', () => {
         );
         expect(
           platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
         const compiled = compileCommitBody.mock.invocationCallOrder[0];
         const order = [
           compiled,
@@ -4278,7 +4282,11 @@ describe('workers/repository/update/branch/index', () => {
         expect(commit.pushBranchCommit).toHaveBeenCalledOnce();
         expect(
           platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
       });
 
       it('does not cancel platform automerge which the platform cannot re-enable', async () => {
@@ -4403,7 +4411,11 @@ describe('workers/repository/update/branch/index', () => {
 
           expect(
             platform.reattemptPlatformAutomerge,
-          ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+          ).toHaveBeenCalledExactlyOnceWith({
+            number: 123,
+            platformPrOptions,
+            sha: commitSha,
+          });
         },
       );
 
@@ -4453,7 +4465,11 @@ describe('workers/repository/update/branch/index', () => {
         expect(res).toMatchObject({ commitSha });
         expect(
           platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
       });
 
       it('re-enables platform automerge which might have been canceled', async () => {
@@ -4467,7 +4483,11 @@ describe('workers/repository/update/branch/index', () => {
         expect(commit.pushBranchCommit).toHaveBeenCalledOnce();
         expect(
           platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
       });
 
       it('does not enable platform automerge which was not enabled', async () => {
@@ -4536,7 +4556,11 @@ describe('workers/repository/update/branch/index', () => {
         expect(res).toMatchObject({ result: 'error', prNo: 123 });
         expect(
           platform.reattemptPlatformAutomerge,
-        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
       });
 
       it('does not re-enable platform automerge again when a step after it throws', async () => {

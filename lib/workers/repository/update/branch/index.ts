@@ -116,16 +116,21 @@ async function cancelPlatformAutomergeForPush(
 }
 
 /**
- * Re-enables platform automerge of the PR and logs errors.
+ * Re-enables platform automerge of the PR, for the pushed commit if there is one, and logs errors.
  * Rate limit errors are only rethrown with `propagateRateLimit`.
  */
 async function restorePlatformAutomerge(
   number: number,
   platformPrOptions: PlatformPrOptions,
+  commitSha: string | null,
   propagateRateLimit: boolean,
 ): Promise<void> {
   try {
-    await platform.reattemptPlatformAutomerge!({ number, platformPrOptions });
+    await platform.reattemptPlatformAutomerge!({
+      number,
+      platformPrOptions,
+      sha: commitSha ?? undefined,
+    });
   } catch (err) {
     if (
       propagateRateLimit &&
@@ -669,6 +674,7 @@ export async function processBranch(
           await restorePlatformAutomerge(
             automergeCanceledPrNo,
             platformPrOptions,
+            commitSha,
             !updateFailed,
           );
         }
