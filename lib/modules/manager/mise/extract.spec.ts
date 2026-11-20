@@ -2343,6 +2343,129 @@ describe('modules/manager/mise/extract', () => {
     });
   });
 
+  describe('task_config includes', () => {
+    it('extracts a github git ref and ignores local paths', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = [
+          "git::https://github.com/org/tasks.git//tasks?ref=v1.0.0",
+          "local-tasks",
+        ]
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'github.com/org/tasks',
+            depType: 'task-include',
+            packageName: 'org/tasks',
+            datasource: 'github-tags',
+            currentValue: 'v1.0.0',
+            replaceString:
+              'git::https://github.com/org/tasks.git//tasks?ref=v1.0.0',
+            autoReplaceStringTemplate:
+              'git::https://github.com/org/tasks.git//tasks?ref={{newValue}}',
+          },
+        ],
+      });
+    });
+
+    it('ignores files with only local task_config includes', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = [".mise/tasks", "./tasks"]
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+
+    it('extracts an oci ref', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = ["oci::ghcr.io/org/tasks:1.0"]
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'ghcr.io/org/tasks',
+            depType: 'task-include',
+            packageName: 'ghcr.io/org/tasks',
+            datasource: 'docker',
+            currentValue: '1.0',
+            replaceString: 'ghcr.io/org/tasks:1.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+        ],
+      });
+    });
+
+    it('skips remote forms without versioning support', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = ["zip::https://example.com/shared-tasks-1.0.0.zip"]
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'zip::https://example.com/shared-tasks-1.0.0.zip',
+            depType: 'task-include',
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
+    });
+
+    it('extracts a sha ref with a comment hint', async () => {
+      const sha = '0123456789abcdef0123456789abcdef01234567';
+      const content = codeBlock`
+        [task_config]
+        includes = [
+          "git::https://github.com/org/tasks.git//tasks?ref=${sha}", # v1.0.0
+        ]
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps[0]).toMatchObject({
+        depType: 'task-include',
+        datasource: 'github-tags',
+        currentDigest: sha,
+        currentValue: 'v1.0.0',
+      });
+      expect(result?.deps[0].skipReason).toBeUndefined();
+    });
+
+    it('extracts task_config includes together with tools and includes', async () => {
+      const content = codeBlock`
+        include = ["oci::ghcr.io/org/base:1.0"]
+
+        [task_config]
+        includes = ["git::https://github.com/org/tasks.git//tasks?ref=v1.0.0"]
+
+        [tools]
+        erlang = '23.3'
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'include',
+        'task-include',
+      ]);
+    });
+
+    it('ignores invalid task_config include values', async () => {
+      const content = codeBlock`
+        [task_config]
+        includes = "not-an-array"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+  });
+
   describe('remote task files', () => {
     const sha = '0123456789abcdef0123456789abcdef01234567';
 

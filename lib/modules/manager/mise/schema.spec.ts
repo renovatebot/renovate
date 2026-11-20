@@ -11,11 +11,17 @@ describe('modules/manager/mise/schema', () => {
         tools: {},
         tasks: {},
         include: [],
+        task_config: { includes: [] },
       });
     });
 
     it('defaults tools to empty object for empty TOML', () => {
-      expect(MiseFile.parse('')).toEqual({ tools: {}, tasks: {}, include: [] });
+      expect(MiseFile.parse('')).toEqual({
+        tools: {},
+        tasks: {},
+        include: [],
+        task_config: { includes: [] },
+      });
     });
 
     it('parses [tools] when present', () => {
@@ -27,6 +33,33 @@ describe('modules/manager/mise/schema', () => {
         tools: { node: '20' },
         tasks: {},
         include: [],
+        task_config: { includes: [] },
+      });
+    });
+
+    it('parses [task_config] includes when present', () => {
+      const content = codeBlock`
+        [task_config]
+        includes = ["tasks"]
+      `;
+      expect(MiseFile.parse(content)).toEqual({
+        tools: {},
+        tasks: {},
+        include: [],
+        task_config: { includes: ['tasks'] },
+      });
+    });
+
+    it('defaults [task_config] includes when the table is invalid', () => {
+      const content = codeBlock`
+        [task_config]
+        includes = "not-an-array"
+      `;
+      expect(MiseFile.parse(content)).toEqual({
+        tools: {},
+        tasks: {},
+        include: [],
+        task_config: { includes: [] },
       });
     });
   });
