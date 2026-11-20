@@ -83,6 +83,9 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
+  if (rangeStrategy === 'widen' && matches(newVersion, currentValue)) {
+    return currentValue;
+  }
   let npmNewVersion = npm.getNewValue({
     currentValue: hashicorp2npm(currentValue),
     rangeStrategy,
