@@ -13,7 +13,9 @@ const cacheNamespace = 'datasource-go-proxy-timestamps';
 const ttlMinutes = 100 * 24 * 60;
 
 /**
- * The publication times we already know for a module, so that a run only fetches the `.info` file of a version it has never seen before.
+ * The publication times we already know for a module, so that a run only fetches the `.info` file, or looks up the GitHub tag, of a version it has never seen before.
+ *
+ * Keyed by the Go proxy's URL for `.info` times, and by the source repository's URL for GitHub tag times.
  *
  * This is intentionally separate from the Go module's releases cache, as the current releases list changes (somewhat frequently), whereas the release timestamp for a given Go module shouldn't change after publication.
  */
