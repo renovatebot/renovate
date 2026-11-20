@@ -1,5 +1,40 @@
 {% extends "base.html" %}
 
+<!-- This adds Open Graph and Twitter Card meta tags, so shared docs links get a rich preview on socials/Slack/etc. -->
+<!-- https://ogp.me/ -->
+<!-- https://squidfunk.github.io/mkdocs-material/customization/#extending-the-theme -->
+{# Mirror Material's htmltitle logic so og:title matches the browser tab: front-matter title, then page title (except the homepage), then the site name. #}
+{% block extrahead %}
+{% if page and page.meta and page.meta.title %}
+{% set og_title = page.meta.title ~ ' - ' ~ config.site_name %}
+{% elif page and page.title and not page.is_homepage %}
+{% set og_title = (page.title | striptags) ~ ' - ' ~ config.site_name %}
+{% else %}
+{% set og_title = config.site_name %}
+{% endif %}
+{% set og_description = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
+{% set og_image = config.site_url | trim('/') ~ '/assets/images/logo.png' %}
+{% set og_image_alt = config.site_name ~ ' logo' %}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+{% if page %}
+<meta property="og:url" content="{{ page.canonical_url }}">
+{% endif %}
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:alt" content="{{ og_image_alt }}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="201">
+<meta property="og:image:height" content="201">
+<meta property="og:site_name" content="{{ config.site_name }}">
+<!-- X/Twitter accepts the og: tags as a fallback, but setting them explicitly is more reliable. -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
+<meta name="twitter:image" content="{{ og_image }}">
+<meta name="twitter:image:alt" content="{{ og_image_alt }}">
+{% endblock %}
+
 <!-- This file has the content for our announcement bar. -->
 <!-- https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-header/#announcement-bar -->
 <!-- https://squidfunk.github.io/mkdocs-material/customization/#overriding-blocks -->
