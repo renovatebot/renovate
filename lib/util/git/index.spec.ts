@@ -14,6 +14,7 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { postUpgradeCommandsExecutor } from '../../workers/repository/update/branch/execute-post-upgrade-commands.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../workers/types.ts';
 import { setCustomEnv } from '../env.ts';
@@ -470,6 +471,25 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await expect(
           git.getMergeBase('not_found', defaultBranch),
         ).resolves.toBeNull();
+      });
+
+      it('returns null for branches without shared history', async () => {
+        vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce('');
+
+        await expect(
+          git.getMergeBase('renovate/future_branch', defaultBranch),
+        ).resolves.toBeNull();
+      });
+
+      it('rethrows platform failures', async () => {
+        vi.stubEnv('NODE_ENV', '');
+        vi.spyOn(SimpleGit.prototype, 'raw').mockRejectedValueOnce(
+          new Error('Could not resolve host: example.com'),
+        );
+
+        await expect(
+          git.getMergeBase('renovate/future_branch', defaultBranch),
+        ).rejects.toThrow(ExternalHostError);
       });
     });
 

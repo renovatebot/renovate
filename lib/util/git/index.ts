@@ -941,25 +941,31 @@ export function getBranchList(): string[] {
   return Object.keys(coerceObject(config.branchCommits));
 }
 
+/**
+ * Returns the commit `branchName` forked from on `baseBranch`, or `null` when
+ * the branches share no history or git cannot compute it.
+ */
 export async function getMergeBase(
   branchName: string,
   baseBranch: string,
 ): Promise<LongCommitSha | null> {
   await syncGit();
   try {
-    const mergeBase = await git.raw([
-      'merge-base',
-      `origin/${branchName}`,
-      `origin/${baseBranch}`,
-    ]);
-    return toLongCommitSha(mergeBase.trim());
+    // git exits with 1 and prints nothing when the branches share no history
+    const mergeBase = (
+      await git.raw([
+        'merge-base',
+        `origin/${branchName}`,
+        `origin/${baseBranch}`,
+      ])
+    ).trim();
+    return mergeBase ? toLongCommitSha(mergeBase) : null;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
       throw errChecked;
     }
-    logger.debug({ err, branchName, baseBranch }, 'No merge base found');
+    logger.debug({ err, branchName, baseBranch }, 'Failed to get merge base');
     return null;
   }
 }
