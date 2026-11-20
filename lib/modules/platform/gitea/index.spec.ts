@@ -377,7 +377,9 @@ describe('modules/platform/gitea/index', () => {
           uid: 1,
           archived: false,
         })
-        .replyWithError(httpMock.error('searchRepos()'));
+        .replyWithError(httpMock.error('searchRepos()'))
+        .get('/user/orgs')
+        .reply(200, []);
       await initFakePlatform(scope);
 
       await expect(gitea.getRepos()).rejects.toThrow('searchRepos()');
@@ -394,11 +396,106 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, {
           ok: true,
           data: mockRepos,
-        });
+        })
+        .get('/user/orgs')
+        .reply(200, []);
       await initFakePlatform(scope);
 
       const repos = await gitea.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
+    });
+
+    it('should merge and deduplicate repos of the organizations the bot is a member of', async () => {
+      const scope = httpMock.scope('https://gitea.com/api/v1');
+
+      scope
+        .get('/repos/search')
+        .query({
+          uid: 1,
+          archived: false,
+        })
+        .reply(200, {
+          ok: true,
+          data: mockRepos,
+        })
+        .get('/user/orgs')
+        .reply(200, [{ username: 'org1' }, { username: 'org2' }])
+        .get('/orgs/org1/repos')
+        .reply(200, [
+          // already returned by the repository search
+          mockedRepo({ full_name: 'a/b' }),
+          mockedRepo({ full_name: 'org1/public' }),
+        ])
+        .get('/orgs/org2/repos')
+        .reply(200, [mockedRepo({ full_name: 'org2/public' })]);
+
+      await initFakePlatform(scope);
+
+      const repos = await gitea.getRepos();
+      expect(repos).toEqual(['a/b', 'c/d', 'org1/public', 'org2/public']);
+    });
+
+    it('should filter unusable organization repos', async () => {
+      const scope = httpMock.scope('https://gitea.com/api/v1');
+
+      scope
+        .get('/repos/search')
+        .query({
+          uid: 1,
+          archived: false,
+        })
+        .reply(200, {
+          ok: true,
+          data: [],
+        })
+        .get('/user/orgs')
+        .reply(200, [{ username: 'org1' }])
+        .get('/orgs/org1/repos')
+        .reply(200, [
+          mockedRepo({ full_name: 'org1/ok' }),
+          mockedRepo({ full_name: 'org1/archived', archived: true }),
+          mockedRepo({ full_name: 'org1/mirror', mirror: true }),
+          mockedRepo({ full_name: 'org1/no-prs', has_pull_requests: false }),
+          mockedRepo({
+            full_name: 'org1/read-only',
+            permissions: partial<RepoPermission>({
+              push: false,
+              pull: true,
+              admin: false,
+            }),
+          }),
+        ]);
+
+      await initFakePlatform(scope);
+
+      const repos = await gitea.getRepos();
+      expect(repos).toEqual(['org1/ok']);
+    });
+
+    it('should continue when the organizations of the bot cannot be listed', async () => {
+      const scope = httpMock.scope('https://gitea.com/api/v1');
+
+      scope
+        .get('/repos/search')
+        .query({
+          uid: 1,
+          archived: false,
+        })
+        .reply(200, {
+          ok: true,
+          data: mockRepos,
+        })
+        .get('/user/orgs')
+        .reply(403);
+
+      await initFakePlatform(scope);
+
+      const repos = await gitea.getRepos();
+      expect(repos).toEqual(['a/b', 'c/d']);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'Unable to list organizations of the Renovate user, so only repositories found by repository search are autodiscovered. Does the token have the `read:organization` scope?',
+      );
     });
 
     it('should return an filtered array of repos', async () => {
@@ -452,6 +549,29 @@ describe('modules/platform/gitea/index', () => {
       expect(repos).toEqual(['org1/repo', 'org2/repo']);
     });
 
+    it('should filter unusable repos when querying namespaces', async () => {
+      const scope = httpMock.scope('https://gitea.com/api/v1');
+
+      scope.get('/orgs/org1/repos').reply(200, [
+        ...mockNamespaceRepos,
+        mockedRepo({
+          full_name: 'org1/read-only',
+          permissions: partial<RepoPermission>({
+            push: false,
+            pull: true,
+            admin: false,
+          }),
+        }),
+      ]);
+
+      await initFakePlatform(scope);
+
+      const repos = await gitea.getRepos({
+        namespaces: ['org1'],
+      });
+      expect(repos).toEqual(['org1/repo', 'org2/repo']);
+    });
+
     it('Sorts repos', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
@@ -465,7 +585,9 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, {
           ok: true,
           data: mockRepos,
-        });
+        })
+        .get('/user/orgs')
+        .reply(200, []);
       await initFakePlatform(scope);
 
       const repos = await gitea.getRepos({

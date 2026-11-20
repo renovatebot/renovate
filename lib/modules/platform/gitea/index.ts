@@ -47,7 +47,7 @@ import { getRepoFile } from './files.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
-import type { Comment, Label, Repo } from './schema.ts';
+import type { Comment, Label, Org, Repo } from './schema.ts';
 import { PRMergeMethod } from './schema.ts';
 import type {
   AllowedMergeMethods,
@@ -209,6 +209,41 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       }),
     });
     return repos.filter(usableRepo).map((r) => r.full_name);
+  }
+
+  async function fetchOrganizationRepositories(
+    organization: string,
+  ): Promise<string[]> {
+    const orgRepos = await helper.orgListRepos(http, organization);
+    return orgRepos
+      .filter((r) => !r.archived)
+      .filter(usableRepo)
+      .map((r) => r.full_name);
+  }
+
+  /**
+   * Repositories of organizations the bot is a member of are not reliably
+   * returned by `/repos/search?uid=`: that endpoint only returns repositories
+   * the user owns or has an explicit access entry for, which public
+   * organization repositories often lack. So list them per organization
+   * instead and merge the results.
+   */
+  async function fetchMemberOrganizationRepositories(): Promise<string[]> {
+    let orgs: Org[];
+    try {
+      orgs = await helper.getCurrentUserOrgs(http);
+    } catch (err) {
+      logger.warn(
+        { err },
+        'Unable to list organizations of the Renovate user, so only repositories found by repository search are autodiscovered. Does the token have the `read:organization` scope?',
+      );
+      return [];
+    }
+
+    const repos = await map(orgs, (org: Org) =>
+      fetchOrganizationRepositories(org.username),
+    );
+    return repos.flat();
   }
 
   const platform: Platform = {
@@ -416,19 +451,18 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           );
           const repos = await map(
             config.namespaces,
-            async (organization: string) => {
-              const orgRepos = await helper.orgListRepos(http, organization);
-              return orgRepos
-                .filter((r) => !r.mirror && !r.archived)
-                .map((r) => r.full_name);
-            },
+            fetchOrganizationRepositories,
           );
           return deduplicateArray(repos.flat());
         }
-        return await fetchRepositories({
-          sort: config?.sort,
-          order: config?.order,
-        });
+        const [searchedRepos, orgRepos] = await Promise.all([
+          fetchRepositories({
+            sort: config?.sort,
+            order: config?.order,
+          }),
+          fetchMemberOrganizationRepositories(),
+        ]);
+        return deduplicateArray([...searchedRepos, ...orgRepos]);
       } catch (err) {
         logger.error(
           { err, platform: id },
