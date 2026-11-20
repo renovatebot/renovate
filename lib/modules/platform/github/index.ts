@@ -2272,8 +2272,8 @@ export async function getPrAutoMergeState(
   });
   if (res?.errors) {
     logger.debug(
-      { errors: res.errors },
-      `Failed to fetch auto-merge state of PR #${prNo}`,
+      { prNo, errors: res.errors },
+      'Failed to fetch PR auto-merge state',
     );
     return null;
   }
@@ -2282,7 +2282,7 @@ export async function getPrAutoMergeState(
     res?.data?.repository?.pullRequest,
   );
   if (!pr.success) {
-    logger.debug(`Could not confirm auto-merge state of PR #${prNo}`);
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge state');
     return null;
   }
   return pr.data;
