@@ -2601,6 +2601,49 @@ This option could be used to avoid rate limits for certain platforms like GitHub
 
 If more than one token matches for a read-only request then the `readOnly` token will be given preference.
 
+### `hostRules.registryApiUrl`
+
+Overrides the base URL of the API Renovate calls to fetch release timestamps for a [`registryType`](#hostrulesregistrytype).
+
+Each `registryType` has a default:
+
+| `registryType` | Default API base URL                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| `gitlab`       | `https://gitlab.com/api/v4` for `registry.gitlab.com`, else the registry host + `/api/v4` |
+
+You usually need this for self-managed GitLab, where the registry and the GitLab API are served from different hosts.
+
+### `hostRules.registryType`
+
+Set this on a host rule for a Docker registry to tell Renovate which software runs the registry.
+Renovate then fetches the time each tag was pushed from the registry's own API, and sets it as the release timestamp.
+The registry records this time itself, so whoever pushes an image cannot backdate it.
+This lets features like [`minimumReleaseAge`](#minimumreleaseage) work for images from self-hosted registries.
+
+Supported values:
+
+- `gitlab`: GitLab container registry. Renovate reads each tag's `publishedAt` time with the GitLab API. Requests use `gitlab` host rules that match the API URL, so an existing token for your GitLab platform also works here
+
+`registry.gitlab.com` is detected automatically, so it does not need this option.
+If the registry's API fails, Renovate still returns the tags, but without release timestamps.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "registry.gitlab.example.com",
+      "registryType": "gitlab",
+      "registryApiUrl": "https://gitlab.example.com/api/v4"
+    },
+    {
+      "matchHost": "gitlab.example.com",
+      "hostType": "gitlab",
+      "token": "{{ secrets.GITLAB_TOKEN }}"
+    }
+  ]
+}
+```
+
 ### `hostRules.timeout`
 
 Use this figure to adjust the timeout for queries.

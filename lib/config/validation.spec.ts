@@ -2572,6 +2572,35 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if registryType in hostRules is not a supported value', async () => {
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            registryType: 'gitlab',
+          },
+          {
+            matchHost: 'harbor.example.com',
+            registryType: 'harbour' as never,
+          },
+        ],
+      } satisfies RenovateConfig;
+
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid hostRules[1].registryType: registryType had a value `"harbour"` which was not part of the allowedValues: ["gitlab"]',
+        },
+      ]);
+      expect(warnings).toEqual([]);
+    });
+
     it('errors if invalid matchHost values in hostRules', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
