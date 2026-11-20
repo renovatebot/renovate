@@ -18,6 +18,31 @@ import matchers from './matchers.ts';
 
 const slugify = _slugify;
 
+const replacementKeys = [
+  'replacementName',
+  'replacementNameTemplate',
+  'replacementVersion',
+  'replacementVersionTemplate',
+] as const;
+
+function describeRule(
+  rule: PackageRule,
+  ruleIndex: number,
+): Record<string, unknown> {
+  return {
+    ruleIndex,
+    ...Object.fromEntries(
+      Object.entries(rule).filter(
+        ([key]) =>
+          key === 'description' ||
+          key.startsWith('match') ||
+          key.startsWith('exclude') ||
+          key.startsWith('replacement'),
+      ),
+    ),
+  };
+}
+
 function hasRegistryUrls(config: PackageRuleInputConfig): boolean {
   return (
     isNonEmptyArray(config.registryUrls) ||
@@ -61,7 +86,8 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`,
   );
-  for (const packageRule of packageRules) {
+  const replacementRuleIndexes = new Map<string, number>();
+  for (const [ruleIndex, packageRule] of packageRules.entries()) {
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (await matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
@@ -131,11 +157,37 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
       if (isString(toApply.sourceUrl)) {
         toApply.sourceUrl = compile(toApply.sourceUrl, config);
       }
+      for (const key of replacementKeys) {
+        if (!isNullOrUndefined(toApply[key])) {
+          replacementRuleIndexes.set(key, ruleIndex);
+        }
+      }
       delete toApply.overrideDatasource;
       delete toApply.overrideDepName;
       delete toApply.overridePackageName;
       config = mergeChildConfig(config, toApply);
     }
+  }
+  // the last rule to set a field wins, so the replacement is only a mix of
+  // rules if the winning rules differ
+  if (new Set(replacementRuleIndexes.values()).size > 1) {
+    logger.once.warn(
+      { depName: config.depName, packageName: config.packageName },
+      'The `replacement*` fields come from multiple matching `packageRules`, which may result in an invalid replacement. See the debug logs for the rules which set each field',
+    );
+    logger.once.debug(
+      {
+        depName: config.depName,
+        packageName: config.packageName,
+        replacementRules: Object.fromEntries(
+          [...replacementRuleIndexes].map(([field, ruleIndex]) => [
+            field,
+            describeRule(packageRules[ruleIndex], ruleIndex),
+          ]),
+        ),
+      },
+      'Rules which set each `replacement*` field',
+    );
   }
   // A manager which could not work out where to look leaves `unknown-registry`
   // behind. Config can still answer that, from a rule applied above or from the
