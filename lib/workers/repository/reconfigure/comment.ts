@@ -97,41 +97,39 @@ export async function ensureReconfigurePrComment(
   const baseBranchDesc = getBaseBranchDesc(config);
   const prList = getExpectedPrList(config, branches);
 
-  let prBody = fillReconfigurePrCommentBody(
-    buildReconfigurePrCommentTemplate(SECTION_ORDER),
-    {
-      packageFiles: packageFilesDesc,
-      config: configDesc,
-      baseBranch: baseBranchDesc,
-      prList,
-      warnings,
-      errors,
-    },
-  );
+  let sectionOrder: readonly string[] = SECTION_ORDER;
+  let sections: ReconfigurePrCommentSections = {
+    packageFiles: packageFilesDesc,
+    config: configDesc,
+    baseBranch: baseBranchDesc,
+    prList,
+    warnings,
+    errors,
+  };
+  function render(prSections: ReconfigurePrCommentSections): string {
+    return fillReconfigurePrCommentBody(
+      buildReconfigurePrCommentTemplate(sectionOrder),
+      prSections,
+    );
+  }
+
+  let prBody = render(sections);
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
       'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    const prListSummary = getExpectedPrListSummary(config, branches);
+    sections = {
+      ...sections,
+      prList: getExpectedPrListSummary(config, branches),
+    };
     if (packageFilesDesc) {
-      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
       // "What to Expect" should render before "Detected Package Files" in the summary view,
       // so rebuild from a template with that section order rather than reordering the rendered body.
-      prBody = fillReconfigurePrCommentBody(
-        buildReconfigurePrCommentTemplate(SUMMARY_SECTION_ORDER),
-        {
-          packageFiles: packageFilesSummary,
-          config: configDesc,
-          baseBranch: baseBranchDesc,
-          prList: prListSummary,
-          warnings,
-          errors,
-        },
-      );
-    } else {
-      prBody = prBody.replace(prList, prListSummary);
+      sectionOrder = SUMMARY_SECTION_ORDER;
+      sections.packageFiles = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
     }
+    prBody = render(sections);
   }
 
   logger.trace(`prBody:\n${prBody}`);
