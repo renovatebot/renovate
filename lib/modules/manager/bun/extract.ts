@@ -1,5 +1,14 @@
-import { isArray, isObject, isString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNullOrUndefined,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
+import semver from 'semver';
+import upath from 'upath';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { parseJsonc } from '../../../util/common.ts';
 import {
   getParentDir,
   getSiblingFileName,
@@ -10,13 +19,165 @@ import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
-import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
+import type {
+  ExtractConfig,
+  NpmrcPackageFile,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
     fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
   );
+}
+
+const lockfileDependencyTypes = new Set<string | undefined>([
+  'dependencies',
+  'devDependencies',
+  'optionalDependencies',
+  'peerDependencies',
+  'overrides',
+]);
+
+const BunLock = z.object({
+  lockfileVersion: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  workspaces: z.record(
+    z.string(),
+    z.object({
+      name: z.string().optional(),
+    }),
+  ),
+  packages: z.record(z.string(), z.unknown()),
+});
+
+function omitDependency(
+  dep: PackageDependency<NpmManagerData>,
+  reason: string,
+): null {
+  logger.debug(
+    { depName: dep.depName, depType: dep.depType, reason },
+    'Omitting dependency that cannot be resolved from bun.lock',
+  );
+  return null;
+}
+
+function resolveLockedDependency(
+  dep: PackageDependency<NpmManagerData>,
+  lock: z.infer<typeof BunLock>,
+  workspace: z.infer<typeof BunLock>['workspaces'][string],
+  workspacePath: string,
+): PackageDependency<NpmManagerData> | null {
+  if (
+    !lockfileDependencyTypes.has(dep.depType) ||
+    dep.datasource !== 'npm' ||
+    dep.skipReason
+  ) {
+    return dep;
+  }
+
+  const depName = dep.depName!;
+  const workspaceEntry = workspacePath
+    ? lock.packages[`${workspace.name}/${depName}`]
+    : undefined;
+  const entry = workspaceEntry ?? lock.packages[depName];
+  if (!entry) {
+    // Overrides of transitive dependencies need not have a root lock entry.
+    return dep.depType === 'overrides'
+      ? dep
+      : omitDependency(dep, 'no-lock-entry');
+  }
+  if (!isArray(entry) || !isString(entry[0])) {
+    return omitDependency(dep, 'invalid-lock-entry');
+  }
+
+  const separator = entry[0].indexOf('@', 1);
+  if (separator === -1) {
+    return omitDependency(dep, 'invalid-lock-entry');
+  }
+  const resolvedName = entry[0].slice(0, separator);
+  const reference = entry[0].slice(separator + 1);
+  if (reference.startsWith('workspace:')) {
+    return omitDependency(dep, 'workspace-reference');
+  }
+
+  const packageName = dep.packageName ?? depName;
+  if (resolvedName !== packageName) {
+    return omitDependency(dep, 'package-name-mismatch');
+  }
+
+  const version = semver.valid(reference);
+  if (!version) {
+    return omitDependency(dep, 'non-semver-reference');
+  }
+  dep.lockedVersion = version;
+  return dep;
+}
+
+/** Re-extract a manifest using versions from the regenerated text lockfile. */
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig = {},
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  let result: PackageFileContent<NpmManagerData> | null;
+  try {
+    result = extractPackageJson(JSON.parse(content), packageFile);
+  } catch (err) {
+    logger.debug({ err, packageFile }, 'Error parsing package.json');
+    return null;
+  }
+  if (!result) {
+    return null;
+  }
+
+  const lockFile = config.lockFiles?.find((file) =>
+    matchesFileName(file, 'bun.lock'),
+  );
+  // Binary lockfiles cannot be parsed as text. Do not fall back to manifest ranges.
+  if (!lockFile) {
+    return null;
+  }
+  let lockContent = config.fileContents?.[lockFile];
+  if (lockContent === undefined) {
+    lockContent = await readLocalFile(lockFile, 'utf8');
+  }
+  if (isNullOrUndefined(lockContent)) {
+    return null;
+  }
+
+  let lock: z.infer<typeof BunLock>;
+  try {
+    lock = BunLock.parse(parseJsonc(lockContent.toString()));
+  } catch (err) {
+    logger.debug({ err, lockFile }, 'Error parsing bun.lock');
+    return null;
+  }
+
+  const workspacePath = upath.relative(
+    upath.dirname(lockFile),
+    upath.dirname(packageFile),
+  );
+  const workspace = lock.workspaces[workspacePath];
+  const unnamedWorkspace = workspacePath && !workspace?.name;
+  if (!workspace || unnamedWorkspace) {
+    return null;
+  }
+
+  const deps: PackageDependency<NpmManagerData>[] = [];
+  for (const dep of result.deps) {
+    const resolved = resolveLockedDependency(
+      dep,
+      lock,
+      workspace,
+      workspacePath,
+    );
+    if (resolved) {
+      deps.push(resolved);
+    }
+  }
+  return { ...result, deps };
 }
 
 export async function processPackageFile(

@@ -3,6 +3,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
+import * as _bun from '../../../../modules/manager/bun/index.ts';
 import * as _bundler from '../../../../modules/manager/bundler/index.ts';
 import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
@@ -1615,6 +1616,304 @@ describe('workers/repository/update/branch/get-updated', () => {
       } satisfies BranchConfig;
       git.getFile.mockResolvedValueOnce('existing content');
     });
+
+    it.each([
+      { resolvedVersion: '1.2.3', lockfileOnly: false, expectedErrors: [] },
+      { resolvedVersion: '1.2.3', lockfileOnly: true, expectedErrors: [] },
+      {
+        resolvedVersion: '1.3.0',
+        lockfileOnly: true,
+        expectedErrors: [
+          {
+            fileName: 'package.json',
+            stderr: expect.stringContaining('resolved to version 1.3.0'),
+          },
+        ],
+      },
+      {
+        resolvedVersion: '1.3.0',
+        lockfileOnly: false,
+        expectedErrors: [
+          {
+            fileName: 'package.json',
+            stderr: expect.stringContaining('resolved to version 1.3.0'),
+          },
+        ],
+      },
+    ])(
+      'checks the regenerated Bun lock version $resolvedVersion (lockfileOnly=$lockfileOnly) with the real extractor',
+      async ({ resolvedVersion, lockfileOnly, expectedErrors }) => {
+        const manifest = JSON.stringify({ dependencies: { foo: '^1.2.3' } });
+        const lock = JSON.stringify({
+          lockfileVersion: 2,
+          workspaces: { '': { name: 'app' } },
+          packages: { foo: [`foo@${resolvedVersion}`, '', {}, 'integrity'] },
+        });
+        config.packageFiles = {
+          bun: [
+            { packageFile: 'package.json', lockFiles: ['bun.lock'], deps: [] },
+          ],
+        };
+        config.upgrades.push({
+          packageFile: 'package.json',
+          manager: 'bun',
+          branchName: '',
+          isLockfileUpdate: lockfileOnly,
+          depName: 'foo',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        });
+        git.getFile
+          .mockReset()
+          .mockResolvedValue(lockfileOnly ? manifest : 'existing content');
+        vi.spyOn(_bun, 'updateDependency').mockResolvedValueOnce(manifest);
+        vi.spyOn(_bun, 'updateArtifacts').mockResolvedValueOnce([
+          { file: { type: 'deletion', path: 'bun.lockb' } },
+          { file: { type: 'addition', path: 'bun.lock', contents: lock } },
+        ]);
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(result.artifactErrors).toEqual(expectedErrors);
+        expect(logger.logger.warn).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Could not re-extract the packageFile after updating it',
+        );
+      },
+    );
+
+    it.each([false, true])(
+      'checks earlier workspace updates against the final shared Bun lock (first artifact changed=%s)',
+      async (firstArtifactChanged) => {
+        const rootManifest = JSON.stringify({
+          dependencies: { foo: '^1.2.3' },
+        });
+        const childManifest = JSON.stringify({
+          dependencies: { bar: '^1.2.3' },
+        });
+        function lock(fooVersion: string): string {
+          return JSON.stringify({
+            lockfileVersion: 2,
+            workspaces: { '': {}, 'packages/app': { name: 'app' } },
+            packages: { foo: [`foo@${fooVersion}`], bar: ['bar@1.2.3'] },
+          });
+        }
+        config.packageFiles = {
+          bun: ['package.json', 'packages/app/package.json'].map(
+            (packageFile) => ({
+              packageFile,
+              lockFiles: ['bun.lock'],
+              deps: [],
+            }),
+          ),
+        };
+        config.upgrades.push(
+          {
+            packageFile: 'package.json',
+            manager: 'bun',
+            branchName: '',
+            depName: 'foo',
+            newVersion: '1.2.3',
+            pendingVersions: ['1.3.0'],
+          },
+          {
+            packageFile: 'packages/app/package.json',
+            manager: 'bun',
+            branchName: '',
+            depName: 'bar',
+            newVersion: '1.2.3',
+            pendingVersions: ['1.4.0'],
+          },
+        );
+        git.getFile.mockReset().mockResolvedValue('existing content');
+        vi.spyOn(_bun, 'updateDependency')
+          .mockResolvedValueOnce(rootManifest)
+          .mockResolvedValueOnce(childManifest);
+        vi.spyOn(_bun, 'updateArtifacts')
+          .mockResolvedValueOnce(
+            firstArtifactChanged
+              ? [
+                  {
+                    file: {
+                      type: 'addition',
+                      path: 'bun.lock',
+                      contents: lock('1.2.3'),
+                    },
+                  },
+                ]
+              : null,
+          )
+          .mockResolvedValueOnce([
+            {
+              file: {
+                type: 'addition',
+                path: 'bun.lock',
+                contents: lock('1.3.0'),
+              },
+            },
+          ]);
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(result.artifactErrors).toEqual([
+          {
+            fileName: 'package.json',
+            stderr: expect.stringContaining('resolved to version 1.3.0'),
+          },
+        ]);
+      },
+    );
+
+    it.each([
+      {
+        artifactPath: 'bun.lock',
+        expectedErrors: [
+          {
+            fileName: 'packages/web/package.json',
+            stderr: expect.stringContaining('resolved to version 2.8.8'),
+          },
+        ],
+      },
+      { artifactPath: 'unrelated.lock', expectedErrors: [] },
+      { artifactPath: null, expectedErrors: [] },
+    ])(
+      'checks an unchanged child lock against relevant final artifacts ($artifactPath)',
+      async ({ artifactPath, expectedErrors }) => {
+        const rootManifest = JSON.stringify({
+          overrides: { prettier: '2.8.8' },
+        });
+        const childManifest = JSON.stringify({
+          dependencies: { prettier: '^2.8.0' },
+        });
+        const lock = JSON.stringify({
+          lockfileVersion: 1,
+          workspaces: { '': {}, 'packages/web': { name: 'web' } },
+          packages: { prettier: ['prettier@2.8.8'] },
+        });
+        config.packageFiles = {
+          bun: ['package.json', 'packages/web/package.json'].map(
+            (packageFile) => ({
+              packageFile,
+              lockFiles: ['bun.lock'],
+              deps: [],
+            }),
+          ),
+        };
+        config.upgrades.push(
+          {
+            packageFile: 'package.json',
+            manager: 'bun',
+            branchName: '',
+            depName: 'prettier',
+            newVersion: '2.8.8',
+          },
+          {
+            packageFile: 'packages/web/package.json',
+            manager: 'bun',
+            branchName: '',
+            depName: 'prettier',
+            isLockfileUpdate: true,
+            newVersion: '2.8.0',
+            pendingVersions: ['2.8.8'],
+          },
+        );
+        git.getFile
+          .mockReset()
+          .mockResolvedValueOnce('old root content')
+          .mockResolvedValue(childManifest);
+        vi.spyOn(_bun, 'updateDependency').mockResolvedValueOnce(rootManifest);
+        vi.spyOn(_bun, 'updateArtifacts')
+          .mockResolvedValueOnce(
+            artifactPath
+              ? [
+                  {
+                    file: {
+                      type: 'addition',
+                      path: artifactPath,
+                      contents: lock,
+                    },
+                  },
+                ]
+              : null,
+          )
+          .mockResolvedValueOnce(null);
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(result.artifactErrors).toEqual(expectedErrors);
+        expect(result.updatedPackageFiles.map((file) => file.path)).toEqual([
+          'package.json',
+        ]);
+        expect(logger.logger.warn).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Could not re-extract the packageFile after updating it',
+        );
+      },
+    );
+
+    it.each([
+      { packageNames: ['is-number'], expectedErrors: [] },
+      {
+        packageNames: ['is-odd'],
+        expectedErrors: [
+          {
+            fileName: 'package.json',
+            stderr: expect.stringContaining('resolved to version 3.0.1'),
+          },
+        ],
+      },
+      {
+        packageNames: ['is-odd', 'is-number'],
+        expectedErrors: [
+          {
+            fileName: 'package.json',
+            stderr: expect.stringContaining('resolved to version 3.0.1'),
+          },
+        ],
+      },
+    ])(
+      'matches pending versions to the resolved package identity ($packageNames)',
+      async ({ packageNames, expectedErrors }) => {
+        const manifest = JSON.stringify({
+          dependencies: { 'is-number': '^6.0.0' },
+          overrides: { 'is-number': 'npm:is-odd@^3.0.0' },
+        });
+        const lock = JSON.stringify({
+          lockfileVersion: 1,
+          workspaces: { '': {} },
+          overrides: { 'is-number': 'npm:is-odd@^3.0.0' },
+          packages: { 'is-number': ['is-odd@3.0.1'] },
+        });
+        config.packageFiles = {
+          bun: [
+            { packageFile: 'package.json', lockFiles: ['bun.lock'], deps: [] },
+          ],
+        };
+        config.upgrades.push(
+          ...packageNames.map((packageName) => ({
+            packageFile: 'package.json',
+            manager: 'bun',
+            branchName: '',
+            depName: 'is-number',
+            packageName,
+            newVersion: '3.0.0',
+            pendingVersions: ['3.0.1'],
+          })),
+        );
+        vi.spyOn(_bun, 'updateDependency').mockResolvedValue(manifest);
+        vi.spyOn(_bun, 'updateArtifacts').mockResolvedValueOnce([
+          { file: { type: 'addition', path: 'bun.lock', contents: lock } },
+        ]);
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(result.artifactErrors).toEqual(expectedErrors);
+        expect(logger.logger.warn).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Could not re-extract the packageFile after updating it',
+        );
+      },
+    );
 
     describe('when artifact update introduces a pending version', () => {
       it('logs an artifact error', async () => {
