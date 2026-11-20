@@ -163,6 +163,48 @@ describe('workers/repository/update/pr/participants', () => {
         'baz',
       ]);
     });
+
+    it('supports excludeAssignees', async () => {
+      await addParticipants({ ...config, excludeAssignees: ['@a', 'c'] }, pr);
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, ['b']);
+    });
+
+    it('excludes assignees from code owners', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['foo', '@bot', 'baz']);
+      await addParticipants(
+        {
+          ...config,
+          assigneesFromCodeOwners: true,
+          excludeAssignees: ['bot'],
+        },
+        pr,
+      );
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
+        'a',
+        'b',
+        'c',
+        'foo',
+        'baz',
+      ]);
+    });
+
+    it('samples assignees after exclusion', async () => {
+      util.sampleSize.mockReturnValueOnce(['b']);
+      await addParticipants(
+        { ...config, excludeAssignees: ['a'], assigneesSampleSize: 1 },
+        pr,
+      );
+      expect(util.sampleSize).toHaveBeenCalledExactlyOnceWith(['b', 'c'], 1);
+      expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, ['b']);
+    });
+
+    it('adds no assignees when all are excluded', async () => {
+      await addParticipants(
+        { ...config, excludeAssignees: ['a', 'b', 'c'] },
+        pr,
+      );
+      expect(platform.addAssignees).not.toHaveBeenCalled();
+    });
   });
 
   describe('reviewers', () => {
@@ -242,6 +284,65 @@ describe('workers/repository/update/pr/participants', () => {
         'bar',
         'baz',
       ]);
+    });
+
+    it('supports excludeReviewers', async () => {
+      await addParticipants({ ...config, excludeReviewers: ['@x', 'z'] }, pr);
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, ['y']);
+    });
+
+    it('excludes reviewers from code owners', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['foo', '@bot', 'baz']);
+      await addParticipants(
+        {
+          ...config,
+          reviewersFromCodeOwners: true,
+          excludeReviewers: ['bot'],
+        },
+        pr,
+      );
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'x',
+        'y',
+        'z',
+        'foo',
+        'baz',
+      ]);
+    });
+
+    it('excludes additionalReviewers', async () => {
+      await addParticipants(
+        {
+          ...config,
+          additionalReviewers: ['foo', 'bar'],
+          excludeReviewers: ['bar'],
+        },
+        pr,
+      );
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'x',
+        'y',
+        'z',
+        'foo',
+      ]);
+    });
+
+    it('samples reviewers after exclusion', async () => {
+      util.sampleSize.mockReturnValueOnce(['y']);
+      await addParticipants(
+        { ...config, excludeReviewers: ['x'], reviewersSampleSize: 1 },
+        pr,
+      );
+      expect(util.sampleSize).toHaveBeenCalledExactlyOnceWith(['y', 'z'], 1);
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, ['y']);
+    });
+
+    it('adds no reviewers when all are excluded', async () => {
+      await addParticipants(
+        { ...config, excludeReviewers: ['x', 'y', 'z'] },
+        pr,
+      );
+      expect(platform.addReviewers).not.toHaveBeenCalled();
     });
   });
 });
