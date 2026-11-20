@@ -29,6 +29,7 @@ You must set `platform=gerrit` in your Renovate config file.
 
 If you use the "Code-Review" label and want to get `automerge` working then you must set `autoApprove=true` in your Renovate config.
 Renovate will now add the _Code-Review_ label with the value "+2" to each of its "pull requests" (Gerrit-Change).
+Reviewers that Renovate adds to a change it approved are not added to the attention set.
 
 !!! note
   The Renovate user account must have permission to give +2 for the Code-Review label.

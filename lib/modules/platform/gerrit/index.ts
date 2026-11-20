@@ -42,7 +42,7 @@ import type {
   GerritLabels,
   GerritProjectInfo,
 } from './schema.ts';
-import { configureScm, pushForReview } from './scm.ts';
+import { CODE_REVIEW_LABEL, configureScm, pushForReview } from './scm.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
@@ -614,7 +614,16 @@ export async function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  await client.addReviewers(number, reviewers);
+  const change = await client.getChange(number, [
+    'LABELS',
+    'DETAILED_ACCOUNTS',
+  ]);
+  const approver = change.labels?.[CODE_REVIEW_LABEL]?.approved;
+  // An auto-approved change awaits no action from its reviewers
+  await client.addReviewers(number, reviewers, {
+    ignoreAutomaticAttentionSetRules:
+      approver?.username === config.gerritUsername,
+  });
 }
 
 /**

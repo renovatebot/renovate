@@ -864,9 +864,14 @@ describe('modules/platform/gerrit/client', () => {
         .post('/a/changes/123456/revisions/current/review', {
           reviewers: [{ reviewer: 'user1' }, { reviewer: 'user2' }],
           notify: 'OWNER_REVIEWERS',
+          ignore_automatic_attention_set_rules: true,
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addReviewers(123456, ['user1', 'user2'])).toResolve();
+      await expect(
+        client.addReviewers(123456, ['user1', 'user2'], {
+          ignoreAutomaticAttentionSetRules: true,
+        }),
+      ).toResolve();
     });
   });
 

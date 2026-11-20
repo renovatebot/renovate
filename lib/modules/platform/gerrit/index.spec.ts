@@ -1249,15 +1249,58 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('addReviewers()', () => {
-    it('addReviewers() - add reviewers', async () => {
+    it('addReviewers() - ignore automatic attention set rules when renovate approved the change', async () => {
+      clientMock.getChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          labels: {
+            'Code-Review': { approved: { _account_id: 1, username: 'user' } },
+          },
+        }),
+      );
       await expect(
         gerrit.addReviewers(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
-      expect(clientMock.addReviewers).toHaveBeenCalledTimes(1);
-      expect(clientMock.addReviewers).toHaveBeenCalledExactlyOnceWith(123456, [
-        'user1',
-        'user2',
+      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(123456, [
+        'LABELS',
+        'DETAILED_ACCOUNTS',
       ]);
+      expect(clientMock.addReviewers).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        ['user1', 'user2'],
+        { ignoreAutomaticAttentionSetRules: true },
+      );
+    });
+
+    it('addReviewers() - apply automatic attention set rules when someone else approved the change', async () => {
+      clientMock.getChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          labels: {
+            'Code-Review': {
+              approved: { _account_id: 2, username: 'other-user' },
+            },
+          },
+        }),
+      );
+      await expect(
+        gerrit.addReviewers(123456, ['user1', 'user2']),
+      ).resolves.toBeUndefined();
+      expect(clientMock.addReviewers).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        ['user1', 'user2'],
+        { ignoreAutomaticAttentionSetRules: false },
+      );
+    });
+
+    it('addReviewers() - apply automatic attention set rules when the change is not approved', async () => {
+      clientMock.getChange.mockResolvedValueOnce(partial<GerritChange>({}));
+      await expect(
+        gerrit.addReviewers(123456, ['user1', 'user2']),
+      ).resolves.toBeUndefined();
+      expect(clientMock.addReviewers).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        ['user1', 'user2'],
+        { ignoreAutomaticAttentionSetRules: false },
+      );
     });
   });
 
