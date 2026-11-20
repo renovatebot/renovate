@@ -3208,6 +3208,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'changesets',
       'composerWithAll',
       'composerNoMinimalChanges',
       'dotnetWorkloadRestore',
