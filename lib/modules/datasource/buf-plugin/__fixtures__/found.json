@@ -1,0 +1,149 @@
+{
+    "plugin": {
+        "id": "ddba756c-6f46-4291-825b-eaf58b4378b7",
+        "owner": "bufbuild",
+        "name": "connect-go",
+        "registryType": "PLUGIN_REGISTRY_TYPE_GO",
+        "version": "v1.10.0",
+        "containerImageDigest": "sha256:a978d08840ee6e9aad315eb815845822e24dd2013eb8aadb0d837cc797fee8cf",
+        "createTime": "2024-10-25T21:41:28.561233Z",
+        "dependencies": [
+            {
+                "owner": "protocolbuffers",
+                "name": "go",
+                "version": "v1.31.0",
+                "revision": 2
+            }
+        ],
+        "sourceUrl": "https://github.com/bufbuild/connect-go",
+        "description": "Generates client and server stubs for connect-go. Compatible with the gRPC, gRPC-Web, and Connect RPC protocols.",
+        "registryConfig": {
+            "goConfig": {
+                "runtimeLibraries": [
+                    {
+                        "module": "github.com/bufbuild/connect-go",
+                        "version": "v1.10.0"
+                    }
+                ],
+                "minimumVersion": "1.19"
+            },
+            "options": [
+                "paths=source_relative"
+            ]
+        },
+        "revision": 2,
+        "outputLanguages": [
+            "PLUGIN_LANGUAGE_GO"
+        ],
+        "spdxLicenseId": "Apache-2.0",
+        "licenseUrl": "https://github.com/bufbuild/connect-go/blob/v1.10.0/LICENSE",
+        "verified": true,
+        "visibility": "CURATED_PLUGIN_VISIBILITY_PUBLIC",
+        "deprecated": true
+    },
+    "versions": [
+        {
+            "version": "v1.10.0",
+            "revisions": [
+                2,
+                1
+            ]
+        },
+        {
+            "version": "v1.9.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.8.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.7.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.6.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.5.2",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.5.1",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.5.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.4.1",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.4.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.3.2",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.3.1",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.3.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.2.0",
+            "revisions": [
+                1
+            ]
+        },
+        {
+            "version": "v1.1.0",
+            "revisions": [
+                4,
+                3,
+                2,
+                1
+            ]
+        },
+        {
+            "version": "v1.0.0",
+            "revisions": [
+                4,
+                3,
+                2,
+                1
+            ]
+        }
+    ]
+}
