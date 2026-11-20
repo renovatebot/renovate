@@ -42,7 +42,6 @@ export interface BranchUpgradeConfig
   artifactErrors?: ArtifactError[];
   artifactNotices?: ArtifactNotice[];
   autoReplaceStringTemplate?: string;
-  baseDeps?: PackageDependency[];
   branchName: string;
   commitBody?: string;
   commitMessage?: string;
