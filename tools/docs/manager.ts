@@ -39,6 +39,7 @@ export const CategoryNames: Record<Category, string> = {
   ansible: 'Ansible',
   batect: 'Batect',
   bazel: 'Bazel',
+  buf: 'Buf',
   c: 'C and C++',
   cd: 'Continuous Delivery',
   ci: 'Continuous Integration',
