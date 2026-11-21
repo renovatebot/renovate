@@ -34,14 +34,31 @@ import { resolveToolConstraint } from '../util.ts';
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 
-function getChecksumFromUrl(url: string): Promise<string> {
+function resolveRegistryAlias(
+  url: string,
+  registryAliases: Record<string, string> = {},
+): string {
+  for (const [registry, alias] of Object.entries(registryAliases)) {
+    if (url === registry || url.startsWith(`${registry}/`)) {
+      return `${alias}${url.slice(registry.length)}`;
+    }
+  }
+  return url;
+}
+
+function getChecksumFromUrl(
+  url: string,
+  registryAliases?: Record<string, string>,
+): Promise<string> {
+  const resolvedUrl = resolveRegistryAlias(url, registryAliases);
   return withCache(
     {
       namespace: 'url-sha256',
-      key: url,
+      key: resolvedUrl,
+      public: false,
       ttlMinutes: 3 * 24 * 60, // 3 days
     },
-    () => hashStream(http.stream(url), 'sha256'),
+    () => hashStream(http.stream(resolvedUrl), 'sha256'),
   );
 }
 
@@ -102,7 +119,7 @@ async function updateChecksums(
   updatedDeps: PackageDependency[],
   addDistributionChecksum: boolean,
   addWrapperChecksum: boolean,
-  originalContent: string,
+  registryAliases?: Record<string, string>,
 ): Promise<string> {
   let updatedContent = content;
 
@@ -112,14 +129,11 @@ async function updateChecksums(
       updatedContent,
       'distributionSha256Sum',
     );
-    const fallbackChecksum = getChecksumValue(
-      originalContent,
-      'distributionSha256Sum',
-    );
+
     const distUrl = getDistributionUrl(updatedContent);
     if (distUrl) {
       try {
-        const checksum = await getChecksumFromUrl(distUrl);
+        const checksum = await getChecksumFromUrl(distUrl, registryAliases);
         if (existingChecksum) {
           updatedContent = updatedContent.replace(
             regEx(/distributionSha256Sum=.*/),
@@ -139,14 +153,7 @@ async function updateChecksums(
           { err, url: distUrl },
           'Failed to fetch distribution checksum',
         );
-        if (!existingChecksum && fallbackChecksum) {
-          updatedContent = addChecksumAfterLine(
-            updatedContent,
-            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
-            'distributionSha256Sum',
-            fallbackChecksum,
-          );
-        }
+        throw err;
       }
     }
   }
@@ -157,10 +164,7 @@ async function updateChecksums(
       updatedContent,
       'wrapperSha256Sum',
     );
-    const fallbackChecksum = getChecksumValue(
-      originalContent,
-      'wrapperSha256Sum',
-    );
+
     let wrapperUrl = getWrapperUrl(updatedContent);
 
     // If no wrapperUrl, try to construct from wrapperVersion
@@ -177,7 +181,7 @@ async function updateChecksums(
 
     if (wrapperUrl) {
       try {
-        const checksum = await getChecksumFromUrl(wrapperUrl);
+        const checksum = await getChecksumFromUrl(wrapperUrl, registryAliases);
         if (existingChecksum) {
           updatedContent = updatedContent.replace(
             regEx(/wrapperSha256Sum=.*/),
@@ -197,14 +201,7 @@ async function updateChecksums(
           { err, url: wrapperUrl },
           'Failed to fetch wrapper checksum',
         );
-        if (!existingChecksum && fallbackChecksum) {
-          updatedContent = addChecksumAfterLine(
-            updatedContent,
-            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
-            'wrapperSha256Sum',
-            fallbackChecksum,
-          );
-        }
+        throw err;
       }
     }
   }
@@ -309,7 +306,7 @@ export async function updateArtifacts({
 
     // Run wrapper:wrapper if the wrapper itself is being updated
     if (hasWrapperUpdate && cmd) {
-      const extraEnv = getExtraEnvOptions(updatedDeps);
+      const extraEnv = getExtraEnvOptions(updatedDeps, config.registryAliases);
       await executeWrapperCommand(cmd, config, packageFileName, extraEnv);
     }
 
@@ -323,7 +320,7 @@ export async function updateArtifacts({
           updatedDeps,
           hadDistributionChecksum,
           hadWrapperChecksum,
-          newPackageFileContent,
+          config.registryAliases,
         );
         await writeLocalFile(packageFileName, contentWithChecksums);
       }
@@ -428,10 +425,20 @@ async function executeWrapperCommand(
   }
 }
 
-function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
+function getExtraEnvOptions(
+  deps: PackageDependency[],
+  registryAliases?: Record<string, string>,
+): ExtraEnv {
   const extraEnv: ExtraEnv = {};
 
-  const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
+  const originalRepoUrl =
+    getCustomMavenWrapperRepoUrl(deps) ?? DEFAULT_MAVEN_REPO_URL;
+  const resolvedRepoUrl = resolveRegistryAlias(
+    originalRepoUrl,
+    registryAliases,
+  );
+  const customMavenWrapperUrl =
+    resolvedRepoUrl === DEFAULT_MAVEN_REPO_URL ? null : resolvedRepoUrl;
   if (customMavenWrapperUrl) {
     extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
 

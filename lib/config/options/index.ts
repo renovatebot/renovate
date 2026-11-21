@@ -1635,6 +1635,7 @@ const options: Readonly<RenovateOptions>[] = [
       'kubernetes',
       'kustomize',
       'maven',
+      'maven-wrapper',
       'regex',
       'terraform',
       'vendir',
