@@ -30,6 +30,10 @@ export const knownDepTypes = [
     description: 'Listed under `[tool.uv.dev-dependencies]`',
   },
   {
+    depType: 'tool.uv.required-version',
+    description: 'The uv version constraint from `[tool.uv]`',
+  },
+  {
     depType: 'tool.uv.sources',
     description: 'Listed under `[tool.uv.sources]`',
   },
