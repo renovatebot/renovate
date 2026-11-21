@@ -221,6 +221,15 @@ export interface DatasourceApi extends ModuleApi {
   sourceUrlNote?: string;
 
   /**
+   * Whether releases can be returned with `constraints`, for use with `constraintsFiltering`.
+   */
+  constraintsFilteringSupport: boolean;
+  /**
+   * Notes on how the release constraints are determined.
+   */
+  constraintsFilteringNote?: string;
+
+  /**
    * Whether to perform centralized caching in the datasource index/wrapper or not.
    *
    * - `true`: datasource index wrapper will cache all results (based on registryUrl/packageName)

@@ -51,6 +51,9 @@ export class RubygemsDatasource extends Datasource {
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_uri` field in the results.';
+  override readonly constraintsFilteringSupport = true;
+  override readonly constraintsFilteringNote =
+    'The `ruby`, `rubygems` and `platform` constraints are determined from the `ruby_version`, `rubygems_version` and `platform` fields in the results. These are only available from registries which support the `/api/v1/versions` endpoint.';
 
   private async fetchReleases({
     packageName,
