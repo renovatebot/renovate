@@ -22,6 +22,7 @@ export interface RegistryInfo {
 }
 
 export interface CrateRecord {
+  name: string;
   vers: string;
   yanked: boolean;
   rust_version?: string;
