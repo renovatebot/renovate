@@ -37,6 +37,7 @@ export type CircleCiOrb = z.infer<typeof CircleCiOrb>;
 export const CircleCiFile = NotCircular.pipe(
   BaseOrb.extend({
     aliases: LooseArray(CircleCiDocker).catch([]),
+    functions: LooseRecord(z.string()).catch({}),
     orbs: LooseRecord(z.union([z.string(), CircleCiOrb])).catch({}),
   }),
 );
