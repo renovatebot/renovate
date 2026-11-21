@@ -7,3 +7,5 @@ nav:
   - 'Automerge': 'automerge.md'
   - 'Minimum Release Age': 'minimum-release-age.md'
   - 'Renovate and changelogs': 'changelogs.md'
+  # TODO move this
+  # - 'How Renovate caches package and repository metadata': 'caching.md'
