@@ -56,6 +56,7 @@ import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
 import {
+  getInheritedPackageManagerVersion,
   getInstalledPackageName,
   getNodeOptions,
   getPackageManagerVersion,
@@ -278,6 +279,13 @@ export async function generateLockFile(
             'yarn',
             await lazyPgkJson.getValue(),
           );
+          if (isNullOrUndefined(yarnVersion)) {
+            // walk up to an inherited packageManager (mirrors corepack)
+            yarnVersion = await getInheritedPackageManagerVersion(
+              'yarn',
+              lockFileDir,
+            );
+          }
           if (isNullOrUndefined(yarnVersion)) {
             const yarnLock = await getYarnLock(lockFileName);
             yarnVersion = getYarnVersionFromLock(yarnLock);

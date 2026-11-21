@@ -46,6 +46,7 @@ import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
 import {
+  getInheritedPackageManagerVersion,
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
@@ -221,6 +222,13 @@ export async function generateLockFile(
             'npm',
             await lazyPkgJson.getValue(),
           );
+          if (isNullOrUndefined(npmVersion)) {
+            // walk up to an inherited packageManager (mirrors corepack)
+            npmVersion = await getInheritedPackageManagerVersion(
+              'npm',
+              lockFileDir,
+            );
+          }
           if (isNullOrUndefined(npmVersion)) {
             npmVersion = await getNpmConstraintFromPackageLock(
               lockFileDir,
