@@ -1,7 +1,19 @@
 import { resolve } from 'node:path';
 import { execa } from 'execa';
+import { readCheckout } from './test/checkout.ts';
+import { compileGlob } from './test/rules.ts';
 import { selectChangedTests } from './test/select.ts';
 import { runCheck } from './tui.ts';
+
+const sharedInputs = [
+  'tools/check/**',
+  'package.json',
+  'pnpm-lock.yaml',
+  'pnpm-workspace.yaml',
+  'patches/**',
+  'mise.toml',
+  '.nvmrc',
+];
 
 const checks = [
   ['Format', 'prettier-fix'],
@@ -10,7 +22,12 @@ const checks = [
   ['Oxlint', 'oxlint'],
   ['Biome', 'biome'],
   ['File names', 'ls-lint'],
-  ['Markdown', 'markdown-lint'],
+  [
+    'Markdown',
+    'markdown-lint',
+    ['**/*.md', '**/.markdownlint*', 'tools/lint/markdown-anchor.mjs'],
+  ],
+  ['Prose', 'lint-prose', ['**/*.{md,ts}', '.vale.ini', '.vale/**']],
   ['Code examples', 'doc-fence-check'],
 ] as const;
 
@@ -67,7 +84,24 @@ async function main(): Promise<void> {
   }
 
   const failures: string[] = [];
-  for (const [name, script] of checks) {
+  let changedPaths: Promise<string[] | undefined> | undefined;
+  for (const [name, script, inputs] of checks) {
+    if (inputs) {
+      changedPaths ??= readCheckout().then(
+        ({ changes }) => changes,
+        () => undefined,
+      );
+      const changes = await changedPaths;
+      const globs = [...sharedInputs, ...inputs].map(compileGlob);
+      const affected = changes?.some((file) =>
+        globs.some((glob) => glob.match(file)),
+      );
+      if (affected === false) {
+        console.log(`  ${name}: skipped (no matching changes)`);
+        continue;
+      }
+    }
+
     if (!(await runCheck(name, script))) {
       failures.push(name);
     }
