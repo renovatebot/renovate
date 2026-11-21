@@ -26,6 +26,7 @@ import {
   compileCommitBody,
   compileCommitTrailers,
 } from '../../model/commit-body.ts';
+import { refreshBranchConfig } from '../../updates/generate.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -397,6 +398,19 @@ export async function processBranch(
       config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
     )) {
       await scm.checkoutBranch(config.baseBranch);
+      config.upgrades = config.upgrades.map((upgrade) => ({ ...upgrade }));
+      const previousTargets = new Map(
+        config.upgrades.map((upgrade) => [
+          upgrade,
+          {
+            newValue: upgrade.newValue,
+            newVersion: upgrade.newVersion,
+            updateType: upgrade.updateType,
+            isBreaking: upgrade.isBreaking,
+            automerge: upgrade.automerge,
+          },
+        ]),
+      );
       const res = await getUpdatedPackageFiles(config);
       if (res.artifactErrors && config.artifactErrors) {
         res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
@@ -419,6 +433,71 @@ export async function processBranch(
         config,
         branchConfig.packageFiles!,
       );
+      config.upgrades = config.upgrades.filter((upgrade) => {
+        const previous = previousTargets.get(upgrade)!;
+        const targetChanged =
+          previous.newValue !== upgrade.newValue ||
+          previous.newVersion !== upgrade.newVersion;
+        // lock file updates keep newValue at currentValue and change only the version
+        const versionChanged =
+          upgrade.currentVersion !== undefined &&
+          upgrade.newVersion !== undefined &&
+          upgrade.newVersion !== upgrade.currentVersion;
+        // as in lookup, currentDigest may be a prefix of the same newDigest
+        const sameDigest =
+          upgrade.currentDigest === undefined
+            ? false
+            : upgrade.newDigest?.startsWith(upgrade.currentDigest);
+        const digestChanged = !!upgrade.newDigest && !sameDigest;
+        const renamed =
+          upgrade.newName !== undefined &&
+          upgrade.newName !== upgrade.packageName;
+        return (
+          !targetChanged ||
+          upgrade.newValue !== upgrade.currentValue ||
+          versionChanged ||
+          digestChanged ||
+          renamed ||
+          upgrade.isReplacement === true
+        );
+      });
+      if (!config.upgrades.length) {
+        logger.debug('No upgrades remain after updating artifacts');
+        if (branchExists) {
+          // a static import creates a cycle through finalize/prune.ts and process/index.ts
+          const { cleanUpBranches } = await import('../../finalize/prune.ts');
+          await cleanUpBranches(
+            {
+              ...config,
+              baseBranchPatterns: [],
+              baseBranches: [config.baseBranch],
+            },
+            [config.branchName],
+          );
+          branchExists = await scm.branchExists(config.branchName);
+        }
+        return {
+          branchExists,
+          // cleanup closes the PR when it deletes the branch
+          prNo: branchExists ? branchPr?.number : undefined,
+          result: 'no-work',
+        };
+      }
+      refreshBranchConfig(config, previousTargets);
+      if (
+        !branchExists &&
+        config.minimumGroupSize &&
+        config.minimumGroupSize > config.upgrades.length &&
+        !dependencyDashboardCheck
+      ) {
+        logger.debug(
+          `Skipping branch creation as minimumGroupSize: ${config.minimumGroupSize} is not met`,
+        );
+        return {
+          branchExists: false,
+          result: 'minimum-group-size-not-met',
+        };
+      }
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );
