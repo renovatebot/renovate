@@ -1572,6 +1572,30 @@ Supported fields:
 
 ### `dependencyDashboard.footer`
 
+### `dependencyDashboard.groupByBaseBranch`
+
+Set this to `true` to group the updates in each section of the Dependency Dashboard by their base branch.
+
+This is useful when you are using Renovate to manage multiple branches through [`baseBranchPatterns`](#basebranchpatterns), and want to see more clearly which update targets which branch.
+
+For example, instead of listing the updates as:
+
+```markdown
+- [ ] Update ubuntu Docker tag to v26
+- [ ] Update dependency @yarnpkg/core to v4.9.2
+```
+
+Renovate lists them as:
+
+```markdown
+- `main`
+  - [ ] Update ubuntu Docker tag to v26
+- `next`
+  - [ ] Update dependency @yarnpkg/core to v4.9.2
+```
+
+If you also use [`dependencyDashboardCategory`](#dependencydashboardcategory) then Renovate groups the updates by base branch within each category.
+
 ### `dependencyDashboard.header`
 
 ### `dependencyDashboard.osvVulnerabilitySummary`

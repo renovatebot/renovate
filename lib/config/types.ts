@@ -947,6 +947,7 @@ export interface DependencyDashboardConfig {
   title?: string;
   header?: string;
   footer?: string;
+  groupByBaseBranch?: boolean;
   labels?: string[];
   osvVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   reportAbandonment?: boolean;

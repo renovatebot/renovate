@@ -283,13 +283,36 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
 function getBranchList(
   branches: BranchConfig[],
   listItemType: DependencyDashboardListItemType,
+  groupByBaseBranch: boolean,
 ): string {
-  return branches
-    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
-    .join('');
+  if (!groupByBaseBranch) {
+    return branches
+      .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+      .join('');
+  }
+
+  const branchesByBaseBranch = new Map<string, BranchConfig[]>();
+  for (const branch of branches) {
+    const baseBranchBranches = branchesByBaseBranch.get(branch.baseBranch);
+    if (baseBranchBranches) {
+      baseBranchBranches.push(branch);
+    } else {
+      branchesByBaseBranch.set(branch.baseBranch, [branch]);
+    }
+  }
+
+  let result = '';
+  for (const [baseBranch, baseBranchBranches] of branchesByBaseBranch) {
+    result += ` - \`${baseBranch}\`\n`;
+    for (const branch of baseBranchBranches) {
+      result += `  ${getListItem(branch, listItemType)}`;
+    }
+  }
+  return result;
 }
 
 function getBranchesListMd(
+  config: RenovateConfig,
   branches: BranchConfig[],
   predicate: (
     value: BranchConfig,
@@ -307,6 +330,8 @@ function getBranchesListMd(
   if (filteredBranches.length === 0) {
     return '';
   }
+  const groupByBaseBranch =
+    config.dependencyDashboard?.groupByBaseBranch === true;
   let result = `## ${title}\n\n${description}\n\n`;
   const { categories, uncategorized, hasCategorized, hasUncategorized } =
     splitBranchesByCategory(filteredBranches);
@@ -317,7 +342,7 @@ function getBranchesListMd(
     )) {
       result = `${result.trimEnd()}\n\n`;
       result += `### ${category}\n\n`;
-      result += getBranchList(branches, listItemType);
+      result += getBranchList(branches, listItemType, groupByBaseBranch);
     }
     if (hasUncategorized) {
       result = `${result.trimEnd()}\n\n`;
@@ -325,7 +350,7 @@ function getBranchesListMd(
     }
   }
   result = `${result.trimEnd()}\n\n`;
-  result += getBranchList(uncategorized, listItemType);
+  result += getBranchList(uncategorized, listItemType, groupByBaseBranch);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (hasCategorized) {
@@ -508,6 +533,7 @@ export async function ensureDependencyDashboard(
   }
 
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'needs-approval',
     'Pending Approval',
@@ -518,6 +544,7 @@ export async function ensureDependencyDashboard(
     '🔐',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'minimum-group-size-not-met',
     'Group Size Not Met',
@@ -525,6 +552,7 @@ export async function ensureDependencyDashboard(
     'approveGroup',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'not-scheduled',
     'Awaiting Schedule',
@@ -535,6 +563,7 @@ export async function ensureDependencyDashboard(
     '🔐',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) =>
       branch.result === 'branch-limit-reached' ||
@@ -549,6 +578,7 @@ export async function ensureDependencyDashboard(
     '🔐',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'error',
     'Errored',
@@ -556,12 +586,14 @@ export async function ensureDependencyDashboard(
     'retry',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'needs-pr-approval',
     'PR Creation Approval Required',
     'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'pr-edited',
     'PR Edited (Blocked)',
@@ -569,6 +601,7 @@ export async function ensureDependencyDashboard(
     'rebase',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
@@ -576,6 +609,7 @@ export async function ensureDependencyDashboard(
     'unpend',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.prBlockedBy === 'BranchAutomerge',
     'Pending Branch Automerge',
@@ -609,6 +643,7 @@ export async function ensureDependencyDashboard(
       branch.prBlockedBy !== 'BranchAutomerge',
   );
   issueBody += getBranchesListMd(
+    config,
     inProgress,
     (branch) => !!branch.prBlockedBy || !branch.prNo,
     'Other Branches',
@@ -616,6 +651,7 @@ export async function ensureDependencyDashboard(
     'other',
   );
   issueBody += getBranchesListMd(
+    config,
     inProgress,
     (branch) => branch.prNo && !branch.prBlockedBy,
     'Open',
@@ -626,6 +662,7 @@ export async function ensureDependencyDashboard(
   );
 
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'already-existed',
     'PR Closed (Blocked)',
