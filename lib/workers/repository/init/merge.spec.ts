@@ -1490,6 +1490,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('does not fetch a repository preset that the global `ignorePresets` ignores', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>some-org/unreachable'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        ignorePresets: ['local>some-org/unreachable'],
+      });
+
+      expect(res).toBeDefined();
+    });
+
     it("continues without the exemption when the admin's global `extends` cannot be resolved", async () => {
       // resolving them here only builds the exemption; the resolution whose result is actually used reports the failure, so it must not be reported twice - nor first
       fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
@@ -1945,10 +1958,10 @@ describe('workers/repository/init/merge', () => {
         },
         {
           name: 'it merges static config with the current config',
-          staticConfig: { dependencyDashboard: true },
+          staticConfig: { dependencyDashboard: { enabled: true } },
           currentConfig: { repositories: ['some/repo'] },
           want: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             repositories: ['some/repo'],
           },
         },
@@ -2117,7 +2130,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           staticConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             packageRules: [
               {
                 groupName: 'my-custom-socketio-override',
@@ -2126,7 +2139,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           wantConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             description: ['Group socket.io packages.'],
             packageRules: [
               {
@@ -2153,7 +2166,7 @@ describe('workers/repository/init/merge', () => {
             extends: ['group:springAndroid'],
           },
           staticConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             extends: ['group:springAmqp'],
             packageRules: [
               {
@@ -2163,7 +2176,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           wantConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             description: [
               'Group Java Spring AMQP packages.',
               'Group Java Spring Android packages.',

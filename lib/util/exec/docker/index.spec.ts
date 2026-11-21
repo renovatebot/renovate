@@ -1,5 +1,5 @@
 import { execa } from 'execa';
-import { quote } from 'shlex';
+import { quote, split } from 'shlex';
 import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
@@ -19,6 +19,18 @@ vi.mock('../../../modules/datasource/index.ts', () => ({
 }));
 
 describe('util/exec/docker/index', () => {
+  const dockerEnv = {
+    env: expect.objectContaining({
+      DOCKER_HOST: 'tcp://docker:2375',
+      PATH: '/usr/local/bin:/usr/bin:/bin',
+    }),
+  };
+
+  beforeEach(() => {
+    vi.stubEnv('DOCKER_HOST', 'tcp://docker:2375');
+    vi.stubEnv('PATH', '/usr/local/bin:/usr/bin:/bin');
+  });
+
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
       resetPrefetchedImages();
@@ -27,7 +39,9 @@ describe('util/exec/docker/index', () => {
     it('runs prefetch command', async () => {
       const execSnapshots = mockExecAll();
       await prefetchDockerImage('foo:1.2.3');
-      expect(execSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull foo:1.2.3', options: dockerEnv },
+      ]);
     });
 
     it('performs prefetch once for each image', async () => {
@@ -68,8 +82,8 @@ describe('util/exec/docker/index', () => {
       ]);
       await removeDockerContainer('bar', 'foo_');
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker ps --filter name=foo_sidecar -aq' },
-        { cmd: 'docker rm -f 12345' },
+        { cmd: 'docker ps --filter name=foo_sidecar -aq', options: dockerEnv },
+        { cmd: 'docker rm -f 12345', options: dockerEnv },
       ]);
     });
   });
@@ -135,8 +149,11 @@ describe('util/exec/docker/index', () => {
       ]);
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker ps --filter label=renovate_child -aq' },
-        { cmd: 'docker rm -f 111 222 333' },
+        {
+          cmd: 'docker ps --filter label=renovate_child -aq',
+          options: dockerEnv,
+        },
+        { cmd: 'docker rm -f 111 222 333', options: dockerEnv },
       ]);
     });
   });
@@ -169,6 +186,95 @@ describe('util/exec/docker/index', () => {
         'ghcr.io/renovatebot/base-image',
       );
       expect(res).toBe(command(sideCarName));
+    });
+
+    it('keeps stdin open when the child command receives input', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      expect(res).toContain('docker run --rm -i ');
+      expect(res).toEndWith("bash -l -c '{ foo\n} </dev/null >&2 && bar'");
+    });
+
+    it('separates setup output from the response without consuming input', async () => {
+      mockExecAll();
+      const input = '{"private":"manifest"}';
+      const res = await generateDockerCommand(
+        ['cat'],
+        [
+          'cat',
+          'echo installing',
+          { command: ['echo', 'installed'] },
+          { command: ['echo', 'ignored'], ignoreFailure: true },
+        ],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        {
+          input,
+        },
+      );
+
+      expect(stdout).toBe(input);
+      expect(stderr).toBe('installing\ninstalled\nignored');
+    });
+
+    it('passes input only to the final command in a sequence', async () => {
+      mockExecAll();
+      const input = 'private manifest';
+      const res = await generateDockerCommand(
+        [
+          'cat && echo first',
+          { command: ['cat'] },
+          { command: ['false'], ignoreFailure: true },
+          { command: ['cat'] },
+        ],
+        [],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        { input },
+      );
+
+      expect(stdout).toBe(input);
+      expect(stderr).toBe('first');
+    });
+
+    it('isolates compound setup commands while preserving shell state', async () => {
+      mockExecAll();
+      const input = '{"private":"manifest"}';
+      const res = await generateDockerCommand(
+        ['printf "%s:%s\\n" "$PWD" "$SETUP_STATE" && cat'],
+        ['echo installing && cat && cd / && export SETUP_STATE=ready; # setup'],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        { input },
+      );
+
+      expect(stdout).toBe(`/:ready\n${input}`);
+      expect(stderr).toBe('installing');
     });
 
     it('keeps shell metacharacters inert in the outer command', async () => {

@@ -14,7 +14,7 @@ import * as fs from '../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { Http } from '../../../util/http/index.ts';
-import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -250,8 +250,7 @@ export class NugetV3Api {
             dep.sourceUrl = massageUrl(sourceUrl);
           }
         } catch (err) {
-          /* v8 ignore else -- not easy testable with nock */
-          if (err instanceof HttpError && err.response?.statusCode === 404) {
+          if (isNotFound(err)) {
             shouldTryNupkg = true;
             logger.debug(
               { registryUrl, pkgName, pkgVersion: latestStable },
@@ -284,7 +283,7 @@ export class NugetV3Api {
         throw err;
       }
       // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
+      if (isNotFound(err)) {
         logger.debug(
           { registryUrl, pkgName, pkgVersion: latestStable },
           `package manifest (.nuspec) not found`,

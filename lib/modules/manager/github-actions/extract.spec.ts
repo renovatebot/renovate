@@ -3598,6 +3598,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'fluxcd/flux-mirror/actions/setup@v0.13.0',
+        with: { version: 'v0.11.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.11.1',
+          datasource: 'github-releases',
+          depName: 'flux-mirror',
+          depType: 'uses-with',
+          packageName: 'fluxcd/flux-mirror',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'fluxcd/flux-mirror/actions/setup@v0.13.0',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'flux-mirror',
+          depType: 'uses-with',
+          packageName: 'fluxcd/flux-mirror',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'github/gh-aw-actions/setup-cli@v1',
         with: { version: 'v0.37.18' },
       },
@@ -5612,7 +5643,7 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('actions.lock', () => {
     beforeEach(() => {
-      // the lock file is read through the memory cache, which production initialises per repository
+      // the lock file is read through the memory cache, which production initializes per repository
       memCache.init();
     });
 

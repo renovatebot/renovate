@@ -115,6 +115,7 @@
   Alert: [
     'notification.toolkit.fluxcd.io/v1beta2',
     'notification.toolkit.fluxcd.io/v1beta3',
+    'notification.toolkit.fluxcd.io/v1',
   ],
   Bucket: [
     'source.toolkit.fluxcd.io/v1alpha1',
@@ -164,6 +165,7 @@
   Provider: [
     'notification.toolkit.fluxcd.io/v1beta2',
     'notification.toolkit.fluxcd.io/v1beta3',
+    'notification.toolkit.fluxcd.io/v1',
   ],
   Receiver: [
     'notification.toolkit.fluxcd.io/v1beta2',

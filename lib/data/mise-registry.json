@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.10.19 linux-x64 (2026-10-24)"
+    "version": "2026.11.8 linux-x64 (2026-11-13)"
   },
   "tools": {
     "1password": {
@@ -44,7 +44,6 @@
       "asdf": "https"
     },
     "ag": {
-      "asdf": "mise-plugins/mise-ag",
       "vfox": "jdx/vfox-ag"
     },
     "age": {
@@ -52,7 +51,6 @@
       "asdf": "threkk/asdf-age"
     },
     "age-plugin-yubikey": {
-      "asdf": "joke/asdf-age-plugin-yubikey",
       "cargo": "age-plugin-yubikey",
       "github": "str4d/age-plugin-yubikey"
     },
@@ -78,7 +76,6 @@
       "asdf": "robsonpeixoto/asdf-aks-engine"
     },
     "allure": {
-      "asdf": "mise-plugins/mise-allure",
       "github": "allure-framework/allure2"
     },
     "allurectl": {
@@ -174,14 +171,12 @@
       "asdf": "beardix/asdf-argocd"
     },
     "asciidoctorj": {
-      "asdf": "mise-plugins/mise-asciidoctorj",
       "vfox": "jdx/vfox-asciidoctorj"
     },
     "aspire": {
       "github": "microsoft/aspire"
     },
     "assh": {
-      "asdf": "mise-plugins/mise-assh",
       "github": "moul/assh"
     },
     "ast-grep": {
@@ -214,7 +209,6 @@
       "packslip": "github.com/aubepkg/aube"
     },
     "auto-doc": {
-      "asdf": "mise-plugins/mise-auto-doc",
       "github": "tj-actions/auto-doc"
     },
     "aws": {
@@ -246,12 +240,10 @@
     },
     "aws-sam": {
       "aqua": "aws/aws-sam-cli",
-      "asdf": "mise-plugins/mise-pyapp",
       "pypi": "aws-sam-cli"
     },
     "aws-sam-cli": {
       "aqua": "aws/aws-sam-cli",
-      "asdf": "mise-plugins/mise-pyapp",
       "pypi": "aws-sam-cli"
     },
     "aws-sso": {
@@ -273,15 +265,12 @@
       "pypi": "awsebcli"
     },
     "awsls": {
-      "asdf": "chessmango/asdf-awsls",
       "github": "jckuester/awsls"
     },
     "awsrm": {
-      "asdf": "chessmango/asdf-awsrm",
       "github": "jckuester/awsrm"
     },
     "awsweeper": {
-      "asdf": "chessmango/asdf-awsweeper",
       "github": "jckuester/awsweeper"
     },
     "azd": {
@@ -294,7 +283,6 @@
       "pypi": "azure-cli"
     },
     "azure-functions-core-tools": {
-      "asdf": "mise-plugins/mise-azure-functions-core-tools",
       "vfox": "jdx/vfox-azure-functions-core-tools"
     },
     "azure-kubelogin": {
@@ -306,11 +294,9 @@
       "github": "babashka/babashka"
     },
     "balena": {
-      "asdf": "jaredallard/asdf-balena-cli",
       "github": "balena-io/balena-cli"
     },
     "balena-cli": {
-      "asdf": "jaredallard/asdf-balena-cli",
       "github": "balena-io/balena-cli"
     },
     "basecamp": {
@@ -345,7 +331,6 @@
     },
     "bazelisk": {
       "aqua": "bazelbuild/bazelisk",
-      "asdf": "josephtate/asdf-bazelisk",
       "npm": "@bazel/bazelisk"
     },
     "benthos": {
@@ -357,7 +342,6 @@
       "github": "betterleaks/betterleaks"
     },
     "bfs": {
-      "asdf": "mise-plugins/mise-bfs",
       "vfox": "jdx/vfox-bfs"
     },
     "bibtex-tidy": {
@@ -382,6 +366,9 @@
     },
     "black": {
       "aqua": "psf/black"
+    },
+    "blaze": {
+      "github": "indexable-inc/blaze"
     },
     "blender": {
       "aqua": "blender/blender"
@@ -415,7 +402,6 @@
       "asdf": "mise-plugins/mise-hashicorp"
     },
     "bpkg": {
-      "asdf": "mise-plugins/mise-bpkg",
       "vfox": "jdx/vfox-bpkg"
     },
     "broot": {
@@ -485,7 +471,6 @@
     },
     "cargo-make": {
       "aqua": "sagiegurari/cargo-make",
-      "asdf": "mise-plugins/asdf-cargo-make",
       "cargo": "cargo-make"
     },
     "cargo-msrv": {
@@ -496,7 +481,6 @@
       "github": "crate-ci/cargo-release"
     },
     "carthage": {
-      "asdf": "mise-plugins/mise-carthage",
       "vfox": "jdx/vfox-carthage"
     },
     "ccache": {
@@ -511,7 +495,6 @@
       "github": "square/certstrap"
     },
     "cf": {
-      "asdf": "mise-plugins/mise-cf",
       "github": "cloudfoundry/cli"
     },
     "cfn-lint": {
@@ -551,7 +534,6 @@
       "asdf": "joke/asdf-chezmoi"
     },
     "chezscheme": {
-      "asdf": "mise-plugins/mise-chezscheme",
       "vfox": "jdx/vfox-chezscheme"
     },
     "chicken": {
@@ -568,7 +550,6 @@
       "cargo": "choose"
     },
     "chromedriver": {
-      "asdf": "mise-plugins/mise-chromedriver",
       "vfox": "jdx/vfox-chromedriver"
     },
     "cidr-merger": {
@@ -597,7 +578,6 @@
       "asdf": "ucpr/asdf-circleci-cli"
     },
     "clang": {
-      "asdf": "mise-plugins/mise-llvm",
       "conda": "clang",
       "vfox": "jdx/vfox-clang"
     },
@@ -623,7 +603,6 @@
       "github": "bjarneo/cliamp"
     },
     "clickhouse": {
-      "asdf": "mise-plugins/mise-clickhouse",
       "vfox": "jdx/vfox-clickhouse"
     },
     "clipboard": {
@@ -641,7 +620,6 @@
       "github": "AlDanial/cloc"
     },
     "clojure": {
-      "asdf": "mise-plugins/mise-clojure",
       "vfox": "jdx/vfox-clojure"
     },
     "cloud-sql-proxy": {
@@ -665,7 +643,6 @@
     },
     "cmake": {
       "aqua": "Kitware/CMake",
-      "asdf": "mise-plugins/mise-cmake",
       "vfox": "jdx/vfox-cmake"
     },
     "cmctl": {
@@ -702,7 +679,6 @@
       "aqua": "colbymchenry/codegraph"
     },
     "codeql": {
-      "asdf": "mise-plugins/mise-codeql",
       "github": "github/codeql-cli-binaries"
     },
     "coder": {
@@ -815,7 +791,6 @@
       "aqua": "charmbracelet/crush"
     },
     "crystal": {
-      "asdf": "mise-plugins/mise-crystal",
       "github": "crystal-lang/crystal",
       "vfox": "jdx/vfox-crystal"
     },
@@ -870,7 +845,6 @@
       "asdf": "asdf-community/asdf-dapr-cli"
     },
     "dart": {
-      "asdf": "mise-plugins/mise-dart",
       "http": "dart",
       "vfox": "jdx/vfox-dart"
     },
@@ -883,7 +857,6 @@
       "github": "databricks/cli"
     },
     "daytona": {
-      "asdf": "mise-plugins/mise-daytona",
       "github": "daytonaio/daytona"
     },
     "dbmate": {
@@ -985,12 +958,10 @@
       "aqua": "dotenvx/dotenvx"
     },
     "dotnet": {
-      "asdf": "mise-plugins/mise-dotnet",
       "core": "dotnet",
       "vfox": "mise-plugins/vfox-dotnet"
     },
     "dotnet-core": {
-      "asdf": "mise-plugins/mise-dotnet",
       "core": "dotnet",
       "vfox": "mise-plugins/vfox-dotnet"
     },
@@ -1071,7 +1042,6 @@
       "asdf": "elementalvoid/asdf-eksctl"
     },
     "elasticsearch": {
-      "asdf": "mise-plugins/mise-elasticsearch",
       "vfox": "jdx/vfox-elasticsearch"
     },
     "elixir": {
@@ -1086,7 +1056,6 @@
       "github": "elm/compiler"
     },
     "emsdk": {
-      "asdf": "mise-plugins/mise-emsdk",
       "vfox": "jdx/vfox-emsdk"
     },
     "engram": {
@@ -1173,7 +1142,6 @@
       "github": "google/flatbuffers"
     },
     "flutter": {
-      "asdf": "mise-plugins/mise-flutter",
       "http": "flutter",
       "vfox": "jdx/vfox-flutter"
     },
@@ -1200,7 +1168,6 @@
       "asdf": "chessmango/asdf-flyctl"
     },
     "flyway": {
-      "asdf": "mise-plugins/mise-flyway",
       "github": "flyway/flyway"
     },
     "fnox": {
@@ -1211,7 +1178,6 @@
       "aqua": "foundry-rs/foundry"
     },
     "func-e": {
-      "asdf": "mise-plugins/mise-func-e",
       "github": "tetratelabs/func-e"
     },
     "furyctl": {
@@ -1238,11 +1204,9 @@
       "asdf": "MxNxPx/asdf-gator"
     },
     "gcc-arm-none-eabi": {
-      "asdf": "mise-plugins/mise-gcc-arm-none-eabi",
       "vfox": "jdx/vfox-gcc-arm-none-eabi"
     },
     "gcloud": {
-      "asdf": "mise-plugins/mise-gcloud",
       "vfox": "jdx/vfox-gcloud"
     },
     "gdal": {
@@ -1262,7 +1226,6 @@
       "github": "Gentleman-Programming/gentle-ai"
     },
     "getenvoy": {
-      "asdf": "mise-plugins/mise-getenvoy",
       "github": "tetratelabs-attic/getenvoy"
     },
     "ggshield": {
@@ -1300,7 +1263,6 @@
       "npm": "@kitlangton/ghui"
     },
     "ginkgo": {
-      "asdf": "mise-plugins/mise-ginkgo",
       "go": "github.com/onsi/ginkgo/v2/ginkgo"
     },
     "git-chglog": {
@@ -1396,7 +1358,6 @@
       "asdf": "jfreeland/asdf-go-swagger"
     },
     "goconvey": {
-      "asdf": "mise-plugins/mise-goconvey",
       "go": "github.com/smartystreets/goconvey"
     },
     "gocryptfs": {
@@ -1465,7 +1426,6 @@
       "github": "orf/gping"
     },
     "graalvm": {
-      "asdf": "mise-plugins/mise-graalvm",
       "vfox": "jdx/vfox-graalvm"
     },
     "gradle": {
@@ -1496,7 +1456,6 @@
       "aqua": "tomnomnom/gron"
     },
     "groovy": {
-      "asdf": "mise-plugins/mise-groovy",
       "vfox": "jdx/vfox-groovy"
     },
     "grpc-health-probe": {
@@ -1547,7 +1506,6 @@
       "pypi": "hatch"
     },
     "haxe": {
-      "asdf": "mise-plugins/mise-haxe",
       "github": "HaxeFoundation/haxe"
     },
     "hcl2json": {
@@ -1557,6 +1515,9 @@
     "hcloud": {
       "aqua": "hetznercloud/cli",
       "asdf": "chessmango/asdf-hcloud"
+    },
+    "headscale": {
+      "aqua": "juanfont/headscale"
     },
     "helix": {
       "aqua": "helix-editor/helix"
@@ -1574,7 +1535,6 @@
       "asdf": "tablexi/asdf-helm-ct"
     },
     "helm-diff": {
-      "asdf": "mise-plugins/mise-helm-diff",
       "github": "databus23/helm-diff"
     },
     "helm-docs": {
@@ -1660,7 +1620,7 @@
     },
     "hugo": {
       "aqua": "gohugoio/hugo",
-      "asdf": "nklmilojevic/asdf-hugo"
+      "asdf": "NeoHsu/asdf-hugo"
     },
     "hugo-extended": {
       "aqua": "gohugoio/hugo/hugo-extended"
@@ -1706,7 +1666,6 @@
       "aqua": "IBM-Cloud/ibm-cloud-cli-release"
     },
     "imagemagick": {
-      "asdf": "mise-plugins/mise-imagemagick",
       "conda": "imagemagick"
     },
     "imessage-exporter": {
@@ -1728,7 +1687,9 @@
       "asdf": "virtualstaticvoid/asdf-istioctl"
     },
     "jactionlint": {
-      "github": "jdx/jactionlint"
+      "aqua": "jdx/jactionlint",
+      "github": "jdx/jactionlint",
+      "packslip": "github.com/jdx/jactionlint"
     },
     "janet": {
       "github": "janet-lang/janet"
@@ -1761,7 +1722,6 @@
       "conda": "jfrog-cli"
     },
     "jib": {
-      "asdf": "mise-plugins/mise-jib",
       "vfox": "jdx/vfox-jib"
     },
     "jiq": {
@@ -1787,6 +1747,10 @@
     "jnv": {
       "aqua": "ynqa/jnv",
       "asdf": "raimon49/asdf-jnv"
+    },
+    "jouet": {
+      "github": "jdx/jouet",
+      "packslip": "github.com/jdx/jouet"
     },
     "jq": {
       "aqua": "jqlang/jq",
@@ -1933,9 +1897,11 @@
       "asdf": "Antiarchitect/asdf-kops"
     },
     "kotlin": {
-      "asdf": "mise-plugins/mise-kotlin",
       "github": "JetBrains/kotlin",
       "vfox": "jdx/vfox-kotlin"
+    },
+    "kotlin-toolchain": {
+      "http": "kotlin-toolchain"
     },
     "kpt": {
       "aqua": "kptdev/kpt",
@@ -2103,7 +2069,6 @@
       "go": "github.com/evilmartians/lefthook"
     },
     "leiningen": {
-      "asdf": "mise-plugins/mise-lein",
       "vfox": "jdx/vfox-leiningen"
     },
     "libsql-server": {
@@ -2123,7 +2088,6 @@
       "asdf": "kforsthoevel/asdf-linkerd"
     },
     "liquibase": {
-      "asdf": "mise-plugins/mise-liquibase",
       "github": "liquibase/liquibase"
     },
     "lisette": {
@@ -2165,14 +2129,12 @@
     },
     "lsd": {
       "aqua": "lsd-rs/lsd",
-      "asdf": "mise-plugins/asdf-lsd",
       "cargo": "lsd"
     },
     "lstk": {
       "github": "localstack/lstk"
     },
     "lua": {
-      "asdf": "mise-plugins/mise-lua",
       "vfox": "jdx/vfox-lua"
     },
     "lua-language-server": {
@@ -2191,7 +2153,6 @@
       "cargo": "lychee"
     },
     "maestro": {
-      "asdf": "dotanuki-labs/asdf-maestro",
       "github": "mobile-dev-inc/maestro"
     },
     "mage": {
@@ -2247,7 +2208,6 @@
     },
     "maven": {
       "aqua": "apache/maven",
-      "asdf": "mise-plugins/mise-maven",
       "vfox": "jdx/vfox-maven"
     },
     "mbx": {
@@ -2260,11 +2220,9 @@
     },
     "mdbook": {
       "aqua": "rust-lang/mdBook",
-      "asdf": "cipherstash/asdf-mdbook",
       "cargo": "mdbook"
     },
     "mdbook-linkcheck": {
-      "asdf": "mise-plugins/mise-mdbook-linkcheck",
       "cargo": "mdbook-linkcheck",
       "github": "Michael-F-Bryan/mdbook-linkcheck"
     },
@@ -2287,7 +2245,6 @@
       "github": "mamba-org/micromamba-releases"
     },
     "micronaut": {
-      "asdf": "mise-plugins/mise-micronaut",
       "github": "micronaut-projects/micronaut-starter"
     },
     "microsandbox": {
@@ -2343,7 +2300,6 @@
       "asdf": "cabify/asdf-mockery"
     },
     "mockolo": {
-      "asdf": "mise-plugins/mise-mockolo",
       "github": "uber/mockolo"
     },
     "mold": {
@@ -2353,12 +2309,10 @@
       "github": "tw93/Mole"
     },
     "mongodb": {
-      "asdf": "mise-plugins/mise-mongodb",
       "conda": "mongodb",
       "vfox": "jdx/vfox-mongod"
     },
     "mongosh": {
-      "asdf": "itspngu/asdf-mongosh",
       "github": "mongodb-js/mongosh"
     },
     "mosh": {
@@ -2389,7 +2343,6 @@
       "asdf": "joschi/asdf-mvnd"
     },
     "mysql": {
-      "asdf": "mise-plugins/mise-mysql",
       "vfox": "jdx/vfox-mysql"
     },
     "mysql-client": {
@@ -2463,7 +2416,6 @@
       "asdf": "mise-plugins/mise-hashicorp"
     },
     "nomad-pack": {
-      "asdf": "mise-plugins/mise-hashicorp",
       "http": "nomad-pack"
     },
     "nono": {
@@ -2510,12 +2462,10 @@
       "aqua": "SecureAuthCorp/oauth2c"
     },
     "oc": {
-      "asdf": "mise-plugins/mise-oc",
       "conda": "openshift-cli",
       "http": "oc"
     },
     "oci": {
-      "asdf": "mise-plugins/mise-oci",
       "vfox": "jdx/vfox-oci"
     },
     "octosql": {
@@ -2604,7 +2554,6 @@
       "aqua": "opengrep/opengrep"
     },
     "opensearch-cli": {
-      "asdf": "mise-plugins/mise-opensearch-cli",
       "github": "opensearch-project/opensearch-cli"
     },
     "openshift-install": {
@@ -2639,6 +2588,7 @@
       "go": "github.com/DarthSim/overmind/v2"
     },
     "oxfmt": {
+      "aqua": "oxc-project/oxc/oxfmt",
       "npm": "oxfmt"
     },
     "oxipng": {
@@ -2698,7 +2648,6 @@
       "aqua": "xataio/pgroll"
     },
     "php": {
-      "asdf": "mise-plugins/asdf-php",
       "vfox": "jdx/vfox-php"
     },
     "pi": {
@@ -2800,7 +2749,6 @@
       "npm": "portless"
     },
     "postgres": {
-      "asdf": "mise-plugins/mise-postgres",
       "conda": "postgresql",
       "vfox": "jdx/vfox-postgres"
     },
@@ -2898,7 +2846,6 @@
       "github": "dathere/qsv"
     },
     "quarkus": {
-      "asdf": "mise-plugins/mise-quarkus",
       "github": "quarkusio/quarkus"
     },
     "quicktype": {
@@ -2940,7 +2887,6 @@
       "github": "FairwindsOps/reckoner"
     },
     "redis": {
-      "asdf": "mise-plugins/mise-redis",
       "conda": "redis-server",
       "vfox": "jdx/vfox-redis"
     },
@@ -3074,16 +3020,13 @@
       "aqua": "sqshq/sampler"
     },
     "sbt": {
-      "asdf": "mise-plugins/mise-sbt",
       "conda": "sbt",
       "github": "sbt/sbt"
     },
     "scala": {
-      "asdf": "mise-plugins/mise-scala",
       "vfox": "jdx/vfox-scala"
     },
     "scala-cli": {
-      "asdf": "mise-plugins/mise-scala-cli",
       "github": "VirtusLab/scala-cli"
     },
     "scalafmt": {
@@ -3138,7 +3081,6 @@
       "vfox": "jdx/vfox-semver"
     },
     "sentinel": {
-      "asdf": "mise-plugins/mise-hashicorp",
       "http": "sentinel"
     },
     "sentry": {
@@ -3227,7 +3169,6 @@
       "aqua": "nklmilojevic/sofka"
     },
     "soft-serve": {
-      "asdf": "chessmango/asdf-soft-serve",
       "github": "charmbracelet/soft-serve"
     },
     "solidity": {
@@ -3254,7 +3195,6 @@
       "asdf": "elementalvoid/asdf-sopstool"
     },
     "sourcery": {
-      "asdf": "mise-plugins/mise-sourcery",
       "github": "krzysztofzablocki/Sourcery"
     },
     "spacectl": {
@@ -3294,7 +3234,6 @@
       "github": "aome510/spotify-player"
     },
     "spring-boot": {
-      "asdf": "mise-plugins/mise-spring-boot",
       "vfox": "jdx/vfox-spring-boot"
     },
     "spruce": {
@@ -3398,16 +3337,13 @@
       "core": "swift"
     },
     "swift-package-list": {
-      "asdf": "mise-plugins/mise-swift-package-list",
       "github": "FelixHerrmann/swift-package-list",
       "spm": "FelixHerrmann/swift-package-list"
     },
     "swiftformat": {
-      "asdf": "mise-plugins/mise-swiftformat",
       "github": "nicklockwood/SwiftFormat"
     },
     "swiftgen": {
-      "asdf": "mise-plugins/mise-swiftgen",
       "github": "SwiftGen/SwiftGen"
     },
     "swiftlint": {
@@ -3427,6 +3363,9 @@
     },
     "tailpipe": {
       "aqua": "turbot/tailpipe"
+    },
+    "tailscale": {
+      "aqua": "tailscale/tailscale"
     },
     "tak": {
       "cargo": "tak-cli",
@@ -3483,11 +3422,9 @@
       "asdf": "johnhamelink/asdf-tekton-cli"
     },
     "teleport-community": {
-      "asdf": "mise-plugins/mise-teleport-community",
       "vfox": "jdx/vfox-teleport-community"
     },
     "teleport-ent": {
-      "asdf": "mise-plugins/mise-teleport-ent",
       "vfox": "jdx/vfox-teleport-ent"
     },
     "telepresence": {
@@ -3502,12 +3439,11 @@
       "asdf": "pdemagny/asdf-teller"
     },
     "temporal": {
-      "aqua": "temporalio/temporal",
+      "aqua": "temporalio/cli",
       "asdf": "asdf-community/asdf-temporal"
     },
     "terraform": {
       "aqua": "hashicorp/terraform",
-      "asdf": "mise-plugins/mise-hashicorp",
       "vfox": "jdx/vfox-terraform"
     },
     "terraform-docs": {
@@ -3547,7 +3483,6 @@
       "asdf": "adamcrews/asdf-tf-summarize"
     },
     "tfc-agent": {
-      "asdf": "mise-plugins/mise-hashicorp",
       "http": "tfc-agent"
     },
     "tfctl": {
@@ -3613,7 +3548,6 @@
       "cargo": "tinymist"
     },
     "tinytex": {
-      "asdf": "mise-plugins/mise-tinytex",
       "vfox": "jdx/vfox-tinytex"
     },
     "tirith": {
@@ -3700,6 +3634,10 @@
       "aqua": "tsl0922/ttyd",
       "asdf": "ivanvc/asdf-ttyd"
     },
+    "tuios": {
+      "aqua": "Gaurav-Gosain/tuios",
+      "github": "Gaurav-Gosain/tuios"
+    },
     "tuist": {
       "aqua": "tuist/tuist",
       "asdf": "mise-plugins/mise-tuist"
@@ -3763,7 +3701,6 @@
     },
     "usage": {
       "aqua": "jdx/usage",
-      "asdf": "mise-plugins/mise-usage",
       "cargo": "usage-cli",
       "packslip": "github.com/jdx/usage"
     },
@@ -3777,7 +3714,6 @@
       "pypi": "uv"
     },
     "v": {
-      "asdf": "mise-plugins/mise-v",
       "vfox": "jdx/vfox-v"
     },
     "vacuum": {
@@ -3803,7 +3739,6 @@
       "aqua": "vectordotdev/vector"
     },
     "velad": {
-      "asdf": "mise-plugins/mise-velad",
       "github": "kubevela/velad"
     },
     "velero": {
@@ -3850,7 +3785,6 @@
       "cargo": "vivid"
     },
     "vlang": {
-      "asdf": "mise-plugins/mise-v",
       "vfox": "jdx/vfox-v"
     },
     "vp": {
@@ -3966,7 +3900,6 @@
     },
     "yamlfmt": {
       "aqua": "google/yamlfmt",
-      "asdf": "mise-plugins/asdf-yamlfmt",
       "go": "github.com/google/yamlfmt/cmd/yamlfmt"
     },
     "yamllint": {
@@ -3982,7 +3915,6 @@
     },
     "yarn": {
       "aqua": "yarnpkg/berry",
-      "asdf": "mise-plugins/mise-yarn",
       "npm": "@yarnpkg/cli-dist",
       "vfox": "jdx/vfox-yarn"
     },
@@ -4023,7 +3955,6 @@
     },
     "zellij": {
       "aqua": "zellij-org/zellij",
-      "asdf": "chessmango/asdf-zellij",
       "cargo": "zellij"
     },
     "zephyr": {
@@ -4035,7 +3966,6 @@
     },
     "zigmod": {
       "aqua": "nektro/zigmod",
-      "asdf": "mise-plugins/asdf-zigmod",
       "github": "nektro/zigmod"
     },
     "zizmor": {

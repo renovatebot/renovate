@@ -14,6 +14,7 @@ import { toSha256 } from '../hash.ts';
 import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
 import { Http } from '../http/index.ts';
+import { isForbidden, isServerError } from '../http/status.ts';
 import { regEx } from '../regex.ts';
 import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../url.ts';
 import { MERGE_CONFIDENCE } from './common.ts';
@@ -286,12 +287,12 @@ function apiErrorHandler(err: any): void {
     throw new ExternalHostError(err, hostType);
   }
 
-  if (err.statusCode === 403) {
+  if (isForbidden(err)) {
     logger.error({ err }, 'merge confidence API token rejected - aborting run');
     throw new ExternalHostError(err, hostType);
   }
 
-  if (err.statusCode >= 500 && err.statusCode < 600) {
+  if (isServerError(err)) {
     logger.error({ err }, 'merge confidence API failure: 5xx - aborting run');
     throw new ExternalHostError(err, hostType);
   }

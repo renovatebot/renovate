@@ -11,8 +11,15 @@ import urlJoin from 'url-join';
 import { logger } from '../logger/index.ts';
 import { regEx } from './regex.ts';
 
+/**
+ * Joins URL parts with `url-join`. The result ends with a slash only if the last
+ * part does.
+ */
 export function joinUrlParts(...parts: string[]): string {
-  return urlJoin(...parts);
+  const joined = urlJoin(...parts);
+  return parts.at(-1)?.endsWith('/')
+    ? ensureTrailingSlash(joined)
+    : trimTrailingSlash(joined);
 }
 
 export function ensurePathPrefix(url: string, prefix: string): string {
@@ -57,7 +64,7 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
     pathname = inputString;
   }
 
-  return host ? inputString : urlJoin(baseUrl, pathname || '');
+  return host ? inputString : joinUrlParts(baseUrl, pathname || '');
 }
 
 /**
@@ -72,7 +79,7 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
   }
 
   const { origin } = isString(baseUrl) ? new URL(baseUrl) : baseUrl;
-  return urlJoin(origin, path);
+  return joinUrlParts(origin, path);
 }
 
 /**

@@ -26,9 +26,22 @@ export const presets: Record<string, Preset> = {
       'workarounds:groupings',
       'workarounds:helmDocs',
       'workarounds:guavaVariants',
+      'workarounds:aospTagVersioning',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
+    ],
+  },
+  aospTagVersioning: {
+    description: 'Use regex versioning for AOSP submodule tags.',
+    packageRules: [
+      {
+        matchDatasources: ['git-refs'],
+        matchManagers: ['git-submodules'],
+        matchSourceUrls: ['https://android.googlesource.com/**'],
+        versioning:
+          'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
+      },
     ],
   },
   bitnamiDockerImageVersioning: {
@@ -256,6 +269,22 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
+          'Parse four-part Eclipse Temurin tags (e.g. 17.0.4.1_1) so out-of-band releases are offered.',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['eclipse-temurin'],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(\\.(?<build>\\d+))?(_(?<revision>\\d+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
+          'Parse four-part Eclipse Temurin tags (e.g. 17.0.4.1_1) so out-of-band releases are offered.',
+        matchDatasources: ['docker'],
+        matchDepNames: ['eclipse-temurin'],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(\\.(?<build>\\d+))?(_(?<revision>\\d+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
           'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
         matchCurrentValue: '/^\\d+(-|$)/',
         matchDatasources: ['docker'],
@@ -418,6 +447,7 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel7**',
           'registry.access.redhat.com/rhel8/**',
           'registry.access.redhat.com/rhel9/**',
+          'registry.access.redhat.com/rhel10/**',
           'registry.access.redhat.com/rhscl/**',
           'registry.access.redhat.com/ubi*{,/}**',
           'redhat/**',

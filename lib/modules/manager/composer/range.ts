@@ -17,10 +17,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
     return rangeStrategy!;
   }
-  if (
-    isComplexRange ||
-    (composerJsonType && ['typo3-cms-extension'].includes(composerJsonType))
-  ) {
+  if (isComplexRange || composerJsonType === 'typo3-cms-extension') {
     return 'widen';
   }
   return 'update-lockfile';
