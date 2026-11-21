@@ -1,4 +1,13 @@
-import { type CollectionTag, Scalar } from 'yaml';
+import is from '@sindresorhus/is';
+import type { CollectionTag, Document } from 'yaml';
+import {
+  Scalar,
+  isAlias,
+  isMap,
+  isScalar,
+  isSeq,
+  parseAllDocuments,
+} from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -6,18 +15,14 @@ import { Result } from '../../../util/result.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { id as semverPartialId } from '../../versioning/semver-partial/index.ts';
+import { buildRefDigestProps } from '../gitlabci-include/parse.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
-import {
-  GitlabDocument,
-  Job,
-  Jobs,
-  MultiDocumentLocalIncludes,
-} from './schema.ts';
+import { Job, Jobs, MultiDocumentLocalIncludes } from './schema.ts';
 import { getGitlabDep } from './utils.ts';
 
 // GitLab `!reference` tags point at other parts of the configuration,
@@ -35,11 +40,103 @@ const componentReferenceRegex = regEx(
   /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
 );
 
+interface ComponentEntry {
+  component: string;
+  keyStart: number;
+  valueNode: Scalar;
+  valueRange: [number, number, number];
+  isFlow: boolean;
+}
+
+function resolveNode(node: unknown, doc: Document): unknown {
+  if (isAlias(node)) {
+    return node.resolve(doc);
+  }
+  return node;
+}
+
+function extractComponentEntry(
+  rawNode: unknown,
+  doc: Document,
+): ComponentEntry | null {
+  const node = resolveNode(rawNode, doc);
+  if (!isMap(node)) {
+    return null;
+  }
+
+  for (const item of node.items) {
+    if (
+      isScalar(item.key) &&
+      item.key.value === 'component' &&
+      isScalar(item.value) &&
+      is.string(item.value.value)
+    ) {
+      return {
+        component: item.value.value,
+        keyStart: item.key.range![0],
+        valueNode: item.value,
+        valueRange: item.value.range!,
+        isFlow: node.flow === true,
+      };
+    }
+  }
+
+  return null;
+}
+
+function extractIncludedComponents(
+  rawNode: unknown,
+  doc: Document,
+): ComponentEntry[] {
+  const node = resolveNode(rawNode, doc);
+  if (isSeq(node)) {
+    const entries: ComponentEntry[] = [];
+    for (const item of node.items) {
+      const entry = extractComponentEntry(item, doc);
+      if (entry) {
+        entries.push(entry);
+      }
+    }
+    return entries;
+  }
+
+  const entry = extractComponentEntry(node, doc);
+  return entry ? [entry] : [];
+}
+
+function findComponentEntries(node: unknown, doc: Document): ComponentEntry[] {
+  if (isSeq(node)) {
+    const entries: ComponentEntry[] = [];
+    for (const item of node.items) {
+      entries.push(...findComponentEntries(item, doc));
+    }
+    return entries;
+  }
+
+  if (!isMap(node)) {
+    return [];
+  }
+
+  const childrenEntries: ComponentEntry[] = [];
+  const includeEntries: ComponentEntry[] = [];
+
+  for (const item of node.items) {
+    if (isScalar(item.key) && item.key.value === 'include') {
+      includeEntries.push(...extractIncludedComponents(item.value, doc));
+    } else {
+      childrenEntries.push(...findComponentEntries(item.value, doc));
+    }
+  }
+
+  return [...childrenEntries, ...includeEntries];
+}
+
 function extractDepFromIncludeComponent(
-  component: string,
+  entry: ComponentEntry,
+  content: string,
   registryAliases?: Record<string, string>,
 ): PackageDependency | null {
-  let componentUrl = component;
+  let componentUrl = entry.component;
   if (registryAliases) {
     for (const key in registryAliases) {
       componentUrl = componentUrl.replace(key, registryAliases[key]);
@@ -62,15 +159,25 @@ function extractDepFromIncludeComponent(
     return null;
   }
 
-  const dep: PackageDependency = {
+  const atIndex = entry.component.lastIndexOf('@');
+  const valuePrefix = entry.component.slice(0, atIndex + 1);
+
+  return {
     datasource: GitlabTagsDatasource.id,
     depName: componentReference.projectPath,
     depType: 'repository',
-    currentValue: componentReference.specificVersion,
     registryUrls: [`https://${componentReference.fqdn}`],
     versioning: semverPartialId,
+    ...buildRefDigestProps({
+      content,
+      keyStart: entry.keyStart,
+      valueNode: entry.valueNode,
+      valueRange: entry.valueRange,
+      ref: componentReference.specificVersion,
+      valuePrefix,
+      isFlow: entry.isFlow,
+    }),
   };
-  return dep;
 }
 
 export function extractPackageFile(
@@ -80,12 +187,19 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
-    const docs = parseYaml(content, {
+    const rawDocs = parseAllDocuments(content, {
+      prettyErrors: true,
       uniqueKeys: false,
+      strict: false,
       customTags: [referenceTag],
     });
 
-    for (const doc of docs) {
+    for (const rawDoc of rawDocs) {
+      if (rawDoc.errors.length) {
+        throw new AggregateError(rawDoc.errors, 'Failed to parse YAML file');
+      }
+
+      const doc = rawDoc.toJS({ maxAliasCount: 10000 });
       const topLevel = Job.parse(doc);
       const jobs = Jobs.parse(doc);
 
@@ -105,10 +219,11 @@ export function extractPackageFile(
         }
       }
 
-      const includedComponents = GitlabDocument.parse(doc);
+      const includedComponents = findComponentEntries(rawDoc.contents, rawDoc);
       for (const includedComponent of includedComponents) {
         const dep = extractDepFromIncludeComponent(
           includedComponent,
+          content,
           config.registryAliases,
         );
         if (dep) {

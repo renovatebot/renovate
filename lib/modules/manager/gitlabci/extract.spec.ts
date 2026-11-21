@@ -535,11 +535,12 @@ describe('modules/manager/gitlabci/extract', () => {
           versioning: 'semver-partial',
         },
         {
-          currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          currentDigest: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
           datasource: 'gitlab-tags',
           depName: 'an-org/a-subgroup/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
+          skipReason: 'unversioned-reference',
           versioning: 'semver-partial',
         },
         {
@@ -608,11 +609,12 @@ describe('modules/manager/gitlabci/extract', () => {
           versioning: 'semver-partial',
         },
         {
-          currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          currentDigest: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
           datasource: 'gitlab-tags',
           depName: 'an-org/a-subgroup/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
+          skipReason: 'unversioned-reference',
           versioning: 'semver-partial',
         },
         {
@@ -643,6 +645,86 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(
         res?.deps.find((dep) => dep.currentValue === '~latest'),
       ).not.toHaveProperty('skipReason');
+    });
+
+    it('returns null for invalid YAML', () => {
+      expect(
+        extractPackageFile('include: [unclosed', '.gitlab-ci.yml', {}),
+      ).toBeNull();
+    });
+
+    it('extracts digest-pinned and single-object component references', () => {
+      const content = codeBlock`
+        .shared-component: &shared
+          component: "$CI_SERVER_FQDN/my-org/my-project/my-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8"  # 1.2.3
+
+        include:
+          - *shared
+          - component: gitlab.example.com/my-org/my-project/branch-comp@e3262fdd0914fa823210cdb79a8c421e2cef79d8 # main
+          - { component: "gitlab.example.com/my-org/flow-project/flow-comp@1.0.0" }
+          - 'local-include.yml'
+
+        trigger-job:
+          trigger:
+            include:
+              component: gitlab.example.com/my-org/single-project/single-comp@2.0.0
+      `;
+
+      const res = extractPackageFile(content, '.gitlab-ci.yml', {
+        registryAliases: {
+          $CI_SERVER_FQDN: 'gitlab.example.com',
+        },
+      });
+
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            'component: gitlab.example.com/my-org/single-project/single-comp@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{else}}{{newValue}}{{/if}}',
+          currentValue: '2.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'my-org/single-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+          replaceString:
+            'component: gitlab.example.com/my-org/single-project/single-comp@2.0.0',
+          versioning: 'semver-partial',
+        },
+        {
+          autoReplaceStringTemplate:
+            'component: "$CI_SERVER_FQDN/my-org/my-project/my-component@{{#if newDigest}}{{newDigest}}"{{#if newValue}}  # {{newValue}}{{/if}}{{else}}{{newValue}}"{{/if}}',
+          currentDigest: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          currentValue: '1.2.3',
+          datasource: 'gitlab-tags',
+          depName: 'my-org/my-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+          replaceString:
+            'component: "$CI_SERVER_FQDN/my-org/my-project/my-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8"  # 1.2.3',
+          versioning: 'semver-partial',
+        },
+        {
+          autoReplaceStringTemplate:
+            'component: gitlab.example.com/my-org/my-project/branch-comp@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{else}}{{newValue}}{{/if}}',
+          currentDigest: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          currentValue: 'main',
+          datasource: 'gitlab-tags',
+          depName: 'my-org/my-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+          replaceString:
+            'component: gitlab.example.com/my-org/my-project/branch-comp@e3262fdd0914fa823210cdb79a8c421e2cef79d8 # main',
+          versioning: 'semver-partial',
+        },
+        {
+          currentValue: '1.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'my-org/flow-project',
+          depType: 'repository',
+          pinDigests: false,
+          registryUrls: ['https://gitlab.example.com'],
+          versioning: 'semver-partial',
+        },
+      ]);
     });
   });
 });
