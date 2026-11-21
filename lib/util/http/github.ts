@@ -18,6 +18,7 @@ import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
+import { isIpAllowListError } from '../github/ip-allow-list.ts';
 import * as hostRules from '../host-rules.ts';
 import { maskToken } from '../mask.ts';
 import { coerceObject } from '../object.ts';
@@ -410,7 +411,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     url: URL,
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
-    if (!opts.token) {
+    if (!opts.token && !opts.noAuth) {
       // create a mutable copy of `url`
       const authUrl = parseUrl(url.toString())!;
 
@@ -446,6 +447,25 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       ...opts.headers,
       accept,
     };
+  }
+
+  /**
+   * Public data of an organization with an IP allow list can be read anonymously, even though a token from a disallowed address is refused.
+   * Only done when `githubIpAllowListFallback` is enabled, only for read-only requests, and only when GitHub explicitly names the IP allow list.
+   * The GraphQL API cannot be used without a token, so its requests are never repeated.
+   */
+  protected override shouldRetryWithoutAuth(
+    url: URL,
+    options: InternalHttpOptions,
+    err: unknown,
+  ): boolean {
+    return (
+      GlobalConfig.get('githubIpAllowListFallback') === true &&
+      options.readOnly === true &&
+      !options.noAuth &&
+      !url.pathname.endsWith('/graphql') &&
+      isIpAllowListError(err)
+    );
   }
 
   protected override handleError(

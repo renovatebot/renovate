@@ -14,7 +14,7 @@ import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from './cache/memory-http-cache-provider.ts';
-import { applyDefaultHeaders } from './http.ts';
+import { applyDefaultHeaders, withoutAuth } from './http.ts';
 import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
 import * as throttle from './throttle.ts';
@@ -1206,6 +1206,30 @@ describe('util/http/index', () => {
       await expect(http.getToml('http://renovate.com')).rejects.toThrow(
         'Invalid TOML',
       );
+    });
+  });
+
+  describe('withoutAuth', () => {
+    it('removes all credentials and forbids adding them back', () => {
+      const options = {
+        token: 'secret',
+        username: 'user',
+        password: 'pass',
+        headers: { Authorization: 'token secret', accept: 'text/plain' },
+        method: 'get',
+      } as const;
+
+      expect(withoutAuth(options)).toEqual({
+        noAuth: true,
+        headers: { accept: 'text/plain' },
+        method: 'get',
+      });
+      expect(options.token).toBe('secret');
+      expect(options.headers.Authorization).toBe('token secret');
+    });
+
+    it('supports options without headers', () => {
+      expect(withoutAuth({ token: 'secret' })).toEqual({ noAuth: true });
     });
   });
 });

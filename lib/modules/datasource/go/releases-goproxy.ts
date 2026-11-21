@@ -266,7 +266,7 @@ export class GoProxyDatasource extends Datasource {
       }),
     ]);
 
-    const timestamps = new Map<string, Timestamp>();
+    const timestamps = new Map<string, Timestamp | undefined>();
     for (const { version, releaseTimestamp } of githubTags) {
       timestamps.set(version, releaseTimestamp);
     }

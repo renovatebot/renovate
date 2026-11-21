@@ -257,6 +257,23 @@ It is also OK to configure the same as a host rule instead, if you prefer that.
   If you are using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
   Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
+### GitHub organizations with an IP allow list
+
+Some GitHub organizations use an IP allow list.
+GitHub refuses a token that is used from an address outside of the allow list, even if the repository is public and can be read without a token.
+
+By default, Renovate reports the refusal as an error.
+If you set the self-hosted configuration option [`githubIpAllowListFallback`](../self-hosted-configuration.md#githubipallowlistfallback) to `true`, and GitHub names the IP allow list in its refusal, Renovate reads the public data without a token:
+
+- Renovate repeats a refused read-only REST request once without credentials.
+- GitHub's GraphQL API cannot be used without a token, so Renovate reads the tags and releases of the repository with the REST API instead.
+  The REST API does not tell when a tag was created, so such a tag has no release timestamp unless it also has a release.
+
+Renovate still reports the original error if the repository is private, or if the request without credentials fails.
+
+Requests without credentials have a much lower hourly rate limit, per IP address, than requests with a token.
+This means that many dependencies in organizations with an IP allow list can exhaust the rate limit.
+
 ### Self-hosting examples
 
 For more examples on running Renovate self-hosted, read our [Self-hosted examples](../examples/self-hosting.md) page.

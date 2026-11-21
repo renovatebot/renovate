@@ -99,6 +99,24 @@ export function applyDefaultHeaders(options: OptionsInit): void {
   };
 }
 
+/**
+ * Copies `options` without any credentials and forbids adding them back
+ */
+export function withoutAuth<T extends InternalHttpOptions>(options: T): T {
+  const result: T = { ...options, noAuth: true };
+  delete result.token;
+  delete result.username;
+  delete result.password;
+  if (result.headers) {
+    result.headers = Object.fromEntries(
+      Object.entries(result.headers).filter(
+        ([name]) => name.toLowerCase() !== 'authorization',
+      ),
+    );
+  }
+  return result;
+}
+
 export abstract class HttpBase<
   JSONOpts extends HttpOptions = HttpOptions,
   Opts extends HttpOptions = HttpOptions,
@@ -367,6 +385,18 @@ export abstract class HttpBase<
         return staleResponse;
       }
 
+      if (this.shouldRetryWithoutAuth(resolvedUrl, options, err)) {
+        const retryOptions = withoutAuth(httpOptions);
+        try {
+          return await this.request(requestUrl, retryOptions);
+        } catch (retryErr) {
+          logger.debug(
+            { err: retryErr, url },
+            'Request without authorization also failed, using original error',
+          );
+        }
+      }
+
       this.handleError(requestUrl, httpOptions, err);
     }
   }
@@ -398,6 +428,19 @@ export abstract class HttpBase<
     err: Error,
   ): never {
     throw err;
+  }
+
+  /**
+   * Whether a failed request should be repeated once without credentials.
+   *
+   * If the repeated request fails too, the original error is handled as usual.
+   */
+  protected shouldRetryWithoutAuth(
+    _url: URL,
+    _options: InternalHttpOptions,
+    _err: unknown,
+  ): boolean {
+    return false;
   }
 
   protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {

@@ -948,6 +948,15 @@ const options: Readonly<RenovateOptions>[] = [
     experimental: true,
   },
   {
+    name: 'githubIpAllowListFallback',
+    description:
+      'If GitHub refuses the token because of an IP allow list of the organization, read public data without a token.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+  },
+  {
     name: 'githubTokenWarn',
     description: 'Display warnings about GitHub token not being set.',
     type: 'boolean',
