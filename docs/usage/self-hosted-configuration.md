@@ -1007,15 +1007,6 @@ The first rule permits HTTP presets from that server, the second `npm:` presets 
 
 Cloud instance-metadata endpoints are always blocked, and cannot be permitted with this field.
 
-## `httpCacheTtlDays`
-
-This option sets the number of days that Renovate will cache HTTP responses.
-The default value is 90 days.
-Value of `0` means no caching.
-
-!!! warning
-  When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
-
 ## `ignorePrAuthor`
 
 This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate app to self-hosted.
@@ -1300,10 +1291,6 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## `platform`
 
-## `prCacheSyncMaxPages`
-
-Maximum number of pages to fetch when syncing the pull request cache.
-
 ## `prCommitsPerRunLimit`
 
 Parameter to reduce CI load.
@@ -1552,21 +1539,53 @@ module.exports = {
 
 ## `repositoryCache`
 
-Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
-Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
-JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+The `repositoryCache` object configures the JSON cache which Renovate maintains per-repository to speed up extractions.
 
-## `repositoryCacheForceLocal`
+```json {configType=global}
+{
+  "repositoryCache": {
+    "state": "enabled"
+  }
+}
+```
+
+!!! note
+  Before the `repositoryCache` object was introduced, `repositoryCache` was the state, and the other settings were separate options, `repositoryCacheType`, `repositoryCacheForceLocal`, `httpCacheTtlDays` and `prCacheSyncMaxPages`.
+  Renovate migrates them into the `repositoryCache` object.
+  Their environment variables and CLI flags, such as `RENOVATE_REPOSITORY_CACHE_TYPE` and `--repository-cache-type`, are also migrated into `RENOVATE_REPOSITORY_CACHE` and `--repository-cache`, but fields set in those take precedence.
+
+### `repositoryCache.forceLocal`
 
 If set to `true`, Renovate will persist repository cache locally after uploading to S3.
 
 This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
 
-## `repositoryCacheType`
+### `repositoryCache.httpTtlDays`
 
-```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
+This option sets the number of days that Renovate will cache HTTP responses.
+The default value is 90 days.
+Value of `0` means no caching.
+
+!!! warning
+  When you set `repositoryCache.httpTtlDays` to `0`, Renovate will remove the cached HTTP data.
+
+### `repositoryCache.prSyncMaxPages`
+
+Maximum number of pages to fetch when syncing the pull request cache.
+
+### `repositoryCache.state`
+
+Set `state` to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
+Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
+JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+### `repositoryCache.type`
+
+```ts title="Set repositoryCache.type to an S3 URI to enable S3 backed repository cache"
 {
-  repositoryCacheType: 's3://bucket-name';
+  repositoryCache: {
+    type: 's3://bucket-name',
+  },
 }
 ```
 
@@ -1575,8 +1594,8 @@ Therefore, Renovate supports all the authentication methods supported by the AWS
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 !!! tip
-  If you are storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
-  For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+  If you are storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCache.type`.
+  For example, `repositoryCache.type: 's3://bucket-name/dir1/.../dirN/'`.
 
 !!! note
   S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).

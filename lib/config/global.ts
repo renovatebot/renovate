@@ -1,9 +1,12 @@
+import { isPlainObject } from '@sindresorhus/is';
 import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
 import type {
   InternalGlobalConfigOptions,
   RenovateConfig,
   RepoGlobalConfig,
 } from './types.ts';
+
+const mergedDefaultOptions = new Set<string>(['repositoryCache']);
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
@@ -42,7 +45,6 @@ export class GlobalConfig {
     'gitTimeout',
     'githubTokenWarn',
     'goEnvFromHostRules',
-    'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
     'inheritConfigTrusted',
@@ -59,13 +61,10 @@ export class GlobalConfig {
     'onboardingNoDeps',
     'onboardingPrTitle',
     'platform',
-    'prCacheSyncMaxPages',
     'presetCachePersistence',
     'productLinks',
     'rebaseAllOpenBranches',
     'repositoryCache',
-    'repositoryCacheForceLocal',
-    'repositoryCacheType',
     'requireConfig',
     's3Endpoint',
     's3PathStyle',
@@ -88,17 +87,25 @@ export class GlobalConfig {
   ):
     | (RepoGlobalConfig & InternalGlobalConfigOptions)
     | Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key] {
-    const defaultValue = key
-      ? (globalConfigOptionDefaults[key] as Required<
-          RepoGlobalConfig & InternalGlobalConfigOptions
-        >[Key])
-      : undefined;
+    if (!key) {
+      return GlobalConfig.config;
+    }
 
-    return key
-      ? ((GlobalConfig.config[key] ?? defaultValue) as Required<
-          RepoGlobalConfig & InternalGlobalConfigOptions
-        >[Key])
-      : GlobalConfig.config;
+    const defaultValue = globalConfigOptionDefaults[key];
+    const value = GlobalConfig.config[key];
+    // fill in the defaults of the fields these object options don't set
+    if (
+      mergedDefaultOptions.has(key) &&
+      isPlainObject(defaultValue) &&
+      isPlainObject(value)
+    ) {
+      return Object.assign({}, defaultValue, value) as Required<
+        RepoGlobalConfig & InternalGlobalConfigOptions
+      >[Key];
+    }
+    return (value ?? defaultValue) as Required<
+      RepoGlobalConfig & InternalGlobalConfigOptions
+    >[Key];
   }
 
   static set(

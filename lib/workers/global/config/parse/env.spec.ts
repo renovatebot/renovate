@@ -98,6 +98,9 @@ describe('workers/global/config/parse/env', () => {
       ${{ RENOVATE_BASE_BRANCHES: '["main", "dev"]' }} | ${{ baseBranchPatterns: ['main', 'dev'] }}
       ${{ RENOVATE_DEPENDENCY_DASHBOARD: 'true' }}     | ${{ dependencyDashboard: { enabled: true } }}
       ${{ RENOVATE_DEPENDENCY_DASHBOARD: 'false' }}    | ${{ dependencyDashboard: { enabled: false } }}
+      ${{ RENOVATE_REPOSITORY_CACHE: 'disabled' }}     | ${{ repositoryCache: { state: 'disabled' } }}
+      ${{ RENOVATE_REPOSITORY_CACHE: 'enabled' }}      | ${{ repositoryCache: { state: 'enabled' } }}
+      ${{ RENOVATE_REPOSITORY_CACHE: 'reset' }}        | ${{ repositoryCache: { state: 'reset' } }}
     `('"$envArg" -> $config', async ({ envArg, config }) => {
       await expect(env.getConfig(envArg)).resolves.toMatchObject(config);
     });
@@ -403,7 +406,7 @@ describe('workers/global/config/parse/env', () => {
         deleteConfigFile: true,
         s3Endpoint: 'endpoint',
         s3PathStyle: true,
-        repositoryCacheForceLocal: true,
+        repositoryCache: { forceLocal: true },
       });
     });
 
@@ -412,7 +415,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_REPO_CACHE_FORCE_LOCAL: '',
       };
       const config = await env.getConfig(envParam);
-      expect(config.repositoryCacheForceLocal).toBeUndefined();
+      expect(config.repositoryCache).toBeUndefined();
     });
 
     describe('RENOVATE_CONFIG tests', () => {
@@ -463,6 +466,51 @@ describe('workers/global/config/parse/env', () => {
         };
         const config = await env.getConfig(envParam);
         expect(config.platformAutomerge).toBe(true);
+      });
+
+      describe('migrates the flat repository cache env vars', () => {
+        it('moves them into repositoryCache with their old types', async () => {
+          const envParam: NodeJS.ProcessEnv = {
+            RENOVATE_REPOSITORY_CACHE: 'enabled',
+            RENOVATE_REPOSITORY_CACHE_TYPE: 's3://bucket',
+            RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL: 'true',
+            RENOVATE_HTTP_CACHE_TTL_DAYS: '7',
+            RENOVATE_PR_CACHE_SYNC_MAX_PAGES: '5',
+          };
+
+          await expect(env.getConfig(envParam)).resolves.toEqual({
+            hostRules: [],
+            repositoryCache: {
+              state: 'enabled',
+              type: 's3://bucket',
+              forceLocal: true,
+              httpTtlDays: 7,
+              prSyncMaxPages: 5,
+            },
+          });
+          expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+            {
+              objectName: 'repositoryCache',
+              oldKeys: [
+                'RENOVATE_HTTP_CACHE_TTL_DAYS',
+                'RENOVATE_PR_CACHE_SYNC_MAX_PAGES',
+                'RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL',
+                'RENOVATE_REPOSITORY_CACHE_TYPE',
+              ],
+            },
+            'env config has been migrated into a grouped option',
+          );
+        });
+
+        it('migrates RENOVATE_X_REPO_CACHE_FORCE_LOCAL', async () => {
+          const envParam: NodeJS.ProcessEnv = {
+            RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'yes',
+          };
+
+          const res = await env.getConfig(envParam);
+
+          expect(res.repositoryCache).toEqual({ forceLocal: true });
+        });
       });
 
       describe('migrates the flat Dependency Dashboard env vars', () => {

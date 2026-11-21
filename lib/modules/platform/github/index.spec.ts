@@ -2283,7 +2283,7 @@ describe('modules/platform/github/index', () => {
       });
 
       it('stops at custom max sync pages', async () => {
-        GlobalConfig.set({ prCacheSyncMaxPages: 2 });
+        GlobalConfig.set({ repositoryCache: { prSyncMaxPages: 2 } });
         const scope = httpMock.scope(githubApiHost);
 
         // Run 1: initial fetch — cache gets lastModified = t1

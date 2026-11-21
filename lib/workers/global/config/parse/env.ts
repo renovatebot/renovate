@@ -1,5 +1,6 @@
 import { isArray, isPlainObject } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { repositoryCacheStates } from '../../../../config/migrations/custom/repository-cache-migration.ts';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig, RenovateOptions } from '../../../../config/types.ts';
@@ -75,6 +76,12 @@ const migratedKeysWithValues = [
     from: 'false',
     to: '{"enabled":false}',
   },
+  ...repositoryCacheStates.map((state) => ({
+    oldName: 'repositoryCache',
+    newName: 'repositoryCache',
+    from: state,
+    to: `{"state":"${state}"}`,
+  })),
 ];
 
 function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {

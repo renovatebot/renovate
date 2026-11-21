@@ -47,6 +47,7 @@ import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration.ts
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration.ts';
 import { RecreateClosedMigration } from './custom/recreate-closed-migration.ts';
 import { RenovateForkMigration } from './custom/renovate-fork-migration.ts';
+import { RepositoryCacheMigration } from './custom/repository-cache-migration.ts';
 import { RequireConfigMigration } from './custom/require-config-migration.ts';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration.ts';
 import { ScheduleMigration } from './custom/schedule-migration.ts';
@@ -177,6 +178,7 @@ export class MigrationsService {
     UpdateLockFilesMigration,
     ConstraintsMigration,
     DependencyDashboardMigration,
+    RepositoryCacheMigration,
   ];
 
   static run(

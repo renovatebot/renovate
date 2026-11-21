@@ -21,4 +21,42 @@ describe('config/global', () => {
       sorted,
     );
   });
+
+  describe('get()', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('returns the defaults of an object option which is not set', () => {
+      GlobalConfig.set({});
+
+      expect(GlobalConfig.get('repositoryCache')).toEqual({
+        state: 'disabled',
+        type: 'local',
+        forceLocal: false,
+        httpTtlDays: 90,
+        prSyncMaxPages: 100,
+      });
+    });
+
+    it('fills in the defaults of the fields an object option does not set', () => {
+      GlobalConfig.set({ repositoryCache: { state: 'enabled' } });
+
+      expect(GlobalConfig.get('repositoryCache')).toEqual({
+        state: 'enabled',
+        type: 'local',
+        forceLocal: false,
+        httpTtlDays: 90,
+        prSyncMaxPages: 100,
+      });
+    });
+
+    it('does not fill in the defaults of other object options', () => {
+      GlobalConfig.set({ productLinks: { homepage: 'https://example.com' } });
+
+      expect(GlobalConfig.get('productLinks')).toEqual({
+        homepage: 'https://example.com',
+      });
+    });
+  });
 });

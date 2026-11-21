@@ -1,5 +1,6 @@
 import { isPlainObject } from '@sindresorhus/is';
 import { Command, Option } from 'commander';
+import { repositoryCacheStates } from '../../../../config/migrations/custom/repository-cache-migration.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { pkg } from '../../../../expose.ts';
@@ -78,7 +79,7 @@ function createProgram(): Command<[string[]]> {
  * before Commander tries to consume them.
  */
 function migrateArgs(input: string[]): string[] {
-  return input
+  return joinRepositoryCacheState(input)
     .map((a) =>
       a
         .replace(
@@ -110,9 +111,33 @@ function migrateArgs(input: string[]): string[] {
         .replace(
           '--dependency-dashboard=false',
           '--dependency-dashboard={"enabled":false}',
+        )
+        .replace(
+          regEx(/^--repository-cache=(?<state>disabled|enabled|reset)$/),
+          '--repository-cache={"state":"$<state>"}',
         ),
     )
     .filter((a) => !a.startsWith('--git-fs'));
+}
+
+/**
+ * Joins `--repository-cache <state>` into `--repository-cache=<state>`, so the state can be migrated into the `repositoryCache` object.
+ */
+function joinRepositoryCacheState(input: string[]): string[] {
+  const result: string[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const state = input[i + 1];
+    if (
+      input[i] === '--repository-cache' &&
+      repositoryCacheStates.includes(state)
+    ) {
+      result.push(`--repository-cache=${state}`);
+      i++;
+    } else {
+      result.push(input[i]);
+    }
+  }
+  return result;
 }
 
 export function parseEarlyFlags(input: string[] = process.argv): void {
