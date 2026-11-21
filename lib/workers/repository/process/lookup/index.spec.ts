@@ -13,6 +13,7 @@ import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags/index.ts';
 import { GoDatasource } from '../../../../modules/datasource/go/index.ts';
+import { JavaVersionDatasource } from '../../../../modules/datasource/java-version/index.ts';
 import { MavenDatasource } from '../../../../modules/datasource/maven/index.ts';
 import { defaultRegistryUrl as npmDefaultRegistryUrl } from '../../../../modules/datasource/npm/common.ts';
 import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
@@ -23,6 +24,7 @@ import { id as debianVersioningId } from '../../../../modules/versioning/debian/
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import { id as gitVersioningId } from '../../../../modules/versioning/git/index.ts';
 import { id as githubActionsVersioningId } from '../../../../modules/versioning/github-actions/index.ts';
+import { id as looseVersioningId } from '../../../../modules/versioning/loose/index.ts';
 import { id as mavenVersioningId } from '../../../../modules/versioning/maven/index.ts';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node/index.ts';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
@@ -5168,6 +5170,79 @@ describe('workers/repository/process/lookup/index', () => {
           pendingChecks: true,
         },
       ]);
+    });
+
+    describe('asdf GraalVM CE pins', () => {
+      // asdf: `java graalvm-<currentValue>+java<javaMajor>`
+      function graalvmCeConfig(currentValue: string, javaMajor: string): void {
+        config.datasource = JavaVersionDatasource.id;
+        config.packageName = 'graalvm-ce-jdk';
+        config.currentValue = currentValue;
+        config.extractVersion = `^(?<version>\\d+(?:\\.\\d+)+)\\+java${javaMajor}$`;
+        config.versioning = looseVersioningId;
+        httpMock
+          .scope('https://mise-java.jdx.dev')
+          .get('/jvm/ga/linux/x86_64.json')
+          .reply(200, Fixtures.get('mise-java-graalvm.json'));
+      }
+
+      it.each`
+        currentValue  | javaMajor | updateType
+        ${'22.3.1'}   | ${'17'}   | ${'patch'}
+        ${'22.3.0'}   | ${'17'}   | ${'patch'}
+        ${'22.0.0.2'} | ${'17'}   | ${'minor'}
+        ${'21.3.3.1'} | ${'11'}   | ${'major'}
+      `(
+        'updates $currentValue+java$javaMajor to 22.3.3 ($updateType)',
+        async ({ currentValue, javaMajor, updateType }) => {
+          graalvmCeConfig(currentValue, javaMajor);
+
+          const { updates } = await Result.wrap(
+            lookup.lookupUpdates(config),
+          ).unwrapOrThrow();
+
+          expect(updates).toMatchObject([
+            {
+              newValue: '22.3.3',
+              newVersion: '22.3.3',
+              updateType,
+              releaseTimestamp: '2025-03-28T22:04:28.484Z',
+            },
+          ]);
+        },
+      );
+
+      it.each`
+        currentValue | javaMajor
+        ${'22.3.3'}  | ${'17'}
+        ${'22.3.1'}  | ${'19'}
+        ${'21.2.0'}  | ${'16'}
+      `(
+        'does not offer releases built for another Java major ($currentValue+java$javaMajor)',
+        async ({ currentValue, javaMajor }) => {
+          graalvmCeConfig(currentValue, javaMajor);
+
+          const { updates } = await Result.wrap(
+            lookup.lookupUpdates(config),
+          ).unwrapOrThrow();
+
+          expect(updates).toBeEmptyArray();
+        },
+      );
+
+      it('is not held back by minimumReleaseAge', async () => {
+        graalvmCeConfig('22.3.1', '17');
+        config.minimumReleaseAge = '3 days';
+        config.internalChecksFilter = 'strict';
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toHaveLength(1);
+        expect(updates[0].newValue).toBe('22.3.3');
+        expect(updates[0].pendingChecks).toBeUndefined();
+      });
     });
 
     it('respects a minimumReleaseAge packageRule scoped to matchUpdateTypes=digest', async () => {

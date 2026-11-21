@@ -303,6 +303,9 @@ describe('modules/datasource/java-version/index', () => {
         expect(versions).toContain('23.0.1');
         expect(versions).toContain('21.0.5');
         expect(versions).toContain('17.0.13');
+        expect(res?.releases[0].releaseTimestamp).toBe(
+          '2025-03-28T22:04:32.319Z',
+        );
       });
 
       it('processes real data for JRE', async () => {
@@ -576,6 +579,100 @@ describe('modules/datasource/java-version/index', () => {
           registryUrls: [graalvmRegistryUrl],
         });
         expect(graalvmRes?.releases).toHaveLength(3);
+      });
+    });
+
+    describe('GraalVM CE', () => {
+      const graalvmBasePath = '/jvm/ga/linux/x86_64.json';
+
+      function miseJavaRelease(
+        vendor: string,
+        version: string,
+        imageType = 'jdk',
+        createdAt: string | null = '2025-03-28T22:04:28.484345',
+      ) {
+        return {
+          checksum: 'sha256:abc',
+          ...(createdAt && { created_at: createdAt }),
+          features: [],
+          file_type: 'tar.gz',
+          image_type: imageType,
+          java_version: version,
+          jvm_impl: 'graalvm',
+          url: `https://example.com/${vendor}-${version}.tar.gz`,
+          vendor,
+          version,
+        };
+      }
+
+      const releases = [
+        miseJavaRelease('graalvm', '22.3.1+java17'),
+        miseJavaRelease('graalvm', '22.3.3+java17'),
+        miseJavaRelease('graalvm', '22.3.3+java11'),
+        miseJavaRelease('graalvm', '22.3.1+java19'),
+        miseJavaRelease('graalvm', '22.3.3+java17', 'jre'),
+        miseJavaRelease('graalvm-community', '25.0.5.0.3'),
+        miseJavaRelease('oracle-graalvm', '25.0.5.0.3'),
+      ];
+
+      it('returns only GraalVM CE JDK releases', async () => {
+        httpMock
+          .scope(graalvmRegistryUrl)
+          .get(graalvmBasePath)
+          .reply(200, releases);
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'graalvm-ce-jdk',
+        });
+        expect(res).toEqual({
+          homepage: 'https://www.graalvm.org/',
+          sourceUrl: 'https://github.com/graalvm/graalvm-ce-builds',
+          registryUrl: 'https://mise-java.jdx.dev',
+          releases: [
+            {
+              version: '22.3.1+java17',
+              releaseTimestamp: '2025-03-28T22:04:28.484Z',
+            },
+            {
+              version: '22.3.1+java19',
+              releaseTimestamp: '2025-03-28T22:04:28.484Z',
+            },
+            {
+              version: '22.3.3+java17',
+              releaseTimestamp: '2025-03-28T22:04:28.484Z',
+            },
+            {
+              version: '22.3.3+java11',
+              releaseTimestamp: '2025-03-28T22:04:28.484Z',
+            },
+          ],
+        });
+      });
+
+      it('omits the timestamp when created_at is missing or invalid', async () => {
+        httpMock
+          .scope(graalvmRegistryUrl)
+          .get(graalvmBasePath)
+          .reply(200, [
+            miseJavaRelease('graalvm', '22.3.2+java17', 'jdk', null),
+            miseJavaRelease('graalvm', '22.3.3+java17', 'jdk', 'not a date'),
+          ]);
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'graalvm-ce-jdk',
+        });
+        expect(res?.releases).toEqual([
+          { version: '22.3.2+java17' },
+          { version: '22.3.3+java17' },
+        ]);
+      });
+
+      it('uses the GraalVM registry', () => {
+        const ds = new JavaVersionDatasource();
+        expect(ds.getDefaultRegistryUrls('graalvm-ce-jdk')).toEqual([
+          graalvmRegistryUrl,
+        ]);
+        expect(ds.supportsCustomRegistry('graalvm-ce-jdk')).toBeTrue();
       });
     });
   });

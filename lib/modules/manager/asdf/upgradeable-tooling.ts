@@ -12,6 +12,7 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
+import * as looseVersioning from '../../versioning/loose/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { ToolingDefinition } from './types.ts';
@@ -418,6 +419,21 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
           currentValue: adoptOpenJreMatches.version,
+        };
+      }
+      // GraalVM CE releases up to 22.3, one build per Java major,
+      // e.g. `graalvm-22.3.1+java17`
+      const graalvmCeMatches = regEx(
+        /^graalvm-(?<version>\d+(?:\.\d+)+)\+java(?<javaMajor>\d+)$/,
+      ).exec(version)?.groups;
+      if (graalvmCeMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'graalvm-ce-jdk',
+          currentValue: graalvmCeMatches.version,
+          // Only offer releases built for the same Java major
+          extractVersion: `^(?<version>\\d+(?:\\.\\d+)+)\\+java${graalvmCeMatches.javaMajor}$`,
+          versioning: looseVersioning.id,
         };
       }
       const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(

@@ -23,3 +23,17 @@ For example, to get only Linux x64 jre releases, you can pass `java-jre?os=linux
 See <https://api.adoptium.net/q/swagger-ui/#/Release%20Info/getReleaseVersions> for allowed values.
 
 Use `java?system=true` to let renovate detect the current `os` and `architecture`.
+
+### GraalVM
+
+GraalVM releases come from the [mise-java](https://mise-java.jdx.dev) metadata instead of the Adoptium API.
+The following `packageName` values are supported:
+
+| `packageName`                              | Distribution                                                   | Example version |
+| ------------------------------------------ | -------------------------------------------------------------- | --------------- |
+| `oracle-graalvm-jdk`, `oracle-graalvm-jre` | Oracle GraalVM                                                 | `25.0.1`        |
+| `graalvm-ce-jdk`                           | GraalVM Community Edition up to 22.3, one build per Java major | `22.3.3+java17` |
+
+These packages default to `os=linux` and `architecture=x86_64`.
+Pass `os` and `architecture`, or `system=true`, to use other values, for example `graalvm-ce-jdk?os=macosx&architecture=aarch64`.
+Release timestamps are the time mise-java first listed a release, which can be later than the vendor's release date.
