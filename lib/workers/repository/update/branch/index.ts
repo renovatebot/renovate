@@ -26,6 +26,7 @@ import {
   compileCommitBody,
   compileCommitTrailers,
 } from '../../model/commit-body.ts';
+import { refreshBranchConfig } from '../../updates/generate.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -75,6 +76,8 @@ export async function processBranch(
   forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
+  // PR whose platform automerge was canceled before the push
+  let automergeCancelledPrNo: number | undefined;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
@@ -393,10 +396,27 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (!(
-      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
-    )) {
+    let reconciliationDisabledPlatformAutomerge = false;
+    const canReuseArtifacts =
+      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched';
+    if (
+      !canReuseArtifacts ||
+      config.postUpdateOptions?.includes('vitePlusSyncVersions')
+    ) {
       await scm.checkoutBranch(config.baseBranch);
+      config.upgrades = config.upgrades.map((upgrade) => ({ ...upgrade }));
+      const previousTargets = new Map(
+        config.upgrades.map((upgrade) => [
+          upgrade,
+          {
+            newValue: upgrade.newValue,
+            newVersion: upgrade.newVersion,
+            updateType: upgrade.updateType,
+            isBreaking: upgrade.isBreaking,
+            automerge: upgrade.automerge,
+          },
+        ]),
+      );
       const res = await getUpdatedPackageFiles(config);
       if (res.artifactErrors && config.artifactErrors) {
         res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
@@ -419,6 +439,76 @@ export async function processBranch(
         config,
         branchConfig.packageFiles!,
       );
+      config.upgrades = config.upgrades.filter((upgrade) => {
+        const previous = previousTargets.get(upgrade)!;
+        const targetChanged =
+          previous.newValue !== upgrade.newValue ||
+          previous.newVersion !== upgrade.newVersion;
+        // lock file updates keep newValue at currentValue and change only the version
+        const versionChanged =
+          upgrade.currentVersion !== undefined &&
+          upgrade.newVersion !== undefined &&
+          upgrade.newVersion !== upgrade.currentVersion;
+        // as in lookup, currentDigest may be a prefix of the same newDigest
+        const sameDigest =
+          upgrade.currentDigest === undefined
+            ? false
+            : upgrade.newDigest?.startsWith(upgrade.currentDigest);
+        const digestChanged = !!upgrade.newDigest && !sameDigest;
+        const renamed =
+          upgrade.newName !== undefined &&
+          upgrade.newName !== upgrade.packageName;
+        return (
+          !targetChanged ||
+          upgrade.newValue !== upgrade.currentValue ||
+          versionChanged ||
+          digestChanged ||
+          renamed ||
+          upgrade.isReplacement === true
+        );
+      });
+      if (!config.upgrades.length) {
+        logger.debug('No upgrades remain after updating artifacts');
+        if (branchExists) {
+          // a static import creates a cycle through finalize/prune.ts and process/index.ts
+          const { cleanUpBranches } = await import('../../finalize/prune.ts');
+          await cleanUpBranches(
+            {
+              ...config,
+              baseBranchPatterns: [],
+              baseBranches: [config.baseBranch],
+            },
+            [config.branchName],
+          );
+          branchExists = await scm.branchExists(config.branchName);
+        }
+        return {
+          branchExists,
+          // cleanup closes the PR when it deletes the branch
+          prNo: branchExists ? branchPr?.number : undefined,
+          result: 'no-work',
+        };
+      }
+      const usedPlatformAutomerge =
+        getPlatformPrOptions(config).usePlatformAutomerge;
+      refreshBranchConfig(config, previousTargets);
+      reconciliationDisabledPlatformAutomerge =
+        !!usedPlatformAutomerge &&
+        !getPlatformPrOptions(config).usePlatformAutomerge;
+      if (
+        !branchExists &&
+        config.minimumGroupSize &&
+        config.minimumGroupSize > config.upgrades.length &&
+        !dependencyDashboardCheck
+      ) {
+        logger.debug(
+          `Skipping branch creation as minimumGroupSize: ${config.minimumGroupSize} is not met`,
+        );
+        return {
+          branchExists: false,
+          result: 'minimum-group-size-not-met',
+        };
+      }
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );
@@ -545,7 +635,55 @@ export async function processBranch(
       // compiled after the body, as before, so the trailer context sees the full commit message
       config.commitTrailers = compileCommitTrailers(config, config);
 
+      // platform auto-merge keeps the commit message it was enabled with
+      const platformPrOptions = getPlatformPrOptions(config);
+      const shouldCancelPlatformAutomerge =
+        !!platformPrOptions.usePlatformAutomerge ||
+        reconciliationDisabledPlatformAutomerge;
+      if (
+        branchPr &&
+        shouldCancelPlatformAutomerge &&
+        platform.cancelPlatformAutomerge
+      ) {
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would check platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          // auto-merge which is not Renovate's own is left as it is
+          const cancellation = await platform.cancelPlatformAutomerge({
+            number: branchPr.number,
+            platformPrOptions,
+          });
+          if (cancellation.cancelled) {
+            automergeCancelledPrNo = branchPr.number;
+          } else if (
+            reconciliationDisabledPlatformAutomerge &&
+            ['unconfirmed', 'unchanged'].includes(cancellation.reason)
+          ) {
+            // Renovate's auto-merge could merge content the user's rules did not approve
+            logger.warn(
+              { prNo: branchPr.number },
+              'Cannot confirm platform automerge is disabled after version reconciliation',
+            );
+            return {
+              branchExists,
+              prNo: branchPr.number,
+              result: 'error',
+            };
+          }
+        }
+      }
+
       commitSha = await commitFilesToBranch(config);
+      if (!commitSha && automergeCancelledPrNo) {
+        const number = automergeCancelledPrNo;
+        automergeCancelledPrNo = undefined;
+        await platform.reattemptPlatformAutomerge?.({
+          number,
+          platformPrOptions,
+        });
+      }
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
       await scm.checkoutBranch(config.baseBranch);
@@ -585,6 +723,7 @@ export async function processBranch(
             `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
           );
         } else {
+          automergeCancelledPrNo = undefined;
           await platform.reattemptPlatformAutomerge({
             number: branchPr.number,
             platformPrOptions,
@@ -693,12 +832,45 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    return handleBranchError(err, {
+    // re-enable platform automerge which was canceled before the push,
+    // unless the repository, branch or PR is gone or the rate limit is hit
+    const canReattempt = !(
+      err?.statusCode === 404 ||
+      err?.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
+      err?.message === REPOSITORY_CHANGED
+    );
+    let reattemptRateLimitErr: Error | undefined;
+    if (automergeCancelledPrNo && canReattempt) {
+      try {
+        await platform.reattemptPlatformAutomerge?.({
+          number: automergeCancelledPrNo,
+          platformPrOptions: getPlatformPrOptions(config),
+        });
+      } catch (reattemptErr) {
+        // keep handling the original error
+        logger.warn(
+          { err: reattemptErr },
+          'Error re-enabling platform automerge',
+        );
+        if (
+          reattemptErr instanceof Error &&
+          reattemptErr.message === PLATFORM_RATE_LIMIT_EXCEEDED
+        ) {
+          reattemptRateLimitErr = reattemptErr;
+        }
+      }
+    }
+    const result = handleBranchError(err, {
       branchExists,
       prNo: branchPr?.number,
       commitSha,
       updatesVerified,
     });
+    // the original error was handled without being passed up, so pass up the rate limit hit while re-enabling
+    if (reattemptRateLimitErr) {
+      throw reattemptRateLimitErr;
+    }
+    return result;
   }
   try {
     logger.debug('Ensuring PR');

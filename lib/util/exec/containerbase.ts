@@ -245,6 +245,12 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     packageName: 'uv',
     versioning: 'pep440',
   },
+  vp: {
+    datasource: 'github-releases',
+    packageName: 'voidzero-dev/vite-plus',
+    extractVersion: '^v(?<version>.*)$',
+    versioning: 'npm',
+  },
   yarn: {
     datasource: 'npm',
     packageName: 'yarn',
