@@ -143,8 +143,9 @@ export interface VersioningApi {
   /**
    * Convert the `newVersion` to a pinned value.
    * @param newVersion
+   * @param currentValue the constraint being pinned
    */
-  getPinnedValue?(newVersion: string): string;
+  getPinnedValue?(newVersion: string, currentValue?: string): string;
 
   /**
    * Compare two versions. Return `0` if `v1 == v2`, or `1` if `v1` is
