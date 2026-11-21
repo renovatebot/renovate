@@ -259,7 +259,7 @@
     "simple-git": "4.0.2",
     "slugify": "1.6.9",
     "source-map-support": "0.5.21",
-    "strip-json-comments": "5.0.3",
+    "strip-json-comments": "5.1.0",
     "tar": "catalog:",
     "toml-eslint-parser": "1.0.3",
     "upath": "3.0.8",
