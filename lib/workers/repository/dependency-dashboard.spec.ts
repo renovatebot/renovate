@@ -955,6 +955,102 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 0, 1);
     });
 
+    describe('with multiple base branches', () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr0',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep0' }],
+          result: 'needs-approval',
+          baseBranch: 'main',
+          dependencyDashboardCategory: 'Category',
+          branchName: 'branchName0',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          result: 'needs-approval',
+          baseBranch: 'next',
+          dependencyDashboardCategory: 'Category',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: 'needs-approval',
+          baseBranch: 'main',
+          dependencyDashboardCategory: 'Category',
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          result: 'needs-approval',
+          baseBranch: 'next',
+          branchName: 'branchName3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr4',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
+          result: 'needs-approval',
+          baseBranch: 'main',
+          branchName: 'branchName4',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr5',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
+          result: 'error',
+          baseBranch: 'next',
+          branchName: 'branchName5',
+        },
+      ];
+
+      beforeEach(() => {
+        config.dependencyDashboard!.enabled = true;
+      });
+
+      it('lists updates from all base branches together by default', async () => {
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          branches,
+          {},
+          { result: 'no-migration' },
+        );
+        const body = platform.ensureIssue.mock.calls[0][0].body;
+        expect(body).toContain(codeBlock`
+          ## Pending Approval
+
+          The following branches are pending approval. To create them, click on a checkbox below.
+
+          ### Category
+
+           - [ ] <!-- approve-branch=branchName0 -->pr0
+           - [ ] <!-- approve-branch=branchName1 -->pr1
+           - [ ] <!-- approve-branch=branchName2 -->pr2
+
+          ### Others
+
+           - [ ] <!-- approve-branch=branchName3 -->pr3
+           - [ ] <!-- approve-branch=branchName4 -->pr4
+
+          ### All
+
+           - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
+          ## Errored
+
+          The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
+
+           - [ ] <!-- retry-branch=branchName5 -->pr5
+        `);
+      });
+    });
+
     it('checks an issue with 2 PR pr-edited', async () => {
       const branches: BranchConfig[] = [
         {
