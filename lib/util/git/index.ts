@@ -941,6 +941,35 @@ export function getBranchList(): string[] {
   return Object.keys(coerceObject(config.branchCommits));
 }
 
+/**
+ * Returns the commit `branchName` forked from on `baseBranch`, or `null` when
+ * the branches share no history or git cannot compute it.
+ */
+export async function getMergeBase(
+  branchName: string,
+  baseBranch: string,
+): Promise<LongCommitSha | null> {
+  await syncGit();
+  try {
+    // git exits with 1 and prints nothing when the branches share no history
+    const mergeBase = (
+      await git.raw([
+        'merge-base',
+        `origin/${branchName}`,
+        `origin/${baseBranch}`,
+      ])
+    ).trim();
+    return mergeBase ? toLongCommitSha(mergeBase) : null;
+  } catch (err) {
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
+    logger.debug({ err, branchName, baseBranch }, 'Failed to get merge base');
+    return null;
+  }
+}
+
 export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string,
@@ -1343,15 +1372,41 @@ async function getBranchFilesFromRef(
   }
 }
 
+/**
+ * Reads `filePath` at `origin/<branchName>`, or at the remote ref of the
+ * current branch. Returns `null` when the file is missing or `git show` fails,
+ * but platform failures still throw. With `throwOnError`, a failed read throws
+ * unless `git ls-tree` shows that the file is missing.
+ */
 export async function getFile(
   filePath: string,
   branchName?: string,
+  options: { throwOnError?: boolean } = {},
 ): Promise<string | null> {
   await syncGit();
+  return getFileFromRef(
+    filePath,
+    `origin/${branchName ?? config.currentBranch}`,
+    options,
+  );
+}
+
+export async function getFileFromCommit(
+  filePath: string,
+  commit: LongCommitSha,
+  options: { throwOnError?: boolean } = {},
+): Promise<string | null> {
+  await syncGit();
+  return getFileFromRef(filePath, commit, options);
+}
+
+async function getFileFromRef(
+  filePath: string,
+  ref: string,
+  options: { throwOnError?: boolean },
+): Promise<string | null> {
   try {
-    const content = await git.show([
-      `origin/${branchName ?? config.currentBranch}:${filePath}`,
-    ]);
+    const content = await git.show([`${ref}:${filePath}`]);
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
 
@@ -1362,8 +1417,31 @@ export async function getFile(
     if (errChecked) {
       throw errChecked;
     }
+    if (!options.throwOnError) {
+      return null;
+    }
+    if (await fileExistsAtRef(ref, filePath)) {
+      throw err;
+    }
     return null;
   }
+}
+
+// `git show` fails both when the file is missing and when git itself fails.
+// `ls-tree` lists the path only when the file exists at `ref`.
+async function fileExistsAtRef(
+  ref: string,
+  filePath: string,
+): Promise<boolean> {
+  const files = await git.raw([
+    'ls-tree',
+    '--name-only',
+    '-z',
+    ref,
+    '--',
+    filePath,
+  ]);
+  return !!files;
 }
 
 export async function getFiles(
