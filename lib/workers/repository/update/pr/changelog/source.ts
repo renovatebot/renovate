@@ -11,6 +11,7 @@ import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
@@ -24,7 +25,7 @@ import {
 } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { slugifyUrl } from './common.ts';
-import { addReleaseNotes } from './release-notes.ts';
+import { addReleaseNotes, isFreshRelease } from './release-notes.ts';
 import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
@@ -83,6 +84,27 @@ export abstract class ChangeLogSource {
   ): Promise<ChangeLogNotes[]> {
     logger.trace(`${this.platform}: release lists are not supported`);
     return Promise.resolve([]);
+  }
+
+  /**
+   * Fetch the first page of the platform's releases, bypassing all caches.
+   * Returns `null` when the platform does not support it.
+   */
+  getRefreshedReleaseList(
+    _project: ChangeLogProject,
+  ): Promise<ChangeLogNotes[] | null> {
+    return Promise.resolve(null);
+  }
+
+  /**
+   * Fetch the first page of the repository's tag names, bypassing all caches.
+   * Returns `null` when the platform does not support it.
+   */
+  getRefreshedTags(
+    _endpoint: string,
+    _repository: string,
+  ): Promise<string[] | null> {
+    return Promise.resolve(null);
   }
 
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
@@ -186,6 +208,14 @@ export abstract class ChangeLogSource {
         }
 
         const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
+        const getRefreshedTags = memoize(async () => {
+          try {
+            return await this.getRefreshedTags(apiBaseUrl, repository);
+          } catch (err) {
+            logger.debug({ repository, err }, 'getRefreshedTags error');
+            return null;
+          }
+        });
         // Fetch releases newest-first, matching the order they're shown in the PR body.
         for (let i = validReleases.length - 1; i >= 1; i -= 1) {
           const prev = validReleases[i - 1];
@@ -211,7 +241,15 @@ export abstract class ChangeLogSource {
               changes: [],
               compare: {},
             };
-            const tags = await getTags();
+            const isFresh = isFreshRelease(next.releaseTimestamp);
+            let tags = await getTags();
+            if (
+              isFresh &&
+              !this.getRef(versioningApi, packageName, depName, next, tags)
+            ) {
+              const refreshedTags = await getRefreshedTags();
+              tags = [...coerceArray(refreshedTags), ...tags];
+            }
             const prevHead = this.getRef(
               versioningApi,
               packageName,
@@ -234,18 +272,20 @@ export abstract class ChangeLogSource {
                 nextHead,
               );
             }
-            const cacheMinutes = 55;
-            await packageCache.set(
-              this.cacheNamespace,
-              this.getCacheKey(
-                sourceUrl,
-                packageName,
-                prev.version,
-                next.version,
-              ),
-              release,
-              cacheMinutes,
-            );
+            if (release.compare.url || !isFresh) {
+              const cacheMinutes = 55;
+              await packageCache.set(
+                this.cacheNamespace,
+                this.getCacheKey(
+                  sourceUrl,
+                  packageName,
+                  prev.version,
+                  next.version,
+                ),
+                release,
+                cacheMinutes,
+              );
+            }
           }
           changelogReleases.push(release);
         }

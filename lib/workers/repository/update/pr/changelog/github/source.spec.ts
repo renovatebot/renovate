@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../../config/global.ts';
@@ -367,6 +368,164 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
           },
         ],
         hasReleaseNotes: true,
+      });
+    });
+
+    describe('fresh releases', () => {
+      const freshUpgrade = partial<BranchUpgradeConfig>({
+        manager: 'some-manager',
+        branchName: '',
+        packageName: 'renovate',
+        versioning: semverVersioning.id,
+        currentVersion: '1.0.0',
+        newVersion: '1.0.1',
+        sourceUrl: 'https://github.com/chalk/chalk',
+        releases: [
+          { version: '1.0.0' },
+          {
+            version: '1.0.1',
+            releaseTimestamp: DateTime.now()
+              .minus({ minutes: 5 })
+              .toISO() as Timestamp,
+          },
+        ],
+      });
+
+      beforeEach(() => {
+        vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValue([]);
+      });
+
+      it('refetches tags when the tag of a fresh release is missing', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue(
+          partial<GithubTagItem>([{ version: 'v1.0.0' }]),
+        );
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/tags?per_page=100')
+          .reply(200, [{ name: 'v1.0.1' }]);
+        const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+
+        const res = await getChangeLogJSON({ ...freshUpgrade });
+
+        expect(res?.versions).toMatchObject([
+          {
+            version: '1.0.1',
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/v1.0.0...v1.0.1',
+            },
+          },
+        ]);
+        expect(packageCacheSetSpy).toHaveBeenCalledWith(
+          'changelog-github-release',
+          expect.any(String),
+          expect.objectContaining({ version: '1.0.1' }),
+          55,
+        );
+      });
+
+      it('keeps the cached tags when refetching tags fails', async () => {
+        const freshTimestamp = DateTime.now()
+          .minus({ minutes: 5 })
+          .toISO() as Timestamp;
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue(
+          partial<GithubTagItem>([
+            { version: 'v1.0.1' },
+            { version: 'v1.0.0' },
+          ]),
+        );
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/tags?per_page=100')
+          .reply(404);
+
+        const res = await getChangeLogJSON({
+          ...freshUpgrade,
+          newVersion: '1.0.3',
+          releases: [
+            { version: '1.0.0' },
+            { version: '1.0.1', releaseTimestamp: freshTimestamp },
+            { version: '1.0.2', releaseTimestamp: freshTimestamp },
+            { version: '1.0.3', releaseTimestamp: freshTimestamp },
+          ],
+        });
+
+        expect(res?.versions).toMatchObject([
+          { version: '1.0.3', compare: {} },
+          { version: '1.0.2', compare: {} },
+          {
+            version: '1.0.1',
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/v1.0.0...v1.0.1',
+            },
+          },
+        ]);
+      });
+
+      it('does not cache a fresh release without compare URL', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue([]);
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/tags?per_page=100')
+          .reply(200, []);
+        const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+
+        const res = await getChangeLogJSON({ ...freshUpgrade });
+
+        expect(res?.versions).toMatchObject([
+          { version: '1.0.1', compare: {} },
+        ]);
+        expect(packageCacheSetSpy).not.toHaveBeenCalledWith(
+          'changelog-github-release',
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+        );
+      });
+
+      it('refetches releases when the release of a fresh version is missing', async () => {
+        vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue(
+          partial<GithubTagItem>([
+            { version: 'v1.0.1' },
+            { version: 'v1.0.0' },
+          ]),
+        );
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/chalk/chalk/releases?per_page=100')
+          .reply(200, [
+            {
+              id: 2,
+              tag_name: 'v1.0.1',
+              draft: true,
+              html_url: 'https://github.com/chalk/chalk/releases/tag/draft',
+              name: 'draft',
+              body: 'draft notes',
+            },
+            {
+              id: 1,
+              tag_name: 'v1.0.1',
+              draft: false,
+              html_url: 'https://github.com/chalk/chalk/releases/tag/v1.0.1',
+              name: 'v1.0.1',
+              body: 'some notes',
+            },
+          ]);
+
+        const res = await getChangeLogJSON({ ...freshUpgrade });
+
+        expect(res?.versions).toMatchObject([
+          {
+            version: '1.0.1',
+            releaseNotes: {
+              url: 'https://github.com/chalk/chalk/releases/tag/v1.0.1',
+              notesSourceUrl:
+                'https://api.github.com/repos/chalk/chalk/releases',
+              id: 1,
+              tag: 'v1.0.1',
+              body: 'some notes\n',
+            },
+          },
+        ]);
       });
     });
   });
