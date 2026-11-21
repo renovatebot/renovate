@@ -72,10 +72,17 @@ export class PdmProcessor extends BasePyProjectProcessor {
         PdmLockfile.transform(({ lock }) => lock),
       ).unwrapOr({});
 
-      for (const dep of deps) {
+      for (const dep of deps as PackageDependency<Pep621ManagerData>[]) {
         const packageName = dep.packageName;
         if (packageName && packageName in lockFileMapping) {
-          dep.lockedVersion = lockFileMapping[packageName];
+          const locked = lockFileMapping[packageName];
+          dep.lockedVersion = locked.version;
+          if (locked.hasMultipleEntries) {
+            dep.managerData = {
+              ...dep.managerData,
+              hasMultipleLockedEntries: true,
+            };
+          }
         }
       }
     }
