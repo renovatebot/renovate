@@ -76,7 +76,7 @@ _The above AI Assistance Notice is largely copy/pasted from the Ghostty project 
 
 Pull requests can only be merged once all status checks are green, including 100% code coverage check. The `pnpm test` command resembles CI most accurately, but is resource-intensive and takes too long to finish.
 
-The `pnpm check` command does the checks of current code changes. It selects all the relevant tests to run, so you can iterate quickly. If it doesn't meet your needs (usually debugging the code coverage), use these commands to help run your tests:
+The `pnpm check` command does the checks of current code changes. It selects all the relevant tests to run, so you can iterate quickly. If it does not meet your needs (usually debugging the code coverage), use these commands to help run your tests:
 
 - To run a single test folder, specify the path
 
