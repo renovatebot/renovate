@@ -231,7 +231,7 @@ describe('workers/global/config/parse/cli', () => {
             state: 'enabled',
             type: 's3://bucket',
             forceLocal: true,
-            httpTtlDays: 7,
+            maximumHttpDays: 7,
             prSyncMaxPages: 5,
           },
         });

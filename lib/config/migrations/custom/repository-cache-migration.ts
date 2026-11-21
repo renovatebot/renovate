@@ -9,7 +9,7 @@ export const flatRepositoryCacheOptions: Record<
   string,
   { field: keyof RepositoryCacheConfig; type: RenovateOptions['type'] }
 > = {
-  httpCacheTtlDays: { field: 'httpTtlDays', type: 'integer' },
+  httpCacheTtlDays: { field: 'maximumHttpDays', type: 'integer' },
   prCacheSyncMaxPages: { field: 'prSyncMaxPages', type: 'integer' },
   repositoryCacheForceLocal: { field: 'forceLocal', type: 'boolean' },
   repositoryCacheType: { field: 'type', type: 'string' },

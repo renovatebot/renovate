@@ -16,7 +16,7 @@ export function cleanupHttpCache(cacheData: RepoCacheData): void {
     return;
   }
 
-  const ttlDays = GlobalConfig.get('repositoryCache').httpTtlDays!;
+  const ttlDays = GlobalConfig.get('repositoryCache').maximumHttpDays!;
   if (ttlDays === 0) {
     logger.trace('cleanupHttpCache: zero value received, removing the cache');
     delete cacheData.httpCache;

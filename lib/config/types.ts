@@ -947,7 +947,7 @@ export interface RepositoryCacheConfig {
   state?: RepositoryCacheState;
   type?: RepositoryCacheType;
   forceLocal?: boolean;
-  httpTtlDays?: number;
+  maximumHttpDays?: number;
   prSyncMaxPages?: number;
 }
 
