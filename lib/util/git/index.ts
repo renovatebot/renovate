@@ -983,6 +983,52 @@ export async function isBranchBehindBase(
   }
 }
 
+/**
+ * True when `branchName` has no commits that `baseBranch` does not already
+ * contain (`git rev-list --count base..branch` is 0, the same predicate as
+ * `git merge-base --is-ancestor branch base`). An equal SHA counts as contained.
+ * False when either ref is missing.
+ */
+export async function isBranchAncestorOfBase(
+  branchName: string,
+  baseBranch: string,
+): Promise<boolean> {
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branchName);
+  if (!baseBranchSha || !branchSha) {
+    logger.debug(
+      { baseBranch, branchName },
+      'branch.isAncestorOfBase(): branch does not exist',
+    );
+    return false;
+  }
+
+  logger.debug(
+    `branch.isAncestorOfBase(): using git to calculate against baseBranch "${baseBranch}"`,
+  );
+
+  await syncGit();
+  try {
+    // Commits reachable from the branch but not from the base. Zero means the
+    // branch head is an ancestor of the base (or the same commit).
+    const aheadCount = (
+      await git.raw(['rev-list', '--count', `${baseBranchSha}..${branchSha}`])
+    ).trim();
+    const isAncestor = aheadCount === '0';
+    logger.debug(
+      { baseBranch, branchName },
+      `branch.isAncestorOfBase(): ${isAncestor}`,
+    );
+    return isAncestor;
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
+    throw err;
+  }
+}
+
 export async function isBranchModified(
   branchName: string,
   baseBranch: string,
