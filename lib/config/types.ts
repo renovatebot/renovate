@@ -153,8 +153,6 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
   repository?: string;
-  repositoryCache?: RepositoryCacheConfig;
-  repositoryCacheType?: RepositoryCacheType;
   respectLatest?: boolean;
   rollbackPrs?: boolean;
   schedule?: string[];
@@ -280,7 +278,9 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  repositoryCache?: RepositoryCacheConfig;
   repositoryCacheForceLocal?: boolean;
+  repositoryCacheType?: RepositoryCacheType;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];

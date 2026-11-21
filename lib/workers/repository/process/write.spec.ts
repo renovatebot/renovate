@@ -343,7 +343,6 @@ describe('workers/repository/process/write', () => {
         result: 'done',
       });
       scm.branchExists.mockResolvedValue(true);
-      config.repositoryCache = 'enabled';
       await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });

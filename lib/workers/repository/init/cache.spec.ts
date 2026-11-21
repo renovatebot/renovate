@@ -1,8 +1,6 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepositoryCacheConfig } from '../../../config/types.ts';
 import type { WorkerPlatformConfig } from './apis.ts';
 import { initializeCaches } from './cache.ts';
 
@@ -15,8 +13,6 @@ describe('workers/repository/init/cache', () => {
       tmpDir = await dir({ unsafeCleanup: true });
       config = {
         repository: '',
-        repositoryCache: partial<RepositoryCacheConfig>(),
-        repositoryCacheType: 'local',
         repoFingerprint: '0123456789abcdef',
         defaultBranch: 'main',
         isFork: false,
