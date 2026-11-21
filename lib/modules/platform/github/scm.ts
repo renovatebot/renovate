@@ -1,19 +1,20 @@
 import { isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig } from '../../../util/git/types.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
+import type { PreparedCommit } from '../types.ts';
 import {
   assertPrNotInMergeQueue,
-  commitFiles,
   isGHApp,
   massageCommitMessage,
+  pushCommitFiles,
 } from './index.ts';
 
 export class GithubScm extends DefaultGitScm {
-  override async commitAndPush(
+  override async prepareCommit(
     commitConfig: CommitFilesConfig,
-  ): Promise<LongCommitSha | null> {
+  ): Promise<PreparedCommit | null> {
     let platformCommit = commitConfig.platformCommit;
     if (platformCommit === 'auto' && isGHApp()) {
       platformCommit = 'enabled';
@@ -31,8 +32,29 @@ export class GithubScm extends DefaultGitScm {
       : commitConfig.message.map((part) => massageCommitMessage(part));
     const massagedConfig = { ...commitConfig, message };
 
-    return platformCommit === 'enabled'
-      ? commitFiles(massagedConfig)
-      : git.commitFiles(massagedConfig);
+    const commitResult = await git.prepareCommit(massagedConfig);
+    if (!commitResult) {
+      if (platformCommit === 'enabled') {
+        logger.debug(
+          {
+            branchName: commitConfig.branchName,
+            files: commitConfig.files.map(({ path }) => path),
+          },
+          `Platform-native commit: unable to prepare for commit`,
+        );
+      }
+      return null;
+    }
+
+    if (platformCommit === 'enabled') {
+      return {
+        sha: commitResult.commitSha,
+        push: () => pushCommitFiles(massagedConfig, commitResult),
+      };
+    }
+    return {
+      sha: commitResult.commitSha,
+      push: () => git.pushPreparedCommit(massagedConfig, commitResult),
+    };
   }
 }

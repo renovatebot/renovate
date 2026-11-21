@@ -51,6 +51,12 @@ describe('modules/platform/local/scm', () => {
       await expect(localFs.deleteBranch('')).resolves.toBeUndefined();
     });
 
+    it('prepareCommit', async () => {
+      await expect(
+        localFs.prepareCommit(partial<CommitFilesConfig>()),
+      ).resolves.toBeNull();
+    });
+
     it('commitAndPush', async () => {
       await expect(
         localFs.commitAndPush(partial<CommitFilesConfig>()),

@@ -19,6 +19,7 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
 import * as _git from '../../../util/git/index.ts';
+import type { CommitResult } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { hashBody } from '../pr-body.ts';
@@ -7403,17 +7404,15 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('pushFiles', () => {
+  describe('pushCommitFiles', () => {
     const fetchedSha = fakeSha('0abcdef');
+    const commitResult = {
+      parentCommitSha: fakeSha('1234567'),
+      commitSha: fakeSha('7654321'),
+      files: [],
+    } satisfies CommitResult;
 
     beforeEach(() => {
-      git.prepareCommit.mockImplementation(({ files }) =>
-        Promise.resolve({
-          parentCommitSha: fakeSha('1234567'),
-          commitSha: fakeSha('7654321'),
-          files,
-        }),
-      );
       git.fetchBranch.mockImplementation(() => Promise.resolve(fetchedSha));
       git.pushCommitToRenovateRef.mockResolvedValue(undefined);
       git.getCommitTreeSha.mockResolvedValue(
@@ -7429,37 +7428,20 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    it('returns null if pre-commit phase has failed', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      git.prepareCommit.mockResolvedValueOnce(null);
-
-      await github.initRepo({ repository: 'some/repo' });
-
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [
-          { type: 'addition', path: 'foo.bar', contents: 'foobar' },
-          { type: 'deletion', path: 'baz' },
-          { type: 'deletion', path: 'qux' },
-        ],
-        message: 'Foobar',
-      });
-
-      expect(res).toBeNull();
-    });
-
     it('returns null on REST error', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope.post('/repos/some/repo/git/trees').replyWithError('unknown');
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBeNull();
     });
@@ -7470,16 +7452,19 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       git.diffCommitTree.mockResolvedValueOnce([]);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBeNull();
     });
 
-    it('commits and returns SHA string', async () => {
+    it('commits, replaces the local branch and returns SHA string', async () => {
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -7498,13 +7483,20 @@ describe('modules/platform/github/index', () => {
         .reply(200);
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBe(fetchedSha);
+      expect(git.resetToCommit).toHaveBeenCalledExactlyOnceWith(
+        fakeSha('1234567'),
+      );
+      expect(git.fetchBranch).toHaveBeenCalledExactlyOnceWith('foo/bar');
     });
 
     it('includes commit trailers in the platform-native commit message', async () => {
@@ -7534,12 +7526,15 @@ describe('modules/platform/github/index', () => {
         .reply(200);
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-        trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        },
+        commitResult,
+      );
 
       expect(res).toBe(fetchedSha);
     });
@@ -7563,11 +7558,14 @@ describe('modules/platform/github/index', () => {
         .reply(200);
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBe(fetchedSha);
     });
@@ -7593,11 +7591,14 @@ describe('modules/platform/github/index', () => {
         .reply(200);
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBe(fetchedSha);
     });
@@ -7621,11 +7622,14 @@ describe('modules/platform/github/index', () => {
         .reply(404);
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBeNull();
     });
@@ -7646,11 +7650,14 @@ describe('modules/platform/github/index', () => {
         )
         .reply(404);
 
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-      });
+      const res = await github.pushCommitFiles(
+        {
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        },
+        commitResult,
+      );
 
       expect(res).toBeNull();
     });

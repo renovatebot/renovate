@@ -12,10 +12,68 @@ describe('modules/platform/default-scm', () => {
     expect(git.branchExists).toHaveBeenCalledTimes(1);
   });
 
-  it('delegate commitAndPush to util/git', async () => {
-    git.commitFiles.mockResolvedValueOnce(fakeSha('sha'));
-    await defaultGitScm.commitAndPush(partial<CommitFilesConfig>());
-    expect(git.commitFiles).toHaveBeenCalledTimes(1);
+  describe('prepareCommit()', () => {
+    const commitConfig = partial<CommitFilesConfig>({ branchName: 'branch' });
+
+    it('returns null if there is nothing to commit', async () => {
+      git.prepareCommit.mockResolvedValueOnce(null);
+
+      const res = await defaultGitScm.prepareCommit(commitConfig);
+
+      expect(res).toBeNull();
+      expect(git.pushPreparedCommit).not.toHaveBeenCalled();
+    });
+
+    it('returns the prepared commit and pushes it on demand', async () => {
+      const commitResult = {
+        parentCommitSha: fakeSha('parent'),
+        commitSha: fakeSha('commit'),
+        files: [],
+      };
+      git.prepareCommit.mockResolvedValueOnce(commitResult);
+      git.pushPreparedCommit.mockResolvedValueOnce(fakeSha('commit'));
+
+      const res = await defaultGitScm.prepareCommit(commitConfig);
+
+      expect(res?.sha).toBe(fakeSha('commit'));
+      expect(git.pushPreparedCommit).not.toHaveBeenCalled();
+      await expect(res?.push()).resolves.toBe(fakeSha('commit'));
+      expect(git.pushPreparedCommit).toHaveBeenCalledExactlyOnceWith(
+        commitConfig,
+        commitResult,
+      );
+    });
+  });
+
+  describe('commitAndPush()', () => {
+    it('returns null if there is nothing to commit', async () => {
+      git.prepareCommit.mockResolvedValueOnce(null);
+
+      const res =
+        await defaultGitScm.commitAndPush(partial<CommitFilesConfig>());
+
+      expect(res).toBeNull();
+      expect(git.pushPreparedCommit).not.toHaveBeenCalled();
+    });
+
+    it('prepares and pushes the commit', async () => {
+      const commitConfig = partial<CommitFilesConfig>({ branchName: 'branch' });
+      const commitResult = {
+        parentCommitSha: fakeSha('parent'),
+        commitSha: fakeSha('commit'),
+        files: [],
+      };
+      git.prepareCommit.mockResolvedValueOnce(commitResult);
+      git.pushPreparedCommit.mockResolvedValueOnce(fakeSha('commit'));
+
+      const res = await defaultGitScm.commitAndPush(commitConfig);
+
+      expect(res).toBe(fakeSha('commit'));
+      expect(git.pushPreparedCommit).toHaveBeenCalledExactlyOnceWith(
+        commitConfig,
+        commitResult,
+      );
+    });
   });
 
   it('delegate deleteBranch to util/git', async () => {

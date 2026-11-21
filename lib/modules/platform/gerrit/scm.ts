@@ -5,8 +5,8 @@ import { coerceArray } from '../../../util/array.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
+import type { PreparedCommit } from '../types.ts';
 import { client } from './client.ts';
 import type { GerritLabels } from './schema.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
@@ -90,10 +90,10 @@ export async function pushForReview(options: {
 }
 
 export class GerritScm extends DefaultGitScm {
-  override async commitAndPush(
+  override async prepareCommit(
     commit: CommitFilesConfig,
-  ): Promise<LongCommitSha | null> {
-    logger.debug(`commitAndPush(${commit.branchName})`);
+  ): Promise<PreparedCommit | null> {
+    logger.debug(`prepareCommit(${commit.branchName})`);
 
     const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
@@ -130,9 +130,24 @@ export class GerritScm extends DefaultGitScm {
     // refs/remotes/origin/<branchName> during init.  This avoids pushing empty
     // patch sets without a separate diff check.
     const commitResult = await git.prepareCommit(commit);
-    if (commitResult) {
-      const { commitSha } = commitResult;
-      if (existingChange) {
+    if (!commitResult) {
+      return null; // empty commit, no changes in this Gerrit Change
+    }
+    const { commitSha } = commitResult;
+
+    if (!existingChange) {
+      return {
+        sha: commitSha,
+        push: () => {
+          logger.debug(`Commit prepared, push deferred to createPr()`);
+          return Promise.resolve(commitSha);
+        },
+      };
+    }
+
+    return {
+      sha: commitSha,
+      push: async () => {
         // Since the change already exists, we push to the same target branch to
         // avoid creating a new change if the base branch has changed.
         // updatePr() will later take care of moving the existing change to a
@@ -143,7 +158,6 @@ export class GerritScm extends DefaultGitScm {
           files: commit.files,
           autoApprove: commit.autoApprove,
         });
-        /* v8 ignore else -- should never happen */
         if (pushResult) {
           const currentRef =
             existingChange.revisions![existingChange.current_revision!].ref;
@@ -154,17 +168,14 @@ export class GerritScm extends DefaultGitScm {
           );
           return commitSha;
         }
-      } else {
-        logger.debug(`Commit prepared, push deferred to createPr()`);
-        return commitSha;
-      }
-    }
-    return null; // empty commit, no changes in this Gerrit Change
+        return null;
+      },
+    };
   }
 
   /**
    * Merges the virtual branch of an open change, or else the local branch
-   * prepared by commitAndPush() for a change that is not pushed yet.
+   * prepared by prepareCommit() for a change that is not pushed yet.
    */
   override async mergeToLocal(branchName: string): Promise<void> {
     await git.mergeToLocal(branchName, { localBranch: true });

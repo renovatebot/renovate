@@ -117,7 +117,7 @@ export function handleCommitError(
     isRejected &&
     files?.some((file) => file.path?.startsWith('.github/workflows/'))
   ) {
-    logger.debug({ err }, 'commitFiles error');
+    logger.debug({ err }, 'Commit error');
     logger.info('Workflows update rejection - aborting branch.');
     return null;
   }
