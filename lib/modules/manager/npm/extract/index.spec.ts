@@ -2,7 +2,11 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { ExtractConfig, NpmrcPackageFile } from '../../types.ts';
+import type {
+  ExtractConfig,
+  NpmrcPackageFile,
+  PackageFile,
+} from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
 import type { NpmManagerData } from '../types.ts';
 import * as npmExtract from './index.ts';
@@ -2073,6 +2077,35 @@ describe('modules/manager/npm/extract/index', () => {
         packageRules: [
           { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '3 days' },
         ],
+      });
+    });
+
+    it('adds the package file managerData to deps with their own managerData', async () => {
+      const packageFiles: PackageFile<NpmManagerData>[] = [
+        {
+          packageFile: 'package.json',
+          deps: [
+            { depName: 'nx', depType: 'dependencies' },
+            {
+              depName: 'undici',
+              depType: 'overrides',
+              managerData: { parents: ['nx'] },
+            },
+          ],
+          managerData: {
+            npmLock: 'package-lock.json',
+            hasPackageManager: true,
+          },
+        },
+      ];
+
+      await postExtract(packageFiles, {});
+
+      expect(packageFiles[0].deps[0].managerData).toBeUndefined();
+      expect(packageFiles[0].deps[1].managerData).toEqual({
+        npmLock: 'package-lock.json',
+        hasPackageManager: true,
+        parents: ['nx'],
       });
     });
   });
