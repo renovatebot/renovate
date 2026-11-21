@@ -131,7 +131,7 @@ export function migrateConfig(
         for (const [from, to] of Object.entries(migratedTemplates)) {
           // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = (migratedConfig[key] as string).replace(
-            regEx(from, 'g'),
+            regEx(`\\b${RegExp.escape(from)}\\b`, 'g'),
             to,
           );
         }
