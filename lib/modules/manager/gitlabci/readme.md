@@ -38,7 +38,15 @@ The alias value works with or without a trailing slash.
 
 ### Component digest pinning and updating
 
-To pin GitLab CI/CD component references (`include:component`) to immutable commit SHAs while keeping Docker image settings separate, enable `pinDigests` for the `repository` `depType`:
+To pin GitLab CI/CD component references (`include:component`) to immutable commit SHAs while keeping Docker image settings separate, add the `helpers:pinGitLabIncludeDigests` preset to the `extends` array:
+
+```json
+{
+  "extends": ["helpers:pinGitLabIncludeDigests"]
+}
+```
+
+Or enable `pinDigests` specifically for the `repository` `depType`:
 
 ```json
 {

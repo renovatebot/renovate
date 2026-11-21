@@ -136,6 +136,16 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  pinGitLabIncludeDigests: {
+    description: 'Pin GitLab CI/CD `include` digests.',
+    packageRules: [
+      {
+        matchDepTypes: ['repository'],
+        matchManagers: ['gitlabci-include', 'gitlabci'],
+        pinDigests: true,
+      },
+    ],
+  },
   renovateChangelog: {
     description:
       "Provide a link to octochangelog's improved breakdown for Renovate's changelogs",

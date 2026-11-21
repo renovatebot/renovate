@@ -2,7 +2,15 @@ Extracts "includes" dependencies from `gitlab-ci.yml` files.
 
 ### Digest pinning and updating
 
-To pin `include:project` references to immutable commit SHAs while tracking a tag or branch, enable `pinDigests`:
+To pin `include:project` references to immutable commit SHAs while tracking a tag or branch, add the `helpers:pinGitLabIncludeDigests` preset to the `extends` array (which covers both `gitlabci-include` and `gitlabci` components):
+
+```json
+{
+  "extends": ["helpers:pinGitLabIncludeDigests"]
+}
+```
+
+Or enable `pinDigests` directly for this manager:
 
 ```json
 {
