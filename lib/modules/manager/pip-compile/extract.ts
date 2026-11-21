@@ -13,7 +13,8 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
-import { extractHeaderCommand, matchManager } from './common.ts';
+import { extractHeaderCommand, isPylockFile, matchManager } from './common.ts';
+import { PylockToml } from './schema.ts';
 import type { DependencyBetweenFiles, PipCompileArgs } from './types.ts';
 import {
   generateMermaidGraph,
@@ -101,7 +102,9 @@ export async function extractAllPackageFiles(
         type: 'override',
       });
     }
-    const lockedDeps = extractRequirementsFile(fileContent)?.deps;
+    const lockedDeps = isPylockFile(matchedFile)
+      ? PylockToml.safeParse(fileContent).data
+      : extractRequirementsFile(fileContent)?.deps;
     if (!lockedDeps) {
       logger.debug(
         { matchedFile },
@@ -289,7 +292,7 @@ function extendWithIndirectDeps(
  *
  * By disabling them by default, we won't create noise by updating them.
  * Unless they have vulnerability alert, then they are forced to be updated.
- * @param dep dependency extracted from lock file (requirements.txt)
+ * @param dep dependency extracted from lock file (requirements.txt or pylock.toml)
  * @returns unconstrained dependency with locked version
  */
 function indirectDep(dep: PackageDependency): PackageDependency {

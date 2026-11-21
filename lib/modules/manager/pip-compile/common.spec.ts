@@ -7,6 +7,7 @@ import {
   extractHeaderCommand,
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
+  isPylockFile,
   matchManager,
 } from './common.ts';
 import { inferCommandExecDir } from './utils.ts';
@@ -458,5 +459,21 @@ describe('modules/manager/pip-compile/common', () => {
       expect(matchManager('file.txt')).toBe('pip_requirements');
       expect(matchManager('another_file.txt')).toBe('pip_requirements');
     });
+  });
+
+  describe('isPylockFile()', () => {
+    it.each(['pylock.toml', 'sub/dir/pylock.toml', 'pylock.dev.toml'])(
+      'matches %s',
+      (fileName) => {
+        expect(isPylockFile(fileName)).toBeTrue();
+      },
+    );
+
+    it.each(['pyproject.toml', 'requirements.txt', 'pylock.a.b.toml'])(
+      'does not match %s',
+      (fileName) => {
+        expect(isPylockFile(fileName)).toBeFalse();
+      },
+    );
   });
 });

@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts.ts';
 export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
-export const lockFileNames = ['requirements.txt'];
+export const lockFileNames = ['requirements.txt', 'pylock.toml'];
 export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const displayName = 'pip-compile';
