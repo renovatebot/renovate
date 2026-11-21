@@ -4295,6 +4295,10 @@ Where supported, platform-native automerge uses [`automergeStrategy`](#automerge
 
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it is rebased.
 
+On GitHub, platform-native automerge keeps the commit message it was enabled with.
+Renovate refreshes the commit message by disabling and re-enabling platform-native automerge when the message changes.
+Branches with a merge queue are excluded, because the merge queue uses the PR title.
+
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
