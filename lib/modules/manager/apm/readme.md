@@ -32,3 +32,6 @@ This requires the `apm` CLI to be available (for example, with `binarySource=glo
 
 With `lockFileMaintenance` enabled, Renovate runs `apm install --update` instead, which re-resolves each dependency to the latest ref `apm.yml` allows without editing `apm.yml`.
 Renovate keeps `apm.lock.yaml` in place for both commands: it is APM's record of which deployed files it owns, and without it APM skips the committed files instead of updating them.
+
+For private dependencies on github.com, Renovate passes `apm install` the token its `github-tags` lookups use, as `GITHUB_APM_PAT`: that of a `github-tags` host rule for `https://api.github.com/`, or else of the `github` one.
+Dependencies on other hosts get no credentials from Renovate.
