@@ -1,6 +1,7 @@
 # Development setup
 
-Use this guide to set up Renovate on a workstation or in a cloud workspace. You can also use the [Dev Container](#dev-container).
+Use this guide to set up Renovate on a workstation or in a cloud workspace.
+You can also use the [Dev Container](#dev-container).
 You can improve this documentation by opening a pull request.
 For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
@@ -14,9 +15,12 @@ You need the following dependencies:
 - Node.js `^24.11.0 || ^26.13.0`
 - pnpm `^11.0.0`
 
-If a prebuilt RE2 binary is unavailable, installation builds it from source. This requires Python and the [native build tools for your platform](https://github.com/nodejs/node-gyp#installation), including `make` and a C/C++ compiler on Unix.
+If a prebuilt RE2 binary is unavailable, installation builds it from source.
+This requires Python and the [native build tools for your platform](https://github.com/nodejs/node-gyp#installation), including `make` and a C/C++ compiler on Unix.
 
-On Linux systems with limited RAM, full Oxlint checks can run out of memory. During setup, check whether swap is active. If it is not, enable a 4 GiB swap file if you can configure swap on the host or VM.
+On Linux systems with limited RAM, full Oxlint checks can run out of memory.
+During setup, check whether swap is active.
+If it is not, enable a 4 GiB swap file if you can configure swap on the host or VM.
 
 For building the documentation, you also need:
 
@@ -65,7 +69,8 @@ If you already installed a part, skip the corresponding step.
 
 #### Dev Container
 
-To use the repository's Dev Container in [GitHub Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository), create a codespace for the repository. Codespaces uses the configuration in `.devcontainer`.
+To use the repository's Dev Container in [GitHub Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository), create a codespace for the repository.
+Codespaces uses the configuration in `.devcontainer`.
 
 To open the same container in [VS Code](https://code.visualstudio.com/docs/devcontainers/containers):
 
@@ -110,7 +115,8 @@ The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package manag
 
 To ensure everything is working properly on your end, you must:
 
-1. Run `pnpm install` if your setup has not already installed dependencies. Mise and the repository's Dev Container both run it during setup.
+1. Run `pnpm install` if your setup has not already installed dependencies.
+   Mise and the repository's Dev Container both run it during setup.
 1. Make a build with `pnpm build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
 1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
