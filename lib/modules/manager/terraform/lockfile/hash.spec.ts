@@ -598,6 +598,72 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       ]);
     });
 
+    it('adds every SHA256SUMS entry, including the manifest, as zh: hashes', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          shasums_url: 'https://example.com/SHA256SUMS',
+          packages: {
+            linux_amd64: {
+              hashes: [
+                'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+                'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+              ],
+            },
+          },
+        });
+      httpMock
+        .scope('https://example.com')
+        .get('/SHA256SUMS')
+        .reply(
+          200,
+          '422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96  terraform-provider-local_2.5.1_linux_amd64.zip\n' +
+            '890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f  terraform-provider-local_2.5.1_manifest.json\n',
+        );
+
+      const result = await TerraformProviderHash.createHashes(
+        openTofuRegistryUrl,
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(result).toEqual([
+        'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+        'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+        'zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f',
+      ]);
+    });
+
+    it('keeps packages hashes when SHA256SUMS cannot be fetched', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          shasums_url: 'https://example.com/SHA256SUMS',
+          packages: {
+            linux_amd64: {
+              hashes: [
+                'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+                'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+              ],
+            },
+          },
+        });
+      httpMock.scope('https://example.com').get('/SHA256SUMS').reply(404);
+
+      const result = await TerraformProviderHash.createHashes(
+        openTofuRegistryUrl,
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(result).toEqual([
+        'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+        'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+      ]);
+    });
+
     it('falls back to slow path when packages field is missing', async () => {
       const readStreamLinux = createReadStream(
         'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
