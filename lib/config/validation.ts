@@ -336,6 +336,7 @@ export async function validateConfig(
               errors,
               currentPath,
               config,
+              parentPath,
             );
             continue;
           } else if (
@@ -1147,6 +1148,7 @@ async function validateGlobalConfig(
   errors: ValidationMessage[],
   currentPath: string | undefined,
   config: AllConfig,
+  parentPath: string | undefined,
 ): Promise<void> {
   /* v8 ignore next -- not testable yet */
   if (getDeprecationMessage(key)) {
@@ -1307,13 +1309,21 @@ async function validateGlobalConfig(
         } else if (key === 'force') {
           // `force` is validated as a global config of its own, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
           // Inherit them (unless `force` sets its own) so that the self-hosted admin's own `force.env`/`force.hostRules[].headers` are validated against the allowlists they set, rather than an empty one.
-          const subValidation = await validateConfig('global', {
-            ...(config.allowedEnv ? { allowedEnv: config.allowedEnv } : {}),
-            ...(config.allowedHeaders
-              ? { allowedHeaders: config.allowedHeaders }
-              : {}),
-            ...val,
-          });
+          // As `force` is merged into the config it is set in, its contents are validated as if they were set there (i.e. `packageRules[0].force.registryUrls` as `packageRules[0].registryUrls`), but reported at the path they were set.
+          const subValidation = await validateConfig(
+            'global',
+            {
+              ...(config.allowedEnv ? { allowedEnv: config.allowedEnv } : {}),
+              ...(config.allowedHeaders
+                ? { allowedHeaders: config.allowedHeaders }
+                : {}),
+              ...val,
+            },
+            false,
+            parentPath,
+            undefined,
+            currentPath,
+          );
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {
