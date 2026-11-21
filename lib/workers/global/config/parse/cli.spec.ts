@@ -156,6 +156,66 @@ describe('workers/global/config/parse/cli', () => {
       expect(cli.getConfig(argv)).toMatchObject(config);
     });
 
+    describe('migrates the flat package cache flags', () => {
+      it('moves them into packageCache with their old types', () => {
+        argv.push(
+          '--cache-hard-ttl-minutes=60',
+          '--cache-private-packages',
+          '--cache-ttl-override={"datasource-npm":30}',
+          '--preset-cache-persistence=true',
+          '--redis-prefix=prefix',
+          '--redis-url=redis://localhost:6379',
+        );
+
+        expect(cli.getConfig(argv)).toEqual({
+          packageCache: {
+            hardTtlMinutes: 60,
+            privatePackages: true,
+            ttlOverride: { 'datasource-npm': 30 },
+            presetPersistence: true,
+            redisPrefix: 'prefix',
+            redisUrl: 'redis://localhost:6379',
+          },
+        });
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          {
+            objectFlag: '--package-cache',
+            oldFlags: [
+              '--cache-hard-ttl-minutes',
+              '--cache-private-packages',
+              '--cache-ttl-override',
+              '--preset-cache-persistence',
+              '--redis-prefix',
+              '--redis-url',
+            ],
+          },
+          'cli config has been migrated into a grouped option',
+        );
+      });
+
+      it('prefers fields set in --package-cache', () => {
+        argv.push(
+          '--package-cache={"redisUrl":"new"}',
+          '--redis-url=old',
+          '--redis-prefix=prefix',
+        );
+
+        expect(cli.getConfig(argv)).toEqual({
+          packageCache: { redisUrl: 'new', redisPrefix: 'prefix' },
+        });
+      });
+
+      it('leaves a --package-cache which is not an object', () => {
+        argv.push('--package-cache=5', '--redis-url=url');
+
+        expect(cli.getConfig(argv)).toEqual({ packageCache: 5 });
+        expect(logger.warn).toHaveBeenCalledExactlyOnceWith(
+          { objectFlag: '--package-cache', oldFlags: ['--redis-url'] },
+          'Could not migrate cli config into a grouped option, as it is not an object',
+        );
+      });
+    });
+
     describe('migrates the flat repository cache flags', () => {
       it('moves them into repositoryCache with their old types', () => {
         argv.push(

@@ -8,7 +8,7 @@ describe('util/cache/package/ttl', () => {
 
   describe('getTtlOverride', () => {
     describe('No configuration', () => {
-      it('returns undefined when no cacheTtlOverride config exists', () => {
+      it('returns undefined when no packageCache.ttlOverride config exists', () => {
         GlobalConfig.set({});
 
         const res = getTtlOverride('datasource-npm' as never);
@@ -16,8 +16,8 @@ describe('util/cache/package/ttl', () => {
         expect(res).toBeUndefined();
       });
 
-      it('returns undefined when cacheTtlOverride is empty', () => {
-        GlobalConfig.set({ cacheTtlOverride: {} });
+      it('returns undefined when packageCache.ttlOverride is empty', () => {
+        GlobalConfig.set({ packageCache: { ttlOverride: {} } });
 
         const res = getTtlOverride('datasource-npm' as never);
 
@@ -28,9 +28,11 @@ describe('util/cache/package/ttl', () => {
     describe('Exact match', () => {
       it('returns exact match when namespace exists in config', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 120,
-            'datasource-docker': 60,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 120,
+              'datasource-docker': 60,
+            },
           },
         });
 
@@ -43,9 +45,11 @@ describe('util/cache/package/ttl', () => {
 
       it('returns undefined when exact match is not a number', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            // @ts-expect-error -- testing
-            'datasource-npm': 'invalid',
+          packageCache: {
+            ttlOverride: {
+              // @ts-expect-error -- testing
+              'datasource-npm': 'invalid',
+            },
           },
         });
 
@@ -56,8 +60,10 @@ describe('util/cache/package/ttl', () => {
 
       it('returns undefined when no matching namespace found', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 120,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 120,
+            },
           },
         });
 
@@ -70,8 +76,10 @@ describe('util/cache/package/ttl', () => {
     describe('Glob patterns', () => {
       it('matches simple glob patterns', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-*': 90,
+          packageCache: {
+            ttlOverride: {
+              'datasource-*': 90,
+            },
           },
         });
 
@@ -86,8 +94,10 @@ describe('util/cache/package/ttl', () => {
 
       it('matches wildcard pattern for all namespaces', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            '*': 45,
+          packageCache: {
+            ttlOverride: {
+              '*': 45,
+            },
           },
         });
 
@@ -102,8 +112,10 @@ describe('util/cache/package/ttl', () => {
 
       it('matches complex glob patterns with braces', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-{npm,docker}': 150,
+          packageCache: {
+            ttlOverride: {
+              'datasource-{npm,docker}': 150,
+            },
           },
         });
 
@@ -118,9 +130,11 @@ describe('util/cache/package/ttl', () => {
 
       it('handles special characters in namespace patterns', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm:*': 120,
-            'changelog-*@v2': 60,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm:*': 120,
+              'changelog-*@v2': 60,
+            },
           },
         });
 
@@ -135,8 +149,10 @@ describe('util/cache/package/ttl', () => {
     describe('Regex patterns', () => {
       it('matches regex patterns', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            '/^datasource-/': 75,
+          packageCache: {
+            ttlOverride: {
+              '/^datasource-/': 75,
+            },
           },
         });
 
@@ -151,8 +167,10 @@ describe('util/cache/package/ttl', () => {
 
       it('matches patterns with regex escape sequences', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            '/datasource-\\w+/': 120,
+          packageCache: {
+            ttlOverride: {
+              '/datasource-\\w+/': 120,
+            },
           },
         });
 
@@ -169,10 +187,12 @@ describe('util/cache/package/ttl', () => {
     describe('Priority and multiple patterns', () => {
       it('prioritizes exact match over glob patterns', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-*': 90,
-            'datasource-npm': 120,
-            '*': 45,
+          packageCache: {
+            ttlOverride: {
+              'datasource-*': 90,
+              'datasource-npm': 120,
+              '*': 45,
+            },
           },
         });
 
@@ -185,10 +205,12 @@ describe('util/cache/package/ttl', () => {
 
       it('returns longest matching pattern when multiple patterns apply', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-*': 90,
-            'datasource-n*': 100,
-            '*': 45,
+          packageCache: {
+            ttlOverride: {
+              'datasource-*': 90,
+              'datasource-n*': 100,
+              '*': 45,
+            },
           },
         });
 
@@ -199,11 +221,13 @@ describe('util/cache/package/ttl', () => {
 
       it('selects longest matching pattern across all configs', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            '*': 10,
-            'datasource-*': 20,
-            'datasource-npm*': 30,
-            'datasource-npm-*': 40,
+          packageCache: {
+            ttlOverride: {
+              '*': 10,
+              'datasource-*': 20,
+              'datasource-npm*': 30,
+              'datasource-npm-*': 40,
+            },
           },
         });
 
@@ -218,11 +242,13 @@ describe('util/cache/package/ttl', () => {
 
       it('skips non-numeric values and selects next longest matching pattern', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            // @ts-expect-error -- testing
-            'datasource-*': 'invalid',
-            'datasource-n*': 100,
-            '*': 45,
+          packageCache: {
+            ttlOverride: {
+              // @ts-expect-error -- testing
+              'datasource-*': 'invalid',
+              'datasource-n*': 100,
+              '*': 45,
+            },
           },
         });
 
@@ -233,9 +259,11 @@ describe('util/cache/package/ttl', () => {
 
       it('returns undefined when no patterns match', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'changelog-*': 90,
-            'preset-*': 100,
+          packageCache: {
+            ttlOverride: {
+              'changelog-*': 90,
+              'preset-*': 100,
+            },
           },
         });
 
@@ -246,9 +274,11 @@ describe('util/cache/package/ttl', () => {
 
       it('applies patterns consistently regardless of case in config order', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'Datasource-*': 120,
-            'datasource-*': 90,
+          packageCache: {
+            ttlOverride: {
+              'Datasource-*': 120,
+              'datasource-*': 90,
+            },
           },
         });
 
@@ -261,9 +291,11 @@ describe('util/cache/package/ttl', () => {
     describe('Edge cases', () => {
       it('handles empty string pattern', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            '': 30,
-            'datasource-npm': 120,
+          packageCache: {
+            ttlOverride: {
+              '': 30,
+              'datasource-npm': 120,
+            },
           },
         });
 
@@ -276,12 +308,14 @@ describe('util/cache/package/ttl', () => {
 
       it('treats null and undefined values as invalid', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            // @ts-expect-error -- testing
-            'datasource-npm': null,
-            // @ts-expect-error -- testing
-            'datasource-docker': undefined,
-            'datasource-maven': 90,
+          packageCache: {
+            ttlOverride: {
+              // @ts-expect-error -- testing
+              'datasource-npm': null,
+              // @ts-expect-error -- testing
+              'datasource-docker': undefined,
+              'datasource-maven': 90,
+            },
           },
         });
 
@@ -296,8 +330,10 @@ describe('util/cache/package/ttl', () => {
 
       it('handles very large numbers', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 999999999,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 999999999,
+            },
           },
         });
 
@@ -308,8 +344,10 @@ describe('util/cache/package/ttl', () => {
 
       it('handles negative numbers', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': -100,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': -100,
+            },
           },
         });
 
@@ -320,10 +358,12 @@ describe('util/cache/package/ttl', () => {
 
       it('treats string numbers as invalid, only accepts number types', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            // @ts-expect-error -- testing
-            'datasource-npm': '120',
-            'datasource-docker': 90,
+          packageCache: {
+            ttlOverride: {
+              // @ts-expect-error -- testing
+              'datasource-npm': '120',
+              'datasource-docker': 90,
+            },
           },
         });
 
@@ -353,8 +393,10 @@ describe('util/cache/package/ttl', () => {
     describe('Override application', () => {
       it('uses override for softTtlMinutes when available', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 120,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 120,
+            },
           },
         });
 
@@ -366,10 +408,8 @@ describe('util/cache/package/ttl', () => {
         });
       });
 
-      it('applies custom cacheHardTtlMinutes from config', () => {
-        GlobalConfig.set({
-          cacheHardTtlMinutes: 1440,
-        });
+      it('applies custom packageCache.hardTtlMinutes from config', () => {
+        GlobalConfig.set({ packageCache: { hardTtlMinutes: 1440 } });
 
         const res = resolveTtlValues('datasource-npm' as never, 60);
 
@@ -381,10 +421,12 @@ describe('util/cache/package/ttl', () => {
 
       it('resolves TTL with glob pattern overrides', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-*': 180,
+          packageCache: {
+            ttlOverride: {
+              'datasource-*': 180,
+            },
+            hardTtlMinutes: 2880,
           },
-          cacheHardTtlMinutes: 2880,
         });
 
         const res = resolveTtlValues('datasource-npm' as never, 60);
@@ -397,12 +439,14 @@ describe('util/cache/package/ttl', () => {
 
       it('resolves TTL correctly with multiple overlapping overrides', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-*': 100,
-            'datasource-npm': 200,
-            '*': 50,
+          packageCache: {
+            ttlOverride: {
+              'datasource-*': 100,
+              'datasource-npm': 200,
+              '*': 50,
+            },
+            hardTtlMinutes: 5760,
           },
-          cacheHardTtlMinutes: 5760,
         });
 
         const res = resolveTtlValues('datasource-npm' as never, 60);
@@ -415,12 +459,14 @@ describe('util/cache/package/ttl', () => {
     });
 
     describe('Hard TTL calculation', () => {
-      it('uses maximum of softTtlMinutes and cacheHardTtlMinutes for hardTtlMinutes', () => {
+      it('uses maximum of softTtlMinutes and packageCache.hardTtlMinutes for hardTtlMinutes', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 20160,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 20160,
+            },
+            hardTtlMinutes: 1440,
           },
-          cacheHardTtlMinutes: 1440,
         });
 
         const res = resolveTtlValues('datasource-npm' as never, 60);
@@ -431,12 +477,14 @@ describe('util/cache/package/ttl', () => {
         });
       });
 
-      it('handles negative cacheHardTtlMinutes config', () => {
+      it('handles negative packageCache.hardTtlMinutes config', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 120,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 120,
+            },
+            hardTtlMinutes: -1,
           },
-          cacheHardTtlMinutes: -1,
         });
 
         const res = resolveTtlValues('datasource-npm' as never, 60);
@@ -451,10 +499,12 @@ describe('util/cache/package/ttl', () => {
     describe('Edge cases and special scenarios', () => {
       it('handles zero as valid override value', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 0,
+          packageCache: {
+            ttlOverride: {
+              'datasource-npm': 0,
+            },
+            hardTtlMinutes: 1440,
           },
-          cacheHardTtlMinutes: 1440,
         });
 
         const res = resolveTtlValues('datasource-npm' as never, 60);
@@ -467,9 +517,11 @@ describe('util/cache/package/ttl', () => {
 
       it('uses fallback when override is not a number', () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            // @ts-expect-error -- testing
-            'datasource-npm': 'invalid',
+          packageCache: {
+            ttlOverride: {
+              // @ts-expect-error -- testing
+              'datasource-npm': 'invalid',
+            },
           },
         });
 

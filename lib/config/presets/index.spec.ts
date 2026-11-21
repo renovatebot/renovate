@@ -621,9 +621,7 @@ describe('config/presets/index', () => {
     });
 
     it('default packageCache TTL should be 15 minutes', async () => {
-      GlobalConfig.set({
-        presetCachePersistence: true,
-      });
+      GlobalConfig.set({ packageCache: { presetPersistence: true } });
 
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [
@@ -662,9 +660,7 @@ describe('config/presets/index', () => {
     });
 
     it('use packageCache when presetCachePersistence is set', async () => {
-      GlobalConfig.set({
-        presetCachePersistence: true,
-      });
+      GlobalConfig.set({ packageCache: { presetPersistence: true } });
 
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [

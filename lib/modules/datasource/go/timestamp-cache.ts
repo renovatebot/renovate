@@ -84,7 +84,7 @@ async function read(cacheKey: string): Promise<Record<string, Timestamp>> {
  * Any credentials in the proxy URL are left out, as the key is stored as-is by the cache backends.
  */
 function getCacheKey(baseUrl: string, packageName: string): string | null {
-  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
+  const cachePrivatePackages = GlobalConfig.get('packageCache').privatePackages;
   if (!cachePrivatePackages && !isPublicGoPackage(packageName)) {
     return null;
   }

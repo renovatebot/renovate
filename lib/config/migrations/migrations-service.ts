@@ -34,6 +34,7 @@ import { MatchDatasourcesMigration } from './custom/match-datasources-migration.
 import { MatchManagersMigration } from './custom/match-managers-migration.ts';
 import { MatchStringsMigration } from './custom/match-strings-migration.ts';
 import { NodeMigration } from './custom/node-migration.ts';
+import { PackageCacheMigration } from './custom/package-cache-migration.ts';
 import { PackageFilesMigration } from './custom/package-files-migration.ts';
 import { PackageNameMigration } from './custom/package-name-migration.ts';
 import { PackagePatternMigration } from './custom/package-pattern-migration.ts';
@@ -178,6 +179,7 @@ export class MigrationsService {
     UpdateLockFilesMigration,
     ConstraintsMigration,
     DependencyDashboardMigration,
+    PackageCacheMigration,
     RepositoryCacheMigration,
   ];
 

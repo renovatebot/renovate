@@ -6,7 +6,10 @@ import type {
   RepoGlobalConfig,
 } from './types.ts';
 
-const mergedDefaultOptions = new Set<string>(['repositoryCache']);
+const mergedDefaultOptions = new Set<string>([
+  'packageCache',
+  'repositoryCache',
+]);
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
@@ -25,9 +28,6 @@ export class GlobalConfig {
     'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
-    'cacheHardTtlMinutes',
-    'cachePrivatePackages',
-    'cacheTtlOverride',
     'checkedBranches',
     'configFileNames',
     'containerbaseDir',
@@ -60,8 +60,8 @@ export class GlobalConfig {
     'onboardingConfigFileName',
     'onboardingNoDeps',
     'onboardingPrTitle',
+    'packageCache',
     'platform',
-    'presetCachePersistence',
     'productLinks',
     'rebaseAllOpenBranches',
     'repositoryCache',

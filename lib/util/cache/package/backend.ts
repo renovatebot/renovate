@@ -1,6 +1,7 @@
 import type { AllConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { getEnv } from '../../env.ts';
+import { coerceObject } from '../../object.ts';
 import type { PackageCacheBase } from './impl/base.ts';
 import { PackageCacheFile } from './impl/file.ts';
 import { PackageCacheRedis } from './impl/redis.ts';
@@ -17,11 +18,9 @@ export function getCacheType(): typeof cacheType {
 export async function init(config: AllConfig): Promise<void> {
   await destroy();
   await instrument('init PackageCache', async () => {
-    if (config.redisUrl) {
-      cacheProxy = await PackageCacheRedis.create(
-        config.redisUrl,
-        config.redisPrefix,
-      );
+    const { redisUrl, redisPrefix } = coerceObject(config.packageCache);
+    if (redisUrl) {
+      cacheProxy = await PackageCacheRedis.create(redisUrl, redisPrefix);
       cacheType = 'redis';
       return;
     }

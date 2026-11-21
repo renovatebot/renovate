@@ -30,18 +30,26 @@ describe('config/global', () => {
     it('returns the defaults of an object option which is not set', () => {
       GlobalConfig.set({});
 
-      expect(GlobalConfig.get('repositoryCache')).toEqual({
-        state: 'disabled',
-        type: 'local',
-        forceLocal: false,
-        httpTtlDays: 90,
-        prSyncMaxPages: 100,
+      expect(GlobalConfig.get('packageCache')).toEqual({
+        hardTtlMinutes: 10080,
+        presetPersistence: false,
+        privatePackages: false,
+        ttlOverride: {},
       });
     });
 
     it('fills in the defaults of the fields an object option does not set', () => {
-      GlobalConfig.set({ repositoryCache: { state: 'enabled' } });
+      GlobalConfig.set({
+        packageCache: { privatePackages: true },
+        repositoryCache: { state: 'enabled' },
+      });
 
+      expect(GlobalConfig.get('packageCache')).toEqual({
+        hardTtlMinutes: 10080,
+        presetPersistence: false,
+        privatePackages: true,
+        ttlOverride: {},
+      });
       expect(GlobalConfig.get('repositoryCache')).toEqual({
         state: 'enabled',
         type: 'local',

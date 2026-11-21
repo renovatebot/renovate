@@ -98,7 +98,7 @@ const topLevelObjects = [...managerList, 'env'];
 /**
  * Global options which are objects of their own child options, each validated individually.
  */
-const globalObjectsWithChildren = ['repositoryCache'];
+const globalObjectsWithChildren = ['packageCache', 'repositoryCache'];
 
 const ignoredNodes = [
   '$schema',
@@ -1340,7 +1340,7 @@ async function validateGlobalConfig(
               config,
             );
           }
-        } else if (key === 'cacheTtlOverride') {
+        } else if (key === 'ttlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {
             const allowsNegative = optionAllowsNegativeIntegers.has(key);
             warnings.push(

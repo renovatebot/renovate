@@ -238,7 +238,8 @@ export class GithubGraphqlDatasourceFetcher<
     }
     const cacheNs = this.getCacheNs();
     const cacheKey = this.getCacheKey();
-    const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
+    const cachePrivatePackages =
+      GlobalConfig.get('packageCache').privatePackages;
     const skipStabilization = !is.undefined(this.datasourceAdapter.maxItems);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
