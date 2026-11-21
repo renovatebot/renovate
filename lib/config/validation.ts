@@ -688,6 +688,7 @@ export async function validateConfig(
                     'customType',
                     'description',
                     'fileFormat',
+                    'yamlMaxAliasCount',
                     'managerFilePatterns',
                     'matchStrings',
                     'matchStringsStrategy',

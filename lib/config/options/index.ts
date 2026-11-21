@@ -3650,6 +3650,16 @@ const options: Readonly<RenovateOptions>[] = [
     ],
   },
   {
+    name: 'yamlMaxAliasCount',
+    description:
+      'Maximum YAML alias expansion count for a custom JSONata manager. Set to 0 to disable aliases.',
+    type: 'integer',
+    default: 10000,
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchStrings',
     description:
       'Queries to use. Valid only within `bumpVersions` or `customManagers` object. Templating is supported within `bumpVersions` only.',

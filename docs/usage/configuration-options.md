@@ -1494,6 +1494,14 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### `customManagers.yamlMaxAliasCount`
+
+This option applies only to custom JSONata managers with `fileFormat: "yaml"`.
+It sets the YAML parser's alias expansion limit. The default preserves existing alias resolution.
+Set it to `0` to reject files containing any YAML alias, including aliases outside the matched dependency or in another document.
+This is useful when updating a shared anchor could also change a value outside the manager's intended scope.
+The whole file is skipped with a warning when it cannot be parsed with aliases disabled; literal values without aliases remain supported.
+
 ## `defaultRegistryUrls`
 
 Override a datasource's default registries with this config option.

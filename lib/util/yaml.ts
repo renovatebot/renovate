@@ -17,6 +17,7 @@ export interface YamlOptions<
 >
   extends ParseOptions, DocumentOptions, SchemaOptions {
   customSchema?: Schema;
+  maxAliasCount?: number;
   removeTemplates?: boolean;
 }
 
@@ -79,7 +80,9 @@ export function parseYaml<ResT = unknown>(
       throw error;
     }
 
-    const document = rawDocument.toJS({ maxAliasCount: 10000 });
+    const document = rawDocument.toJS({
+      maxAliasCount: options?.maxAliasCount ?? 10000,
+    });
 
     // skip schema validation if no schema is provided
     if (!schema) {
@@ -124,7 +127,9 @@ export function parseSingleYaml<ResT = unknown>(
 ): ResT {
   const rawDocument = parseSingleYamlDocument(content, options);
 
-  const document = rawDocument.toJS({ maxAliasCount: 10000 });
+  const document = rawDocument.toJS({
+    maxAliasCount: options?.maxAliasCount ?? 10000,
+  });
   const schema = options?.customSchema;
   if (!schema) {
     return document as ResT;

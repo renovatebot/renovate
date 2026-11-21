@@ -3,6 +3,21 @@ import { z } from 'zod/v4';
 import { parseSingleYaml, parseYaml } from './yaml.ts';
 
 describe('util/yaml', () => {
+  it.each([parseYaml, parseSingleYaml])(
+    'honors an explicit alias limit',
+    (parse) => {
+      const content = codeBlock`
+      version: &version 1.2.3
+      other: *version
+    `;
+
+      expect(() => parse(content)).not.toThrow();
+      expect(() => parse(content, { maxAliasCount: 0 })).toThrow(
+        'Alias resolution is disabled',
+      );
+    },
+  );
+
   describe('loadAll', () => {
     it('should return empty array for empty string', () => {
       expect(parseYaml(``)).toEqual([]);

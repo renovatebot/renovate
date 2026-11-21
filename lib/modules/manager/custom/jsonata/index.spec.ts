@@ -546,4 +546,83 @@ describe('modules/manager/custom/jsonata/index', () => {
       'Error executing jsonata query. Please check your query.',
     );
   });
+
+  describe('YAML alias limits', () => {
+    const config = {
+      fileFormat: 'yaml',
+      matchStrings: [
+        'packages.{ "depName": name, "currentValue": version, "datasource": "npm" }',
+      ],
+    };
+
+    it('keeps alias resolution enabled by default', async () => {
+      const content = codeBlock`
+        shared: &version 1.2.3
+        packages:
+          - name: example
+            version: *version
+      `;
+
+      const result = await extractPackageFile(content, 'packages.yaml', config);
+
+      expect(result?.deps).toEqual([
+        { depName: 'example', currentValue: '1.2.3', datasource: 'npm' },
+      ]);
+    });
+
+    it.each([
+      codeBlock`
+        shared: &version 1.2.3
+        packages:
+          - name: example
+            version: *version
+      `,
+      codeBlock`
+        packages:
+          - name: example
+            version: &version 1.2.3
+        shared: *version
+      `,
+      codeBlock`
+        packages:
+          - name: example
+            version: 1.2.3
+        ---
+        shared: &unrelated value
+        other: *unrelated
+      `,
+    ])(
+      'refuses the whole file when alias resolution is disabled',
+      async (content) => {
+        const result = await extractPackageFile(content, 'packages.yaml', {
+          ...config,
+          yamlMaxAliasCount: 0,
+        });
+
+        expect(result).toBeNull();
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { fileName: 'packages.yaml', fileFormat: 'yaml' },
+          'Unable to parse YAML with aliases disabled; skipping custom JSONata extraction',
+        );
+      },
+    );
+
+    it('extracts literal values with alias resolution disabled', async () => {
+      const content = codeBlock`
+        packages:
+          - name: example
+            version: 1.2.3
+      `;
+
+      const result = await extractPackageFile(content, 'packages.yaml', {
+        ...config,
+        yamlMaxAliasCount: 0,
+      });
+
+      expect(result?.deps).toEqual([
+        { depName: 'example', currentValue: '1.2.3', datasource: 'npm' },
+      ]);
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+  });
 });

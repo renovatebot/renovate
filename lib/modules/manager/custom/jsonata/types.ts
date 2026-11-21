@@ -20,11 +20,13 @@ export interface JSONataManagerTemplates {
 
 export interface JSONataManagerConfig extends JSONataManagerTemplates {
   fileFormat: string;
+  yamlMaxAliasCount?: number;
   matchStrings: string[];
 }
 
 export interface JsonataExtractConfig
   extends ExtractConfig, JSONataManagerTemplates {
   fileFormat: string;
+  yamlMaxAliasCount?: number;
   matchStrings: string[];
 }
