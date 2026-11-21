@@ -419,20 +419,14 @@ If you are proposing a "monorepo" preset addition then it is OK to raise a PR di
 
 ## Group/Organization level presets
 
-Whenever repository onboarding happens, Renovate checks for a a default config to extend.
-Renovate will check for a repository called `renovate-config` with a `default.json` file in the parent user/group/org of the repository.
-On platforms that support nested groups (e.g. GitLab), Renovate will check for this repository at each level of grouping, from nearest to furthest, and use the first one it finds.
-On all platforms, it will then look for a repository named like `.{{platform}}` (e.g. `.github`) with a `renovate-config.json`, under the same top-level user/group/org.
+When Renovate onboards a repository, it can use a default preset from your organization instead of the built-in onboarding config.
+To provide one, create either of these:
 
-If found, that repository's preset will be suggested as the sole extended preset, and any existing `onboardingConfig` config will be ignored/overridden.
-For example the result may be:
+- a `renovate-config` repository containing `default.json`, in the top-level group or in any subgroup
+- a `renovate-config.json` file in a `.{{platform}}` repository (for example `.github`), in the top-level group
 
-```json
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>myorgname/.github:renovate-config"]
-}
-```
+If both exist, `renovate-config` takes priority, and on platforms with nested groups the nearest `renovate-config` wins.
+Read [Onboarding Config](./config-overview.md#onboarding-config) for the full lookup order and how to choose between these options.
 
 ## npm-hosted presets
 
