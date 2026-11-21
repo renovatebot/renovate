@@ -481,6 +481,33 @@ describe('modules/datasource/common', () => {
         }),
       ).toEqual({ releases: [] });
     });
+
+    it('should use the constraintsVersioning of a tool constraint', () => {
+      const releaseResult = {
+        releases: [
+          { version: '2.25.9', constraints: { python: ['>=3.9'] } },
+          { version: '2.26.0', constraints: { python: ['>=3.13'] } },
+        ],
+      };
+      const config: GetPkgReleasesConfig = {
+        datasource: 'containerbase',
+        packageName: 'pdm',
+        versioning: 'semver',
+        constraintsFiltering: 'strict',
+        constraints: { python: '3.12.4' },
+      };
+
+      // `semver` can't read `>=3.9`, so every release is dropped
+      expect(
+        applyConstraintsFiltering(structuredClone(releaseResult), config),
+      ).toEqual({ releases: [] });
+      expect(
+        applyConstraintsFiltering(structuredClone(releaseResult), {
+          ...config,
+          constraintsVersioning: { python: 'python' },
+        }),
+      ).toEqual({ releases: [{ version: '2.25.9' }] });
+    });
   });
 
   describe('applyVersionCompatibility', () => {
