@@ -2536,6 +2536,110 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
 
+    describe('keepBranchIfSameChanges', () => {
+      const lockFile: FileChange = {
+        type: 'addition',
+        path: 'uv.lock',
+        contents: codeBlock`
+          [[package]]
+          name = "requests"
+          version = "2.33.0"
+        `,
+      };
+
+      beforeEach(() => {
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValue(
+          partial<Pr>({
+            number: 5,
+            state: 'open',
+            targetBranch: 'base-branch',
+          }),
+        );
+        getUpdated.getUpdatedPackageFiles.mockResolvedValue({
+          ...updatedPackageFiles,
+          updatedArtifacts: [lockFile],
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValue({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+      });
+
+      it('sets the flag on the restart after a reuse pass', async () => {
+        commit.commitFilesToBranch.mockResolvedValue(null);
+
+        const res = await branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: true,
+          cacheFingerprintMatch: 'no-fingerprint',
+        });
+
+        expect(res).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: 5,
+          result: 'done',
+          commitSha: null,
+        });
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Existing branch needs updating. Restarting processBranch() with a clean branch',
+        );
+        expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(2);
+        expect(commit.commitFilesToBranch).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            keepBranchIfSameChanges: true,
+            updatedArtifacts: [lockFile],
+          }),
+        );
+        expect(platform.ensureCommentRemoval).toHaveBeenCalledWith({
+          type: 'by-topic',
+          number: 5,
+          topic: '⚠️ Artifact update problem',
+        });
+        expect(platform.ensureCommentRemoval).toHaveBeenCalledWith({
+          type: 'by-topic',
+          number: 5,
+          topic: 'ℹ️ Artifact update notice',
+        });
+      });
+
+      it('sets the flag when the reuse pass falls back to the base branch', async () => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValue({
+          ...updatedPackageFiles,
+          reuseExistingBranch: false,
+          updatedArtifacts: [lockFile],
+        });
+
+        await branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: true,
+          cacheFingerprintMatch: 'no-fingerprint',
+        });
+
+        expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledOnce();
+        expect(commit.commitFilesToBranch).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ keepBranchIfSameChanges: true }),
+        );
+      });
+
+      it('does not set the flag for a branch behind base', async () => {
+        reuse.shouldReuseExistingBranch.mockImplementationOnce((config) =>
+          Promise.resolve({ ...config, reuseExistingBranch: false }),
+        );
+
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'behind-base-branch',
+        });
+
+        expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledOnce();
+        expect(commit.commitFilesToBranch).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ keepBranchIfSameChanges: false }),
+        );
+      });
+    });
+
     it('swallows pr errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({

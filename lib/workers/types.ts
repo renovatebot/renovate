@@ -200,6 +200,7 @@ export interface BranchConfig
   dependencyDashboardPrApproval?: boolean;
   releaseTimestamp?: Timestamp;
   forceCommit?: boolean;
+  keepBranchIfSameChanges?: boolean;
   rebaseRequested?: boolean;
   result?: BranchResult;
   upgrades: BranchUpgradeConfig[];

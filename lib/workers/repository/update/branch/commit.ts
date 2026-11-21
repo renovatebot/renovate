@@ -56,6 +56,7 @@ export function commitFilesToBranch(
     message: config.commitMessage!,
     trailers: config.commitTrailers,
     force: !!config.forceCommit,
+    keepBranchIfSameChanges: !!config.keepBranchIfSameChanges,
     platformCommit: config.platformCommit,
     // Only needed by Gerrit platform
     prTitle: config.prTitle,

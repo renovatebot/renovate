@@ -393,6 +393,8 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
+    // captured before getUpdatedPackageFiles(), whose fallbacks reset reuseExistingBranch
+    const startedAsReuse = !!config.reuseExistingBranch;
     if (!(
       config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
     )) {
@@ -534,6 +536,8 @@ export async function processBranch(
         }
       }
       config.forceCommit = forcedManually || config.isConflicted;
+      // a pass that started as reuse, or the restart after one, keeps the existing branch when the rebuilt commit has the same changes
+      config.keepBranchIfSameChanges = forceRebase || startedAsReuse;
 
       // compile commit message with body, which maybe needs changelogs
       config.commitMessage = compileCommitBody(config, config.commitMessage!, {

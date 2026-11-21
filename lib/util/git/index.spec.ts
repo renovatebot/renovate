@@ -1903,6 +1903,150 @@ describe('util/git/index', { timeout: 30000 }, () => {
         const result = await local.raw(['ls-tree', 'HEAD', 'master_file']);
         expect(result).toStartWith('100755');
       });
+
+      describe('keepBranchIfSameChanges', () => {
+        const branchName = 'renovate/same-changes';
+        const lockFile: FileChange = {
+          type: 'addition',
+          path: 'uv.lock',
+          contents: 'lock v2',
+        };
+
+        async function createBranch(files: FileChange[]): Promise<void> {
+          const commit = await git.commitFiles({
+            branchName,
+            files,
+            message: 'Update lock file',
+          });
+          expect(commit).not.toBeNull();
+        }
+
+        async function updateBase(
+          path: string,
+          contents: string,
+        ): Promise<void> {
+          const local = simpleGit(tmpDir.path);
+          await local.checkout(defaultBranch);
+          await fs.writeFile(`${tmpDir.path}/${path}`, contents);
+          await local.add([path]);
+          await local.commit('base update');
+          await local.push('origin', defaultBranch);
+          await git.initRepo({ url: origin.path });
+          git.setGitAuthor('Jest <Jest@example.com>');
+          await git.syncGit();
+        }
+
+        async function getRemoteSha(name: string): Promise<string> {
+          return (await simpleGit(origin.path).revparse([name])).trim();
+        }
+
+        it('skips the commit if the changes equal the branch behind base', async () => {
+          await createBranch([lockFile]);
+          await updateBase('other_file', 'other');
+          const remoteSha = await getRemoteSha(branchName);
+
+          const commit = await git.commitFiles({
+            branchName,
+            files: [lockFile],
+            message: 'Update lock file',
+            keepBranchIfSameChanges: true,
+          });
+
+          expect(commit).toBeNull();
+          await expect(getRemoteSha(branchName)).resolves.toBe(remoteSha);
+        });
+
+        it('pushes the same changes without the flag', async () => {
+          await createBranch([lockFile]);
+          await updateBase('other_file', 'other');
+          const remoteSha = await getRemoteSha(branchName);
+
+          const commit = await git.commitFiles({
+            branchName,
+            files: [lockFile],
+            message: 'Update lock file',
+          });
+
+          expect(commit).not.toBeNull();
+          await expect(getRemoteSha(branchName)).resolves.not.toBe(remoteSha);
+        });
+
+        it.each`
+          name                               | branchFiles                                                                         | files
+          ${'different content'}             | ${[lockFile]}                                                                       | ${[{ ...lockFile, contents: 'lock v3' }]}
+          ${'a changed executable bit'}      | ${[lockFile]}                                                                       | ${[{ ...lockFile, isExecutable: true }]}
+          ${'an extra file on the branch'}   | ${[lockFile, { type: 'addition', path: 'extra_file', contents: 'extra' }]}          | ${[lockFile]}
+          ${'different invalid UTF-8 bytes'} | ${[{ type: 'addition', path: 'binary.lock', contents: Buffer.from([0xff, 0x01]) }]} | ${[{ type: 'addition', path: 'binary.lock', contents: Buffer.from([0xfe, 0x01]) }]}
+        `(
+          'pushes the commit for $name',
+          async ({
+            branchFiles,
+            files,
+          }: {
+            branchFiles: FileChange[];
+            files: FileChange[];
+          }) => {
+            await createBranch(branchFiles);
+            await updateBase('other_file', 'other');
+            const remoteSha = await getRemoteSha(branchName);
+
+            const commit = await git.commitFiles({
+              branchName,
+              files,
+              message: 'Update lock file',
+              keepBranchIfSameChanges: true,
+            });
+
+            expect(commit).not.toBeNull();
+            await expect(getRemoteSha(branchName)).resolves.not.toBe(remoteSha);
+          },
+        );
+
+        it('pushes the same changes if force is set', async () => {
+          await createBranch([lockFile]);
+          await updateBase('other_file', 'other');
+
+          const commit = await git.commitFiles({
+            branchName,
+            files: [lockFile],
+            message: 'Update lock file',
+            force: true,
+            keepBranchIfSameChanges: true,
+          });
+
+          expect(commit).not.toBeNull();
+        });
+
+        it('pushes the same changes if base changed the same file', async () => {
+          await createBranch([lockFile]);
+          await updateBase('other_file', 'other');
+          await updateBase('uv.lock', 'lock base');
+
+          const commit = await git.commitFiles({
+            branchName,
+            files: [lockFile],
+            message: 'Update lock file',
+            keepBranchIfSameChanges: true,
+          });
+
+          expect(commit).not.toBeNull();
+        });
+
+        it('pushes the commit if the remote branch is missing', async () => {
+          const commit = await git.commitFiles({
+            branchName,
+            files: [lockFile],
+            message: 'Update lock file',
+            keepBranchIfSameChanges: true,
+          });
+
+          expect(commit).not.toBeNull();
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            expect.objectContaining({ branchName }),
+            'Failed to compare branch changes',
+          );
+        });
+      });
     });
 
     describe('initRepo())', () => {
