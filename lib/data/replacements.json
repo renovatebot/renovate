@@ -990,6 +990,18 @@
       }
     ]
   },
+  "rc-tooltip-to-scoped": {
+    "description": "`rc-tooltip` is now published as `@rc-component/tooltip`. Version 1.0.0 under the new name is version 6.4.0, the last one under the old name, without the deprecated `animation` and `transitionName` props (use `motion` instead).",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=6.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rc-tooltip"],
+        "replacementName": "@rc-component/tooltip",
+        "replacementVersion": "1.0.0"
+      }
+    ]
+  },
   "react-native-magic-modal-to-magic-modal": {
     "description": "`react-native-magic-modal` was renamed to `magic-modal` in version 10.0.0. The old name is deprecated but still published at the same version, depending on and re-exporting `magic-modal`.",
     "packageRules": [
