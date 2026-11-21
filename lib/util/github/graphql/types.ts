@@ -66,6 +66,15 @@ export interface GithubPackageConfig {
    * Default: https://api.github.com
    */
   registryUrl?: string | undefined;
+
+  /**
+   * Optional server-side ref-name filter forwarded to the GraphQL
+   * `refs(query: ...)` argument. Lets a caller scope a tag lookup to a subset
+   * of refs (e.g. a Go monorepo submodule prefix such as `config/`) so GitHub
+   * does not traverse the repository's entire tag set. Only the tags adapter
+   * honors it; when unset the query is unchanged.
+   */
+  refQuery?: string | undefined;
 }
 
 /**
@@ -103,6 +112,7 @@ export interface GithubGraphqlRepoParams {
   name: string;
   cursor: string | null;
   count: number;
+  query?: string;
 }
 
 export interface GithubGraphqlCacheRecord<

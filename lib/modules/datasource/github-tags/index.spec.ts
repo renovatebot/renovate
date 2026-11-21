@@ -205,6 +205,34 @@ describe('modules/datasource/github-tags/index', () => {
       });
     });
 
+    it('forwards refQuery to the tags query but not to the releases query', async () => {
+      const queryTags = vi
+        .spyOn(githubGraphql, 'queryTags')
+        .mockResolvedValueOnce([]);
+      const queryReleases = vi
+        .spyOn(githubGraphql, 'queryReleases')
+        .mockResolvedValueOnce([]);
+
+      await github.getReleases({
+        packageName,
+        registryUrl: 'https://github.com',
+        refQuery: 'service/s3/',
+      });
+
+      expect(queryTags).toHaveBeenCalledWith(
+        {
+          packageName,
+          registryUrl: 'https://github.com',
+          refQuery: 'service/s3/',
+        },
+        expect.anything(),
+      );
+      expect(queryReleases).toHaveBeenCalledWith(
+        { packageName, registryUrl: 'https://github.com' },
+        expect.anything(),
+      );
+    });
+
     describe('releaseTimestamp takes precedence from GitHub Release', () => {
       const packageName = 'some/dep3';
 
