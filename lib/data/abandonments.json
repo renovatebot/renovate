@@ -3,6 +3,7 @@
   "npm": {
     "@types/*": "eternal",
     "eslint-plugin-no-only-tests": "5 years",
+    "husky": "3 years",
     "lodash": "6 years"
   }
 }
