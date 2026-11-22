@@ -202,6 +202,10 @@ If a package is used in a way knip cannot see, add it to `ignoreDependencies` in
 
 If you are only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
+We use [rumdl](https://rumdl.dev) to lint Markdown, configured in `.rumdl.toml`.
+Run `pnpm markdown-lint` to check Markdown or `pnpm markdown-lint-fix` to apply lint fixes.
+Prettier remains the Markdown formatter, and existing `markdownlint-disable` comments are supported.
+
 ### IDE extensions
 
 We recommend installing the extensions listed in `.vscode/extensions.json`.
@@ -329,8 +333,6 @@ module.exports = {
   repositories: ['r4harry/testrepo1'],
 };
 ```
-
-<!-- markdownlint-disable MD029 -->
 
 3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
 4. Wait for your breakpoint to be triggered

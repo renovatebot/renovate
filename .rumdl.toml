@@ -1,0 +1,61 @@
+[global]
+# Start from rumdl's default rule set on purpose: rules that rumdl adds or
+# enables in future releases should surface here instead of being ignored.
+# Disable rules individually when they conflict with this repository's style.
+disable = [
+  "MD013", # Allow long lines without enforcing a line-length limit.
+  "MD033", # Allow inline HTML.
+  "MD036", # Allow emphasis where a heading might otherwise be expected.
+  "MD040", # Allow fenced code blocks without a language tag.
+  "MD041", # Allow documents that do not start with a top-level heading.
+  "MD057", # Allow links to documentation that tools/docs generates at build time.
+]
+# Fail on disable comments that no longer suppress anything.
+extend-enable = ["MD087"]
+include = ["**/*.md"]
+exclude = [
+  "**/__fixtures__/*",
+  "**/node_modules/**",
+  "tmp/**",
+  "**/.cache/**",
+  ".venv/**",
+  "tools/mkdocs/docs/**",
+  "tools/mkdocs/site/**",
+  ".agents/**",
+  ".claude/**",
+  ".opencode/**",
+  "AGENTS.md",
+  "CLAUDE.md",
+  ".worktrees/**/*",
+]
+# Match the previous explicit globs instead of inheriting user Git exclusions.
+respect-gitignore = false
+cache-dir = ".cache/rumdl"
+# MkDocs flavor assumes four-space indentation, but this site uses two spaces.
+flavor = "standard"
+
+# Preserve markdownlint defaults where rumdl differs.
+[MD010]
+# Check tabs inside code blocks as well as prose.
+code-blocks = true
+
+[MD025]
+# Page titles live in the YAML frontmatter, not in a second level 1 heading.
+front-matter-title = ""
+
+[MD027]
+# Check spacing in blockquoted list items as well as other blockquote content.
+list-items = true
+
+[MD051]
+# Require fragments to match anchor capitalization exactly.
+ignore-case = false
+
+[MD060]
+# Explicitly enable this opt-in rule and retain Prettier-aligned tables.
+enabled = true
+style = "aligned"
+
+[MD076]
+# Allow the blank lines that Prettier keeps around list-item continuation blocks.
+allow-loose-continuation = true

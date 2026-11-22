@@ -197,7 +197,6 @@ Add `"docker:disableMajor"` to your `extends` array.
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
-<!-- markdownlint-disable MD046 -->
 !!! note
   This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
   If you have configured package rules that set `pinDigests` to `true`, those will still apply.
