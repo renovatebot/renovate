@@ -11,7 +11,7 @@
 ## Add new NodeJS version
 
 - Add new version via `package.json>engines>node`
-- Update the node version in the [local-development](./local-development.md) docs
+- Update the node version in the [development setup guide](./setup.md)
 - Update the node version in the GitHub Actions workflow files
 
 ## Remove old NodeJS version
