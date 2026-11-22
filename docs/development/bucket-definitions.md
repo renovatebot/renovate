@@ -294,7 +294,6 @@ Belongs here:
 Not this bucket:
 
 - A `docs:` PR that changes the docs build or site tooling → `engineering-health`
-
 - [#43741](https://github.com/renovatebot/renovate/discussions/43741) "regex fails silently" → `predictability` (docs would paper over a fixable silence)
 - Docs shipped alongside a new manager → stay with the feature's bucket
 
