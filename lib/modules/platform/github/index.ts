@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { MergeStrategy } from '../../../config/types.ts';
@@ -46,6 +51,13 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import type { GithubHttpOptions } from '../../../util/http/github.ts';
 import * as githubHttp from '../../../util/http/github.ts';
+import {
+  isForbidden,
+  isGone,
+  isMethodNotAllowed,
+  isNotFound,
+  isUnprocessableContent,
+} from '../../../util/http/status.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -59,6 +71,7 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
+  CancelPlatformAutomergeConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -81,14 +94,20 @@ import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import { getRepoFile } from './files.ts';
 import {
+  disableAutoMergeMutation,
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
+  pinIssueMutation,
+  prAutoMergeStateQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
-import { massageMarkdownLinks } from './massage-markdown-links.ts';
+import {
+  massageCommitMessageLinks,
+  massageMarkdownLinks,
+} from './massage-markdown-links.ts';
 import {
   isPrInMergeQueue as checkPrInMergeQueue,
   getPrCache,
@@ -98,6 +117,7 @@ import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubGraphqlIssueAuthor,
+  GithubPullRequestAutoMergeState,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
@@ -128,10 +148,25 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
+function isGhesVersionSatisfying(range: string): boolean {
+  if (!isGithubEnterpriseServer(platformConfig.host)) {
+    return false;
+  }
+  return semver.satisfies(platformConfig.host.version ?? '', range);
+}
+
+function isGhesVersionUnknownOrBelow(minVersion: string): boolean {
+  if (!isGithubEnterpriseServer(platformConfig.host)) {
+    return false;
+  }
+  const { version } = platformConfig.host;
+  return !version || semver.lt(version, minVersion);
+}
+
 const defaultGithubApiUrl = 'https://api.github.com/';
 
-// GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
-const GitHubMaxPrBodyLen = 58000;
+// GitHub's max is 60k, but the hosted app can encounter connection resets near the limit
+const GitHubMaxPrBodyLen = 50000;
 
 const noteAlertRegex = regEx(/> ℹ️? \*\*Note\*\*\n> ?\n/g);
 const warningAlertRegex = regEx(/> ⚠️? \*\*Warning\*\*\n> ?\n/g);
@@ -217,9 +252,7 @@ export async function initPlatform({
    */
   if (
     isGithubFineGrainedPersonalAccessToken(token) &&
-    isGithubEnterpriseServer(platformConfig.host) &&
-    (!platformConfig.host.version ||
-      semver.lt(platformConfig.host.version, '3.10.0'))
+    isGhesVersionUnknownOrBelow('3.10.0')
   ) {
     throw new Error(
       'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.',
@@ -230,13 +263,17 @@ export async function initPlatform({
   if (username) {
     renovateUsername = username;
   } else if (platformConfig.isGHApp) {
-    platformConfig.userDetails ??= await getAppDetails(token);
+    if (isNullOrUndefined(platformConfig.userDetails)) {
+      platformConfig.userDetails = await getAppDetails(token);
+    }
     renovateUsername = platformConfig.userDetails.username;
   } else {
-    platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.host.apiUrl.href,
-      token,
-    );
+    if (isNullOrUndefined(platformConfig.userDetails)) {
+      platformConfig.userDetails = await getUserDetails(
+        platformConfig.host.apiUrl.href,
+        token,
+      );
+    }
     renovateUsername = platformConfig.userDetails.username;
   }
 
@@ -252,18 +289,24 @@ export async function initPlatform({
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
-      platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: coverage error #40625
+      if (isNullOrUndefined(platformConfig.userDetails)) {
+        platformConfig.userDetails = await getAppDetails(token);
+      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
-      platformConfig.userDetails ??= await getUserDetails(
-        platformConfig.host.apiUrl.href,
-        token,
-      );
-      // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail =
-        platformConfig.userDetails.email ??
-        (await getUserEmail(platformConfig.host.apiUrl.href, token));
+      if (isNullOrUndefined(platformConfig.userDetails)) {
+        platformConfig.userDetails = await getUserDetails(
+          platformConfig.host.apiUrl.href,
+          token,
+        );
+      }
+      platformConfig.userEmail = platformConfig.userDetails.email;
+      if (isNullOrUndefined(platformConfig.userEmail)) {
+        platformConfig.userEmail = await getUserEmail(
+          platformConfig.host.apiUrl.href,
+          token,
+        );
+      }
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -408,7 +451,7 @@ async function getBranchRulesets(
     );
     return res.body;
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug(`No branch rulesets found for ${branchName}`);
       return [];
     }
@@ -467,7 +510,7 @@ export async function listForks(
     logger.debug(`Found ${repos.length} forked repo(s)`);
     return repos;
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug('Cannot list repo forks - it is likely private');
     } else {
       logger.debug({ err }, 'Unknown error listing repository forks');
@@ -572,19 +615,13 @@ export async function initRepo({
 
     // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
-    if (
-      isGithubEnterpriseServer(platformConfig.host) &&
-      semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
-    ) {
+    if (isGhesVersionSatisfying('<3.3.0')) {
       infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
       infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
-    if (
-      isGithubEnterpriseServer(platformConfig.host) &&
-      semver.satisfies(platformConfig.host.version ?? '', '<3.9.0')
-    ) {
+    if (isGhesVersionSatisfying('<3.9.0')) {
       infoQuery = infoQuery.replace(
         regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
         '\n',
@@ -592,10 +629,7 @@ export async function initRepo({
     }
 
     // GitHub Enterprise Server <3.12.0 doesn't support merge queues
-    if (
-      isGithubEnterpriseServer(platformConfig.host) &&
-      semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
-    ) {
+    if (isGhesVersionSatisfying('<3.12.0')) {
       infoQuery = infoQuery.replace(
         regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
         '\n',
@@ -684,10 +718,10 @@ export async function initRepo({
     ) {
       throw err;
     }
-    if (err.statusCode === 403) {
+    if (isForbidden(err)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message.startsWith('Repository access blocked')) {
@@ -916,13 +950,13 @@ function handleBranchProtectionError(
   err: any,
   branchName: string,
 ): void {
-  if (err.statusCode === 404) {
+  if (isNotFound(err)) {
     logger.debug(`No ${protection} found for ${branchName}`);
     return;
   }
 
   const isUnauthorized =
-    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED || err.statusCode === 403;
+    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED || isForbidden(err);
 
   if (isUnauthorized) {
     logger.once.debug(
@@ -966,17 +1000,23 @@ async function fetchPr(prNo: number): Promise<GhPr | null> {
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<GhPr | null> {
+export async function getPr(
+  prNo: number,
+  refreshCache = false,
+): Promise<GhPr | null> {
   if (!prNo) {
     return null;
   }
+  if (refreshCache) {
+    return fetchPr(prNo);
+  }
   const prList = await getPrList();
-  let pr = prList.find(({ number }) => number === prNo) ?? null;
+  const pr = prList.find(({ number }) => number === prNo) ?? null;
   if (pr) {
     logger.debug('Returning PR from cache');
+    return pr;
   }
-  pr ??= await fetchPr(prNo);
-  return pr;
+  return fetchPr(prNo);
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -1082,7 +1122,7 @@ async function ensureBranchSha(
       await githubApi.patchJson(refUrl, { body: { sha, force: true } });
       return;
     } catch (err) {
-      if (err.err?.response?.statusCode === 422) {
+      if (isUnprocessableContent(err.err)) {
         logger.debug(
           { err },
           'Branch update failed due to reference not existing - will try to create',
@@ -1189,7 +1229,7 @@ export async function getBranchStatus(
   try {
     commitStatus = await getStatus(branchName);
   } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for deleted branches is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
       );
@@ -1248,10 +1288,7 @@ export async function getBranchStatus(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    if (
-      err.statusCode === 403 ||
-      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
-    ) {
+    if (isForbidden(err) || err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('No permission to view check runs');
     } else {
       logger.warn({ err }, 'Error retrieving check runs');
@@ -1272,8 +1309,10 @@ export async function getBranchStatus(
   ) {
     return 'red';
   }
+  const isCommitStatusOk =
+    commitStatus.state === 'success' || commitStatus.statuses.length === 0;
   if (
-    (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
+    isCommitStatusOk &&
     checkRuns.every((run) =>
       ['skipped', 'neutral', 'success'].includes(run.conclusion),
     )
@@ -1319,7 +1358,7 @@ export async function getBranchStatusCheck(
     }
     return null;
   } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for missing commits is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -1375,31 +1414,35 @@ export async function setBranchStatus({
 
 // Issue
 
-async function getIssues(): Promise<Issue[]> {
-  const result = await githubApi.queryRepoField<unknown>(
-    getIssuesQuery,
-    'issues',
-    {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-      },
-      readOnly: true,
+async function queryIssues(user?: string): Promise<unknown[]> {
+  return await githubApi.queryRepoField<unknown>(getIssuesQuery, 'issues', {
+    variables: {
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      ...(user && { user }),
     },
-  );
+    readOnly: true,
+  });
+}
 
-  // `filterBy: { createdBy }` does not match GitHub App bot logins on GitHub Enterprise Cloud,
-  // so the issues are filtered by author in code, like pull requests
-  const issues = config.ignorePrAuthor
-    ? result
-    : result.filter((issue) => {
-        const login =
-          GithubGraphqlIssueAuthor.safeParse(issue).data?.author?.login;
-        return login === config.renovateUsername;
-      });
+async function getIssues(): Promise<Issue[]> {
+  const user = config.ignorePrAuthor ? undefined : config.renovateUsername;
+  let result = await queryIssues(user);
 
-  logger.debug(`Retrieved ${issues.length} issues`);
-  return Issue.array().parse(issues);
+  // `filterBy: { createdBy }` does not match GitHub App bot logins on GitHub
+  // Enterprise Cloud, so retry without it and match the author in code.
+  // GraphQL returns the login without the `[bot]` suffix.
+  if (result.length === 0 && user?.endsWith('[bot]')) {
+    const login = user.replace(/\[bot\]$/, '');
+    result = (await queryIssues()).filter(
+      (issue) =>
+        GithubGraphqlIssueAuthor.safeParse(issue).data?.author?.login ===
+        login,
+    );
+  }
+
+  logger.debug(`Retrieved ${result.length} issues`);
+  return Issue.array().parse(result);
 }
 
 export async function getIssueList(): Promise<Issue[]> {
@@ -1434,7 +1477,7 @@ export async function getIssue(number: number): Promise<Issue | null> {
     return issue;
   } catch (err) {
     logger.debug({ err, number }, 'Error getting issue');
-    if (err.response?.statusCode === 410) {
+    if (isGone(err)) {
       logger.debug(`Issue #${number} has been deleted`);
       GithubIssueCache.deleteIssue(number);
     }
@@ -1465,8 +1508,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
     );
     GithubIssueCache.updateIssue(closedIssue);
   } catch (err) {
-    const statusCode = err.response?.statusCode;
-    if (statusCode === 404 || statusCode === 410) {
+    if (isNotFound(err) || isGone(err)) {
       logger.debug(
         `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
       );
@@ -1477,6 +1519,18 @@ async function closeIssue(issueNumber: number): Promise<void> {
   }
 }
 
+async function pinIssue(issueId: string): Promise<void> {
+  logger.debug(`pinIssue(${issueId})`);
+  const res = await githubApi.requestGraphql(pinIssueMutation, {
+    variables: { issueId },
+  });
+  if (res?.errors) {
+    logger.debug({ errors: res.errors }, 'Issue could not be pinned');
+    return;
+  }
+  logger.debug('Issue pinned');
+}
+
 export async function ensureIssue({
   title,
   reuseTitle,
@@ -1484,6 +1538,7 @@ export async function ensureIssue({
   labels,
   once = false,
   shouldReOpen = true,
+  shouldPin = false,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   /* v8 ignore next -- specs initialize repos with issues enabled */
@@ -1552,6 +1607,9 @@ export async function ensureIssue({
         );
         GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
+        if (shouldPin && updatedIssue.node_id) {
+          await pinIssue(updatedIssue.node_id);
+        }
         return 'updated';
       }
     }
@@ -1569,6 +1627,9 @@ export async function ensureIssue({
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
+    if (shouldPin && createdIssue.node_id) {
+      await pinIssue(createdIssue.node_id);
+    }
     return 'created';
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
@@ -1653,7 +1714,7 @@ export async function addAssignees(
       GithubIssueCache.updateIssue(updatedIssue);
       return;
     } catch (err) {
-      if (err.statusCode !== 404) {
+      if (!isNotFound(err)) {
         throw err;
       }
       lastErr = err;
@@ -1778,7 +1839,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* v8 ignore next -- comment-fetch 404s are wrapped as ExternalHostError, not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
     }
@@ -1899,10 +1960,7 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  if (
-    isGithubEnterpriseServer(platformConfig.host) &&
-    semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
-  ) {
+  if (isGhesVersionSatisfying('<3.3.0')) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
@@ -1919,11 +1977,10 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod =
-      (
-        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
-        config.mergeMethod
-      )?.toUpperCase() || 'MERGE';
+    const configuredMergeMethod =
+      mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+      config.mergeMethod;
+    const mergeMethod = configuredMergeMethod?.toUpperCase() || 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
@@ -2040,10 +2097,7 @@ export async function isBranchMergeQueueEnabled(
   }
 
   // TODO #22198
-  if (
-    isGithubEnterpriseServer(platformConfig.host) &&
-    semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
-  ) {
+  if (isGhesVersionSatisfying('<3.12.0')) {
     // Merge queues are only supported on GHES >=3.12.0
     config.mergeQueueEnabled[baseBranch] = false;
     return false;
@@ -2171,6 +2225,91 @@ export async function updatePr({
   }
 }
 
+export async function getPrAutoMergeState(
+  prNo: number,
+): Promise<GithubPullRequestAutoMergeState | null> {
+  const res = await githubApi.requestGraphql<{
+    repository: { pullRequest: unknown };
+  }>(prAutoMergeStateQuery, {
+    variables: {
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      number: prNo,
+    },
+    readOnly: true,
+    count: 1,
+  });
+  if (res?.errors) {
+    logger.debug(
+      { prNo, errors: res.errors },
+      'Failed to fetch PR auto-merge state',
+    );
+    return null;
+  }
+
+  const pr = GithubPullRequestAutoMergeState.safeParse(
+    res?.data?.repository?.pullRequest,
+  );
+  if (!pr.success) {
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge state');
+    return null;
+  }
+  return pr.data;
+}
+
+export async function cancelPlatformAutomerge({
+  number: prNo,
+  enabledBy,
+}: CancelPlatformAutomergeConfig): Promise<boolean> {
+  const pr = await getPrAutoMergeState(prNo);
+  if (!pr) {
+    return false;
+  }
+  if (pr.autoMergeRequest === null) {
+    return true;
+  }
+  const actor = pr.autoMergeRequest.enabledBy;
+  // GraphQL omits the REST login's [bot] suffix. Use actor type to avoid matching a user with the same name.
+  const login =
+    actor?.__typename === 'Bot' ? `${actor.login}[bot]` : actor?.login;
+  if (login?.toLowerCase() !== enabledBy.toLowerCase()) {
+    logger.debug(
+      { prNo },
+      'PR auto-merge actor does not match cancellation filter',
+    );
+    return false;
+  }
+
+  const cancellation = await githubApi.requestGraphql<{
+    disablePullRequestAutoMerge: { pullRequest: unknown };
+  }>(disableAutoMergeMutation, {
+    variables: { pullRequestId: pr.id },
+    count: 1,
+  });
+  if (cancellation?.errors) {
+    logger.debug(
+      { prNo, errors: cancellation.errors },
+      'Failed to cancel PR auto-merge',
+    );
+    // Another actor may have disabled auto-merge after the state query.
+    const current = await getPrAutoMergeState(prNo);
+    return current?.id === pr.id && current.autoMergeRequest === null;
+  }
+
+  const disabledPr = GithubPullRequestAutoMergeState.safeParse(
+    cancellation?.data?.disablePullRequestAutoMerge?.pullRequest,
+  );
+  if (
+    !disabledPr.success ||
+    disabledPr.data.id !== pr.id ||
+    disabledPr.data.autoMergeRequest !== null
+  ) {
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
+    return false;
+  }
+  return true;
+}
+
 export async function reattemptPlatformAutomerge({
   number,
   platformPrOptions,
@@ -2236,10 +2375,13 @@ export async function mergePr({
   if (await directMergePr(prNo, strategy)) {
     return true;
   }
-  if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
-    // The direct merge was refused - fall back to adding the PR to the merge
-    // queue, so it must not be cached as merged nor may its branch be deleted
-    return tryEnqueuePr(pr);
+  if (pr?.targetBranch) {
+    const mergeQueueEnabled = await isBranchMergeQueueEnabled(pr.targetBranch);
+    if (mergeQueueEnabled) {
+      // The direct merge was refused - fall back to adding the PR to the merge
+      // queue, so it must not be cached as merged nor may its branch be deleted
+      return tryEnqueuePr(pr);
+    }
   }
   return false;
 }
@@ -2272,7 +2414,7 @@ async function directMergePr(
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
-      if (err.statusCode === 404 || err.statusCode === 405) {
+      if (isNotFound(err) || isMethodNotAllowed(err)) {
         const body = err.response?.body;
         if (
           isNonEmptyString(body?.message) &&
@@ -2286,11 +2428,11 @@ async function directMergePr(
         }
         if (
           isNonEmptyString(body?.message) &&
-          (body.message.includes('approving review') ||
-            body.message.includes('code owner review') ||
-            body.message.includes(
-              'New changes require approval from someone other than the last pusher',
-            ))
+          [
+            'approving review',
+            'code owner review',
+            'New changes require approval from someone other than the last pusher',
+          ].some((text) => body.message.includes(text))
         ) {
           logger.debug(
             { response: body },
@@ -2372,6 +2514,16 @@ export function massageMarkdown(input: string): string {
     .replaceAll(warningAlertRegex, '> [!WARNING]\n')
     .replaceAll(cautionAlertRegex, '> [!CAUTION]\n')
     .replaceAll(importantAlertRegex, '> [!IMPORTANT]\n');
+}
+
+/**
+ * Replaces github.com links to discussions, issues and pull requests in a commit message with `redirect.github.com` links, so that the linked items do not show a reference to the commit.
+ */
+export function massageCommitMessage(message: string): string {
+  if (platformConfig.host.type !== 'github') {
+    return message;
+  }
+  return massageCommitMessageLinks(message);
 }
 
 export function maxBodyLength(): number {

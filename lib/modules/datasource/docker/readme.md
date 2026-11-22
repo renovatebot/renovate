@@ -7,7 +7,7 @@ The [Label Schema](https://label-schema.org/) is superseded by OCI annotations, 
 
 If you maintain a Docker image and want Renovate to find your changelogs, add a `org.opencontainers.image.source` field to your Dockerfile.
 The link must point to your GitHub or GitLab repository.
-Here's an example from our `renovate/renovate` Dockerfile:
+Here is an example from our `renovate/renovate` Dockerfile:
 
 ```dockerfile
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"

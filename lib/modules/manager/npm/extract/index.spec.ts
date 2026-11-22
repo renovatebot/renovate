@@ -2,8 +2,9 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { ExtractConfig } from '../../types.ts';
+import type { ExtractConfig, NpmrcPackageFile } from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
+import type { NpmManagerData } from '../types.ts';
 import * as npmExtract from './index.ts';
 import { postExtract } from './post/index.ts';
 
@@ -232,6 +233,27 @@ describe('modules/manager/npm/extract/index', () => {
         { ...defaultExtractConfig, npmrc: 'config-npmrc' },
       );
       expect(res?.npmrc).toBe('config-npmrc');
+    });
+
+    it('omits npmrc if the .npmrc cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, configFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && configFile === '.npmrc') {
+            return Promise.resolve('.npmrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockResolvedValue(null);
+
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { ...defaultExtractConfig, npmrc: 'config-npmrc' },
+      );
+
+      expect(res).not.toHaveProperty('npmrc');
+      expect(res?.managerData?.npmrcFileName).toBe('.npmrc');
     });
 
     it('uses config.npmrc if .npmrc does exist but npmrcMerge=false', async () => {
@@ -1793,7 +1815,6 @@ describe('modules/manager/npm/extract/index', () => {
             yarnLock: undefined,
             yarnZeroInstall: false,
           },
-          npmrc: undefined,
           packageFile: 'package.json',
           packageFileVersion: '1.0.0',
           skipInstalls: true,
@@ -2033,7 +2054,26 @@ describe('modules/manager/npm/extract/index', () => {
 
   describe('.postExtract()', () => {
     it('runs', async () => {
-      await expect(postExtract([])).resolves.not.toThrow();
+      await expect(postExtract([], {})).resolves.not.toThrow();
+    });
+
+    it('adds the minimum release age of the merged .npmrc', async () => {
+      const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [
+        {
+          packageFile: 'package.json',
+          deps: [],
+          npmrc: 'min-release-age=3\n',
+          managerData: { npmrcFileName: '.npmrc' },
+        },
+      ];
+
+      await postExtract(packageFiles, {});
+
+      expect(packageFiles[0]).toMatchObject({
+        packageRules: [
+          { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '3 days' },
+        ],
+      });
     });
   });
 });

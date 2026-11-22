@@ -6,5 +6,5 @@ It uses nix packages sourced from the devbox package registry.
 
 ### Package versioning
 
-Some packages in the devbox registry don't follow the basic versioning we have set up.
+Some packages in the devbox registry do not follow the basic versioning we have set up.
 We have allowed for defining an versioning API override within `tool-versioning.ts`.

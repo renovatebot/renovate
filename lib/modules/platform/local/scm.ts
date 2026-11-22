@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { glob } from 'glob';
 import type { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
@@ -50,10 +51,12 @@ export class LocalFs implements PlatformScm {
       fileList = stdout.split('\n');
     } catch {
       logger.debug('Could not get file list using git, using glob instead');
-      fileList ??= await glob('**', {
-        dot: true,
-        nodir: true,
-      });
+      if (isNullOrUndefined(fileList)) {
+        fileList = await glob('**', {
+          dot: true,
+          nodir: true,
+        });
+      }
     }
 
     return fileList;

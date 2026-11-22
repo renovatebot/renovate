@@ -78,11 +78,8 @@ export function getDetails(rec: BunyanRecord): string {
   const recFiltered = { ...rec };
   delete recFiltered.module;
   Object.keys(recFiltered).forEach((key) => {
-    if (
-      key === 'logContext' ||
-      bunyanFields.includes(key) ||
-      (metaFields.includes(key) && isString(recFiltered[key]))
-    ) {
+    const isMetaString = metaFields.includes(key) && isString(recFiltered[key]);
+    if (key === 'logContext' || bunyanFields.includes(key) || isMetaString) {
       delete recFiltered[key];
     }
   });

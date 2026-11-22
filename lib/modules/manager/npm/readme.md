@@ -8,7 +8,7 @@ This is less efficient than running npm once, but has been known to fix most pro
 Renovate already runs `npm install` twice during lock file maintenance, because regenerating a lock file from scratch is known to need a second pass.
 
 If this npm bug remains unfixed, and it becomes too frequent for Renovate users, then we may need to modify Renovate to do this by default.
-Please post feedback to the Renovate repository "Discussions" if you're needing to use this feature frequently or widely.
+Please post feedback to the Renovate repository "Discussions" if you are needing to use this feature frequently or widely.
 
 ### Yarn
 

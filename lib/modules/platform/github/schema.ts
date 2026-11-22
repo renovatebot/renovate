@@ -139,6 +139,25 @@ export const GithubBranchProtection = z.object({
 });
 export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;
 
+export const GithubPullRequestAutoMergeState = z.object({
+  id: z.string().min(1),
+  autoMergeRequest: z
+    .object({
+      commitHeadline: z.string().nullable(),
+      commitBody: z.string().nullable(),
+      enabledBy: z
+        .object({
+          __typename: z.string(),
+          login: z.string().min(1),
+        })
+        .nullable(),
+    })
+    .nullable(),
+});
+export type GithubPullRequestAutoMergeState = z.infer<
+  typeof GithubPullRequestAutoMergeState
+>;
+
 const GithubRulesetRule = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('non_fast_forward'),
@@ -158,34 +177,46 @@ const GithubRulesetRule = z.discriminatedUnion('type', [
 export const GithubBranchRulesets = LooseArray(GithubRulesetRule);
 export type GithubBranchRulesets = z.infer<typeof GithubBranchRulesets>;
 
+interface TransformedIssue {
+  number: number;
+  state: string;
+  title: string;
+  body: string;
+  lastModified: string;
+  node_id?: string;
+}
+
 const GithubIssueBase = z.object({
   number: z.number(),
   state: z.string().transform((val) => val.toLowerCase()),
   title: z.string(),
   body: z.string(),
+  node_id: z.string().optional(),
 });
 
 const GithubGraphqlIssue = GithubIssueBase.extend({
+  id: z.string().optional(),
   updatedAt: z.string(),
-}).transform((issue) => {
+}).transform((issue): TransformedIssue => {
   const lastModified = issue.updatedAt;
-  const { number, state, title, body } = issue;
-  return { number, state, title, body, lastModified };
+  const { number, state, title, body, id } = issue;
+  const node_id = id ?? issue.node_id;
+  return { number, state, title, body, lastModified, node_id };
 });
 
 const GithubRestIssue = GithubIssueBase.extend({
   updated_at: z.string(),
-}).transform((issue) => {
+}).transform((issue): TransformedIssue => {
   const lastModified = issue.updated_at;
-  const { number, state, title, body } = issue;
-  return { number, state, title, body, lastModified };
+  const { number, state, title, body, node_id } = issue;
+  return { number, state, title, body, lastModified, node_id };
 });
 
 /**
  * The author of an issue node returned by the GraphQL API.
  *
- * Issues are filtered by author in code, because `filterBy: { createdBy }`
- * does not match GitHub App bot logins on every GitHub flavour.
+ * Only used by the fallback for GitHub App logins, where
+ * `filterBy: { createdBy }` returns nothing on GitHub Enterprise Cloud.
  */
 export const GithubGraphqlIssueAuthor = z.object({
   author: Nullish(z.object({ login: z.string() })),

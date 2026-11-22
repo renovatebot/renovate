@@ -28,6 +28,7 @@ query($owner: String!, $name: String!, $user: String) {
       first: 5
     ) {
       nodes {
+        id
         number
         state
         title
@@ -39,16 +40,54 @@ query($owner: String!, $name: String!, $user: String) {
 }
 `;
 
+export const prAutoMergeStateQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
+export const disableAutoMergeMutation = `
+mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId }) {
+    pullRequest {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
 export const getIssuesQuery = `
 query(
   $owner: String!,
   $name: String!,
+  $user: String,
   $count: Int,
   $cursor: String
 ) {
   repository(owner: $owner, name: $name) {
     issues(
       orderBy: { field: UPDATED_AT, direction: DESC },
+      filterBy: { createdBy: $user },
       first: $count,
       after: $cursor
     ) {
@@ -57,6 +96,7 @@ query(
         hasNextPage
       }
       nodes {
+        id
         number
         state
         title
@@ -124,6 +164,38 @@ mutation EnablePullRequestAutoMerge(
     }
   ) {
     pullRequest {
+      number
+    }
+  }
+}
+`;
+
+export const pinIssueMutation = `
+mutation PinIssue(
+  $issueId: ID!,
+) {
+  pinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
+      number
+    }
+  }
+}
+`;
+
+export const unpinIssueMutation = `
+mutation UnpinIssue(
+  $issueId: ID!,
+) {
+  unpinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
       number
     }
   }

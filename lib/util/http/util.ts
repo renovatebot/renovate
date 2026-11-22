@@ -12,8 +12,14 @@ export function copyResponse<T>(
 
   if (deep) {
     res.headers = clone(headers);
-    res.body =
-      body instanceof Uint8Array ? (body.slice() as T) : clone<T>(body);
+    if (Buffer.isBuffer(body)) {
+      // Buffer#slice returns a view, so copy it explicitly
+      res.body = Buffer.from(body) as T;
+    } else if (body instanceof Uint8Array) {
+      res.body = body.slice() as T;
+    } else {
+      res.body = clone<T>(body);
+    }
   }
 
   if (cached) {
