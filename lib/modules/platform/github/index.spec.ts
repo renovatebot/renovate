@@ -3056,41 +3056,48 @@ describe('modules/platform/github/index', () => {
     });
 
     describe('GitHub App author fallback', () => {
-      const node = (
+      function node(
         number: number,
         updatedAt: string,
         author: { login: string } | null,
-      ) => ({
-        number,
-        state: 'open',
-        title: 'title-2',
-        body: `body-${number}`,
-        updatedAt,
-        author,
-      });
-      const issuesResponse = (nodes: unknown[]) => ({
-        data: {
-          repository: {
-            issues: {
-              pageInfo: {
-                startCursor: null,
-                hasNextPage: false,
-                endCursor: null,
+      ) {
+        return {
+          number,
+          state: 'open',
+          title: 'title-2',
+          body: `body-${number}`,
+          updatedAt,
+          author,
+        };
+      }
+      function issuesResponse(nodes: unknown[]) {
+        return {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes,
               },
-              nodes,
             },
           },
-        },
-      });
-      const restIssue = (number: number, updated_at: string) => ({
-        number,
-        state: 'open',
-        title: 'title-2',
-        body: `body-${number}`,
-        updated_at,
-      });
-      const hasUser = (body: { variables: Record<string, unknown> }) =>
-        'user' in body.variables;
+        };
+      }
+      function restIssue(number: number, updated_at: string) {
+        return {
+          number,
+          state: 'open',
+          title: 'title-2',
+          body: `body-${number}`,
+          updated_at,
+        };
+      }
+      function hasUser(body: { variables: Record<string, unknown> }) {
+        return 'user' in body.variables;
+      }
 
       it('refetches without the filter and matches the author in code', async () => {
         const scope = httpMock.scope(githubApiHost);

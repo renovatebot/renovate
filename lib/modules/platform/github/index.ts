@@ -1433,11 +1433,9 @@ async function getIssues(): Promise<Issue[]> {
   // Enterprise Cloud, so retry without it and match the author in code.
   // GraphQL returns the login without the `[bot]` suffix.
   if (result.length === 0 && user?.endsWith('[bot]')) {
-    const login = user.replace(/\[bot\]$/, '');
+    const login = user.replace(regEx(/\[bot\]$/), '');
     result = (await queryIssues()).filter(
-      (issue) =>
-        GithubGraphqlIssueAuthor.safeParse(issue).data?.author?.login ===
-        login,
+      (issue) => GithubGraphqlIssueAuthor.parse(issue).author?.login === login,
     );
   }
 
