@@ -1,9 +1,6 @@
 import { logger } from '../../../../logger/index.ts';
-import {
-  getSiblingFileName,
-  localPathExists,
-} from '../../../../util/fs/index.ts';
 import { updatePixiLockfile } from '../../pixi/lockfile.ts';
+import { findPixiLockFile } from '../../pixi/workspace.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -30,9 +27,9 @@ export class PixiProcessor extends BasePyProjectProcessor {
     _project: PyProject,
     packageFile: string,
   ): Promise<string[]> {
-    const lockfileName = getSiblingFileName(packageFile, 'pixi.lock');
-    if (await localPathExists(lockfileName)) {
-      return [lockfileName];
+    const lockFile = await findPixiLockFile(packageFile);
+    if (lockFile) {
+      return [lockFile.lockFileName];
     }
     logger.debug({ packageFile }, 'No pixi.lock found');
     return [];
@@ -42,16 +39,32 @@ export class PixiProcessor extends BasePyProjectProcessor {
     { config, updatedDeps, packageFileName }: UpdateArtifact,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
-    const constraint = await resolveToolConstraint(
-      config,
-      'pixi',
-      () => project.tool?.pixi?.['requires-pixi'],
+    const lockFile = await findPixiLockFile(packageFileName);
+    if (!lockFile) {
+      logger.debug({ packageFileName }, 'No pixi.lock found');
+      return null;
+    }
+
+    // The `pixi` manager maintains the lock file of the parent workspace.
+    if (lockFile.isParent && config.isLockFileMaintenance) {
+      logger.debug(
+        { packageFileName },
+        'Skipping lock file maintenance of parent pixi workspace',
+      );
+      return null;
+    }
+
+    const constraint = await resolveToolConstraint(config, 'pixi', () =>
+      lockFile.isParent
+        ? lockFile.requiresPixi
+        : project.tool?.pixi?.['requires-pixi'],
     );
 
     // The `pep621` manager has already written the updated package file, so
     // `newPackageFileContent` is intentionally left unset here.
     return await updatePixiLockfile({
       packageFileName,
+      lockFileName: lockFile.lockFileName,
       updatedDeps,
       isLockFileMaintenance: config.isLockFileMaintenance,
       constraint,
