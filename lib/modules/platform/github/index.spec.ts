@@ -3147,6 +3147,23 @@ describe('modules/platform/github/index', () => {
         expect(res).toMatchObject({ number: 2 });
       });
 
+      it('does not refetch when ignorePrAuthor is set', async () => {
+        GlobalConfig.set({ ignorePrAuthor: true });
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'my-app[bot]',
+        });
+        scope
+          .post('/graphql', (body) => !hasUser(body))
+          .reply(200, issuesResponse([]));
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toBeNull();
+      });
+
       it('does not refetch for a username without the bot suffix', async () => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo');
