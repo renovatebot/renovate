@@ -26,7 +26,7 @@ workflows:
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
         - 'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532'
         - 'slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa'
-        - 'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd'
+        - 'zizmorcore/zizmor-action@bd12b495c90993a4301c73398142281a61499af3'
     '.github/workflows/cancel-stale-merge-queue-workflows.yml':
         - 'pierreraffa/cancel-previous-runs-action@133ec2d94c3dfeb83959ffc3c73640633044bd89'
     '.github/workflows/check-commit-messages.yml':
@@ -184,9 +184,9 @@ dependencies:
         commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
         owner_id: 9919
         repo_id: 259445878
-    'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
-        ref: 'v4.39.1'
-        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+    'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066':
+        ref: 'v4.39.3'
+        commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
     'hkusu/review-assign-action@5bee595fdb9765d4a0bd35724b6302fa15569158':
@@ -241,10 +241,10 @@ dependencies:
         commit: 'sha1-0bc3581177d9a0f8d555e07689384b376528e8fa'
         owner_id: 6962987
         repo_id: 306439799
-    'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd':
-        ref: 'v0.8.1'
-        commit: 'sha1-45d7276c9ca790aabd705e31ca99c6185c3e76dd'
+    'zizmorcore/zizmor-action@bd12b495c90993a4301c73398142281a61499af3':
+        ref: 'v0.9.0'
+        commit: 'sha1-bd12b495c90993a4301c73398142281a61499af3'
         owner_id: 210636713
         repo_id: 985558803
         uses:
-            - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+            - 'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066'
