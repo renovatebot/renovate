@@ -332,7 +332,7 @@
     "oxlint": "1.93.0",
     "oxlint-tsgolint": "7.0.2007",
     "rimraf": "6.1.4",
-    "rumdl": "0.2.78",
+    "rumdl": "0.3.4",
     "semantic-release": "25.0.9",
     "tmp-promise": "3.0.3",
     "tsdown": "0.23.7",
