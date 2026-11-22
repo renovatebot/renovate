@@ -334,7 +334,5 @@ module.exports = {
 };
 ```
 
-<!-- markdownlint-disable MD029 -->
-
 3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
 4. Wait for your breakpoint to be triggered

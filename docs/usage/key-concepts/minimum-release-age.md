@@ -586,8 +586,6 @@ Depending on your manager, datasource and the given package(s), it may be that s
   warning) rather than holding them back indefinitely.
 -->
 
-<!-- markdownlint-disable MD060 -->
-
 | Update Type           | Supports `minimumReleaseAge`? | Notes                                                                                                     |
 | --------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `major`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
@@ -768,8 +766,6 @@ The table below lists every datasource Renovate supports, and whether it provide
 ### Which registries support release timestamps?
 
 The below is a non-exhaustive list of public registries which support release timestamps:
-
-<!-- markdownlint-disable MD060 -->
 
 | Datasource           | Registry URL                                       | Supported | Notes                                                            |
 | -------------------- | -------------------------------------------------- | --------- | ---------------------------------------------------------------- |
@@ -1074,8 +1070,6 @@ You can see exact examples below:
 #### Maven datasource
 
 For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
-
-<!-- markdownlint-disable MD046 -->
 
 If your custom Maven source registry is **pull-through** and does _not_ support the `last-modified` header, like GAR (Google Artifact Registry's Maven implementation) then you can extend the Maven source registry URL with `https://repo1.maven.org/maven2` as the first item. Then the `currentVersionTimestamp` via `last-modified` will be taken from Maven central for public dependencies.
 

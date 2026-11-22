@@ -10,6 +10,8 @@ disable = [
   "MD041", # Allow documents that do not start with a top-level heading.
   "MD057", # Allow links to documentation that tools/docs generates at build time.
 ]
+# Fail on disable comments that no longer suppress anything.
+extend-enable = ["MD087"]
 include = ["**/*.md"]
 exclude = [
   "**/__fixtures__/*",

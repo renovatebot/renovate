@@ -12,7 +12,6 @@ Mend Renovate CLI banner
 
 ## Why use Renovate?
 
-<!-- markdownlint-disable list-marker-space -->
 <!-- prettier-ignore-start -->
 
 <div class="grid cards" markdown>
