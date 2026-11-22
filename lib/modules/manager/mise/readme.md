@@ -203,6 +203,12 @@ Even if the tool does not use the `asdf` backend in the registry, the short name
 
 This may no longer be necessary now we automagically add support via the tools that the mise registry advertises.
 
+### Tool aliases
+
+Renovate resolves tools through backend aliases in [`[tool_alias]`](https://mise.jdx.dev/dev-tools/aliases.html), and the deprecated `[alias]` section.
+For example, with `renovate = "npm:renovate"` in `[tool_alias]`, Renovate looks up `renovate` in `[tools]` on npm.
+Version aliases, like `[tool_alias.node.versions]`, are not resolved.
+
 ### Backends support
 
 Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev/dev-tools/backends/):

@@ -44,7 +44,12 @@ import {
 import { extractGitReference } from './git-reference.ts';
 import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
-import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
+import type {
+  MiseFile,
+  MiseTool,
+  MiseToolOptions,
+  MiseToolValue,
+} from './schema.ts';
 import { MiseLockFile } from './schema.ts';
 import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
 import {
@@ -86,6 +91,7 @@ export async function extractPackageFile(
     return null;
   }
 
+  const toolAliases = getToolAliases(misefile);
   const toolEntries: [string, MiseTool, string][] = [];
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
@@ -139,7 +145,7 @@ export async function extractPackageFile(
   }
 
   const toolDeps = toolEntries.map(([name, toolData, depType]) =>
-    extractToolEntry(name, toolData, depType, lockFileData),
+    extractToolEntry(name, toolData, depType, lockFileData, toolAliases),
   );
   const deps = [...toolDeps, ...taskFileDeps, ...includeDeps];
   const result: PackageFileContent = { deps };
@@ -486,20 +492,38 @@ function extractSelectorLockedDependency(
   };
 }
 
+/**
+ * Returns the backend aliases, e.g. `renovate = "npm:renovate"` in `[tool_alias]`.
+ */
+function getToolAliases(misefile: MiseFile): Record<string, string> {
+  const aliases: Record<string, string> = {};
+  for (const [name, value] of Object.entries({
+    ...misefile.alias,
+    ...misefile.tool_alias,
+  })) {
+    if (isNonEmptyString(value)) {
+      aliases[name] = value.trim();
+    }
+  }
+  return aliases;
+}
+
 function extractToolEntry(
   name: string,
   toolData: MiseTool,
   depType: string,
   lockFileData?: MiseLockFile,
+  toolAliases: Record<string, string> = {},
 ): MiseDependency {
   const toolValue = getPrimaryToolValue(toolData);
   const version = parseVersion(toolValue);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
     name.trim(),
   )!.groups!;
-  const delimiterIndex = depName.indexOf(':');
-  const backend = depName.substring(0, delimiterIndex);
-  const toolName = depName.substring(delimiterIndex + 1);
+  const toolSpec = toolAliases[depName] ?? depName;
+  const delimiterIndex = toolSpec.indexOf(':');
+  const backend = toolSpec.substring(0, delimiterIndex);
+  const toolName = toolSpec.substring(delimiterIndex + 1);
   const options = parseOptions(
     optionsInName,
     isObject(toolValue) ? toolValue : {},
