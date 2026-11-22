@@ -4,7 +4,6 @@
 # Disable rules individually when they conflict with this repository's style.
 disable = [
   "MD013", # Allow long lines without enforcing a line-length limit.
-  "MD025", # Allow multiple top-level headings in a document.
   "MD033", # Allow inline HTML.
   "MD036", # Allow emphasis where a heading might otherwise be expected.
   "MD040", # Allow fenced code blocks without a language tag.
@@ -37,6 +36,10 @@ flavor = "standard"
 [MD010]
 # Check tabs inside code blocks as well as prose.
 code-blocks = true
+
+[MD025]
+# Page titles live in the YAML frontmatter, not in a second level 1 heading.
+front-matter-title = ""
 
 [MD027]
 # Check spacing in blockquoted list items as well as other blockquote content.
