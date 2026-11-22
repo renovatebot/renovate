@@ -1,12 +1,6 @@
-import type { BlockOutput, PreToolUseDenyOutput } from './schemas.ts';
-
-export function block(reason: string): void {
-  const output: BlockOutput = { decision: 'block', reason };
-  console.log(JSON.stringify(output));
-}
-
+// https://code.claude.com/docs/en/hooks#pretooluse
 export function deny(reason: string): void {
-  const output: PreToolUseDenyOutput = {
+  const output = {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',

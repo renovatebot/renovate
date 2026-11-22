@@ -8,7 +8,7 @@ vi.mock('./utils/stdin.ts', () => ({ readStdin }));
 const { getRepoRoot } = vi.hoisted(() => ({
   getRepoRoot: vi.fn<(dir?: string) => Promise<string | null>>(),
 }));
-vi.mock('./utils/git.ts', () => ({ getRepoRoot, getChangedFiles: vi.fn() }));
+vi.mock('./utils/git.ts', () => ({ getRepoRoot }));
 
 const { provision } = vi.hoisted(() => ({ provision: vi.fn() }));
 vi.mock('./utils/provision.ts', () => ({ provision }));

@@ -59,12 +59,12 @@
     "test-e2e:npm": "cd test/e2e && npm install --dry-run --ignore-scripts --no-package-lock --no-audit --no-fund",
     "test-e2e:install": "cd test/e2e && pnpm install --ignore-workspace --ignore-scripts --no-lockfile",
     "test-e2e:run": "cd test/e2e && pnpm test",
-    "test-schema": "run-s create-json-schema && node tools/validate-schema.ts",
+    "test-schema": "node --run create-json-schema && node tools/validate-schema.ts",
     "test:docs": "node --test tools/docs/test/**/*.mjs",
     "schedule-test-shards": "SCHEDULE_TEST_SHARDS=true node tools/test-shards.ts",
     "tsc": "tsc",
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
-    "type-check:tsrs": "run-s 'generate:*' && tsrs --noEmit",
+    "type-check:tsrs": "node --run generate:imports && tsrs --noEmit",
     "update-static-data": "node tools/static-data/update.ts"
   },
   "repository": {

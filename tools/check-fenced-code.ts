@@ -268,7 +268,11 @@ void (async () => {
     ],
   });
 
-  const files = await glob(markdownGlob);
+  const args = process.argv.slice(2);
+  let files = args;
+  if (args.length === 0) {
+    files = await glob(markdownGlob);
+  }
 
   for (const file of files) {
     await processFile(file);
