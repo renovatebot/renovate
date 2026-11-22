@@ -726,6 +726,11 @@ async function checkForPendingVersions(
     if (!upgradeInfo) {
       continue;
     }
+    // a skipped dep can share its name with the upgraded one (e.g. a Terraform
+    // `provider` block next to its `required_providers` entry) and has no version
+    if (dep.skipReason) {
+      continue;
+    }
     const resolvedVersion =
       dep.lockedVersion ??
       dep.newVersion ??
