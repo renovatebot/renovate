@@ -698,6 +698,32 @@ describe('util/git/auth', () => {
       });
     });
 
+    it('prefers a readonly GitHub token for git authentication', () => {
+      add({
+        matchHost: 'api.github.com',
+        readOnly: true,
+        token: 'readonly-token',
+      });
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'write-token',
+      });
+
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:readonly-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:readonly-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:readonly-token@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
+
     it('appends authentication to the supplied environment', () => {
       add({
         hostType: 'github',

@@ -41,7 +41,9 @@ function needsRelock(version: string | undefined): boolean {
 }
 
 function findToken(url: string): string | undefined {
-  return findGithubToken(hostRules.find({ hostType: 'github', url }));
+  return findGithubToken(
+    hostRules.find({ hostType: 'github', url, readOnly: true }),
+  );
 }
 
 /**
