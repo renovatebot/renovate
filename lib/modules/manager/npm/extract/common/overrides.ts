@@ -1,9 +1,17 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
+import { regEx } from '../../../../../util/regex.ts';
 import type { PackageDependency } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import type { OverrideDependency } from '../types.ts';
 import { extractDependency } from './dependency.ts';
 import { setNodeCommitTopic } from './node.ts';
+
+/**
+ * npm override keys may carry a version selector, e.g. `foo@^2` or `@scope/foo@1.0.0`
+ */
+export function getOverridePackageName(key: string): string {
+  return key.replace(regEx(/^(?<name>.[^@]*)@.*$/), '$<name>');
+}
 
 /**
  * Used when there is a json object as a value in overrides block.
@@ -24,15 +32,19 @@ export function extractOverrideDepsRec(
       // special handling for "." override dependency name
       // "." means the constraint is applied to the parent dep
       const currDepName = overrideName === '.' ? parents.at(-1)! : overrideName;
+      const packageName = getOverridePackageName(currDepName);
       const dep: PackageDependency<NpmManagerData> = {
         depName: currDepName,
         depType: 'overrides',
         managerData: { parents: parents.slice() }, // set parents for dependency
       };
+      if (packageName !== currDepName) {
+        dep.packageName = packageName;
+      }
       setNodeCommitTopic(dep);
       deps.push({
         ...dep,
-        ...extractDependency('overrides', currDepName, versionValue),
+        ...extractDependency('overrides', packageName, versionValue),
       });
     } else {
       // versionValue is an object, run recursively.

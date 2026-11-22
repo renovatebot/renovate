@@ -23,7 +23,7 @@ import {
   parseDepName,
 } from './dependency.ts';
 import { setNodeCommitTopic } from './node.ts';
-import { extractOverrideDepsRec } from './overrides.ts';
+import { extractOverrideDepsRec, getOverridePackageName } from './overrides.ts';
 
 export function hasDevEnginesPackageManager(
   packageJson: Pick<NpmPackage, 'devEngines'>,
@@ -128,7 +128,14 @@ export function extractPackageJson(
               }
             }
           } else {
-            dep = { ...dep, ...extractDependency(depType, depName, val) };
+            const packageName =
+              depType === 'overrides'
+                ? getOverridePackageName(depName)
+                : depName;
+            if (packageName !== depName) {
+              dep.packageName = packageName;
+            }
+            dep = { ...dep, ...extractDependency(depType, packageName, val) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
