@@ -807,7 +807,7 @@ describe('modules/manager/npm/npmrc', () => {
       const [restored] = await restoreNpmrc(stripNpmrc([extracted]), config);
 
       expect(npmrc).toBeUndefined();
-      expect(restored.npmrc).toBeUndefined();
+      expect(restored).not.toHaveProperty('npmrc');
       expect(fs.readLocalFile).toHaveBeenNthCalledWith(2, '.npmrc', 'utf8');
     });
 
@@ -817,7 +817,7 @@ describe('modules/manager/npm/npmrc', () => {
 
       const [restored] = await restoreNpmrc(stripped, { npmrc: 'config' });
 
-      expect(restored.npmrc).toBeUndefined();
+      expect(restored).not.toHaveProperty('npmrc');
     });
 
     it('restoreNpmrc leaves the package files extracted without npmrc without one', async () => {

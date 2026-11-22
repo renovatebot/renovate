@@ -12,7 +12,7 @@ import { keepAliveAgents } from './keep-alive.ts';
 import type { GotOptions } from './types.ts';
 
 export type HostRulesGotOptions = Pick<
-  GotOptions & InternalHttpOptions,
+  GotOptions & Omit<InternalHttpOptions, 'headers'>,
   | 'hostType'
   | 'noAuth'
   | 'headers'

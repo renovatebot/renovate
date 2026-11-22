@@ -52,7 +52,7 @@ export async function extractPackageFile(
 
       while (
         lineNumber < lines.length &&
-        (trimGroupLine ? groupLine.trim() !== 'end' : groupLine !== 'end')
+        (trimGroupLine ? groupLine.trim() : groupLine) !== 'end'
       ) {
         lineNumber += 1;
         groupLine = lines[lineNumber];
@@ -65,7 +65,7 @@ export async function extractPackageFile(
           );
           groupLine = 'end';
         }
-        if (trimGroupLine ? groupLine.trim() !== 'end' : groupLine !== 'end') {
+        if ((trimGroupLine ? groupLine.trim() : groupLine) !== 'end') {
           groupContent += formatContent(groupLine);
         }
       }

@@ -1,4 +1,5 @@
-import { isNonEmptyArray, isTruthy } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
+import { getManagerConfig } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
@@ -152,6 +153,28 @@ export function isCacheExtractValid(
   return true;
 }
 
+/**
+ * Removes the `packageRules` which managers extracted from the package manager's own configuration from the package files of each manager whose config does not enable `minimumReleaseAgePackageManagerSync`.
+ */
+function dropExtractedPackageRules(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>,
+): void {
+  for (const [manager, managerPackageFiles] of Object.entries(
+    coerceObject(packageFiles),
+  )) {
+    if (!managerPackageFiles.some((file) => file.packageRules)) {
+      continue;
+    }
+    if (getManagerConfig(config, manager).minimumReleaseAgePackageManagerSync) {
+      continue;
+    }
+    for (const file of managerPackageFiles) {
+      delete file.packageRules;
+    }
+  }
+}
+
 export async function extract(
   config: RenovateConfig,
   overwriteCache = true,
@@ -198,10 +221,12 @@ export async function extract(
       ? withoutNpmrc(packageFiles)
       : undefined;
     // the registry URLs held their credentials before they were detached, the other strings are checked on what would be cached
-    const hasUrlCredentials =
-      overwriteCache &&
-      (registryUrlsHadCredentials ||
-        containsUrlCredentials(cachedPackageFiles));
+    function hasCredentials(): boolean {
+      return (
+        registryUrlsHadCredentials || containsUrlCredentials(cachedPackageFiles)
+      );
+    }
+    const hasUrlCredentials = overwriteCache && hasCredentials();
 
     if (hasUrlCredentials) {
       logger.once.warn(
@@ -231,6 +256,8 @@ export async function extract(
       }
     });
   }
+  // after caching, so that the cache keeps the rules for when the flag is enabled
+  dropExtractedPackageRules(config, packageFiles);
   const stats = extractStats(packageFiles);
   logger.info(
     { baseBranch: config.baseBranch, stats },
@@ -281,6 +308,10 @@ function detachRegistryUrlCredentials(
   let hadCredentials = false;
 
   function detach(url: string, hostTypes: string[]): string {
+    // managers may yield non-string entries despite the type
+    if (!isString(url)) {
+      return url;
+    }
     hadCredentials ||= hostTypes.length > 0 && hasUrlCredentials(url);
     return detachUrlCredentials(url, hostTypes);
   }
@@ -295,16 +326,23 @@ function detachRegistryUrlCredentials(
           ...file.deps,
         ]),
       );
-      file.registryUrls = file.registryUrls?.map((url) =>
-        detach(url, hostTypes),
-      );
-      file.additionalRegistryUrls = file.additionalRegistryUrls?.map((url) =>
-        detach(url, hostTypes),
-      );
-      for (const dep of file.deps) {
-        dep.registryUrls = dep.registryUrls?.map((url) =>
-          detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+      // absent fields stay absent, so they don't override configured ones
+      if (isArray(file.registryUrls)) {
+        file.registryUrls = file.registryUrls.map((url) =>
+          detach(url, hostTypes),
         );
+      }
+      if (isArray(file.additionalRegistryUrls)) {
+        file.additionalRegistryUrls = file.additionalRegistryUrls.map((url) =>
+          detach(url, hostTypes),
+        );
+      }
+      for (const dep of file.deps) {
+        if (isArray(dep.registryUrls)) {
+          dep.registryUrls = dep.registryUrls.map((url) =>
+            detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+          );
+        }
       }
     }
   }

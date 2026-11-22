@@ -135,8 +135,10 @@ export function exec(
       }
     }
 
+    const { redactOutput, ...execaOptions } = opts;
     const subprocess = execa(cmd, args, {
-      ...opts,
+      ...execaOptions,
+      ...(redactOutput && { verbose: 'none' }),
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',
@@ -182,31 +184,38 @@ export function exec(
       }
       if (code !== 0) {
         if (ignoreFailure === undefined || ignoreFailure === false) {
+          const message = redactOutput
+            ? `Command failed: ${cp.spawnargs.join(' ')}`
+            : `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`;
           reject(
-            new ExecError(
-              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`,
-              {
-                ...rejectInfo(),
-                exitCode: code,
-              },
-            ),
+            new ExecError(message, {
+              ...rejectInfo(),
+              exitCode: code,
+            }),
           );
           return;
         }
 
+        const ignoredStdout = stringify(stdout, opts.outputWriters?.stdout);
+        const ignoredStderr = stringify(stderr, opts.outputWriters?.stderr);
+        const outputFields = redactOutput
+          ? {
+              stdoutBytes: Buffer.byteLength(ignoredStdout),
+              stderrBytes: Buffer.byteLength(ignoredStderr),
+            }
+          : { stdout: ignoredStdout, stderr: ignoredStderr };
         logger.once.debug(
           {
             command: cp.spawnargs.join(' '),
-            stdout: stringify(stdout, opts.outputWriters?.stdout),
-            stderr: stringify(stderr, opts.outputWriters?.stderr),
+            ...outputFields,
             exitCode: code,
           },
           `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
 
         resolve({
-          stderr: stringify(stderr, opts.outputWriters?.stderr),
-          stdout: stringify(stdout, opts.outputWriters?.stdout),
+          stderr: ignoredStderr,
+          stdout: ignoredStdout,
           exitCode: code,
         });
         return;
@@ -218,11 +227,32 @@ export function exec(
     });
 
     function rejectInfo(): ExecErrorData {
+      const {
+        input: _input,
+        redactOutput: _redactOutput,
+        outputWriters,
+        ...safeOptions
+      } = opts;
+      const cmd = cp.spawnargs.join(' ');
+      if (redactOutput) {
+        // Stream options and output writers can buffer the output, so keep only scalar options.
+        const { cwd, env, maxBuffer, shell, timeout } = safeOptions;
+        return {
+          cmd,
+          options: Object.fromEntries(
+            Object.entries({ cwd, env, maxBuffer, shell, timeout }).filter(
+              ([, value]) => value !== undefined,
+            ),
+          ),
+          stdout: '',
+          stderr: '',
+        };
+      }
       return {
-        cmd: cp.spawnargs.join(' '),
-        options: opts,
-        stdout: stringify(stdout, opts.outputWriters?.stdout),
-        stderr: stringify(stderr, opts.outputWriters?.stderr),
+        cmd,
+        options: { ...safeOptions, ...(outputWriters && { outputWriters }) },
+        stdout: stringify(stdout, outputWriters?.stdout),
+        stderr: stringify(stderr, outputWriters?.stderr),
       };
     }
   });

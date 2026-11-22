@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fakeSha, fs, logger, partial, scm } from '~test/util.ts';
+import { mergeChildConfig } from '../../../config/utils.ts';
 import { extractPackageFile as extractRegexPackageFile } from '../../../modules/manager/custom/regex/index.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
 import * as npmrc from '../../../modules/manager/npmrc.ts';
@@ -695,6 +696,73 @@ describe('workers/repository/process/extract-update', () => {
       );
     });
 
+    it('keeps non-string registry URLs', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        kustomize: [
+          {
+            packageFile: 'kustomization.yaml',
+            registryUrls: [undefined as never],
+            additionalRegistryUrls: [null as never],
+            deps: [
+              {
+                depName: 'local-chart',
+                datasource: 'helm',
+                registryUrls: [undefined as never],
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(packageFiles.kustomize[0]).toMatchObject({
+        registryUrls: [undefined],
+        additionalRegistryUrls: [null],
+        deps: [{ registryUrls: [undefined] }],
+      });
+      expect(cache.scan?.master?.packageFiles).toEqual(packageFiles);
+    });
+
+    it('does not add registry URLs to package files and deps without them', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        nuget: [
+          {
+            packageFile: 'test.csproj',
+            deps: [{ depName: 'foo', datasource: 'nuget' }],
+          },
+        ],
+      };
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+      const registryUrls = ['https://nuget.example.com/v3/index.json'];
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      const [file] = packageFiles.nuget;
+      expect(Object.hasOwn(file, 'registryUrls')).toBeFalse();
+      expect(Object.hasOwn(file, 'additionalRegistryUrls')).toBeFalse();
+      expect(Object.hasOwn(file.deps[0], 'registryUrls')).toBeFalse();
+      const fileConfig = mergeChildConfig({ registryUrls }, file);
+      expect(fileConfig.registryUrls).toEqual(registryUrls);
+      expect(mergeChildConfig(fileConfig, file.deps[0]).registryUrls).toEqual(
+        registryUrls,
+      );
+    });
+
     describe('cached package files', () => {
       const config = { repoIsOnboarded: true, baseBranch: 'master' };
       let cache: { scan: Record<string, BaseBranchCache> };
@@ -745,6 +813,68 @@ describe('workers/repository/process/extract-update', () => {
         expect(
           (await extract(config)).npm[0].deps[0].skipReason,
         ).toBeUndefined();
+      });
+    });
+
+    describe('packageRules of package files', () => {
+      let cache: { scan: Record<string, BaseBranchCache> };
+
+      beforeEach(() => {
+        cache = { scan: {} };
+        repositoryCache.getCache.mockReturnValue(cache);
+        scm.getBranchCommit.mockResolvedValue(branchSha);
+        scm.checkoutBranch.mockResolvedValue(branchSha);
+      });
+
+      function createPackageFiles(): Record<string, PackageFile[]> {
+        return {
+          poetry: [
+            {
+              packageFile: 'pyproject.toml',
+              packageRules: [
+                {
+                  matchDatasources: ['pypi'],
+                  minimumReleaseAgeExtracted: '3 days',
+                },
+              ],
+              deps: [],
+            },
+            { packageFile: 'other/pyproject.toml', deps: [] },
+          ],
+          pep621: [{ packageFile: 'pyproject.toml', deps: [] }],
+        };
+      }
+
+      it('are dropped without minimumReleaseAgePackageManagerSync, but cached', async () => {
+        const config = { repoIsOnboarded: true, baseBranch: 'master' };
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: createPackageFiles(),
+          extractionFingerprints: {},
+        });
+
+        const res = await extract(config);
+
+        expect(res.poetry[0]).not.toHaveProperty('packageRules');
+        expect(cache.scan.master.packageFiles).toEqual(createPackageFiles());
+      });
+
+      it('are kept from the cache with minimumReleaseAgePackageManagerSync in the manager config', async () => {
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+          poetry: { minimumReleaseAgePackageManagerSync: true },
+        };
+        cache.scan.master = {
+          revision: EXTRACT_CACHE_REVISION,
+          sha: branchSha,
+          configHash: fingerprint(generateFingerprintConfig(config)),
+          extractionFingerprints: {},
+          packageFiles: createPackageFiles(),
+        };
+
+        const res = await extract(config);
+
+        expect(res).toEqual(createPackageFiles());
       });
     });
 
@@ -1019,7 +1149,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     describe('malicious package detection', () => {
-      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behaviour
+      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behavior
       describe('when using mocks', () => {
         it('skips malicious package updates', async () => {
           const packageFiles: Record<string, PackageFile[]> = {

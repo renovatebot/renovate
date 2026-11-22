@@ -576,6 +576,22 @@ describe('modules/manager/helmfile/extract', () => {
       });
     });
 
+    it('detects kustomize from release keys without checking the chart directory', async () => {
+      const content = codeBlock`
+      releases:
+        - name: my-chart
+          chart: ./charts/my-chart
+          strategicMergePatches:
+            - patch.yaml
+      `;
+      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+      expect(result).toMatchObject({
+        deps: [{ depName: 'my-chart', skipReason: 'local-chart' }],
+        managerData: { needKustomize: true },
+      });
+      expect(fs.localPathExists).not.toHaveBeenCalled();
+    });
+
     it('makes sure url joiner works correctly', async () => {
       const content = codeBlock`
       releases:

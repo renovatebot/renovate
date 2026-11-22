@@ -4,7 +4,7 @@ import {
   exposedConfigOptions,
 } from '../../lib/util/template/index.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { replaceContent } from './utils.ts';
+import { readDocsHeadings, replaceContent } from './utils.ts';
 
 function getOptionLink(
   name: string,
@@ -21,9 +21,12 @@ function getOptionLink(
 
 export async function generateTemplates(dist: string): Promise<void> {
   const options = getOptions();
+  const headings = await readDocsHeadings('configuration-options.md');
+  // an option can be a child of a parent while being documented under its own heading, like the shared `labels`
   const optionParentMap = new Map(
     options
       .filter((o) => o.parents?.length)
+      .filter((o) => headings.has(`${o.parents![0]}.${o.name}`))
       .map((o) => [o.name, o.parents![0]]),
   );
   const optionGlobalOnly = new Set(

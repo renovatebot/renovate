@@ -2,7 +2,7 @@
 
 ## Easiest way to run Renovate
 
-For users on GitLab.com, the easiest way to get started is to install the Mend-hosted Renovate app [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
+For users on GitLab.com, the easiest way to get started is to install the Mend Renovate app [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
 When you use the app, Mend will:
 
 - authenticate Renovate to GitLab.com

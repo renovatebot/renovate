@@ -396,7 +396,7 @@ describe('modules/manager/bun/extract', () => {
 
     const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
 
-    expect(packageFiles[0].npmrc).toBeUndefined();
+    expect(packageFiles[0]).not.toHaveProperty('npmrc');
     expect(stripNpmrc(packageFiles)[0].managerData).toMatchObject({
       npmrcFileName: '.npmrc',
       uncachedNpmrcFileName: '.npmrc',

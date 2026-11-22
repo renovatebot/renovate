@@ -1,12 +1,11 @@
-import type { Result } from 'execa';
-import type { TextOptions } from '../../../utils/exec.ts';
+import type { ExecResult, TextOptions } from '../../../utils/exec.ts';
 import { exec as execBase } from '../../../utils/exec.ts';
 
 export async function exec<T extends TextOptions = Record<never, never>>(
   cmd: string,
   args: string[] = [],
   opts?: T,
-): Promise<Result<T & { encoding: 'utf8' }>> {
+): Promise<ExecResult<T>> {
   return await execBase(cmd, args, {
     stdout: process.stderr,
     stderr: process.stderr,

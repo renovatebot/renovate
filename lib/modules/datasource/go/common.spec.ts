@@ -82,6 +82,17 @@ describe('modules/datasource/go/common', () => {
         expect(isPublicGoPackage('example.com/foo/bar')).toBe(true);
       });
 
+      it('treats modules with go-proxy host rule credentials as private', () => {
+        hostRules.add({
+          hostType: 'go-proxy',
+          matchHost: 'example.com',
+          token: 'some-token',
+        });
+
+        expect(isPublicGoPackage('example.com/foo/bar')).toBe(false);
+        expect(isPublicGoPackage('github.com/foo/bar')).toBe(true);
+      });
+
       it('ignores credentials from other host types', () => {
         hostRules.add({ matchHost: 'example.com', token: 'some-token' });
         hostRules.add({

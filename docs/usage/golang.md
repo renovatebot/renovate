@@ -7,7 +7,7 @@ description: Go modules support in Renovate
 
 Renovate supports upgrading dependencies in `go.mod` files and associated `go.sum` checksums.
 
-If you're self-hosting Renovate, you may use these environment variables:
+If you are self-hosting Renovate, you may use these environment variables:
 
 - `GOPROXY`
 - `GONOPROXY`
@@ -32,7 +32,7 @@ To learn what these variables do, read the [Go Modules Reference about the`GOPRO
 ## Enabling Go Modules Updating
 
 Renovate updates Go Modules by default.
-To install Renovate itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+To install Renovate itself, either enable the [Mend Renovate app](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
 
@@ -167,8 +167,6 @@ When Renovate looks up a module directly, it follows the `mod` proxy URL, as the
 
 Renovate looks up a module directly when `GOPROXY` is set to `direct`, or the module matches `GONOPROXY` or `GOPRIVATE`.
 
-<!-- TODO: #47041 -->
-
 For a private registry, set `GOPRIVATE` (or `GONOPROXY`) to the registry's host so that the module is not sent to the public proxy:
 
 ```sh
@@ -188,3 +186,73 @@ module.exports = {
   ],
 };
 ```
+
+### Deriving Go environment variables from host rules
+
+If you are self-hosting Renovate, you can set [`goEnvFromHostRules`](./self-hosted-configuration.md#goenvfromhostrules) to `true` to have Renovate derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from your host rules.
+Renovate uses the derived values to look up modules and to run `go`, so you do not have to configure the same hosts twice.
+
+- `GOPROXY`: one URL for each host rule with `hostType` set to `go-proxy`, followed by `https://proxy.golang.org,direct`.
+  When Renovate runs `go`, the rule's `username` and `password` are added to the URL.
+  Rules with only a `token` are skipped, because `go` cannot send a token from a `GOPROXY` URL. Use `username` and `password` instead.
+  For a Buf Schema Registry, set `username` to your BSR username and `password` to your BSR token.
+- `GONOPROXY`: each host rule with `hostType` set to `go` whose `matchHost` includes a path, for example `https://github.com/my-org` becomes `github.com/my-org`.
+  Rules for a host without a path are skipped, so public modules on that host still use the proxy.
+- `GONOSUMDB`: the `go-proxy` hosts, and the `GONOPROXY` values derived from `go` host rules.
+
+Renovate only derives a value if you have not set the environment variable yourself.
+If you set `GOPRIVATE`, Renovate does not derive `GONOPROXY`, and derives `GONOSUMDB` as your `GOPRIVATE` value followed by the `go-proxy` hosts.
+
+For example, with a private proxy and a GitHub organization whose modules may be private:
+
+```js
+module.exports = {
+  goEnvFromHostRules: true,
+  hostRules: [
+    {
+      matchHost: 'bsr.example.com',
+      hostType: 'go-proxy',
+      username: process.env.BSR_USERNAME,
+      password: process.env.BSR_TOKEN,
+    },
+    {
+      matchHost: 'https://github.com/my-org',
+      hostType: 'go',
+      token: process.env.GITHUB_TOKEN,
+    },
+  ],
+};
+```
+
+Renovate uses:
+
+```sh
+GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
+GONOPROXY=github.com/my-org
+GONOSUMDB=bsr.example.com,github.com/my-org
+```
+
+Modules under `github.com/my-org` are fetched directly from GitHub with the token, and skip both proxies and the public checksum database.
+Other modules go through `bsr.example.com`, then the public proxy.
+
+You can also mark private modules with `GOPRIVATE` instead of `go` host rules, for example in the repository config's [`env`](./configuration-options.md#env):
+
+```json
+{
+  "env": {
+    "GOPRIVATE": "github.com/my-org"
+  }
+}
+```
+
+With the same `go-proxy` rule for `bsr.example.com`, Renovate uses:
+
+```sh
+GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
+GOPRIVATE=github.com/my-org
+GONOSUMDB=github.com/my-org,bsr.example.com
+```
+
+`GOPROXY` is still derived from the `go-proxy` rule, and `go` uses `GOPRIVATE` in place of `GONOPROXY`.
+
+If you only want to use your own proxy, without the public proxy, set `GOPROXY` yourself.
