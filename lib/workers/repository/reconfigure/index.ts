@@ -61,10 +61,8 @@ export async function checkReconfigureBranch(
   }
 
   // only use valid cached information
-  if (
-    reconfigureCache?.reconfigureBranchSha === branchSha &&
-    (!existingPr || reconfigureCache.extractionSucceeded)
-  ) {
+  const isCacheUsable = !existingPr || reconfigureCache?.extractionSucceeded;
+  if (reconfigureCache?.reconfigureBranchSha === branchSha && isCacheUsable) {
     logger.debug('Skipping validation check as branch sha is unchanged');
     return;
   }
@@ -121,9 +119,15 @@ export async function checkReconfigureBranch(
     await scm.checkoutBranch(config.defaultBranch!);
     extractResult = await extractDependencies(newConfig, false);
   } catch (err) {
-    logger.debug(
+    logger.warn(
       { err },
       'Error while extracting dependencies using the reconfigure config',
+    );
+    await setBranchStatus(
+      reconfigureBranch,
+      'Failed to extract dependencies using the new config',
+      'red',
+      context,
     );
     setReconfigureBranchCache(branchSha, true);
     await scm.checkoutBranch(config.defaultBranch!); // being cautious

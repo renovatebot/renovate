@@ -26,6 +26,17 @@ function hasStringOperand(node: ESTree.Node): boolean {
   return false;
 }
 
+function isDynamicMessage(node: ESTree.Node): boolean {
+  if (node.type === 'TemplateLiteral') {
+    return node.expressions.length > 0;
+  }
+  return (
+    node.type === 'BinaryExpression' &&
+    node.operator === '+' &&
+    hasStringOperand(node)
+  );
+}
+
 export default defineRule({
   meta: {
     type: 'problem',
@@ -52,13 +63,7 @@ export default defineRule({
         if (!messageArg) {
           return;
         }
-        if (
-          (messageArg.type === 'TemplateLiteral' &&
-            messageArg.expressions.length > 0) ||
-          (messageArg.type === 'BinaryExpression' &&
-            messageArg.operator === '+' &&
-            hasStringOperand(messageArg))
-        ) {
+        if (isDynamicMessage(messageArg)) {
           context.report({
             node: messageArg,
             messageId: 'staticMessage',

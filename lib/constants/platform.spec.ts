@@ -96,7 +96,7 @@ describe('constants/platform', () => {
 
   describe('PLATFORM_FAMILIES', () => {
     // The values every consumer of `detectPlatform` used to hard-code for
-    // itself. Keeping them here pins the table to that behaviour.
+    // itself. Keeping them here pins the table to that behavior.
     it.each`
       family                | tagsDatasource                      | knownHosts                            | webDirPath
       ${'azure'}            | ${AzureTagsDatasource.id}           | ${['dev.azure.com']}                  | ${'tree/HEAD'}

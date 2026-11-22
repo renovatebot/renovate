@@ -1,14 +1,11 @@
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
-import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { toSha256 } from '../../../../util/hash.ts';
-import {
-  getDefaultConfigFileName,
-  getSemanticCommitPrTitle,
-} from '../common.ts';
-import { OnboardingCommitMessageFactory } from './commit-message.ts';
+import { commitConfigFile } from '../../model/commit-config-file.ts';
+import { getDefaultConfigFileName, getOnboardingPrTitle } from '../common.ts';
+import { getOnboardingCommitMessage } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
 export async function rebaseOnboardingBranch(
@@ -39,36 +36,13 @@ export async function rebaseOnboardingBranch(
     'Rebasing onboarding branch',
   );
 
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would rebase files in onboarding branch');
-    return null;
-  }
-
-  const commitMessageFactory = new OnboardingCommitMessageFactory(
+  return await commitConfigFile({
     config,
-    configFile,
-  );
-  const commitMessage = commitMessageFactory.create();
-
-  const prTitle =
-    config.semanticCommits === 'enabled'
-      ? getSemanticCommitPrTitle(config)
-      : getInheritedOrGlobal('onboardingPrTitle')!;
-
-  // TODO #22198
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
     branchName: getInheritedOrGlobal('onboardingBranch')!,
-    files: [
-      {
-        type: 'addition',
-        path: configFile,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
-    // Only needed by Gerrit platform
-    prTitle,
+    // TODO #22198
+    getFiles: () => [{ type: 'addition', path: configFile, contents }],
+    message: getOnboardingCommitMessage(config, configFile),
+    prTitle: getOnboardingPrTitle(config),
+    dryRunMessage: 'DRY-RUN: Would rebase files in onboarding branch',
   });
 }

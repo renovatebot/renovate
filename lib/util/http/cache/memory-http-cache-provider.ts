@@ -6,6 +6,9 @@ import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
 import type { HttpCache } from './schema.ts';
 
 export class MemoryHttpCacheProvider extends AbstractHttpCacheProvider {
+  // oxlint-disable-next-line renovate/cached-response-headers -- in-process only, and callers such as the docker datasource read further headers from the cached response
+  protected override readonly persistedHeaders = null;
+
   private cacheKey(method: string, url: string): string {
     return buildCacheKey('memory-cache-http-provider', method, url);
   }

@@ -73,11 +73,16 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings', async () => {
+      const repoNpmrc = {
+        fileName: '.npmrc',
+        content: '@org:registry=//registry.some.org\n',
+        detectedLineEnding: '\n' as const,
+      };
       const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
         {
           packageFile: 'package.json',
           npmrc: '@org:registry=//registry.some.org\n',
-          managerData: { workspacesPackages: 'packages/*' },
+          managerData: { workspacesPackages: 'packages/*', repoNpmrc },
         },
         {
           packageFile: 'packages/a/package.json',
@@ -85,15 +90,20 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
         },
         {
           packageFile: 'packages/b/package.json',
+          npmrc: 'own',
           managerData: { packageJsonName: '@org/b' },
         },
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchObject([
         {},
-        { npmrc: '@org:registry=//registry.some.org\n' },
-        {},
+        {
+          npmrc: '@org:registry=//registry.some.org\n',
+          managerData: { repoNpmrc },
+        },
+        { npmrc: 'own' },
       ]);
+      expect(packageFiles[2].managerData?.repoNpmrc).toBeUndefined();
     });
 
     it('uses yarn workspaces package settings with extractedConstraints', async () => {
