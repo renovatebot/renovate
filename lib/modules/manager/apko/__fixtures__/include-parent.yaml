@@ -1,0 +1,8 @@
+include: pkgs/apko.yaml
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+  packages:
+    - curl=8.12.1-r0
+archs:
+  - amd64
