@@ -51,6 +51,23 @@ describe('workers/repository/reconfigure/comment', () => {
       ).resolves.toBeTrue();
     });
 
+    it('separates the base branch description from the following heading', async () => {
+      config.baseBranchPatterns = ['$default', 'next'];
+      platform.maxBodyLength.mockReturnValueOnce(1);
+      await ensureReconfigurePrComment(
+        config,
+        packageFiles,
+        branches,
+        reconfigureBranch,
+        reconfigurePr,
+      );
+
+      const prBody = platform.ensureComment.mock.calls[0][0].content;
+      expect(prBody).toContain(
+        'baseBranchPatterns: `$default`, `next`.\n\n### Detected Package Files',
+      );
+    });
+
     it('dryrun', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       await expect(
