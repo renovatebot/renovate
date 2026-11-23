@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>renovatebot/.github"],
+  "extends": ["github>renovatebot/.github", "group:commander"],
   "assignees": ["viceice", "secustor", "jamietanna"],
   "reviewers": ["@renovatebot/maintainers"],
   "semanticCommitScope": "deps",
@@ -144,13 +144,6 @@
       "matchPackageNames": ["github/gh-actions-lock"],
       "matchJsonata": ["isBreaking = true"],
       "automerge": false
-    },
-    {
-      "description": "Group commander major updates, they depend on each other.",
-      "matchDatasources": ["npm"],
-      "matchPackageNames": ["@commander-js/extra-typings", "commander"],
-      "matchUpdateTypes": ["major"],
-      "groupName": "commander"
     },
     {
       "matchPackageNames": ["tsrs"],
