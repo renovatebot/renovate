@@ -44,10 +44,9 @@ export function extractPackageFile(
 // Comes from https://github.com/distribution/reference/blob/v0.6.0/regexp.go
 // Extracted & converted with https://go.dev/play/p/KQQAONGp__2
 const dockerImageRegexPattern = `((?:(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])(?:\\.(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]))*|\\[(?:[a-fA-F0-9:]+)\\])(?::[0-9]+)?/)?[a-z0-9]+(?:(?:[._]|__|[-]+)[a-z0-9]+)*(?:/[a-z0-9]+(?:(?:[._]|__|[-]+)[a-z0-9]+)*)*)(?::([A-Za-z0-9_][A-Za-z0-9_.-]{0,127}))?(?:@([A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][0-9a-fA-F]{32,}))?`;
+const dockerImageRegex = regEx(dockerImageRegexPattern);
 
-const k8sImageRegex = regEx(
-  `^\\s*-?\\s*image:\\s*['"]?(${dockerImageRegexPattern})['"]?\\s*`,
-);
+const k8sImageRegex = regEx(`^\\s*-?\\s*image:\\s*['"]?([^\\s'"]+)['"]?\\s*`);
 
 function extractImages(
   content: string,
@@ -62,6 +61,9 @@ function extractImages(
       const dep = getDep(currentFrom, {
         registryAliases: config.registryAliases,
       });
+      if (!dep.depName || !dockerImageRegex.exec(dep.depName)) {
+        continue;
+      }
       deps.push(dep);
     }
   }
