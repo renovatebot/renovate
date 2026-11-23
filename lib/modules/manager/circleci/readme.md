@@ -1,10 +1,22 @@
 The `circleci` manager extracts `docker`, `orb` and `github-releases` datasources from CircleCI config files.
 
-[Functions](https://circleci.com/docs/functions/functions-intro/) are read from the top-level `functions:` block, for example `setup-go: github.com/circleci-functions/setup-go@v0.7.0`.
-A function is released as a GitHub release of the repository it is named after, so Renovate looks it up with the `github-releases` datasource.
-CircleCI only accepts exact function versions, so Renovate updates the exact version.
-
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
+
+### Functions
+
+[Functions](https://circleci.com/docs/functions/functions-intro/) are read from the top-level `functions:` block, for example:
+
+```yaml
+functions:
+  setup-go: github.com/circleci-functions/setup-go@v0.7.0
+```
+
+Functions are looked up with the `github-releases` datasource, so Renovate only discovers updates for functions named after a GitHub.com repository.
+
+!!! note
+  CircleCI only accepts a full `vX.Y.Z` version tag, so Renovate uses [`semver` versioning](../../versioning/semver/index.md) instead of [`github-actions` versioning](../../versioning/github-actions/index.md).
+  <br>
+  It is also not possible to digest pin these references.
 
 ### Private orbs
 
