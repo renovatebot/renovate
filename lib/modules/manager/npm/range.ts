@@ -25,5 +25,10 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (isComplexRange) {
     return 'widen';
   }
+  if (depType === 'overrides') {
+    // npm rejects a lock file update which conflicts with the override value
+    logger.debug('Bumping overrides');
+    return 'bump';
+  }
   return 'update-lockfile';
 }

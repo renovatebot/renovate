@@ -33,6 +33,24 @@ describe('modules/manager/npm/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
+  it('bumps overrides', () => {
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: 'overrides',
+      currentValue: '^9.0.0',
+    };
+    expect(getRangeStrategy(config)).toBe('bump');
+  });
+
+  it('widens complex ranges in overrides', () => {
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: 'overrides',
+      currentValue: '^8.0.0 || ^9.0.0',
+    };
+    expect(getRangeStrategy(config)).toBe('widen');
+  });
+
   it('defaults to update-lockfile', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
