@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { getDatasources } from '../../lib/modules/datasource/index.ts';
+import type { RegistryStrategy } from '../../lib/modules/datasource/types.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import type { OpenItems } from './github-query-items.ts';
 import { generateFeatureAndBugMarkdown } from './github-query-items.ts';
@@ -10,6 +11,12 @@ import {
   getModuleLink,
   replaceContent,
 } from './utils.ts';
+
+const registryStrategyNotes: Record<RegistryStrategy, string> = {
+  first: 'Only the first registry URL is used',
+  hunt: 'Registry URLs are tried in order until one returns a result',
+  merge: 'Results from all registry URLs are merged',
+};
 
 export async function generateDatasources(
   dist: string,
@@ -28,6 +35,7 @@ export async function generateDatasources(
       releaseTimestampNote,
       sourceUrlSupport,
       sourceUrlNote,
+      registryStrategy,
     } = definition;
     const customRegistrySupport = definition.supportsCustomRegistry(id);
     const displayName = getDisplayName(datasource, definition);
@@ -58,6 +66,9 @@ export async function generateDatasources(
     }
 
     tableContent += `| Custom registry support | ${customRegistrySupport ? 'Yes' : 'No'} | \n`;
+    if (customRegistrySupport) {
+      tableContent += `| Registry strategy | \`${registryStrategy}\` | ${registryStrategyNotes[registryStrategy]} |\n`;
+    }
     tableContent += `| Release timestamp support | ${releaseTimestampSupport ? 'Yes' : 'No'} | ${releaseTimestampNote ?? ''} |\n`;
     tableContent += `| Source URL support | ${sourceUrlSupport === 'none' ? 'No' : 'Yes'} | ${sourceUrlNote ?? ''} |\n`;
 
