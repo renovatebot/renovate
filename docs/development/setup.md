@@ -1,6 +1,7 @@
-# Local Development
+# Development setup
 
-This document gives tips and tricks on how to run Renovate locally to add features or fix bugs.
+Use this guide to set up Renovate on a workstation or in a cloud workspace.
+You can also use the [Dev Container](#dev-container).
 You can improve this documentation by opening a pull request.
 For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
@@ -8,21 +9,27 @@ For example, if you think anything is unclear, or you think something needs to b
 
 ### Prerequisites
 
-You need the following dependencies for local development:
+You need the following dependencies:
 
 - Git `>=2.45.1`
 - Node.js `^24.11.0 || ^26.13.0`
-- pnpm `^10.0.0`
-- C++ compiler
+- pnpm `^11.0.0`
+
+If a prebuilt RE2 binary is unavailable, installation builds it from source.
+This requires Python and the [native build tools for your platform](https://github.com/nodejs/node-gyp#installation), including `make` and a C/C++ compiler on Unix.
+
+On Linux systems with limited RAM, full Oxlint checks can run out of memory.
+During setup, check whether swap is active.
+If it is not, enable a 4 GiB swap file if you can configure swap on the host or VM.
 
 For building the documentation, you also need:
 
 - Python `>=3.11`
-- PDM `>=2.26.0`
+- [uv](https://docs.astral.sh/uv/)
 
 #### Recommended: Mise
 
-We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
+We recommend [Mise](https://mise.jdx.dev/) to install and manage the tools pinned in [`mise.toml`](../../mise.toml).
 After installing Mise, run `mise install` from the repository root.
 This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
 This includes [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
@@ -60,9 +67,12 @@ If you already installed a part, skip the corresponding step.
   PS C:\Windows\system32> pnpm --version
   ```
 
-#### VS Code Dev Containers
+#### Dev Container
 
-If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
+To use the repository's Dev Container in [GitHub Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository), create a codespace for the repository.
+Codespaces uses the configuration in `.devcontainer`.
+
+To open the same container in [VS Code](https://code.visualstudio.com/docs/devcontainers/containers):
 
 - Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
@@ -100,15 +110,13 @@ docker run -it --rm -v "${PWD}:/usr/src/app" -w /usr/src/app renovatebot_local p
 
 ## Fork and Clone
 
-If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork.
 The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
 
-!!! tip "Mise users"
-  If you ran `mise install`, the `postinstall` hook already executed `pnpm install`.
-
-1. Install all dependencies with `pnpm install`
+1. Run `pnpm install` if your setup has not already installed dependencies.
+   Mise and the repository's Dev Container both run it during setup.
 1. Make a build with `pnpm build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
 1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
