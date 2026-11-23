@@ -395,10 +395,7 @@ function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
 
   for (const dep of updatedDeps) {
     switch (dep.depType) {
-      case depTypes.optionalDependencies: {
-        deps.push(directUpgrade(dep, dep.depName!));
-        break;
-      }
+      case depTypes.optionalDependencies:
       case depTypes.uvDevDependencies:
       case depTypes.uvSources: {
         deps.push(directUpgrade(dep, dep.depName!));
