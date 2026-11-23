@@ -155,7 +155,7 @@ Use `updateDependency` if _both_ conditions apply:
 - the manager cannot be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
 
-It returns the new package file content, or `null` on failure.
+Return the updated package file content as a string, or return `null` when the dependency cannot be updated.
 If the update is also applied outside the package file, for example by modifying the checkout on disk, return `{ content, updatedOutOfBand: true }` instead.
 Renovate then treats the package file as updated even if `content` is unchanged, so that `updateArtifacts` still runs for it.
 The `git-submodules` manager uses this.
