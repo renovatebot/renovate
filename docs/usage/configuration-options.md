@@ -4977,7 +4977,12 @@ How they are used depends on the datasource's registry strategy, listed in the "
 - `hunt`: URLs are tried in order until one returns a result
 - `merge`: results from all URLs are merged
 
-The registry strategy is set by Renovate and cannot be configured.
+Each datasource's strategy is set in code to match how its package manager uses multiple registries, so you cannot configure it.
+For example:
+
+- `docker` uses `first`, because an image name points to a single registry
+- `packagist` uses `hunt`, because Composer takes a package from the first repository that has it
+- `maven` and `pypi` use `merge`, because Maven and pip look for versions in all configured repositories
 
 In some situations managers can not derive which registry a given dependency comes from.
 In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
