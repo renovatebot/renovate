@@ -14,7 +14,8 @@ functions:
 Functions are looked up with the `github-releases` datasource, so Renovate only discovers updates for functions named after a GitHub.com repository.
 
 !!! note
-  CircleCI only accepts a full `vX.Y.Z` version tag, so Renovate uses [`semver` versioning](../../versioning/semver/index.md) instead of [`github-actions` versioning](../../versioning/github-actions/index.md).
+  CircleCI only accepts a full `vX.Y.Z` version tag, so Renovate uses [`regex` versioning](../../versioning/regex/index.md) that requires the `v`, instead of [`github-actions` versioning](../../versioning/github-actions/index.md).
+  Functions pinned to any other version, such as `0.7.0` or `v0.7`, are skipped.
   <br>
   It is also not possible to digest pin these references.
 

@@ -6,8 +6,8 @@ import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { OrbDatasource } from '../../datasource/orb/index.ts';
+import { get as getVersioning } from '../../versioning/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
-import * as semverVersioning from '../../versioning/semver/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
@@ -18,13 +18,16 @@ import { CircleCiFile, type CircleCiOrb } from './schema.ts';
 
 const functionReference = regEx(/^(?<name>[^@]+)@(?<currentValue>[^@]+)$/);
 const githubFunctionName = regEx(/^github\.com\/(?<repo>[^/]+\/[^/]+)$/);
+// CircleCI only accepts a version tag led by `v`, as in `v0.7.0` or `v0.7.0-rc.1`
+const functionVersioning =
+  'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[0-9A-Za-z.-]+))?$';
 
 function getFunctionDep(key: string, reference: string): PackageDependency {
   const dep: PackageDependency = {
     depName: key,
     depType: 'function',
     datasource: GithubReleasesDatasource.id,
-    versioning: semverVersioning.id,
+    versioning: functionVersioning,
     packageName: reference,
   };
 
@@ -43,6 +46,9 @@ function getFunctionDep(key: string, reference: string): PackageDependency {
   }
 
   dep.packageName = repo;
+  if (!getVersioning(functionVersioning).isValid(groups.currentValue)) {
+    dep.skipReason = 'invalid-version';
+  }
   return dep;
 }
 
