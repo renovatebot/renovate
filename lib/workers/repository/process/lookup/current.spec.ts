@@ -71,6 +71,32 @@ describe('workers/repository/process/lookup/current', () => {
       ).toBe('1.0.0');
     });
 
+    it('uses a deprecated currentValue version which exists as a release', () => {
+      expect(
+        resolveCurrentVersion(
+          '8.0.9',
+          undefined,
+          allVersioning.get('nuget'),
+          'bump',
+          '8.0.11',
+          [{ version: '8.0.9', isDeprecated: true }, { version: '8.0.11' }],
+        ),
+      ).toBe('8.0.9');
+    });
+
+    it('does not use a range currentValue which exists as a release', () => {
+      expect(
+        resolveCurrentVersion(
+          'v8',
+          undefined,
+          allVersioning.get('github-actions'),
+          'pin',
+          'v8.0.1',
+          [{ version: 'v8.0.1' }, { version: 'v8' }],
+        ),
+      ).toBe('v8.0.1');
+    });
+
     it('prefers non-deprecated versions', () => {
       expect(
         resolveCurrentVersion(

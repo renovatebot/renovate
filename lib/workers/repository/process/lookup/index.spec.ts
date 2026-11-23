@@ -16,6 +16,7 @@ import { GoDatasource } from '../../../../modules/datasource/go/index.ts';
 import { MavenDatasource } from '../../../../modules/datasource/maven/index.ts';
 import { defaultRegistryUrl as npmDefaultRegistryUrl } from '../../../../modules/datasource/npm/common.ts';
 import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
+import { NugetDatasource } from '../../../../modules/datasource/nuget/index.ts';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist/index.ts';
 import { PypiDatasource } from '../../../../modules/datasource/pypi/index.ts';
 import { id as composerVersioningId } from '../../../../modules/versioning/composer/index.ts';
@@ -26,6 +27,7 @@ import { id as githubActionsVersioningId } from '../../../../modules/versioning/
 import { id as mavenVersioningId } from '../../../../modules/versioning/maven/index.ts';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node/index.ts';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
+import { id as nugetVersioningId } from '../../../../modules/versioning/nuget/index.ts';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
 import { id as rezVersioningId } from '../../../../modules/versioning/rez/index.ts';
@@ -5049,6 +5051,35 @@ describe('workers/repository/process/lookup/index', () => {
         ],
         versioning: 'github-actions',
         warnings: [],
+      });
+    });
+
+    it('keeps a deprecated nuget current version', async () => {
+      config.currentValue = '8.0.9';
+      config.rangeStrategy = 'bump';
+      config.packageName = 'Duende.IdentityServer';
+      config.versioning = nugetVersioningId;
+      config.datasource = NugetDatasource.id;
+      vi.spyOn(NugetDatasource.prototype, 'getReleases').mockResolvedValueOnce({
+        releases: [
+          { version: '8.0.9', isDeprecated: true },
+          { version: '8.0.11' },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toMatchObject({
+        currentVersion: '8.0.9',
+        updates: [
+          {
+            newValue: '8.0.11',
+            newVersion: '8.0.11',
+            updateType: 'patch',
+          },
+        ],
       });
     });
 
