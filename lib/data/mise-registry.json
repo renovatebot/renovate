@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.11.8 linux-x64 (2026-11-13)"
+    "version": "2026.11.12 linux-x64 (2026-11-21)"
   },
   "tools": {
     "1password": {
@@ -476,6 +476,9 @@
     "cargo-msrv": {
       "aqua": "foresterre/cargo-msrv",
       "cargo": "cargo-msrv"
+    },
+    "cargo-nextest": {
+      "aqua": "nextest-rs/nextest/cargo-nextest"
     },
     "cargo-release": {
       "github": "crate-ci/cargo-release"
@@ -1691,6 +1694,9 @@
       "github": "jdx/jactionlint",
       "packslip": "github.com/jdx/jactionlint"
     },
+    "jadx": {
+      "github": "skylot/jadx"
+    },
     "janet": {
       "github": "janet-lang/janet"
     },
@@ -1763,6 +1769,9 @@
     "jreleaser": {
       "aqua": "jreleaser/jreleaser",
       "asdf": "joschi/asdf-jreleaser"
+    },
+    "jscpd": {
+      "github": "kucherenko/jscpd"
     },
     "json5": {
       "npm": "json5"
@@ -2973,6 +2982,9 @@
     },
     "rtk": {
       "aqua": "rtk-ai/rtk",
+      "github": "rtk-ai/rtk"
+    },
+    "rtk-proxy": {
       "github": "rtk-ai/rtk"
     },
     "ruby": {
