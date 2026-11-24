@@ -42,7 +42,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea'
+        - 'github/codeql-action@915412ff23e8b7659517e607487dbeae018f2934'
     '.github/workflows/dependency-review.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec'
@@ -68,7 +68,7 @@ workflows:
     '.github/workflows/scorecard.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'github/codeql-action@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea'
+        - 'github/codeql-action@915412ff23e8b7659517e607487dbeae018f2934'
         - 'ossf/scorecard-action@23f22cd43608bae7a1f1fa2603d7314dee9538a5'
     '.github/workflows/undesirable-test-additions.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -174,11 +174,6 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
-    'github/codeql-action@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea':
-        ref: 'v4.39.4'
-        commit: 'sha1-1bd86f2fdb4b86187fa4059f16f31a3202acc9ea'
-        owner_id: 9919
-        repo_id: 259445878
     'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2':
         ref: 'v4.38.2'
         commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
@@ -187,6 +182,11 @@ dependencies:
     'github/codeql-action@33d7b85da1a04171e211befe2c739303b9a4c066':
         ref: 'v4.39.3'
         commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
+        owner_id: 9919
+        repo_id: 259445878
+    'github/codeql-action@915412ff23e8b7659517e607487dbeae018f2934':
+        ref: 'v4.39.5'
+        commit: 'sha1-915412ff23e8b7659517e607487dbeae018f2934'
         owner_id: 9919
         repo_id: 259445878
     'hkusu/review-assign-action@5bee595fdb9765d4a0bd35724b6302fa15569158':
