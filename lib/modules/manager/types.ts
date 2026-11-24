@@ -207,6 +207,7 @@ export interface LookupUpdate {
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];
+  pendingVersionTimestamps?: Record<string, Timestamp>;
   newVersion?: string;
   updateType?: UpdateType;
   /**

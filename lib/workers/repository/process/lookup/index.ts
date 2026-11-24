@@ -497,6 +497,16 @@ export async function lookupUpdates(
 
         if (pendingReleases.length) {
           update.pendingVersions = pendingReleases.map((r) => r.version);
+          const pendingVersionTimestamps: Record<string, Timestamp> = {};
+          for (const pendingRelease of pendingReleases) {
+            if (pendingRelease.releaseTimestamp) {
+              pendingVersionTimestamps[pendingRelease.version] =
+                pendingRelease.releaseTimestamp;
+            }
+          }
+          if (Object.keys(pendingVersionTimestamps).length) {
+            update.pendingVersionTimestamps = pendingVersionTimestamps;
+          }
         }
         if (!update.newValue || update.newValue === compareValue) {
           if (!config.lockedVersion) {

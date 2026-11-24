@@ -14,7 +14,9 @@ import type {
 import { coerceArray } from '../../../../util/array.ts';
 import { getFile } from '../../../../util/git/index.ts';
 import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { coerceString } from '../../../../util/string.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { normalizeDepNames } from '../../extract/manager-files.ts';
 import { doAutoReplace } from './auto-replace.ts';
@@ -659,6 +661,27 @@ function processUpdateArtifactResults(
 }
 
 /**
+ * A version is marked as pending when the lookup runs, but the branch can be updated some time after the lookup (long runs, queued branches, cached lookups).
+ * In the meantime, the version may have passed `minimumReleaseAge`, in which case the package manager picking it is not a problem.
+ */
+function hasPassedMinimumReleaseAgeSinceLookup(
+  upgradeInfo: {
+    pendingVersionTimestamps: Record<string, Timestamp> | undefined;
+    upgrade: BranchUpgradeConfig;
+  },
+  version: string,
+): boolean {
+  const { pendingVersionTimestamps, upgrade } = upgradeInfo;
+  const releaseTimestamp = pendingVersionTimestamps?.[version];
+  if (!releaseTimestamp) {
+    return false;
+  }
+
+  const ageCheck = checkMinimumReleaseAge(upgrade, releaseTimestamp);
+  return ageCheck.hasTimestamp && !ageCheck.isPending;
+}
+
+/**
  * When using Minimum Release Age, and a package manager that doesn't support being told an explicit version to update to (#41624) it is possible that an artifact update leads to a different version of a dependency being used compared to what Renovate is expecting.
  *
  * We should report these cases more explicitly with an Artifact Error, to allow the reviewers to decide what to do with the changes.
@@ -675,6 +698,8 @@ async function checkForPendingVersions(
     string,
     {
       pendingVersions: Set<string>;
+      pendingVersionTimestamps: Record<string, Timestamp> | undefined;
+      upgrade: BranchUpgradeConfig;
       newVersion: string | undefined;
     }
   >();
@@ -682,6 +707,8 @@ async function checkForPendingVersions(
     if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
       depNameToUpgradeInfo.set(dep.depName, {
         pendingVersions: new Set(dep.pendingVersions),
+        pendingVersionTimestamps: dep.pendingVersionTimestamps,
+        upgrade: dep,
         newVersion: dep.newVersion,
       });
     }
@@ -758,6 +785,19 @@ async function checkForPendingVersions(
             expectedVersion,
           },
           'No expectedVersion found after updating package file',
+        );
+        continue;
+      }
+
+      if (hasPassedMinimumReleaseAgeSinceLookup(upgradeInfo, resolvedVersion)) {
+        logger.debug(
+          {
+            packageFileName,
+            depName,
+            expectedVersion,
+            resolvedVersion,
+          },
+          'Artifact update resolved to a version which was pending at lookup time, but has since passed the Minimum Release Age threshold',
         );
         continue;
       }

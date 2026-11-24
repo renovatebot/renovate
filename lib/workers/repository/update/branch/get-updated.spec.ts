@@ -19,6 +19,7 @@ import type {
   PackageFile,
   UpdateArtifact,
 } from '../../../../modules/manager/types.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import * as _autoReplace from './auto-replace.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
@@ -1614,6 +1615,71 @@ describe('workers/repository/update/branch/get-updated', () => {
         minimumReleaseAgeBehaviour: 'timestamp-required',
       } satisfies BranchConfig;
       git.getFile.mockResolvedValueOnce('existing content');
+    });
+
+    describe('when the pending version has passed minimumReleaseAge since lookup', () => {
+      const setup = (upgrade: Partial<BranchUpgradeConfig>): void => {
+        config.upgrades.push({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+          minimumReleaseAge: '7 days',
+          ...upgrade,
+        });
+        autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
+        composer.updateArtifacts.mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'composer.lock',
+              contents: 'some lock contents',
+            },
+          },
+        ]);
+        composer.extractPackageFile.mockResolvedValueOnce({
+          deps: [{ depName: 'some-dep', lockedVersion: '1.3.0' }],
+        });
+      };
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-11-23T21:16:00.000Z'));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('does not log an artifact error', async () => {
+        setup({
+          // 7 days and 23 minutes ago
+          pendingVersionTimestamps: {
+            '1.3.0': '2026-11-16T20:53:00.000Z' as Timestamp,
+          },
+        });
+        const res = await getUpdatedPackageFiles(config);
+        expect(res.artifactErrors).toBeEmpty();
+      });
+
+      it('still logs an artifact error when the pending version is still too young', async () => {
+        setup({
+          // 6 days ago
+          pendingVersionTimestamps: {
+            '1.3.0': '2026-11-17T21:16:00.000Z' as Timestamp,
+          },
+        });
+        const res = await getUpdatedPackageFiles(config);
+        expect(res.artifactErrors).toHaveLength(1);
+      });
+
+      it('still logs an artifact error when there is no release timestamp for the version', async () => {
+        setup({});
+        const res = await getUpdatedPackageFiles(config);
+        expect(res.artifactErrors).toHaveLength(1);
+      });
     });
 
     describe('when artifact update introduces a pending version', () => {
