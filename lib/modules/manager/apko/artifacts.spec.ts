@@ -19,10 +19,16 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
+const repoDir = '/tmp/github/some/repo';
+
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
-  localDir: '/tmp/github/some/repo',
+  localDir: repoDir,
   binarySource: 'global',
 };
+
+function lockCwd(packageFileName: string): string {
+  return upath.join(repoDir, upath.dirname(packageFileName));
+}
 
 function artifact(overrides: Partial<UpdateArtifact> = {}): UpdateArtifact {
   return {
@@ -114,8 +120,8 @@ describe('modules/manager/apko/artifacts', () => {
       newPackageFileContent,
     );
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool apko 0.31.0' },
-      { cmd: 'apko lock apko.yaml' },
+      { cmd: 'install-tool apko 0.31.0', options: { cwd: repoDir } },
+      { cmd: 'apko lock apko.yaml', options: { cwd: repoDir } },
     ]);
   });
 
@@ -171,7 +177,10 @@ describe('modules/manager/apko/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: `apko lock ${quote(packageFileName)}` },
+      {
+        cmd: `apko lock ${quote('my file.yaml')}`,
+        options: { cwd: lockCwd(packageFileName) },
+      },
     ]);
   });
 
@@ -289,6 +298,45 @@ describe('modules/manager/apko/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'apko lock dir/image.yaml' }]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'apko lock image.yaml',
+        options: { cwd: lockCwd('dir/image.yaml') },
+      },
+    ]);
+  });
+
+  it('locks images/apko.lock.json from images/apko.yaml', async () => {
+    const packageFileName = 'images/apko.yaml';
+    fs.readLocalFile.mockResolvedValueOnce('old\n');
+    fs.readLocalFile.mockResolvedValueOnce('new\n');
+    const execSnapshots = mockExecAll();
+
+    await expect(
+      updateArtifacts(
+        artifact({
+          packageFileName,
+          updatedDeps: [{ depName: 'bash', newValue: '5.2.38-r0' }],
+        }),
+      ),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'images/apko.lock.json',
+          contents: 'new\n',
+        },
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledWith(
+      'images/apko.lock.json',
+      'utf8',
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'apko lock apko.yaml',
+        options: { cwd: lockCwd(packageFileName) },
+      },
+    ]);
   });
 });

@@ -497,20 +497,26 @@ describe('modules/manager/apko/extract', () => {
     });
   });
 
-  it('extracts http tags, skips local tags, and keeps undeclared tags', async () => {
+  it('limits untagged packages to untagged repositories and puts a declared tag before them', async () => {
+    const untagged = [wolfi, alpineCommunity].flatMap((repository) => [
+      registryUrl(repository, 'x86_64'),
+      registryUrl(repository, 'aarch64'),
+    ]);
+    const edge = [
+      registryUrl(edgeMain, 'x86_64'),
+      registryUrl(edgeMain, 'aarch64'),
+    ];
+
     await expect(
       extractPackageFile(Fixtures.get('tags.yaml'), 'apko.yaml'),
     ).resolves.toEqual({
       deps: [
-        pin('bash=5.2.37-r2', 'bash', '5.2.37-r2', [
-          wolfiX86,
-          registryUrl(edgeMain, 'x86_64'),
-        ]),
+        pin('bash=5.2.37-r2', 'bash', '5.2.37-r2', untagged),
         pin(
           'nodejs@edge=22.13.1-r0',
           'nodejs',
           '22.13.1-r0',
-          [registryUrl(edgeMain, 'x86_64')],
+          [...edge, ...untagged],
           'nodejs@edge={{{newValue}}}',
         ),
         {
@@ -522,7 +528,7 @@ describe('modules/manager/apko/extract', () => {
           'busybox@missing=1.36.1-r0',
           'busybox',
           '1.36.1-r0',
-          [wolfiX86],
+          untagged,
           'busybox@missing={{{newValue}}}',
         ),
       ],
