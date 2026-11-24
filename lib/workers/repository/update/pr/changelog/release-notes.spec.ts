@@ -1783,6 +1783,50 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
+    it('matches a host-qualified name with a major version suffix on its trailing name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'storage/v2.7.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some other body',
+        },
+        {
+          id: 2,
+          version: 'pubsub/v2.7.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'googleapis/google-cloud-go',
+          packageName: 'cloud.google.com/go/pubsub/v2',
+          depName: 'cloud.google.com/go/pubsub/v2',
+        },
+        partial<ChangeLogRelease>({
+          version: 'v2.7.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/googleapis/google-cloud-go/releases',
+        id: 2,
+        tag: 'pubsub/v2.7.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
     it('matches a host-qualified name on its unqualified name', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {

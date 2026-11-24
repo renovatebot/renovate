@@ -45,6 +45,9 @@ const hostQualifiedNameRegex = regEx(
   /^(?:localhost(?::\d+)?|[^/]+[.:][^/]*)\/(?<unqualifiedName>.+)$/,
 );
 
+// Go modules tag `<dir>/vN.x.y` without the module's `/vN` suffix
+const majorVersionSuffixRegex = regEx(/\/v\d+$/);
+
 export async function getReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease,
@@ -235,7 +238,10 @@ function getNamePatterns(
     if (isNonEmptyString(unqualifiedName)) {
       names.add(unqualifiedName);
 
-      const trailingName = unqualifiedName.split('/').pop();
+      const trailingName = unqualifiedName
+        .replace(majorVersionSuffixRegex, '')
+        .split('/')
+        .pop();
       if (isNonEmptyString(trailingName)) {
         names.add(trailingName);
       }
