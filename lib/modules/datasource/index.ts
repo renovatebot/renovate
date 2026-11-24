@@ -616,13 +616,20 @@ function getDigestConfig(
   datasource: DatasourceApi,
   config: GetDigestInputConfig,
 ): DigestConfig {
-  const { lookupName, currentValue, currentDigest } = config;
+  const { lookupName, currentValue, currentDigest, requiredPlatforms } = config;
   const packageName = config.replacementName ?? config.packageName;
   // Prefer registryUrl from getReleases() lookup if it has been passed
   const registryUrl =
     config.registryUrl ??
     resolveRegistryUrls(datasource, packageName, config)[0];
-  return { lookupName, packageName, registryUrl, currentValue, currentDigest };
+  return {
+    lookupName,
+    packageName,
+    registryUrl,
+    currentValue,
+    currentDigest,
+    requiredPlatforms,
+  };
 }
 
 export function getDigest(

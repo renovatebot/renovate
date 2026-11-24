@@ -30,6 +30,7 @@ export interface DigestConfig {
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
+  requiredPlatforms?: string[];
 }
 
 /**

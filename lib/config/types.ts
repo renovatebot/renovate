@@ -155,6 +155,7 @@ export interface RenovateSharedConfig {
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
+  requiredPlatforms?: string[];
   respectLatest?: boolean;
   rollbackPrs?: boolean;
   schedule?: string[];

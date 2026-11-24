@@ -35,9 +35,12 @@ const OciPlatform = Nullish(
   DeepNullish(
     z.object({
       architecture: z.string().optional(),
+      os: z.string().optional(),
+      variant: z.string().optional(),
     }),
   ),
 );
+export type OciPlatform = z.infer<typeof OciPlatform>;
 
 /**
  * OCI Image Configuration.
@@ -176,6 +179,8 @@ export const ManifestJson = Json.pipe(Manifest);
 export const DockerHubTagImage = z.object({
   architecture: z.string().nullable().catch(null),
   digest: z.string().nullable().catch(null),
+  os: z.string().nullable().catch(null),
+  variant: z.string().nullable().catch(null),
 });
 export type DockerHubTagImage = z.infer<typeof DockerHubTagImage>;
 
@@ -185,6 +190,7 @@ export const DockerHubTag = z.object({
   name: z.string(),
   tag_last_pushed: z.string().datetime().nullable().catch(null),
   digest: z.string().nullable().catch(null),
+  media_type: z.string().nullable().catch(null),
   images: z.array(DockerHubTagImage).catch([]),
 });
 export type DockerHubTag = z.infer<typeof DockerHubTag>;
