@@ -26,7 +26,7 @@ workflows:
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
         - 'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532'
         - 'slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa'
-        - 'zizmorcore/zizmor-action@bd12b495c90993a4301c73398142281a61499af3'
+        - 'zizmorcore/zizmor-action@1b4550e929643b8b26a62303c6bd64814271a4f1'
     '.github/workflows/cancel-stale-merge-queue-workflows.yml':
         - 'pierreraffa/cancel-previous-runs-action@133ec2d94c3dfeb83959ffc3c73640633044bd89'
     '.github/workflows/check-commit-messages.yml':
@@ -241,9 +241,9 @@ dependencies:
         commit: 'sha1-0bc3581177d9a0f8d555e07689384b376528e8fa'
         owner_id: 6962987
         repo_id: 306439799
-    'zizmorcore/zizmor-action@bd12b495c90993a4301c73398142281a61499af3':
-        ref: 'v0.9.0'
-        commit: 'sha1-bd12b495c90993a4301c73398142281a61499af3'
+    'zizmorcore/zizmor-action@1b4550e929643b8b26a62303c6bd64814271a4f1':
+        ref: 'v0.9.2'
+        commit: 'sha1-1b4550e929643b8b26a62303c6bd64814271a4f1'
         owner_id: 210636713
         repo_id: 985558803
         uses:
