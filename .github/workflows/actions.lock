@@ -24,7 +24,7 @@ workflows:
         - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
         - 'pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
-        - 'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532'
+        - 'sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab'
         - 'slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa'
         - 'zizmorcore/zizmor-action@1b4550e929643b8b26a62303c6bd64814271a4f1'
     '.github/workflows/cancel-stale-merge-queue-workflows.yml':
@@ -231,9 +231,9 @@ dependencies:
         commit: 'sha1-731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1'
         owner_id: 21320719
         repo_id: 1235693694
-    'sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532':
-        ref: 'v4.1.3'
-        commit: 'sha1-756fe2d284c7292c4e9b62c8a28f1e5629c59532'
+    'sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab':
+        ref: 'v4.1.4'
+        commit: 'sha1-881c63bd87e38389154debd8331404ce7ca8a3ab'
         owner_id: 71096353
         repo_id: 351211695
     'slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa':
