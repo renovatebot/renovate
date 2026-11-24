@@ -38,7 +38,6 @@ interface VersionedSpec {
 type PackageSpec = DroppedSpec | SkippedSpec | VersionedSpec;
 
 interface RepositoryIndex {
-  allHttp: string[];
   untaggedHttp: string[];
   httpByTag: Map<string, string[]>;
   fileTags: Set<string>;
@@ -124,7 +123,6 @@ function parsePackageSpec(
 
 function indexRepositories(entries: string[]): RepositoryIndex {
   const index: RepositoryIndex = {
-    allHttp: [],
     untaggedHttp: [],
     httpByTag: new Map(),
     fileTags: new Set(),
@@ -143,7 +141,6 @@ function indexRepositories(entries: string[]): RepositoryIndex {
       continue;
     }
 
-    index.allHttp.push(url);
     if (tag) {
       index.httpByTag.set(tag, [...coerceArray(index.httpByTag.get(tag)), url]);
       continue;
@@ -168,10 +165,10 @@ function registryUrlsFor(
   repositories: RepositoryIndex,
   apkArchs: string[],
 ): string[] {
-  const urls =
-    tag === null
-      ? repositories.allHttp
-      : (repositories.httpByTag.get(tag) ?? repositories.untaggedHttp);
+  const tagged = tag === null ? undefined : repositories.httpByTag.get(tag);
+  const urls = tagged
+    ? [...tagged, ...repositories.untaggedHttp]
+    : repositories.untaggedHttp;
   return urls.flatMap((url) => apkArchs.map((arch) => `${url}?arch=${arch}`));
 }
 

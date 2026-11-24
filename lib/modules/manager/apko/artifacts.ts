@@ -1,5 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -45,7 +46,11 @@ export async function updateArtifacts({
       lockFileName,
       existingLockFileContent,
       packageFile: { path: packageFileName, contents: newPackageFileContent },
-      run: () => exec(`apko lock ${quote(packageFileName)}`, execOptions),
+      run: () =>
+        exec(
+          `apko lock ${quote(upath.basename(packageFileName))}`,
+          execOptions,
+        ),
     });
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
