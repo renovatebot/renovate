@@ -1,4 +1,5 @@
 import { isUndefined } from '@sindresorhus/is';
+import { E_TIMEOUT } from 'async-mutex';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -93,7 +94,21 @@ export async function withCache<T>(
   const cacheKey = buildCacheKey('cache-decorator', key);
 
   // prevent concurrent processing and cache writes
-  const releaseLock = await acquireLock(cacheKey, namespace);
+  let releaseLock: (() => void) | undefined;
+  try {
+    releaseLock = await acquireLock(cacheKey, namespace);
+  } catch (err) {
+    if (err !== E_TIMEOUT) {
+      throw err;
+    }
+    // Another lookup for this key has held the lock past the timeout.
+    // Continue without the lock rather than failing: the cache is checked
+    // again below, and at worst this repeats the lookup.
+    logger.debug(
+      { namespace, key },
+      'Package cache: lock wait timed out, continuing without lock',
+    );
+  }
 
   try {
     const cachedRecord = await packageCache.get<CachedRecord>(
@@ -160,6 +175,6 @@ export async function withCache<T>(
 
     return newValue;
   } finally {
-    releaseLock();
+    releaseLock?.();
   }
 }
