@@ -619,10 +619,13 @@ describe('modules/manager/apko/extract', () => {
   });
 
   it('reads image.lock.json next to image.yml', async () => {
-    fs.readLocalFile.mockImplementation((fileName: string) =>
-      fileName === 'dir/image.lock.json'
-        ? Fixtures.get('lock-agree.json')
-        : null,
+    fs.readLocalFile.mockImplementation(
+      (fileName: string): Promise<string | null> =>
+        Promise.resolve(
+          fileName === 'dir/image.lock.json'
+            ? Fixtures.get('lock-agree.json')
+            : null,
+        ),
     );
 
     await expect(
@@ -671,12 +674,17 @@ describe('modules/manager/apko/extract', () => {
 
   it('does not follow include', async () => {
     const child = Fixtures.get('include-child.yaml');
-    fs.readLocalFile.mockImplementation((fileName: string) => {
-      if (fileName === 'pkgs/apko.yaml' || fileName === 'app/pkgs/apko.yaml') {
-        return child;
-      }
-      return null;
-    });
+    fs.readLocalFile.mockImplementation(
+      (fileName: string): Promise<string | null> => {
+        if (
+          fileName === 'pkgs/apko.yaml' ||
+          fileName === 'app/pkgs/apko.yaml'
+        ) {
+          return Promise.resolve(child);
+        }
+        return Promise.resolve(null);
+      },
+    );
 
     await expect(
       extractPackageFile(Fixtures.get('include-parent.yaml'), 'app/apko.yaml'),

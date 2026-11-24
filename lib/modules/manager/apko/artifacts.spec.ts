@@ -1,5 +1,6 @@
 import { quote } from 'shlex';
 import upath from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -9,10 +10,14 @@ import type {
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '/tmp/github/some/repo',
@@ -77,6 +82,11 @@ describe('modules/manager/apko/artifacts', () => {
   });
 
   it('regenerates the lock file when a dependency changes', async () => {
+    vi.stubEnv('CONTAINERBASE', 'true');
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.30.0' }, { version: '0.31.0' }],
+    });
     fs.readLocalFile.mockResolvedValueOnce('old\n');
     fs.readLocalFile.mockResolvedValueOnce('new\n');
     const execSnapshots = mockExecAll();
@@ -104,16 +114,14 @@ describe('modules/manager/apko/artifacts', () => {
       newPackageFileContent,
     );
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'apko lock apko.yaml',
-        options: {
-          toolConstraints: [{ toolName: 'apko', constraint: undefined }],
-        },
-      },
+      { cmd: 'install-tool apko 0.31.0' },
+      { cmd: 'apko lock apko.yaml' },
     ]);
   });
 
   it('passes constraints.apko to the apko install', async () => {
+    vi.stubEnv('CONTAINERBASE', 'true');
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('old\n');
     fs.readLocalFile.mockResolvedValueOnce('new\n');
     const execSnapshots = mockExecAll();
@@ -135,12 +143,8 @@ describe('modules/manager/apko/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'apko lock apko.yaml',
-        options: {
-          toolConstraints: [{ toolName: 'apko', constraint: '0.30.11' }],
-        },
-      },
+      { cmd: 'install-tool apko 0.30.11' },
+      { cmd: 'apko lock apko.yaml' },
     ]);
   });
 
