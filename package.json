@@ -64,7 +64,7 @@
     "schedule-test-shards": "SCHEDULE_TEST_SHARDS=true node tools/test-shards.ts",
     "tsc": "tsc",
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
-    "type-check:tsrs": "run-s 'generate:*' && tsrs --noEmit",
+    "type-check:tsrs": "node --run generate:imports && tsrs --noEmit",
     "update-static-data": "node tools/static-data/update.ts"
   },
   "repository": {
