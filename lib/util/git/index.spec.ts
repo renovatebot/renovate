@@ -467,6 +467,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
           git.isBranchAncestorOfBase('renovate/not_found', defaultBranch),
         ).resolves.toBeFalse();
       });
+
+      it('returns false when the base branch does not exist', async () => {
+        await expect(
+          git.isBranchAncestorOfBase('renovate/past_branch', 'not_found'),
+        ).resolves.toBeFalse();
+      });
     });
 
     describe('getBranchCommit(branchName)', () => {

@@ -2712,6 +2712,26 @@ describe('workers/repository/update/branch/index', () => {
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
+    it('keeps a branch that is already in the base while its PR is open', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValue(false);
+      scm.isBranchAncestorOfBase.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({ number: 5, state: 'open' }),
+      );
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+      });
+      await branchWorker.processBranch({
+        ...config,
+        reuseExistingBranch: true,
+        cacheFingerprintMatch: 'matched',
+      });
+      expect(scm.deleteBranch).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledOnce();
+    });
+
     it('does not delete a branch that is already in the base during dry run', async () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValue(false);
