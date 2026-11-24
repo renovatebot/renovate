@@ -10,9 +10,8 @@ If you are using the Mend Renovate app, or if someone else is hosting Renovate f
 
 ## Choosing how to run Renovate
 
-There are a number of different ways for Renovate to be operated.
 When you are looking at getting started with Renovate, it can be a little overwhelming trying to work you actually want to run it.
-The breadth of options comes out of Renovate's flexibility, and has grown out of the many different ways that users want to run Renovate.
+The breadth of options for how to run Renovate comes out of its flexibility, and has grown out of the many different ways that users want to run Renovate.
 
 All of the options below - including Mend's products - runs the Open Source codebase end-to-end.
 
