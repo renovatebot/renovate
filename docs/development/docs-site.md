@@ -17,7 +17,9 @@ If you have submitted a documentation PR and your changes are not published with
 
 `js`/`javascript` validation only runs on files under `docs/` and `readme.md` files under `lib/`, since other `.md` files in `lib/` may contain arbitrary JavaScript examples unrelated to Renovate config.
 
-This is validated through `pnpm run doc-fence-check`.
+From the repository root, run `pnpm doc-fence-check` to scan `docs/` and `lib/`, as CI does.
+To check only specific files, run `pnpm doc-fence-check docs/file.md lib/module/readme.md`.
+The checker takes literal `.md` paths, not glob patterns, and accepts both relative and absolute paths.
 
 There are two comments you can add before a code block to opt out of validation, while still keeping the block's language tag for syntax highlighting:
 
