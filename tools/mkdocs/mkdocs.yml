@@ -192,6 +192,11 @@ markdown_extensions:
   # We're using this to enable collapsible admonition blocks for the list of bug reports and feature requests per manager.
   - pymdownx.details
 
+  # The Tabbed extension adds support for grouping content into tabs.
+  # https://squidfunk.github.io/mkdocs-material/reference/content-tabs/
+  - pymdownx.tabbed:
+      alternate_style: true
+
   # The Abbreviations extension adds the ability to add a small tooltip to an element, by wrapping it with an abbr tag.
   # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#abbreviations
   - abbr
