@@ -86,6 +86,12 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` and self-hosted GitLab.
 Details for how it works can be found in the project.
 
+#### Helm chart
+
+The Renovate team maintain a Helm chart in the [`renovatebot/helm-charts`](https://github.com/renovatebot/helm-charts) repository.
+It runs the Renovate CLI as a Kubernetes `CronJob`, so it works with all of Renovate's supported platforms.
+Details on how to use it can be found in the repository.
+
 #### Mend Renovate Self-Hosted (Community Edition / Enterprise Edition)
 
 Mend Renovate Self-Hosted Community Edition (sometimes "Renovate CE"/"CE") and Enterprise Edition (sometimes "Renovate EE"/"EE") are closed-source offerings of Renovate for self-hosted users.
