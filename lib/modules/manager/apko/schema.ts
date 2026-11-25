@@ -1,14 +1,32 @@
 import { z } from 'zod/v4';
 import { Json, Yaml } from '../../../util/schema-utils/index.ts';
 
+function unspecifiedIfNull(value: unknown): unknown {
+  return value === null ? undefined : value;
+}
+
+function numericArchToString(value: unknown): unknown {
+  return typeof value === 'number' ? String(value) : value;
+}
+
+const optionalStrings = z.preprocess(
+  unspecifiedIfNull,
+  z.array(z.string()).optional(),
+);
+
+const optionalArchs = z.preprocess(
+  unspecifiedIfNull,
+  z.array(z.preprocess(numericArchToString, z.string())).optional(),
+);
+
 export const ApkoConfig = Yaml.pipe(
   z.object({
     contents: z.object({
-      repositories: z.array(z.string()).optional(),
-      build_repositories: z.array(z.string()).optional(),
+      repositories: optionalStrings,
+      build_repositories: optionalStrings,
       packages: z.array(z.string()),
     }),
-    archs: z.array(z.string()).optional(),
+    archs: optionalArchs,
   }),
 );
 
