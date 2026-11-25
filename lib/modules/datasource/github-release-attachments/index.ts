@@ -139,7 +139,7 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     digest: string,
   ): Promise<GithubDigestFile | null> {
     const recordedAsset = release.assets.find(
-      (a) => getRecordedSha256(a) === digest,
+      (a) => getRecordedSha256(a) === digest.toLowerCase(),
     );
     if (recordedAsset) {
       return {

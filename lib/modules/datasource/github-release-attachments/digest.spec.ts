@@ -64,28 +64,31 @@ describe('modules/datasource/github-release-attachments/digest', () => {
       expect(digestAsset?.digestedFileName).toBeUndefined();
     });
 
-    it('finds asset by the digest GitHub recorded, without downloading it', async () => {
-      const recordedDigest = 'a'.repeat(64);
-      const release = releaseMock.release('v1.0.0');
-      release.assets.push({
-        name: 'asset.zip',
-        size: 10 * 1024,
-        url: 'https://api.github.com/repos/some/dep/releases/assets/1',
-        browser_download_url:
-          'https://github.com/some/dep/releases/download/v1.0.0/asset.zip',
-        digest: `sha256:${recordedDigest}`,
-      });
+    it.each(['a'.repeat(64), 'A'.repeat(64)])(
+      'finds asset by the digest GitHub recorded, without downloading it: %s',
+      async (pinnedDigest) => {
+        const recordedDigest = 'a'.repeat(64);
+        const release = releaseMock.release('v1.0.0');
+        release.assets.push({
+          name: 'asset.zip',
+          size: 10 * 1024,
+          url: 'https://api.github.com/repos/some/dep/releases/assets/1',
+          browser_download_url:
+            'https://github.com/some/dep/releases/download/v1.0.0/asset.zip',
+          digest: `sha256:${recordedDigest}`,
+        });
 
-      const digestAsset = await githubReleaseAttachments.findDigestAsset(
-        release,
-        recordedDigest,
-      );
-      expect(digestAsset).toEqual({
-        assetName: 'asset.zip',
-        currentVersion: 'v1.0.0',
-        currentDigest: recordedDigest,
-      });
-    });
+        const digestAsset = await githubReleaseAttachments.findDigestAsset(
+          release,
+          pinnedDigest,
+        );
+        expect(digestAsset).toEqual({
+          assetName: 'asset.zip',
+          currentVersion: 'v1.0.0',
+          currentDigest: pinnedDigest,
+        });
+      },
+    );
 
     it('returns null when no assets available', async () => {
       const release = releaseMock.release('v1.0.0');
