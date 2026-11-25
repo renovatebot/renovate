@@ -1209,7 +1209,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(res?.artifactErrors).toHaveLength(0);
     });
 
-    it('only executes the first executionMode=branch commands when multiple upgrades have them', async () => {
+    it('executes each distinct executionMode=branch commands when multiple upgrades have them', async () => {
       const config: BranchConfig = {
         manager: 'some-manager',
         updatedPackageFiles: [
@@ -1245,30 +1245,26 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         branchName: 'main',
         baseBranch: 'base',
       };
-      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
-      git.getRepoStatus.mockResolvedValueOnce(
+      exec.exec.mockResolvedValue({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
       );
       GlobalConfig.set({
         localDir: upath.join(tmpDir.path, 'local'),
         allowedCommands: ['first-command', 'second-command'],
       });
-      fs.localPathIsFile.mockResolvedValueOnce(true);
+      fs.localPathIsFile.mockResolvedValue(true);
 
       const res = await postUpgradeCommands.default(config);
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+      expect(exec.exec.mock.calls.map(([cmd]) => cmd)).toEqual([
         'first-command',
-        expect.anything(),
-      );
+        'second-command',
+      ]);
       expect(res?.artifactErrors).toHaveLength(0);
-      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { branchName: 'main', skippedCommands: [['second-command']] },
-        'Skipping `postUpgradeTasks` with `executionMode=branch` that differ from the first one found',
-      );
     });
 
-    it('does not warn when multiple upgrades have the same executionMode=branch commands', async () => {
+    it('only executes identical executionMode=branch commands once when multiple upgrades have them', async () => {
       const postUpgradeTasks = {
         commands: ['some-command'],
         fileFilters: ['**/*'],
@@ -1314,7 +1310,170 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         expect.anything(),
       );
       expect(res?.artifactErrors).toHaveLength(0);
-      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it(`doesn't log the depName if there isn't one, for executionMode=branch commands`, async () => {
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [{ manager: 'some-manager', branchName: 'main' }],
+        postUpgradeTasks: {
+          commands: ['some-command'],
+          fileFilters: ['**/*'],
+          executionMode: 'branch',
+        },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      await postUpgradeCommands.default(config);
+
+      expect(logger.addMeta).not.toHaveBeenCalled();
+    });
+
+    it(`has an empty {{depName}} if there isn't one, for executionMode=branch commands`, async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            dataFileTemplate:
+              '[{{#each upgrades}}{{#if depName}}{"depName": "{{{depName}}}"}{{#unless @last}},{{/unless}}{{/if}}{{/each}}]',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.outputCacheFile).toHaveBeenCalledTimes(1);
+      expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
+        expect.stringMatching(
+          `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+        ),
+        '[{"depName": "some-dep1"},]', // trailing comma because I couldn't get the syntax right
+      );
+    });
+
+    it('skips upgrades without a depName for executionMode=branch commands', async () => {
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        postUpgradeTasks: {
+          commands: ['some-command'],
+          fileFilters: ['**/*'],
+          executionMode: 'branch',
+        },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      await postUpgradeCommands.default(config);
+
+      expect(logger.addMeta).toHaveBeenCalledWith({
+        dep: 'some-dep1 some-dep2',
+      });
+    });
+
+    it('only includes each depName once for executionMode=branch commands', async () => {
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        postUpgradeTasks: {
+          commands: ['some-command'],
+          fileFilters: ['**/*'],
+          executionMode: 'branch',
+        },
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+      );
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      await postUpgradeCommands.default(config);
+
+      expect(logger.addMeta).toHaveBeenCalledWith({
+        dep: 'some-dep1 some-dep2',
+      });
     });
 
     it('does not execute branch-level commands when no upgrade has executionMode=branch', async () => {

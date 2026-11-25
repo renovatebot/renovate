@@ -39,6 +39,7 @@ import {
   resolveToolConstraint,
 } from '../../util.ts';
 import { MINUTE_MS } from '../constants.ts';
+import { isPackageManagerDepType } from '../dep-types.ts';
 import { hasPackageManager } from '../extract/common/package-file.ts';
 import type { YarnPreapprovedPackage } from '../extract/types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
@@ -124,10 +125,7 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  const isPackageManagerDepType =
-    upgrade.depType === 'packageManager' ||
-    upgrade.depType === 'devEngines.packageManager';
-  return isPackageManagerDepType && upgrade.depName === 'yarn';
+  return isPackageManagerDepType(upgrade.depType) && upgrade.depName === 'yarn';
 }
 
 const scopeRegex = regEx(/^@(?<scope>[^/]+)\//);
@@ -299,11 +297,11 @@ export async function generateLockFile(
       constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
     };
 
-    // check first upgrade, see #17786
+    // check all upgrades, see #17786
     let packageManagerDeclared =
       !!config.managerData?.hasPackageManager ||
-      !!upgrades[0]?.managerData?.hasPackageManager;
-    // dep-level managerData can shadow the flag (e.g. nested resolutions), see #25853
+      upgrades.some((upgrade) => !!upgrade.managerData?.hasPackageManager);
+    // only upgrades of the package file declaring `packageManager` carry the flag (not yarn workspace packages), see #25853
     if (!isYarn1 && !packageManagerDeclared) {
       packageManagerDeclared = await hasPackageManager(lockFileDir);
     }

@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import type { FileChange } from '../../../util/git/types.ts';
+import * as template from '../../../util/template/index.ts';
 import { compileCommitBody, compileCommitTrailers } from './commit-body.ts';
 import type { CommitMessageConfig } from './commit-message-factory.ts';
 import { CommitMessageFactory } from './commit-message-factory.ts';
@@ -14,7 +15,13 @@ export function createConfigFileCommitMessage(
   config: CommitMessageConfig,
   subject: string,
 ): string {
-  const commitMessageFactory = new CommitMessageFactory(config);
+  const commitMessageFactory = new CommitMessageFactory({
+    ...config,
+    commitMessagePrefix: template.compile(
+      config.commitMessagePrefix ?? '',
+      config,
+    ),
+  });
   const commitMessage = commitMessageFactory.create();
   commitMessage.subject = subject;
   return commitMessage.toString();

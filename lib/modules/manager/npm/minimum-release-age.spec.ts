@@ -1,4 +1,6 @@
 import { fs } from '~test/util.ts';
+import type { NpmrcPackageFile } from '../types.ts';
+import { setPnpmMinimumReleaseAge } from './extract/pnpm-minimum-release-age.ts';
 import { enforcesMinimumReleaseAge } from './minimum-release-age.ts';
 import type { NpmManagerData } from './types.ts';
 
@@ -230,16 +232,14 @@ describe('modules/manager/npm/minimum-release-age', () => {
     );
 
     it.each`
-      minimumReleaseAge | workspace                                                         | expected
-      ${null}           | ${{ minimumReleaseAge: 1440 }}                                    | ${true}
-      ${'0 days'}       | ${{ minimumReleaseAge: 1440 }}                                    | ${true}
-      ${null}           | ${undefined}                                                      | ${false}
-      ${'bananas'}      | ${{ minimumReleaseAge: 0 }}                                       | ${false}
-      ${'3 days'}       | ${{ minimumReleaseAgeStrict: false }}                             | ${false}
-      ${null}           | ${{ minimumReleaseAge: 1440, minimumReleaseAgeStrict: false }}    | ${false}
-      ${'3 days'}       | ${{ minimumReleaseAgeStrict: true }}                              | ${true}
-      ${'3 days'}       | ${{ hasMinimumReleaseAgeExclude: true }}                          | ${false}
-      ${null}           | ${{ minimumReleaseAge: 1440, hasMinimumReleaseAgeExclude: true }} | ${false}
+      minimumReleaseAge | workspace                                                      | expected
+      ${null}           | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
+      ${'0 days'}       | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
+      ${null}           | ${undefined}                                                   | ${false}
+      ${'bananas'}      | ${{ minimumReleaseAge: 0 }}                                    | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: false }}                          | ${false}
+      ${null}           | ${{ minimumReleaseAge: 1440, minimumReleaseAgeStrict: false }} | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: true }}                           | ${true}
     `(
       'returns $expected for minimumReleaseAge=$minimumReleaseAge and workspace=$workspace',
       async ({ minimumReleaseAge, workspace, expected }) => {
@@ -257,6 +257,30 @@ describe('modules/manager/npm/minimum-release-age', () => {
         ).resolves.toBe(expected);
       },
     );
+
+    it('returns true for a pnpm-workspace.yaml with minimumReleaseAgeExclude', async () => {
+      fs.readLocalFile.mockImplementation((fileName: string) =>
+        Promise.resolve(
+          fileName === 'some-dir/pnpm-workspace.yaml'
+            ? "minimumReleaseAge: 1440\nminimumReleaseAgeExclude:\n  - '@myorg/*'\n"
+            : null,
+        ),
+      );
+      const packageFile: Partial<NpmrcPackageFile<NpmManagerData>> = {
+        packageFile: 'some-dir/package.json',
+        managerData: { ...pnpmLockManagerData },
+      };
+      await setPnpmMinimumReleaseAge([packageFile], {});
+
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: packageFile.managerData,
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          constraints: { pnpm: '10.17.0' },
+        }),
+      ).resolves.toBeTrue();
+    });
 
     it('does not read the pnpm-workspace.yaml in the working tree', async () => {
       fs.readLocalFile.mockResolvedValue('minimumReleaseAgeStrict: false\n');

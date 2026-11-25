@@ -113,15 +113,16 @@ For more information about mise lock files, see the [mise lock file documentatio
 
 Running `mise lock` can execute repository-defined behavior, so Renovate treats mise lockfile refreshes as an unsafe execution.
 
-Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
+By default, Renovate runs `mise lock` in [safe mode](https://mise.jdx.dev/configuration/settings.html#safe) (`MISE_SAFE=1`), which needs mise `2026.7.12` or newer.
+This path does not need `mise` in [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions).
 
-Because mise lock can execute repository-defined scripts, Renovate treats lockfile refreshes as an unsafe execution and attempts to run mise in [safe mode](https://mise.jdx.dev/configuration/settings.html#safe).
-
-If mise does not support safe mode or version detection fails, Renovate blocks all mise operations.
+If the mise version does not support safe mode or cannot be detected, Renovate skips the `mise.lock` update, unless `mise` is in `allowedUnsafeExecutions`.
+Extracting and updating the mise config files still works.
 
 #### Allowing Unsafe Executions
 
 Self-hosted administrators can permit these operations by adding "mise" to the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) configuration.
+Renovate then runs `mise lock` without safe mode.
 
 Once allowed, Renovate runs mise trust before mise lock when a mise.lock file is present. This exposes the trust step in execution logs and defers trust rules to mise.
 

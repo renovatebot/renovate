@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -245,14 +245,10 @@ export async function setPnpmMinimumReleaseAge(
       () => root?.extractedConstraints?.pnpm,
     );
     const npmrcMinimumReleaseAge = parseNpmrcPnpmMinimumReleaseAge(root?.npmrc);
-    const hasMinimumReleaseAgeExclude = isNonEmptyArray(
-      workspace.minimumReleaseAgeExclude,
-    );
     for (const packageFile of lockFilePackageFiles) {
       packageFile.managerData!.pnpmMinimumReleaseAge = {
         minimumReleaseAge: workspace.minimumReleaseAge,
         minimumReleaseAgeStrict: workspace.minimumReleaseAgeStrict,
-        ...(hasMinimumReleaseAgeExclude && { hasMinimumReleaseAgeExclude }),
         pnpmConstraint,
         ...(npmrcMinimumReleaseAge !== null && { npmrcMinimumReleaseAge }),
       };

@@ -542,6 +542,7 @@ Currently, this config option only works with these managers:
 
 - `cargo`
 - `helmv3`
+- `julia`
 - `npm`
 - `nuget`
 - `maven`
@@ -4483,6 +4484,8 @@ Example:
 Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
+
+If multiple updates on the branch have different `postUpgradeTasks` with `executionMode=branch`, for instance when different `packageRules` match different files in the branch, each distinct set of tasks is executed once, in the order the updates appear in the branch.
 
 ### `postUpgradeTasks.fileFilters`
 
