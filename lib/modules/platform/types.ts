@@ -357,6 +357,7 @@ export interface Platform {
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
+  getRateLimit?(): Promise<Record<string, unknown> | null>;
 }
 
 export interface PlatformScm {

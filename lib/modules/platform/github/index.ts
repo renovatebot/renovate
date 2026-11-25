@@ -2516,6 +2516,21 @@ export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
 }
 
+/**
+ * `GET /rate_limit` does not count against the REST API rate limit.
+ */
+export async function getRateLimit(): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await githubApi.getJsonUnchecked<{
+      resources: Record<string, unknown>;
+    }>('rate_limit', { memCache: false });
+    return res.body.resources;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to fetch rate limit');
+    return null;
+  }
+}
+
 export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
   /* v8 ignore next -- specs initialize repos with vulnerability alerts enabled */
   if (config.hasVulnerabilityAlertsEnabled === false) {

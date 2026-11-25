@@ -6923,6 +6923,24 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('getRateLimit()', () => {
+    it('returns rate limit resources', async () => {
+      const resources = {
+        core: { limit: 5000, used: 5000, remaining: 0, reset: 1 },
+      };
+      httpMock
+        .scope(githubApiHost)
+        .get('/rate_limit')
+        .reply(200, { resources, rate: resources.core });
+      await expect(github.getRateLimit()).resolves.toEqual(resources);
+    });
+
+    it('returns null on error', async () => {
+      httpMock.scope(githubApiHost).get('/rate_limit').reply(500);
+      await expect(github.getRateLimit()).resolves.toBeNull();
+    });
+  });
+
   describe('getVulnerabilityAlerts()', () => {
     it('avoids fetching if repo has vulnerability alerts disabled', async () => {
       const scope = httpMock.scope(githubApiHost);

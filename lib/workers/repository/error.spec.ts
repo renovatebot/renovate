@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { logger, partial } from '~test/util.ts';
+import { logger, partial, platform } from '~test/util.ts';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -114,6 +114,20 @@ describe('workers/repository/error', () => {
       );
       const res = await handleError(config, gitError);
       expect(res).toEqual(TEMPORARY_ERROR);
+    });
+
+    it('logs platform rate limit info', async () => {
+      const rateLimit = { core: { remaining: 0 } };
+      platform.getRateLimit.mockResolvedValueOnce(rateLimit);
+      const res = await handleError(
+        config,
+        new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+      );
+      expect(res).toEqual(PLATFORM_RATE_LIMIT_EXCEEDED);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { rateLimit },
+        'Rate limit exceeded - aborting',
+      );
     });
 
     it('handles unknown error', async () => {

@@ -37,6 +37,7 @@ import {
 } from '../../constants/error-messages.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
+import { platform } from '../../modules/platform/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import {
   raiseConfigWarningIssue,
@@ -177,7 +178,8 @@ export default async function handleError(
       return SYSTEM_INSUFFICIENT_DISK_SPACE;
     }
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-      logger.warn('Rate limit exceeded - aborting');
+      const rateLimit = await platform.getRateLimit?.();
+      logger.warn({ rateLimit }, 'Rate limit exceeded - aborting');
       delete config.branchList;
       return err.message;
     }
