@@ -3,6 +3,7 @@ import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { clearEnv } from '~test/util.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitTagsDatasource } from './index.ts';
@@ -12,6 +13,12 @@ const createSimpleGit = vi.mocked(git.createSimpleGit);
 const packageName = 'https://github.com/example/example.git';
 
 const lsRemote1 = Fixtures.get('ls-remote-1.txt', '../git-refs');
+
+// a lightweight tag shadowed by a branch of the same name
+const lsRemoteShadowedTag = [
+  'a1d9b3fa58c5d9b7bd0b1bd8b0aa4b44b0b4a1d9\trefs/heads/v3.0.0',
+  'b2e0c4fb69d6e0c8ce1c2ce9c1bb5c55c1c5b2e0\trefs/tags/v3.0.0',
+].join('\n');
 
 const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
@@ -88,6 +95,37 @@ describe('modules/datasource/git-tags/index', () => {
         sourceUrl: 'https://github.com/example/example',
       });
     });
+
+    it('caches the source URL without the URL credentials of the package name', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+      const setWithRawTtl = vi.spyOn(packageCache, 'setWithRawTtl');
+      const credentialedPackageName =
+        'https://user:glpat-abcdefghijklmnop@gitlab.example.com/grp/mod.git';
+
+      const versions = await getPkgReleases({
+        datasource,
+        packageName: credentialedPackageName,
+      });
+
+      expect(versions?.sourceUrl).toBe('https://gitlab.example.com/grp/mod');
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        credentialedPackageName,
+      ]);
+      expect(setWithRawTtl).toHaveBeenCalledWith(
+        'datasource-git-tags',
+        expect.any(String),
+        {
+          cachedAt: expect.any(String),
+          value: expect.objectContaining({
+            sourceUrl: 'https://gitlab.example.com/grp/mod',
+          }),
+        },
+        expect.any(Number),
+      );
+      // the keys are sanitized by the package cache itself
+      const cachedValues = setWithRawTtl.mock.calls.map(([, , value]) => value);
+      expect(JSON.stringify(cachedValues)).not.toContain('glpat-');
+    });
   });
 
   describe('getDigest()', () => {
@@ -101,6 +139,16 @@ describe('modules/datasource/git-tags/index', () => {
       expect(digest).toBeNull();
     });
 
+    it('returns null if there are no refs', async () => {
+      gitMock.listRemote.mockResolvedValue('');
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: 'a tag to look up' },
+        'v1.0.2',
+      );
+      expect(digest).toBeNull();
+    });
+
     it('returns digest for tag', async () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
 
@@ -109,6 +157,16 @@ describe('modules/datasource/git-tags/index', () => {
         'v1.0.2',
       );
       expect(digest).toBe('3936a6bced3587dc9fd464b0a910e0dfd4cfe10d');
+    });
+
+    it('ignores a branch with the same name as the tag', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemoteShadowedTag);
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: 'a tag to look up' },
+        'v3.0.0',
+      );
+      expect(digest).toBe('b2e0c4fb69d6e0c8ce1c2ce9c1bb5c55c1c5b2e0');
     });
 
     it('returns digest for HEAD', async () => {

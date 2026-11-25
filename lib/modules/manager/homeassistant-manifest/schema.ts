@@ -5,7 +5,7 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile as extractPipRequirements } from '../pip_requirements/extract.ts';
 import type { PackageDependency } from '../types.ts';
 
-const Requirement = z.string().transform((requirement) => {
+const Requirement = z.string().transform((requirement): PackageDependency => {
   const pipResult = extractPipRequirements(requirement);
   const dep = pipResult?.deps?.[0];
   if (dep) {
@@ -19,7 +19,7 @@ const Requirement = z.string().transform((requirement) => {
     depName: requirement,
     datasource: PypiDatasource.id,
     skipReason: 'invalid-dependency-specification',
-  } as PackageDependency;
+  };
 });
 
 export const HomeAssistantManifest = Json.pipe(

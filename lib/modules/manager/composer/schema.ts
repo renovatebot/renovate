@@ -9,6 +9,7 @@ import {
   LooseRecord,
   withDebugMessage,
 } from '../../../util/schema-utils/index.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -256,7 +257,7 @@ export const ComposerExtract = z
     const { composerJsonType, require, requireDev } = file;
     const { registryUrls, gitRepos, pathRepos } = file.repositories;
 
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<ComposerManagerData>[] = [];
 
     const profiles = [
       {
@@ -294,7 +295,7 @@ export const ComposerExtract = z
           continue;
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<ComposerManagerData> = {
           depType,
           depName,
           currentValue,
@@ -306,7 +307,7 @@ export const ComposerExtract = z
 
         const lockedDep = locked.find((item) => item.name === depName);
         if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
-          dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
+          dep.lockedVersion = stripVersionPrefix(lockedDep.version);
         }
 
         const gitRepo = gitRepos[depName];

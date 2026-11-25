@@ -48,7 +48,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { isString } from '@sindresorhus/is';
-import * as aws4 from 'aws4';
+import aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';

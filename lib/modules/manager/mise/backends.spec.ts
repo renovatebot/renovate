@@ -1,6 +1,7 @@
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createCondaToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
@@ -86,6 +87,15 @@ describe('modules/manager/mise/backends', () => {
       ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
         skipReason: 'invalid-version',
+      });
+    });
+  });
+
+  describe('createCondaToolConfig()', () => {
+    it('should create a tooling config', () => {
+      expect(createCondaToolConfig('ripgrep')).toStrictEqual({
+        packageName: 'ripgrep',
+        datasource: 'conda',
       });
     });
   });

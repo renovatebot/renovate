@@ -1,6 +1,8 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import type { Http } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
@@ -84,8 +86,8 @@ export class MavenDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` tags in the results.';
 
-  constructor(id = MavenDatasource.id) {
-    super(id);
+  constructor(id = MavenDatasource.id, http?: Http) {
+    super(id, http);
   }
 
   async fetchVersionsFromMetadata(
@@ -95,7 +97,13 @@ export class MavenDatasource extends Datasource {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
     const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
     return metadataXmlResult
-      .transform(({ data: metadata }) => extractVersions(metadata))
+      .transform(({ data: metadata, isCacheable }) => {
+        const res = extractVersions(metadata);
+        if (isCacheable === false) {
+          res.isPrivate = true;
+        }
+        return res;
+      })
       .onError((err) => {
         logger.debug(
           `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
@@ -116,11 +124,13 @@ export class MavenDatasource extends Datasource {
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
 
-    if (
+    const isGradlePlugin =
       // groupId
-      (packageName.includes('.gradle.plugin:') ||
-        // artifactId
-        packageName.endsWith('.gradle.plugin')) &&
+      packageName.includes('.gradle.plugin:') ||
+      // artifactId
+      packageName.endsWith('.gradle.plugin');
+    if (
+      isGradlePlugin &&
       MAVEN_CENTRAL_URLS.some((url) => repoUrl === ensureTrailingSlash(url))
     ) {
       logger.debug(
@@ -142,14 +152,15 @@ export class MavenDatasource extends Datasource {
     );
 
     const latestSuitableVersion = getLatestSuitableVersion(releases);
-    const dependencyInfo =
-      latestSuitableVersion &&
-      (await getDependencyInfo(
+    let dependencyInfo;
+    if (latestSuitableVersion) {
+      dependencyInfo = await getDependencyInfo(
         this.http,
         dependency,
         repoUrl,
         latestSuitableVersion,
-      ));
+      );
+    }
 
     const result: ReleaseResult = {
       ...dependency,
@@ -164,7 +175,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
+    if (metadata.isPrivate) {
       result.isPrivate = true;
     }
 
@@ -176,9 +187,13 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = versionOrig
-      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
-      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
+    const cacheKey = buildCacheKey(
+      'postprocessRelease',
+      registryUrl,
+      packageName,
+      versionOrig,
+      version,
+    );
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven:postprocess-reject',
       cacheKey,

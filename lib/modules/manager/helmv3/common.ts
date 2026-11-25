@@ -11,6 +11,7 @@ import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { ecrRegex, getECRAuthToken } from '../../datasource/docker/ecr.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { removeOCIPrefix } from './oci.ts';
 import type { RepositoryRule } from './types.ts';
 
@@ -21,6 +22,8 @@ export async function generateLoginCmd(
   const { hostRule, repository } = repositoryRule;
   const { username, password, token } = hostRule;
   const loginCMD = 'helm registry login';
+  // Split off any path as it's not valid for the helm registry login command
+  const hostPart = repository.split('/')[0];
   if (username !== 'AWS' && ecrRegex.test(repository)) {
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
     const [, region] = coerceArray(ecrRegex.exec(repository));
@@ -36,12 +39,10 @@ export async function generateLoginCmd(
     addSecretForSanitizing(password);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${quote(repository)}`;
+    )} ${quote(hostPart)}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
-    // Split off any path as it's not valid for the helm registry login command
-    const hostPart = repository.split('/')[0];
     const cmd = `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
     )} ${quote(hostPart)}`;
@@ -50,7 +51,6 @@ export async function generateLoginCmd(
     return cmd;
   }
   if (token) {
-    const hostPart = repository.split('/')[0];
     return `${loginCMD} --username '' --password ${quote(token)} ${quote(hostPart)}`;
   }
   return null;
@@ -70,6 +70,32 @@ export async function generateRegistryLoginCmd(
     }),
   };
   return generateLoginCmd(repositoryRule);
+}
+
+/**
+ * Returns the username and password of the Helm host rule of `repository`, or null when it lacks either.
+ */
+export function findHelmRepositoryCredentials(
+  repository: string,
+): { username: string; password: string } | null {
+  const { username, password } = hostRules.find({
+    url: repository,
+    hostType: HelmDatasource.id,
+  });
+  return username && password ? { username, password } : null;
+}
+
+/**
+ * Returns the `--username` and `--password` arguments from the Helm host rule of `repository`, or none when it lacks either.
+ */
+export function helmRepositoryCredentialArgs(repository: string): string[] {
+  const credentials = findHelmRepositoryCredentials(repository);
+  return credentials
+    ? [
+        `--username ${quote(credentials.username)}`,
+        `--password ${quote(credentials.password)}`,
+      ]
+    : [];
 }
 
 export function generateHelmEnvs(helmConstraint?: string): ExtraEnv {

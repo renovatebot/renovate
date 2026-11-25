@@ -12,6 +12,7 @@ import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../../modules/versioning/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { memoize } from '../../../../../util/memoize.ts';
 import { regEx } from '../../../../../util/regex.ts';
@@ -146,7 +147,10 @@ export abstract class ChangeLogSource {
           return null;
         }
 
-        const releases = config.releases ?? (await getInRangeReleases(config));
+        let releases: Release[] | null | undefined = config.releases;
+        if (isNullOrUndefined(releases)) {
+          releases = await getInRangeReleases(config);
+        }
         // v8 ignore next -- `getInRangeReleases` only returns null on paths it already ignores
         if (!releases?.length) {
           logger.debug('No releases');
@@ -329,7 +333,7 @@ export abstract class ChangeLogSource {
     prev: string,
     next: string,
   ): string {
-    return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
+    return buildCacheKey(slugifyUrl(sourceUrl), packageName, prev, next);
   }
 
   getBaseUrl(config: BranchUpgradeConfig): string {

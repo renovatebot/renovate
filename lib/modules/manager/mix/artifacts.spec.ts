@@ -193,11 +193,9 @@ describe('modules/manager/mix/artifacts', () => {
     // erlang
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '22.3.4.26' },
-        { version: '23.1.1.0' },
         { version: '24.3.4.1' },
-        { version: '24.3.4.2' },
         { version: '25.0.0.0' },
+        { version: '27.3.4.3' },
       ],
     });
     // elixir
@@ -232,7 +230,7 @@ describe('modules/manager/mix/artifacts', () => {
           '-e CI -e HEX_HOME -e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          "bash -l -c 'install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix deps.update plug'",
+          "bash -l -c 'install-tool erlang 27.3.4.3 && install-tool elixir v1.13.4 && mix deps.update plug'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -296,6 +294,110 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
   });
 
+  describe('erlang constraint from the elixir constraint', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+      getPkgReleases.mockImplementation(({ packageName }) => {
+        const versions =
+          packageName === 'elixir-lang/elixir'
+            ? ['v1.10.4', 'v1.13.4', 'v1.15.8', 'v1.18.4', 'v1.20.5']
+            : [
+                '24.3.4.17',
+                '25.3.2.21',
+                '26.2.5.4',
+                '27.3.4.3',
+                '28.3.1.0',
+                '29.1.2.0',
+              ];
+        return Promise.resolve({
+          releases: versions.map((version) => ({ version })),
+        });
+      });
+    });
+
+    it.each`
+      constraint              | erlang         | elixir
+      ${undefined}            | ${'29.1.2.0'}  | ${'v1.20.5'}
+      ${'>=1.13.0 <2.0.0-0'}  | ${'29.1.2.0'}  | ${'v1.20.5'}
+      ${'>=1.15.0 <1.16.0-0'} | ${'26.2.5.4'}  | ${'v1.15.8'}
+      ${'1.18.4'}             | ${'27.3.4.3'}  | ${'1.18.4'}
+      ${'1.14.5'}             | ${'25.3.2.21'} | ${'1.14.5'}
+      ${'>=1.10.0 <1.11.0-0'} | ${'24.3.4.17'} | ${'v1.10.4'}
+      ${'>=1.10.0 <1.10.4.1'} | ${'29.1.2.0'}  | ${'v1.10.4'}
+    `(
+      'installs erlang $erlang and elixir $elixir for elixir constraint $constraint',
+      async ({
+        constraint,
+        erlang,
+        elixir,
+      }: {
+        constraint: string | undefined;
+        erlang: string;
+        elixir: string;
+      }) => {
+        const execSnapshots = mockExecAll();
+
+        await updateArtifacts({
+          packageFileName: 'mix.exs',
+          updatedDeps: [{ depName: 'plug' }],
+          newPackageFileContent: '{}',
+          config: { ...config, extractedConstraints: { elixir: constraint } },
+        });
+
+        expect(execSnapshots).toMatchObject([
+          { cmd: `install-tool erlang ${erlang}` },
+          { cmd: `install-tool elixir ${elixir}` },
+          { cmd: 'mix deps.update plug' },
+        ]);
+      },
+    );
+
+    it('prefers the configured elixir constraint over the extracted one', async () => {
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          constraints: { elixir: '1.15.8' },
+          extractedConstraints: { elixir: '>=1.18.0 <2.0.0-0' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool erlang 26.2.5.4' },
+        { cmd: 'install-tool elixir 1.15.8' },
+        { cmd: 'mix deps.update plug' },
+      ]);
+    });
+
+    it('keeps the configured erlang constraint', async () => {
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          constraints: { erlang: '25' },
+          extractedConstraints: { elixir: '>=1.18.0 <2.0.0-0' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool erlang 25.3.2.21' },
+        { cmd: 'install-tool elixir v1.20.5' },
+        { cmd: 'mix deps.update plug' },
+      ]);
+    });
+  });
+
   it('authenticates to private repositories in updated dependencies', async () => {
     GlobalConfig.set({
       ...adminConfig,
@@ -314,11 +416,9 @@ describe('modules/manager/mix/artifacts', () => {
     // erlang
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '22.3.4.26' },
-        { version: '23.1.1.0' },
         { version: '24.3.4.1' },
-        { version: '24.3.4.2' },
         { version: '25.0.0.0' },
+        { version: '27.3.4.3' },
       ],
     });
     // elixir
@@ -361,7 +461,7 @@ describe('modules/manager/mix/artifacts', () => {
           '-e CI -e HEX_HOME -e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          "bash -l -c 'install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && " +
+          "bash -l -c 'install-tool erlang 27.3.4.3 && install-tool elixir v1.13.4 && " +
           'mix hex.organization auth renovate_test --key valid_test_token && ' +
           "mix deps.update private_package other_package'",
         options: { cwd: '/tmp/github/some/repo' },
@@ -590,11 +690,9 @@ describe('modules/manager/mix/artifacts', () => {
     // erlang
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '22.3.4.26' },
-        { version: '23.1.1.0' },
         { version: '24.3.4.1' },
-        { version: '24.3.4.2' },
         { version: '25.0.0.0' },
+        { version: '27.3.4.3' },
       ],
     });
     // elixir
@@ -619,7 +717,7 @@ describe('modules/manager/mix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool erlang 27.3.4.3' },
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix hex.organization auth an_organization --key an_organization_token',
@@ -643,7 +741,7 @@ describe('modules/manager/mix/artifacts', () => {
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
+      releases: [{ version: '27.3.4.3' }],
     });
     // elixir
     getPkgReleases.mockResolvedValueOnce({
@@ -665,7 +763,7 @@ describe('modules/manager/mix/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool erlang 27.3.4.3' },
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: "mix hex.organization auth 'evil --key leaked_or_arbitrary' --key secret_token",

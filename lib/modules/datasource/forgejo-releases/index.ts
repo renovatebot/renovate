@@ -19,9 +19,10 @@ export class ForgejoReleasesDatasource extends GiteaReleasesDatasource {
   protected override readonly cacheNamespace: PackageCacheNamespace =
     'datasource-forgejo-releases';
 
-  override http = new ForgejoHttp(ForgejoReleasesDatasource.id);
-
   constructor() {
-    super(ForgejoReleasesDatasource.id);
+    super(
+      ForgejoReleasesDatasource.id,
+      new ForgejoHttp(ForgejoReleasesDatasource.id),
+    );
   }
 }

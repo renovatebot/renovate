@@ -25,8 +25,6 @@ export class RustVersionDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
 
-  override readonly caching = true;
-
   constructor() {
     super(RustVersionDatasource.id);
   }
@@ -101,7 +99,7 @@ export class RustVersionDatasource extends Datasource {
     return this.cached(
       {
         key: config.registryUrl!,
-        cacheable: true,
+        public: true,
       },
       () => this.fetchReleases(config),
     );

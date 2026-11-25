@@ -14,7 +14,7 @@ export const knownDepTypes = [
   {
     depType: 'docker',
     description:
-      'A Docker image reference in a `uses:` field (e.g. `uses: docker://alpine:3`)',
+      'A Docker image reference in a `uses:` field (e.g. `uses: docker://alpine:3`), or in the `runs.image:` field of a Docker container action (e.g. `image: docker://alpine:3`)',
   },
   {
     depType: 'container',

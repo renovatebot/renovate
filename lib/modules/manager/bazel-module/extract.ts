@@ -38,7 +38,10 @@ export async function extractPackageFile(
           // Reconstruct the image reference from parsed data
           const imageRef = `${dep.packageName}${dep.currentValue ? `:${dep.currentValue}` : ''}${dep.currentDigest ? `@${dep.currentDigest}` : ''}`;
           // Use getDep to handle registry aliases properly
-          const processedDep = getDep(imageRef, false, config?.registryAliases);
+          const processedDep = getDep(imageRef, {
+            specifyReplaceString: false,
+            registryAliases: config?.registryAliases,
+          });
           return {
             ...processedDep,
             depType: 'oci_pull',

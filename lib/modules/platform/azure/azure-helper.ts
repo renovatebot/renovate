@@ -148,11 +148,10 @@ export async function getMergeMethod(
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }
   function isRelevantScope(scope: Scope): boolean {
-    if (
-      scope.matchKind === 'DefaultBranch' &&
-      // TODO: types (#22198)
-      (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
-    ) {
+    // TODO: types (#22198)
+    const isDefaultBranchRef =
+      !branchRef || branchRef === `refs/heads/${defaultBranch!}`;
+    if (scope.matchKind === 'DefaultBranch' && isDefaultBranchRef) {
       return true;
     }
     if (scope.repositoryId !== repoId && scope.repositoryId !== null) {

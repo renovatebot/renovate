@@ -92,6 +92,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('metadata.xml')),
       },
       timestamp,
@@ -100,6 +101,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('pom.xml')),
       },
       timestamp,
@@ -137,6 +139,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('metadata.xml')),
       },
       timestamp,
@@ -145,6 +148,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(pomWithEmptyRelocation),
       },
       timestamp,
@@ -225,6 +229,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('metadata-snapshot-only.xml')),
       },
       timestamp,
@@ -233,6 +238,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(
           Fixtures.get('metadata-snapshot-version.xml'),
         ),
@@ -243,6 +249,7 @@ describe('modules/datasource/maven/cache', () => {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
+        headers: {},
         body: CachedMavenXml.parse(Fixtures.get('pom.xml')),
       },
       timestamp,

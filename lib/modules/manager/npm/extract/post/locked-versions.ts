@@ -4,6 +4,11 @@ import upath from 'upath';
 import { logger } from '../../../../../logger/index.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import type { PackageFile } from '../../../types.ts';
+import {
+  isDevEnginesDepType,
+  isPackageManagerDepType,
+  isToolDepType,
+} from '../../dep-types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { getNpmLock } from '../npm.ts';
 import { getPnpmLock } from '../pnpm.ts';
@@ -39,17 +44,17 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.yarn = yarn;
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion =
-          lockFileCache[yarnLock].lockedVersions?.[
-            // TODO: types (#22198)
-            `${dep.depName}@${dep.currentValue}`
-          ];
-        if (
-          (dep.depType === 'engines' || dep.depType === 'packageManager') &&
-          dep.depName === 'yarn' &&
-          !isYarn1
-        ) {
-          dep.packageName = '@yarnpkg/cli';
+        if (!isDevEnginesDepType(dep.depType)) {
+          dep.lockedVersion =
+            lockFileCache[yarnLock].lockedVersions?.[
+              // TODO: types (#22198)
+              `${dep.depName}@${dep.currentValue}`
+            ];
+        }
+        const isYarnVersionDepType =
+          dep.depType === 'engines' || isPackageManagerDepType(dep.depType);
+        if (isYarnVersionDepType && dep.depName === 'yarn' && !isYarn1) {
+          dep.packageName = '@yarnpkg/cli-dist';
         }
       }
     } else if (npmLock) {
@@ -112,11 +117,7 @@ export async function getLockedVersions(
 
       for (const dep of packageFile.deps) {
         // Skip dependency types which are not locked in the lock file
-        if (
-          dep.depType === 'engines' ||
-          dep.depType === 'packageManager' ||
-          dep.depType === 'volta'
-        ) {
+        if (isToolDepType(dep.depType) || dep.depType === 'volta') {
           continue;
         }
 

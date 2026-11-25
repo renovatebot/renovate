@@ -16,6 +16,7 @@ import {
   id as npmVersioningId,
 } from '../../../../versioning/npm/index.ts';
 import type { PackageDependency } from '../../../types.ts';
+import { isToolDepType } from '../../dep-types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
@@ -53,9 +54,9 @@ export function parseDepName(depType: string, key: string): string {
 export function extractDependency(
   depType: string,
   depName: string,
-  input: string,
-): PackageDependency {
-  const dep: PackageDependency = {};
+  input: unknown,
+): Omit<PackageDependency, 'managerData'> {
+  const dep: Omit<PackageDependency, 'managerData'> = {};
   if (!validateNpmPackageName(depName).validForOldPackages) {
     dep.skipReason = 'invalid-name';
     return dep;
@@ -65,7 +66,7 @@ export function extractDependency(
     return dep;
   }
   dep.currentValue = input.trim();
-  if (depType === 'engines' || depType === 'packageManager') {
+  if (isToolDepType(depType)) {
     if (depName === 'node') {
       dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
@@ -74,7 +75,7 @@ export function extractDependency(
       const major =
         isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
       if (major && major > 1) {
-        dep.packageName = '@yarnpkg/cli';
+        dep.packageName = '@yarnpkg/cli-dist';
       }
     } else if (depName === 'npm') {
       dep.datasource = NpmDatasource.id;
@@ -82,6 +83,9 @@ export function extractDependency(
     } else if (depName === 'pnpm') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'pnpm';
+    } else if (depType === 'devEngines.runtime' && depName === 'deno') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Deno';
     } else if (depName === 'vscode') {
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
@@ -108,7 +112,7 @@ export function extractDependency(
       const major =
         isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
       if (major && major > 1) {
-        dep.packageName = '@yarnpkg/cli';
+        dep.packageName = '@yarnpkg/cli-dist';
       }
     } else if (depName === 'npm') {
       dep.datasource = NpmDatasource.id;
@@ -249,7 +253,7 @@ export function getExtractedConstraints(
   for (const dep of deps) {
     if (
       !dep.skipReason &&
-      (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+      isToolDepType(dep.depType) &&
       dep.depName &&
       isConstraintName(dep.depName) &&
       constraints.includes(dep.depName) &&

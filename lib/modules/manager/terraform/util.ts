@@ -59,7 +59,10 @@ export function applyOciDependency(
   // Strip optional `//subfolder` sub-path (e.g. `example.com/repo//modules/vpc`)
   const imageRef = (url.host + url.pathname).replace(regEx(/\/\/.+$/), '');
 
-  const parsed = getDep(imageRef, false, registryAliases);
+  const parsed = getDep(imageRef, {
+    specifyReplaceString: false,
+    registryAliases,
+  });
   dep.packageName = parsed.packageName;
   dep.datasource = parsed.datasource;
   dep.currentValue = url.searchParams.get('tag') ?? undefined;

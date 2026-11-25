@@ -17,14 +17,13 @@ dedupePeers: true
 
 catalog:
   esbuild: 0.28.2
-  tar: 7.5.22
-  vite: 8.3.0
+  tar: 7.5.23
+  vite: 8.3.8
 
 overrides:
-  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
-  '@yarnpkg/core@4.5.0>tar': 'catalog:'
   esbuild: 'catalog:'
-  protobufjs@8.0.1: 8.8.0
+  katex@>=0.11.0 <0.18.2: 0.19.1
+  re2js@>=2.2.0 <2.8.7: 2.10.0
   vite: 'catalog:'
 
 ignoredOptionalDependencies:
@@ -40,6 +39,8 @@ strictPeerDependencies: true
 # 7 days
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - '@containerbase/base'
+  - '@renovatebot/base-image'
   - '@renovatebot/detect-tools'
   - '@renovatebot/good-enough-parser'
   - '@renovatebot/osv-offline'
@@ -50,7 +51,5 @@ minimumReleaseAgeExclude:
   - '@containerbase/eslint-plugin'
   - '@containerbase/istanbul-reports-html'
   - '@containerbase/semantic-release-pnpm'
-  # Renovate security update: tar@7.5.21
-  - tar@7.5.21
 
 provenance: true

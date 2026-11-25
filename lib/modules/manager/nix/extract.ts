@@ -18,7 +18,7 @@ const lockableHTTPTarballProtocol = regEx(
 );
 
 const lockableChannelOriginalUrl = regEx(
-  '^https://(?:channels\\.nixos\\.org|nixos\\.org/channels)/(?<channel>[^/]+)/nixexprs\\.tar\\.xz$',
+  '^https://(?:channels\\.nixos\\.org|nixos\\.org/channels)/(?<channel>[^/]+)/nixexprs\\.tar\\.(?:xz|zst)$',
 );
 
 export async function extractPackageFile(
@@ -198,9 +198,5 @@ export async function extractPackageFile(
     deps.push(dep);
   }
 
-  if (deps.length) {
-    return { deps };
-  }
-
-  return null;
+  return { deps };
 }

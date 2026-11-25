@@ -5,9 +5,15 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import {
+  isNotFound,
+  isRateLimitedOrServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
@@ -61,15 +67,14 @@ function releasesGithubUrl(
 function handleError(packageName: string, err: HttpError): void {
   const errorData = { packageName, err };
 
-  const statusCode = err.response?.statusCode ?? 0;
-  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
+  if (isRateLimitedOrServerError(err)) {
     logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (statusCode === 401) {
+  if (isUnauthorized(err)) {
     logger.debug(errorData, 'Authorization error');
-  } else if (statusCode === 404) {
+  } else if (isNotFound(err)) {
     logger.debug(errorData, 'Package lookup error');
   } else if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
     logger.trace(errorData, refusedHostMessage(err));
@@ -245,8 +250,7 @@ export class PodDatasource extends Datasource {
       {
         ttlMinutes: 30,
         namespace: `datasource-${PodDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

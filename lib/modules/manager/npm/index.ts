@@ -2,10 +2,18 @@ import type { Category } from '../../../constants/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
+import {
+  minReleaseAgeNpmRange,
+  minimumReleaseAgeEnforcedPnpmRange,
+  minimumReleaseAgePnpmRange,
+  minimumReleaseAgeYarnRange,
+} from './minimum-release-age.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
 export { extractAllPackageFiles } from './extract/index.ts';
+export { enforcesMinimumReleaseAge } from './minimum-release-age.ts';
 export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,
@@ -14,6 +22,7 @@ export {
 } from './update/index.ts';
 
 export const supportsLockFileMaintenance = true;
+export const supportsNpmrc = true;
 export const lockFileNames = [
   'package-lock.json',
   'pnpm-lock.yaml',
@@ -25,6 +34,27 @@ export const lockFileMaintenanceIsDelegatedToPackageManager =
 export const displayName = 'npm';
 export const url = 'https://docs.npmjs.com';
 export const categories: Category[] = ['js'];
+
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  npm: {
+    passesMinimumReleaseAge: true,
+    readsConfiguredAge: minReleaseAgeNpmRange,
+    enforcedInLockFile: true,
+    note: 'Passes `--before`, unless `.npmrc` sets `min-release-age`. If `minimumReleaseAgePackageManagerSync` is enabled, reads `.npmrc`, see [npm](#npm).',
+  },
+  pnpm: {
+    passesMinimumReleaseAge: minimumReleaseAgePnpmRange,
+    readsConfiguredAge: minimumReleaseAgePnpmRange,
+    enforcedInLockFile: minimumReleaseAgeEnforcedPnpmRange,
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `--config.minimum-release-age` and reads `pnpm-workspace.yaml`, see [pnpm](#pnpm).',
+  },
+  yarn: {
+    passesMinimumReleaseAge: minimumReleaseAgeYarnRange,
+    readsConfiguredAge: minimumReleaseAgeYarnRange,
+    enforcedInLockFile: minimumReleaseAgeYarnRange,
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `YARN_NPM_MINIMAL_AGE_GATE` and reads `.yarnrc.yml`, see [Yarn](#yarn).',
+  },
+};
 
 export const defaultConfig = {
   managerFilePatterns: [
@@ -40,7 +70,7 @@ export const defaultConfig = {
   },
   prBodyDefinitions: {
     Change:
-      "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+      "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if packageName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
   },
 };
 

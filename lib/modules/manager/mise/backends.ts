@@ -5,6 +5,8 @@ import {
   isUrlString,
 } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -36,7 +38,7 @@ export function createAquaToolConfig(
     packageName: name,
     datasource: GithubTagsDatasource.id,
     // Trim the leading 'v' from both the current and extracted version
-    currentValue: version.replace(regEx(/^v/), ''),
+    currentValue: stripVersionPrefix(version),
     extractVersion: '^v?(?<version>.+)',
   };
 }
@@ -90,6 +92,17 @@ export function createCargoToolConfig(
         currentValue: gitVersion,
       };
   }
+}
+
+/**
+ * Create a tooling config for conda backend
+ * @link https://mise.jdx.dev/dev-tools/backends/conda.html
+ */
+export function createCondaToolConfig(name: string): BackendToolingConfig {
+  return {
+    packageName: name,
+    datasource: CondaDatasource.id,
+  };
 }
 
 /**

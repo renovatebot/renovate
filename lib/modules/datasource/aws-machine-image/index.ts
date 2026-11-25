@@ -2,6 +2,7 @@ import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image/index.ts';
@@ -13,8 +14,6 @@ export class AwsMachineImageDatasource extends Datasource {
   static readonly id = 'aws-machine-image';
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
-
-  override readonly caching = true;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -111,7 +110,7 @@ export class AwsMachineImageDatasource extends Datasource {
   getSortedAwsMachineImages(serializedAmiFilter: string): Promise<Image[]> {
     return this.cached(
       {
-        key: `getSortedAwsMachineImages:${serializedAmiFilter}`,
+        key: buildCacheKey('getSortedAwsMachineImages', serializedAmiFilter),
       },
       () => this.fetchSortedAwsMachineImages(serializedAmiFilter),
     );
@@ -148,7 +147,7 @@ export class AwsMachineImageDatasource extends Datasource {
   ): Promise<string | null> {
     return this.cached(
       {
-        key: `getDigest:${config.packageName}:${newValue ?? ''}`,
+        key: buildCacheKey('getDigest', config.packageName, newValue),
         fallback: true,
       },
       () => this.fetchDigest(config, newValue),
@@ -176,7 +175,7 @@ export class AwsMachineImageDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.packageName}`,
+        key: buildCacheKey('getReleases', config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

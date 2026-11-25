@@ -13,9 +13,14 @@ import type {
   VolumeOption,
   VolumesPair,
 } from '../types.ts';
-import { isCommandWithOptions } from '../utils.ts';
+import { getChildEnv, isCommandWithOptions } from '../utils.ts';
 
 const prefetchedImages = new Map<string, string>();
+
+// rawExec does not inherit the environment, so pass the allowed variables such as PATH and DOCKER_HOST.
+function dockerExec(cmd: string): ReturnType<typeof rawExec> {
+  return rawExec(cmd, { env: getChildEnv() });
+}
 
 const digestRegex = regEx('Digest: (.*?)\n');
 
@@ -30,7 +35,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    const res = await rawExec(`docker pull ${taggedImage}`, {});
+    const res = await dockerExec(`docker pull ${taggedImage}`);
     const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
     logger.debug(
       `Finished fetching Docker image ${taggedImage}@${imageDigest}`,
@@ -87,12 +92,12 @@ export async function removeDockerContainer(
   const containerName = getContainerName(sideCarName, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {});
+    const res = await dockerExec(cmd);
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
       logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {});
+      await dockerExec(cmd);
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
@@ -116,9 +121,8 @@ export async function removeDanglingContainers(): Promise<void> {
     logger.debug(
       `Removing dangling child containers with label ${containerLabel}`,
     );
-    const res = await rawExec(
+    const res = await dockerExec(
       `docker ps --filter label=${containerLabel} -aq`,
-      {},
     );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
@@ -127,7 +131,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(isTruthy);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
+      await dockerExec(`docker rm -f ${containerIds.join(' ')}`);
     } else {
       logger.debug('No dangling containers to remove');
     }
@@ -148,6 +152,7 @@ export async function generateDockerCommand(
   preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
   sideCarImage: string,
+  hasInput = false,
 ): Promise<string> {
   const { envVars, cwd } = options;
   const volumes = coerceArray(options.volumes);
@@ -160,6 +165,9 @@ export async function generateDockerCommand(
     dockerCliOptions,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
+  if (hasInput) {
+    result.push('-i');
+  }
   const containerName = getContainerName(sideCarName, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
@@ -205,30 +213,42 @@ export async function generateDockerCommand(
 
   const bashCommandParts = [];
 
+  function preparePreCommand(command: string): string {
+    return hasInput ? `{ ${command}\n} </dev/null >&2` : command;
+  }
+
   for (const preCommand of preCommands) {
     if (
       isCommandWithOptions(preCommand) &&
       isString(join(preCommand.command))
     ) {
+      const command = preparePreCommand(join(preCommand.command));
       if (preCommand.ignoreFailure) {
-        bashCommandParts.push(`${join(preCommand.command)} || true`);
+        bashCommandParts.push(`${command} || true`);
       } else {
-        bashCommandParts.push(join(preCommand.command));
+        bashCommandParts.push(command);
       }
     } else if (isString(preCommand)) {
-      bashCommandParts.push(preCommand);
+      bashCommandParts.push(preparePreCommand(preCommand));
     }
   }
 
-  for (const command of commands) {
+  for (const [index, command] of commands.entries()) {
+    const commandText = isCommandWithOptions(command)
+      ? join(command.command)
+      : command;
+    const preparedCommand =
+      index === commands.length - 1
+        ? commandText
+        : preparePreCommand(commandText);
     if (isCommandWithOptions(command)) {
       if (command.ignoreFailure) {
-        bashCommandParts.push(`${join(command.command)} || true`);
+        bashCommandParts.push(`${preparedCommand} || true`);
       } else {
-        bashCommandParts.push(join(command.command));
+        bashCommandParts.push(preparedCommand);
       }
     } else {
-      bashCommandParts.push(command);
+      bashCommandParts.push(preparedCommand);
     }
   }
 

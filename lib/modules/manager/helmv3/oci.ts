@@ -38,8 +38,7 @@ export function getOciChartDep(
   const image = trimTrailingSlash(removeOCIPrefix(repository));
   const { packageName, skipReason } = getDep(
     chart ? `${image}/${chart}` : image,
-    false,
-    registryAliases,
+    { specifyReplaceString: false, registryAliases },
   );
   return {
     datasource: DockerDatasource.id,
