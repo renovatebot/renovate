@@ -355,6 +355,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
 
+  return hydratePr(azurePr);
+}
+
+async function hydratePr(azurePr: AzurePr): Promise<AzurePr> {
+  const pullRequestId = azurePr.number;
   const azureApiGit = await azureApi.gitApi();
   // the PR list returns descriptions truncated to 400 characters, so read the
   // full one for the body hash
@@ -451,7 +456,49 @@ export async function getBranchPr(
     state: 'open',
     targetBranch,
   });
-  return existingPr ? getPr(existingPr.number) : null;
+  if (
+    existingPr &&
+    (!targetBranch || existingPr.targetBranch === targetBranch)
+  ) {
+    return getPr(existingPr.number);
+  }
+
+  const legacyAuthorIds = GlobalConfig.get('azureLegacyPrAuthorIds');
+  if (
+    !targetBranch ||
+    !legacyAuthorIds.length ||
+    config.ignorePrAuthor ||
+    !renovateUserId
+  ) {
+    return existingPr ? getPr(existingPr.number) : null;
+  }
+
+  const sourceRefName = getNewBranchName(branchName);
+  const targetRefName = getNewBranchName(targetBranch);
+  if (!git.branchExists(branchName)) {
+    return null;
+  }
+  const [legacyPr] = await getRepoPullRequests({
+    gitApi: await azureApi.gitApi(),
+    searchCriteria: {
+      sourceRefName,
+      targetRefName,
+      sourceRepositoryId: config.repoId,
+      status: PullRequestStatus.Active,
+    },
+    skip: 0,
+    top: 1,
+  });
+  if (
+    legacyPr?.status === PullRequestStatus.Active &&
+    legacyPr.sourceRefName === sourceRefName &&
+    legacyPr.targetRefName === targetRefName &&
+    legacyPr.createdBy?.id &&
+    legacyAuthorIds.includes(legacyPr.createdBy.id)
+  ) {
+    return hydratePr(getRenovatePRFormat(legacyPr));
+  }
+  return null;
 }
 
 async function getStatusCheck(branchName: string): Promise<GitStatus[]> {

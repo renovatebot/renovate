@@ -1016,6 +1016,14 @@ Value of `0` means no caching.
 !!! warning
   When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
+## `azureLegacyPrAuthorIds`
+
+Azure DevOps only. Set this to the Azure DevOps identity IDs of former Renovate accounts during an account migration.
+If the current account has no active PR for an existing branch and target, Renovate can reuse an active PR for that exact branch pair from an explicitly listed account.
+Use dedicated automation identities where possible: an author match does not establish that Renovate originally created the PR.
+Remove the setting after the migration is complete.
+This setting has no effect when `ignorePrAuthor` is enabled.
+
 ## `ignorePrAuthor`
 
 This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate app to self-hosted.

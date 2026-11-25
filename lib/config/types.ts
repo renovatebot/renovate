@@ -283,6 +283,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   repositoryCacheForceLocal?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
+  azureLegacyPrAuthorIds?: string[];
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;

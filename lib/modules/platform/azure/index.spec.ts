@@ -789,6 +789,80 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('getBranchPr(branchName, targetBranch)', () => {
+    it.each([
+      ['legacy-author', 'refs/heads/main', PullRequestStatus.Active, true],
+      ['other-author', 'refs/heads/main', PullRequestStatus.Active, false],
+      ['legacy-author', 'refs/heads/another', PullRequestStatus.Active, false],
+      ['legacy-author', 'refs/heads/main', PullRequestStatus.Abandoned, false],
+    ])(
+      'reuses only allowlisted active PRs for the exact branch pair (%s, %s, %s)',
+      async (author, targetRefName, status, expectedMatch) => {
+        GlobalConfig.set({ azureLegacyPrAuthorIds: ['legacy-author'] });
+        azureApi.getAuthenticatedUserId.mockResolvedValue('current-author');
+        await azure.initPlatform({
+          endpoint: 'https://azure.test',
+          token: 'token',
+        });
+        await initRepo();
+
+        const getPullRequests = vi
+          .fn()
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([
+            {
+              pullRequestId: 123,
+              sourceRefName: 'refs/heads/renovate/update',
+              targetRefName,
+              status,
+              createdBy: { id: author },
+            },
+          ]);
+        const getPullRequestById = vi
+          .fn()
+          .mockResolvedValue({ description: 'Complete description' });
+        const getPullRequestLabels = vi
+          .fn()
+          .mockResolvedValue([{ active: true, name: 'dependency' }]);
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({
+            getPullRequests,
+            getPullRequestById,
+            getPullRequestLabels,
+          }),
+        );
+
+        const pr = await azure.getBranchPr('renovate/update', 'main');
+
+        expect(getPullRequests).toHaveBeenCalledTimes(2);
+        expect(getPullRequests.mock.calls[0][1]).toMatchObject({
+          creatorId: 'current-author',
+          status: PullRequestStatus.All,
+        });
+        expect(getPullRequests.mock.calls[1].slice(1)).toEqual([
+          {
+            sourceRefName: 'refs/heads/renovate/update',
+            targetRefName: 'refs/heads/main',
+            sourceRepositoryId: getPullRequests.mock.calls[0][0],
+            status: PullRequestStatus.Active,
+          },
+          expect.any(String),
+          0,
+          0,
+          1,
+        ]);
+        if (expectedMatch) {
+          expect(pr).toMatchObject({ number: 123, labels: ['dependency'] });
+          expect(getPullRequestById).toHaveBeenCalledWith(
+            123,
+            expect.any(String),
+          );
+        } else {
+          expect(pr).toBeNull();
+          expect(getPullRequestById).not.toHaveBeenCalled();
+        }
+      },
+    );
+
     it('should return null if no PR exists', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockResolvedValue(
