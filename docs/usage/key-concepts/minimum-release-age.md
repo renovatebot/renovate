@@ -266,8 +266,10 @@ pnpm enforces the minimum release age during lock file maintenance of a `pnpm-lo
 
 - `minimumReleaseAge` or the project's pnpm setting is set, and
 - the project's `pnpm-workspace.yaml` does not set `minimumReleaseAgeStrict: false`, and
-- the project's `pnpm-workspace.yaml` does not set `minimumReleaseAgeExclude`, which lets pnpm install versions of the excluded packages which are too new, and
 - the pnpm version used is v10.17.0 to v10.x, v11.0.4 to v11.x, or v12.3.0 or later
+
+Renovate treats the packages in `minimumReleaseAgeExclude` as trusted by you.
+pnpm installs new versions of those packages during lock file maintenance, and Renovate does not hold the branch back for them.
 
 pnpm v10.16.0 skips the check for an exact version from its metadata cache, and pnpm v11.0.0 to v11.0.3 and v12.0.0 to v12.2.x install a version which is too new if no other version matches.
 Renovate reads the pnpm version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), the `lockfileVersion` of the `pnpm-lock.yaml`, or the extracted constraints of tool managers.
@@ -299,8 +301,8 @@ minimumReleaseAgeExclude:
 - An update of `semver` to `7.7.3` runs pnpm with `--config.minimum-release-age=14400 --config.minimum-release-age-exclude=@types/node --config.minimum-release-age-exclude=semver@7.7.3`.
 - An update of `@types/node` runs pnpm with `--config.minimum-release-age=14400` only, as the `pnpm-workspace.yaml` already excludes it.
 - Lock file maintenance runs pnpm with `--config.minimum-release-age=14400`.
-  As pnpm installs new versions of `@types/node`, Renovate still waits for the release timestamps before it creates the branch.
-  Without `minimumReleaseAgeExclude`, Renovate creates the branch without waiting, unless the `pnpm-workspace.yaml` sets `minimumReleaseAgeStrict: false`.
+  pnpm may install new versions of `@types/node`, which you trust, and enforces the minimum release age for every other package.
+  Renovate creates the branch without waiting, unless the `pnpm-workspace.yaml` sets `minimumReleaseAgeStrict: false`.
 
 #### Yarn
 

@@ -74,8 +74,6 @@ export type NpmrcCooldown =
 export interface PnpmManagerDataMinimumReleaseAge {
   minimumReleaseAge?: number;
   minimumReleaseAgeStrict?: boolean;
-  /** whether `minimumReleaseAgeExclude` lets pnpm install versions of some packages which are too new */
-  hasMinimumReleaseAgeExclude?: boolean;
   /** the pnpm constraint from the `constraints` config, the root `package.json` or the `lockfileVersion` of the lock file */
   pnpmConstraint?: string;
   /** the `minimum-release-age` of the `.npmrc` of the root `package.json`, which pnpm reads before v11 */

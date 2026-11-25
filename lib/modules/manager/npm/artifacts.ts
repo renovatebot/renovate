@@ -14,6 +14,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { isPackageManagerDepType } from './dep-types.ts';
 import type { NpmManagerData } from './types.ts';
 import { updateDependency } from './update/dependency/index.ts';
 
@@ -63,16 +64,12 @@ async function handlePackageManagerUpdates(
 ): Promise<UpdateArtifactsResult | null> {
   const { packageFileName, updatedDeps, newPackageFileContent } =
     updateArtifactsConfig;
-  const packageManagerUpdates = updatedDeps.filter((dep) => {
-    const isPackageManager =
-      dep.depType === 'packageManager' ||
-      dep.depType === 'devEngines.packageManager';
-    return (
-      isPackageManager &&
+  const packageManagerUpdates = updatedDeps.filter(
+    (dep) =>
+      isPackageManagerDepType(dep.depType) &&
       dep.currentValue &&
-      regEx(versionWithHashRegString).test(dep.currentValue)
-    );
-  });
+      regEx(versionWithHashRegString).test(dep.currentValue),
+  );
 
   let newContent = newPackageFileContent;
   for (const packageManagerUpdate of packageManagerUpdates) {
