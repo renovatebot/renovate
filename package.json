@@ -201,7 +201,7 @@
     "commander": "15.1.0",
     "common-tags": "1.8.2",
     "croner": "10.0.1",
-    "cronstrue": "3.42.0",
+    "cronstrue": "3.43.0",
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "7.0.2",
