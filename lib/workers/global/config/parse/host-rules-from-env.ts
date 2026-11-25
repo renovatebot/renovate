@@ -74,10 +74,8 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
       .replace(regEx(/__/g), '-')
       .split('_');
     const hostType = splitEnv.shift()!;
-    if (
-      datasources.has(hostType) ||
-      (platforms.has(hostType) && splitEnv.length > 1)
-    ) {
+    const isPlatformWithHost = platforms.has(hostType) && splitEnv.length > 1;
+    if (datasources.has(hostType) || isPlatformWithHost) {
       let suffix = splitEnv.pop()!;
       if (isAuthField(suffix) || isHttpsAuthField(suffix)) {
         suffix = restoreHttpsAuthField(suffix);

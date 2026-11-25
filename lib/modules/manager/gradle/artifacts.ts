@@ -47,6 +47,16 @@ export function isGradleExecutionAllowed(command: string): boolean {
   return true;
 }
 
+function isRootBuildFile(
+  packageFileName: string,
+  gradlewFile: string,
+): boolean {
+  return (
+    isGradleBuildFile(packageFileName) &&
+    upath.dirname(packageFileName) === upath.dirname(gradlewFile)
+  );
+}
+
 // .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
   return fileName.endsWith('.lockfile') || isGcvLockFile(fileName);
@@ -137,7 +147,8 @@ async function buildUpdateVerificationMetadataCmd(
     );
   }
 
-  if ((verifiesChecksums || verifiesSignatures) && !hashTypes.length) {
+  const verifiesIntegrity = !!verifiesChecksums || !!verifiesSignatures;
+  if (verifiesIntegrity && !hashTypes.length) {
     // fallback algorithm for pgp and in case a weak algorithm (md5, sha1) is used for checksums
     hashTypes.push('sha256');
   }
@@ -190,8 +201,7 @@ export async function updateArtifacts({
 
   if (
     config.isLockFileMaintenance &&
-    (!isGradleBuildFile(packageFileName) ||
-      upath.dirname(packageFileName) !== upath.dirname(gradlewFile))
+    !isRootBuildFile(packageFileName, gradlewFile)
   ) {
     logger.trace(
       'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',

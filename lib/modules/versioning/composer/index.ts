@@ -294,9 +294,10 @@ function getNewValue({
     regEx(/^[~^](?:[0-9]*(?:\.[0-9]*)?)$/).test(currentValue)
   ) {
     const operator = currentValue.at(0)!;
+    const isMajorIncrease = isNumber(currentMajor) && toMajor > currentMajor;
     if (rangeStrategy === 'bump') {
       newValue = `${operator}${newVersion}`;
-    } else if ((isNumber(currentMajor) && toMajor > currentMajor) || !toMinor) {
+    } else if (isMajorIncrease || !toMinor) {
       // handle ~4.1 case
       newValue = `${operator}${toMajor}.0`;
     } else {

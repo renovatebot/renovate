@@ -1,4 +1,4 @@
-import type { Options, Result } from 'execa';
+import type { Options } from 'execa';
 import { execa } from 'execa';
 
 const maxBuffer = 20 * 1024 * 1024;
@@ -9,6 +9,11 @@ export type TextOptions = Extract<
   { readonly encoding?: 'utf8' | 'utf16le' }
 >;
 
+/** Result of {@link exec}, typed the way execa merges the options */
+export type ExecResult<T extends TextOptions> = Awaited<
+  ReturnType<typeof execa<T & { encoding: 'utf8' }>>
+>;
+
 /**
  * Execute a command asynchronously using execa
  */
@@ -16,7 +21,7 @@ export async function exec<T extends TextOptions = Record<never, never>>(
   cmd: string,
   args: string[] = [],
   opts?: T,
-): Promise<Result<T & { encoding: 'utf8' }>> {
+): Promise<ExecResult<T>> {
   const options = { ...opts, maxBuffer, encoding: 'utf8' } as T & {
     encoding: 'utf8';
   };

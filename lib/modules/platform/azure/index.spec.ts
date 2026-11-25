@@ -266,6 +266,83 @@ describe('modules/platform/azure/index', () => {
         }),
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
+
+    describe('initRepo URL encoding', () => {
+      it('does not manually encode whitespace in org/collection when falling back to manualUrl', async () => {
+        await azure.initPlatform({
+          endpoint: 'https://dev.azure.com/my org/',
+          token: 'token',
+        });
+
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            getRepositories: vi.fn().mockResolvedValue([
+              {
+                name: 'my-repo',
+                defaultBranch: 'main',
+                project: { name: 'my-project' },
+                // simulates no remoteUrl returned by azure -> exercises the manualUrl fallback
+              },
+            ]),
+          }),
+        );
+
+        await azure.initRepo({ repository: 'my-project/my-repo' });
+
+        expect(git.initRepo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: 'https://dev.azure.com/my org/my-project/_git/my-repo',
+          }),
+        );
+      });
+
+      it('encodes whitespace in org/collection when using repo.remoteUrl', async () => {
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            getRepositories: vi.fn().mockResolvedValue([
+              {
+                name: 'my-repo',
+                defaultBranch: 'main',
+                project: { name: 'my-project' },
+                remoteUrl:
+                  'https://dev.azure.com/my org/my-project/_git/my-repo',
+              },
+            ]),
+          }),
+        );
+
+        await azure.initRepo({ repository: 'my-project/my-repo' });
+
+        expect(git.initRepo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: 'https://dev.azure.com/my%20org/my-project/_git/my-repo',
+          }),
+        );
+      });
+
+      it('falls back to manualUrl when repo.remoteUrl is invalid', async () => {
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            getRepositories: vi.fn().mockResolvedValue([
+              {
+                name: 'my-repo',
+                defaultBranch: 'main',
+                project: { name: 'my-project' },
+                remoteUrl: 'not a valid URL',
+              },
+            ]),
+          }),
+        );
+
+        await azure.initRepo({ repository: 'my-project/my-repo' });
+
+        expect(git.initRepo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: 'https://dev.azure.com/renovate12345/my-project/_git/my-repo',
+          }),
+        );
+      });
+    });
   });
 
   describe('findPr(branchName, prTitle, state, targetBranch)', () => {
@@ -2260,11 +2337,18 @@ describe('modules/platform/azure/index', () => {
       );
     });
 
-    it('does not corrupt HTML entities or URL anchors', () => {
+    it('does not corrupt URL anchors', () => {
       const input =
-        '[#&#8203;32124](https://github.com/org/repo/issues/32124) ' +
         '[`v4.78.0`](https://github.com/org/repo/blob/HEAD/CHANGELOG.md#4780-june-18-2026)';
       expect(azure.massageMarkdown(input)).toBe(input);
+    });
+
+    it('replaces zero-width space entities so they do not mention work item 8203', () => {
+      const input =
+        '[#&#8203;32124](https://github.com/org/repo/issues/32124) by @&#8203;someone';
+      expect(azure.massageMarkdown(input)).toBe(
+        '[#\u200B32124](https://github.com/org/repo/issues/32124) by @\u200Bsomeone',
+      );
     });
   });
 

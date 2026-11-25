@@ -1,7 +1,7 @@
 import { defineRule } from '@oxlint/plugins';
 
 /**
- * Flags `x ?? {}` in favour of `coerceObject(x)` from `lib/util/object.ts`.
+ * Flags `x ?? {}` in favor of `coerceObject(x)` from `lib/util/object.ts`.
  * A chain like `x ?? y ?? {}` maps onto the two-argument `coerceObject(x, y)`.
  *
  * Only a bare `{}` literal counts: `x ?? { a: 1 }` keeps a meaningful default,

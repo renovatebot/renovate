@@ -9,7 +9,7 @@ As part of this build process, there are two key variants of this:
 
 Renovate's "slim" image is recommended as the minimal set of installed tools on a given container to be able to run Renovate.
 
-It uses [`binarySource=install`](./self-hosted-configuration.md#binarysource) to dynamically install tools as they're needed.
+It uses [`binarySource=install`](./self-hosted-configuration.md#binarysource) to dynamically install tools as they are needed.
 This keeps the base container quite lightweight (hence "slim") but requires outbound network access at runtime.
 
 It is possible to make the "slim" container even more lightweight by removing some of the tools and packages - for instance to reduce the attack surface, or reduce the size of the resulting image - but that is left as an exercise to the reader.
