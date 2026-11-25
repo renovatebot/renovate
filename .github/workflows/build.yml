@@ -1119,13 +1119,12 @@ jobs:
       - release
 
     permissions:
-      actions: read
       pages: write
       id-token: write
 
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry_1.outputs.page_url || steps.deployment_retry_2.outputs.page_url || steps.deployment_retry_3.outputs.page_url }}
 
     runs-on: ubuntu-latest
     steps:
@@ -1147,47 +1146,43 @@ jobs:
           curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
 
       - name: Upload GitHub Pages artifact
-        id: upload
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: tools/mkdocs/site
 
-      # Per https://github.com/actions/deploy-pages/issues/451, the artifact may not be listed immediately after it is uploaded, which makes `deploy-pages` fail
-      - name: Wait for GitHub Pages artifact to be available by ID
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
-        run: |
-          for delay in 1 2 4 8 16 32 64; do
-            if gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" \
-              --jq 'select(.expired == false)' | grep -q .; then
-              echo "Artifact ${ARTIFACT_ID} is available"
-              exit 0
-            fi
-            echo "Artifact ${ARTIFACT_ID} not available yet, retrying in ${delay}s"
-            sleep "${delay}"
-          done
-          echo "::error::Artifact ${ARTIFACT_ID} never became available"
-          exit 1
-
-      - name: Wait for GitHub Pages artifact to be listed by name
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          for delay in 1 2 4 8 16 32 64; do
-            if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" \
-              --jq '.artifacts[] | select(.expired == false)' | grep -q .; then
-              echo "Artifact github-pages is listed"
-              exit 0
-            fi
-            echo "Artifact github-pages not listed yet, retrying in ${delay}s"
-            sleep "${delay}"
-          done
-          echo "::error::Artifact github-pages never became listed"
-          exit 1
-
+      # Per https://github.com/actions/deploy-pages/issues/451, `deploy-pages` looks up the artifact once, and it may not be listed immediately after it is uploaded. Retry only the deploy, not the upload, as a second upload makes the lookup fail with multiple artifacts. Remove once https://github.com/actions/deploy-pages/pull/455 is released
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+
+      - name: Wait before retrying deploy to GitHub Pages
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 5
+
+      - name: Deploy to GitHub Pages (retry 1)
+        id: deployment_retry_1
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+
+      - name: Wait before retrying deploy to GitHub Pages
+        if: steps.deployment_retry_1.outcome == 'failure'
+        run: sleep 20
+
+      - name: Deploy to GitHub Pages (retry 2)
+        id: deployment_retry_2
+        if: steps.deployment_retry_1.outcome == 'failure'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+
+      - name: Wait before retrying deploy to GitHub Pages
+        if: steps.deployment_retry_2.outcome == 'failure'
+        run: sleep 60
+
+      - name: Deploy to GitHub Pages (retry 3)
+        id: deployment_retry_3
+        if: steps.deployment_retry_2.outcome == 'failure'
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   notify-release-failure:
