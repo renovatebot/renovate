@@ -77,7 +77,7 @@ export class ApkDatasource extends Datasource {
     return true;
   }
 
-  override readonly registryStrategy = 'merge';
+  override readonly registryStrategy = 'intersect';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

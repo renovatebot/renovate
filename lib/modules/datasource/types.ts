@@ -175,7 +175,17 @@ export type RegistryStrategy =
    *
    * Returns `null` when all registries fail.
    */
-  | 'merge';
+  | 'merge'
+  /**
+   * All registries are queried and only versions present in every result are kept.
+   *
+   * A registry that returns no releases, including one whose index cannot be fetched, removes every version.
+   *
+   * An `ExternalHostError` aborts immediately.
+   *
+   * Returns `null` when the intersection is empty.
+   */
+  | 'intersect';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;

@@ -193,6 +193,7 @@ function toDependency(
   repositories: RepositoryIndex,
   apkArchs: string[],
   lockPackages: ApkoLockPackage[],
+  registryWasConfigured: boolean,
 ): PackageDependency {
   if (spec.kind === 'skip') {
     return {
@@ -212,6 +213,8 @@ function toDependency(
   const registryUrls = registryUrlsFor(spec.tag, repositories, apkArchs);
   if (isNonEmptyArray(registryUrls)) {
     dep.registryUrls = registryUrls;
+  } else if (registryWasConfigured) {
+    dep.skipReason = 'unknown-registry';
   }
   const lockedVersion = lockedVersionOf(spec.depName, lockPackages);
   if (lockedVersion) {
@@ -254,10 +257,13 @@ export async function extractPackageFile(
   }
 
   const { contents, archs } = parsed.data;
-  const repositories = indexRepositories([
+  const repositoryEntries = [
     ...coerceArray(contents.repositories),
     ...coerceArray(contents.build_repositories),
-  ]);
+  ];
+  const repositories = indexRepositories(repositoryEntries);
+  const registryWasConfigured =
+    repositoryEntries.length > 0 || archs !== undefined;
   const specs = contents.packages
     .map((spec) => parsePackageSpec(spec, repositories.fileTags))
     .filter((spec) => spec.kind !== 'drop');
@@ -272,7 +278,13 @@ export async function extractPackageFile(
   const lockFileName = getLockFileName(packageFile);
   const lockPackages = await readLockPackages(lockFileName, packageFile);
   const deps = specs.map((spec) =>
-    toDependency(spec, repositories, apkArchs, coerceArray(lockPackages)),
+    toDependency(
+      spec,
+      repositories,
+      apkArchs,
+      coerceArray(lockPackages),
+      registryWasConfigured,
+    ),
   );
   if (!lockPackages) {
     return { deps };
