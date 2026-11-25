@@ -346,8 +346,8 @@ importers:
         specifier: 1.1.4
         version: 1.1.4
       shlex:
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 3.0.1
+        version: 3.0.1
       simple-git:
         specifier: 4.1.0
         version: 4.1.0(supports-color@7.2.0)
@@ -5448,8 +5448,8 @@ packages:
     resolution: {integrity: sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==}
     engines: {node: '>= 0.4'}
 
-  shlex@3.0.0:
-    resolution: {integrity: sha512-jHPXQQk9d/QXCvJuLPYMOYWez3c43sORAgcIEoV7bFv5AJSJRAOyw5lQO12PMfd385qiLRCaDt7OtEzgrIGZUA==}
+  shlex@3.0.1:
+    resolution: {integrity: sha512-5ZM9M0xaWThR0cJDJKfNSKKbrACHjND55F25yS8HLl1FsQcyVy5oAxcaBLLaV/vHUtWpzd+PZlzGfxYLibVLZg==}
 
   side-channel-list@1.0.1:
     resolution: {integrity: sha512-mjn/0bi/oUURjc5Xl7IaWi/OJJJumuoJFQJfDDyO46+hBWsfaVM65TBHq2eoZBhzl9EchxOijpkbRC8SVBQU0w==}
@@ -11156,7 +11156,7 @@ snapshots:
 
   shell-quote@1.12.0: {}
 
-  shlex@3.0.0: {}
+  shlex@3.0.1: {}
 
   side-channel-list@1.0.1:
     dependencies:
