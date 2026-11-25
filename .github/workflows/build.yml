@@ -382,9 +382,9 @@ jobs:
           args: --color --profile correctness
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@bd12b495c90993a4301c73398142281a61499af3 # v0.9.0
+        uses: zizmorcore/zizmor-action@1b4550e929643b8b26a62303c6bd64814271a4f1 # v0.9.2
         with:
-          version: 1.33.0
+          version: 1.33.1
 
   test:
     needs: [setup, prefetch]
@@ -827,7 +827,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
-          version: 0.13.9
+          version: 0.13.10
           enable-cache: true
           cache-python: true
 
@@ -983,7 +983,7 @@ jobs:
       - name: Install newer npm if needed
         run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
 
-      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+      - uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
 
       - name: Docker registry login
         env:
@@ -998,7 +998,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
-          version: 0.13.9
+          version: 0.13.10
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -1119,6 +1119,7 @@ jobs:
       - release
 
     permissions:
+      actions: read
       pages: write
       id-token: write
 
@@ -1146,9 +1147,44 @@ jobs:
           curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
 
       - name: Upload GitHub Pages artifact
+        id: upload
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: tools/mkdocs/site
+
+      # Per https://github.com/actions/deploy-pages/issues/451, the artifact may not be listed immediately after it is uploaded, which makes `deploy-pages` fail
+      - name: Wait for GitHub Pages artifact to be available by ID
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
+        run: |
+          for delay in 1 2 4 8 16 32 64; do
+            if gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" \
+              --jq 'select(.expired == false)' | grep -q .; then
+              echo "Artifact ${ARTIFACT_ID} is available"
+              exit 0
+            fi
+            echo "Artifact ${ARTIFACT_ID} not available yet, retrying in ${delay}s"
+            sleep "${delay}"
+          done
+          echo "::error::Artifact ${ARTIFACT_ID} never became available"
+          exit 1
+
+      - name: Wait for GitHub Pages artifact to be listed by name
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for delay in 1 2 4 8 16 32 64; do
+            if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" \
+              --jq '.artifacts[] | select(.expired == false)' | grep -q .; then
+              echo "Artifact github-pages is listed"
+              exit 0
+            fi
+            echo "Artifact github-pages not listed yet, retrying in ${delay}s"
+            sleep "${delay}"
+          done
+          echo "::error::Artifact github-pages never became listed"
+          exit 1
 
       - name: Deploy to GitHub Pages
         id: deployment

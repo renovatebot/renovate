@@ -146,13 +146,6 @@
       "automerge": false
     },
     {
-      "description": "Group commander major updates, they depend on each other.",
-      "matchDatasources": ["npm"],
-      "matchPackageNames": ["@commander-js/extra-typings", "commander"],
-      "matchUpdateTypes": ["major"],
-      "groupName": "commander"
-    },
-    {
       "matchPackageNames": ["tsrs"],
       "ignoreUnstable": false
     }
