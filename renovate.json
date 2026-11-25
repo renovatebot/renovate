@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>renovatebot/.github", "group:commander"],
+  "extends": ["github>renovatebot/.github"],
   "assignees": ["viceice", "secustor", "jamietanna"],
   "reviewers": ["@renovatebot/maintainers"],
   "semanticCommitScope": "deps",
