@@ -63,7 +63,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
 
   async extractLockedVersions(
     project: PyProject,
-    deps: PackageDependency[],
+    deps: PackageDependency<Pep621ManagerData>[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
     if (
@@ -81,7 +81,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
         PdmLockfile.transform(({ lock }) => lock),
       ).unwrapOr({});
 
-      for (const dep of deps as PackageDependency<Pep621ManagerData>[]) {
+      for (const dep of deps) {
         const packageName = dep.packageName;
         if (packageName && packageName in lockFileMapping) {
           const locked = lockFileMapping[packageName];
