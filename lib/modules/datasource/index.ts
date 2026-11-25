@@ -225,31 +225,6 @@ async function huntRegistries(
   return null;
 }
 
-async function intersectRegistries(
-  config: GetPkgReleasesConfig,
-  datasource: DatasourceApi,
-  registryUrls: string[],
-): Promise<ReleaseResult | null> {
-  let common: ReleaseResult | null = null;
-  for (const registryUrl of registryUrls) {
-    const res = clone(
-      await getRegistryReleases(datasource, config, registryUrl),
-    );
-    if (!res?.releases.length) {
-      return null;
-    }
-    if (!common) {
-      common = res;
-      continue;
-    }
-    const versions = new Set(res.releases.map((release) => release.version));
-    common.releases = common.releases.filter((release) =>
-      versions.has(release.version),
-    );
-  }
-  return common;
-}
-
 async function mergeRegistries(
   config: GetPkgReleasesConfig,
   datasource: DatasourceApi,
@@ -506,9 +481,8 @@ async function fetchReleases(
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
-      } else if (registryStrategy === 'intersect') {
-        dep = await intersectRegistries(config, datasource, registryUrls);
       } else {
+        // `merge` is the only remaining strategy
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
