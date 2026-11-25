@@ -1153,21 +1153,37 @@ jobs:
           path: tools/mkdocs/site
 
       # Per https://github.com/actions/deploy-pages/issues/451, the artifact may not be listed immediately after it is uploaded, which makes `deploy-pages` fail
-      - name: Wait for GitHub Pages artifact to be listed
+      - name: Wait for GitHub Pages artifact to be available by ID
         env:
           GH_TOKEN: ${{ github.token }}
           ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
         run: |
           for delay in 1 2 4 8 16 32 64; do
-            if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" \
-              --jq ".artifacts[] | select(.id == ${ARTIFACT_ID} and .expired == false)" | grep -q .; then
-              echo "Artifact ${ARTIFACT_ID} is listed"
+            if gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" \
+              --jq 'select(.expired == false)' | grep -q .; then
+              echo "Artifact ${ARTIFACT_ID} is available"
               exit 0
             fi
-            echo "Artifact ${ARTIFACT_ID} not listed yet, retrying in ${delay}s"
+            echo "Artifact ${ARTIFACT_ID} not available yet, retrying in ${delay}s"
             sleep "${delay}"
           done
-          echo "::error::Artifact ${ARTIFACT_ID} never became visible"
+          echo "::error::Artifact ${ARTIFACT_ID} never became available"
+          exit 1
+
+      - name: Wait for GitHub Pages artifact to be listed by name
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for delay in 1 2 4 8 16 32 64; do
+            if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" \
+              --jq '.artifacts[] | select(.expired == false)' | grep -q .; then
+              echo "Artifact github-pages is listed"
+              exit 0
+            fi
+            echo "Artifact github-pages not listed yet, retrying in ${delay}s"
+            sleep "${delay}"
+          done
+          echo "::error::Artifact github-pages never became listed"
           exit 1
 
       - name: Deploy to GitHub Pages
