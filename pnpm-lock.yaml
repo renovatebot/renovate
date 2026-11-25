@@ -175,8 +175,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       commander:
-        specifier: 15.0.0
-        version: 15.0.0
+        specifier: 15.1.0
+        version: 15.1.0
       common-tags:
         specifier: 1.8.2
         version: 1.8.2
@@ -392,8 +392,8 @@ importers:
         specifier: 2.6.8
         version: 2.6.8
       '@commander-js/extra-typings':
-        specifier: 15.0.0
-        version: 15.0.0(commander@15.0.0)
+        specifier: 15.1.0
+        version: 15.1.0(commander@15.1.0)
       '@containerbase/istanbul-reports-html':
         specifier: 2.0.26
         version: 2.0.26
@@ -889,10 +889,10 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@commander-js/extra-typings@15.0.0':
-    resolution: {integrity: sha512-yeJlba62xqmkgELUsn7356MEnzLLu/fw2x4lofFqGnXh6YysRdEs2BaLeLtg1+KU0AXvMeqQvTTp+3hBEBK+EA==}
+  '@commander-js/extra-typings@15.1.0':
+    resolution: {integrity: sha512-FsI7l5tFON52RyyDKyCkvwFl+peHZuP5TZ7AhxbDFGo/5T6KQd4+KE48aJ8jrDSSAQDvZ8hYKX47fmwZ5bGFNw==}
     peerDependencies:
-      commander: ~15.0.0
+      commander: ~15.1.0
 
   '@containerbase/base@14.69.3':
     resolution: {integrity: sha512-i2z1U2IyUVe/rjU/fX1CH7fjkKyz8LytIs9oMOIjweMHPjWndxw5gdl4T4GL/jJqejoY/Wh5BakdAjYGEAfNtQ==}
@@ -3186,8 +3186,8 @@ packages:
     resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
     engines: {node: '>=20'}
 
-  commander@15.0.0:
-    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
   common-tags@1.8.2:
@@ -6658,9 +6658,9 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@commander-js/extra-typings@15.0.0(commander@15.0.0)':
+  '@commander-js/extra-typings@15.1.0(commander@15.1.0)':
     dependencies:
-      commander: 15.0.0
+      commander: 15.1.0
 
   '@containerbase/base@14.69.3(zod@4.6.7)':
     dependencies:
@@ -8610,7 +8610,7 @@ snapshots:
 
   commander@14.0.3: {}
 
-  commander@15.0.0: {}
+  commander@15.1.0: {}
 
   common-tags@1.8.2: {}
 
@@ -9685,7 +9685,7 @@ snapshots:
 
   katex@0.19.1:
     dependencies:
-      commander: 15.0.0
+      commander: 15.1.0
 
   keyv@4.5.4:
     dependencies:
