@@ -1119,6 +1119,7 @@ jobs:
       - release
 
     permissions:
+      actions: read
       pages: write
       id-token: write
 
@@ -1146,9 +1147,28 @@ jobs:
           curl --retry 5 --silent https://renovatebot.github.io/helm-charts/index.yaml -o tools/mkdocs/site/helm-charts/index.yaml
 
       - name: Upload GitHub Pages artifact
+        id: upload
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: tools/mkdocs/site
+
+      # Per https://github.com/actions/deploy-pages/issues/451, the artifact may not be listed immediately after it is uploaded, which makes `deploy-pages` fail
+      - name: Wait for GitHub Pages artifact to be listed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
+        run: |
+          for delay in 1 2 4 8 16 32 64; do
+            if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" \
+              --jq ".artifacts[] | select(.id == ${ARTIFACT_ID} and .expired == false)" | grep -q .; then
+              echo "Artifact ${ARTIFACT_ID} is listed"
+              exit 0
+            fi
+            echo "Artifact ${ARTIFACT_ID} not listed yet, retrying in ${delay}s"
+            sleep "${delay}"
+          done
+          echo "::error::Artifact ${ARTIFACT_ID} never became visible"
+          exit 1
 
       - name: Deploy to GitHub Pages
         id: deployment
