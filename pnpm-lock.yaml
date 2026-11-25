@@ -124,8 +124,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
       '@renovatebot/osv-offline':
-        specifier: 4.5.10
-        version: 4.5.10(supports-color@7.2.0)(zod@4.6.7)
+        specifier: 4.5.11
+        version: 4.5.11(supports-color@7.2.0)(zod@4.6.7)
       '@renovatebot/pep440':
         specifier: 6.0.0
         version: 6.0.0
@@ -896,6 +896,15 @@ packages:
 
   '@containerbase/base@14.70.0':
     resolution: {integrity: sha512-2jgXI/w0+GRGcpONzxuHgbL2knEnImgNEd5Zflc7QapQY0TvEhaC4DKVv+Y1HNttCTph8eJ+PbU97Gv66r+JYg==}
+    engines: {node: '>=24.10.0'}
+    peerDependencies:
+      zod: ^4.0.0
+    peerDependenciesMeta:
+      zod:
+        optional: true
+
+  '@containerbase/base@15.0.1':
+    resolution: {integrity: sha512-C30i7Jb/q5/TOSXyAp97vn7Obnrqe63cgSlaExZeYc77fpRSSphQOlMM4PgAujbqUeA4gRSlZy6uAEKScuySWg==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -2066,12 +2075,12 @@ packages:
     resolution: {integrity: sha512-D8PRmC0voAmSzdXaPQT9JJNm+QeXpwQDXzbuf0hXIxg4EgSc4X8J+REseT3aaacOC9zht4Ntpb0tnjwQEL2nfg==}
     engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline-db@4.5.10':
-    resolution: {integrity: sha512-fFrlNqQKHnpVFEB9S5KOeUWCol0fnsLbhzxlAINUJC+0SFrgdI/a5FfUU/o4d7qzL2gdFNOmIogFpkxZwzEdXw==}
+  '@renovatebot/osv-offline-db@4.5.11':
+    resolution: {integrity: sha512-egfLNTZsSAWozqJ8F8nbUUMWdVfC6l9rbTJe8/DuvX21fFJZSpyv5W2sH/GEK9d6PytB/Aabh+gxlZA4i9U01A==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline@4.5.10':
-    resolution: {integrity: sha512-aHxcXVh2oDB2ia2S+Iz5fXTGsFKR2vQFvZPmoVyx8wkzC5RXW3vQDy/tR+tOCsart5qR7uZ9x/qkRuQ5OGBR6Q==}
+  '@renovatebot/osv-offline@4.5.11':
+    resolution: {integrity: sha512-+rfK4ob2hk0MxROqUA9NwRGC531nlLrhUWYnYOVWAAKcvHgXwRQ+PykuGPfBq1qIDlX5UYoiR780iScORwP8OA==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pep440@6.0.0':
@@ -6668,6 +6677,12 @@ snapshots:
     optionalDependencies:
       zod: 4.6.7
 
+  '@containerbase/base@15.0.1(zod@4.6.7)':
+    dependencies:
+      semver: 7.8.6
+    optionalDependencies:
+      zod: 4.6.7
+
   '@containerbase/istanbul-reports-html@2.0.26':
     dependencies:
       istanbul-reports: 3.2.0
@@ -7613,17 +7628,17 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.3
 
-  '@renovatebot/osv-offline-db@4.5.10(supports-color@7.2.0)(zod@4.6.7)':
+  '@renovatebot/osv-offline-db@4.5.11(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.70.0(zod@4.6.7)
+      '@containerbase/base': 15.0.1(zod@4.6.7)
       debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
       - zod
 
-  '@renovatebot/osv-offline@4.5.10(supports-color@7.2.0)(zod@4.6.7)':
+  '@renovatebot/osv-offline@4.5.11(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
-      '@renovatebot/osv-offline-db': 4.5.10(supports-color@7.2.0)(zod@4.6.7)
+      '@renovatebot/osv-offline-db': 4.5.11(supports-color@7.2.0)(zod@4.6.7)
       fs-extra: 11.4.1
       got: 15.1.0
       luxon: 3.7.2
