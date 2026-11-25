@@ -253,6 +253,85 @@ archs: []
     });
   });
 
+  it('maps an unquoted 386 arch to x86', async () => {
+    await expect(
+      extractPackageFile(
+        `contents:
+  repositories:
+    - ${wolfi}
+  packages:
+    - bash=5.2.37-r2
+archs: [386]
+`,
+        'apko.yaml',
+      ),
+    ).resolves.toEqual({
+      deps: [
+        pin('bash=5.2.37-r2', 'bash', '5.2.37-r2', [registryUrl(wolfi, 'x86')]),
+      ],
+    });
+  });
+
+  it('maps a mixed list of an unquoted 386 and x86_64', async () => {
+    await expect(
+      extractPackageFile(
+        `contents:
+  repositories:
+    - ${wolfi}
+  packages:
+    - bash=5.2.37-r2
+archs: [386, x86_64]
+`,
+        'apko.yaml',
+      ),
+    ).resolves.toEqual({
+      deps: [
+        pin('bash=5.2.37-r2', 'bash', '5.2.37-r2', [
+          registryUrl(wolfi, 'x86'),
+          wolfiX86,
+        ]),
+      ],
+    });
+  });
+
+  it('uses AllArchs order when archs is null', async () => {
+    await expect(
+      extractPackageFile(
+        `contents:
+  repositories:
+    - ${wolfi}
+  packages:
+    - bash=5.2.37-r2
+archs:
+`,
+        'apko.yaml',
+      ),
+    ).resolves.toEqual({
+      deps: [
+        pin('bash=5.2.37-r2', 'bash', '5.2.37-r2', wolfiArchs(defaultArchs)),
+      ],
+    });
+  });
+
+  it('uses build repositories when repositories is null', async () => {
+    await expect(
+      extractPackageFile(
+        `contents:
+  repositories:
+  build_repositories:
+    - ${wolfi}
+  packages:
+    - bash=5.2.37-r2
+archs:
+  - amd64
+`,
+        'apko.yaml',
+      ),
+    ).resolves.toEqual({
+      deps: [pin('bash=5.2.37-r2', 'bash', '5.2.37-r2', [wolfiX86])],
+    });
+  });
+
   it('translates apko arch names and keeps apk arch names', async () => {
     const archs = [
       '386',
