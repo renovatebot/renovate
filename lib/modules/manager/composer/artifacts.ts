@@ -206,13 +206,16 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       args = 'update';
     } else {
-      const deps = updatedDeps
+      const depArgs = updatedDeps
         .map((dep) =>
-          dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName,
+          // Only regular packages (vendor/name) get a version constraint. Platform packages
+          // (php, ext-*, lib-*, ...) cannot be updated and pinning them conflicts with config.platform.
+          dep.newVersion && dep.depName?.includes('/')
+            ? `${dep.depName}:${dep.newVersion}`
+            : dep.depName,
         )
-        .filter(isString)
-        .map(quote)
-        .join(' ');
+        .filter(isString);
+      const deps = [...new Set(depArgs)].map(quote).join(' ');
       args = `update ${deps}`.trim();
       args += config.postUpdateOptions?.includes('composerWithAll')
         ? ' --with-all-dependencies'
