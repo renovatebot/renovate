@@ -127,6 +127,22 @@ export class BbsPrCache {
     prCache.setPr(item);
   }
 
+  private deletePr(prNo: number): void {
+    delete this.cache.items[prNo];
+    this.updateItems();
+  }
+
+  static deletePr(
+    projectKey: string,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string,
+    prNo: number,
+  ): void {
+    // no sync needed to drop an entry
+    new BbsPrCache(projectKey, repo, ignorePrAuthor, author).deletePr(prNo);
+  }
+
   private reconcile(rawItems: BbsRestPr[]): boolean {
     logger.debug('reconciled');
     const { items } = this.cache;

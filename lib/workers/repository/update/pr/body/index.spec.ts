@@ -250,7 +250,7 @@ describe('workers/repository/update/pr/body/index', () => {
         '| [codspeed-divan-compat](https://crates.io/crates/codspeed-divan-compat) (aliased as `other-alias`) | [other-alias](https://crates.io/crates/codspeed-divan-compat) | `5.0.0` → `6.0.0` |',
       );
       expect(result).toContain(
-        '| [local-alias](https://example.com) → [replacement](https://example.com) | [local-alias](https://example.com) | [`5.0.0` → `6.0.0`](https://renovatebot.com/diffs/npm/local-alias/5.0.0/6.0.0) |',
+        '| [local-alias](https://example.com) → [replacement](https://example.com) | [local-alias](https://example.com) | [`5.0.0` → `6.0.0`](https://renovatebot.com/diffs/npm/registry-name/5.0.0/6.0.0) |',
       );
       expect(
         upgrades.map(({ manager, datasource, depName, packageName }) => ({

@@ -663,6 +663,32 @@ describe('workers/repository/update/branch/get-updated', () => {
       );
     });
 
+    it('uses updated contents for lockFileMaintenance of an updated package file', async () => {
+      config.upgrades.push(
+        {
+          manager: 'npm',
+          packageFile: 'package.json',
+          branchName: '',
+        },
+        {
+          manager: 'npm',
+          updateType: 'lockFileMaintenance',
+          packageFile: 'package.json',
+          branchName: '',
+        } satisfies BranchUpgradeConfig,
+      );
+      npm.updateDependency.mockReturnValue('updated content');
+      npm.updateArtifacts.mockResolvedValue(null);
+      await getUpdatedPackageFiles(config);
+      expect(npm.updateArtifacts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          packageFileName: 'package.json',
+          newPackageFileContent: 'updated content',
+        }),
+      );
+      expect(git.getFile).toHaveBeenCalledTimes(1);
+    });
+
     it('for lockFileMaintenance passes proper lockFiles', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -817,7 +843,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         datasource: GitRefsDatasource.id,
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+        updatedOutOfBand: true,
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
@@ -828,6 +857,20 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('drops unchanged package file if not updated out of band', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({ updatedPackageFiles: [] });
     });
 
     /*

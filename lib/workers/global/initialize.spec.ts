@@ -1,4 +1,5 @@
 import {
+  configure as _configure,
   validateContainerbaseVersion as _validateContainerbaseVersion,
   containerbaseVersionFile,
   packageVersion,
@@ -10,7 +11,8 @@ import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import { setCustomEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
-import { globalInitialize } from './initialize.ts';
+import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
+import { globalFinalize, globalInitialize } from './initialize.ts';
 
 vi.mock('@renovatebot/base-image', { spy: true });
 vi.mock('node:fs/promises', async () => {
@@ -18,6 +20,7 @@ vi.mock('node:fs/promises', async () => {
   return { ...fs.promises, default: fs.promises };
 });
 
+const configure = vi.mocked(_configure);
 const initPlatform = vi.mocked(_initPlatform);
 const validateContainerbaseVersion = vi.mocked(_validateContainerbaseVersion);
 
@@ -26,6 +29,14 @@ describe('workers/global/initialize', () => {
     vi.stubEnv('CONTAINERBASE', undefined);
     vi.stubEnv('RENOVATE_X_IGNORE_CONTAINERBASE_VERSION', undefined);
     initPlatform.mockImplementationOnce((r) => Promise.resolve(r));
+  });
+
+  it('configures the containerbase logger', async () => {
+    git.validateGitVersion.mockResolvedValueOnce(true);
+    await expect(globalInitialize({})).toResolve();
+    expect(configure).toHaveBeenCalledExactlyOnceWith({
+      logger: logger.logger,
+    });
   });
 
   describe('checkVersions()', () => {
@@ -210,6 +221,14 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
       expect(process.env.AWS_EC2_METADATA_DISABLED).toBeUndefined();
       expect(process.env.METADATA_SERVER_DETECTION).toBeUndefined();
+    });
+  });
+
+  describe('globalFinalize()', () => {
+    it('cleans up the vulnerabilities', async () => {
+      const cleanup = vi.spyOn(Vulnerabilities, 'cleanup');
+      await expect(globalFinalize({})).toResolve();
+      expect(cleanup).toHaveBeenCalledOnce();
     });
   });
 });

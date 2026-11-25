@@ -14,7 +14,7 @@ See [pixi's security documentation](https://pixi.prefix.dev/latest/security/#4-t
 Self-hosted administrators must explicitly allow this path by including `pixi` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
 When `pixi` is not allowed, the package file is still updated, but `pixi.lock` is left unchanged.
 
-Renovatebot will pick pixi version in following order:
+Renovate will pick the pixi version in the following order:
 
 1. renovatebot setting `constraints.pixi`
 2. `requires-pixi` in `pixi.toml`

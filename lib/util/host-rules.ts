@@ -65,7 +65,7 @@ interface RegisteredHostRule extends HostRule {
  * `trustedHeaderNames` is deliberately not a field of `HostRule`, for the same reason `trustTier` is not: it must never be settable through configuration.
  */
 export interface CombinedHostRuleWithTrustedHeaders extends CombinedHostRule {
-  /** header names in `headers` that came from an `admin` tier rule (the self-hosted administrator's own config), and so already bypassed `allowedHeaders` at registration - `applyHostRule`'s request-time defence-in-depth must not re-check, and drop, them */
+  /** header names in `headers` that came from an `admin` tier rule (the self-hosted administrator's own config), and so already bypassed `allowedHeaders` at registration - `applyHostRule`'s request-time defense-in-depth must not re-check, and drop, them */
   trustedHeaderNames?: string[];
 }
 
@@ -89,7 +89,7 @@ let detachedCredentials: DetachedCredentials[] = [];
 let detachedRules = new WeakSet<HostRule>();
 
 /**
- * Fields within `HostRule`s that must have their value registered for sanitising through `sanitize.addSecretForSanitizing()`.
+ * Fields within `HostRule`s that must have their value registered for sanitizing through `sanitize.addSecretForSanitizing()`.
  *
  * Kept in sync with `redactedFields` through tests.
  */
@@ -241,7 +241,7 @@ function register(
   }
 
   if (rule.headers && rule.trustTier !== 'admin') {
-    // enforced here, at the single registration chokepoint, so that no current or future caller can register a rule whose headers bypass `allowedHeaders`; `applyHostRule` filters by header name again at request time as defence in depth
+    // enforced here, at the single registration chokepoint, so that no current or future caller can register a rule whose headers bypass `allowedHeaders`; `applyHostRule` filters by header name again at request time as defense in depth
     // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - the same exemption `filterAllowedEnv` gives the admin's own `env`, just enforced through the `admin` trust tier here rather than a name+value comparison, as `headers` are host-scoped
     [rule] = filterAllowedHeaders([rule]);
   }
@@ -426,7 +426,10 @@ function parseUserinfoUrl(url: string): URL | null {
     return null;
   }
   const parsed = parseUrl(url);
-  if (!parsed || !isHttpUrl(parsed) || (!parsed.username && !parsed.password)) {
+  if (!parsed || !isHttpUrl(parsed)) {
+    return null;
+  }
+  if (!parsed.username && !parsed.password) {
     return null;
   }
   // a rule for the placeholder would supply it as a credential and stop the lookup which resolves the real one
@@ -658,11 +661,12 @@ export function matchesHost(
     const { href } = parsedMatchHost!;
     // ignore any userinfo (`user:pass@`) on the searched URL, so a `matchHost` without credentials still matches
     // a `matchHost` ending with a slash also matches the URL of that path itself, without the slash
+    if (stripUrlCredentials(parsedUrl).startsWith(href)) {
+      return true;
+    }
     return (
-      stripUrlCredentials(parsedUrl).startsWith(href) ||
-      (!prefixOnly &&
-        ensureTrailingSlash(`${parsedUrl.origin}${parsedUrl.pathname}`) ===
-          href)
+      !prefixOnly &&
+      ensureTrailingSlash(`${parsedUrl.origin}${parsedUrl.pathname}`) === href
     );
   }
 
@@ -689,7 +693,8 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
 }
 
 function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
-  if ((hostType || readOnly) && matchHost) {
+  const isScoped = !!hostType || !!readOnly;
+  if (isScoped && matchHost) {
     return 3;
   }
 
@@ -716,7 +721,7 @@ function fromLowerRankAndShorterMatchHost(a: HostRule, b: HostRule): number {
 /**
  * The `headers` that apply from a set of matching rules of the same trust tier.
  *
- * The last rule to set any wins outright, as `find()`'s callers receive them sorted from least to most specific. That is the behaviour every matching rule had before `headers` were combined across tiers, and it is what lets a broad rule's headers be masked by a narrower rule from the same source.
+ * The last rule to set any wins outright, as `find()`'s callers receive them sorted from least to most specific. That is the behavior every matching rule had before `headers` were combined across tiers, and it is what lets a broad rule's headers be masked by a narrower rule from the same source.
  */
 function headersOfLastRuleToSetThem(
   rules: RegisteredHostRule[],
@@ -820,7 +825,7 @@ export function find(
     // concretely, this stops an admin's trusted `github` hostType rule leaking its trusted status onto an unrelated, untrusted `github-tags` rule for the same header name: without `res.trustedHeaderNames` set to `[]` here, the repository's own header would inherit the admin's exemption from `allowedHeaders` once the two results are combined - see "does not let a fallback hostType's trustedHeaderNames leak onto a rule's own untrusted headers" in `lib/util/http/host-rules.spec.ts`, and "keeps `trustedHeaderNames` as an explicit key, set to `[]`, when only untrusted headers match" below, for this in practice
     // an empty array rather than `undefined`, unlike the rest of this function's optional fields: `undefined`-valued properties are invisible to `toEqual`, which would silently let a caller's assertion miss a regression in the shadowing above - every other test asserting on a plain `{ headers: {...} }` result must now spell out `trustedHeaderNames: []` too, which is deliberate
     // never set when `res.headers` isn't either, so a `find()` with no matching headers still returns `{}` rather than `{ trustedHeaderNames: [] }`, which callers that check for an empty result (e.g. `isNonEmptyObject`) rely on
-    // tracked so that `applyHostRule`'s request-time defence-in-depth knows which of `res.headers` already bypassed `allowedHeaders` at registration as the administrator's own, and does not re-drop them
+    // tracked so that `applyHostRule`'s request-time defense-in-depth knows which of `res.headers` already bypassed `allowedHeaders` at registration as the administrator's own, and does not re-drop them
     res.trustedHeaderNames = trustedHeaders ? Object.keys(trustedHeaders) : [];
   }
 
@@ -890,9 +895,11 @@ export function hosts({ hostType }: { hostType: string }): string[] {
 }
 
 export function hostType({ url }: { url: string }): string | null {
+  const matchingRules = configuredRules().filter(
+    (rule) => rule.matchHost && matchesHost(url, rule.matchHost),
+  );
   return (
-    configuredRules()
-      .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
+    matchingRules
       .sort(fromShorterToLongerMatchHost)
       .map((rule) => rule.hostType)
       .filter(isTruthy)

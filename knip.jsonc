@@ -13,5 +13,5 @@
     "markdownlint-cli2-formatter-template"
   ],
   // external tools installed by mise, not npm
-  "ignoreBinaries": ["uv", "mise"]
+  "ignoreBinaries": ["uv", "mise", "vale"]
 }

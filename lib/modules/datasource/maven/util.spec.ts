@@ -165,6 +165,45 @@ describe('modules/datasource/maven/util', () => {
   });
 
   describe('downloadHttpProtocol', () => {
+    it.each`
+      registryUrl                                       | authorization | isCacheable
+      ${MAVEN_REPO}                                     | ${false}      | ${true}
+      ${MAVEN_REPO}                                     | ${true}       | ${false}
+      ${'https://clojars.org/repo'}                     | ${false}      | ${true}
+      ${MAVEN_CENTRAL_MIRROR}                           | ${false}      | ${true}
+      ${MAVEN_CENTRAL_MIRROR}                           | ${true}       | ${false}
+      ${'https://repo1.maven.org.evil/maven2'}          | ${false}      | ${false}
+      ${'https://REPO.Maven.Apache.org/maven2'}         | ${false}      | ${true}
+      ${'https://repo.maven.apache.org:443/maven2'}     | ${false}      | ${true}
+      ${'not-a-url'}                                    | ${false}      | ${false}
+      ${'https://custom.registry.renovatebot.com'}      | ${false}      | ${false}
+      ${'https://repo.maven.apache.org.evil/maven2'}    | ${false}      | ${false}
+      ${'https://repo.maven.apache.org/maven2-private'} | ${false}      | ${false}
+    `(
+      'returns isCacheable=$isCacheable for $registryUrl with authorization=$authorization',
+      async ({ registryUrl, authorization, isCacheable }) => {
+        const http = partial<Http>({
+          getText: () =>
+            Promise.resolve({
+              statusCode: 200,
+              body: 'pom text',
+              headers: {},
+              authorization,
+            }),
+        });
+
+        const res = await downloadHttpProtocol(
+          http,
+          `${registryUrl}/org/example/package/1.0.0/package-1.0.0.pom`,
+        );
+
+        expect(res.unwrap()).toEqual({
+          ok: true,
+          val: { data: 'pom text', isCacheable },
+        });
+      },
+    );
+
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({
         getText: () => Promise.reject(httpError({ message: HOST_DISABLED })),
@@ -267,6 +306,16 @@ describe('modules/datasource/maven/util', () => {
           { failedUrl: `${MAVEN_REPO}/some/path`, err: expect.any(HttpError) },
           'Temporary error',
         );
+      });
+
+      it('marks the ExternalHostError as failing only the dependency', async () => {
+        const http = partial<Http>({
+          getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
+        });
+
+        await expect(
+          downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`),
+        ).rejects.toMatchObject({ onlyThisDependencyAffected: true });
       });
     });
 

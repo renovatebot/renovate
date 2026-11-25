@@ -277,7 +277,7 @@ describe('modules/manager/gomod/line-parser', () => {
   it.each`
     version
     ${'v2.0.0-00010101000000-000000000000'}
-    ${'v1.2.3-00010101000000-000000000000'}
+    ${'v0.0.0-00010101000000-000000000000'}
   `('should skip the placeholder pseudo-version $version', ({ version }) => {
     const res = parseLine(`require foo/foo/v2 ${version}`);
     expect(res).toMatchObject({

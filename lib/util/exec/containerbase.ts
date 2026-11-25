@@ -91,12 +91,12 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   erlang: {
     datasource: 'github-releases',
     packageName: 'containerbase/erlang-prebuild',
-    versioning: 'semver-coerced',
+    versioning: 'semver-extended',
   },
   elixir: {
     datasource: 'github-releases',
     packageName: 'elixir-lang/elixir',
-    versioning: 'semver',
+    versioning: 'semver-extended',
   },
   flux: {
     datasource: 'github-releases',
@@ -146,7 +146,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   jb: {
     datasource: 'github-releases',
     packageName: 'containerbase/jb-prebuild',
-    versioning: 'loose',
+    versioning: 'semver-extended',
   },
   kustomize: {
     datasource: 'github-releases',
@@ -178,6 +178,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     datasource: 'npm',
     packageName: 'npm',
     versioning: 'npm',
+  },
+  paket: {
+    datasource: 'nuget',
+    packageName: 'paket',
+    versioning: 'paket',
   },
   pdm: {
     datasource: 'github-releases',
@@ -219,6 +224,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     datasource: 'github-releases',
     packageName: 'containerbase/python-prebuild',
     versioning: 'python',
+  },
+  renovate: {
+    datasource: 'npm',
+    packageName: 'renovate',
+    versioning: 'npm',
   },
   ruby: {
     datasource: 'github-releases',
@@ -429,6 +439,8 @@ export async function generateInstallCommands(
     // Parents are listed before their tools (e.g. node before npm),
     // so a tool is matched against its parent's already resolved version.
     const resolvedTools: Partial<Record<ToolName, string>> = {};
+    const resolvedConstraints: { toolName: ToolName; toolVersion: string }[] =
+      [];
     for (const toolConstraint of toolConstraints) {
       const { toolName } = toolConstraint;
       const { parent }: ToolMetadata = tools[toolName];
@@ -441,16 +453,37 @@ export async function generateInstallCommands(
         parentConstraint,
       );
       resolvedTools[toolName] = toolVersion;
+      resolvedConstraints.push({ toolName, toolVersion });
+    }
+    for (const { toolName, toolVersion } of resolvedConstraints) {
       if (memoize) {
+        const { parent }: ToolMetadata = tools[toolName];
         const cacheKey = buildCacheKey('containerbase-active', toolName);
-        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+        // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
+        const parentActive = isToolName(parent)
+          ? memCache.get<string | undefined>(
+              buildCacheKey('containerbase-active', parent),
+            )
+          : undefined;
+        const active = parentActive
+          ? `${toolVersion}@${parent}:${parentActive}`
+          : toolVersion;
+        if (memCache.get<string | undefined>(cacheKey) === active) {
           continue;
         }
-        memCache.set(cacheKey, toolVersion);
+        memCache.set(cacheKey, active);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
     }
   }
   return installCommands;
+}
+
+export function invalidateActiveTools(
+  toolConstraints: Opt<ToolConstraint[]>,
+): void {
+  for (const { toolName } of coerceArray(toolConstraints)) {
+    memCache.set(buildCacheKey('containerbase-active', toolName), undefined);
+  }
 }

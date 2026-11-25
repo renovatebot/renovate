@@ -121,6 +121,52 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it.each`
+      content                | expectedContent
+      ${'### Release notes'} | ${'### Release notes'}
+      ${undefined}           | ${undefined}
+      ${''}                  | ${''}
+      ${null}                | ${undefined}
+      ${123}                 | ${undefined}
+      ${{ body: 'Notes' }}   | ${undefined}
+    `(
+      'preserves valid changelog content and keeps the release for $content',
+      async ({ content, expectedContent }) => {
+        httpMock
+          .scope('https://example.com')
+          .get('/v1')
+          .reply(200, {
+            releases: [
+              {
+                version: '1.1.0',
+                changelogContent: content,
+                changelogUrl: 'https://example.com/releases/1.1.0',
+              },
+            ],
+          });
+
+        const result = await getPkgReleases({
+          datasource: `${CustomDatasource.id}.foo`,
+          packageName: 'myPackage',
+          customDatasources: {
+            foo: {
+              defaultRegistryUrlTemplate: 'https://example.com/v1',
+            },
+          },
+        });
+
+        expect(result).toEqual({
+          releases: [
+            {
+              version: '1.1.0',
+              changelogContent: expectedContent,
+              changelogUrl: 'https://example.com/releases/1.1.0',
+            },
+          ],
+        });
+      },
+    );
+
     it('return releases with tags and other optional fields for api directly exposing in renovate format', async () => {
       const expected = {
         releases: [

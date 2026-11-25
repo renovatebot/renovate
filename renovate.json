@@ -9,7 +9,7 @@
   "ignorePresets": [":ignoreModulesAndTests"],
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
-  "baseBranchPatterns": ["$default", "/^disable-next$/"],
+  "baseBranchPatterns": ["$default", "next"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -146,11 +146,8 @@
       "automerge": false
     },
     {
-      "description": "Group commander major updates, they depend on each other.",
-      "matchDatasources": ["npm"],
-      "matchPackageNames": ["@commander-js/extra-typings", "commander"],
-      "matchUpdateTypes": ["major"],
-      "groupName": "commander"
+      "matchPackageNames": ["tsrs"],
+      "ignoreUnstable": false
     }
   ],
   "customManagers": [
@@ -161,14 +158,6 @@
         "default: '(?<depName>ghcr.io/renovatebot/base-image):(?<currentValue>.*)'"
       ],
       "datasourceTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": ["lib/modules/manager/mix/artifacts.ts"],
-      "matchStrings": ["const erlangVersion = '(?<currentValue>[\\^0-9]*)'"],
-      "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "containerbase/erlang-prebuild",
-      "versioningTemplate": "loose"
     },
     {
       "customType": "regex",
