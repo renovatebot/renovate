@@ -272,7 +272,7 @@
   },
   "optionalDependencies": {
     "openpgp": "6.3.2",
-    "re2": "1.27.1"
+    "re2": "1.27.2"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
