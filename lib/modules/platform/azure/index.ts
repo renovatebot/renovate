@@ -456,10 +456,9 @@ export async function getBranchPr(
     state: 'open',
     targetBranch,
   });
-  if (
-    existingPr &&
-    (!targetBranch || existingPr.targetBranch === targetBranch)
-  ) {
+  const matchesTarget =
+    !targetBranch || existingPr?.targetBranch === targetBranch;
+  if (existingPr && matchesTarget) {
     return getPr(existingPr.number);
   }
 
