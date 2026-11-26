@@ -6939,6 +6939,14 @@ describe('modules/platform/github/index', () => {
       httpMock.scope(githubApiHost).get('/rate_limit').reply(500);
       await expect(github.getRateLimit()).resolves.toBeNull();
     });
+
+    it('returns null on invalid response', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/rate_limit')
+        .reply(200, { resources: { core: 'nope' } });
+      await expect(github.getRateLimit()).resolves.toBeNull();
+    });
   });
 
   describe('getVulnerabilityAlerts()', () => {

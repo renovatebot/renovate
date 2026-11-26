@@ -214,3 +214,18 @@ const GithubRestIssue = GithubIssueBase.extend({
 
 export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
 export type GithubIssue = z.infer<typeof GithubIssue>;
+
+export const GithubRateLimit = z
+  .object({
+    resources: z.record(
+      z.string(),
+      z.object({
+        limit: z.number(),
+        used: z.number(),
+        remaining: z.number(),
+        reset: z.number(),
+      }),
+    ),
+  })
+  .transform(({ resources }) => resources);
+export type GithubRateLimit = z.infer<typeof GithubRateLimit>;

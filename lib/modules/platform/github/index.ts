@@ -117,6 +117,7 @@ import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubPullRequestAutoMergeState,
+  GithubRateLimit,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
@@ -2519,12 +2520,14 @@ export function maxBodyLength(): number {
 /**
  * `GET /rate_limit` does not count against the REST API rate limit.
  */
-export async function getRateLimit(): Promise<Record<string, unknown> | null> {
+export async function getRateLimit(): Promise<GithubRateLimit | null> {
   try {
-    const res = await githubApi.getJsonUnchecked<{
-      resources: Record<string, unknown>;
-    }>('rate_limit', { memCache: false });
-    return res.body.resources;
+    const res = await githubApi.getJson(
+      'rate_limit',
+      { memCache: false },
+      GithubRateLimit,
+    );
+    return res.body;
   } catch (err) {
     logger.debug({ err }, 'Failed to fetch rate limit');
     return null;
