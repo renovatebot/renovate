@@ -16,7 +16,12 @@ import * as _repositoryCache from '../cache/repository/index.ts';
 import type { RepoCacheData } from '../cache/repository/types.ts';
 import * as hostRules from '../host-rules.ts';
 import type { GraphqlPageCache } from './github.ts';
-import { GithubHttp, isPrAlreadyExistsError, setBaseUrl } from './github.ts';
+import {
+  GithubHttp,
+  GithubRateLimitError,
+  isPrAlreadyExistsError,
+  setBaseUrl,
+} from './github.ts';
 
 vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
@@ -529,12 +534,14 @@ describe('util/http/github', () => {
       });
 
       it('should throw rate limit exceeded', async () => {
-        await expect(
-          fail(403, {
-            message:
-              'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
-          }),
-        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+        const res = fail(403, {
+          message:
+            'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+        });
+        await expect(res).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+        await expect(res).rejects.toMatchObject({
+          apiBaseUrl: 'https://api.github.com/',
+        });
       });
 
       it('when the rate limit is exceeded, and host rules are set for GitHub.com, a warn is logged', async () => {
@@ -968,7 +975,12 @@ describe('util/http/github', () => {
 
       await expect(
         githubApi.queryRepoField(graphqlQuery, 'testItem'),
-      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      ).rejects.toThrow(
+        expect.objectContaining({
+          message: PLATFORM_RATE_LIMIT_EXCEEDED,
+          apiBaseUrl: 'https://api.github.com/',
+        }),
+      );
     });
 
     it('queryRepo', async () => {
@@ -1267,6 +1279,53 @@ describe('util/http/github', () => {
       ).resolves.toMatchObject({
         body: 'test',
       });
+    });
+  });
+
+  describe('GithubRateLimitError', () => {
+    it('uses the GHE API base for REST and GraphQL URLs', () => {
+      expect(
+        new GithubRateLimitError(
+          'https://ghe.example.com/api/v3/repos/a/b',
+          {},
+        ),
+      ).toMatchObject({ apiBaseUrl: 'https://ghe.example.com/api/v3/' });
+      expect(
+        new GithubRateLimitError('graphql', {
+          baseUrl: 'https://ghe.example.com/api/',
+        }),
+      ).toMatchObject({ apiBaseUrl: 'https://ghe.example.com/api/v3/' });
+    });
+  });
+
+  describe('getRateLimit', () => {
+    const resources = {
+      core: { limit: 5000, used: 5000, remaining: 0, reset: 1 },
+    };
+
+    it('fetches the rate limit with the rate limited token', async () => {
+      httpMock
+        .scope('https://ghe.example.com', {
+          reqheaders: { authorization: 'token some-token' },
+        })
+        .get('/api/v3/rate_limit')
+        .reply(200, { resources, rate: resources.core });
+      const err = new GithubRateLimitError(
+        'https://ghe.example.com/api/v3/repos/a/b',
+        { token: 'some-token' },
+      );
+      expect(JSON.stringify(err)).not.toContain('some-token');
+      await expect(err.getRateLimit()).resolves.toEqual(resources);
+    });
+
+    it('returns null on invalid response', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/rate_limit')
+        .reply(200, { resources: { core: 'nope' } });
+      await expect(
+        new GithubRateLimitError('repos/a/b', {}).getRateLimit(),
+      ).resolves.toBeNull();
     });
   });
 });

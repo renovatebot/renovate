@@ -37,8 +37,8 @@ import {
 } from '../../constants/error-messages.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
-import { platform } from '../../modules/platform/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { GithubRateLimitError } from '../../util/http/github.ts';
 import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
@@ -178,8 +178,15 @@ export default async function handleError(
       return SYSTEM_INSUFFICIENT_DISK_SPACE;
     }
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-      const rateLimit = await platform.getRateLimit?.();
-      logger.warn({ rateLimit }, 'Rate limit exceeded - aborting');
+      const meta: Record<string, unknown> = {};
+      if (err instanceof GithubRateLimitError) {
+        meta.apiBaseUrl = err.apiBaseUrl;
+        const rateLimit = await err.getRateLimit();
+        if (rateLimit) {
+          meta.rateLimit = rateLimit;
+        }
+      }
+      logger.warn(meta, 'Rate limit exceeded - aborting');
       delete config.branchList;
       return err.message;
     }

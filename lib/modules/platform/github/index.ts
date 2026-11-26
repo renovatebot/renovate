@@ -117,7 +117,6 @@ import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubPullRequestAutoMergeState,
-  GithubRateLimit,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
@@ -2515,23 +2514,6 @@ export function massageCommitMessage(message: string): string {
 
 export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
-}
-
-/**
- * `GET /rate_limit` does not count against the REST API rate limit.
- */
-export async function getRateLimit(): Promise<GithubRateLimit | null> {
-  try {
-    const res = await githubApi.getJson(
-      'rate_limit',
-      { memCache: false },
-      GithubRateLimit,
-    );
-    return res.body;
-  } catch (err) {
-    logger.debug({ err }, 'Failed to fetch rate limit');
-    return null;
-  }
 }
 
 export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
