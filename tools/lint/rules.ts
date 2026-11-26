@@ -23,6 +23,7 @@ import preferCoerceArray from './rules/prefer-coerce-array.ts';
 import preferCoerceObject from './rules/prefer-coerce-object.ts';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.ts';
 import preferFsUtil from './rules/prefer-fs-util.ts';
+import preferGetOption from './rules/prefer-get-option.ts';
 import preferIsHelpers from './rules/prefer-is-helpers.ts';
 import preferIsObject from './rules/prefer-is-object.ts';
 import preferLuxon from './rules/prefer-luxon.ts';
@@ -73,6 +74,7 @@ export default definePlugin({
     'prefer-coerce-object': preferCoerceObject,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,
+    'prefer-get-option': preferGetOption,
     'prefer-luxon': preferLuxon,
     'prefer-is-helpers': preferIsHelpers,
     'prefer-is-object': preferIsObject,

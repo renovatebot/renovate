@@ -82,6 +82,7 @@
     "renovate/no-complex-conditional-expression": "error",
     "renovate/no-nested-logical-expressions": ["error", { "max": 1 }],
     "renovate/no-number-constructor": "error",
+    "renovate/prefer-get-option": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/prefer-parser-pipe": "error",
     "renovate/require-regex-util": "error",
