@@ -15,7 +15,7 @@
     "clean-cache": "node tools/clean-cache.mjs",
     "compile:ts": "tsdown",
     "config-validator": "node lib/config-validator.ts",
-    "create-json-schema": "node tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json' renovate-inherited-schema.json renovate-global-schema.json",
+    "create-json-schema": "node tools/generate-schema.ts && prettier --write --cache --ignore-path .prettierignore renovate-schema.json renovate-inherited-schema.json renovate-global-schema.json",
     "debug": "node --inspect-brk lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation",
@@ -201,7 +201,7 @@
     "commander": "15.1.0",
     "common-tags": "1.8.2",
     "croner": "10.0.1",
-    "cronstrue": "3.42.0",
+    "cronstrue": "3.43.0",
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "7.0.2",
@@ -272,7 +272,7 @@
   },
   "optionalDependencies": {
     "openpgp": "6.3.2",
-    "re2": "1.27.1"
+    "re2": "1.27.2"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
@@ -323,7 +323,7 @@
     "graphql": "17.1.0",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
-    "knip": "6.46.0",
+    "knip": "6.46.1",
     "lint-staged": "17.6.1",
     "markdownlint-cli2": "0.24.1",
     "markdownlint-cli2-formatter-template": "0.0.4",
