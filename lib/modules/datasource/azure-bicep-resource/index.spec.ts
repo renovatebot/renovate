@@ -154,7 +154,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
 
   it('persists public releases and index when private package caching is disabled', async () => {
     const cacheDir = await tmpDir({ unsafeCleanup: true });
-    GlobalConfig.set({ cachePrivatePackages: false });
+    GlobalConfig.set({ packageCache: { privatePackages: false } });
     await packageCache.init({ cacheDir: cacheDir.path });
     httpMock
       .scope(gitHubHost)

@@ -174,7 +174,7 @@ Only applies when `RENOVATE_X_SQLITE_PACKAGE_CACHE` is set.
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.
-Do not combine with `redisUrl`, Redis would be preferred over SQlite.
+Do not combine with `packageCache.redisUrl`, Redis would be preferred over SQlite.
 
 ## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
 

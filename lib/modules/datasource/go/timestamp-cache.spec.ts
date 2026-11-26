@@ -99,7 +99,7 @@ describe('modules/datasource/go/timestamp-cache', () => {
   });
 
   it('caches private modules if cachePrivatePackages is enabled', async () => {
-    GlobalConfig.set({ cachePrivatePackages: true });
+    GlobalConfig.set({ packageCache: { privatePackages: true } });
     vi.stubEnv('GOPRIVATE', 'github.com/foo/*');
 
     const cache = await GoVersionTimestampCache.init(baseUrl, packageName);

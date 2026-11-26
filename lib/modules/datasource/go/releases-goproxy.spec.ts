@@ -1952,7 +1952,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       it('caches modules served by a private proxy if cachePrivatePackages is enabled', async () => {
-        GlobalConfig.set({ cachePrivatePackages: true });
+        GlobalConfig.set({ packageCache: { privatePackages: true } });
         vi.stubEnv('GOPROXY', privateUrl);
         mockProxy(privateUrl);
 
@@ -2031,10 +2031,12 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       it('does not store a version which has no publication time', async () => {
         GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-go-proxy':
-              // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
-              0,
+          packageCache: {
+            ttlOverride: {
+              'datasource-go-proxy':
+                // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
+                0,
+            },
           },
         });
         vi.stubEnv('GOPROXY', baseUrl);

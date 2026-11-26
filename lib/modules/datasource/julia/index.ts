@@ -95,7 +95,7 @@ export class JuliaDatasource extends Datasource {
     }
 
     // A cloned registry may be private, so its releases are cached only with
-    // `cachePrivatePackages`.
+    // `packageCache.privatePackages`.
     return withCache(
       {
         namespace: `datasource-${JuliaDatasource.id}`,

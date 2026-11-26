@@ -3799,7 +3799,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('does not cache failed lookups when cachePrivatePackages is enabled', async () => {
-      GlobalConfig.set({ cachePrivatePackages: true });
+      GlobalConfig.set({ packageCache: { privatePackages: true } });
 
       httpMock
         .scope('https://registry.company.com/v2')

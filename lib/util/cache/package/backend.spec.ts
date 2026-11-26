@@ -69,7 +69,7 @@ describe('util/cache/package/backend', () => {
   });
 
   it('initializes redis backend', async () => {
-    await backend.init({ redisUrl: 'some-url' });
+    await backend.init({ packageCache: { redisUrl: 'some-url' } });
 
     expect(PackageCacheRedis.create).toHaveBeenCalledWith(
       'some-url',
@@ -105,7 +105,7 @@ describe('util/cache/package/backend', () => {
   });
 
   it('re-init destroys previous backend', async () => {
-    await backend.init({ redisUrl: 'some-url' });
+    await backend.init({ packageCache: { redisUrl: 'some-url' } });
 
     expect(backend.getCacheType()).toBe('redis');
 
@@ -134,7 +134,7 @@ describe('util/cache/package/backend', () => {
   });
 
   it('destroys backend and clears state', async () => {
-    await backend.init({ redisUrl: 'some-url' });
+    await backend.init({ packageCache: { redisUrl: 'some-url' } });
 
     expect(backend.getCacheType()).toBe('redis');
 

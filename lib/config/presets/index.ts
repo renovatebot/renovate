@@ -143,7 +143,8 @@ export async function getPreset(
     });
   } else {
     const cacheKey = buildCacheKey('preset', preset);
-    const presetCachePersistence = GlobalConfig.get('presetCachePersistence');
+    const presetCachePersistence =
+      GlobalConfig.get('packageCache').presetPersistence;
 
     let packageCache:
       typeof import('../../util/cache/package/index.ts') | undefined;

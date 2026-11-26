@@ -220,8 +220,6 @@ export interface GlobalOnlyConfigLegacy {
   privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
-  redisPrefix?: string;
-  redisUrl?: string;
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
@@ -246,8 +244,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedHeaders?: string[];
   binarySource?: BinarySource;
   cacheDir?: string;
-  cacheHardTtlMinutes?: number;
-  cacheTtlOverride?: Record<string, number>;
   checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
@@ -268,14 +264,13 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
-  presetCachePersistence?: boolean;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
   dockerMaxPages?: number;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
-  cachePrivatePackages?: boolean;
+  packageCache?: PackageCacheConfig;
   repositoryCache?: RepositoryCacheConfig;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
@@ -658,6 +653,7 @@ export const namedParents = [
   'group',
   'hostRules',
   'logLevelRemap',
+  'packageCache',
   'packageRules',
   'postUpgradeTasks',
   'repositoryCache',
@@ -936,6 +932,15 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface PackageCacheConfig {
+  hardTtlMinutes?: number;
+  presetPersistence?: boolean;
+  privatePackages?: boolean;
+  redisPrefix?: string;
+  redisUrl?: string;
+  ttlOverride?: Record<string, number>;
 }
 
 export interface RepositoryCacheConfig {

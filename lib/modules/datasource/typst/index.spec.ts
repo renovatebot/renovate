@@ -13,7 +13,7 @@ describe('modules/datasource/typst/index', () => {
 
     beforeEach(async () => {
       cacheDir = await dir({ unsafeCleanup: true });
-      GlobalConfig.set({ cachePrivatePackages: false });
+      GlobalConfig.set({ packageCache: { privatePackages: false } });
       memCache.init();
       await packageCache.init({ cacheDir: cacheDir.path });
     });
@@ -34,7 +34,9 @@ describe('modules/datasource/typst/index', () => {
     `(
       'rejects $packageName before cache access',
       async ({ packageName, cachePrivatePackages, ageMinutes }) => {
-        GlobalConfig.set({ cachePrivatePackages });
+        GlobalConfig.set({
+          packageCache: { privatePackages: cachePrivatePackages },
+        });
         await packageCache.setWithRawTtl(
           'datasource-typst:registry-releases',
           `cache-decorator:${packageName}`,

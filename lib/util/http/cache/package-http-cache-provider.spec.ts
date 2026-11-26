@@ -238,7 +238,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
   });
 
   it('allows caching when cache-control is private but cachePrivatePackages=true', async () => {
-    GlobalConfig.set({ cachePrivatePackages: true });
+    GlobalConfig.set({ packageCache: { privatePackages: true } });
 
     mockTime('2024-06-15T00:00:00.000Z');
 
@@ -628,7 +628,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
         authorization,
         expected,
       }) => {
-        GlobalConfig.set({ cachePrivatePackages });
+        GlobalConfig.set({
+          packageCache: { privatePackages: cachePrivatePackages },
+        });
 
         const cacheProvider = createCacheProvider({
           checkCacheControlHeader,
@@ -650,7 +652,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     );
 
     it('handles case-insensitive cache-control values', () => {
-      GlobalConfig.set({ cachePrivatePackages: false });
+      GlobalConfig.set({ packageCache: { privatePackages: false } });
 
       const cacheProvider = createCacheProvider({
         checkCacheControlHeader: true,

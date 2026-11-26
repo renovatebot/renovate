@@ -184,9 +184,9 @@ describe('util/cache/package/with-cache', () => {
     ${true}   | ${false} | ${false} | ${false}
     ${true}   | ${false} | ${true}  | ${true}
   `(
-    'caches=$stored for cacheable=$cacheable, public=$isPublic, cachePrivatePackages=$override',
+    'caches=$stored for cacheable=$cacheable, public=$isPublic, packageCache.privatePackages=$override',
     async ({ cacheable, isPublic, override, stored }) => {
-      GlobalConfig.set({ cachePrivatePackages: override });
+      GlobalConfig.set({ packageCache: { privatePackages: override } });
 
       for (const mode of ['options', 'context']) {
         const options: CachedOptions = {
@@ -334,7 +334,7 @@ describe('util/cache/package/with-cache', () => {
   describe('fallback with hard TTL', () => {
     beforeEach(() => {
       vi.useFakeTimers();
-      GlobalConfig.set({ cacheHardTtlMinutes: 2 });
+      GlobalConfig.set({ packageCache: { hardTtlMinutes: 2 } });
     });
 
     it('updates cached result after soft TTL expires', async () => {
@@ -399,8 +399,10 @@ describe('util/cache/package/with-cache', () => {
 
     it('overrides soft ttl and updates result', async () => {
       GlobalConfig.set({
-        cacheTtlOverride: { '_test-namespace': 2 },
-        cacheHardTtlMinutes: 3,
+        packageCache: {
+          ttlOverride: { '_test-namespace': 2 },
+          hardTtlMinutes: 3,
+        },
       });
       function fn(ctx: CacheContext) {
         ctx.public = true;

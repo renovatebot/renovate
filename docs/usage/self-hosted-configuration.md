@@ -364,89 +364,6 @@ For example:
 }
 ```
 
-## `cacheHardTtlMinutes`
-
-This experimental feature configures the physical lifetime of cache entries.
-Renovate internally uses two types of Time-to-Live (TTL) for its cache:
-
-- **Soft TTL (logical):** When a cache entry's soft TTL expires, Renovate tries to refresh the data from the upstream source.
-- **Hard TTL (physical):** When a cache entry's hard TTL expires, Renovate permanently removes the data from the cache.
-
-This two-level cache expiry is used for:
-
-1. [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) with `ETag`, `Last-Modified`, and `If-Modified-Since` headers
-2. `getReleases` and `getDigest` datasource methods, i.e. the package release data
-
-If an upstream request fails, Renovate can still use stale data from the cache as long as its hard TTL has not expired.
-
-The `cacheHardTtlMinutes` option lets you configure the hard TTL.
-Set this to a non-zero value, the recommended minimum is 60 (one hour).
-
-If the soft TTL for a cache entry is longer than the hard TTL, Renovate uses the soft TTL value for both.
-The soft TTL is hard-coded but can be overridden with [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride).
-
-**Example:**
-
-The `npm` datasource has a default soft TTL of 15 minutes.
-When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stale `npm` data in the following ways:
-
-- The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
-- If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
-
-## `cachePrivatePackages`
-
-In the self-hosted setup, use option to enable caching of private packages to improve performance.
-
-## `cacheTtlOverride`
-
-Use this key-value map to override the default package cache TTL values for a specific namespace.
-This object contains pairs of namespaces and their corresponding TTL values in minutes.
-
-Internally, Renovate has the notion of soft TTL and hard TTL.
-In some contexts they are equal, but when they differ, this option overrides the soft TTL.
-See [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes) for more information.
-
-You can use:
-
-- **Exact matches**: Direct namespace names
-- **Glob patterns**: Wildcards like `datasource-*` or `*`
-- **Regex patterns**: Regular expressions like `/^datasource-/`
-
-Priority order:
-
-1. Exact namespace matches take highest priority
-2. If no exact match, the longest (most specific) matching pattern wins
-
-Example:
-
-```json {configType=global}
-{
-  "cacheTtlOverride": {
-    "datasource-rubygems": 120,
-    "datasource-*": 60,
-    "datasource-{crate,go}": 90,
-    "/^changelog-/": 45,
-    "*": 30
-  }
-}
-```
-
-In this example:
-
-- `datasource-rubygems` gets 120 minutes (exact match - highest priority)
-- `datasource-crate` and `datasource-go` get 90 minutes (matches `datasource-{crate,go}` - longest pattern)
-- `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
-- `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
-- `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
-
-Namespaces of special interest follow the pattern `datasource-{datasource}`.
-When releases for a datasource are fetched, they are stored in this namespace.
-Whether caching is enabled for a particular datasource depends on whether it is private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
-
-Other valid cache namespaces are as follows:
-
-<!-- Autogenerate cache-namespaces -->
-
 ## `checkedBranches`
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
@@ -1281,6 +1198,141 @@ In that case, Renovate searches the repository config file for any of these conf
 If Renovate finds any of the above configurations, it continues initializing the repository.
 If not, then Renovate skips the repository without cloning it.
 
+## `packageCache`
+
+The `packageCache` object configures Renovate's package cache, which stores lookup results (e.g. dependency versions and changelogs) between repositories and runs.
+
+```json {configType=global}
+{
+  "packageCache": {
+    "hardTtlMinutes": 1440,
+    "privatePackages": true
+  }
+}
+```
+
+!!! note
+  Before the `packageCache` object was introduced, these settings were separate options, such as `cacheHardTtlMinutes` and `redisUrl`.
+  Renovate migrates them into the `packageCache` object.
+  Their environment variables and CLI flags, such as `RENOVATE_REDIS_URL` and `--redis-url`, are also migrated into `RENOVATE_PACKAGE_CACHE` and `--package-cache`, but fields set in those take precedence.
+
+### `packageCache.hardTtlMinutes`
+
+This experimental feature configures the physical lifetime of cache entries.
+Renovate internally uses two types of Time-to-Live (TTL) for its cache:
+
+- **Soft TTL (logical):** When a cache entry's soft TTL expires, Renovate tries to refresh the data from the upstream source.
+- **Hard TTL (physical):** When a cache entry's hard TTL expires, Renovate permanently removes the data from the cache.
+
+This two-level cache expiry is used for:
+
+1. [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) with `ETag`, `Last-Modified`, and `If-Modified-Since` headers
+2. `getReleases` and `getDigest` datasource methods, i.e. the package release data
+
+If an upstream request fails, Renovate can still use stale data from the cache as long as its hard TTL has not expired.
+
+The `packageCache.hardTtlMinutes` option lets you configure the hard TTL.
+Set this to a non-zero value, the recommended minimum is 60 (one hour).
+
+If the soft TTL for a cache entry is longer than the hard TTL, Renovate uses the soft TTL value for both.
+The soft TTL is hard-coded but can be overridden with [`packageCache.ttlOverride`](./self-hosted-configuration.md#packagecachettloverride).
+
+**Example:**
+
+The `npm` datasource has a default soft TTL of 15 minutes.
+When `packageCache.hardTtlMinutes` is set, for example to 60, Renovate will use the stale `npm` data in the following ways:
+
+- The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
+- If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
+
+### `packageCache.presetPersistence`
+
+When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
+
+TTL is 15 minutes by default, and it is adjustable in [`packageCache.ttlOverride`](#packagecachettloverride).
+
+!!! warning
+  Doing so improves efficiency because shared presets do not need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+  You should only enable this when all repositories are trusted, such as a corporate environment.
+
+### `packageCache.privatePackages`
+
+In the self-hosted setup, use option to enable caching of private packages to improve performance.
+
+### `packageCache.redisPrefix`
+
+If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
+It is only used if `packageCache.redisUrl` is configured.
+
+### `packageCache.redisUrl`
+
+If this value is set then Renovate will use Redis for its global cache instead of the local file system.
+The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
+
+For non encrypted connections,
+
+Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
+
+For TLS/SSL-enabled connections, use rediss prefix
+
+Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
+
+Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
+
+Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
+
+### `packageCache.ttlOverride`
+
+Use this key-value map to override the default package cache TTL values for a specific namespace.
+This object contains pairs of namespaces and their corresponding TTL values in minutes.
+
+Internally, Renovate has the notion of soft TTL and hard TTL.
+In some contexts they are equal, but when they differ, this option overrides the soft TTL.
+See [`packageCache.hardTtlMinutes`](./self-hosted-configuration.md#packagecachehardttlminutes) for more information.
+
+You can use:
+
+- **Exact matches**: Direct namespace names
+- **Glob patterns**: Wildcards like `datasource-*` or `*`
+- **Regex patterns**: Regular expressions like `/^datasource-/`
+
+Priority order:
+
+1. Exact namespace matches take highest priority
+2. If no exact match, the longest (most specific) matching pattern wins
+
+Example:
+
+```json {configType=global}
+{
+  "packageCache": {
+    "ttlOverride": {
+      "datasource-rubygems": 120,
+      "datasource-*": 60,
+      "datasource-{crate,go}": 90,
+      "/^changelog-/": 45,
+      "*": 30
+    }
+  }
+}
+```
+
+In this example:
+
+- `datasource-rubygems` gets 120 minutes (exact match - highest priority)
+- `datasource-crate` and `datasource-go` get 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
+- `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
+- `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
+
+Namespaces of special interest follow the pattern `datasource-{datasource}`.
+When releases for a datasource are fetched, they are stored in this namespace.
+Whether caching is enabled for a particular datasource depends on whether it is private or caching is forced with [`packageCache.privatePackages`](./self-hosted-configuration.md#packagecacheprivatepackages).
+
+Other valid cache namespaces are as follows:
+
+<!-- Autogenerate cache-namespaces -->
+
 ## `password`
 
 ## `persistRepoData`
@@ -1297,16 +1349,6 @@ Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
-
-## `presetCachePersistence`
-
-When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
-
-TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
-
-!!! warning
-  Doing so improves efficiency because shared presets do not need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
-  You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## `privateKey`
 
@@ -1472,28 +1514,6 @@ It is highly unlikely that you should ever need to add this to your permanent gl
 
 Example: `renovate --rebase-all-open-branches=true renovate-reproductions/checked` will rebase all open PRs in the `renovate-reproductions/checked` repository.
 
-## `redisPrefix`
-
-If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
-It is only used if `redisUrl` is configured.
-
-## `redisUrl`
-
-If this value is set then Renovate will use Redis for its global cache instead of the local file system.
-The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
-
-For non encrypted connections,
-
-Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
-
-For TLS/SSL-enabled connections, use rediss prefix
-
-Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
-
-Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
-
-Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
-
 ## `reportFormatting`
 
 This option only applies when [`reportType`](#reporttype) is `file` or `s3`.
@@ -1598,7 +1618,7 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
   For example, `repositoryCache.type: 's3://bucket-name/dir1/.../dirN/'`.
 
 !!! note
-  S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
+  S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#packagecacheredisurl).
 
 ## `requireConfig`
 
