@@ -79,6 +79,27 @@ describe('config/index', () => {
       });
     });
 
+    it('merges toolSettings', () => {
+      const parentConfig = {
+        ...defaultConfig,
+        toolSettings: { jvmMaxMemory: 1024, nodeMaxMemory: 1024 },
+      };
+      const childConfig = { toolSettings: { nodeMaxMemory: 2048 } };
+      const config = mergeChildConfig(parentConfig, childConfig);
+      expect(config.toolSettings).toStrictEqual({
+        jvmMaxMemory: 1024,
+        nodeMaxMemory: 2048,
+      });
+    });
+
+    it('does not merge toolSettings with any defaults', () => {
+      const config = mergeChildConfig(
+        { ...defaultConfig },
+        { toolSettings: { jvmMaxMemory: 1024 } },
+      );
+      expect(config.toolSettings).toStrictEqual({ jvmMaxMemory: 1024 });
+    });
+
     it('merges forced options', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
@@ -132,10 +153,10 @@ describe('config/index', () => {
 
     it.each`
       toolSettings | expected
-      ${{}}        | ${{}}
+      ${{}}        | ${{ nodeMaxMemory: 1024 }}
       ${null}      | ${null}
     `(
-      'replaces inherited toolSettings with $toolSettings',
+      'merges inherited toolSettings with $toolSettings',
       ({ toolSettings, expected }) => {
         const parentConfig = {
           ...defaultConfig,
