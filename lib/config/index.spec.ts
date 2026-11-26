@@ -130,6 +130,22 @@ describe('config/index', () => {
       expect(config).toMatchObject(parentConfig);
     });
 
+    it.each`
+      toolSettings | expected
+      ${{}}        | ${{}}
+      ${null}      | ${null}
+    `(
+      'replaces inherited toolSettings with $toolSettings',
+      ({ toolSettings, expected }) => {
+        const parentConfig = {
+          ...defaultConfig,
+          toolSettings: { nodeMaxMemory: 1024 },
+        };
+        const config = mergeChildConfig(parentConfig, { toolSettings });
+        expect(config.toolSettings).toStrictEqual(expected);
+      },
+    );
+
     it('getManagerConfig()', () => {
       const parentConfig = { ...defaultConfig };
       const config = getManagerConfig(parentConfig, 'npm');
