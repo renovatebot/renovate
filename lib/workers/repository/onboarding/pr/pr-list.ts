@@ -1,6 +1,6 @@
 import { getDefault } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import { getOptions } from '../../../../config/options/index.ts';
+import { getOption } from '../../../../config/options/index.ts';
 import {
   type RenovateConfig,
   type UpdateType,
@@ -89,7 +89,7 @@ function resolveVulnerabilityConcurrentLimit(
   const vulnerabilityAlerts = config.vulnerabilityAlerts as
     RenovateConfig | undefined;
   const vulnerabilityAlertsDefault = getDefault(
-    getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
+    getOption('vulnerabilityAlerts'),
   ) as RenovateConfig;
   const configAsUpgrade: BranchUpgradeConfig = {
     branchName: '',

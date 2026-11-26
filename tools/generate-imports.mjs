@@ -284,6 +284,20 @@ export const configOptionDefaults = ${JSON.stringify(defaults, null, 2)} as cons
  * needs them, and runs inside oxlint where importing `lib/` isn't an option.
  * `test/other/validate-templatable-fields.spec.ts` fails if this drifts.
  */
+async function generateConfigOptionNames() {
+  const { getOptions } = await import('../lib/config/options/index.ts');
+  const names = getOptions()
+    .map((option) => JSON.stringify(option.name))
+    .sort();
+
+  const content = `
+export type ConfigOptionName =
+  | ${names.join('\n  | ')};
+`;
+
+  await updateFile('lib/config-option-names.generated.ts', content);
+}
+
 async function generateTemplatableFields() {
   const { validMatchFields } =
     await import('../lib/modules/manager/custom/utils.ts');
@@ -372,6 +386,7 @@ await (async () => {
     await generateVersioningList();
     await generateDatasourceList();
     await generateConfigOptionDefaults();
+    await generateConfigOptionNames();
     await generateTemplatableFields();
     await generateHash();
     await Promise.all(

@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { getOptions } from '../../lib/config/options/index.ts';
+import { getOption, getOptions } from '../../lib/config/options/index.ts';
 import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type { RenovateOptions, UpdateType } from '../../lib/config/types.ts';
 import { regEx } from '../../lib/util/regex.ts';
@@ -77,8 +77,8 @@ describe('docs/documentation', () => {
       });
 
       function getPostUpdateOptionsValues(): Set<string> {
-        const option = options.find((o) => o.name === 'postUpdateOptions');
-        return new Set(option?.allowedValues ?? []);
+        const option = getOption('postUpdateOptions');
+        return new Set(option.allowedValues ?? []);
       }
 
       async function getConfigSubHeaders(file: string): Promise<string[]> {
@@ -156,11 +156,9 @@ describe('docs/documentation', () => {
           'configuration-options.md',
           'postUpdateOptions',
         );
-        const postUpdateOption = options.find(
-          (o) => o.name === 'postUpdateOptions',
-        );
+        const postUpdateOption = getOption('postUpdateOptions');
         const allowedValues = [
-          ...(postUpdateOption?.allowedValues ?? []),
+          ...(postUpdateOption.allowedValues ?? []),
         ].sort();
         expect(postUpdateHeaders).toEqual(allowedValues);
       });
