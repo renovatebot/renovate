@@ -882,7 +882,10 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Configuration to use for onboarding PRs.',
     stage: 'repository',
     type: 'object',
-    default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
+    default: {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      extends: ['config:recommended'],
+    },
     globalOnly: true,
     inheritConfigSupport: true,
     mergeable: true,
