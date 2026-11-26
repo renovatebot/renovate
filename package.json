@@ -143,7 +143,7 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^24.11.0 || ^26.13.0",
+    "node": "^24.15.0 || ^26.13.0",
     "pnpm": "^11.0.0"
   },
   "dependencies": {
