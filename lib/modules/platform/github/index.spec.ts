@@ -2586,6 +2586,42 @@ describe('modules/platform/github/index', () => {
       );
 
       expect(pr).toBeNull();
+      expect(git.forcePushToRemote).not.toHaveBeenCalled();
+    });
+
+    it('restores the local branch if PR reopening fails', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .head(`/repos/some/repo/git/commits/${prSha}`)
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(422);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      const localSha = fakeSha('5678');
+      git.getBranchCommit.mockReturnValueOnce(localSha);
+
+      await github.initRepo({ repository: 'some/repo' });
+
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: prSha,
+        },
+        'new title',
+      );
+
+      expect(pr).toBeNull();
+      expect(git.forcePushToRemote).toHaveBeenCalledExactlyOnceWith(
+        'somebranch',
+        'origin',
+      );
     });
 
     it('aborts reopening if PR reopening fails', async () => {

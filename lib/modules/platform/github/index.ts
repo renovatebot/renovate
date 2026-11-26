@@ -1198,6 +1198,12 @@ export async function tryReuseAutoclosedPr(
     return result;
   } catch {
     logger.debug('Could not reopen autoclosed PR');
+    // The branch was reset to the autoclosed PR's head above, so restore the
+    // fresh local commit to let the caller create a new PR from it
+    const localSha = git.getBranchCommit(branchName);
+    if (localSha && localSha !== sha) {
+      await git.forcePushToRemote(branchName, 'origin');
+    }
     return null;
   }
 }
