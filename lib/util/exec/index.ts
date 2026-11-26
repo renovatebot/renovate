@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isBoolean, isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoToolSettingsOptions } from '../../config/types.ts';
@@ -284,6 +284,9 @@ export function getToolSettingsOptions(
     jvmMaxMemory,
     jvmMemory: globalConfig.jvmMemory ?? jvmMaxMemory,
     nodeMaxMemory: globalConfig.nodeMaxMemory,
+    pnpmMinimumReleaseAgeExcludeSecurityUpdates:
+      globalConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates ??
+      defaults.pnpmMinimumReleaseAgeExcludeSecurityUpdates,
   };
 
   if (repoConfig !== undefined) {
@@ -314,6 +317,20 @@ export function getToolSettingsOptions(
         );
       } else {
         options.nodeMaxMemory = repoConfig.nodeMaxMemory;
+      }
+    }
+
+    if (isBoolean(repoConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates)) {
+      if (
+        globalConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates === false &&
+        repoConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates
+      ) {
+        logger.once.debug(
+          'Enabling pnpmMinimumReleaseAgeExcludeSecurityUpdates is not permitted when the global configuration disables it. Using global configuration instead',
+        );
+      } else {
+        options.pnpmMinimumReleaseAgeExcludeSecurityUpdates =
+          repoConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates;
       }
     }
   }
