@@ -1241,6 +1241,9 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## `onboardingConfig`
 
+By default, the onboarding config extends the `config:recommended` preset.
+Set `extends` in `onboardingConfig` to use a different preset.
+
 ## `onboardingConfigFileName`
 
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.

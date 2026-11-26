@@ -826,7 +826,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.178.1',
+    default: 'ghcr.io/renovatebot/base-image:14.0.2',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -882,7 +882,10 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Configuration to use for onboarding PRs.',
     stage: 'repository',
     type: 'object',
-    default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
+    default: {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      extends: ['config:recommended'],
+    },
     globalOnly: true,
     inheritConfigSupport: true,
     mergeable: true,
@@ -3397,19 +3400,6 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
-    name: 'dnsCache',
-    description: 'Enable got DNS cache.',
-    type: 'boolean',
-    default: false,
-    stage: 'repository',
-    parents: ['hostRules'],
-    cli: false,
-    env: false,
-    experimental: true,
-    deprecationMsg:
-      'This option is deprecated and will be removed in a future release.',
-  },
-  {
     name: 'keepAlive',
     description: 'Enable HTTP keep-alive for hosts.',
     type: 'boolean',
@@ -4056,10 +4046,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Tool specific configuration. Global self-hosted configuration takes precedence.',
     type: 'object',
-    default: {
-      jvmMaxMemory: 512,
-      jvmMemory: 512,
-    },
+    mergeable: true,
     additionalProperties: false,
     cli: false,
   },
@@ -4068,6 +4055,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
+    default: 512,
     parents: ['toolSettings'],
     supportedManagers: ['gradle-wrapper'],
     cli: false,
