@@ -182,7 +182,7 @@
     "@renovatebot/detect-tools": "5.0.0",
     "@renovatebot/good-enough-parser": "4.0.3",
     "@renovatebot/osv-offline": "4.5.11",
-    "@renovatebot/pep440": "6.0.0",
+    "@renovatebot/pep440": "6.0.1",
     "@renovatebot/pgp": "2.0.6",
     "@renovatebot/ruby-semver": "6.0.0",
     "@sindresorhus/is": "8.1.0",
