@@ -2020,7 +2020,7 @@ describe('util/exec/index', () => {
     describe('for pnpm settings', () => {
       it.each`
         global       | repo         | expected
-        ${undefined} | ${undefined} | ${true}
+        ${undefined} | ${undefined} | ${false}
         ${undefined} | ${false}     | ${false}
         ${false}     | ${undefined} | ${false}
         ${false}     | ${false}     | ${false}
