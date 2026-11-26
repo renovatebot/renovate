@@ -95,6 +95,11 @@ const managerList: readonly string[] = AllManagersListLiteral;
 
 const topLevelObjects = [...managerList, 'env'];
 
+/**
+ * Global options which are objects of their own child options, each validated individually.
+ */
+const globalObjectsWithChildren = ['repositoryCache'];
+
 const ignoredNodes = [
   '$schema',
   'headers',
@@ -1314,6 +1319,26 @@ async function validateGlobalConfig(
             subValidation.errors,
           )) {
             warnings.push(warning);
+          }
+        } else if (globalObjectsWithChildren.includes(key)) {
+          for (const [subKey, subVal] of Object.entries(val)) {
+            const subOption = optionsByName.get(subKey);
+            if (!subOption?.parents?.includes(key as AllowedParents)) {
+              errors.push({
+                topic: ConfigValidationTopic.Error,
+                message: `Invalid configuration option: ${currentPath}.${subKey}`,
+              });
+              continue;
+            }
+            await validateGlobalConfig(
+              subKey,
+              subVal,
+              subOption.type,
+              warnings,
+              errors,
+              `${currentPath}.${subKey}`,
+              config,
+            );
           }
         } else if (key === 'cacheTtlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {

@@ -774,7 +774,7 @@ describe('workers/global/config/parse/index', () => {
           repositories: [
             {
               repository: 'org/simple-repo',
-              repositoryCache: 'disabled',
+              repositoryCache: { state: 'disabled' },
             },
           ],
         });

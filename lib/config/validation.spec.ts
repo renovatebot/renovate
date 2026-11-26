@@ -3379,9 +3379,9 @@ describe('config/validation', () => {
         ]);
       });
 
-      it('repositoryCache', async () => {
+      it('repositoryCache.state', async () => {
         const config = {
-          repositoryCache: 'invalid' as never,
+          repositoryCache: { state: 'invalid' as never },
         };
         const { warnings, errors } = await configValidation.validateConfig(
           'global',
@@ -3391,7 +3391,58 @@ describe('config/validation', () => {
         expect(errors).toMatchObject([
           {
             message:
-              'Invalid repositoryCache: repositoryCache had a value `"invalid"` which was not part of the allowedValues: ["disabled","enabled","reset"]',
+              'Invalid repositoryCache.state: state had a value `"invalid"` which was not part of the allowedValues: ["disabled","enabled","reset"]',
+          },
+        ]);
+      });
+
+      it('repositoryCache with an unknown field', async () => {
+        const config = {
+          repositoryCache: { unknown: true },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          // @ts-expect-error: contains invalid values
+          config,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message: 'Invalid configuration option: repositoryCache.unknown',
+          },
+        ]);
+      });
+
+      it('repositoryCache with a field of the wrong type', async () => {
+        const config = {
+          repositoryCache: { forceLocal: 'yes' as never },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(errors).toBeEmptyArray();
+        expect(warnings).toMatchObject([
+          {
+            message:
+              'Configuration option `repositoryCache.forceLocal` should be a boolean. Found: "yes" (string).',
+          },
+        ]);
+      });
+
+      it('repositoryCache with a field of another option', async () => {
+        const config = {
+          repositoryCache: { redisUrl: 'redis://localhost' },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          // @ts-expect-error: contains invalid values
+          config,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message: 'Invalid configuration option: repositoryCache.redisUrl',
           },
         ]);
       });

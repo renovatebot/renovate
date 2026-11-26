@@ -1,4 +1,5 @@
 import { flatDependencyDashboardOptions } from '../../../../config/migrations/custom/dependency-dashboard-migration.ts';
+import { flatRepositoryCacheOptions } from '../../../../config/migrations/custom/repository-cache-migration.ts';
 import type { RenovateOptions } from '../../../../config/types.ts';
 
 export type FlatOptions = Record<
@@ -11,4 +12,5 @@ export type FlatOptions = Record<
  */
 export const flatOptionsByObject: Record<string, FlatOptions> = {
   dependencyDashboard: flatDependencyDashboardOptions,
+  repositoryCache: flatRepositoryCacheOptions,
 };

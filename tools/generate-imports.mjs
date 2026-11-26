@@ -241,6 +241,8 @@ async function generateGlobalConfigOptionDefaults() {
   const defaults = {};
   for (const option of options
     .filter((o) => o.globalOnly)
+    // the defaults of a child option are part of the default of its parent
+    .filter((o) => !o.parents)
     .filter((o) => 'default' in o)
     // if the default is null, it means there is no default, so don't include it
     .filter((o) => o.default !== null)
