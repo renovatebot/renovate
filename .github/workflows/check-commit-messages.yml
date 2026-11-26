@@ -63,7 +63,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
           # When we're preparing the next major release, on the `next-major` branch (or releasing it, by merging `next-major` into `main`), we're expecting that we would hit a major bump, so don't fail the job if so
-          ALLOW_MAJOR: ${{ github.repository == 'renovatebot/renovate' && (github.base_ref == 'next-major' || (github.head_ref == 'next-major' && github.event.pull_request.head.repo.full_name == github.repository)) }}
+          ALLOW_MAJOR: ${{ github.repository == 'renovatebot/renovate' && (github.base_ref == 'next-major' || (github.base_ref == 'main' && github.head_ref == 'next-major' && github.event.pull_request.head.repo.full_name == github.repository)) }}
         run: |
           set -euo pipefail
 
