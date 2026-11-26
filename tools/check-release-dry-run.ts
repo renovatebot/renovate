@@ -104,6 +104,13 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (env.ALLOW_MAJOR === 'true') {
+    console.log(
+      `✓ New major version ${version} is allowed on this branch; not failing.`,
+    );
+    return;
+  }
+
   const title = 'Unexpected major release';
   const hint =
     `Merging this PR would make semantic-release publish a new major version ` +
