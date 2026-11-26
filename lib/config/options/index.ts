@@ -4086,7 +4086,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Whether security updates add their versions to the `minimumReleaseAgeExclude` setting of the `pnpm-workspace.yaml`. Repo configuration can change this value, unless the global configuration sets it to `false`.',
     type: 'boolean',
-    default: true,
+    default: false,
     parents: ['toolSettings'],
     supportedManagers: ['npm'],
     cli: false,
