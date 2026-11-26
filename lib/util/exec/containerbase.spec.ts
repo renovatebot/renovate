@@ -8,6 +8,7 @@ import {
   getToolConfig,
   isDynamicInstall,
   resolveConstraint,
+  supportsDynamicInstall,
 } from './containerbase.ts';
 import type { ToolConstraint, ToolName } from './types.ts';
 
@@ -73,6 +74,15 @@ describe('util/exec/containerbase', () => {
         packageName: 'renovate',
         versioning: 'npm',
       });
+    });
+
+    it('returns the apko install config without extractVersion', () => {
+      expect(getToolConfig('apko')).toEqual({
+        datasource: 'github-releases',
+        packageName: 'chainguard-dev/apko',
+        versioning: 'semver',
+      });
+      expect(supportsDynamicInstall('apko')).toBe(true);
     });
 
     it('returns undefined for an unknown tool', () => {

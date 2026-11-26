@@ -1,0 +1,11 @@
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+  build_repositories:
+    - https://apk.cgr.dev/chainguard
+  runtime_repositories:
+    - https://dl-cdn.alpinelinux.org/alpine/v3.22/main
+  packages:
+    - bash=5.2.37-r2
+archs:
+  - amd64

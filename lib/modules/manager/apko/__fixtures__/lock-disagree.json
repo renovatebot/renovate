@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "contents": {
+    "packages": [
+      {
+        "name": "bash",
+        "version": "5.2.37-r2",
+        "architecture": "x86_64",
+        "url": "https://example.com/bash-x86_64.apk",
+        "checksum": "a"
+      },
+      {
+        "name": "bash",
+        "version": "5.2.37-r3",
+        "architecture": "aarch64",
+        "url": "https://example.com/bash-aarch64.apk",
+        "checksum": "b"
+      }
+    ]
+  }
+}

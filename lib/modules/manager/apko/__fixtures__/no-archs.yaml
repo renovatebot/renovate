@@ -1,0 +1,5 @@
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+  packages:
+    - bash=5.2.37-r2
