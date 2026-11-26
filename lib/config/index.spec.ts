@@ -36,6 +36,28 @@ describe('config/index', () => {
       });
     });
 
+    it('merges `onboardingConfig` with the defaults', () => {
+      const config = mergeChildConfig(defaultConfig, {
+        onboardingConfig: { minimumReleaseAge: '1 day' },
+      });
+      expect(config.onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['config:recommended'],
+        minimumReleaseAge: '1 day',
+      });
+    });
+
+    it('allows `onboardingConfig.extends` to override the default preset', () => {
+      const config = mergeChildConfig(defaultConfig, {
+        onboardingConfig: { extends: [], minimumReleaseAge: '1 day' },
+      });
+      expect(config.onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: [],
+        minimumReleaseAge: '1 day',
+      });
+    });
+
     it('merges packageRules', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
