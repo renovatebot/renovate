@@ -4056,10 +4056,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Tool specific configuration. Global self-hosted configuration takes precedence.',
     type: 'object',
-    default: {
-      jvmMaxMemory: 512,
-      jvmMemory: 512,
-    },
+    mergeable: true,
     additionalProperties: false,
     cli: false,
   },
@@ -4068,6 +4065,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
+    default: 512,
     parents: ['toolSettings'],
     supportedManagers: ['gradle-wrapper'],
     cli: false,
