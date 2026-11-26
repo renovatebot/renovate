@@ -118,7 +118,9 @@ describe('modules/manager/apm/artifacts', () => {
           },
         },
       ]);
-      expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'apm install', options: { env: { CI: 'false' } } },
+      ]);
     });
 
     it('returns regenerated harness files alongside the lockfile', async () => {
