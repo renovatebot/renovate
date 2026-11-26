@@ -2117,10 +2117,7 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       const res = await getUpdatedPackageFiles(config);
       expect(res.artifactErrors).toHaveLength(0);
-      expect(logger.logger.warn).not.toHaveBeenCalledWith(
-        expect.anything(),
-        'Could not determine resolved version after updating package file; skipping pending-version check',
-      );
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     // should never happen, but our types allow this
