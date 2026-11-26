@@ -131,8 +131,8 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 ## How to Use Preset Configs
 
-By default, the onboarding PR of the Mend Renovate app suggests the `["config:recommended"]` preset.
-If you are self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your self-hosted config.
+By default, onboarding PRs suggest the `["config:recommended"]` preset.
+If you are self hosting and want to suggest a different preset, then set `onboardingConfig` in your self-hosted config, for example `"onboardingConfig": { "extends": ["config:best-practices"] }`.
 
 Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.
 
