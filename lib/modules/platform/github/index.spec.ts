@@ -2570,6 +2570,7 @@ describe('modules/platform/github/index', () => {
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce(prSha);
 
       await github.initRepo({ repository: 'some/repo' });
 
