@@ -707,6 +707,9 @@ If the fixed version is younger than that, the lock file update fails, and the P
 This keeps a fix which your package manager would reject visible, instead of holding it back without a PR.
 Set the minimum release age of your package manager to the smallest age which you want security updates to wait for.
 
+pnpm is an exception by default: if the `pnpm-workspace.yaml` next to the `pnpm-lock.yaml` sets `minimumReleaseAge`, Renovate adds the fixed version to its `minimumReleaseAgeExclude` list, so pnpm installs it straight away.
+To turn this off, set [`toolSettings.pnpmMinimumReleaseAgeExcludeSecurityUpdates`](../configuration-options.md#toolsettingspnpmminimumreleaseageexcludesecurityupdates) to `false`.
+
 ### What happens if a package has multiple updates available?
 
 !!! note

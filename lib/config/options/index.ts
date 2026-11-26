@@ -4054,7 +4054,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'toolSettings',
     scopes: sharedScopes,
     description:
-      'Tool specific configuration. Global self-hosted configuration takes precedence.',
+      'Tool specific configuration. Global self-hosted configuration takes precedence',
     type: 'object',
     mergeable: true,
     additionalProperties: false,
@@ -4086,6 +4086,17 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Maximum memory in MiB for Node child processes invoked by Renovate. If unset, the Node process will automagically determine the memory limit to use. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.nodeMaxMemory`',
     type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['npm'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'pnpmMinimumReleaseAgeExcludeSecurityUpdates',
+    description:
+      'Whether security updates add their versions to the `minimumReleaseAgeExclude` setting of the `pnpm-workspace.yaml`. Repo configuration can change this value, unless the global configuration sets it to `false`.',
+    type: 'boolean',
+    default: true,
     parents: ['toolSettings'],
     supportedManagers: ['npm'],
     cli: false,
