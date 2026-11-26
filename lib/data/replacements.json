@@ -891,6 +891,17 @@
       }
     ]
   },
+  "msgpack-python-to-msgpack": {
+    "description": "`msgpack-python` was renamed to `msgpack`; the 0.5.x releases exist under both names.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.5.0,<=0.5.6",
+        "matchDatasources": ["pypi"],
+        "matchPackageNames": ["msgpack-python"],
+        "replacementName": "msgpack"
+      }
+    ]
+  },
   "now-to-vercel": {
     "description": "`now` was renamed to `vercel`.",
     "packageRules": [
@@ -1189,6 +1200,17 @@
         "matchPackageNames": ["@temporalio/interceptors-opentelemetry"],
         "replacementName": "@temporalio/interceptors-opentelemetry-v2",
         "replacementVersion": "1.19.0"
+      }
+    ]
+  },
+  "tensorflow-gpu-to-tensorflow": {
+    "description": "`tensorflow-gpu` is discontinued; GPU support ships in `tensorflow` since 2.1.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=2.1.0",
+        "matchDatasources": ["pypi"],
+        "matchPackageNames": ["tensorflow-gpu"],
+        "replacementName": "tensorflow"
       }
     ]
   },
