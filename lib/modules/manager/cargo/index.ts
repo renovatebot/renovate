@@ -9,6 +9,7 @@ import { updateArtifacts } from './artifacts.ts';
 import { extractPackageFile } from './extract.ts';
 import { minPublishAgeRustRange } from './minimum-release-age.ts';
 
+export { knownDepTypes } from './dep-types.ts';
 export { enforcesMinimumReleaseAge } from './minimum-release-age.ts';
 export { getRangeStrategy } from './range.ts';
 export { bumpPackageVersion } from './update.ts';
