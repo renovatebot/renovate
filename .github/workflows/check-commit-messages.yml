@@ -62,6 +62,8 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
+          # When we're preparing the next major release, on the `next-major` branch, we're expecting that we would hit a major bump, so don't fail the job if so
+          ALLOW_MAJOR: ${{ github.repository == 'renovatebot/renovate' && github.base_ref == 'next-major' }}
         run: |
           set -euo pipefail
 
@@ -74,6 +76,11 @@ jobs:
           #     plugins does not change the computed version;
           #   * it is presented as a push to the base branch at the merge commit,
           #     i.e. exactly the state that would exist right after this PR merges.
+
+          # `next-major` is not a release branch, so evaluate it as `main`, which is where its changes will eventually be released.
+          if [[ "$ALLOW_MAJOR" == "true" ]]; then
+            BASE_REF=main
+          fi
 
           # Only main / next / maint/* ever publish a release.
           case "$BASE_REF" in
