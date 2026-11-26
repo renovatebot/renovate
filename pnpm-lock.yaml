@@ -127,8 +127,8 @@ importers:
         specifier: 4.5.11
         version: 4.5.11(supports-color@7.2.0)(zod@4.6.7)
       '@renovatebot/pep440':
-        specifier: 6.0.0
-        version: 6.0.0
+        specifier: 6.0.1
+        version: 6.0.1
       '@renovatebot/pgp':
         specifier: 2.0.6
         version: 2.0.6
@@ -2083,8 +2083,8 @@ packages:
     resolution: {integrity: sha512-+rfK4ob2hk0MxROqUA9NwRGC531nlLrhUWYnYOVWAAKcvHgXwRQ+PykuGPfBq1qIDlX5UYoiR780iScORwP8OA==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/pep440@6.0.0':
-    resolution: {integrity: sha512-L/HtOYInkZGLJCe9h/gpsm2Gig0JWzyvWajrEVK+pP6BGfRl1eFzg7jyVcis7tmht7hvpau/+pMzF60geiLq6w==}
+  '@renovatebot/pep440@6.0.1':
+    resolution: {integrity: sha512-+pt8ngwl68ZqsTp5nhNwx3XxgfD+BIL+0tsH9vkEEFzrF5X0B//O7Vd1VInhwmcCjwOMNptjaL9HBA84++ZPrw==}
     engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pgp@2.0.6':
@@ -7648,7 +7648,7 @@ snapshots:
       - supports-color
       - zod
 
-  '@renovatebot/pep440@6.0.0': {}
+  '@renovatebot/pep440@6.0.1': {}
 
   '@renovatebot/pgp@2.0.6': {}
 
