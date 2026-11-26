@@ -40,6 +40,8 @@ And can be used to surface issues in repository runs more visually:
 
 ### HTML exports
 
+#### `renovate-pretty-log`
+
 There are some additional utilities in the project, including the ability to generate a single-page HTML view of the logs:
 
 ```sh
@@ -47,6 +49,22 @@ renovate-pretty-log -path /path/to/debug.log -html > report.html
 ```
 
 You can see [a live example of what this looks like from one of Renovate's own runs](https://www.jvt.me/casts/2026-08-renovate-pretty-log/renovate-debug-out.html).
+
+#### `renovate-report-html`
+
+[`renovate-report-html`](https://github.com/jvacek/renovate-report-html) turns the JSON report from Renovate's [`reportType`](./self-hosted-configuration.md#reporttype) into one self-contained HTML page.
+It shows the dependencies and updates of all the repositories in one Renovate run, for example a whole GitHub organization or GitLab group.
+See [the demo](https://jvacek.github.io/renovate-report-html/demo/).
+
+![renovate-report-html overview page showing totals for repositories, dependencies and pending updates, a problems summary, and bar charts of pending updates by type and skipped dependencies](assets/images/renovate-report-html-overview.jpg)
+
+- Pending updates by type, skipped dependencies and problems from Renovate
+- Every repository, down to each package file and dependency
+- Every package across repositories: which repository is on which version, with outliers marked
+- Open Renovate pull requests per repository, and which ones update each package
+- Runs as a CLI (`npx renovate-report-html`) in any CI pipeline, with setup guides for GitHub and GitLab
+
+![renovate-report-html repositories page showing a GitLab group as a folder tree, with problems, dependency counts, pending major, minor and patch updates, and color-coded dependency age per repository](assets/images/renovate-report-html-repositories.jpg)
 
 ## Renovate Config Debugger
 
@@ -64,15 +82,3 @@ It runs Renovate's own code in the browser, so the config never leaves the page.
 
 The project is maintained by Renovate maintainer Sebastian Poxhofer ( @secustor ).
 The blog post [Renovate: It was a packageRule all along](https://secustor.dev/blog/renovate_config_debugger/) walks through debugging a config with it.
-
-## `renovate-report-html`
-
-[`renovate-report-html`](https://github.com/jvacek/renovate-report-html) turns the JSON report from Renovate's [`reportType`](./self-hosted-configuration.md#reporttype) into one self-contained HTML page.
-It shows the dependencies and updates of all the repositories in one Renovate run, for example a whole GitHub organization or GitLab group.
-See [the demo](https://jvacek.github.io/renovate-report-html/demo/).
-
-- Pending updates by type, skipped dependencies and problems from Renovate
-- Every repository, down to each package file and dependency
-- Every package across repositories: which repository is on which version, with outliers marked
-- Open Renovate pull requests per repository, and which ones update each package
-- Runs as a CLI (`npx renovate-report-html`) in any CI pipeline, with setup guides for GitHub and GitLab
