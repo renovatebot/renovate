@@ -4054,7 +4054,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'toolSettings',
     scopes: sharedScopes,
     description:
-      'Tool specific configuration. Global self-hosted configuration takes precedence',
+      'Tool specific configuration. Global self-hosted configuration takes precedence.',
     type: 'object',
     mergeable: true,
     additionalProperties: false,
