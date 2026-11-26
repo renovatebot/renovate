@@ -116,6 +116,21 @@ describe('modules/manager/apko/extract', () => {
     await expect(extractPackageFile(content, 'apko.yaml')).resolves.toBeNull();
   });
 
+  it('returns null when packages is null', async () => {
+    await expect(
+      extractPackageFile(
+        `contents:
+  repositories:
+    - ${wolfi}
+  packages:
+archs:
+  - amd64
+`,
+        'apko.yaml',
+      ),
+    ).resolves.toBeNull();
+  });
+
   it('returns null when the file has no packages', async () => {
     await expect(
       extractPackageFile(
