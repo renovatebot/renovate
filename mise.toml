@@ -2,7 +2,7 @@
 node = "24.22.3"
 pnpm = "11.28.13"
 uv   = "0.13.10"
-vale = "3.28.1"
+vale = "3.29.0"
 
 [hooks]
 postinstall = '''
