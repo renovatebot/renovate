@@ -13,6 +13,7 @@ export class GlobalConfig {
   static OPTIONS = [
     'allowCustomCrateGitRegistries',
     'allowCustomJuliaRegistries',
+    'allowCustomVcpkgRegistries',
     'allowPlugins',
     'allowScripts',
     'allowShellExecutorForPostUpgradeCommands',
