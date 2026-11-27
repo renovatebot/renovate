@@ -18,6 +18,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
     'Could not write new index file',
     'Failed to connect to',
     'Connection timed out',
+    'SSL connection timeout',
     'malformed object name',
     'Could not resolve host',
     'early EOF',
