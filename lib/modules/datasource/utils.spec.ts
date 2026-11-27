@@ -1,4 +1,5 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import * as memCache from '../../util/cache/memory/index.ts';
 import type { HttpResponse } from '../../util/http/types.ts';
 import { getGoogleAuthToken, isArtifactoryServer } from './util.ts';
 
@@ -65,6 +66,33 @@ describe('modules/datasource/utils', () => {
     );
 
     await expect(getGoogleAuthToken()).rejects.toThrow('some-error');
+  });
+
+  it('reuses one Google client while the repository cache is active', async () => {
+    const getAccessToken = vi.fn().mockResolvedValue('some-token');
+    googleAuth.mockImplementation(
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = getAccessToken;
+        },
+      ),
+    );
+    memCache.init();
+
+    try {
+      await getGoogleAuthToken();
+      await getGoogleAuthToken();
+
+      expect(googleAuth).toHaveBeenCalledExactlyOnceWith({
+        scopes: 'https://www.googleapis.com/auth/cloud-platform',
+        clientOptions: { eagerRefreshThresholdMillis: 60_000 },
+      });
+      expect(getAccessToken).toHaveBeenCalledTimes(2);
+    } finally {
+      memCache.reset();
+      googleAuth.mockReset();
+    }
   });
 
   it('Google Access token could not load default credentials', async () => {

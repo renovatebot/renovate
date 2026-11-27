@@ -2,6 +2,7 @@ import { isString } from '@sindresorhus/is';
 import { GoogleAuth } from 'google-auth-library';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
 import { getEnv } from '../../util/env.ts';
 import type { HttpResponse } from '../../util/http/types.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
@@ -75,12 +76,27 @@ export function isGoogleArtifactRegistry(hostname: string): boolean {
   return hostname.endsWith('.pkg.dev');
 }
 
+const googleAuthCacheKey = 'datasource-google-auth-client';
+
+/**
+ * google-auth-library caches the access token on the client, so reuse one client per repository instead of re-running the credential exchange on every lookup.
+ * The eager refresh window is shortened because federated tokens can live only five minutes (e.g. GitHub OIDC), which the library's five-minute default would always treat as expired.
+ */
+function getGoogleAuthClient(): GoogleAuth {
+  let googleAuth = memCache.get<GoogleAuth | undefined>(googleAuthCacheKey);
+  if (!googleAuth) {
+    googleAuth = new GoogleAuth({
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      clientOptions: { eagerRefreshThresholdMillis: 60_000 },
+    });
+    memCache.set(googleAuthCacheKey, googleAuth);
+  }
+  return googleAuth;
+}
+
 export async function getGoogleAuthHostRule(): Promise<HostRule | null> {
   try {
-    const googleAuth: GoogleAuth = new GoogleAuth({
-      scopes: 'https://www.googleapis.com/auth/cloud-platform',
-    });
-    const accessToken = await googleAuth.getAccessToken();
+    const accessToken = await getGoogleAuthClient().getAccessToken();
     if (accessToken) {
       // sanitize token
       addSecretForSanitizing(accessToken);
