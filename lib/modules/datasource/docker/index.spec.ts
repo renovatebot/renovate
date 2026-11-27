@@ -2708,6 +2708,49 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    it('keeps the Docker Hub tags already fetched when a later page fails', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
+      const saveSpy = vi.spyOn(DockerHubCache.prototype, 'save');
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 2000,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        })
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
+        .reply(403, {
+          message:
+            'pagination offset too large for anonymous requests; sign in to page further',
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+
+      expect(res?.releases).toEqual([
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
+      ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Docker: error fetching page 2 of Docker Hub tags for library/node, keeping the tags already fetched',
+      );
+      expect(saveSpy).not.toHaveBeenCalled();
+    });
+
     // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
     it('does not follow Docker Hub tags pagination to a different origin', async () => {
       vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
