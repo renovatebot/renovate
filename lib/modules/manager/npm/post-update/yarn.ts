@@ -39,6 +39,7 @@ import {
   resolveToolConstraint,
 } from '../../util.ts';
 import { MINUTE_MS } from '../constants.ts';
+import { isPackageManagerDepType } from '../dep-types.ts';
 import { hasPackageManager } from '../extract/common/package-file.ts';
 import type { YarnPreapprovedPackage } from '../extract/types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
@@ -124,10 +125,7 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  const isPackageManagerDepType =
-    upgrade.depType === 'packageManager' ||
-    upgrade.depType === 'devEngines.packageManager';
-  return isPackageManagerDepType && upgrade.depName === 'yarn';
+  return isPackageManagerDepType(upgrade.depType) && upgrade.depName === 'yarn';
 }
 
 const scopeRegex = regEx(/^@(?<scope>[^/]+)\//);

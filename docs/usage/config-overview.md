@@ -229,7 +229,7 @@ By default, Renovate will create an "Onboarding PR" with a default config if a r
 ### Onboarding Config
 
 When Renovate creates an Onboarding PR it will propose a Repository config file to be merged.
-By default, it is essentially an empty config with only the Renovate JSON schema referenced, but you can change this behavior if desired.
+By default, it references the Renovate JSON schema and extends the `config:recommended` preset, but you can change this behavior if desired.
 
 If you configure `onboardingConfig` in either Global config or Inherited config then Renovate will use that config directly instead of the default.
 

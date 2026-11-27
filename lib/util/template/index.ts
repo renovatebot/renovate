@@ -224,7 +224,8 @@ export const allowedFields = {
     'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
   patch:
     'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
-  packageFile: 'The filename that the dependency was found in',
+  packageFile:
+    'The path of the file that the dependency was found in, relative to the repository root',
   packageFileDir:
     'The directory with full path where the packageFile was found',
   packageName: 'The full name that was used to look up the dependency',

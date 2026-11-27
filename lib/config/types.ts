@@ -972,6 +972,8 @@ export interface GlobalToolSettingsOptions {
   jvmMemory?: number;
   /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
   nodeMaxMemory?: number;
+  /** Whether security updates add their versions to the `minimumReleaseAgeExclude` of the `pnpm-workspace.yaml`. If `false`, repositories cannot enable it, otherwise repositories can override this value */
+  pnpmMinimumReleaseAgeExcludeSecurityUpdates?: boolean;
 }
 
 /**
@@ -984,6 +986,8 @@ export interface RepoToolSettingsOptions {
   jvmMemory?: number;
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
+  /** Whether security updates add their versions to the `minimumReleaseAgeExclude` of the `pnpm-workspace.yaml`. Overrides the Global Self-Hosted configuration setting, unless that is `false` **/
+  pnpmMinimumReleaseAgeExcludeSecurityUpdates?: boolean;
 }
 
 /** All known `VulnerabilityAlertSource`s */

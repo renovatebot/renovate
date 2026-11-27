@@ -671,6 +671,7 @@
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
     "protobuf": "https://github.com/protocolbuffers/protobuf",
+    "pydantic-ai": "https://github.com/pydantic/pydantic-ai",
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",

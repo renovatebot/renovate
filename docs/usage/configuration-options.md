@@ -2418,11 +2418,6 @@ Example config:
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it will not work.
 
-### `hostRules.dnsCache`
-
-This option is deprecated and has no effect.
-Renovate removed its DNS cache in v38.0.0.
-
 ### `hostRules.enableHttp2`
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
@@ -5330,6 +5325,21 @@ Defaults to `jvmMaxMemory`.
 
 !!! note
   This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+
+### `toolSettings.pnpmMinimumReleaseAgeExcludeSecurityUpdates`
+
+When a security update updates an npm package which belongs to a `pnpm-lock.yaml`, and the `pnpm-workspace.yaml` next to it sets `minimumReleaseAge`, Renovate adds the fixed version to the `minimumReleaseAgeExclude` list of the `pnpm-workspace.yaml`.
+This lets pnpm install the fixed version, even if it is younger than pnpm allows, as a security update should generally be installed as early as possible.
+
+This option is disabled by default, so Renovate does not modify `minimumReleaseAgeExclude`.
+pnpm then refuses a fixed version which is younger than pnpm allows, and the PR shows an artifact error, unless you add exclusions to the `pnpm-workspace.yaml` yourself.
+
+Set this option to `true` to have Renovate add the exclusions.
+Be aware that this means a newly published release, which could be malicious, is installed without waiting for the minimum release age.
+
+You can set this option in the repository config and in the [global self-hosted configuration](./self-hosted-configuration.md).
+The repository config takes precedence over the global self-hosted configuration, unless the global self-hosted configuration sets it to `false`.
+This lets the administrator of a self-hosted Renovate instance prevent it for all repositories.
 
 ## `updateInternalDeps`
 

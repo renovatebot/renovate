@@ -138,6 +138,20 @@ describe('workers/global/index', () => {
       expect(GlobalConfig.get('onboarding')).toBe(false);
     });
 
+    it('GlobalConfig.set replaces global toolSettings with per-repo toolSettings', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        { ...globalConfig, toolSettings: { jvmMaxMemory: 2048 } },
+        {
+          repository: 'test/repo',
+          toolSettings: { nodeMaxMemory: 4096 },
+        },
+      );
+      GlobalConfig.set(repoConfig);
+      expect(GlobalConfig.get('toolSettings')).toStrictEqual({
+        nodeMaxMemory: 4096,
+      });
+    });
+
     it('does not store repositoryEntryConfig for repositories[] string entries', async () => {
       const repoConfig = await globalWorker.getRepositoryConfig(
         globalConfig,

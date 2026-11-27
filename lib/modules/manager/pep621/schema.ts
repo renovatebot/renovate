@@ -236,6 +236,15 @@ export const PyProject = z.object({
 });
 export type PyProject = z.infer<typeof PyProject>;
 
+export interface PdmLockedPackage {
+  version: string;
+  /**
+   * Whether the lock file holds this package at more than one version, as it
+   * does when lock targets resolve to different versions.
+   */
+  hasMultipleEntries?: boolean;
+}
+
 export const PdmLockfile = Toml.pipe(
   z.object({
     package: LooseArray(
@@ -246,11 +255,24 @@ export const PdmLockfile = Toml.pipe(
     ),
   }),
 )
-  .transform(({ package: pkg }) =>
-    Object.fromEntries(
-      pkg.map(({ name, version }): [string, string] => [name, version]),
-    ),
-  )
+  .transform(({ package: pkgs }) => {
+    const lock: Record<string, PdmLockedPackage> = {};
+    for (const { name, version } of pkgs) {
+      const locked = lock[name];
+      if (!locked) {
+        lock[name] = { version };
+        continue;
+      }
+      // A package with extras has an entry of its own at the same version, so
+      // only another version counts. The last entry wins.
+      const hasMultipleEntries =
+        locked.hasMultipleEntries === true || locked.version !== version;
+      lock[name] = hasMultipleEntries
+        ? { version, hasMultipleEntries }
+        : { version };
+    }
+    return lock;
+  })
   .transform((lock) => ({ lock }));
 
 export interface UvLockedPackage {

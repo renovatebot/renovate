@@ -2016,6 +2016,51 @@ describe('util/exec/index', () => {
         });
       });
     });
+
+    describe('for pnpm settings', () => {
+      it.each`
+        global       | repo         | expected
+        ${undefined} | ${undefined} | ${false}
+        ${undefined} | ${false}     | ${false}
+        ${false}     | ${undefined} | ${false}
+        ${false}     | ${false}     | ${false}
+        ${false}     | ${true}      | ${false}
+        ${true}      | ${undefined} | ${true}
+        ${true}      | ${true}      | ${true}
+        ${true}      | ${false}     | ${false}
+      `(
+        'resolves pnpmMinimumReleaseAgeExcludeSecurityUpdates to $expected with global $global and repo $repo',
+        ({ global, repo, expected }) => {
+          GlobalConfig.set({
+            toolSettings: {
+              pnpmMinimumReleaseAgeExcludeSecurityUpdates: global,
+            },
+          });
+
+          const res = getToolSettingsOptions({
+            pnpmMinimumReleaseAgeExcludeSecurityUpdates: repo,
+          });
+
+          expect(res.pnpmMinimumReleaseAgeExcludeSecurityUpdates).toBe(
+            expected,
+          );
+        },
+      );
+
+      it('when repo enables pnpmMinimumReleaseAgeExcludeSecurityUpdates but global disables it, a debug log is logged', () => {
+        GlobalConfig.set({
+          toolSettings: { pnpmMinimumReleaseAgeExcludeSecurityUpdates: false },
+        });
+
+        getToolSettingsOptions({
+          pnpmMinimumReleaseAgeExcludeSecurityUpdates: true,
+        });
+
+        expect(logger.logger.once.debug).toHaveBeenCalledWith(
+          'Enabling pnpmMinimumReleaseAgeExcludeSecurityUpdates is not permitted when the global configuration disables it. Using global configuration instead',
+        );
+      });
+    });
   });
 
   describe('gradleJvmArg()', () => {
