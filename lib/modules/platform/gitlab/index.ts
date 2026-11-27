@@ -28,6 +28,12 @@ import * as git from '../../../util/git/index.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
+import {
+  isForbidden,
+  isNotAcceptable,
+  isNotFound,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseInteger } from '../../../util/number.ts';
 import * as p from '../../../util/promises.ts';
@@ -60,6 +66,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -254,15 +261,10 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+  return await getRepoFile(gitlabApi, repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
-  const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
-  return str;
 }
 
 export async function getJsonFile(
@@ -361,10 +363,10 @@ export async function initRepo({
     ) {
       throw err;
     }
-    if (err.statusCode === 403) {
+    if (isForbidden(err)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message === REPOSITORY_DISABLED) {
@@ -419,7 +421,7 @@ export async function isPrInMergeQueue(id: number): Promise<boolean> {
     );
     return status !== 'merged';
   } catch (err) {
-    if (err.statusCode !== 404) {
+    if (!isNotFound(err)) {
       logger.debug({ err }, 'Failed to fetch merge train status');
     }
     return false;
@@ -447,13 +449,13 @@ interface GitlabBranchStatus {
 async function getStatus(
   branchName: string,
   useCache = true,
+  sha: string | null = git.getBranchCommit(branchName),
 ): Promise<GitlabBranchStatus[]> {
-  const branchSha = git.getBranchCommit(branchName);
   try {
     // TODO: types (#22198)
     const url = `projects/${
       config.repository
-    }/repository/commits/${branchSha!}/statuses`;
+    }/repository/commits/${sha!}/statuses`;
 
     const opts: GitlabHttpOptions = { paginate: true };
     if (useCache) {
@@ -466,7 +468,7 @@ async function getStatus(
       .body;
   } catch (err) /* v8 ignore next -- commit status fetch failures map 404 to REPOSITORY_CHANGED, not mocked in specs */ {
     logger.debug({ err }, 'Error getting commit status');
-    if (err.response?.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
@@ -526,11 +528,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    branchStatuses.every(
-      (check) =>
-        check.name?.startsWith('renovate/') &&
-        gitlabToRenovateStatusMapping[check.status] === 'green',
-    )
+    branchStatuses.every((check) => {
+      const isGreen = gitlabToRenovateStatusMapping[check.status] === 'green';
+      return check.name?.startsWith('renovate/') && isGreen;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -625,9 +626,15 @@ async function ignoreApprovals(pr: number): Promise<void> {
   }
 }
 
+/**
+ * Enables platform automerge for the merge request.
+ * With `sha`, waits until the merge request is at that commit, then enables
+ * auto-merge bound to it, also when auto-merge is already enabled.
+ */
 async function tryPrAutomerge(
   pr: number,
   platformPrOptions: PlatformPrOptions | undefined,
+  sha?: string,
 ): Promise<void> {
   try {
     if (platformPrOptions?.gitLabIgnoreApprovals) {
@@ -658,9 +665,14 @@ async function tryPrAutomerge(
         250,
       );
 
+      // SHA to bind auto-merge to, set once GitLab reports the pushed commit
+      let mergeSha: string | undefined;
+      let autoMergeEnabled = false;
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
+          sha?: string;
           merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
@@ -670,9 +682,20 @@ async function tryPrAutomerge(
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+        autoMergeEnabled = body.merge_when_pipeline_succeeds === true;
 
-        // Exit early if merge_when_pipeline_succeeds is already set
-        if (body.merge_when_pipeline_succeeds === true) {
+        if (sha) {
+          if (body.sha !== sha) {
+            logger.debug(
+              `MR !${pr} not yet at pushed commit ${sha}. Retrying ${attempt}`,
+            );
+            await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
+            continue;
+          }
+          // Enabling auto-merge again binds it to the pushed commit
+          mergeSha = sha;
+        } else if (autoMergeEnabled) {
+          // Exit early if merge_when_pipeline_succeeds is already set
           logger.debug(
             'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
           );
@@ -688,8 +711,10 @@ async function tryPrAutomerge(
           !use_detailed_merge_status && body.merge_status === desiredStatus;
 
         // Only continue if the merge request can be merged and has a pipeline.
+        const merge_status_check =
+          detailed_merge_status_check || deprecated_merge_status_check;
         if (
-          (detailed_merge_status_check || deprecated_merge_status_check) &&
+          merge_status_check &&
           body.pipeline !== null &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
@@ -697,6 +722,16 @@ async function tryPrAutomerge(
         }
         logger.debug(`PR not yet in mergeable state. Retrying ${attempt}`);
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
+      }
+
+      if (sha && !mergeSha) {
+        logger.debug(`MR !${pr} did not reach pushed commit ${sha}`);
+        if (autoMergeEnabled) {
+          logger.debug(
+            'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+          );
+          return;
+        }
       }
 
       // The merge_trains endpoint's auto_merge parameter requires GitLab
@@ -722,6 +757,7 @@ async function tryPrAutomerge(
               {
                 body: {
                   auto_merge: true,
+                  ...(mergeSha && { sha: mergeSha }),
                 },
               },
             );
@@ -732,6 +768,7 @@ async function tryPrAutomerge(
                 body: {
                   should_remove_source_branch: true,
                   merge_when_pipeline_succeeds: true,
+                  ...(mergeSha && { sha: mergeSha }),
                 },
               },
             );
@@ -885,8 +922,9 @@ export async function updatePr({
 export async function reattemptPlatformAutomerge({
   number: iid,
   platformPrOptions,
+  sha,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
-  await tryPrAutomerge(iid, platformPrOptions);
+  await tryPrAutomerge(iid, platformPrOptions, sha);
 
   logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
@@ -923,11 +961,11 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     );
     return true;
   } catch (err) /* v8 ignore next -- merge rejection statuses (401/406) are mapped to false, not mocked in specs */ {
-    if (err.statusCode === 401) {
+    if (isUnauthorized(err)) {
       logger.debug('No permissions to merge PR');
       return false;
     }
-    if (err.statusCode === 406) {
+    if (isNotAcceptable(err)) {
       logger.debug({ err }, 'PR not acceptable for merging');
       return false;
     }
@@ -1003,14 +1041,15 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  return (
-    prList.find(
-      (p: { sourceBranch: string; title: string; state: string }) =>
-        p.sourceBranch === branchName &&
-        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state),
-    ) ?? null
+  const pr = prList.find(
+    (p: { sourceBranch: string; title: string; state: string }) => {
+      if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+        return false;
+      }
+      return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+    },
   );
+  return pr ?? null;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -1025,12 +1064,42 @@ export async function getBranchPr(
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+interface MergedResultsPipeline {
+  id: number;
+  sha: string;
+}
+
+// A merged results pipeline runs on the merge ref commit, not on the branch head,
+// so status checks for it have to be set on that commit instead.
+async function getMergedResultsPipeline(
+  branchName: string,
+): Promise<MergedResultsPipeline | null> {
+  const branchSha = git.getBranchCommit(branchName);
+  const mr = await getBranchPr(branchName);
+  if (
+    mr?.sha !== branchSha ||
+    mr.headPipelineSource !== 'merge_request_event' ||
+    !mr.headPipelineId ||
+    !mr.headPipelineSha ||
+    mr.headPipelineSha === branchSha
+  ) {
+    return null;
+  }
+  return { id: mr.headPipelineId, sha: mr.headPipelineSha };
+}
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string,
 ): Promise<BranchStatus | null> {
   // cache-bust in case we have rebased
-  const res = await getStatus(branchName, false);
+  let res = await getStatus(branchName, false);
+  if (!res.some((check) => check.name === context)) {
+    const mergedResultsPipeline = await getMergedResultsPipeline(branchName);
+    if (mergedResultsPipeline) {
+      res = await getStatus(branchName, false, mergedResultsPipeline.sha);
+    }
+  }
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
@@ -1053,8 +1122,7 @@ export async function setBranchStatus({
     logger.warn('Failed to get the branch commit SHA');
     return;
   }
-  // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/statuses/${branchSha}`;
+  let statusSha: string = branchSha;
   let state = 'success';
   if (renovateState === 'yellow') {
     state = 'pending';
@@ -1099,6 +1167,16 @@ export async function setBranchStatus({
         parseInteger(env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
       );
     }
+    if (options.pipeline_id === undefined) {
+      const mergedResultsPipeline = await getMergedResultsPipeline(branchName);
+      if (mergedResultsPipeline) {
+        logger.debug(
+          `Setting branch status on merged results pipeline ${mergedResultsPipeline.id}`,
+        );
+        options.pipeline_id = mergedResultsPipeline.id;
+        statusSha = mergedResultsPipeline.sha;
+      }
+    }
   } catch (err) {
     logger.debug({ err });
     logger.warn('Failed to retrieve commit pipeline');
@@ -1113,6 +1191,7 @@ export async function setBranchStatus({
   }
 
   try {
+    const url = `projects/${config.repository}/statuses/${statusSha}`;
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache
@@ -1448,7 +1527,8 @@ export async function ensureComment({
   const massagedTopic = topic
     ? topic
         .replace(regEx(/Pull Request/g), 'Merge Request')
-        .replace(regEx(/PR/g), 'MR')
+        .replace(regEx(/\bPR\b/g), 'MR')
+        .replace(regEx(/\bPRs\b/g), 'MRs')
     : topic;
   const comments = await getComments(number);
   let body: string;
@@ -1461,7 +1541,8 @@ export async function ensureComment({
     body = smartTruncate(
       body
         .replace(regEx(/Pull Request/g), 'Merge Request')
-        .replace(regEx(/PR/g), 'MR'),
+        .replace(regEx(/\bPR\b/g), 'MR')
+        .replace(regEx(/\bPRs\b/g), 'MRs'),
       maxBodyLength(),
     );
     comments.forEach((comment: { body: string; id: number }) => {
@@ -1591,7 +1672,7 @@ export async function expandGroupMembers(
       const members = await getMemberUsernames(reviewerOrAssignee);
       expandedReviewersOrAssignees.push(...members);
     } catch (err) {
-      if (err.statusCode !== 404) {
+      if (!isNotFound(err)) {
         logger.debug({ err, reviewerOrAssignee }, 'Unable to fetch group');
       }
       expandedReviewersOrAssignees.push(reviewerOrAssignee);

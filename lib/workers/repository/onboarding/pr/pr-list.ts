@@ -59,10 +59,12 @@ function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
     'branchConcurrentLimit',
   );
 
+  const isBelowPrLimit =
+    prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit;
   if (
     typeof config.branchConcurrentLimit === 'number' &&
     branchConcurrentLimit > 0 &&
-    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+    isBelowPrLimit
   ) {
     return {
       limit: branchConcurrentLimit,
@@ -105,10 +107,12 @@ function resolveVulnerabilityConcurrentLimit(
     'branchConcurrentLimit',
   );
 
+  const isBelowPrLimit =
+    prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit;
   if (
     typeof vulnerabilityAlerts?.branchConcurrentLimit === 'number' &&
     branchConcurrentLimit > 0 &&
-    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+    isBelowPrLimit
   ) {
     return {
       limit: branchConcurrentLimit,

@@ -24,29 +24,6 @@ export const SessionStartHookInput = BaseHookInput.extend({
 });
 export type SessionStartHookInput = z.infer<typeof SessionStartHookInput>;
 
-// Stop hook input
-// https://code.claude.com/docs/en/hooks#stop
-export const StopHookInput = BaseHookInput.extend({
-  hook_event_name: z.literal('Stop'),
-  permission_mode: z.enum([
-    'default',
-    'plan',
-    'acceptEdits',
-    'auto',
-    'dontAsk',
-    'bypassPermissions',
-  ]),
-});
-export type StopHookInput = z.infer<typeof StopHookInput>;
-
-// Block output (used by Stop hooks to prevent stopping)
-// https://code.claude.com/docs/en/hooks#stop
-export const BlockOutput = z.object({
-  decision: z.literal('block'),
-  reason: z.string(),
-});
-export type BlockOutput = z.infer<typeof BlockOutput>;
-
 // https://code.claude.com/docs/en/hooks#pretooluse
 const PreToolUseBaseInput = BaseHookInput.extend({
   hook_event_name: z.literal('PreToolUse'),

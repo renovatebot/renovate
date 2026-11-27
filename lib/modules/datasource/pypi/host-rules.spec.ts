@@ -17,10 +17,6 @@ function mockGoogleAccessToken(token: string | undefined): void {
 }
 
 describe('modules/datasource/pypi/host-rules', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   it('returns no credentials for an unparseable URL', async () => {
     await expect(findPypiIndexCredentials('not-a-url')).resolves.toEqual({});
     expect(logger.logger.once.debug).toHaveBeenCalledWith(

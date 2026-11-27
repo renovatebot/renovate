@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, hostRules } from '~test/util.ts';
+import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -9,6 +9,7 @@ import type {
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
@@ -20,6 +21,7 @@ const datasource = vi.mocked(_datasource);
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/git/index.ts');
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
@@ -58,7 +60,9 @@ describe('modules/manager/mise/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+    );
   });
 
   it('returns null if lock file does not exist', async () => {
@@ -236,6 +240,115 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('returns the sidecars written by mise lock', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(
+        `[[tools.prettier]]\nversion = "3.9.9"\naube = { path = ".mise/locks/prettier/3.9.9", digest = "sha256:abc" }\n`,
+      )
+      .mockResolvedValueOnce('modified uv.lock')
+      .mockResolvedValueOnce('new package.json')
+      .mockResolvedValueOnce('new aube-lock.yaml');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['.mise/locks/pipx-black/26.5.1/uv.lock'],
+        not_added: [
+          '.mise/locks/prettier/3.9.9/package.json',
+          '.mise/locks/prettier/3.9.9/aube-lock.yaml',
+        ],
+        deleted: [
+          '.mise/locks/prettier/3.9.8/package.json',
+          '.mise/locks/prettier/3.9.8/aube-lock.yaml',
+        ],
+      }),
+    );
+    mockExecAll(safeMiseVersionOutput);
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: lockMaintenanceConfig,
+    });
+
+    expect(git.getRepoStatus).toHaveBeenCalledWith('.mise/locks');
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expect.stringContaining('version = "3.9.9"'),
+          path: 'mise.lock',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'modified uv.lock',
+          path: '.mise/locks/pipx-black/26.5.1/uv.lock',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'new package.json',
+          path: '.mise/locks/prettier/3.9.9/package.json',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'new aube-lock.yaml',
+          path: '.mise/locks/prettier/3.9.9/aube-lock.yaml',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          path: '.mise/locks/prettier/3.9.8/package.json',
+          type: 'deletion',
+        },
+      },
+      {
+        file: {
+          path: '.mise/locks/prettier/3.9.8/aube-lock.yaml',
+          type: 'deletion',
+        },
+      },
+    ]);
+  });
+
+  it('returns restored sidecars when the lock file is unchanged', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('restored uv.lock');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+        not_added: ['subdir/.mise/locks/pipx-black/26.5.1/uv.lock'],
+        deleted: [],
+      }),
+    );
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'subdir/mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(git.getRepoStatus).toHaveBeenCalledWith('subdir/.mise/locks');
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'restored uv.lock',
+          path: 'subdir/.mise/locks/pipx-black/26.5.1/uv.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
+
   it('refreshes metadata from the updated in-memory lockfile', async () => {
     const originalLockFile =
       '[[tools.node]]\nversion = "20.0.0"\nplatforms = { linux = { checksum = "old" } }\n';
@@ -273,6 +386,56 @@ describe('modules/manager/mise/artifacts', () => {
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
+  });
+
+  it('includes generated sidecars in targeted artifact updates', async () => {
+    const updatedLockFile =
+      '[[tools."npm:renovate"]]\nversion = "44.134.1"\naube = { path = ".mise/locks/npm-renovate/44.134.1~aa673d8d", digest = "sha256:new" }\n';
+    fs.readLocalFile
+      .mockResolvedValueOnce('original lockfile')
+      .mockResolvedValueOnce(updatedLockFile)
+      .mockResolvedValueOnce('updated generated package manifest');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['.mise/locks/npm-renovate/44.134.1~aa673d8d/package.json'],
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'npm:renovate' }],
+      newPackageFileContent: '[tools]\n"npm:renovate" = "44.134.1"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: updatedLockFile,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: '.mise/locks/npm-renovate/44.134.1~aa673d8d/package.json',
+          contents: 'updated generated package manifest',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: 'mise lock npm:renovate' },
+    ]);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'mise.lock',
+      updatedLockFile,
+    );
   });
 
   it('returns regenerated content that matches the in-memory update', async () => {
@@ -354,7 +517,7 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    // version probe returns nothing here, so no --bump
+    // Fall back to plain lock when the mise version cannot be detected.
     expect(execSnapshots).toMatchObject([
       { cmd: miseVersionCmd },
       { cmd: trustCmd },

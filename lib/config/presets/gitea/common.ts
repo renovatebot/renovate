@@ -1,9 +1,11 @@
 import { logger } from '../../../logger/index.ts';
-import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper.ts';
+import { getRepoFile } from '../../../modules/platform/gitea/files.ts';
 import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
+import { API_PATH } from '../../../modules/platform/gitea/utils.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import type { GiteaHttp } from '../../../util/http/gitea.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
@@ -47,8 +49,8 @@ export function createPresetSource(
   ): Promise<Nullish<Preset>> {
     let res: RepoContents;
     try {
-      res = await getRepoContents(http, repo, fileName, tag, {
-        baseUrl: endpoint,
+      res = await getRepoFile(http, repo, fileName, tag, {
+        baseUrl: joinUrlParts(endpoint, API_PATH),
       });
     } catch (err) {
       if (err instanceof ExternalHostError) {

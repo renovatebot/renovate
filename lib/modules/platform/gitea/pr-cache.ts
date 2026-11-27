@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import {
@@ -18,7 +19,7 @@ import type { GiteaPlatformKey, PrCacheData } from './types.ts';
 import { API_PATH, toRenovatePR } from './utils.ts';
 
 function syncedCacheKey(platform: GiteaPlatformKey): string {
-  return `${platform}-pr-cache-synced`;
+  return buildCacheKey(platform, 'pr-cache-synced');
 }
 
 interface RepoPrCacheOptions {

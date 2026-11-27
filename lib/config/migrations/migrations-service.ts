@@ -15,9 +15,11 @@ import { BranchNameMigration } from './custom/branch-name-migration.ts';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration.ts';
 import { CompatibilityMigration } from './custom/compatibility-migration.ts';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration.ts';
+import { ConstraintsMigration } from './custom/constraints-migration.ts';
 import { CustomManagersMigration } from './custom/custom-managers-migration.ts';
 import { DatasourceMigration } from './custom/datasource-migration.ts';
 import { DepTypesMigration } from './custom/dep-types-migration.ts';
+import { DependencyDashboardMigration } from './custom/dependency-dashboard-migration.ts';
 import { DryRunMigration } from './custom/dry-run-migration.ts';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration.ts';
 import { ExtendsMigration } from './custom/extends-migration.ts';
@@ -70,6 +72,7 @@ export class MigrationsService {
     'allowCommandTemplating',
     'allowPostUpgradeCommandTemplating',
     'deepExtract',
+    'dnsCache',
     'gitFs',
     'groupBranchName',
     'groupCommitMessage',
@@ -90,6 +93,7 @@ export class MigrationsService {
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
+    ['allowCustomCrateRegistries', 'allowCustomCrateGitRegistries'],
     ['allowedPostUpgradeCommands', 'allowedCommands'],
     ['azureAutoApprove', 'autoApprove'],
     ['customChangelogUrl', 'changelogUrl'],
@@ -172,6 +176,8 @@ export class MigrationsService {
     PlatformCommitMigration,
     FileMatchMigration,
     UpdateLockFilesMigration,
+    ConstraintsMigration,
+    DependencyDashboardMigration,
   ];
 
   static run(

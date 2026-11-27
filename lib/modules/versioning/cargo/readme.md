@@ -8,4 +8,4 @@ Multiple version requirements can also be separated with a comma, e.g. `>= 1.2, 
 
 **No exact versions unless using equals =**
 
-In Cargo, `1.2.3` doesn't mean "exactly 1.2.3", it actually means `>=1.2.3 <2.0.0`. So this is like the equivalent of `^1.2.3` in npm.
+In Cargo, `1.2.3` does not mean "exactly 1.2.3", it actually means `>=1.2.3 <2.0.0`. So this is like the equivalent of `^1.2.3` in npm.

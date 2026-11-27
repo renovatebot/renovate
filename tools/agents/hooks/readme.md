@@ -24,9 +24,3 @@ Install tools and dependencies in the new cwd, so the session has a working envi
 Runs before every tool call.
 
 Blocks tool invocations that use forbidden package managers or test runners (e.g. `npm`, `yarn`, `npx`, `jest` directly) and requires `pnpm` / `vitest` instead.
-
-### `stop-check.ts` — Stop
-
-Runs when Claude Code is about to stop.
-
-Executes `pnpm check --all` against all files changed since the base branch. If the check fails, the stop is blocked and Claude is prompted to fix the issues before finishing.

@@ -5,6 +5,7 @@ import { hashStream } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
 import { map as pMap } from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type {
   ArtifactError,
   UpdateArtifact,
@@ -16,7 +17,11 @@ import {
   patchCodeAtFragments,
   updateCode,
 } from './common.ts';
-import type { RecordFragment, StringFragment } from './types.ts';
+import type {
+  BazelManagerData,
+  RecordFragment,
+  StringFragment,
+} from './types.ts';
 
 const http = new Http('bazel');
 
@@ -58,7 +63,7 @@ function massageUrl(url: string): string {
 }
 
 function migrateUrl(url: string, upgrade: Upgrade): string {
-  const newValue = upgrade.newValue?.replace(regEx(/^v/), '');
+  const newValue = upgrade.newValue && stripVersionPrefix(upgrade.newValue);
 
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.3.5
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.4.0
@@ -85,8 +90,8 @@ function replaceValues(
   if (!from || !to || from === to) {
     return content;
   }
-  const massagedFrom = from.replace(regEx(/^v/), '');
-  const massagedTo = to.replace(regEx(/^v/), '');
+  const massagedFrom = stripVersionPrefix(from);
+  const massagedTo = stripVersionPrefix(to);
   return replaceAll(content, massagedFrom, massagedTo);
 }
 
@@ -129,15 +134,22 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<BazelManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   const oldContents = updateArtifact.newPackageFileContent;
   let newContents = oldContents;
   const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
-    const { managerData } = upgrade;
-    const idx = managerData?.idx as number;
+    /* v8 ignore next -- defensive handling of upgrades without Bazel manager data */
+    if (!upgrade.managerData) {
+      logger.debug(
+        `Skipping Bazel artifact update for ${upgrade.depName} in ${path}: missing manager data`,
+      );
+      continue;
+    }
+
+    const idx = upgrade.managerData.idx;
 
     // v8 ignore else -- only http rules reach updateArtifacts
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {

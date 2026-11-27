@@ -1,10 +1,13 @@
+import * as datasource from '../modules/datasource/index.ts';
 import { getConfig } from './defaults.ts';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
   removeGlobalConfig,
 } from './index.ts';
+import type { RenovateConfig } from './types.ts';
 
 vi.mock('../modules/datasource/npm/index.ts');
 vi.mock('../../config.ts', () => ({ default: {} }));
@@ -30,6 +33,28 @@ describe('config/index', () => {
         branchTopic: 'lock-file-maintenance',
         enabled: false,
         schedule: ['on monday'],
+      });
+    });
+
+    it('merges `onboardingConfig` with the defaults', () => {
+      const config = mergeChildConfig(defaultConfig, {
+        onboardingConfig: { minimumReleaseAge: '1 day' },
+      });
+      expect(config.onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['config:recommended'],
+        minimumReleaseAge: '1 day',
+      });
+    });
+
+    it('allows `onboardingConfig.extends` to override the default preset', () => {
+      const config = mergeChildConfig(defaultConfig, {
+        onboardingConfig: { extends: [], minimumReleaseAge: '1 day' },
+      });
+      expect(config.onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: [],
+        minimumReleaseAge: '1 day',
       });
     });
 
@@ -74,6 +99,27 @@ describe('config/index', () => {
         node: '<15',
         npm: '^6.0.0',
       });
+    });
+
+    it('merges toolSettings', () => {
+      const parentConfig = {
+        ...defaultConfig,
+        toolSettings: { jvmMaxMemory: 1024, nodeMaxMemory: 1024 },
+      };
+      const childConfig = { toolSettings: { nodeMaxMemory: 2048 } };
+      const config = mergeChildConfig(parentConfig, childConfig);
+      expect(config.toolSettings).toStrictEqual({
+        jvmMaxMemory: 1024,
+        nodeMaxMemory: 2048,
+      });
+    });
+
+    it('does not merge toolSettings with any defaults', () => {
+      const config = mergeChildConfig(
+        { ...defaultConfig },
+        { toolSettings: { jvmMaxMemory: 1024 } },
+      );
+      expect(config.toolSettings).toStrictEqual({ jvmMaxMemory: 1024 });
     });
 
     it('merges forced options', () => {
@@ -127,6 +173,22 @@ describe('config/index', () => {
       expect(config).toMatchObject(parentConfig);
     });
 
+    it.each`
+      toolSettings | expected
+      ${{}}        | ${{ nodeMaxMemory: 1024 }}
+      ${null}      | ${null}
+    `(
+      'merges inherited toolSettings with $toolSettings',
+      ({ toolSettings, expected }) => {
+        const parentConfig = {
+          ...defaultConfig,
+          toolSettings: { nodeMaxMemory: 1024 },
+        };
+        const config = mergeChildConfig(parentConfig, { toolSettings });
+        expect(config.toolSettings).toStrictEqual(expected);
+      },
+    );
+
     it('getManagerConfig()', () => {
       const parentConfig = { ...defaultConfig };
       const config = getManagerConfig(parentConfig, 'npm');
@@ -162,6 +224,47 @@ describe('config/index', () => {
       };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.vulnerabilitySeverity).toBe('CRITICAL');
+    });
+  });
+
+  describe('applyDatasourceDefaultConfig()', () => {
+    it('lets the datasource defaults win over the given config', async () => {
+      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({
+        commitMessageTopic: 'Dummy {{depName}}',
+      });
+
+      const res = await applyDatasourceDefaultConfig({
+        datasource: 'dummy',
+        packageName: 'package',
+        commitMessageTopic: 'dependency {{depName}}',
+      });
+
+      expect(res).toEqual({
+        datasource: 'dummy',
+        packageName: 'package',
+        commitMessageTopic: 'Dummy {{depName}}',
+      });
+    });
+
+    it('keeps the config as-is for a datasource without defaults', async () => {
+      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({});
+
+      const res = await applyDatasourceDefaultConfig({
+        datasource: 'dummy',
+        packageName: 'package',
+      });
+
+      expect(res).toEqual({ datasource: 'dummy', packageName: 'package' });
+    });
+
+    it('keeps the config as-is without a datasource', async () => {
+      const getDefaultConfig = vi.spyOn(datasource, 'getDefaultConfig');
+      const config: RenovateConfig = { depName: 'dep' };
+
+      const res = await applyDatasourceDefaultConfig(config);
+
+      expect(res).toEqual({ depName: 'dep' });
+      expect(getDefaultConfig).not.toHaveBeenCalled();
     });
   });
 

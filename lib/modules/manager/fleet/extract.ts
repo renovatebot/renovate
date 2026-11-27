@@ -8,7 +8,7 @@ import {
   isOCIRegistry,
   removeOCIPrefix,
 } from '../helmv3/oci.ts';
-import { checkIfStringIsPath } from '../terraform/util.ts';
+import { isLocalChartPath } from '../helmv3/utils.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -84,7 +84,7 @@ function extractFleetHelmBlock(
   dep.packageName = doc.chart;
 
   if (!doc.repo) {
-    if (checkIfStringIsPath(doc.chart)) {
+    if (isLocalChartPath(doc.chart)) {
       return {
         ...dep,
         skipReason: 'local-chart',

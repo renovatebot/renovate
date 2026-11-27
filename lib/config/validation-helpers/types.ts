@@ -15,11 +15,6 @@ export const ConfigValidationTopic = {
 export type ConfigValidationTopic =
   (typeof ConfigValidationTopic)[keyof typeof ConfigValidationTopic];
 
-export interface CheckManagerArgs {
-  resolvedRule: PackageRule;
-  currentPath: string;
-}
-
 export interface CheckMatcherArgs {
   val: unknown;
   currentPath: string;

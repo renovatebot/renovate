@@ -73,7 +73,6 @@ vi.mock('../../../config/migrate-validate.ts');
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    hostRules.clear();
     GlobalConfig.reset();
   });
 
@@ -774,7 +773,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig(config);
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: { 'X-Allowed': 'from-repo' } },
+          { headers: { 'X-Allowed': 'from-repo' }, trustedHeaderNames: [] },
         );
       });
 
@@ -807,6 +806,7 @@ describe('workers/repository/init/merge', () => {
               'X-Allowed': 'yes',
             },
             internalHostGrant: { implicit: true },
+            trustedHeaderNames: ['custom-header', 'X-Allowed'],
           },
         );
       });
@@ -893,9 +893,8 @@ describe('workers/repository/init/merge', () => {
         ).toBeUndefined();
       });
 
-      it('drops `repositories[]` entry headers, if it is not in `allowedHeaders`', async () => {
-        // previously this would apply due to a gap in re-validating `allowedHeaders` against the resolved config.
-        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call, but we should make sure this also doesn't break
+      it('applies `repositories[]` entry headers even where they are not in `allowedHeaders`', async () => {
+        // the `repositories[]` entry is the self-hosted admin's own config, so its `headers` are exempt from `allowedHeaders` altogether
         GlobalConfig.set({ allowedHeaders: ['X-*'] });
         fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
 
@@ -912,11 +911,11 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { internalHostGrant: { implicit: true } },
-        );
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { denied: ['Authorization'] },
-          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+          {
+            headers: { Authorization: 'from-admin' },
+            internalHostGrant: { implicit: true },
+            trustedHeaderNames: ['Authorization'],
+          },
         );
       });
 
@@ -1314,8 +1313,8 @@ describe('workers/repository/init/merge', () => {
       );
     });
 
-    it('drops, rather than rejects, a header a repositories[] entry preset contributes outside `allowedHeaders`', async () => {
-      // the entry's presets are the admin's own config, so this is not a violation to abort the repository over - but `allowedHeaders` binds the admin too, and `applyHostRule` would drop the header at request time regardless, so it is dropped at registration with a WARN
+    it('applies a header a repositories[] entry preset contributes, even outside `allowedHeaders`', async () => {
+      // the entry's presets are the admin's own config, so their headers are exempt from `allowedHeaders` altogether, the same as the entry's own
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
       memCache.set('preset:local>entryInjectsHeader', {
         hostRules: [
@@ -1338,13 +1337,11 @@ describe('workers/repository/init/merge', () => {
       });
 
       expect(res).toBeDefined();
-      expect(
-        hostRules.find({ url: 'https://github.com' }).headers,
-      ).toBeUndefined();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['Authorization'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
+      expect(hostRules.find({ url: 'https://github.com' })).toEqual({
+        headers: { Authorization: 'Bearer x' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['Authorization'],
+      });
     });
 
     it('treats non-security resolved-preset issues as advisory by default', async () => {
@@ -1493,6 +1490,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('does not fetch a repository preset that the global `ignorePresets` ignores', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>some-org/unreachable'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        ignorePresets: ['local>some-org/unreachable'],
+      });
+
+      expect(res).toBeDefined();
+    });
+
     it("continues without the exemption when the admin's global `extends` cannot be resolved", async () => {
       // resolving them here only builds the exemption; the resolution whose result is actually used reports the failure, so it must not be reported twice - nor first
       fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
@@ -1581,6 +1591,70 @@ describe('workers/repository/init/merge', () => {
           ],
         }),
       ).toResolve();
+    });
+
+    it.each`
+      matchHost
+      ${'https://registry.example.com/npm/'}
+      ${'https://registry.example.com/npm/sub'}
+    `(
+      "exempts a preset with $matchHost within the admin's path",
+      async ({ matchHost }) => {
+        GlobalConfig.set({ allowedHeaders: ['X-*'] });
+        memCache.set('preset:local>withinPath', {
+          hostRules: [
+            { matchHost, headers: { Authorization: 'admin-secret' } },
+          ],
+        });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['local>withinPath'] }),
+        );
+
+        await expect(
+          mergeRenovateConfig({
+            ...config,
+            hostRules: [
+              {
+                matchHost: 'https://registry.example.com/npm/',
+                headers: { Authorization: 'admin-secret' },
+              },
+            ],
+          }),
+        ).toResolve();
+      },
+    );
+
+    it("reports a preset with the admin's path without its trailing slash", async () => {
+      // `https://registry.example.com/npm` also reaches `https://registry.example.com/npm-other/`, which the admin's rule does not
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>pathWithoutSlash', {
+        hostRules: [
+          {
+            matchHost: 'https://registry.example.com/npm',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>pathWithoutSlash'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'https://registry.example.com/npm/',
+              headers: { Authorization: 'admin-secret' },
+            },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
+      });
     });
 
     it("reports a preset broadening the admin's header to a wider host", async () => {
@@ -1758,6 +1832,7 @@ describe('workers/repository/init/merge', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
+        trustedHeaderNames: [],
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
@@ -1767,7 +1842,7 @@ describe('workers/repository/init/merge', () => {
 
     it('merges with an already-registered admin hostRule instead of replacing its headers', () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `hostRules.add` filters them against `allowedHeaders` itself, and registers them as `trusted`
+      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `trusted: true` exempts them from `allowedHeaders` altogether
       hostRules.add(
         {
           matchHost: 'registry.example.com',
@@ -1786,8 +1861,13 @@ describe('workers/repository/init/merge', () => {
       });
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
-        headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        headers: {
+          'X-From-Admin': 'yes',
+          Authorization: 'from-admin',
+          'X-From-Repo': 'yes',
+        },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin', 'Authorization'],
       });
     });
 
@@ -1817,6 +1897,7 @@ describe('workers/repository/init/merge', () => {
       ).toEqual({
         headers: { 'X-Api-Key': 'from-admin' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Api-Key'],
       });
     });
 
@@ -1877,10 +1958,10 @@ describe('workers/repository/init/merge', () => {
         },
         {
           name: 'it merges static config with the current config',
-          staticConfig: { dependencyDashboard: true },
+          staticConfig: { dependencyDashboard: { enabled: true } },
           currentConfig: { repositories: ['some/repo'] },
           want: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             repositories: ['some/repo'],
           },
         },
@@ -1908,6 +1989,24 @@ describe('workers/repository/init/merge', () => {
           expect(exitMock).not.toHaveBeenCalled();
         },
       );
+
+      it('accepts a string for an option which allows a string', async () => {
+        fs.readSystemFile.mockResolvedValueOnce('{"description":"static"}');
+
+        const got = await resolveStaticRepoConfig(
+          { repositories: ['some/repo'] },
+          'static_config.json5',
+        );
+
+        expect(got).toEqual({
+          description: 'static',
+          repositories: ['some/repo'],
+        });
+        expect(logger.logger.info).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Static repo config validation issues detected',
+        );
+      });
 
       describe('resolveStaticRepoConfig termination cases', () => {
         it.each([
@@ -2031,7 +2130,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           staticConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             packageRules: [
               {
                 groupName: 'my-custom-socketio-override',
@@ -2040,7 +2139,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           wantConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             description: ['Group socket.io packages.'],
             packageRules: [
               {
@@ -2067,7 +2166,7 @@ describe('workers/repository/init/merge', () => {
             extends: ['group:springAndroid'],
           },
           staticConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             extends: ['group:springAmqp'],
             packageRules: [
               {
@@ -2077,7 +2176,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           wantConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             description: [
               'Group Java Spring AMQP packages.',
               'Group Java Spring Android packages.',

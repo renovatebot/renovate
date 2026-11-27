@@ -48,6 +48,11 @@ export interface RepoParams {
   azureWorkItemType?: string;
 }
 
+export interface RepoConfigParams {
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
+}
+
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
@@ -80,6 +85,8 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  /** Only set by Gerrit platform for now */
+  updatedAt?: string;
   isDraft?: boolean;
 }
 
@@ -149,6 +156,13 @@ export interface UpdatePrConfig {
 export interface ReattemptPlatformAutomergeConfig {
   number: number;
   platformPrOptions?: PlatformPrOptions;
+  /** Commit SHA Renovate just pushed to the PR branch. */
+  sha?: string;
+}
+export interface CancelPlatformAutomergeConfig {
+  number: number;
+  /** Expected platform login. On GitHub, include [bot] for app accounts. */
+  enabledBy: string;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -158,6 +172,7 @@ export interface EnsureIssueConfig {
   once?: boolean;
   shouldReOpen?: boolean;
   confidential?: boolean;
+  shouldPin?: boolean;
 }
 export interface StatusCheckConfig {
   context: string;
@@ -236,6 +251,8 @@ export interface Platform {
    * Experimental features might be changed or even removed at any time.
    */
   experimental?: true;
+  /** Applies options read from the repository config after `initRepo`. */
+  applyRepoConfig?(config: RepoConfigParams): void;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
@@ -287,24 +304,31 @@ export interface Platform {
    */
   isPrInMergeQueue?(number: number): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #22198
-    context: string | null | undefined,
+    context: string,
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
       EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  getPr(number: number): Promise<Pr | null>;
+  getPr(number: number, refreshCache?: boolean): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
   reattemptPlatformAutomerge?(
     prConfig: ReattemptPlatformAutomergeConfig,
   ): Promise<void>;
+  /**
+   * Cancels platform auto-merge for the expected actor without scheduling restoration.
+   * Returns true if disabled at the response, false for another actor or unconfirmed state.
+   * Does not confirm the PR is open or prevent queued merges or re-enablement.
+   * Propagates request failures.
+   */
+  cancelPlatformAutomerge?(
+    prConfig: CancelPlatformAutomergeConfig,
+  ): Promise<boolean>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,
@@ -328,7 +352,6 @@ export interface Platform {
   tryReuseAutoclosedPr?(pr: Pr, newTitle: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 

@@ -1,6 +1,34 @@
-import { parseDepName } from './dependency.ts';
+import type { PackageDependency } from '../../../types.ts';
+import { getExtractedConstraints, parseDepName } from './dependency.ts';
 
 describe('modules/manager/npm/extract/common/dependency', () => {
+  describe('getExtractedConstraints', () => {
+    it('ignores skipped and unsupported devEngines dependencies', () => {
+      const deps: PackageDependency[] = [
+        { depType: 'engines', depName: 'node', currentValue: '20.0.0' },
+        {
+          depType: 'devEngines.runtime',
+          depName: 'node',
+          currentValue: 'invalid',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depType: 'devEngines.runtime',
+          depName: 'deno',
+          currentValue: '2.0.0',
+        },
+        {
+          depType: 'devEngines.runtime',
+          depName: 'unknown',
+          currentValue: '1.0.0',
+        },
+        { depType: 'devEngines.packageManager', depName: 'pnpm' },
+      ];
+
+      expect(getExtractedConstraints(deps)).toEqual({ node: '20.0.0' });
+    });
+  });
+
   describe('parseDepName', () => {
     it('returns key unchanged for non-resolutions depTypes', () => {
       expect(parseDepName('dependencies', '@cypress/request/qs@~6.14.1')).toBe(

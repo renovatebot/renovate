@@ -23,13 +23,13 @@ export async function generateDatasources(
       id,
       urls,
       defaultConfig,
-      customRegistrySupport,
       defaultVersioning,
       releaseTimestampSupport,
       releaseTimestampNote,
       sourceUrlSupport,
       sourceUrlNote,
     } = definition;
+    const customRegistrySupport = definition.supportsCustomRegistry(id);
     const displayName = getDisplayName(datasource, definition);
     datasourceContent += `* ${getModuleLink(
       datasource,

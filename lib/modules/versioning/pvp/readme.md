@@ -1,5 +1,5 @@
 [Package Versioning Policy](https://pvp.haskell.org/) is used with Haskell.
-It's like semver, except that the first _two_ parts are of the major
+It is like semver, except that the first _two_ parts are of the major
 version. That is, in `A.B.C`:
 
 - `A.B`: major version

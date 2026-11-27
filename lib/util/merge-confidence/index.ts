@@ -9,9 +9,12 @@ import {
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as packageCache from '../cache/package/index.ts';
+import { buildCacheKey } from '../cache/package/key.ts';
+import { toSha256 } from '../hash.ts';
 import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
 import { Http } from '../http/index.ts';
+import { isForbidden, isServerError } from '../http/status.ts';
 import { regEx } from '../regex.ts';
 import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../url.ts';
 import { MERGE_CONFIDENCE } from './common.ts';
@@ -20,7 +23,7 @@ import type { MergeConfidence } from './types.ts';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);
-let token: string | undefined;
+let tokenHash: string | undefined;
 let apiBaseUrl: string | undefined;
 let supportedDatasources: string[] = [];
 
@@ -36,18 +39,19 @@ export function initConfig({
   mergeConfidenceDatasources,
 }: AllConfig): void {
   apiBaseUrl = getApiBaseUrl(mergeConfidenceEndpoint);
-  token = getApiToken();
+  const token = getApiToken();
+  tokenHash = isNullOrUndefined(token) ? undefined : toSha256(token);
 
   supportedDatasources =
     mergeConfidenceDatasources ?? presetSupportedDatasources;
 
-  if (!isNullOrUndefined(token)) {
+  if (!isNullOrUndefined(tokenHash)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
 }
 
 export function resetConfig(): void {
-  token = undefined;
+  tokenHash = undefined;
   apiBaseUrl = undefined;
   supportedDatasources = [];
 }
@@ -104,7 +108,7 @@ export async function getMergeConfidenceLevel(
   return await instrument(
     'getMergeConfidenceLevel',
     async () => {
-      if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
+      if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(tokenHash)) {
         return undefined;
       }
 
@@ -158,7 +162,7 @@ async function queryApi(
   newVersion: string,
 ): Promise<MergeConfidence> {
   // istanbul ignore if: defensive, already been validated before calling this function
-  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(tokenHash)) {
     return 'neutral';
   }
 
@@ -173,7 +177,7 @@ async function queryApi(
     currentVersion,
     newVersion,
   );
-  const cacheKey = `${token}:${url}`;
+  const cacheKey = buildCacheKey(tokenHash, url);
   const cachedResult = await packageCache.get(hostType, cacheKey);
 
   // istanbul ignore if
@@ -226,7 +230,7 @@ async function queryApi(
 export async function initMergeConfidence(config: AllConfig): Promise<void> {
   initConfig(config);
 
-  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(tokenHash)) {
     logger.trace('merge confidence API usage is disabled');
     return;
   }
@@ -283,12 +287,12 @@ function apiErrorHandler(err: any): void {
     throw new ExternalHostError(err, hostType);
   }
 
-  if (err.statusCode === 403) {
+  if (isForbidden(err)) {
     logger.error({ err }, 'merge confidence API token rejected - aborting run');
     throw new ExternalHostError(err, hostType);
   }
 
-  if (err.statusCode >= 500 && err.statusCode < 600) {
+  if (isServerError(err)) {
     logger.error({ err }, 'merge confidence API failure: 5xx - aborting run');
     throw new ExternalHostError(err, hostType);
   }

@@ -4,7 +4,6 @@ import type {
   UpdateResult,
 } from '../../workers/repository/process/lookup/types.ts';
 import { getDatasourceFor } from './common.ts';
-import { Datasource } from './datasource.ts';
 import type { Release } from './types.ts';
 
 type Config = Partial<LookupUpdateConfig & UpdateResult>;
@@ -24,10 +23,7 @@ export async function postprocessRelease(
     return release;
   }
 
-  if (
-    ds.constructor.prototype.postprocessRelease ===
-    Datasource.prototype.postprocessRelease
-  ) {
+  if (!ds.postprocessRelease) {
     return release;
   }
 

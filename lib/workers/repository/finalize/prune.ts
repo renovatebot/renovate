@@ -9,6 +9,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { uniqueStrings } from '../../../util/string.ts';
+import { PackageFiles } from '../package-files.ts';
 import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
@@ -37,7 +38,7 @@ async function cleanUpBranches(
         // single base branch: branch name doesn't encode it, use the configured one
         baseBranch = config.baseBranches?.[0] ?? config.defaultBranch!;
       }
-      const pr = await platform.findPr({
+      let pr = await platform.findPr({
         branchName,
         state: 'open',
         targetBranch: baseBranch,
@@ -46,6 +47,25 @@ async function cleanUpBranches(
         branchName,
         baseBranch,
       );
+      if (pr && !GlobalConfig.get('dryRun')) {
+        const freshPr = await platform.getPr(pr.number, true);
+        if (!freshPr) {
+          logger.debug(
+            { branchName, prNo: pr.number },
+            'Could not refresh PR - skipping branch pruning',
+          );
+          continue;
+        }
+        if (freshPr.state === 'open') {
+          pr = freshPr;
+        } else {
+          logger.debug(
+            { branchName, prNo: pr.number, prState: freshPr.state },
+            'PR is no longer open - skipping PR update',
+          );
+          pr = null;
+        }
+      }
       if (pr) {
         if (branchIsModified) {
           logger.debug(
@@ -157,6 +177,12 @@ export async function pruneStaleBranches(
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
+    return;
+  }
+  if (PackageFiles.hasLookupFailure()) {
+    logger.debug(
+      'A dependency lookup failed in this run - skipping branch pruning',
+    );
     return;
   }
   if (!config.defaultBranch) {
