@@ -43,6 +43,19 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
 
+    it('should forward automergeBypassRules to the platform', async () => {
+      config.automerge = true;
+      config.automergeBypassRules = false;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+
+      await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(platform.mergePr).toHaveBeenCalledWith(
+        expect.objectContaining({ bypassRules: false }),
+      );
+    });
+
     it('should indicate if automerge failed', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce('green');
