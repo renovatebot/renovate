@@ -507,6 +507,148 @@ describe('modules/manager/bazel-module/extract', () => {
       });
     });
 
+    it('returns maven.install with boms and artifacts and custom repositories', async () => {
+      const input = codeBlock`
+        maven.install(
+            artifacts = [
+                "junit:junit:4.13.2",
+            ],
+            boms = [
+                "com.google.guava:guava-bom:31.1-jre",
+            ],
+            repositories = [
+                "https://repo1.maven.org/maven2/",
+            ],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: MavenDatasource.id,
+            versioning: 'gradle',
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+          {
+            datasource: MavenDatasource.id,
+            versioning: 'gradle',
+            depName: 'com.google.guava:guava-bom',
+            currentValue: '31.1-jre',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+        ],
+      });
+    });
+
+    it('returns maven.install with only boms (no artifacts)', async () => {
+      const input = codeBlock`
+        maven.install(
+            boms = [
+                "com.google.guava:guava-bom:31.1-jre",
+            ],
+            repositories = [
+                "https://repo1.maven.org/maven2/",
+            ],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: MavenDatasource.id,
+            versioning: 'gradle',
+            depName: 'com.google.guava:guava-bom',
+            currentValue: '31.1-jre',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+        ],
+      });
+    });
+
+    it('gives each maven.install block only its own repositories', async () => {
+      const input = codeBlock`
+        maven.install(
+            boms = [
+                "com.google.guava:guava-bom:31.1-jre",
+            ],
+            repositories = [
+                "https://repo1.maven.org/maven2/",
+            ],
+        )
+
+        maven.install(
+            boms = [
+                "org.seleniumhq.selenium:selenium-bom:4.4.0",
+            ],
+            repositories = [
+                "https://custom.repo.example.com/maven2/",
+            ],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: MavenDatasource.id,
+            versioning: 'gradle',
+            depName: 'com.google.guava:guava-bom',
+            currentValue: '31.1-jre',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+          {
+            datasource: MavenDatasource.id,
+            versioning: 'gradle',
+            depName: 'org.seleniumhq.selenium:selenium-bom',
+            currentValue: '4.4.0',
+            depType: 'maven_install',
+            registryUrls: ['https://custom.repo.example.com/maven2/'],
+          },
+        ],
+      });
+    });
+
+    it('ignores malformed boms entries without throwing', async () => {
+      const input = codeBlock`
+        maven.install(
+            boms = [
+                "com.google.guava:guava-bom:31.1-jre",
+                "malformed-entry",
+                "no:version",
+            ],
+            repositories = [
+                "https://repo1.maven.org/maven2/",
+            ],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: MavenDatasource.id,
+            versioning: 'gradle',
+            depName: 'com.google.guava:guava-bom',
+            currentValue: '31.1-jre',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+        ],
+      });
+    });
+
     it('returns oci.pull dependencies', async () => {
       const input = codeBlock`
         oci.pull(
