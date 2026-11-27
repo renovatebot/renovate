@@ -8,6 +8,7 @@ import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -35,10 +36,8 @@ const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateInputCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update nixpkgs`;
-const updateInputTokenCmd = `nix \
---extra-experimental-features 'nix-command flakes' \
---extra-access-tokens github.com=token \
-flake update nixpkgs`;
+// The token is passed through NIX_CONFIG, so the command is the tokenless one.
+const tokenEnv = { NIX_CONFIG: 'extra-access-tokens = github.com=token' };
 const lockfileMaintenanceCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update`;
@@ -148,7 +147,9 @@ describe('modules/manager/nix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: updateInputCmd, options: { env: tokenEnv } },
+    ]);
   });
 
   it('trims "x-access-token:" prefix from GitHub token', async () => {
@@ -178,10 +179,12 @@ describe('modules/manager/nix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: updateInputCmd, options: { env: tokenEnv } },
+    ]);
   });
 
-  it('quotes a GitHub token containing shell metacharacters', async () => {
+  it('keeps a token with shell metacharacters out of the command', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -192,7 +195,7 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
     // hostRules can be set via a repo's own committed config, not only by a
     // trusted platform admin, so the token itself isn't inherently trusted
-    hostRules.add({ matchHost: 'github.com', token: 'x$(touch pwned)y' });
+    hostRules.add({ matchHost: 'github.com', token: 'x$(id)y' });
 
     await updateArtifacts({
       packageFileName: 'flake.nix',
@@ -203,9 +206,143 @@ describe('modules/manager/nix/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `nix --extra-experimental-features 'nix-command flakes' --extra-access-tokens github.com='x$(touch pwned)y' flake update nixpkgs`,
+        cmd: updateInputCmd,
+        options: {
+          env: {
+            NIX_CONFIG: 'extra-access-tokens = github.com=x$(id)y',
+          },
+        },
       },
     ]);
+    expect(execSnapshots[0].cmd).not.toContain('x$(id)y');
+  });
+
+  it('refuses a token nix config cannot carry', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: ['flake.lock'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    // A newline opens a second config line: any nix setting, post-build-hook included
+    hostRules.add({
+      matchHost: 'github.com',
+      token: 'tok-secret\npost-build-hook = /tmp/pwned',
+    });
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'GitHub token is not expressible in NIX_CONFIG, not passing it to nix',
+    );
+    expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
+    expect(execSnapshots[0].options?.env).not.toHaveProperty('NIX_CONFIG');
+  });
+
+  it('spells the setting the way nix parses it', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: ['flake.lock'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.add({ matchHost: 'github.com', token: 'tok-secret' });
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    // nix needs the `=` as its own token; `name=value` is a syntax error it exits
+    // on, and an expectation copied from the source cannot tell the difference
+    const line = execSnapshots[0].options?.env?.NIX_CONFIG;
+    expect(line?.split(/\s+/)).toEqual([
+      'extra-access-tokens',
+      '=',
+      'github.com=tok-secret',
+    ]);
+  });
+
+  it('appends to a NIX_CONFIG the user already set', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: ['flake.lock'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.add({ matchHost: 'github.com', token: 'tok-secret' });
+    vi.stubEnv('NIX_CONFIG', 'cores = 1');
+
+    try {
+      await updateArtifacts({
+        packageFileName: 'flake.nix',
+        updatedDeps: [{ depName: 'nixpkgs' }],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+    } finally {
+      vi.stubEnv('NIX_CONFIG', undefined);
+    }
+
+    expect(execSnapshots[0].options?.env?.NIX_CONFIG).toBe(
+      'cores = 1\nextra-access-tokens = github.com=tok-secret',
+    );
+  });
+
+  it('is not shadowed by an ambient NIX_CONFIG', async () => {
+    env.getChildProcessEnv.mockReturnValue({
+      ...envMock.basic,
+      NIX_CONFIG: 'cores = 1',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: ['flake.lock'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.add({ matchHost: 'github.com', token: 'tok-secret' });
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    // extraEnv alone would lose to this
+    expect(execSnapshots[0].options?.env?.NIX_CONFIG).toContain(
+      'extra-access-tokens = github.com=tok-secret',
+    );
+  });
+
+  it('forwards the token to the docker sidecar by name, not in argv', async () => {
+    GlobalConfig.set(dockerAdminConfig);
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: ['flake.lock'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.add({ matchHost: 'github.com', token: 'tok-secret' });
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { nix: '2.10.0' } },
+    });
+
+    const cmds = execSnapshots.map(({ cmd }) => cmd);
+    expect(cmds.some((cmd) => cmd.includes('-e NIX_CONFIG'))).toBe(true);
+    // the docker run line is argv on the host, the worst of the old exposure
+    expect(cmds.every((cmd) => !cmd.includes('tok-secret'))).toBe(true);
   });
 
   it('supports docker mode', async () => {

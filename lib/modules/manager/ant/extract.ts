@@ -21,8 +21,6 @@ import {
 } from './properties.ts';
 import type { AntProp } from './types.ts';
 
-export { parsePropertiesFile } from './properties.ts';
-
 const scopeNames = new Set([
   'compile',
   'runtime',

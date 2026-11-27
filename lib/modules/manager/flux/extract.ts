@@ -41,7 +41,7 @@ import {
   isSystemManifest,
   systemManifestHeaderRegex,
 } from './common.ts';
-import { FluxResource, type HelmRepository } from './schema.ts';
+import { FluxResource, type HelmRepository, type OCIRef } from './schema.ts';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -88,6 +88,9 @@ const gitlabUrlRegex = regEx(
 const bitbucketUrlRegex = regEx(
   /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
+
+const helmChartLayerMediaType =
+  'application/vnd.cncf.helm.chart.content.v1.tar+gzip';
 
 function resolveGitRepositoryPerSourceTag(
   dep: PackageDependency<FluxManagerData>,
@@ -185,49 +188,67 @@ function resolveSystemManifest(
   ];
 }
 
+interface OCIRefLocator {
+  /** `kind` of the documents to search */
+  kind: 'OCIRepository' | 'HelmRelease';
+  /** `metadata.name` of the documents to search */
+  name: string;
+}
+
+const ociRefPaths: Record<OCIRefLocator['kind'], string[]> = {
+  OCIRepository: ['spec', 'ref'],
+  HelmRelease: ['spec', 'chart', 'spec', 'ref'],
+};
+
 /**
- * Returns all `spec.ref` map nodes for OCIRepository resources matching `resourceName`.
+ * Returns all OCI `ref` map nodes of the documents matching `locator`, those holding the values of `ref` first.
  */
 function findOCIRefNodes(
   docs: Document.Parsed[],
-  resourceName: string,
+  locator: OCIRefLocator,
+  ref: OCIRef,
 ): YAMLMap[] {
   const refNodes: YAMLMap[] = [];
+  const otherRefNodes: YAMLMap[] = [];
   for (const doc of docs) {
     const docContents = doc.contents;
     if (!isMap(docContents)) {
       continue;
     }
     const kindNode = docContents.get('kind', true);
-    if (
-      !isScalar(kindNode) ||
-      (kindNode.value as unknown) !== 'OCIRepository'
-    ) {
+    if (!isScalar(kindNode) || (kindNode.value as unknown) !== locator.kind) {
       continue;
     }
     const nameNode = docContents.getIn(['metadata', 'name'], true);
-    if (!isScalar(nameNode) || nameNode.value !== resourceName) {
+    if (!isScalar(nameNode) || nameNode.value !== locator.name) {
       continue;
     }
-    const specNode = docContents.get('spec');
-    if (!isMap(specNode)) {
+    const refNode = docContents.getIn(ociRefPaths[locator.kind]);
+    if (!isMap(refNode)) {
       continue;
     }
-    const refNode = specNode.get('ref');
-    if (isMap(refNode)) {
+    if (
+      refNode.get('tag') === ref.tag &&
+      refNode.get('digest') === ref.digest
+    ) {
       refNodes.push(refNode);
+    } else {
+      otherRefNodes.push(refNode);
     }
   }
 
-  return refNodes;
+  // `ref` was parsed from template-stripped content, so the raw values of its
+  // own node can differ, and nodes with other values stay as a fallback
+  return [...refNodes, ...otherRefNodes];
 }
 
 function extractOCIRefTagAndDigestRange(
   docs: Document.Parsed[],
   content: string,
-  resourceName: string,
+  locator: OCIRefLocator,
+  ref: OCIRef,
 ): { replaceString: string; tagFirst: boolean } | null {
-  for (const refNode of findOCIRefNodes(docs, resourceName)) {
+  for (const refNode of findOCIRefNodes(docs, locator, ref)) {
     let tagKey: Scalar | undefined;
     let tagValue: Scalar | undefined;
     let digestKey: Scalar | undefined;
@@ -268,9 +289,10 @@ function extractOCIRefTagAndDigestRange(
 function extractOCIRefTagRange(
   docs: Document.Parsed[],
   content: string,
-  resourceName: string,
+  locator: OCIRefLocator,
+  ref: OCIRef,
 ): { replaceString: string; indentation: string } | null {
-  for (const refNode of findOCIRefNodes(docs, resourceName)) {
+  for (const refNode of findOCIRefNodes(docs, locator, ref)) {
     for (const item of refNode.items) {
       if (
         isPair(item) &&
@@ -294,13 +316,115 @@ function extractOCIRefTagRange(
   return null;
 }
 
+interface ResolveOCIRefOptions {
+  url: string;
+  ref: OCIRef | undefined;
+  depType: 'HelmChart' | undefined;
+  locator: OCIRefLocator;
+  manifest: ResourceFluxManifest;
+  registryAliases: Record<string, string> | undefined;
+  getDocs: () => Document.Parsed[];
+}
+
+function resolveOCIRef({
+  url,
+  ref,
+  depType,
+  locator,
+  manifest,
+  registryAliases,
+  getDocs,
+}: ResolveOCIRefOptions): PackageDependency<FluxManagerData> {
+  const container = removeOCIPrefix(url);
+  const content = manifest.content;
+  if (ref?.digest && ref?.tag) {
+    const combinedDep = getDep(`${container}@${ref.digest}`, {
+      specifyReplaceString: false,
+      registryAliases,
+      depType,
+    });
+    // Set currentValue to the tag so the docker datasource can look up the image's new digest
+    combinedDep.currentValue = ref.tag;
+
+    const refRange = extractOCIRefTagAndDigestRange(
+      getDocs(),
+      content,
+      locator,
+      ref,
+    );
+    if (refRange) {
+      combinedDep.replaceString = refRange.replaceString;
+      if (refRange.tagFirst) {
+        combinedDep.autoReplaceStringTemplate = refRange.replaceString
+          .replace(ref.tag, '{{newValue}}')
+          .replace(ref.digest, '{{newDigest}}');
+      } else {
+        combinedDep.autoReplaceStringTemplate = refRange.replaceString
+          .replace(ref.digest, '{{newDigest}}')
+          .replace(ref.tag, '{{newValue}}');
+      }
+    } else {
+      logger.debug(
+        { file: manifest.file, name: locator.name },
+        'Could not find tag/digest nodes in content, skipping replacement',
+      );
+      combinedDep.skipReason = 'invalid-value';
+    }
+
+    return combinedDep;
+  }
+
+  if (ref?.digest) {
+    return getDep(`${container}@${ref.digest}`, {
+      specifyReplaceString: false,
+      registryAliases,
+      depType,
+    });
+  }
+
+  if (ref?.tag) {
+    const dep = getDep(`${container}:${ref.tag}`, {
+      specifyReplaceString: false,
+      registryAliases,
+      depType,
+    });
+    const refTagRange = extractOCIRefTagRange(getDocs(), content, locator, ref);
+    if (refTagRange) {
+      dep.replaceString = refTagRange.replaceString;
+      const newline = content.includes('\r\n') ? '\r\n' : '\n';
+      dep.autoReplaceStringTemplate = `${refTagRange.replaceString.replace(
+        ref.tag,
+        '{{newValue}}',
+      )}{{#if newDigest}}${newline}${refTagRange.indentation}digest: {{newDigest}}{{/if}}`;
+    } else {
+      logger.debug(
+        { file: manifest.file, name: locator.name },
+        'Unable to locate tag node for replacement (may be YAML alias or alias reference), digest pinning will not be possible',
+      );
+      dep.replaceString = ref.tag;
+      dep.autoReplaceStringTemplate = '{{newValue}}';
+    }
+    return dep;
+  }
+
+  const dep = getDep(container, {
+    specifyReplaceString: false,
+    registryAliases,
+    depType,
+  });
+  dep.skipReason = 'unversioned-reference';
+  return dep;
+}
+
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
-  content: string,
 ): PackageDependency<FluxManagerData>[] {
   let docs: Document.Parsed[] | undefined;
+  function getDocs(): Document.Parsed[] {
+    return (docs ??= parseAllDocuments(manifest.content, { strict: false }));
+  }
   const deps: PackageDependency<FluxManagerData>[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
@@ -309,6 +433,22 @@ function resolveResourceManifest(
           logger.trace(
             'HelmRelease using chartRef was found, skipping as version will be handled via referenced resource directly',
           );
+        } else if (resource.spec.chart?.kind === 'OCIRepository') {
+          const chartSpec = resource.spec.chart.spec;
+          deps.push(
+            resolveOCIRef({
+              url: chartSpec.url,
+              ref: chartSpec.ref,
+              depType: 'HelmChart',
+              locator: {
+                kind: 'HelmRelease',
+                name: resource.metadata.name,
+              },
+              manifest,
+              registryAliases,
+              getDocs,
+            }),
+          );
         } else if (resource.spec.chart) {
           const chartSpec = resource.spec.chart.spec;
           const depName = chartSpec.chart;
@@ -316,6 +456,7 @@ function resolveResourceManifest(
             depName,
             currentValue: resource.spec.chart.spec.version,
             datasource: HelmDatasource.id,
+            depType: 'HelmChart',
           };
 
           if (isLocalChartPath(depName)) {
@@ -361,6 +502,7 @@ function resolveResourceManifest(
 
         const dep: PackageDependency<FluxManagerData> = {
           depName: resource.spec.chart,
+          depType: 'HelmChart',
         };
 
         if (resource.spec.sourceRef.kind === 'HelmRepository') {
@@ -414,80 +556,24 @@ function resolveResourceManifest(
         break;
       }
       case 'OCIRepository': {
-        const container = removeOCIPrefix(resource.spec.url);
-        if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
-          const combinedDep = getDep(
-            `${container}@${resource.spec.ref.digest}`,
-            { specifyReplaceString: false, registryAliases },
-          );
-          // Set currentValue to the tag so the docker datasource can look up the image's new digest
-          combinedDep.currentValue = resource.spec.ref.tag;
-
-          const refRange = extractOCIRefTagAndDigestRange(
-            (docs ??= parseAllDocuments(content, { strict: false })),
-            content,
-            resource.metadata.name,
-          );
-          if (refRange) {
-            combinedDep.replaceString = refRange.replaceString;
-            if (refRange.tagFirst) {
-              combinedDep.autoReplaceStringTemplate = refRange.replaceString
-                .replace(resource.spec.ref.tag, '{{newValue}}')
-                .replace(resource.spec.ref.digest, '{{newDigest}}');
-            } else {
-              combinedDep.autoReplaceStringTemplate = refRange.replaceString
-                .replace(resource.spec.ref.digest, '{{newDigest}}')
-                .replace(resource.spec.ref.tag, '{{newValue}}');
-            }
-          } else {
-            logger.debug(
-              { file: manifest.file, name: resource.metadata.name },
-              'Could not find tag/digest nodes in content, skipping replacement',
-            );
-            combinedDep.skipReason = 'invalid-value';
-          }
-
-          deps.push(combinedDep);
-        } else if (resource.spec.ref?.digest) {
-          const dep = getDep(`${container}@${resource.spec.ref.digest}`, {
-            specifyReplaceString: false,
+        const depType =
+          resource.spec.layerSelector?.mediaType === helmChartLayerMediaType
+            ? 'HelmChart'
+            : undefined;
+        deps.push(
+          resolveOCIRef({
+            url: resource.spec.url,
+            ref: resource.spec.ref,
+            depType,
+            locator: {
+              kind: 'OCIRepository',
+              name: resource.metadata.name,
+            },
+            manifest,
             registryAliases,
-          });
-          deps.push(dep);
-        } else if (resource.spec.ref?.tag) {
-          const dep = getDep(`${container}:${resource.spec.ref.tag}`, {
-            specifyReplaceString: false,
-            registryAliases,
-          });
-          const refTagRange = extractOCIRefTagRange(
-            (docs ??= parseAllDocuments(content, { strict: false })),
-            content,
-            resource.metadata.name,
-          );
-          if (refTagRange) {
-            dep.replaceString = refTagRange.replaceString;
-            const newline = content.includes('\r\n') ? '\r\n' : '\n';
-            dep.autoReplaceStringTemplate = `${refTagRange.replaceString.replace(
-              resource.spec.ref.tag,
-              '{{newValue}}',
-            )}{{#if newDigest}}${newline}${refTagRange.indentation}digest: {{newDigest}}{{/if}}`;
-          } else {
-            logger.debug(
-              { file: manifest.file, name: resource.metadata.name },
-              'Unable to locate tag node for replacement (may be YAML alias or alias reference), digest pinning will not be possible',
-            );
-            dep.replaceString = resource.spec.ref.tag;
-            dep.autoReplaceStringTemplate = '{{newValue}}';
-          }
-          deps.push(dep);
-        } else {
-          const dep = getDep(container, {
-            specifyReplaceString: false,
-            registryAliases,
-          });
-          dep.skipReason = 'unversioned-reference';
-          deps.push(dep);
-        }
+            getDocs,
+          }),
+        );
         break;
       }
 
@@ -525,7 +611,6 @@ export function extractPackageFile(
         manifest,
         helmRepositories,
         config?.registryAliases,
-        content,
       );
       break;
     }
@@ -563,7 +648,6 @@ export async function extractAllPackageFiles(
           manifest,
           helmRepositories,
           config.registryAliases,
-          manifest.content,
         );
         break;
       }

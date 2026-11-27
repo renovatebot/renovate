@@ -189,8 +189,10 @@ describe('config/migration', () => {
         constraints: {
           python: '3.7',
         },
-        dependencyDashboard: true,
-        dependencyDashboardTitle: 'foo',
+        dependencyDashboard: {
+          enabled: true,
+          title: 'foo',
+        },
         enabled: true,
         enabledManagers: ['npm'],
         exposeAllEnv: true,
@@ -617,6 +619,22 @@ describe('config/migration', () => {
         ignorePaths: [],
         includePaths: ['test'],
         rebaseWhen: 'auto',
+      });
+      expect(isMigrated).toBeTrue();
+    });
+
+    it('removes dnsCache from hostRules', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- removed property
+      const config = {
+        hostRules: [
+          { matchHost: 'example.com', dnsCache: true },
+          { matchHost: 'example.org' },
+        ],
+      } as TestRenovateConfig;
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toEqual({
+        hostRules: [{ matchHost: 'example.com' }, { matchHost: 'example.org' }],
       });
       expect(isMigrated).toBeTrue();
     });

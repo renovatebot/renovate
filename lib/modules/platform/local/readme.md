@@ -13,12 +13,12 @@ Other `dryRun` values (such as `full`) are not supported on the local platform a
 Avoid giving "repositories" arguments, as this command can only run in a _single_ directory, and it can only run in the _current working_ directory.
 
 You may run the command above on "plain" directories, or "Git directories".
-You don't need to provide any config, as the command will run with or without "repo config".
+You do not need to provide any config, as the command will run with or without "repo config".
 
-The command doesn't do any "compare" - or before and after analysis - if you want to test a new config then you must manually compare.
+The command does not do any "compare" - or before and after analysis - if you want to test a new config then you must manually compare.
 
 ## Limitations
 
-- `local>` presets can't be resolved. Normally these would point to the local platform such as GitHub, but in the case of running locally, it does not exist
+- `local>` presets cannot be resolved. Normally these would point to the local platform such as GitHub, but in the case of running locally, it does not exist
 - `baseBranchPatterns` are ignored
 - Branch creation is not supported

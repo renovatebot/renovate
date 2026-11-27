@@ -18,6 +18,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
     'Could not write new index file',
     'Failed to connect to',
     'Connection timed out',
+    'SSL connection timeout',
     'malformed object name',
     'Could not resolve host',
     'early EOF',
@@ -111,8 +112,10 @@ export function handleCommitError(
       `proceed. Original error: \`${err.message.replaceAll('`', "'")}\``;
     throw error;
   }
+  const isRejected =
+    err.message.includes('remote rejected') || err.message.includes('403');
   if (
-    (err.message.includes('remote rejected') || err.message.includes('403')) &&
+    isRejected &&
     files?.some((file) => file.path?.startsWith('.github/workflows/'))
   ) {
     logger.debug({ err }, 'commitFiles error');

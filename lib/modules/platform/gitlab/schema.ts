@@ -80,8 +80,10 @@ export const GitLabMergeRequest = DeepNullish(
     sha: LongCommitSha.optional(),
     head_pipeline: z
       .object({
+        id: z.number().optional(),
         status: z.string(),
         sha: LongCommitSha,
+        source: z.string().optional(),
       })
       .optional(),
   }),

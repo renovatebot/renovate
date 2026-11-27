@@ -60,7 +60,7 @@ jobs:
 
       - name: Label PR based on size
         if: steps.pr.outputs.number
-        uses: cbrgm/pr-size-labeler-action@503e76dd1fa75f044f303a7d1460f5e2f396df01 # v1.4.0
+        uses: cbrgm/pr-size-labeler-action@371213a8a3de4b4c8f107ec8adcbb7ca293e970f # v1.4.1
         with:
           github_token: ${{ github.token }} # Pass the GitHub token for authentication
           github_repository: ${{ github.repository }} # Pass the repository name

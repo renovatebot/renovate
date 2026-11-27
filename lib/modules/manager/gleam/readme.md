@@ -18,7 +18,7 @@ This way Renovate can update all your dependencies, including those with in-rang
 ### Default `rangeStrategy=auto` behavior
 
 Renovate's default [`rangeStrategy`](../../../configuration-options.md#rangestrategy) is `"auto"`.
-Here's how `"auto"` works with the `gleam` manager:
+Here is how `"auto"` works with the `gleam` manager:
 
 | Version type             | New version | Old range                | New range after update   | What Renovate does                                                        |
 | :----------------------- | :---------- | :----------------------- | :----------------------- | :------------------------------------------------------------------------ |

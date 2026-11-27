@@ -4,7 +4,7 @@ import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import { detectPlatform } from '../common.ts';
 import type { ResolvedChildEnv } from '../exec/utils.ts';
-import { find, getAll } from '../host-rules.ts';
+import { find, findDetachedCredentials, getAll } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
 import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
 import { addGitConfigEnvironmentVariables } from './config.ts';
@@ -152,9 +152,41 @@ export function getAuthenticationRules(
   return authenticationRules;
 }
 
+function hasCredentials(rule: HostRule): boolean {
+  const basicAuth = rule.username && rule.password;
+  return !!(rule.token ?? basicAuth);
+}
+
+/**
+ * Appends Git authentication for the repository `url` from the credentials registered from URL credentials for it with `hostType`, a username without a password as a percent-encoded token; configured host rules come through `getAll()` instead.
+ * @returns a new environment without modifying the input
+ */
+function getGitUrlEnvironmentVariables(
+  environmentVariables: Readonly<ResolvedChildEnv>,
+  url: string,
+  hostType: string,
+): ResolvedChildEnv {
+  const credentials = findDetachedCredentials({ hostType, url });
+  if (!credentials?.username) {
+    return { ...environmentVariables };
+  }
+  const auth: HostRule = credentials.password
+    ? credentials
+    : { token: encodeURIComponent(credentials.username) };
+  return getGitAuthenticatedEnvironmentVariables(environmentVariables, url, {
+    ...auth,
+    hostType,
+  });
+}
+
+/**
+ * Appends Git authentication from the host rules with a `matchHost` for the platform host types and `hostTypes`, and, when `url` is given, for that single repository from the credentials registered from URL credentials for it with each of `hostTypes`.
+ * @returns a new environment without modifying the input
+ */
 export function getGitEnvironmentVariables(
   environmentVariables: Readonly<ResolvedChildEnv>,
   hostTypes: readonly string[] = [],
+  url?: string,
 ): ResolvedChildEnv {
   let gitEnvironmentVariables: ResolvedChildEnv = { ...environmentVariables };
 
@@ -180,7 +212,7 @@ export function getGitEnvironmentVariables(
 
   // filter rules without `matchHost` and `token` or username and password and github api github rules
   const hostRules = getAll()
-    .filter((r) => r.matchHost && (r.token ?? (r.username && r.password)))
+    .filter((r) => r.matchHost && hasCredentials(r))
     .filter((r) => !gitHubHostRule || !githubApiUrls.has(r.matchHost!));
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
@@ -190,6 +222,17 @@ export function getGitEnvironmentVariables(
       gitEnvironmentVariables = addAuthFromHostRule(
         hostRule,
         gitEnvironmentVariables,
+      );
+    }
+  }
+
+  // `getAll()` leaves out the rules registered from URL credentials, which only apply to the repository they came from
+  if (url) {
+    for (const hostType of hostTypes) {
+      gitEnvironmentVariables = getGitUrlEnvironmentVariables(
+        gitEnvironmentVariables,
+        url,
+        hostType,
       );
     }
   }

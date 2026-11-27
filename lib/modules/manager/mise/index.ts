@@ -20,6 +20,8 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
+import { configFileLocations, getConfigFilePattern } from './config-files.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
@@ -32,15 +34,14 @@ export const lockFileNames = ['mise.lock'];
 export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://mise.jdx.dev';
 
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  mise: {
+    note: 'mise has its own `minimum_release_age` setting, which Renovate does not read yet.',
+  },
+};
+
 export const defaultConfig = {
-  managerFilePatterns: [
-    '**/{,.}mise{,.*}.toml',
-    '**/{,.}mise/config{,.*}.toml',
-    '**/.config/mise{,.*}.toml',
-    '**/.config/mise/{mise,config}{,.*}.toml',
-    '**/.config/mise/conf.d/*.toml',
-    '**/.rtx{,.*}.toml',
-  ],
+  managerFilePatterns: configFileLocations.map(getConfigFilePattern),
   pinDigests: false,
 };
 

@@ -1,4 +1,4 @@
-import { add, clear } from '../host-rules.ts';
+import { add, clear, detachUrlCredentials } from '../host-rules.ts';
 import {
   getGitAuthenticatedEnvironmentVariables,
   getGitEnvironmentVariables,
@@ -554,6 +554,128 @@ describe('util/git/auth', () => {
 
     it('returns empty object if no environment variables exist', () => {
       expect(getGitEnvironmentVariables({})).toStrictEqual({});
+    });
+
+    it('leaves out credentials detached from registry URLs', () => {
+      detachUrlCredentials('https://user:pass@git.example.com/org/repo', [
+        'go',
+      ]);
+
+      expect(getGitEnvironmentVariables({}, ['go'])).toStrictEqual({});
+    });
+
+    it('adds credentials detached from the URL of the repository only for that URL', () => {
+      const url = 'https://git.example.com/index.git';
+      detachUrlCredentials(
+        'https://user:pat1234567890123@git.example.com/index.git',
+        ['crate'],
+      );
+
+      expect(getGitEnvironmentVariables({}, ['crate'], url)).toMatchObject({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_2:
+          'url.https://user:pat1234567890123@git.example.com/index.git.insteadOf',
+        GIT_CONFIG_VALUE_2: url,
+      });
+      expect(getGitEnvironmentVariables({}, ['crate'])).toStrictEqual({});
+      expect(getGitEnvironmentVariables({})).toStrictEqual({});
+      expect(
+        getGitEnvironmentVariables(
+          {},
+          ['crate'],
+          'https://git.example.com/other.git',
+        ),
+      ).toStrictEqual({});
+    });
+
+    it('does not add a configured token without matchHost for the URL of the repository', () => {
+      add({ hostType: 'crate', token: 'token123' });
+
+      expect(
+        getGitEnvironmentVariables(
+          {},
+          ['crate'],
+          'https://git.example.com/index.git',
+        ),
+      ).toStrictEqual({});
+    });
+
+    it('adds a configured token with matchHost once for the URL of the repository', () => {
+      const url = 'https://git.example.com/index.git';
+      add({
+        hostType: 'crate',
+        matchHost: 'git.example.com',
+        token: 'token123',
+      });
+
+      expect(getGitEnvironmentVariables({}, ['crate'], url)).toMatchObject({
+        GIT_CONFIG_COUNT: '3',
+      });
+    });
+
+    it('adds the credentials detached from the longest matching path for the URL of the repository', () => {
+      const url = 'https://git.example.com/org/index.git';
+      detachUrlCredentials(
+        'https://outer:outerpass1234567890@git.example.com',
+        ['crate'],
+      );
+      detachUrlCredentials(
+        'https://inner:innerpass1234567890@git.example.com/org',
+        ['crate'],
+      );
+
+      expect(getGitEnvironmentVariables({}, ['crate'], url)).toMatchObject({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_2:
+          'url.https://inner:innerpass1234567890@git.example.com/org/index.git.insteadOf',
+      });
+    });
+
+    it('adds a token detached from the URL of the repository on an unknown host as the username', () => {
+      const url = 'https://git.example.com/index.git';
+      detachUrlCredentials(
+        'https://ghp_abcdefghijklmnopqrstuvwxyz@git.example.com/index.git',
+        ['crate'],
+      );
+
+      expect(getGitEnvironmentVariables({}, ['crate'], url)).toMatchObject({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_2:
+          'url.https://ghp_abcdefghijklmnopqrstuvwxyz@git.example.com/index.git.insteadOf',
+        GIT_CONFIG_VALUE_2: url,
+      });
+    });
+
+    it.each`
+      url                                    | registryUrl                                                        | key
+      ${'https://git.example.com/index.git'} | ${'https://abc%2Fdef%40xyz%3Atok123456@git.example.com/index.git'} | ${'url.https://abc%2Fdef%40xyz%3Atok123456@git.example.com/index.git.insteadOf'}
+      ${'https://github.com/org/index.git'}  | ${'https://abc%2Fdef%40xyz%3Atok123456@github.com/org/index.git'}  | ${'url.https://x-access-token:abc%2Fdef%40xyz%3Atok123456@github.com/org/index.git.insteadOf'}
+    `(
+      'adds a detached token with reserved characters percent-encoded for $url',
+      ({ url, registryUrl, key }) => {
+        detachUrlCredentials(registryUrl, ['crate']);
+
+        expect(getGitEnvironmentVariables({}, ['crate'], url)).toMatchObject({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_2: key,
+          GIT_CONFIG_VALUE_2: url,
+        });
+      },
+    );
+
+    it('adds a token detached from the URL of a github.com repository with x-access-token', () => {
+      const url = 'https://github.com/org/index.git';
+      detachUrlCredentials(
+        'https://ghp_abcdefghijklmnopqrstuvwxyz@github.com/org/index.git',
+        ['crate'],
+      );
+
+      expect(getGitEnvironmentVariables({}, ['crate'], url)).toMatchObject({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:ghp_abcdefghijklmnopqrstuvwxyz@github.com/org/index.git.insteadOf',
+        GIT_CONFIG_VALUE_2: url,
+      });
     });
 
     it('returns environment variables with token if hostRule for api.github.com exists', () => {
