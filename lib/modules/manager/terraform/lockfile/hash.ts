@@ -140,12 +140,14 @@ export class TerraformProviderHash {
   static calculateSingleHash(
     build: TerraformBuild,
     cacheDir: string,
+    cacheable: boolean,
   ): Promise<string> {
     return withCache(
       {
         namespace: `terraform-provider-hash`,
         key: buildCacheKey('calculateSingleHash', build.url),
         ttlMinutes: TerraformProviderHash.hashCacheTTL,
+        cacheable,
       },
       () => TerraformProviderHash._calculateSingleHash(build, cacheDir),
     );
@@ -153,13 +155,16 @@ export class TerraformProviderHash {
 
   static async calculateHashScheme1Hashes(
     builds: TerraformBuild[],
+    cacheable: boolean,
   ): Promise<string[]> {
     logger.debug(`Calculating hashes for ${builds.length} builds`);
     const cacheDir = await fs.ensureCacheDir('terraform');
 
-    return p.map(builds, (build) => this.calculateSingleHash(build, cacheDir), {
-      concurrency: 4,
-    });
+    return p.map(
+      builds,
+      (build) => this.calculateSingleHash(build, cacheDir, cacheable),
+      { concurrency: 4 },
+    );
   }
 
   static async createHashes(
@@ -223,8 +228,16 @@ export class TerraformProviderHash {
       `Got ${zhHashes.length} zip hashes for ${repository}@${version}`,
     );
 
-    const h1Hashes =
-      await TerraformProviderHash.calculateHashScheme1Hashes(builds);
+    const cacheable = [
+      TerraformProviderDatasource.terraformRegistryUrl,
+      TerraformProviderDatasource.hashicorpReleaseUrl,
+      TerraformProviderDatasource.openTofuRegistryUrl,
+      TerraformProviderDatasource.openTofuApiUrl,
+    ].includes(registryURL);
+    const h1Hashes = await TerraformProviderHash.calculateHashScheme1Hashes(
+      builds,
+      cacheable,
+    );
 
     const hashes = [];
     hashes.push(...h1Hashes.map((hash) => `h1:${hash}`));
