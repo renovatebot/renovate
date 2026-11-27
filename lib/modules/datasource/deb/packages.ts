@@ -9,7 +9,7 @@ import {
   computeFileChecksum,
   parseChecksumsFromInRelease,
 } from './checksum.ts';
-import { cacheSubDir } from './common.ts';
+import { cacheSubDir, checksumValidationFailed } from './common.ts';
 import { checkIfModified, getBaseSuiteUrl } from './url.ts';
 import { extract, getFileCreationTime } from './utils.ts';
 
@@ -131,7 +131,7 @@ export async function downloadPackageFile(
     );
     if (actualChecksum !== expectedChecksum) {
       await fs.rmCache(compressedFile);
-      throw new Error('SHA256 checksum validation failed');
+      throw new Error(checksumValidationFailed);
     }
   }
 

@@ -2,9 +2,15 @@ import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as fs from '../../../util/fs/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { isRateLimitedOrServerError } from '../../../util/http/status.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { packageKeys, requiredPackageKeys } from './common.ts';
+import {
+  checksumValidationFailed,
+  packageKeys,
+  requiredPackageKeys,
+} from './common.ts';
 import { downloadAndExtractPackage } from './packages.ts';
 import {
   formatReleaseResult,
@@ -12,6 +18,20 @@ import {
 } from './release.ts';
 import type { PackageDescription } from './types.ts';
 import { constructComponentUrls } from './url.ts';
+
+/**
+ * Whether a later run may read the component: the host could not be reached,
+ * it was rate limited or failed, or the index changed while it was being
+ * downloaded. A 404 means the component or architecture does not exist.
+ */
+function isTransientComponentError(err: Error): boolean {
+  if (err instanceof HttpError) {
+    // a network error, such as ECONNRESET or a timeout, has no response
+    return !err.response || isRateLimitedOrServerError(err);
+  }
+
+  return err.message === checksumValidationFailed;
+}
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
@@ -163,7 +183,7 @@ export class DebDatasource extends Datasource {
 
     const componentUrls = constructComponentUrls(registryUrl);
     let aggregatedRelease: ReleaseResult | null = null;
-    let componentError: Error | undefined;
+    let transientError: Error | undefined;
 
     for (const componentUrl of componentUrls) {
       try {
@@ -186,7 +206,9 @@ export class DebDatasource extends Datasource {
           }
         }
       } catch (error) {
-        componentError = error;
+        if (isTransientComponentError(error)) {
+          transientError = error;
+        }
         logger.debug(
           { componentUrl, err: error },
           'Skipping component due to an error',
@@ -194,11 +216,11 @@ export class DebDatasource extends Datasource {
       }
     }
 
-    // A component that could not be read may hold the package, so its absence
+    // A component that failed transiently may hold the package, so its absence
     // is not a result. Throwing keeps `null` out of the package cache and lets
     // `getReleases` fall back to the last good result.
-    if (aggregatedRelease === null && componentError) {
-      throw componentError;
+    if (aggregatedRelease === null && transientError) {
+      throw transientError;
     }
 
     return aggregatedRelease;

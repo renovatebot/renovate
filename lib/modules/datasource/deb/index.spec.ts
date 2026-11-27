@@ -255,6 +255,16 @@ describe('modules/datasource/deb/index', () => {
         ['non-free', 'non-free-second'],
         'amd64',
       );
+      const secondPackageUrl = getPackageUrl(
+        '',
+        'stable',
+        'non-free-second',
+        'amd64',
+      );
+      const missingPackage = {
+        registryUrl,
+        packageName: 'you-will-never-find-me',
+      };
 
       beforeEach(() => {
         mockHttpCalls(
@@ -265,22 +275,59 @@ describe('modules/datasource/deb/index', () => {
           fixturePackagesArchivePath,
           fixturePackagesArchiveHash,
         );
-        httpMock
-          .scope(debBaseUrl)
-          .get(getPackageUrl('', 'stable', 'non-free-second', 'amd64'))
-          .replyWithError('ECONNRESET');
       });
 
-      it('throws instead of reporting a missing package', async () => {
+      it('throws on a network error instead of reporting a missing package', async () => {
+        httpMock
+          .scope(debBaseUrl)
+          .get(secondPackageUrl)
+          .replyWithError('ECONNRESET');
+
+        await expect(debDatasource.getReleases(missingPackage)).rejects.toThrow(
+          'ECONNRESET',
+        );
+      });
+
+      it('throws on a server error', async () => {
+        httpMock.scope(debBaseUrl).get(secondPackageUrl).reply(503);
+
+        await expect(debDatasource.getReleases(missingPackage)).rejects.toThrow(
+          '503',
+        );
+      });
+
+      it('throws when the checksum does not match', async () => {
+        httpMock
+          .scope(debBaseUrl)
+          .get(secondPackageUrl)
+          .replyWithFile(200, fixturePackagesArchivePath);
+        // lists the checksum of `non-free` only, so `non-free-second` mismatches
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'amd64',
+        );
+
+        await expect(debDatasource.getReleases(missingPackage)).rejects.toThrow(
+          'SHA256 checksum validation failed',
+        );
+      });
+
+      it('returns null when the component does not exist', async () => {
+        httpMock.scope(debBaseUrl).get(secondPackageUrl).reply(404);
+
         await expect(
-          debDatasource.getReleases({
-            registryUrl,
-            packageName: 'you-will-never-find-me',
-          }),
-        ).rejects.toThrow('ECONNRESET');
+          debDatasource.getReleases(missingPackage),
+        ).resolves.toBeNull();
       });
 
       it('returns the releases found in the components that could be read', async () => {
+        httpMock
+          .scope(debBaseUrl)
+          .get(secondPackageUrl)
+          .replyWithError('ECONNRESET');
+
         const res = await debDatasource.getReleases({
           registryUrl,
           packageName: 'album',

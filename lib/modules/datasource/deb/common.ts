@@ -6,6 +6,8 @@ import type { PackageDescription } from './types.ts';
  */
 export const cacheSubDir = 'deb';
 
+export const checksumValidationFailed = 'SHA256 checksum validation failed';
+
 export const requiredPackageKeys: (keyof PackageDescription)[] = [
   'Package',
   'Version',
