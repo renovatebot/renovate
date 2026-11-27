@@ -285,6 +285,22 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(gitFunc).toHaveBeenCalledTimes(3);
       });
 
+      it('retries the func call if git reports an SSL connection timeout', async () => {
+        vi.stubEnv('NODE_ENV', '');
+        const gitFunc = vi
+          .fn()
+          .mockImplementationOnce(() => {
+            throw new Error(
+              "fatal: unable to access 'https://github.com/foo/bar.git/': SSL connection timeout",
+            );
+          })
+          .mockImplementationOnce(() => 'some result');
+        await expect(git.gitRetry(() => gitFunc())).resolves.toBe(
+          'some result',
+        );
+        expect(gitFunc).toHaveBeenCalledTimes(2);
+      });
+
       it('retries the func call up to retry count if ExternalHostError thrown', async () => {
         vi.stubEnv('NODE_ENV', '');
         const gitFunc = vi.fn().mockImplementation(() => {
