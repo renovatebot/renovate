@@ -37,6 +37,7 @@ export const packageCacheNamespaces = [
   'datasource-cdnjs',
   'datasource-conan',
   'datasource-conda',
+  'datasource-containerbase',
   'datasource-cpan',
   'datasource-crate-metadata',
   'datasource-crate-registry-api',
