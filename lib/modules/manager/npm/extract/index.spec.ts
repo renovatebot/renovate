@@ -1607,6 +1607,43 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('adds the npm lock file to overrides', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'package-lock.json') {
+          return Promise.resolve('# package-lock.json');
+        }
+        return Promise.resolve(null);
+      });
+      const content = codeBlock`
+        {
+          "dependencies": { "foo": "^1.0.0" },
+          "overrides": {
+            "bar": "^2.0.0",
+            "baz": { "qux": "^3.0.0" }
+          }
+        }
+      `;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        { depName: 'foo', depType: 'dependencies' },
+        {
+          depName: 'bar',
+          depType: 'overrides',
+          managerData: { npmLock: 'package-lock.json' },
+        },
+        {
+          depName: 'qux',
+          depType: 'overrides',
+          managerData: { parents: ['baz'], npmLock: 'package-lock.json' },
+        },
+      ]);
+      expect(res?.deps[0].managerData).toBeUndefined();
+    });
+
     it('extracts dependencies from pnpm.overrides', async () => {
       const content = codeBlock`
         {

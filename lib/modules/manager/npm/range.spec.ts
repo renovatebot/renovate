@@ -1,4 +1,5 @@
 import type { RangeConfig } from '../types.ts';
+import type { NpmManagerData } from './types.ts';
 import { getRangeStrategy } from './index.ts';
 
 describe('modules/manager/npm/range', () => {
@@ -33,20 +34,32 @@ describe('modules/manager/npm/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('bumps overrides', () => {
-    const config: RangeConfig = {
+  it('bumps npm overrides', () => {
+    const config: RangeConfig<NpmManagerData> = {
       rangeStrategy: 'auto',
       depType: 'overrides',
       currentValue: '^9.0.0',
+      managerData: { npmLock: 'package-lock.json' },
     };
     expect(getRangeStrategy(config)).toBe('bump');
   });
 
-  it('widens complex ranges in overrides', () => {
-    const config: RangeConfig = {
+  it('does not bump overrides without an npm lock file', () => {
+    const config: RangeConfig<NpmManagerData> = {
+      rangeStrategy: 'auto',
+      depType: 'overrides',
+      currentValue: '^9.0.0',
+      managerData: { parents: ['foo'] },
+    };
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
+  });
+
+  it('widens complex ranges in npm overrides', () => {
+    const config: RangeConfig<NpmManagerData> = {
       rangeStrategy: 'auto',
       depType: 'overrides',
       currentValue: '^8.0.0 || ^9.0.0',
+      managerData: { npmLock: 'package-lock.json' },
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });

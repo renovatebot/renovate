@@ -2,9 +2,12 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/index.ts';
 import type { RangeConfig } from '../types.ts';
+import type { NpmManagerData } from './types.ts';
 
-export function getRangeStrategy(config: RangeConfig): RangeStrategy {
-  const { depType, currentValue, rangeStrategy } = config;
+export function getRangeStrategy(
+  config: RangeConfig<NpmManagerData>,
+): RangeStrategy {
+  const { depType, currentValue, managerData, rangeStrategy } = config;
   // TODO #22198
   const isComplexRange = parseRange(currentValue!).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
@@ -25,9 +28,9 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (isComplexRange) {
     return 'widen';
   }
-  if (depType === 'overrides') {
+  if (depType === 'overrides' && managerData?.npmLock) {
     // npm rejects a lock file update which conflicts with the override value
-    logger.debug('Bumping overrides');
+    logger.debug('Bumping npm overrides');
     return 'bump';
   }
   return 'update-lockfile';
