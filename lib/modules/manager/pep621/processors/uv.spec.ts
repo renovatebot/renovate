@@ -1047,6 +1047,92 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
     });
 
+    it('does not run uv lock if only tool.uv.required-version is updated', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps: [
+            {
+              depName: 'uv',
+              packageName: 'astral-sh/uv',
+              depType: depTypes.uvRequiredVersion,
+            },
+          ],
+        },
+        parsePyProject(codeBlock`
+          [tool.uv]
+          required-version = "==0.2.35"
+        `)!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots).toEqual([]);
+    });
+
+    it('does not upgrade tool.uv.required-version in the lock file', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps: [
+            {
+              depName: 'uv',
+              packageName: 'astral-sh/uv',
+              depType: depTypes.uvRequiredVersion,
+            },
+            { packageName: 'dep1', depType: depTypes.dependencies },
+          ],
+        },
+        parsePyProject(codeBlock`
+          [tool.uv]
+          required-version = "==0.2.35"
+        `)!,
+      );
+
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'uv lock --upgrade-package dep1' },
+      ]);
+    });
+
     it('performs update on private package registry', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);

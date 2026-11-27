@@ -94,7 +94,10 @@ export class UvProcessor extends BasePyProjectProcessor {
           continue;
         }
 
-        if (dep.depType === 'requires-python') {
+        if (
+          dep.depType === 'requires-python' ||
+          dep.depType === depTypes.uvRequiredVersion
+        ) {
           continue;
         }
 
@@ -333,7 +336,12 @@ export class UvProcessor extends BasePyProjectProcessor {
       if (isLockFileMaintenance) {
         cmd = `${uvUpdateCMD} --upgrade`;
       } else {
-        cmd = generateCMD(updatedDeps);
+        const upgradeCmd = generateCMD(updatedDeps);
+        if (!upgradeCmd) {
+          logger.debug('No locked dependencies to update in uv.lock');
+          return null;
+        }
+        cmd = upgradeCmd;
       }
       return await updateLockFile({
         lockFileName,
@@ -372,7 +380,11 @@ function pinnedUpgrade(dep: Upgrade<Pep621ManagerData>): string {
     : dep.packageName!;
 }
 
-function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
+function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string | null {
+  if (updatedDeps.every((dep) => dep.depType === depTypes.uvRequiredVersion)) {
+    return null;
+  }
+
   const deps: string[] = [];
 
   for (const dep of updatedDeps) {
@@ -401,6 +413,9 @@ function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
         if (dep.isVulnerabilityAlert && dep.lockedVersion) {
           deps.push(pinnedUpgrade(dep));
         }
+        break;
+      case depTypes.uvRequiredVersion:
+        // not locked in the lock file, no need to update.
         break;
       default: {
         deps.push(dep.packageName!);
