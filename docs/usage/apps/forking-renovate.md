@@ -14,6 +14,6 @@ gh api /apps/forking-renovate --jq .description
 
 ![header](https://app.renovatebot.com/images/whitesource_renovate_660_220.jpg)
 
-"Forking Renovate" is the sister app to Mend's [Renovate Bot](https://github.com/apps/renovate) app. The difference is that Forking Renovate operates using forks of repositories instead of as a collaborator, so needs only read-only permissions rather than read-write. It works on public (e.g. open source) repositories only.
+"Forking Renovate" is the sister app to [the Mend Renovate app](https://github.com/apps/renovate) app. The difference is that Forking Renovate operates using forks of repositories instead of as a collaborator, so needs only read-only permissions rather than read-write. It works on public (e.g. open source) repositories only.
 
-Please see the Renovate Bot page and documentation for further details.
+Please see the Renovate page and documentation for further details.

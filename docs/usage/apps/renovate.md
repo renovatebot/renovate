@@ -22,7 +22,7 @@ This app is free to install for both public and private repositories. Service is
 
 ![Onboarding](https://docs.renovatebot.com/assets/images/onboarding.png)
 
-Install Mend Renovate risk-free and you'll first receive an onboarding Pull Request in each repository. It analyzes the repository files and describes what will happen next, so there's no surprises.
+Install Mend Renovate risk-free and you will first receive an onboarding Pull Request in each repository. It analyzes the repository files and describes what will happen next, so there is no surprises.
 
 ### Unopinionated, highly flexible configuration
 
@@ -50,7 +50,7 @@ It is also works fine with a mix of package managers / languages within the same
 
 ### Automatic lock file and checksum support
 
-Renovate will generate updated lock files such as `package-lock.json` or `yarn.lock` if you're already using them. It will also automatically resolve any conflicts after merges.
+Renovate will generate updated lock files such as `package-lock.json` or `yarn.lock` if you are already using them. It will also automatically resolve any conflicts after merges.
 
 ### Ease the noise with custom schedules
 
