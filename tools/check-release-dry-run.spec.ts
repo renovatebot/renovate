@@ -1,7 +1,13 @@
+import semanticRelease from 'semantic-release';
 import {
   type DryRunResultLike,
   evaluateResult,
+  isMajorPendingOnBase,
 } from './check-release-dry-run.ts';
+import { exec } from './utils/exec.ts';
+
+vi.mock('semantic-release');
+vi.mock('./utils/exec.ts');
 
 function result(
   nextType: string | null,
@@ -62,6 +68,50 @@ describe('tools/check-release-dry-run', () => {
         willRelease: false,
         isMajor: false,
       });
+    });
+  });
+
+  describe('isMajorPendingOnBase', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it('is not pending when the base commit is unknown', async () => {
+      vi.stubEnv('BASE_SHA', '');
+
+      await expect(
+        isMajorPendingOnBase('file:///mirror', 'main'),
+      ).resolves.toBeFalse();
+      expect(exec).not.toHaveBeenCalled();
+      expect(semanticRelease).not.toHaveBeenCalled();
+    });
+
+    it('is pending when the base commit would release a major', async () => {
+      vi.stubEnv('BASE_SHA', 'abc123');
+      vi.mocked(semanticRelease).mockResolvedValueOnce(
+        result('major', '45.0.0') as never,
+      );
+
+      await expect(
+        isMajorPendingOnBase('file:///mirror', 'main'),
+      ).resolves.toBeTrue();
+      expect(exec).toHaveBeenCalledWith('git', [
+        'checkout',
+        '--quiet',
+        '--detach',
+        'abc123',
+      ]);
+    });
+
+    it('is not pending when the base commit would not release a major', async () => {
+      vi.stubEnv('BASE_SHA', 'abc123');
+      vi.mocked(semanticRelease).mockResolvedValueOnce(
+        result('minor', '44.265.0') as never,
+      );
+
+      await expect(
+        isMajorPendingOnBase('file:///mirror', 'main'),
+      ).resolves.toBeFalse();
     });
   });
 });
