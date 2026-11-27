@@ -18,7 +18,7 @@ import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
 import { coerceArray } from '../util/array.ts';
-import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
+import { cacheTtlOverrideNamespaces } from '../util/cache/package/namespaces.ts';
 import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
@@ -384,9 +384,12 @@ export async function validateConfig(
               });
             }
           }
-          const parentName =
-            parentOptionName ??
-            (isRepoRootPath(parentPath) ? '.' : getParentName(parentPath));
+          let parentName = parentOptionName;
+          if (is.undefined(parentName)) {
+            parentName = isRepoRootPath(parentPath)
+              ? '.'
+              : getParentName(parentPath);
+          }
           if (
             !isPreset &&
             parentName &&
@@ -1326,11 +1329,8 @@ async function validateGlobalConfig(
             );
 
             if (
-              !(packageCacheNamespaces as readonly string[]).includes(subKey) &&
-              !anyMatchRegexOrGlobList(
-                packageCacheNamespaces as unknown as string[],
-                [subKey],
-              )
+              !cacheTtlOverrideNamespaces.includes(subKey) &&
+              !anyMatchRegexOrGlobList(cacheTtlOverrideNamespaces, [subKey])
             ) {
               errors.push({
                 message: `${currentPath}: namespace \`${subKey}\` does not exist`,
@@ -1402,7 +1402,12 @@ function describeAllowedValues(option: RenovateOptions): string {
     const page = option.globalOnly
       ? 'self-hosted-configuration'
       : 'configuration-options';
-    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${option.name.toLowerCase()}`;
+    // options which can only be used in one parent, like `packageRules`, are documented under it
+    const heading =
+      option.parents?.length === 1
+        ? `${option.parents[0]}${option.name}`
+        : option.name;
+    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${heading.toLowerCase()}`;
   }
   return `allowedValues: ${JSON.stringify(allowedValues)}`;
 }

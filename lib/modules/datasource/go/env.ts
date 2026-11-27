@@ -118,9 +118,9 @@ export function getGoEnv(withCredentials = false): GoEnv {
 
   if (GOPRIVATE !== undefined) {
     // `GONOSUMDB` replaces `GOPRIVATE` for the checksum database, so it has to keep the `GOPRIVATE` patterns
-    env.GONOSUMDB ??= proxyHosts.some(isNonEmptyString)
-      ? joinNonEmpty([GOPRIVATE, ...proxyHosts])
-      : undefined;
+    if (proxyHosts.some(isNonEmptyString)) {
+      env.GONOSUMDB ??= joinNonEmpty([GOPRIVATE, ...proxyHosts]);
+    }
     return env;
   }
 

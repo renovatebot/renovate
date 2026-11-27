@@ -13,7 +13,7 @@
 Please select one of the following:
 
 - [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
-- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add [a minimal reproduction repository](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) as part of this PR.
+- [ ] This does not close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add [a minimal reproduction repository](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) as part of this PR.
 
 ## AI assistance disclosure
 
@@ -53,7 +53,7 @@ Who answers review comments:
 - [ ] I have updated the documentation, or
 - [ ] No documentation update is required
 
-## How I've tested my work (please select one)
+## How I have tested my work (please select one)
 
 I have verified these changes via:
 

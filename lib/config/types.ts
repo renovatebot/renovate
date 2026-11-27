@@ -126,6 +126,8 @@ export interface RenovateSharedConfig {
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
+  minimumReleaseAgePackageManager?: Nullish<string>;
+  minimumReleaseAgePackageManagerSync?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -238,6 +240,7 @@ export interface GlobalOnlyConfigLegacy {
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateGitRegistries?: boolean;
+  allowCustomJuliaRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
@@ -427,16 +430,9 @@ export interface RenovateConfig
 
   fileList?: string[];
   configWarningReuseIssue?: boolean;
-  dependencyDashboard?: boolean;
-  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboard?: DependencyDashboardConfig;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardHeader?: string;
-  dependencyDashboardFooter?: string;
-  dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
-  dependencyDashboardReportAbandonment?: boolean;
   mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
@@ -487,8 +483,6 @@ export interface RenovateConfig
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
-
-  customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
@@ -664,6 +658,7 @@ export const namedParents = [
   'bumpVersions',
   'customDatasources',
   'customManagers',
+  'dependencyDashboard',
   'group',
   'hostRules',
   'logLevelRemap',
@@ -687,7 +682,7 @@ export interface RenovateOptionBase {
    *
    * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
    *
-   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   * After this check has been performed, additional filtering (for defense in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
    */
   requiresCheckAtTrustBoundary?: boolean;
 
@@ -776,6 +771,11 @@ export interface RenovateOptionBase {
    * Platforms which support this option, leave undefined if all platforms support it.
    */
   supportedPlatforms?: PlatformId[];
+
+  /**
+   * Datasources which support this option, leave undefined if all datasources support it.
+   */
+  supportedDatasources?: string[];
 
   /**
    * Conditions that must be met for this option to be required.
@@ -941,6 +941,19 @@ export interface ValidationResult {
   warnings: ValidationMessage[];
 }
 
+export interface DependencyDashboardConfig {
+  enabled?: boolean;
+  autoclose?: boolean;
+  title?: string;
+  header?: string;
+  footer?: string;
+  labels?: string[];
+  osvVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  reportAbandonment?: boolean;
+  pinned?: boolean;
+  customize?: Record<string, string>;
+}
+
 export interface BumpVersionConfig {
   bumpType?: string;
   filePatterns: string[];
@@ -959,6 +972,8 @@ export interface GlobalToolSettingsOptions {
   jvmMemory?: number;
   /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
   nodeMaxMemory?: number;
+  /** Whether security updates add their versions to the `minimumReleaseAgeExclude` of the `pnpm-workspace.yaml`. If `false`, repositories cannot enable it, otherwise repositories can override this value */
+  pnpmMinimumReleaseAgeExcludeSecurityUpdates?: boolean;
 }
 
 /**
@@ -971,6 +986,8 @@ export interface RepoToolSettingsOptions {
   jvmMemory?: number;
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
+  /** Whether security updates add their versions to the `minimumReleaseAgeExclude` of the `pnpm-workspace.yaml`. Overrides the Global Self-Hosted configuration setting, unless that is `false` **/
+  pnpmMinimumReleaseAgeExcludeSecurityUpdates?: boolean;
 }
 
 /** All known `VulnerabilityAlertSource`s */

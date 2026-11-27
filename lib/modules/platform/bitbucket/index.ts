@@ -702,8 +702,10 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
     .replace(regEx(/<\/?(?:summary|details|blockquote)>/g), '');
 }
 
+// Bitbucket drops PR webhooks over ~1.39 MB of PR JSON, up to ~11x the body length
+// Measurements: https://github.com/renovatebot/renovate/discussions/48241
 export function maxBodyLength(): number {
-  return 250000;
+  return 100000;
 }
 
 function logIssuesRemoved(): void {
@@ -834,11 +836,14 @@ async function sanitizeReviewers(
           ).body;
 
           // There are cases where an active user may still not be a member of a workspace
-          if (
-            reviewerUser.account_status === 'active' &&
-            (await isAccountMemberOfWorkspace(reviewer, config.repository))
-          ) {
-            sanitizedReviewers.push(reviewer);
+          if (reviewerUser.account_status === 'active') {
+            const isMember = await isAccountMemberOfWorkspace(
+              reviewer,
+              config.repository,
+            );
+            if (isMember) {
+              sanitizedReviewers.push(reviewer);
+            }
           }
         }
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace

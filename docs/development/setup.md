@@ -1,6 +1,7 @@
-# Local Development
+# Development setup
 
-This document gives tips and tricks on how to run Renovate locally to add features or fix bugs.
+Use this guide to set up Renovate on a workstation or in a cloud workspace.
+You can also use the [Dev Container](#dev-container).
 You can improve this documentation by opening a pull request.
 For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
@@ -8,23 +9,30 @@ For example, if you think anything is unclear, or you think something needs to b
 
 ### Prerequisites
 
-You need the following dependencies for local development:
+You need the following dependencies:
 
 - Git `>=2.45.1`
-- Node.js `^24.11.0 || ^26.13.0`
-- pnpm `^10.0.0`
-- C++ compiler
+- Node.js `^24.22.3 || ^26.13.1`
+- pnpm `^11.0.0`
+
+If a prebuilt RE2 binary is unavailable, installation builds it from source.
+This requires Python and the [native build tools for your platform](https://github.com/nodejs/node-gyp#installation), including `make` and a C/C++ compiler on Unix.
+
+On Linux systems with limited RAM, full Oxlint checks can run out of memory.
+During setup, check whether swap is active.
+If it is not, enable a 4 GiB swap file if you can configure swap on the host or VM.
 
 For building the documentation, you also need:
 
 - Python `>=3.11`
-- PDM `>=2.26.0`
+- [uv](https://docs.astral.sh/uv/)
 
 #### Recommended: Mise
 
-We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
+We recommend [Mise](https://mise.jdx.dev/) to install and manage the tools pinned in [`mise.toml`](../../mise.toml).
 After installing Mise, run `mise install` from the repository root.
 This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
+This includes [Vale](https://vale.sh/), which checks for American English spelling with `pnpm lint-prose`.
 
 #### Linux
 
@@ -46,12 +54,12 @@ To enter a development shell with the necessary packages, run `nix-shell --packa
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a part, skip the corresponding step.
 
-- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+- Install [Git](https://git-scm.com/downloads). Make sure you have [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install --global npm` and then `npm --debug install --global windows-build-tools`
 - Install pnpm with: `npm install --global pnpm`
 
-  You can see what versions you're using like this:
+  You can see what versions you are using like this:
 
   ```powershell
   PS C:\Windows\system32> git --version
@@ -59,9 +67,12 @@ If you already installed a part, skip the corresponding step.
   PS C:\Windows\system32> pnpm --version
   ```
 
-#### VS Code Dev Containers
+#### Dev Container
 
-If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
+To use the repository's Dev Container in [GitHub Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository), create a codespace for the repository.
+Codespaces uses the configuration in `.devcontainer`.
+
+To open the same container in [VS Code](https://code.visualstudio.com/docs/devcontainers/containers):
 
 - Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
@@ -77,7 +88,7 @@ pnpm build
 
 #### Local Docker
 
-If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
+If, for some reason, you cannot run the relevant versions on your local machine, you can run everything from a Docker image.
 To build the correct Docker image:
 
 ```
@@ -99,15 +110,13 @@ docker run -it --rm -v "${PWD}:/usr/src/app" -w /usr/src/app renovatebot_local p
 
 ## Fork and Clone
 
-If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork.
 The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
 
-!!! tip "Mise users"
-  If you ran `mise install`, the `postinstall` hook already executed `pnpm install`.
-
-1. Install all dependencies with `pnpm install`
+1. Run `pnpm install` if your setup has not already installed dependencies.
+   Mise and the repository's Dev Container both run it during setup.
 1. Make a build with `pnpm build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
 1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
@@ -123,12 +132,12 @@ Before you submit a pull request you should:
 
 ## Platform Account Setup
 
-Although it's possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
-It's possible to do this against GitHub, GitLab or Bitbucket public servers.
+Although it is possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
+It is possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 ### Register new account (optional)
 
-If you're going to be doing a lot of Renovate development then we recommend that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
+If you are going to be doing a lot of Renovate development then we recommend that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
@@ -181,7 +190,7 @@ e.g. `pnpm vitest composer -u` would update the saved snapshots for _all_ tests 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests would not really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -193,13 +202,13 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
-You usually don't need to fix any Prettier errors by hand.
+You usually do not need to fix any Prettier errors by hand.
 
 We use [knip](https://knip.dev) to detect unused, unlisted or unresolved dependencies.
 Run `pnpm knip` to check, and remove packages from `package.json` that nothing uses anymore.
 If a package is used in a way knip cannot see, add it to `ignoreDependencies` in `knip.jsonc` with a comment explaining why.
 
-If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
+If you are only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
 ### IDE extensions
 
@@ -242,7 +251,7 @@ To do this, see these GitHub guides:
 
 Usually the `debug` log level is good enough to troubleshoot most problems or verify functionality.
 
-It's usually easier to have the logs in a file that you can open with a text editor.
+It is usually easier to have the logs in a file that you can open with a text editor.
 You can use a command like this to put the log messages in a file:
 
 ```sh
@@ -262,7 +271,7 @@ Also create documentation for the option in the `docs/usage/configuration-option
 
 ### `Error: Cannot find module './build/Release/re2.node'`
 
-If you're seeing errors related to `re2`, such as:
+If you are seeing errors related to `re2`, such as:
 
 ```
 > renovate@0.0.0-semantic-release prepare:deps ...
@@ -307,7 +316,7 @@ This will rebuild it for the current Node version in use.
 ### Chrome's inspect tool
 
 You can debug Renovate with Chrome's inspect tool.
-Here's an example:
+Here is an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
@@ -317,7 +326,7 @@ Here's an example:
 ### VS Code
 
 You can also debug Renovate with VS Code.
-Here's an example:
+Here is an example:
 
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:

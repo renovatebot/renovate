@@ -1537,6 +1537,21 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(commit).not.toBeNull();
       });
 
+      it('skips the diff check when force is set', async () => {
+        const file: FileChange = {
+          type: 'addition',
+          path: 'some-forced-file',
+          contents: 'some new-contents',
+        };
+        const commit = await git.prepareCommit({
+          branchName: 'renovate/past_branch',
+          files: [file],
+          message: 'Create something',
+          force: true,
+        });
+        expect(commit).not.toBeNull();
+      });
+
       it('link file', async () => {
         const file: FileChange = {
           type: 'addition',
@@ -1925,6 +1940,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(msg).toContain('past message2');
       });
 
+      it('should keep a given currentBranch when fetching an existing checkout', async () => {
+        await git.initRepo({
+          url: origin.path,
+          currentBranch: defaultBranch,
+        });
+
+        await expect(git.syncGit()).resolves.toBeUndefined();
+        await expect(git.getCommitMessages()).resolves.toEqual([
+          'master message',
+          'past message',
+        ]);
+      });
+
       it('should set branch prefix', async () => {
         const repo = simpleGit(base.path);
         await repo.checkout(['-b', 'renovate/test', defaultBranch]);
@@ -2286,7 +2314,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
 
       it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
-        // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+        // set up our repo again, so we can initialize it with `RENOVATE_X_CLEAR_HOOKS`
         await fs.emptyDir(tmpDir.path);
         GlobalConfig.set({ localDir: tmpDir.path });
         vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', 'true');
@@ -2294,7 +2322,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           url: origin.path,
         });
 
-        // initialise the repo
+        // initialize the repo
         await git.syncGit();
         // then hit the RENOVATE_X_CLEAR_HOOKS code path
         await git.syncGit();

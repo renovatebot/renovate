@@ -98,7 +98,7 @@ const FULL_SECTION_ORDER = [
 ] as const;
 
 /**
- * "Summarised" onboarding PRs list PRs before other sections.
+ * "Summarized" onboarding PRs list PRs before other sections.
  */
 const SUMMARY_SECTION_ORDER = [
   'PRLIST',

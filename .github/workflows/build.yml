@@ -298,6 +298,15 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
+      - name: Install Vale
+        uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
+        with:
+          # only install Vale; Node.js and pnpm come from the setup-node action
+          install_args: vale
+
+      - name: Lint prose
+        run: pnpm lint-prose
+
   lint-other:
     needs:
       - setup-build
@@ -368,14 +377,14 @@ jobs:
           sparse-checkout: .github/
 
       - name: Check workflow files
-        uses: jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d # v2.5.0
+        uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
         with:
           args: --color --profile correctness
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        uses: zizmorcore/zizmor-action@1b4550e929643b8b26a62303c6bd64814271a4f1 # v0.9.2
         with:
-          version: 1.32.0
+          version: 1.33.1
 
   test:
     needs: [setup, prefetch]
@@ -816,9 +825,9 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
-          version: 0.13.7
+          version: 0.13.10
           enable-cache: true
           cache-python: true
 
@@ -974,7 +983,7 @@ jobs:
       - name: Install newer npm if needed
         run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
 
-      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+      - uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
 
       - name: Docker registry login
         env:
@@ -987,9 +996,9 @@ jobs:
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$REPOSITORY_OWNER" --password-stdin
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
-          version: 0.13.7
+          version: 0.13.10
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -1115,7 +1124,7 @@ jobs:
 
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry_1.outputs.page_url || steps.deployment_retry_2.outputs.page_url || steps.deployment_retry_3.outputs.page_url }}
 
     runs-on: ubuntu-latest
     steps:
@@ -1141,8 +1150,39 @@ jobs:
         with:
           path: tools/mkdocs/site
 
+      # Per https://github.com/actions/deploy-pages/issues/451, `deploy-pages` looks up the artifact once, and it may not be listed immediately after it is uploaded. Retry only the deploy, not the upload, as a second upload makes the lookup fail with multiple artifacts. Remove once https://github.com/actions/deploy-pages/pull/455 is released
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+
+      - name: Wait before retrying deploy to GitHub Pages
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 5
+
+      - name: Deploy to GitHub Pages (retry 1)
+        id: deployment_retry_1
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+
+      - name: Wait before retrying deploy to GitHub Pages
+        if: steps.deployment_retry_1.outcome == 'failure'
+        run: sleep 20
+
+      - name: Deploy to GitHub Pages (retry 2)
+        id: deployment_retry_2
+        if: steps.deployment_retry_1.outcome == 'failure'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+
+      - name: Wait before retrying deploy to GitHub Pages
+        if: steps.deployment_retry_2.outcome == 'failure'
+        run: sleep 60
+
+      - name: Deploy to GitHub Pages (retry 3)
+        id: deployment_retry_3
+        if: steps.deployment_retry_2.outcome == 'failure'
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   notify-release-failure:
@@ -1153,7 +1193,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        uses: slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa # v4.1.0
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
@@ -1173,7 +1213,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        uses: slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa # v4.1.0
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
