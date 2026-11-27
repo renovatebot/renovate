@@ -4,6 +4,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import { Result } from '../../../util/result.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -22,6 +23,7 @@ describe('modules/manager/github-actions/integration', () => {
     GithubReleaseAttachmentsDatasource.prototype,
     'getDigest',
   );
+  const getCrateReleases = vi.spyOn(CrateDatasource.prototype, 'getReleases');
 
   let baseConfig: LookupUpdateConfig;
 
@@ -83,6 +85,37 @@ describe('modules/manager/github-actions/integration', () => {
         newValue: 'v2026.7.12',
         updateType: 'patch',
       }),
+    ]);
+  });
+
+  it('proposes a patch update for a taiki-e/install-action tool pinned to an exact version', async () => {
+    const workflow = codeBlock`
+      on: push
+      jobs:
+        test:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: taiki-e/install-action@v2
+              with:
+                tool: cargo-hack@0.6.14
+    `;
+
+    const extracted = await extractPackageFile(
+      workflow,
+      '.github/workflows/test.yml',
+      {},
+    );
+    const dep = extracted!.deps.find((d) => d.depName === 'cargo-hack');
+    getCrateReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.6.14' }, { version: '0.6.15' }],
+    });
+
+    const { updates } = await Result.wrap(
+      lookup.lookupUpdates(makeConfig(dep!)),
+    ).unwrapOrThrow();
+
+    expect(updates).toEqual([
+      expect.objectContaining({ newValue: '0.6.15', updateType: 'patch' }),
     ]);
   });
 
