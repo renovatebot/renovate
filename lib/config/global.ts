@@ -1,14 +1,18 @@
-import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
+import { configOptionDefaults } from '../config-option-defaults.generated.ts';
 import type {
   InternalGlobalConfigOptions,
   RenovateConfig,
   RepoGlobalConfig,
 } from './types.ts';
 
+const globalConfigOptionDefaults: Record<string, unknown> =
+  configOptionDefaults.globalConfig;
+
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   static OPTIONS = [
     'allowCustomCrateGitRegistries',
+    'allowCustomJuliaRegistries',
     'allowPlugins',
     'allowScripts',
     'allowShellExecutorForPostUpgradeCommands',

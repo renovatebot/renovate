@@ -16,17 +16,27 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'update-lockfile',
 ];
 
-function hex2npm(input: string): string {
+/**
+ * Converts a Hex version requirement to an npm range.
+ */
+export function hex2npm(input: string): string {
   return input
-    .replace(regEx(/~>\s*(?<version>\d+\.\d+)$/), '^$<version>')
-    .replace(regEx(/~>\s*(?<version>\d+\.\d+\.\d+)/), '~$<version>')
-    .replace(regEx(/==|and/), '')
-    .replace('or', '||')
-    .replace(
-      regEx(/!=\s*(?<version>\d+\.\d+(?:\.\d+.*)?)/),
-      '>$<version> <$<version>',
+    .split(regEx(/\s+or\s+/))
+    .map((part) =>
+      part
+        .replace(
+          regEx(/~>\s*(?<version>\d+\.\d+)(?<patch>\.\d+)?/g),
+          (_str, version: string, patch?: string) =>
+            patch ? `~${version}${patch}` : `^${version}`,
+        )
+        .replace(regEx(/==|\band\b/g), '')
+        .replace(
+          regEx(/!=\s*(?<version>\d+\.\d+(?:\.\d+.*)?)/),
+          '>$<version> <$<version>',
+        )
+        .trim(),
     )
-    .trim();
+    .join(' || ');
 }
 
 function npm2hex(input: string): string {
@@ -113,7 +123,7 @@ function getNewValue({
         regEx(/[\^~]\s*(?<version>\d+\.\d+\.\d+)/g),
         (_str, version: string) => `~> ${version}`,
       );
-    } else if (regEx(/~>\s*(?:\d+\.\d+)$/).test(currentValue)) {
+    } else if (regEx(/~>\s*\d+\.\d+/).test(currentValue)) {
       newSemver = newSemver.replace(
         regEx(/\^\s*(?<version>\d+\.\d+)(?:\.\d+)?/g),
         (_str, version: string) => `~> ${version}`,

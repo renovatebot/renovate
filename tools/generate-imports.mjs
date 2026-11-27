@@ -233,26 +233,40 @@ export type DatasourceName = typeof AllDatasourcesListLiteral[number];
   await updateFile(`lib/datasource-list.generated.ts`, content);
 }
 
-async function generateGlobalConfigOptionDefaults() {
+async function generateConfigOptionDefaults() {
   const { getOptions } = await import('../lib/config/options/index.ts');
   const options = getOptions();
 
-  /** @type {Record<string, unknown>} */
-  const defaults = {};
+  /** @type {Record<'repoConfig' | 'inheritConfig' | 'globalConfig', Record<string, unknown>>} */
+  const defaults = { repoConfig: {}, inheritConfig: {}, globalConfig: {} };
   for (const option of options
-    .filter((o) => o.globalOnly)
     .filter((o) => 'default' in o)
     // if the default is null, it means there is no default, so don't include it
     .filter((o) => o.default !== null)
     .sort((a, b) => a.name.localeCompare(b.name))) {
-    defaults[option.name] = option.default;
+    if (!option.globalOnly) {
+      defaults.repoConfig[option.name] = option.default;
+      continue;
+    }
+
+    defaults.globalConfig[option.name] = option.default;
+    if (option.inheritConfigSupport) {
+      defaults.inheritConfig[option.name] = option.default;
+    }
   }
 
   const content = `
-export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.stringify(defaults, null, 2)};
+/**
+ * The \`default\`s of the configuration options, keyed by option name, split like the JSON schemas:
+ *
+ * - \`repoConfig\`: options which are not \`globalOnly\`, including options which are only valid within a parent, such as \`replacementNameTemplate\` in \`packageRules\`
+ * - \`inheritConfig\`: \`globalOnly\` options which inherited config can also set
+ * - \`globalConfig\`: all \`globalOnly\` options
+ */
+export const configOptionDefaults = ${JSON.stringify(defaults, null, 2)} as const;
 `;
 
-  await updateFile('lib/global-config-option-defaults.generated.ts', content);
+  await updateFile('lib/config-option-defaults.generated.ts', content);
 }
 
 /**
@@ -343,11 +357,11 @@ async function generateHash() {
 await (async () => {
   try {
     // prevent import cycles when trying to generate config options
-    const stubFile = 'lib/global-config-option-defaults.generated.ts';
+    const stubFile = 'lib/config-option-defaults.generated.ts';
     if (!(await fs.pathExists(stubFile))) {
       await fs.writeFile(
         stubFile,
-        '\nexport const globalConfigOptionDefaults: Record<string, unknown> = {};\n',
+        '\nexport const configOptionDefaults = { repoConfig: {}, inheritConfig: {}, globalConfig: {} };\n',
       );
     }
 
@@ -357,7 +371,7 @@ await (async () => {
     await generateManagerDefaultConfigs();
     await generateVersioningList();
     await generateDatasourceList();
-    await generateGlobalConfigOptionDefaults();
+    await generateConfigOptionDefaults();
     await generateTemplatableFields();
     await generateHash();
     await Promise.all(

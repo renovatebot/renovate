@@ -96,7 +96,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   elixir: {
     datasource: 'github-releases',
     packageName: 'elixir-lang/elixir',
-    versioning: 'semver',
+    versioning: 'semver-extended',
   },
   flux: {
     datasource: 'github-releases',
@@ -224,6 +224,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     datasource: 'github-releases',
     packageName: 'containerbase/python-prebuild',
     versioning: 'python',
+  },
+  renovate: {
+    datasource: 'npm',
+    packageName: 'renovate',
+    versioning: 'npm',
   },
   ruby: {
     datasource: 'github-releases',
@@ -434,6 +439,8 @@ export async function generateInstallCommands(
     // Parents are listed before their tools (e.g. node before npm),
     // so a tool is matched against its parent's already resolved version.
     const resolvedTools: Partial<Record<ToolName, string>> = {};
+    const resolvedConstraints: { toolName: ToolName; toolVersion: string }[] =
+      [];
     for (const toolConstraint of toolConstraints) {
       const { toolName } = toolConstraint;
       const { parent }: ToolMetadata = tools[toolName];
@@ -446,7 +453,11 @@ export async function generateInstallCommands(
         parentConstraint,
       );
       resolvedTools[toolName] = toolVersion;
+      resolvedConstraints.push({ toolName, toolVersion });
+    }
+    for (const { toolName, toolVersion } of resolvedConstraints) {
       if (memoize) {
+        const { parent }: ToolMetadata = tools[toolName];
         const cacheKey = buildCacheKey('containerbase-active', toolName);
         // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
         const parentActive = isToolName(parent)
@@ -467,4 +478,12 @@ export async function generateInstallCommands(
     }
   }
   return installCommands;
+}
+
+export function invalidateActiveTools(
+  toolConstraints: Opt<ToolConstraint[]>,
+): void {
+  for (const { toolName } of coerceArray(toolConstraints)) {
+    memCache.set(buildCacheKey('containerbase-active', toolName), undefined);
+  }
 }

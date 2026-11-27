@@ -1,4 +1,5 @@
 import * as versionings from '../../../modules/versioning/index.ts';
+import type { VersioningApi } from '../../../modules/versioning/types.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { PackageRule, PackageRuleInputConfig } from '../../types.ts';
@@ -240,12 +241,13 @@ describe('config/presets/internal/workarounds', () => {
   describe('javaLTSVersions', () => {
     const preset = presets.javaLTSVersions;
     const packageRules = preset.packageRules!;
-    // Indices: 0 regex+names, 1 regex+deps, 2 docker major-only+names, 3 docker major-only+deps, 4 mise partial, 5 liberica
+    // Indices: 0 regex+names, 1 regex+deps, 2 temurin regex+names, 3 temurin regex+deps, 4 docker major-only+names, 5 docker major-only+deps, 6 mise partial, 7 liberica
     const regexPackageRule = packageRules[0];
-    const majorOnlyPackageRule = packageRules[2];
-    const majorOnlyDepRule = packageRules[3];
-    const libericaRule = packageRules[5];
+    const majorOnlyPackageRule = packageRules[4];
+    const majorOnlyDepRule = packageRules[5];
+    const libericaRule = packageRules[7];
     const javaRegexVersioning = regexPackageRule.versioning;
+    const temurinRegexVersioning = packageRules[2].versioning;
 
     describe('major-only docker tag override', () => {
       const matchCurrentValue = majorOnlyPackageRule.matchCurrentValue!;
@@ -300,7 +302,7 @@ describe('config/presets/internal/workarounds', () => {
           packageRules,
         });
 
-        expect(res.versioning).toEqual(javaRegexVersioning);
+        expect(res.versioning).toEqual(temurinRegexVersioning);
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
@@ -346,6 +348,121 @@ describe('config/presets/internal/workarounds', () => {
           expect(res.allowedVersions).toEqual(
             '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
           );
+        },
+      );
+    });
+
+    describe('eclipse-temurin four-part versions', () => {
+      async function temurinVersioning(
+        currentValue: string,
+        rule: 'packageName' | 'depName' = 'packageName',
+      ): Promise<VersioningApi> {
+        const res = await applyPackageRules<PackageRuleInputConfig>({
+          datasource: 'docker',
+          depName: rule === 'depName' ? 'eclipse-temurin' : 'base',
+          packageName:
+            rule === 'packageName' ? 'eclipse-temurin' : 'mirror/temurin',
+          currentValue,
+          packageRules,
+        });
+        return versionings.get(res.versioning);
+      }
+
+      it.each`
+        version
+        ${'25.0.5_8-jdk-resolute'}
+        ${'25.0.5.1_2-jdk-resolute'}
+        ${'25.0.6_10-jdk-resolute'}
+        ${'17.0.4.1_1-jdk-jammy'}
+        ${'17.0.21.1_2-jdk-noble'}
+        ${'21.0.13.1_2-jre'}
+        ${'21.0.13.1_2'}
+      `('isVersion($version) == true', async ({ version }) => {
+        const versioning = await temurinVersioning(version);
+
+        expect(versioning.isVersion(version)).toBeTrue();
+      });
+
+      it.each`
+        rule
+        ${'packageName'}
+        ${'depName'}
+      `(
+        'sorts a four-part version between its neighbours ($rule rule)',
+        async ({ rule }) => {
+          const versioning = await temurinVersioning(
+            '25.0.5_8-jdk-resolute',
+            rule,
+          );
+
+          expect(
+            [
+              '25.0.6_10-jdk-resolute',
+              '25.0.5.1_2-jdk-resolute',
+              '25.0.5_8-jdk-resolute',
+            ].sort((a, b) => versioning.sortVersions(a, b)),
+          ).toEqual([
+            '25.0.5_8-jdk-resolute',
+            '25.0.5.1_2-jdk-resolute',
+            '25.0.6_10-jdk-resolute',
+          ]);
+        },
+      );
+
+      it('offers a four-part release as an update from three parts', async () => {
+        const versioning = await temurinVersioning('17.0.4_8-jdk-jammy');
+
+        expect(
+          versioning.isGreaterThan(
+            '17.0.4.1_1-jdk-jammy',
+            '17.0.4_8-jdk-jammy',
+          ),
+        ).toBeTrue();
+        expect(
+          versioning.isCompatible('17.0.4.1_1-jdk-jammy', '17.0.4_8-jdk-jammy'),
+        ).toBeTrue();
+        expect(
+          versioning.getNewValue({
+            currentValue: '17.0.4_8-jdk-jammy',
+            rangeStrategy: 'replace',
+            newVersion: '17.0.4.1_1-jdk-jammy',
+          }),
+        ).toBe('17.0.4.1_1-jdk-jammy');
+      });
+
+      it('keeps docker versioning for major-only tags', async () => {
+        const res = await applyPackageRules<PackageRuleInputConfig>({
+          datasource: 'docker',
+          depName: 'eclipse-temurin',
+          packageName: 'eclipse-temurin',
+          currentValue: '25-jdk-resolute',
+          packageRules,
+        });
+
+        expect(res.versioning).toBe('docker');
+      });
+
+      it.each`
+        datasource        | depName                | packageName            | currentValue
+        ${'docker'}       | ${'sapmachine'}        | ${'sapmachine'}        | ${'17.0.21.0.2-jdk'}
+        ${'docker'}       | ${'azul/zulu-openjdk'} | ${'azul/zulu-openjdk'} | ${'17.0.21.0.3-17.70'}
+        ${'docker'}       | ${'adoptopenjdk'}      | ${'adoptopenjdk'}      | ${'11.0.7_10.1-jdk-hotspot'}
+        ${'java-version'} | ${'java'}              | ${'java-jdk'}          | ${'21.0.9+10.0.LTS'}
+      `(
+        'keeps the Java regex versioning for $packageName $currentValue',
+        async ({ datasource, depName, packageName, currentValue }) => {
+          const res = await applyPackageRules<PackageRuleInputConfig>({
+            datasource,
+            depName,
+            packageName,
+            currentValue,
+            packageRules,
+          });
+
+          expect(res.versioning).toBe(javaRegexVersioning);
+          expect(
+            versionings.get(res.versioning).isVersion(currentValue),
+          ).toBeTrue();
         },
       );
     });

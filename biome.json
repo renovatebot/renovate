@@ -31,6 +31,7 @@
     "includes": [
       "**",
       "!**/node_modules",
+      "!!.cache",
       "!.pnpm-store",
       "!.worktrees/**/*",
       "!.claude/worktrees/**/*",

@@ -129,7 +129,7 @@ export function massageName(
   let name = input ?? '';
 
   if (version) {
-    name = name.replace(RegExp(`^(Release )?v?${version}`, 'i'), '').trim();
+    name = name.replace(regEx(`^(Release )?v?${version}`, 'i'), '').trim();
   }
 
   name = name.trim();
@@ -252,7 +252,7 @@ async function releaseNotesResult(
     return null;
   }
   const { baseUrl, repository } = project;
-  const releaseNotes: ChangeLogNotes = releaseMatch;
+  const releaseNotes: ChangeLogNotes = { ...releaseMatch };
   if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {

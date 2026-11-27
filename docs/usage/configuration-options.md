@@ -542,6 +542,7 @@ Currently, this config option only works with these managers:
 
 - `cargo`
 - `helmv3`
+- `julia`
 - `npm`
 - `nuget`
 - `maven`
@@ -2416,11 +2417,6 @@ Example config:
 
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it will not work.
-
-### `hostRules.dnsCache`
-
-This option is deprecated and has no effect.
-Renovate removed its DNS cache in v38.0.0.
 
 ### `hostRules.enableHttp2`
 
@@ -4484,6 +4480,8 @@ Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
 
+If multiple updates on the branch have different `postUpgradeTasks` with `executionMode=branch`, for instance when different `packageRules` match different files in the branch, each distinct set of tasks is executed once, in the order the updates appear in the branch.
+
 ### `postUpgradeTasks.fileFilters`
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -4532,6 +4530,32 @@ For example:
 
 !!! note
   The tool objects inside `installTools` currently do not expose any additional configurability.
+
+In the Renovate Docker image, `renovate-config-validator` runs the installed version when the `renovate` tool is installed, instead of the bundled one.
+The installed version comes from the matching `renovate` entry in [`constraints`](#constraints).
+Once installed, every later `renovate-config-validator` call in the same container, also for other repositories, uses that version.
+
+The `renovate` tool needs the Containerbase `node` tool.
+The full Renovate image has it, the slim image does not, so list `node` before `renovate`, as tools install in the order they are listed.
+
+```json title="Validating the config with the installed Renovate version"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["renovate"],
+      "postUpgradeTasks": {
+        "commands": [
+          "renovate-config-validator --no-global --strict --migrate renovate.json"
+        ],
+        "installTools": {
+          "node": {},
+          "renovate": {}
+        }
+      }
+    }
+  ]
+}
+```
 
 ### `postUpgradeTasks.workingDirTemplate`
 
@@ -5300,6 +5324,21 @@ Defaults to `jvmMaxMemory`.
 
 !!! note
   This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+
+### `toolSettings.pnpmMinimumReleaseAgeExcludeSecurityUpdates`
+
+When a security update updates an npm package which belongs to a `pnpm-lock.yaml`, and the `pnpm-workspace.yaml` next to it sets `minimumReleaseAge`, Renovate adds the fixed version to the `minimumReleaseAgeExclude` list of the `pnpm-workspace.yaml`.
+This lets pnpm install the fixed version, even if it is younger than pnpm allows, as a security update should generally be installed as early as possible.
+
+This option is disabled by default, so Renovate does not modify `minimumReleaseAgeExclude`.
+pnpm then refuses a fixed version which is younger than pnpm allows, and the PR shows an artifact error, unless you add exclusions to the `pnpm-workspace.yaml` yourself.
+
+Set this option to `true` to have Renovate add the exclusions.
+Be aware that this means a newly published release, which could be malicious, is installed without waiting for the minimum release age.
+
+You can set this option in the repository config and in the [global self-hosted configuration](./self-hosted-configuration.md).
+The repository config takes precedence over the global self-hosted configuration, unless the global self-hosted configuration sets it to `false`.
+This lets the administrator of a self-hosted Renovate instance prevent it for all repositories.
 
 ## `updateInternalDeps`
 

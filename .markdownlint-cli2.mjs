@@ -10,10 +10,20 @@ export default {
     'no-emphasis-as-header': false,
     'no-inline-html': false,
     'single-h1': false,
+    'no-slash-before-markdown-anchor': false,
     'table-column-style': {
       style: 'aligned',
     },
   },
+
+  customRules: ['./tools/lint/markdown-anchor.mjs'],
+  overrides: [
+    {
+      filter: ['docs/**/*.md', 'lib/**/*.md'],
+      config: { 'no-slash-before-markdown-anchor': true },
+      combine: 'merge',
+    },
+  ],
 
   ...(ci && {
     outputFormatters: [
