@@ -32,7 +32,7 @@ Install Mend Renovate risk-free and you'll first receive an onboarding Pull Requ
   "ignorePaths": ["examples/**"],
   "packageRules": [
     {
-      "packagePatterns": ["^angular.*"],
+      "matchPackageNames": ["^angular.*"],
       "groupName": "angular",
       "automerge": true
     }
@@ -64,8 +64,8 @@ Renovate will generate updated lock files such as `package-lock.json` or `yarn.l
   },
   "packageRules": [
     {
-      "packageNames": ["aws-sdk"],
-      "schedule": "before 5am every wednesday"
+      "matchPackageNames": ["aws-sdk"],
+      "schedule": "before 5am on wednesday"
     }
   ]
 }
