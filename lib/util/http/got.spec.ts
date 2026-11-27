@@ -22,6 +22,42 @@ describe('util/http/got', () => {
     );
   });
 
+  it('logs debug line when request error occurs', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/test')
+      .replyWithError('connection error');
+
+    await expect(
+      fetch(
+        'https://example.com/test',
+        normalize(
+          {
+            method: 'GET',
+            responseType: 'text',
+            noAuth: true,
+            headers: {
+              Authorization: 'Bearer please-do-not-log',
+            },
+          },
+          [],
+        ),
+        {
+          queueMs: 0,
+        },
+      ),
+    ).rejects.toThrow();
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        requestHeaderNames: ['authorization'],
+      },
+      expect.stringMatching(
+        /^GET https:\/\/example\.com\/test = \(code=\w+, statusCode=-1 retryCount=\d+, duration=-?\d+\)$/,
+      ),
+    );
+  });
+
   it('does a flat clone of options', async () => {
     httpMock.scope('https://example.com').get('/test').reply(200, 'ok');
 
