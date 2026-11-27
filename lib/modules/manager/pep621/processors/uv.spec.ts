@@ -654,7 +654,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
       });
 
-      const updatedDeps = [{ packageName: 'dep1' }];
+      const updatedDeps = [{ packageName: 'dep1', newVersion: '0.1.0' }];
       const pyproject = parsePyProject(codeBlock`
         [project]
         requires-python = "==3.11.1"
@@ -694,7 +694,7 @@ describe('modules/manager/pep621/processors/uv', () => {
             '&& ' +
             'install-tool uv 0.2.35 ' +
             '&& ' +
-            'uv lock --upgrade-package dep1' +
+            'uv lock --upgrade-package dep1==0.1.0' +
             "'",
         },
       ]);
@@ -856,13 +856,41 @@ describe('modules/manager/pep621/processors/uv', () => {
       });
 
       const updatedDeps = [
-        { packageName: 'dep1', depType: depTypes.dependencies },
-        { packageName: 'dep2', depType: depTypes.dependencies },
-        { depName: 'dep3', depType: depTypes.optionalDependencies },
-        { depName: 'dep4', depType: depTypes.optionalDependencies },
-        { depName: 'dep5', depType: depTypes.uvDevDependencies },
-        { depName: 'dep6', depType: depTypes.uvDevDependencies },
-        { depName: 'dep7', depType: depTypes.buildSystemRequires },
+        {
+          packageName: 'dep1',
+          newVersion: '0.1.0',
+          depType: depTypes.dependencies,
+        },
+        {
+          packageName: 'dep2',
+          newVersion: '0.2.0',
+          depType: depTypes.dependencies,
+        },
+        {
+          depName: 'dep3',
+          newVersion: '0.3.0',
+          depType: depTypes.optionalDependencies,
+        },
+        {
+          depName: 'dep4',
+          newVersion: '0.4.0',
+          depType: depTypes.optionalDependencies,
+        },
+        {
+          depName: 'dep5',
+          newVersion: '0.5.0',
+          depType: depTypes.uvDevDependencies,
+        },
+        {
+          depName: 'dep6',
+          newVersion: '0.6.0',
+          depType: depTypes.uvDevDependencies,
+        },
+        {
+          depName: 'dep7',
+          newVersion: '0.7.0',
+          depType: depTypes.buildSystemRequires,
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -886,7 +914,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
+          cmd: 'uv lock --upgrade-package dep1==0.1.0 --upgrade-package dep2==0.2.0 --upgrade-package dep3==0.3.0 --upgrade-package dep4==0.4.0 --upgrade-package dep5==0.5.0 --upgrade-package dep6==0.6.0',
         },
       ]);
     });
@@ -1083,30 +1111,35 @@ describe('modules/manager/pep621/processors/uv', () => {
       const updatedDeps = [
         {
           packageName: 'dep1',
+          newVersion: '0.1.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['https://foobar.com'],
         },
         {
           packageName: 'dep2',
+          newVersion: '0.2.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['https://example.com'],
         },
         {
           packageName: 'dep3',
+          newVersion: '0.3.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['invalidurl'],
         },
         {
           packageName: 'dep4',
+          newVersion: '0.4.0',
           depType: depTypes.dependencies,
           datasource: GithubTagsDatasource.id,
           registryUrls: ['https://github.com'],
         },
         {
           packageName: 'dep5',
+          newVersion: '0.5.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: [
@@ -1115,12 +1148,14 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
         {
           packageName: 'dep6',
+          newVersion: '0.6.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['https://pinned.com/simple'],
         },
         {
           packageName: 'dep7',
+          newVersion: '0.7.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['https://unnamed.com/simple'],
@@ -1162,7 +1197,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6 --upgrade-package dep7',
+          cmd: 'uv lock --upgrade-package dep1==0.1.0 --upgrade-package dep2==0.2.0 --upgrade-package dep3==0.3.0 --upgrade-package dep4==0.4.0 --upgrade-package dep5==0.5.0 --upgrade-package dep6==0.6.0 --upgrade-package dep7==0.7.0',
           options: {
             env: {
               GIT_CONFIG_COUNT: '6',
@@ -1223,18 +1258,21 @@ describe('modules/manager/pep621/processors/uv', () => {
       const updatedDeps = [
         {
           packageName: 'dep1',
+          newVersion: '1.0.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['https://example.com/simple'],
         },
         {
           packageName: 'dep2',
+          newVersion: '2.0.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: ['https://pinned.com/simple'],
         },
         {
           packageName: 'dep3',
+          newVersion: '3.0.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: [
@@ -1280,7 +1318,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3',
+          cmd: 'uv lock --upgrade-package dep1==1.0.0 --upgrade-package dep2==2.0.0 --upgrade-package dep3==3.0.0',
           options: {
             env: {
               UV_EXTRA_INDEX_URL: 'https://user:pass@example.com/simple',
@@ -1408,6 +1446,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       const updatedDeps = [
         {
           packageName: 'dep',
+          newVersion: '1.0.0',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: [
@@ -1435,7 +1474,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep',
+          cmd: 'uv lock --upgrade-package dep==1.0.0',
           options: {
             env: {
               UV_EXTRA_INDEX_URL:
