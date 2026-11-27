@@ -4,13 +4,10 @@ import { execa } from 'execa';
 const maxBuffer = 20 * 1024 * 1024;
 
 /** execa options producing text output, which excludes the binary encodings */
-export type TextOptions = Extract<
-  Options,
-  { readonly encoding?: 'utf8' | 'utf16le' }
->;
+type TextOptions = Extract<Options, { readonly encoding?: 'utf8' | 'utf16le' }>;
 
 /** Result of {@link exec}, typed the way execa merges the options */
-export type ExecResult<T extends TextOptions> = Awaited<
+type ExecResult<T extends TextOptions> = Awaited<
   ReturnType<typeof execa<T & { encoding: 'utf8' }>>
 >;
 

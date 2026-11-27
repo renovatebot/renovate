@@ -100,7 +100,12 @@ Two discussion categories are available:
 Use `pnpm` for all commands (NOT npm/npx).
 
 - **Install dependencies:** `pnpm install`
-- **Lint / Type-check / Test / Autofix:** `pnpm check --all <paths>` for the changed files, `pnpm check --all` without a path for a full verification. It already runs lint, prettier, type-check and the tests of those files, so do not run `pnpm type-check`, `tsc`, a separate lint or extra `pnpm vitest` runs next to it.
 - **Run from source:** `pnpm start` or `node lib/renovate.ts`
 
-Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.
+### Test your work
+
+Run `pnpm check` to run lints, checks and tests for your changes. This selects checks specific to your changes instead of running an expensive full test suite, so prefer it over `pnpm vitest` or `pnpm test`. The CI pipeline will take care of the full check.
+
+When adding, moving, or removing code, test inputs, or specs, or changing what a spec covers, fix missing or stale triggers in [`deps.txt`](tools/check/test/deps.txt).
+
+Unit tests use Vitest. Test files use the `.spec.ts` suffix and are co-located with source. For any change you make in `foo.ts`, maintain 100% coverage in the corresponding `foo.spec.ts`.

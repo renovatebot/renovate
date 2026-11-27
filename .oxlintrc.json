@@ -57,6 +57,17 @@
             "name": "zod/v3",
             "message": "Use zod/v4 instead of the zod/v3 compatibility shim."
           }
+        ],
+        "patterns": [
+          {
+            "group": [
+              "jest-extended",
+              "jest-extended/**",
+              "expect-more-jest",
+              "expect-more-jest/**"
+            ],
+            "message": "Use the matchers on expect. Vitest loads these packages in its setup."
+          }
         ]
       }
     ],
@@ -482,7 +493,18 @@
         "no-restricted-imports": [
           "error",
           {
-            "paths": ["nock", "parse-link-header", "path"]
+            "paths": ["nock", "parse-link-header", "path"],
+            "patterns": [
+              {
+                "group": [
+                  "jest-extended",
+                  "jest-extended/**",
+                  "expect-more-jest",
+                  "expect-more-jest/**"
+                ],
+                "message": "Use the matchers on expect. Vitest loads these packages in its setup."
+              }
+            ]
           }
         ]
       }

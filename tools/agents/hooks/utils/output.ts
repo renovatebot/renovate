@@ -1,7 +1,6 @@
-import type { PreToolUseDenyOutput } from './schemas.ts';
-
+// https://code.claude.com/docs/en/hooks#pretooluse
 export function deny(reason: string): void {
-  const output: PreToolUseDenyOutput = {
+  const output = {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
