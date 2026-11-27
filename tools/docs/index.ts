@@ -7,6 +7,7 @@ import { generateDatasources } from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';
 import { generateEnvVars } from './env-vars.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
+import { generateManagerKnownBuildkitePlugins } from './manager/buildkite/known-plugins.ts';
 import { generateManagerKnownGithubActions } from './manager/github-actions/known-actions.ts';
 import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
@@ -61,6 +62,10 @@ export async function generateDocs(
     // managers/github-actions' known Actions that we extract `with`s from
     logger.info('* managers/github-actions/known-actions');
     await generateManagerKnownGithubActions(dist);
+
+    // managers/buildkite's known plugins that we extract embedded deps from
+    logger.info('* managers/buildkite/known-plugins');
+    await generateManagerKnownBuildkitePlugins(dist);
 
     // managers/mise supported plugins
     logger.info('* managers/mise/supported-plugins');
