@@ -539,11 +539,11 @@ importers:
         specifier: 17.6.1
         version: 17.6.1
       markdownlint-cli2:
-        specifier: 0.24.1
-        version: 0.24.1(supports-color@7.2.0)
+        specifier: 0.24.2
+        version: 0.24.2(supports-color@7.2.0)
       markdownlint-cli2-formatter-template:
         specifier: 0.0.4
-        version: 0.0.4(markdownlint-cli2@0.24.1)
+        version: 0.0.4(markdownlint-cli2@0.24.2)
       memfs:
         specifier: 4.80.1
         version: 4.80.1
@@ -4442,13 +4442,13 @@ packages:
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
 
-  markdownlint-cli2@0.24.1:
-    resolution: {integrity: sha512-nLhes/MIPJQLm+Gmh+3jQEnwMOaalaN0wfCD2qz1247zNZ7R3r2WDHJB191x4hcy6soKAUTybp1bFK7aJGw/WA==}
+  markdownlint-cli2@0.24.2:
+    resolution: {integrity: sha512-bgxzhJkgR7t2puRgePHZYVqKzC90etPzxOC+9ZNATjAVJB2zs7EAolfF1inVsrkgYN+ykVIHIxk0WypG2VVLZA==}
     engines: {node: '>=22'}
     hasBin: true
 
-  markdownlint@0.42.1:
-    resolution: {integrity: sha512-Otolm9JX12iO2NG5cetlKfzGygpiLSlHuqXKxoT6HGhN5HtbxprJPicKZqqCQd88qOvUi/TEs3o1AmcYioVscA==}
+  markdownlint@0.42.2:
+    resolution: {integrity: sha512-IhlUBVT+kHBX+u3EjEsQdFB4q0Rl0Hx+JsGsvVkonNut1/n8Kv8yXzwk0pazC9uF35JlwMZ+LxV4CQ9YNAbG8w==}
     engines: {node: '>=22'}
 
   marked-terminal@7.3.1:
@@ -9865,29 +9865,29 @@ snapshots:
 
   markdown-table@3.1.0: {}
 
-  markdownlint-cli2-formatter-default@0.0.6(markdownlint-cli2@0.24.1):
+  markdownlint-cli2-formatter-default@0.0.6(markdownlint-cli2@0.24.2):
     dependencies:
-      markdownlint-cli2: 0.24.1(supports-color@7.2.0)
+      markdownlint-cli2: 0.24.2(supports-color@7.2.0)
 
-  markdownlint-cli2-formatter-template@0.0.4(markdownlint-cli2@0.24.1):
+  markdownlint-cli2-formatter-template@0.0.4(markdownlint-cli2@0.24.2):
     dependencies:
-      markdownlint-cli2: 0.24.1(supports-color@7.2.0)
+      markdownlint-cli2: 0.24.2(supports-color@7.2.0)
 
-  markdownlint-cli2@0.24.1(supports-color@7.2.0):
+  markdownlint-cli2@0.24.2(supports-color@7.2.0):
     dependencies:
       globby: 16.2.4
       js-yaml: 5.5.0
       jsonc-parser: 3.3.1
       jsonpointer: 5.0.1
       markdown-it: 15.0.3
-      markdownlint: 0.42.1(supports-color@7.2.0)
-      markdownlint-cli2-formatter-default: 0.0.6(markdownlint-cli2@0.24.1)
+      markdownlint: 0.42.2(supports-color@7.2.0)
+      markdownlint-cli2-formatter-default: 0.0.6(markdownlint-cli2@0.24.2)
       micromatch: 4.0.8
       smol-toml: 1.9.1
     transitivePeerDependencies:
       - supports-color
 
-  markdownlint@0.42.1(supports-color@7.2.0):
+  markdownlint@0.42.2(supports-color@7.2.0):
     dependencies:
       micromark: 4.0.3(supports-color@7.2.0)
       micromark-core-commonmark: 2.0.4
