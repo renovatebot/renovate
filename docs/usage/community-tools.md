@@ -5,6 +5,8 @@ These tools are not officially supported by the Renovate team, but may be useful
 
 !!! note
   If you have a community tool you'd like to add to this page, please open a pull request.
+  <br>
+  We require that new projects show some level of popularity and age before we will accept them.
 
 ## Renovate Operator (Kubernetes)
 
