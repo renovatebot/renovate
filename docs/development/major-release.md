@@ -88,6 +88,8 @@ As a checklist to work down:
   - Ensure that the Action's new major version shows as default [in the marketplace](https://github.com/marketplace/actions/renovate-bot-github-action)
 - [ ] Update GitLab CI configuration to next major
   - [i.e.](https://gitlab.com/renovate-bot/renovate-runner/-/merge_requests/3357)
+- [ ] Update Helm Charts configuration to next major
+  - [i.e.](https://github.com/renovatebot/helm-charts/pull/5342)
 - [ ] Approve and merge the major bump to the documentation for the new Renovate version
   - [ ] [for the Renovate CLI](https://github.com/renovatebot/renovate/pull/48450)
   - [ ] [for the GitHub Action](https://github.com/renovatebot/renovate/pull/48453)
