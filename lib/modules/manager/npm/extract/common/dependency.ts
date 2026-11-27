@@ -1,7 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger/index.ts';
-import { coerceArray } from '../../../../../util/array.ts';
 import type { ConstraintName } from '../../../../../util/exec/types.ts';
 import { isConstraintName } from '../../../../../util/exec/types.ts';
 import { regEx } from '../../../../../util/regex.ts';
@@ -22,7 +21,15 @@ const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
 );
 
+function stripVersionSelector(key: string): string | undefined {
+  return regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(key)?.groups?.depName;
+}
+
 export function parseDepName(depType: string, key: string): string {
+  if (depType === 'overrides') {
+    // npm override keys may carry a version selector, e.g. `foo@^2` or `@scope/foo@1.0.0`
+    return stripVersionSelector(key) ?? key;
+  }
   if (depType !== 'resolutions') {
     return key;
   }
@@ -44,11 +51,8 @@ export function parseDepName(depType: string, key: string): string {
     }
   }
 
-  const lastSegment = segments.at(-1);
-  const [, depName] = coerceArray(
-    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(coerceString(lastSegment)),
-  );
-  return depName;
+  // TODO #22198
+  return stripVersionSelector(coerceString(segments.at(-1)))!;
 }
 
 export function extractDependency(

@@ -23,7 +23,7 @@ import {
   parseDepName,
 } from './dependency.ts';
 import { setNodeCommitTopic } from './node.ts';
-import { extractOverrideDepsRec, getOverridePackageName } from './overrides.ts';
+import { extractOverrideDepsRec } from './overrides.ts';
 
 export function hasDevEnginesPackageManager(
   packageJson: Pick<NpmPackage, 'devEngines'>,
@@ -99,7 +99,7 @@ export function extractPackageJson(
           }
           // v8 ignore else -- TODO: add test #40625
           if (depType === 'overrides' && !isString(val)) {
-            deps.push(...extractOverrideDepsRec([depName], val));
+            deps.push(...extractOverrideDepsRec([key], val));
           } else if (depType === 'pnpm' && depName === 'overrides') {
             // pnpm overrides
             // https://pnpm.io/package_json#pnpmoverrides
@@ -128,14 +128,7 @@ export function extractPackageJson(
               }
             }
           } else {
-            const packageName =
-              depType === 'overrides'
-                ? getOverridePackageName(depName)
-                : depName;
-            if (packageName !== depName) {
-              dep.packageName = packageName;
-            }
-            dep = { ...dep, ...extractDependency(depType, packageName, val) };
+            dep = { ...dep, ...extractDependency(depType, depName, val) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);

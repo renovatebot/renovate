@@ -36,6 +36,18 @@ describe('modules/manager/npm/extract/common/dependency', () => {
       );
     });
 
+    it('strips the version selector from overrides keys', () => {
+      expect(parseDepName('overrides', 'which')).toBe('which');
+      expect(parseDepName('overrides', 'which@^2')).toBe('which');
+      expect(parseDepName('overrides', '@types/react@18.0.5')).toBe(
+        '@types/react',
+      );
+    });
+
+    it('returns invalid overrides keys unchanged', () => {
+      expect(parseDepName('overrides', '@@1')).toBe('@@1');
+    });
+
     it('returns simple package name unchanged', () => {
       expect(parseDepName('resolutions', 'left-pad')).toBe('left-pad');
     });
