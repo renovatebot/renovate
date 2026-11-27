@@ -1,9 +1,4 @@
-import type { BlockOutput, PreToolUseDenyOutput } from './schemas.ts';
-
-export function block(reason: string): void {
-  const output: BlockOutput = { decision: 'block', reason };
-  console.log(JSON.stringify(output));
-}
+import type { PreToolUseDenyOutput } from './schemas.ts';
 
 export function deny(reason: string): void {
   const output: PreToolUseDenyOutput = {

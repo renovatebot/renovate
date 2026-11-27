@@ -1241,6 +1241,22 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## `onboardingConfig`
 
+By default, the onboarding config extends the `config:recommended` preset.
+
+Renovate will merge your configured `onboardingConfig` with its defaults, so if you would prefer to not use this preset, you will need configuration like so:
+
+```js
+module.exports = {
+  onboardingConfig: {
+    // ensure that the default `onboardingConfig` does not merge with ours
+    extends: [],
+
+    // custom configuration
+    minimumReleaseAge: '1 day',
+  },
+};
+```
+
 ## `onboardingConfigFileName`
 
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.

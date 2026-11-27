@@ -1,8 +1,9 @@
 import { provision } from './provision.ts';
 
 const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
-vi.mock('./exec.ts', () => ({ exec }));
+vi.mock('../../../utils/exec.ts', () => ({ exec }));
 const errorSpy = vi.spyOn(console, 'error');
+const stderrOptions = { stdout: process.stderr, stderr: process.stderr };
 
 it('runs mise install then pnpm install', async () => {
   exec.mockResolvedValue(undefined);
@@ -10,8 +11,8 @@ it('runs mise install then pnpm install', async () => {
   await provision();
 
   expect(exec).toHaveBeenCalledTimes(2);
-  expect(exec).toHaveBeenNthCalledWith(1, 'mise', ['install'], {});
-  expect(exec).toHaveBeenNthCalledWith(2, 'pnpm', ['install'], {});
+  expect(exec).toHaveBeenNthCalledWith(1, 'mise', ['install'], stderrOptions);
+  expect(exec).toHaveBeenNthCalledWith(2, 'pnpm', ['install'], stderrOptions);
 });
 
 it('passes cwd to both commands when provided', async () => {
@@ -20,9 +21,11 @@ it('passes cwd to both commands when provided', async () => {
   await provision('/some/worktree');
 
   expect(exec).toHaveBeenNthCalledWith(1, 'mise', ['install'], {
+    ...stderrOptions,
     cwd: '/some/worktree',
   });
   expect(exec).toHaveBeenNthCalledWith(2, 'pnpm', ['install'], {
+    ...stderrOptions,
     cwd: '/some/worktree',
   });
 });
@@ -35,7 +38,7 @@ it('skips mise failure gracefully and still runs pnpm install', async () => {
   await provision();
 
   expect(exec).toHaveBeenCalledTimes(2);
-  expect(exec).toHaveBeenNthCalledWith(2, 'pnpm', ['install'], {});
+  expect(exec).toHaveBeenNthCalledWith(2, 'pnpm', ['install'], stderrOptions);
   expect(errorSpy).toHaveBeenCalledWith(
     'mise is not installed or failed — skipping',
   );

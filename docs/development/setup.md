@@ -12,7 +12,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies:
 
 - Git `>=2.45.1`
-- Node.js `^24.11.0 || ^26.13.0`
+- Node.js `^24.22.3 || ^26.13.1`
 - pnpm `^11.0.0`
 
 If a prebuilt RE2 binary is unavailable, installation builds it from source.
