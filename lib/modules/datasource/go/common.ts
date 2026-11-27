@@ -1,17 +1,12 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import type { HostRule } from '../../../types/index.ts';
-import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
-import { getSourceUrl as gitlabSourceUrl } from '../../../util/gitlab/url.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
-import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
-import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
-import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
+import { GitTagsDatasource } from '../git-tags/index.ts';
 
 import { publicGoproxyUrl } from './env.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
+import { getGoTagDatasource } from './tag-datasources.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
 
 /**
@@ -66,25 +61,18 @@ export function isPublicGoPackage(packageName: string): boolean {
   });
 }
 
-export function getSourceUrl(
+export async function getSourceUrl(
   dataSource?: DataSource | null,
-): string | undefined {
-  if (dataSource) {
-    const { datasource, registryUrl, packageName } = dataSource;
-
-    switch (datasource) {
-      case ForgejoTagsDatasource.id:
-        return ForgejoTagsDatasource.getSourceUrl(packageName, registryUrl);
-      case GiteaTagsDatasource.id:
-        return GiteaTagsDatasource.getSourceUrl(packageName, registryUrl);
-      case GithubTagsDatasource.id:
-        return githubSourceUrl(packageName, registryUrl);
-      case GitlabTagsDatasource.id:
-        return gitlabSourceUrl(packageName, registryUrl);
-      case BitbucketTagsDatasource.id:
-        return BitbucketTagsDatasource.getSourceUrl(packageName, registryUrl);
-    }
+): Promise<string | undefined> {
+  if (!dataSource) {
+    return undefined;
   }
 
-  return undefined;
+  const { datasource, registryUrl, packageName } = dataSource;
+  const tagDatasource = await getGoTagDatasource(datasource);
+  if (!tagDatasource || tagDatasource instanceof GitTagsDatasource) {
+    return undefined;
+  }
+
+  return tagDatasource.getSourceUrl(packageName, registryUrl);
 }
