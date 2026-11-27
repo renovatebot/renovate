@@ -275,7 +275,7 @@ export async function generateLockFile(
   });
   const isSyncEnabled = syncAgeMs !== null;
   try {
-    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     // if pnpm is being upgraded, it comes first
     let pnpmConstraint: string | null | undefined =
       getPnpmConstraintFromUpgrades(upgrades);
@@ -288,7 +288,7 @@ export async function generateLockFile(
         async () => {
           const pnpmVersion = getPackageManagerVersion(
             'pnpm',
-            await lazyPgkJson.getValue(),
+            await lazyPkgJson.getValue(),
           );
           if (!isNullOrUndefined(pnpmVersion)) {
             return pnpmVersion;
@@ -326,7 +326,7 @@ export async function generateLockFile(
       extraEnv,
       docker: {},
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
         pnpmToolConstraint,
       ],
     };

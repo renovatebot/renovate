@@ -262,9 +262,9 @@ export async function generateLockFile(
   });
   const isSyncEnabled = syncAgeMs !== null;
   try {
-    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
+      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     let yarnCompatibility = yarnUpdate?.newValue;
@@ -275,7 +275,7 @@ export async function generateLockFile(
         async () => {
           let yarnVersion = getPackageManagerVersion(
             'yarn',
-            await lazyPgkJson.getValue(),
+            await lazyPkgJson.getValue(),
           );
           if (isNullOrUndefined(yarnVersion)) {
             // walk up to an inherited packageManager (mirrors corepack)

@@ -74,7 +74,7 @@ export function getInstalledPackageName(upgrade: Upgrade): string | undefined {
  * Walk up the directory tree from `lockFileDir` looking for an ancestor
  * `package.json` whose `packageManager` / `devEngines.packageManager` /
  * `engines` / `volta` field pins `name`. Mirrors how corepack itself resolves
- * the binary at runtime, so per-workspace lockfile generation honours a
+ * the binary at runtime, so per-workspace lockfile generation honors a
  * `packageManager` pin set only at the monorepo root.
  *
  * `lockFileDir` itself is intentionally skipped — the caller already loads the
