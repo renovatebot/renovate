@@ -21,6 +21,8 @@ catalog:
   vite: 8.3.8
 
 overrides:
+  # GHSA-xcx6-jx8p-x3h5, fixed in 7.1.0
+  '@azure/msal-node@<7.1.0': 7.1.1
   esbuild: 'catalog:'
   katex@>=0.11.0 <0.18.2: 0.19.1
   re2js@>=2.2.0 <2.8.7: 2.10.0
