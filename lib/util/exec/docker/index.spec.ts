@@ -19,6 +19,18 @@ vi.mock('../../../modules/datasource/index.ts', () => ({
 }));
 
 describe('util/exec/docker/index', () => {
+  const dockerEnv = {
+    env: expect.objectContaining({
+      DOCKER_HOST: 'tcp://docker:2375',
+      PATH: '/usr/local/bin:/usr/bin:/bin',
+    }),
+  };
+
+  beforeEach(() => {
+    vi.stubEnv('DOCKER_HOST', 'tcp://docker:2375');
+    vi.stubEnv('PATH', '/usr/local/bin:/usr/bin:/bin');
+  });
+
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
       resetPrefetchedImages();
@@ -27,7 +39,9 @@ describe('util/exec/docker/index', () => {
     it('runs prefetch command', async () => {
       const execSnapshots = mockExecAll();
       await prefetchDockerImage('foo:1.2.3');
-      expect(execSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull foo:1.2.3', options: dockerEnv },
+      ]);
     });
 
     it('performs prefetch once for each image', async () => {
@@ -68,8 +82,8 @@ describe('util/exec/docker/index', () => {
       ]);
       await removeDockerContainer('bar', 'foo_');
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker ps --filter name=foo_sidecar -aq' },
-        { cmd: 'docker rm -f 12345' },
+        { cmd: 'docker ps --filter name=foo_sidecar -aq', options: dockerEnv },
+        { cmd: 'docker rm -f 12345', options: dockerEnv },
       ]);
     });
   });
@@ -135,8 +149,11 @@ describe('util/exec/docker/index', () => {
       ]);
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker ps --filter label=renovate_child -aq' },
-        { cmd: 'docker rm -f 111 222 333' },
+        {
+          cmd: 'docker ps --filter label=renovate_child -aq',
+          options: dockerEnv,
+        },
+        { cmd: 'docker rm -f 111 222 333', options: dockerEnv },
       ]);
     });
   });

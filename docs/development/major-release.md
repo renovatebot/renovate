@@ -11,6 +11,7 @@
 
 - Determine what is in the next release by looking at the [Milestones view](https://github.com/renovatebot/renovate/milestones)
 - Look through [breaking changes in the Issues backlog](https://github.com/renovatebot/renovate/issues?q=is%3Aissue%20state%3Aopen%20label%3Abreaking) or in [the PRs list](https://github.com/renovatebot/renovate/pulls?q=is%3Aopen+is%3Apr+label%3Abreaking)
+- Create a `renovate-$MAJOR` Slack channel on the Renovate Developers Slack to discuss + coordinate changes
 
 ### Draft release notes
 
@@ -74,20 +75,31 @@ git push
 
 ## Post-release
 
+Immediately after the release, and the following days:
+
 - Monitor Discussions for early insights about post-release bugs that need to be resolved
-- Approve and merge the major bump to the documentation for the new Renovate version [i.e.](https://github.com/renovatebot/renovate/pull/44942)
-- Update GitHub Action to next major
+
+As a checklist to work down:
+
+- [ ] Close the Milestone for the release
+- [ ] Update GitHub Action to next major
   - Approve and merge the major version bump from Renovate, which will release the next major of the GitHub Action
-  - [i.e.](https://github.com/renovatebot/github-action/pull/1067)
+  - [i.e.](https://github.com/renovatebot/github-action/pull/1105)
   - Ensure that the Action's new major version shows as default [in the marketplace](https://github.com/marketplace/actions/renovate-bot-github-action)
-- Update GitLab CI configuration to next major
-  - [i.e.](https://gitlab.com/renovate-bot/renovate-runner/-/merge_requests/3346)
-- Add a copy of the JSON Schemas to Schema Store
+- [ ] Update GitLab CI configuration to next major
+  - [i.e.](https://gitlab.com/renovate-bot/renovate-runner/-/merge_requests/3357)
+- [ ] Update Helm Charts configuration to next major
+  - [i.e.](https://github.com/renovatebot/helm-charts/pull/5342)
+- [ ] Approve and merge the major bump to the documentation for the new Renovate version
+  - [ ] [for the Renovate CLI](https://github.com/renovatebot/renovate/pull/48450)
+  - [ ] [for the GitHub Action](https://github.com/renovatebot/renovate/pull/48453)
+- [ ] Add a copy of the JSON Schemas to Schema Store
   - Go to the last tagged release (of the last major version) and download `docs.tgz`
   - Copy the `renovate-schema.json`, `renovate-inherited-schema.json` and `renovate-global-schema.json`
-  - See [schemastore#6142](https://github.com/SchemaStore/schemastore/pull/6142) as an example of what configuration may be needed to have the PR build pass
-- Close the Milestone for the release
-- After some time (usually when the Mend Developer Platform has been live with the new major), mark the previous major version as deprecated:
+  - See [schemastore#6732](https://github.com/SchemaStore/schemastore/pull/6732) as an example of what configuration may be needed to have the PR build pass
+- [ ] Update the `next` branch with `git merge --no-ff` from `main` (or PR from `main` to `next`)
+
+Then, after some time (usually when the Mend Developer Platform has been live with the new major), mark the previous major version as deprecated:
 
 ```sh
 % npm deprecate renovate@"<44.0.0" "Renovate versions older than the latest major version are unsupported"

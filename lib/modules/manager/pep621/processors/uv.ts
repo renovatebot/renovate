@@ -171,7 +171,7 @@ export class UvProcessor extends BasePyProjectProcessor {
 
   async extractLockedVersions(
     project: PyProject,
-    deps: PackageDependency[],
+    deps: PackageDependency<Pep621ManagerData>[],
     packageFile: string,
     config?: ExtractConfig,
   ): Promise<PackageDependency[]> {
@@ -193,7 +193,7 @@ export class UvProcessor extends BasePyProjectProcessor {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
           const { packages, declaredNames } = lockFileMapping;
-          for (const dep of deps as PackageDependency<Pep621ManagerData>[]) {
+          for (const dep of deps) {
             const packageName = dep.packageName;
             if (packageName && packageName in packages) {
               const locked = packages[packageName];

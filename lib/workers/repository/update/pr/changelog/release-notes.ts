@@ -252,7 +252,7 @@ async function releaseNotesResult(
     return null;
   }
   const { baseUrl, repository } = project;
-  const releaseNotes: ChangeLogNotes = releaseMatch;
+  const releaseNotes: ChangeLogNotes = { ...releaseMatch };
   if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {

@@ -72,6 +72,7 @@ export class MigrationsService {
     'allowCommandTemplating',
     'allowPostUpgradeCommandTemplating',
     'deepExtract',
+    'dnsCache',
     'gitFs',
     'groupBranchName',
     'groupCommitMessage',

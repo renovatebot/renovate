@@ -1,6 +1,5 @@
 import { partial } from '~test/util.ts';
 import type { CustomManagerName } from '../manager-list.generated.ts';
-import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
@@ -42,24 +41,19 @@ describe('config/validation', () => {
     );
 
     // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
-    it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
-      const config: RenovateConfig = {
-        hostRules: [
-          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
-          {
-            dnsCache: true,
-          } as HostRule,
-        ],
+    it('returns the deprecationMsg for `dockerChildPrefix` as a warning', async () => {
+      const config: AllConfig = {
+        dockerChildPrefix: 'renovate_',
       };
       const { errors, warnings } = await configValidation.validateConfig(
-        'repo',
+        'global',
         config,
       );
       expect(errors).toBeEmptyArray();
       expect(warnings).toMatchObject([
         {
           topic: 'Deprecation Warning',
-          message: `The 'dnsCache' option is deprecated: This option is deprecated and will be removed in a future release.`,
+          message: `The 'dockerChildPrefix' option is deprecated: The usage of \`binarySource=docker\` is deprecated, and will be removed in the future`,
         },
       ]);
     });
@@ -4408,6 +4402,30 @@ describe('config/validation', () => {
 
         expect(warnings).toBeEmptyArray();
         expect(errors).toBeEmptyArray();
+      });
+
+      it('allows the namespace a datasource caches its releases in', async () => {
+        const config: AllConfig = {
+          cacheTtlOverride: {
+            'datasource-releases-npm': 5,
+            'datasource-releases-*': 10,
+            'datasource-releases-not-a-datasource': 15,
+          },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'cacheTtlOverride: namespace `datasource-releases-not-a-datasource` does not exist',
+            topic: 'Configuration Error',
+          },
+        ]);
       });
 
       it('allows wildcards', async () => {

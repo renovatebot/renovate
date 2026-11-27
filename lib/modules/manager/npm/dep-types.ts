@@ -75,5 +75,34 @@ export const knownDepTypes = [
   },
 ] as const satisfies readonly DepTypeMetadata[];
 
+/**
+ * Checks whether the dep type is `packageManager` or `devEngines.packageManager`.
+ */
+export function isPackageManagerDepType(depType: string | undefined): boolean {
+  return (
+    depType === 'packageManager' || depType === 'devEngines.packageManager'
+  );
+}
+
+/**
+ * Checks whether the dep type is `devEngines.runtime` or `devEngines.packageManager`.
+ */
+export function isDevEnginesDepType(depType: string | undefined): boolean {
+  return (
+    depType === 'devEngines.runtime' || depType === 'devEngines.packageManager'
+  );
+}
+
+/**
+ * Checks whether the dep type is `engines`, `packageManager`, `devEngines.runtime` or `devEngines.packageManager`.
+ */
+export function isToolDepType(depType: string | undefined): boolean {
+  return (
+    depType === 'engines' ||
+    isPackageManagerDepType(depType) ||
+    isDevEnginesDepType(depType)
+  );
+}
+
 export const supportsDynamicDepTypesNote =
   'Additionally, catalog dependencies produce dynamic `depType` values: `pnpm.catalog.<name>` for [pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs) and `yarn.catalog.<name>` for [yarn catalogs](https://yarnpkg.com/features/catalogs).';

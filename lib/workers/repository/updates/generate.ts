@@ -203,6 +203,29 @@ function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {
   return minimumGroupSize;
 }
 
+function appendCommitBodyTable(config: BranchConfig): void {
+  const tableRows = config.upgrades
+    .map(getTableValues)
+    .filter((x): x is string[] => isArray(x, isString));
+
+  if (tableRows.length) {
+    const table: string[][] = [];
+    table.push(['datasource', 'package', 'from', 'to']);
+
+    const seenRows = new Set<string>();
+
+    for (const row of tableRows) {
+      const key = safeStringify(row);
+      if (seenRows.has(key)) {
+        continue;
+      }
+      seenRows.add(key);
+      table.push(row);
+    }
+    config.commitMessage += `\n\n${withoutUrlCredentials(markdownTable(table))}\n`;
+  }
+}
+
 // Sorted by priority, from low to high
 const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
@@ -314,7 +337,7 @@ export function generateBranchConfig(
 
     // needs to be done for each upgrade, as we reorder them below
     if (newValue.length > 1 && !groupEligible) {
-      upgrade.commitMessageExtra = `to v${toVersions[0]}`;
+      upgrade.commitMessageExtra = 'to v{{{newVersion}}}';
     }
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
@@ -583,26 +606,7 @@ export function generateBranchConfig(
     );
   }
 
-  const tableRows = config.upgrades
-    .map(getTableValues)
-    .filter((x): x is string[] => isArray(x, isString));
-
-  if (tableRows.length) {
-    const table: string[][] = [];
-    table.push(['datasource', 'package', 'from', 'to']);
-
-    const seenRows = new Set<string>();
-
-    for (const row of tableRows) {
-      const key = safeStringify(row);
-      if (seenRows.has(key)) {
-        continue;
-      }
-      seenRows.add(key);
-      table.push(row);
-    }
-    config.commitMessage += `\n\n${withoutUrlCredentials(markdownTable(table))}\n`;
-  }
+  appendCommitBodyTable(config);
   const additionalReviewers = uniq(
     config.upgrades
       .map((upgrade) => upgrade.additionalReviewers)
