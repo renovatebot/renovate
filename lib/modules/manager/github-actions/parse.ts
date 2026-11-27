@@ -119,7 +119,11 @@ export function parseActionReference(uses: string): ActionReference | null {
     return parseDockerReference(uses);
   }
 
-  if (uses.startsWith('./') || uses.startsWith('../')) {
+  if (
+    uses.startsWith('./') ||
+    uses.startsWith('../') ||
+    uses.startsWith('$/')
+  ) {
     return { kind: 'local', path: uses };
   }
 
