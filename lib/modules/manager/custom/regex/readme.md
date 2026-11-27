@@ -30,10 +30,10 @@ Custom managers are named `custom.<customType>` in `packageRules`, so a regex ma
 }
 ```
 
-A rule that uses `"regex"` instead never matches, and Renovate does not warn about it.
+Config validation rejects `"regex"`, because it is not a manager name.
 
 !!! note
-  A regex manager does not inherit the default config of the manager that normally handles the file type, only the built-in defaults.
+  A regex manager does not inherit the default config of the manager that normally handles the file type, it uses its own defaults instead.
   <br>
   For example, the `nuget` manager defaults `rangeStrategy` to `bump` so that bare NuGet versions keep getting updates, but a regex manager that extracts NuGet dependencies uses the `auto` default instead.
   Read [Getting updates for non-pinned (bare) versions](../nuget/index.md#getting-updates-for-non-pinned-bare-versions) to learn when you need to set `rangeStrategy` yourself.
