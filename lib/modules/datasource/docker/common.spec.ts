@@ -144,6 +144,28 @@ describe('modules/datasource/docker/common', () => {
       ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
     });
 
+    it('warns and returns undefined for an unparseable URL', async () => {
+      logger.logger.warn.mockClear();
+      logger.logger.error.mockClear();
+
+      await expect(
+        getAuthHeaders(
+          http,
+          'https://my.local.registry',
+          'repo',
+          '{{ .Values.registry }}/v2/',
+        ),
+      ).resolves.toBeUndefined();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          apiCheckUrl: '{{ .Values.registry }}/v2/',
+        }),
+        'Invalid URL',
+      );
+      expect(logger.logger.error).not.toHaveBeenCalled();
+    });
+
     it('falls back to base /v2/ auth probe when tags URL returns 405 ECR maxResults error', async () => {
       httpMock
         .scope('https://my.local.registry')
