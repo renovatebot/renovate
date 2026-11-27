@@ -11,6 +11,7 @@
 
 - Determine what is in the next release by looking at the [Milestones view](https://github.com/renovatebot/renovate/milestones)
 - Look through [breaking changes in the Issues backlog](https://github.com/renovatebot/renovate/issues?q=is%3Aissue%20state%3Aopen%20label%3Abreaking) or in [the PRs list](https://github.com/renovatebot/renovate/pulls?q=is%3Aopen+is%3Apr+label%3Abreaking)
+- Create a `renovate-$MAJOR` Slack channel on the Renovate Developers Slack to discuss + coordinate changes
 
 ### Draft release notes
 
