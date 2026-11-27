@@ -168,5 +168,33 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         sourceUrl: 'https://source-url.example.com',
       });
     });
+
+    it.each`
+      jenkins      | expected
+      ${'2.164.0'} | ${['1.0.0', '2.0.0']}
+      ${'2.164.3'} | ${['1.0.0', '2.0.0', '3.0.0']}
+      ${'2.200.1'} | ${['1.0.0', '2.0.0', '3.0.0']}
+    `(
+      'filters releases by requiredCore for jenkins $jenkins with strict constraintsFiltering',
+      async ({ jenkins, expected }) => {
+        httpMock
+          .scope('https://updates.jenkins.io')
+          .get('/current/update-center.actual.json')
+          .reply(200, jenkinsPluginsInfo);
+
+        httpMock
+          .scope('https://updates.jenkins.io')
+          .get('/current/plugin-versions.json')
+          .reply(200, jenkinsPluginsVersions);
+
+        const res = await getPkgReleases({
+          ...params,
+          constraints: { jenkins },
+          constraintsFiltering: 'strict',
+        });
+
+        expect(res?.releases.map(({ version }) => version)).toEqual(expected);
+      },
+    );
   });
 });
