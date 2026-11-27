@@ -31,6 +31,7 @@ export const presets: Record<string, Preset> = {
         prBodyColumns: [
           'Package',
           'Change',
+          'Lib Year',
           'Age',
           'Adoption',
           'Passing',
