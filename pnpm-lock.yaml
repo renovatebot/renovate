@@ -600,8 +600,8 @@ importers:
         version: 3.3.1
     optionalDependencies:
       openpgp:
-        specifier: 6.3.2
-        version: 6.3.2(@openpgp/web-stream-tools@0.3.1)
+        specifier: 6.3.3
+        version: 6.3.3(@openpgp/web-stream-tools@0.3.1)
       re2:
         specifier: 1.27.2
         version: 1.27.2
@@ -3412,6 +3412,9 @@ packages:
   ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
 
+  eckey-utils@0.7.14:
+    resolution: {integrity: sha512-s/mENS+mMnJjDSydy0muBQQHMTWJ1nPe8EiphANZrf+lv/1u35aP9WvWHTWqCBJ21blNIurGF7UoLjtaOpoCFw==}
+
   editorconfig@3.0.2:
     resolution: {integrity: sha512-T0ix8GhtxyKVfUFEcvdNDt3YGqlwkFHbD4/5bgFUDgFmxhI/cSRAeJ87/Sz//Cq8Eam6JX/e23RkoFO71P7aAA==}
     engines: {node: '>=20'}
@@ -4898,8 +4901,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openpgp@6.3.2:
-    resolution: {integrity: sha512-wcZTzHz41LV8Y48zH/JlD1JT8YdNmpWOuMAjQ/podvvCwsjBEU37K3znJh4UQcj3hksE5z9TzvhbUbwzsGvlLQ==}
+  openpgp@6.3.3:
+    resolution: {integrity: sha512-W0foQI+Zb7/TCy7Z50gqZejYe3oJkiZJ9OSV4ImuRT8MmoKOJhtAMvRm6w9STlyYluLiuezG7+0Qdqbcmmx7ig==}
     engines: {node: '>= 18.0.0', typescript: '>= 5.0.0'}
     peerDependencies:
       '@openpgp/web-stream-tools': ~0.3.0
@@ -8811,6 +8814,9 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
+  eckey-utils@0.7.14:
+    optional: true
+
   editorconfig@3.0.2:
     dependencies:
       '@one-ini/wasm': 0.2.1
@@ -10502,7 +10508,9 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openpgp@6.3.2(@openpgp/web-stream-tools@0.3.1):
+  openpgp@6.3.3(@openpgp/web-stream-tools@0.3.1):
+    dependencies:
+      eckey-utils: 0.7.14
     optionalDependencies:
       '@openpgp/web-stream-tools': 0.3.1(@types/node@24.19.2)(typescript@7.0.2)
     optional: true
