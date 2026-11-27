@@ -9,6 +9,7 @@ import * as gitea from './gitea/index.ts';
 import * as github from './github/index.ts';
 import * as gitlab from './gitlab/index.ts';
 import * as local from './local/index.ts';
+import * as onedev from './onedev/index.ts';
 import * as scmm from './scm-manager/index.ts';
 import type { Platform } from './types.ts';
 
@@ -25,4 +26,5 @@ api.set(gitea.id, gitea);
 api.set(github.id, github);
 api.set(gitlab.id, gitlab);
 api.set(local.id, local);
+api.set(onedev.id, onedev);
 api.set(scmm.id, scmm);
