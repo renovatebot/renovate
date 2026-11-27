@@ -101,4 +101,88 @@ export const knownDepTypes = [
     depType: 'kubernetes_stateful_set_v1',
     description: 'A container image in a `kubernetes_stateful_set_v1` resource',
   },
+  {
+    depType: 'google_cloud_run_service',
+    description: 'A container image in a `google_cloud_run_service` resource',
+  },
+  {
+    depType: 'google_cloud_run_v2_service',
+    description:
+      'A container image in a `google_cloud_run_v2_service` resource',
+  },
+  {
+    depType: 'google_cloud_run_v2_worker_pool',
+    description:
+      'A container image in a `google_cloud_run_v2_worker_pool` resource',
+  },
+  {
+    depType: 'google_cloud_run_v2_job',
+    description: 'A container image in a `google_cloud_run_v2_job` resource',
+  },
+  {
+    depType: 'google_app_engine_flexible_app_version',
+    description:
+      'A container image in a `google_app_engine_flexible_app_version` resource',
+  },
+  {
+    depType: 'google_workstations_workstation_config',
+    description:
+      'A container image in a `google_workstations_workstation_config` resource',
+  },
+  {
+    depType: 'google_dataproc_batch',
+    description: 'A container image in a `google_dataproc_batch` resource',
+  },
+  {
+    depType: 'google_dataproc_session_template',
+    description:
+      'A container image in a `google_dataproc_session_template` resource',
+  },
+  {
+    depType: 'google_dataplex_task',
+    description: 'A container image in a `google_dataplex_task` resource',
+  },
+  {
+    depType: 'google_vertex_ai_reasoning_engine',
+    description:
+      'A container image in a `google_vertex_ai_reasoning_engine` resource',
+  },
+  {
+    depType: 'google_vertex_ai_endpoint_with_model_garden_deployment',
+    description:
+      'A container image in a `google_vertex_ai_endpoint_with_model_garden_deployment` resource',
+  },
+  {
+    depType: 'google_firebase_app_hosting_build',
+    description:
+      'A container image in a `google_firebase_app_hosting_build` resource',
+  },
+  {
+    depType: 'google_bigquery_routine',
+    description: 'A container image in a `google_bigquery_routine` resource',
+  },
+  {
+    depType: 'google_cloudbuild_trigger',
+    description: 'A container image in a `google_cloudbuild_trigger` resource',
+  },
+  {
+    depType: 'google_network_services_wasm_plugin',
+    description:
+      'A container image in a `google_network_services_wasm_plugin` resource',
+  },
+  {
+    depType: 'google_dataproc_gdc_spark_application',
+    description:
+      'A container image in a `google_dataproc_gdc_spark_application` resource',
+  },
+  {
+    depType: 'google_clouddeploy_custom_target_type',
+    description:
+      'A container image in a `google_clouddeploy_custom_target_type` resource',
+  },
+  {
+    depType: 'google_clouddeploy_delivery_pipeline',
+    description:
+      'A container image in a `google_clouddeploy_delivery_pipeline` resource',
+  },
 ] as const satisfies readonly DepTypeMetadata[];
