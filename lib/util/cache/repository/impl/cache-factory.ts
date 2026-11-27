@@ -1,6 +1,7 @@
 import type { RepositoryCacheType } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { RepoCache } from '../types.ts';
+import { RepoCacheGCS } from './gcs.ts';
 import { RepoCacheLocal } from './local.ts';
 import { RepoCacheS3 } from './s3.ts';
 
@@ -14,6 +15,8 @@ export class CacheFactory {
     switch (type) {
       case 'local':
         return new RepoCacheLocal(repository, repoFingerprint);
+      case 'gs':
+        return new RepoCacheGCS(repository, repoFingerprint, cacheType);
       case 's3':
         return new RepoCacheS3(repository, repoFingerprint, cacheType);
       default:
