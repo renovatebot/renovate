@@ -238,7 +238,7 @@ The `github-action` manager understands `ratchet` comments, like `# ratchet:acti
 This means that Renovate will:
 
 - update the version of a _pinned_ Ratchet version if needed
-- not delete Ratchet comments after parsing them
+- not delete Ratchet comments after parsing them, and keep the `ratchet:owner/repo@` prefix when it updates the version in the comment
 - keep `# ratchet:exclude` comments
 
 ### Updating `with:` values in GitHub Actions
