@@ -1,10 +1,19 @@
-import { isNullOrUndefined } from '@sindresorhus/is';
+import { isDeepStrictEqual } from 'node:util';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import type { AST } from 'toml-eslint-parser';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import { safeStringify } from '../../../util/stringify.ts';
 import { parseTOMLDocument } from '../../../util/toml.ts';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
+import type {
+  UpdateArtifact,
+  UpdateLockedConfig,
+  UpdateLockedResult,
+} from '../types.ts';
 import * as lockfile from './lockfile.ts';
 import { MiseLockFile } from './schema.ts';
 
@@ -75,16 +84,13 @@ function getVersionValueNode(
     return undefined;
   }
 
-  const table = astTableForTool(content, toolName, toolIndex);
-  const versionKeyValue = table?.body.find(
-    (keyValue) => getVersionKeyValue(keyValue.key) === 'version',
-  );
-  if (versionKeyValue?.value.type !== 'TOMLValue') {
+  const versionNode = astVersionForTool(content, toolName, toolIndex);
+  if (!versionNode) {
     return undefined;
   }
   return {
     currentLockedVersion: lockedTools[toolIndex].version,
-    versionNode: versionKeyValue.value,
+    versionNode,
   };
 }
 
@@ -103,6 +109,183 @@ function astTableForTool(
       node.resolvedKey[1] === toolName &&
       node.resolvedKey[2] === toolIndex,
   );
+}
+
+function astVersionForTool(
+  content: string,
+  toolName: string,
+  toolIndex: number,
+): AST.TOMLValue | undefined {
+  const table = astTableForTool(content, toolName, toolIndex);
+  const value = table?.body.find(
+    (keyValue) => getVersionKeyValue(keyValue.key) === 'version',
+  )?.value;
+  return value?.type === 'TOMLValue' ? value : undefined;
+}
+
+/** Restore selected versions before mise regenerates their metadata. */
+export function restoreSelectedLockedVersions(
+  original: string,
+  updated: string,
+  updatedDeps: UpdateArtifact['updatedDeps'],
+): string {
+  const updates = updatedDeps.flatMap(({ depName, newVersion }) =>
+    isNonEmptyStringAndNotWhitespace(depName) &&
+    isNonEmptyStringAndNotWhitespace(newVersion)
+      ? [{ depName, newVersion }]
+      : [],
+  );
+  if (!updates.length) {
+    return updated;
+  }
+
+  const before = MiseLockFile.parse(original);
+  const after = MiseLockFile.parse(updated);
+  const changes = new Map<number, { end: number; value: string }>();
+  for (const { depName, newVersion } of updates) {
+    const oldEntries = lockfile.getLockedTool(before, depName);
+    const newEntries = lockfile.getLockedTool(after, depName);
+    if (!oldEntries && !newEntries) {
+      continue;
+    }
+    if (!oldEntries || !newEntries || oldEntries.length !== newEntries.length) {
+      throw new Error(`Cannot match original mise lock entries for ${depName}`);
+    }
+    const changedIndexes = newEntries.flatMap(({ version }, index) => {
+      const oldVersion = oldEntries[index].version;
+      return version !== oldVersion &&
+        version === formatLockedVersion(oldVersion, newVersion)
+        ? [index]
+        : [];
+    });
+    if (changedIndexes.length > 1) {
+      throw new Error(`Ambiguous original mise lock entry for ${depName}`);
+    }
+    if (!changedIndexes.length) {
+      continue;
+    }
+    const index = changedIndexes[0];
+    const oldMetadata = { ...oldEntries[index], version: undefined };
+    const newMetadata = { ...newEntries[index], version: undefined };
+    if (!isDeepStrictEqual(oldMetadata, newMetadata)) {
+      throw new Error(`Changed mise lock metadata for ${depName}`);
+    }
+    const oldNode = astVersionForTool(
+      original,
+      getToolName(depName, before),
+      index,
+    );
+    const newNode = astVersionForTool(
+      updated,
+      getToolName(depName, after),
+      index,
+    );
+    if (!oldNode || !newNode) {
+      throw new Error(`Unsupported mise lock version for ${depName}`);
+    }
+    changes.set(newNode.range[0], {
+      end: newNode.range[1],
+      value: original.slice(oldNode.range[0], oldNode.range[1]),
+    });
+  }
+
+  let result = updated;
+  for (const [start, { end, value }] of [...changes].sort(
+    ([left], [right]) => right - left,
+  )) {
+    result = `${result.slice(0, start)}${value}${result.slice(end)}`;
+  }
+  return result;
+}
+
+/** Restore configured selectors after regenerating exact-version lock entries. */
+export function rebindUpdatedToolSelectors(
+  content: string,
+  updatedDeps: UpdateArtifact['updatedDeps'],
+): string {
+  const updates = updatedDeps.flatMap(
+    ({ depName, newVersion, newValue, currentValue, currentVersion }) =>
+      isNonEmptyStringAndNotWhitespace(depName) &&
+      isNonEmptyStringAndNotWhitespace(newVersion)
+        ? [{ depName, newVersion, newValue, currentValue, currentVersion }]
+        : [],
+  );
+  if (!updates.length) {
+    return content;
+  }
+  const parsed = MiseLockFile.parse(content);
+  const changes = new Map<number, { end: number; specifiers: string[] }>();
+  for (const {
+    depName: name,
+    newVersion: version,
+    newValue,
+    currentValue,
+    currentVersion,
+  } of updates) {
+    const entries = lockfile.getLockedTool(parsed, name);
+    if (!entries) {
+      throw new Error(`No regenerated mise lock entry for ${name}`);
+    }
+    // Older lockfile formats do not bind entries to configured selectors.
+    if (entries.every((entry) => !entry.specifiers)) {
+      continue;
+    }
+    const selector = newValue ?? currentValue;
+    if (!isNonEmptyStringAndNotWhitespace(selector)) {
+      throw new Error(`Missing configured mise selector for ${name}`);
+    }
+    const targets = entries.filter(
+      (entry) =>
+        coerceArray(entry.specifiers).includes(version) ||
+        entry.version === version,
+    );
+    if (targets.length !== 1) {
+      throw new Error(
+        `Ambiguous regenerated mise lock entry for ${name}@${version}`,
+      );
+    }
+    const entry = targets[0];
+    if (!entry.specifiers) {
+      throw new Error(`Unsupported mise selector binding for ${name}`);
+    }
+    if (
+      entries.some(
+        (other) => other !== entry && other.specifiers?.includes(selector),
+      )
+    ) {
+      throw new Error(`Conflicting mise lock selector for ${name}@${selector}`);
+    }
+    const table = astTableForTool(
+      content,
+      getToolName(name, parsed),
+      entries.indexOf(entry),
+    );
+    const value = table?.body.find(
+      ({ key }) => getVersionKeyValue(key) === 'specifiers',
+    )?.value;
+    if (!value) {
+      throw new Error(`Unsupported mise selector binding for ${name}`);
+    }
+    const previous =
+      changes.get(value.range[0])?.specifiers ?? entry.specifiers;
+    const replaced = new Set([version, currentVersion, currentValue]);
+    const specifiers = [
+      ...new Set([...previous.filter((item) => !replaced.has(item)), selector]),
+    ];
+    if (
+      specifiers.length !== previous.length ||
+      specifiers.some((item, index) => item !== previous[index])
+    ) {
+      changes.set(value.range[0], { end: value.range[1], specifiers });
+    }
+  }
+  let updatedContent = content;
+  for (const [start, { end, specifiers }] of [...changes].sort(
+    ([left], [right]) => right - left,
+  )) {
+    updatedContent = `${updatedContent.slice(0, start)}${safeStringify(specifiers)}${updatedContent.slice(end)}`;
+  }
+  return updatedContent;
 }
 
 export function updateLockedDependency(
