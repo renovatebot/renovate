@@ -2,6 +2,10 @@ import type { DepTypeMetadata } from '../types.ts';
 
 export const knownDepTypes = [
   {
+    depType: 'requires-python',
+    description: 'The `requires-python` constraint from `[project]`',
+  },
+  {
     depType: 'dependencies',
     description: 'Listed under `[tool.poetry.dependencies]`',
   },
