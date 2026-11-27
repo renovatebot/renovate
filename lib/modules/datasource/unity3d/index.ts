@@ -4,6 +4,7 @@ import * as Unity3dVersioning from '../../versioning/unity3d/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { UnityReleasesJSON } from './schema.ts';
+import { isPublicPageUrl } from './url.ts';
 
 export class Unity3dDatasource extends Datasource {
   static readonly baseUrl =
@@ -56,6 +57,10 @@ export class Unity3dDatasource extends Datasource {
     return registryUrl;
   }
 
+  private getPageUrl(registryUrl: string, offset: number): string {
+    return `${registryUrl}&limit=${Unity3dDatasource.limit}&offset=${offset}`;
+  }
+
   async getByStream(
     registryUrl: string | undefined,
     withHash: boolean,
@@ -79,7 +84,7 @@ export class Unity3dDatasource extends Datasource {
       offset += Unity3dDatasource.limit
     ) {
       const response = await this.http.getJson(
-        `${translatedRegistryUrl}&limit=${Unity3dDatasource.limit}&offset=${offset}`,
+        this.getPageUrl(translatedRegistryUrl, offset),
         UnityReleasesJSON,
       );
 
@@ -115,6 +120,9 @@ export class Unity3dDatasource extends Datasource {
       {
         key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
+        cacheable: isPublicPageUrl(
+          this.getPageUrl(this.translateStream(config.registryUrl!), 0),
+        ),
       },
       () => this.fetchReleases(config),
     );
