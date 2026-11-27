@@ -87,6 +87,13 @@ export async function extractPackageFile(
   }
 
   const toolEntries: [string, MiseTool, string][] = [];
+  const javaSettings = misefile.settings?.java;
+  const shorthandVendor = isObject(javaSettings)
+    ? (javaSettings as Record<string, unknown>).shorthand_vendor
+    : undefined;
+  const javaShorthandVendor = isNonEmptyString(shorthandVendor)
+    ? shorthandVendor
+    : undefined;
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
     toolEntries.push([name, toolData, 'tools']);
@@ -139,7 +146,13 @@ export async function extractPackageFile(
   }
 
   const toolDeps = toolEntries.map(([name, toolData, depType]) =>
-    extractToolEntry(name, toolData, depType, lockFileData),
+    extractToolEntry(
+      name,
+      toolData,
+      depType,
+      lockFileData,
+      javaShorthandVendor,
+    ),
   );
   const deps = [...toolDeps, ...taskFileDeps, ...includeDeps];
   const result: PackageFileContent = { deps };
@@ -452,6 +465,7 @@ function extractSelectorLockedDependency(
   toolConfig: StaticTooling | BackendToolingConfig | null,
   lockedVersion: string,
   depType: string,
+  javaShorthandVendor?: string,
 ): MiseDependency | null {
   const selectorConfig = getSelectorConfig(
     version,
@@ -464,11 +478,12 @@ function extractSelectorLockedDependency(
     return null;
   }
 
-  const resolvedToolConfig = getToolConfig(
+  const resolvedToolConfig = getMiseToolConfig(
     backend,
     toolName,
     lockedVersion,
     options,
+    javaShorthandVendor,
   );
   if (!resolvedToolConfig) {
     return null;
@@ -491,6 +506,7 @@ function extractToolEntry(
   toolData: MiseTool,
   depType: string,
   lockFileData?: MiseLockFile,
+  javaShorthandVendor?: string,
 ): MiseDependency {
   const toolValue = getPrimaryToolValue(toolData);
   const version = parseVersion(toolValue);
@@ -507,7 +523,13 @@ function extractToolEntry(
   const toolConfig =
     version === null
       ? null
-      : getToolConfig(backend, toolName, version, options);
+      : getMiseToolConfig(
+          backend,
+          toolName,
+          version,
+          options,
+          javaShorthandVendor,
+        );
   const dependency = createDependency(depName, version, toolConfig, depType);
   const lockedVersion = lockFileData
     ? getLockedVersion(lockFileData, dependency.depName)
@@ -523,6 +545,7 @@ function extractToolEntry(
       toolConfig,
       lockedVersion,
       depType,
+      javaShorthandVendor,
     );
     if (selectorDependency) {
       return selectorDependency;
@@ -533,6 +556,27 @@ function extractToolEntry(
     return { ...dependency, lockedVersion };
   }
   return dependency;
+}
+
+function getMiseToolConfig(
+  backend: string,
+  toolName: string,
+  version: string,
+  options: MiseToolOptions,
+  javaShorthandVendor?: string,
+): StaticTooling | BackendToolingConfig | null {
+  const toolConfig = getToolConfig(backend, toolName, version, options);
+  const isCoreBackend = backend === '' || backend === 'core';
+  const isCoreJava = isCoreBackend && toolName === 'java';
+  if (
+    javaShorthandVendor === 'openjdk' &&
+    isCoreJava &&
+    regEx(/^\d/).test(version) &&
+    toolConfig?.datasource === JavaVersionDatasource.id
+  ) {
+    return { ...toolConfig, packageName: 'openjdk-jdk' };
+  }
+  return toolConfig;
 }
 
 function getConfiguredDepName(

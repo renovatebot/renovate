@@ -47,6 +47,7 @@ export const MiseFile = Toml.pipe(
     tools: z.record(z.string(), MiseTool).default({}),
     tasks: z.record(z.string(), MiseTask).default({}),
     include: z.array(z.string()).catch([]),
+    settings: z.record(z.string(), z.unknown()).optional(),
   }),
 );
 export type MiseFile = z.infer<typeof MiseFile>;

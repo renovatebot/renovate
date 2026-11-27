@@ -33,6 +33,11 @@ describe('modules/datasource/java-version/common', () => {
         expect(config.vendor).toBe('adoptium');
       });
 
+      it('detects the OpenJDK package', () => {
+        const config = parsePackage('openjdk-jdk');
+        expect(config.vendor).toBe('openjdk');
+      });
+
       it('defaults to adoptium for adoptium-jdk', () => {
         const config = parsePackage('adoptium-jdk');
         expect(config.vendor).toBe('adoptium');
