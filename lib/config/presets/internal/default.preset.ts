@@ -565,7 +565,7 @@ See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for mo
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
+      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use. Using `fix` allows a dependency that is user-facing, for instance as it is shipped to the downstream user, to be more visible in the release notes and/or trigger a release in some tooling',
     packageRules: [
       {
         matchPackageNames: ['*'],
