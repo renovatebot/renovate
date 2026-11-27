@@ -42,6 +42,7 @@ export class GlobalConfig {
     'endpoint',
     'executionTimeout',
     'exposeAllEnv',
+    'gitCredentialPassing',
     'gitTimeout',
     'githubTokenWarn',
     'goEnvFromHostRules',
