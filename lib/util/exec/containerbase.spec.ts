@@ -1,3 +1,4 @@
+import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { applyConstraintsFiltering } from '../../modules/datasource/common.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
@@ -11,7 +12,15 @@ import {
 } from './containerbase.ts';
 import type { ToolConstraint, ToolName } from './types.ts';
 
+const containerbase = vi.hoisted(() => ({ version: '14.0.0' }));
+
 vi.mock('../../modules/datasource/index.ts');
+vi.mock('@renovatebot/base-image', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@renovatebot/base-image')>()),
+  get packageVersion() {
+    return containerbase.version;
+  },
+}));
 
 const datasource = vi.mocked(_datasource);
 
@@ -23,6 +32,7 @@ describe('util/exec/containerbase', () => {
     });
 
     it('returns false if binarySource is not install', () => {
+      GlobalConfig.set({ binarySource: 'global' });
       expect(isDynamicInstall()).toBeFalse();
     });
 
@@ -130,6 +140,25 @@ describe('util/exec/containerbase', () => {
       await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
         '2.0.14',
       );
+    });
+
+    it('prefers a stable version above latest to an unstable one', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        tags: {
+          latest: '2.0.14',
+        },
+        releases: [
+          { version: '2.0.14' },
+          { version: '2.1.0' },
+          { version: '2.2.0-pre.0' },
+        ],
+      });
+      await expect(
+        resolveConstraint({
+          toolName: 'pnpm',
+          constraint: '>=2.1.0 || >=2.2.0-pre.0',
+        }),
+      ).resolves.toBe('2.1.0');
     });
 
     it('supports rust release channels', async () => {
@@ -349,10 +378,166 @@ describe('util/exec/containerbase', () => {
       await expect(
         resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
       ).resolves.toBe('12.0.0');
+      // the containerbase constraint is kept
       expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
-        datasource: 'npm',
-        packageName: 'npm',
+        datasource: 'containerbase',
+        packageName: 'npm?system=true',
         versioning: 'npm',
+        constraintsFiltering: 'strict',
+        constraints: { containerbase: containerbase.version },
+      });
+    });
+
+    it('filters the releases of the containerbase datasource', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/npm.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'npm',
+          updatedAt: '2026-10-09T03:00:00.000Z',
+          versions: [
+            {
+              version: '12.0.0',
+              constraints: { node: '^22.22.2 || >=24.15.0' },
+            },
+            {
+              version: '11.0.0',
+              constraints: { node: '^20.17.0 || >=22.9.0' },
+            },
+          ],
+        });
+
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('11.0.0');
+    });
+
+    it.each`
+      toolName    | parent      | parentVersion  | constraints
+      ${'pdm'}    | ${'python'} | ${'3.12.4'}    | ${['>=3.13', '>=3.9']}
+      ${'elixir'} | ${'erlang'} | ${'26.2.5.16'} | ${['>=27.0.0', '>=25.0.0 <28.0.0']}
+    `(
+      'filters $toolName by the $parent versioning',
+      async ({ toolName, parent, parentVersion, constraints }) => {
+        const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+          '../../modules/datasource/index.ts',
+        );
+        datasource.getPkgReleases.mockImplementation(getPkgReleases);
+        httpMock
+          .scope('https://containerbase.github.io/tool-versions')
+          .get('/index.json')
+          .reply(404)
+          .get(`/v1/${toolName}.json`)
+          .reply(200, {
+            $schema:
+              'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+            tool: toolName,
+            updatedAt: '2026-11-17T03:00:00.000Z',
+            versions: [
+              { version: '2.0.0', constraints: { [parent]: constraints[0] } },
+              { version: '1.0.0', constraints: { [parent]: constraints[1] } },
+              { version: '0.9.0' },
+            ],
+          });
+
+        await expect(
+          resolveConstraint({ toolName }, { [parent]: parentVersion }),
+        ).resolves.toBe('1.0.0');
+      },
+    );
+
+    it('resolves rust nightlies with the containerbase datasource', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/rust.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'rust',
+          updatedAt: '2026-10-20T03:00:00.000Z',
+          versions: [
+            { version: 'nightly-2026-10-20', prerelease: true },
+            { version: 'nightly-2026-10-19', prerelease: true },
+            { version: '1.91.0' },
+          ],
+        });
+
+      await expect(
+        resolveConstraint({ toolName: 'rust', constraint: 'nightly' }),
+      ).resolves.toBe('nightly-2026-10-20');
+    });
+
+    it('skips the releases which need a newer containerbase', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/jb.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'jb',
+          updatedAt: '2026-10-20T03:00:00.000Z',
+          minCb: [{ version: '0.6.0.1', cb: '15.0.0' }],
+          versions: [{ version: '0.6.0.1' }, { version: '0.6.0' }],
+        });
+
+      await expect(resolveConstraint({ toolName: 'jb' })).resolves.toBe(
+        '0.6.0',
+      );
+    });
+
+    it('skips the containerbase constraint for a development build', async () => {
+      containerbase.version = '0.0.0-PLACEHOLDER';
+      onTestFinished(() => {
+        containerbase.version = '14.0.0';
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.1.0' }],
+      });
+
+      await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
+        '2.1.0',
+      );
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'containerbase',
+        packageName: 'composer?system=true',
+        versioning: 'composer',
+      });
+    });
+
+    it('looks up a tool without its extractVersion', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.2.0' }],
+      });
+
+      await expect(resolveConstraint({ toolName: 'apm' })).resolves.toBe(
+        '1.2.0',
+      );
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'containerbase',
+        packageName: 'apm?system=true',
+        versioning: 'semver',
+        constraintsFiltering: 'strict',
+        constraints: { containerbase: containerbase.version },
       });
     });
   });
@@ -391,9 +576,11 @@ describe('util/exec/containerbase', () => {
         'install-tool composer 2.1.0',
       ]);
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
-        datasource: 'github-releases',
-        packageName: 'containerbase/composer-prebuild',
+        datasource: 'containerbase',
+        packageName: 'composer?system=true',
         versioning: 'composer',
+        constraintsFiltering: 'strict',
+        constraints: { containerbase: containerbase.version },
       });
     });
 
@@ -407,11 +594,33 @@ describe('util/exec/containerbase', () => {
         'install-tool npm 2.1.0',
       ]);
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
-        datasource: 'npm',
-        packageName: 'npm',
+        datasource: 'containerbase',
+        packageName: 'npm?system=true',
         versioning: 'npm',
         constraintsFiltering: 'strict',
-        constraints: { node: '20.17.0' },
+        constraints: { node: '20.17.0', containerbase: containerbase.version },
+        constraintsVersioning: { node: 'node' },
+      });
+    });
+
+    it('sets no versioning for resolved constraints without a tool config', async () => {
+      await expect(
+        resolveConstraint(
+          { toolName: 'composer' },
+          { ghActionsLock: 'v0.1.7', apko: '1.5.1' },
+        ),
+      ).resolves.toBe('2.1.0');
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'containerbase',
+        packageName: 'composer?system=true',
+        versioning: 'composer',
+        constraintsFiltering: 'strict',
+        constraints: {
+          ghActionsLock: 'v0.1.7',
+          apko: '1.5.1',
+          containerbase: containerbase.version,
+        },
+        constraintsVersioning: {},
       });
     });
 

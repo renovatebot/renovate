@@ -1,6 +1,8 @@
 import {
   type ToolMetadata,
   isContainerbase,
+  isReleaseVersion,
+  packageVersion,
   tools,
 } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
@@ -283,28 +285,61 @@ let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
 > | null = null;
 
+/**
+ * Looks up the releases of a tool which containerbase can install on this
+ * host: for its arch, its containerbase version and, when possible, the
+ * runtime versions already resolved for the other tools.
+ */
 async function getPkgReleases(
-  toolConfig: ToolConfig,
+  toolName: ToolName,
+  { versioning }: ToolConfig,
   resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
+  // the containerbase data has the versions without prefixes, so no
+  // `extractVersion`, and only the releases with files for the host arch
+  const config: ToolConfig = {
+    datasource: 'containerbase',
+    packageName: `${toolName}?system=true`,
+    versioning,
+  };
+  // drop releases which need a newer containerbase, a development build has no
+  // release version and skips it like the containerbase cli
+  const containerbase: Partial<Record<ConstraintName, string>> =
+    isReleaseVersion(packageVersion) ? { containerbase: packageVersion } : {};
   if (Object.keys(resolvedTools).length) {
+    // each resolved tool is compared with its own versioning, like a python
+    // version with `>=3.10`, not with the versioning of the looked up tool
+    const constraintsVersioning: Partial<Record<ConstraintName, string>> = {};
+    for (const name of Object.keys(resolvedTools)) {
+      if (isToolName(name) && allToolConfig[name]) {
+        constraintsVersioning[name] = allToolConfig[name].versioning;
+      }
+    }
     // drop releases whose runtime constraints (e.g. `engines.node`) exclude the runtime versions we install
     const compatible = await getPkgReleases({
-      ...toolConfig,
+      ...config,
       constraintsFiltering: 'strict',
-      constraints: { ...resolvedTools },
+      constraints: { ...resolvedTools, ...containerbase },
+      constraintsVersioning,
     });
     if (compatible?.releases.length) {
       return compatible;
     }
     logger.debug(
-      { toolConfig, resolvedTools },
+      { toolConfig: config, resolvedTools },
       'No tool releases compatible with resolved tools - ignoring their constraints',
     );
   }
-  return getPkgReleases(toolConfig);
+  if (!Object.keys(containerbase).length) {
+    return getPkgReleases(config);
+  }
+  return getPkgReleases({
+    ...config,
+    constraintsFiltering: 'strict',
+    constraints: containerbase,
+  });
 }
 
 export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
@@ -375,7 +410,7 @@ export async function resolveConstraint(
     }
   }
 
-  const pkgReleases = await getPkgReleases(toolConfig, resolvedTools);
+  const pkgReleases = await getPkgReleases(toolName, toolConfig, resolvedTools);
   const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
@@ -387,9 +422,12 @@ export async function resolveConstraint(
     (r) => !constraint || versioning.matches(r.version, constraint),
   );
 
-  const stableMatchingVersion = matchingReleases
-    .filter((r) => isStable(r.version, versioning, pkgReleases?.tags?.latest))
-    .pop()?.version;
+  const latest = pkgReleases?.tags?.latest;
+  // a stable version above `latest` is still better than an unstable one
+  const stableMatchingVersion =
+    matchingReleases.findLast((r) => isStable(r.version, versioning, latest))
+      ?.version ??
+    matchingReleases.findLast((r) => isStable(r.version, versioning))?.version;
   if (stableMatchingVersion) {
     logger.debug(
       { toolName, constraint, resolvedVersion: stableMatchingVersion },
@@ -408,7 +446,7 @@ export async function resolveConstraint(
   }
 
   const stableVersion = releases
-    .filter((r) => isStable(r.version, versioning, pkgReleases?.tags?.latest))
+    .filter((r) => isStable(r.version, versioning, latest))
     .pop()?.version;
   if (stableVersion) {
     logger.warn(

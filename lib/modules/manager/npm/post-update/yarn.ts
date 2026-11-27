@@ -313,8 +313,14 @@ export async function generateLockFile(
       });
     } else {
       toolConstraints.push(yarnTool);
-      if (isYarn1 && minYarnVersion) {
-        yarnTool.constraint = yarnCompatibility;
+      if (isYarn1 && yarnRange && minYarnVersion) {
+        // the `yarn` tool also has yarn 2+ releases, so cap open ranges like `>=1.22.0`
+        yarnTool.constraint = semver.subset(yarnRange, '<2')
+          ? yarnCompatibility
+          : yarnRange
+              .split('||')
+              .map((range) => `${range} <2`)
+              .join(' || ');
       }
     }
 
