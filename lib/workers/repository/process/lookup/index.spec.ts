@@ -28,6 +28,7 @@ import { id as nodeVersioningId } from '../../../../modules/versioning/node/inde
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
+import { id as rezVersioningId } from '../../../../modules/versioning/rez/index.ts';
 import { id as semverVersioningId } from '../../../../modules/versioning/semver/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
@@ -4884,6 +4885,34 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('keeps the versionCompatibility variant for vulnerability fixes', async () => {
+      config.currentValue = '33.7.1-jre';
+      config.packageName = 'com.google.guava:guava';
+      config.versioning = mavenVersioningId;
+      config.versionCompatibility =
+        '^(?<version>.+)-(?<compatibility>jre|android)$';
+      config.datasource = MavenDatasource.id;
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '33.7.2';
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '33.7.1-android' },
+          { version: '33.7.1-jre' },
+          { version: '33.7.2-android' },
+          { version: '33.7.2-jre' },
+          { version: '33.8.0-android' },
+          { version: '33.8.0-jre' },
+        ],
+      });
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toMatchObject([{ newValue: '33.7.2-jre' }]);
+    });
+
     it('handles versionCompatibility mismatch', async () => {
       config.currentValue = '18.10.0-alpine';
       config.packageName = 'node';
@@ -6558,6 +6587,69 @@ describe('workers/repository/process/lookup/index', () => {
           newName: 'r',
           newValue: '2.0.0',
         },
+      ]);
+    });
+
+    it.each([
+      {
+        setting: 'replacementVersion',
+        rule: { replacementVersion: '3.2.1' },
+      },
+      {
+        setting: 'replacementVersionTemplate',
+        rule: {
+          replacementVersionTemplate:
+            "{{{replace '1.0' '3.2.1' currentValue}}}",
+        },
+      },
+    ])(
+      'preserves the full Rez $setting for a Dockerfile image replacement',
+      async ({ rule }) => {
+        config.manager = 'dockerfile';
+        config.currentValue = '1.0';
+        config.packageName = 'old/image';
+        config.replacementName = 'new/image';
+        config.datasource = DockerDatasource.id;
+        config.versioning = rezVersioningId;
+        config = { ...config, ...rule };
+        getDockerReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.0' }],
+        });
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toEqual([
+          {
+            updateType: 'replacement',
+            newName: 'new/image',
+            newValue: '3.2.1',
+          },
+        ]);
+      },
+    );
+
+    it('keeps Rez precision for an ordinary Dockerfile image update', async () => {
+      config.manager = 'dockerfile';
+      config.currentValue = '1.0';
+      config.packageName = 'old/image';
+      config.datasource = DockerDatasource.id;
+      config.versioning = rezVersioningId;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0' }, { version: '3.2.1' }],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        expect.objectContaining({
+          newVersion: '3.2.1',
+          newValue: '3.2',
+          updateType: 'major',
+        }),
       ]);
     });
 

@@ -327,10 +327,13 @@ describe('workers/repository/update/pr/index', () => {
         });
 
         it('handles error for PR that already exists', async () => {
-          const err: Error & { body?: unknown } = new Error('unknown');
-          err.body = {
-            message: 'Validation failed',
-            errors: [{ message: 'A pull request already exists' }],
+          const err: Error & { response?: unknown } = new Error('unknown');
+          err.response = {
+            statusCode: 422,
+            body: {
+              message: 'Validation Failed',
+              errors: [{ message: 'A pull request already exists' }],
+            },
           };
           platform.createPr.mockRejectedValueOnce(err);
 
@@ -741,6 +744,44 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(participants.addParticipants).toHaveBeenCalled();
+      });
+
+      it('does not add assignees for PR automerge with non-red status', async () => {
+        const changedPr: Pr = {
+          ...pr,
+          hasAssignees: false,
+        };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(participants.addParticipants).not.toHaveBeenCalled();
+      });
+
+      it('automerges branch without pending check when stabilityStatus is yellow', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          stabilityStatus: 'yellow',
+          prNotPendingHours: 1,
+        });
+
+        expect(res).toEqual({
+          type: 'without-pr',
+          prBlockedBy: 'BranchAutomerge',
+        });
+        expect(git.getBranchLastCommitTime).not.toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
       });
 
       it('skips branch automerge and forces PR creation due to artifact errors', async () => {
@@ -1201,7 +1242,7 @@ describe('workers/repository/update/pr/index', () => {
             > ❗ **Important**
             >
             > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
-            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md#githubcom-token-for-changelogs-and-tools).
           `,
         ]);
       });

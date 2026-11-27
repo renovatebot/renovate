@@ -9,7 +9,9 @@ import type {
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as hostRules from '../../../../util/host-rules.ts';
+import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
+import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import type { Pep621ManagerData } from '../types.ts';
@@ -386,6 +388,221 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
         },
       ]);
+    });
+
+    describe('lock-file-only updates', () => {
+      const privateCacheDir = upath.join('/tmp/cache/__renovate-private-cache');
+      const overrideFile = expect.stringMatching(
+        /^\/tmp\/cache\/__renovate-private-cache\/pdm-override-[0-9a-f-]+\.txt$/,
+      );
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          currentValue: '>=1.0.0',
+          newValue: '>=1.0.0',
+          newVersion: '1.2.0',
+          isLockfileUpdate: true,
+        },
+        // pdm resolves a range update within the new range
+        {
+          packageName: 'dep2',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          currentValue: '>=1.0.0',
+          newValue: '>=2.0.0',
+          newVersion: '2.0.0',
+        },
+        {
+          packageName: 'dep3',
+          depType: depTypes.optionalDependencies,
+          datasource: PypiDatasource.id,
+          managerData: { depGroup: 'group1' },
+          newVersion: '3.0.0',
+          isLockfileUpdate: true,
+        },
+        // a git dependency has no version to pin
+        {
+          packageName: 'dep4',
+          depType: depTypes.dependencies,
+          datasource: GitTagsDatasource.id,
+          newVersion: 'v4.0.0',
+          isLockfileUpdate: true,
+        },
+        // no version was determined, so let pdm resolve it
+        {
+          packageName: 'dep5',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          isLockfileUpdate: true,
+        },
+      ];
+
+      beforeEach(() => {
+        GlobalConfig.set(adminConfig);
+        fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+        fs.privateCacheDir.mockReturnValue(privateCacheDir);
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      });
+
+      it.each`
+        constraint
+        ${undefined}
+        ${'2.17.0'}
+        ${'>=2.17.0'}
+      `(
+        'pins the versions with an override file for pdm $constraint',
+        async ({ constraint }: { constraint: string | undefined }) => {
+          const execSnapshots = mockExecAll();
+
+          const result = await processor.updateArtifacts(
+            {
+              packageFileName: 'pyproject.toml',
+              newPackageFileContent: '',
+              config: { constraints: { pdm: constraint } },
+              updatedDeps,
+            },
+            parsePyProject('')!,
+          );
+
+          expect(result).toEqual([
+            {
+              file: {
+                contents: 'changed test content',
+                path: 'pdm.lock',
+                type: 'addition',
+              },
+            },
+          ]);
+          expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
+            overrideFile,
+            'dep1==1.2.0\ndep3==3.0.0\n',
+          );
+          const [[path]] = fs.outputCacheFile.mock.calls;
+          expect(execSnapshots).toMatchObject([
+            {
+              cmd: `pdm update --no-sync --update-eager --override ${path} dep1 dep2 dep4 dep5`,
+            },
+            {
+              cmd: `pdm update --no-sync --update-eager --override ${path} -G group1 dep3`,
+            },
+          ]);
+          expect(fs.rmCache).toHaveBeenCalledExactlyOnceWith(path);
+        },
+      );
+
+      it('removes the override file when pdm fails', async () => {
+        mockExecAll(new Error('pdm failed'));
+
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: {},
+            updatedDeps,
+          },
+          parsePyProject('')!,
+        );
+
+        expect(result).toEqual([
+          { artifactError: { fileName: 'pdm.lock', stderr: 'pdm failed' } },
+        ]);
+        const [[path]] = fs.outputCacheFile.mock.calls;
+        expect(path).toEqual(overrideFile);
+        expect(fs.rmCache).toHaveBeenCalledExactlyOnceWith(path);
+      });
+
+      it('writes no override file without a lock-file-only update', async () => {
+        const execSnapshots = mockExecAll();
+
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: {},
+            updatedDeps: [updatedDeps[1]],
+          },
+          parsePyProject('')!,
+        );
+
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'pdm update --no-sync --update-eager dep2' },
+        ]);
+        expect(fs.outputCacheFile).not.toHaveBeenCalled();
+        expect(fs.rmCache).not.toHaveBeenCalled();
+      });
+
+      it('does not pin a dep which the lock file holds at several versions', async () => {
+        const execSnapshots = mockExecAll();
+
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: {},
+            updatedDeps: [
+              updatedDeps[0],
+              {
+                packageName: 'numpy',
+                depType: depTypes.dependencies,
+                datasource: PypiDatasource.id,
+                newVersion: '2.2.6',
+                isLockfileUpdate: true,
+                managerData: { hasMultipleLockedEntries: true },
+              },
+            ],
+          },
+          parsePyProject('')!,
+        );
+
+        expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
+          overrideFile,
+          'dep1==1.2.0\n',
+        );
+        const [[path]] = fs.outputCacheFile.mock.calls;
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: `pdm update --no-sync --update-eager --override ${path} dep1 numpy`,
+          },
+        ]);
+      });
+
+      it.each`
+        constraint
+        ${'2.16.1'}
+        ${'<2.17'}
+        ${'>=2.10.0'}
+        ${'>=2.17,<3'}
+      `(
+        'does not pin the versions for pdm $constraint',
+        async ({ constraint }: { constraint: string }) => {
+          const execSnapshots = mockExecAll();
+
+          await processor.updateArtifacts(
+            {
+              packageFileName: 'pyproject.toml',
+              newPackageFileContent: '',
+              config: { constraints: { pdm: constraint } },
+              updatedDeps,
+            },
+            parsePyProject('')!,
+          );
+
+          expect(execSnapshots).toMatchObject([
+            { cmd: 'pdm update --no-sync --update-eager dep1 dep2 dep4 dep5' },
+            { cmd: 'pdm update --no-sync --update-eager -G group1 dep3' },
+          ]);
+          expect(fs.outputCacheFile).not.toHaveBeenCalled();
+          expect(fs.rmCache).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalledWith(
+            { constraint },
+            expect.stringContaining('updating without pinning versions'),
+          );
+        },
+      );
     });
 
     it('sets Git environment variables', async () => {

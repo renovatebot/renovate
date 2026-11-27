@@ -1,4 +1,5 @@
 // TODO #22198
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -40,6 +41,7 @@ export async function checkAutoMerge(
     automergeStrategy,
     pruneBranchAfterAutomerge,
     automergeComment,
+    automergeLabel,
     ignoreTests,
     rebaseRequested,
   } = config;
@@ -53,16 +55,20 @@ export async function checkAutoMerge(
   }
   const mergeQueueEnabled =
     await platform.isBranchMergeQueueEnabled?.(baseBranch);
-  if (mergeQueueEnabled && (await platform.isPrInMergeQueue?.(pr.number))) {
-    logger.debug(`PR #${pr.number} is already in the merge queue`);
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'InMergeQueue',
-    };
+  if (mergeQueueEnabled) {
+    const prInMergeQueue = await platform.isPrInMergeQueue?.(pr.number);
+    if (prInMergeQueue) {
+      logger.debug(`PR #${pr.number} is already in the merge queue`);
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      };
+    }
   }
-  const isConflicted =
-    config.isConflicted ??
-    (await scm.isBranchConflicted(baseBranch, branchName));
+  let isConflicted = config.isConflicted;
+  if (isNullOrUndefined(isConflicted)) {
+    isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
+  }
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -125,6 +131,25 @@ export async function checkAutoMerge(
       topic: null,
       content: automergeComment!,
     });
+    return { automerged: true, branchRemoved: false };
+  }
+  if (automergeType === 'label') {
+    // TODO: types (#22198)
+    logger.debug(`Applying automerge label: ${automergeLabel!}`);
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(`DRY-RUN: Would add automerge label to PR #${pr.number}`);
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+    }
+    if (!pr.labels?.includes(automergeLabel!)) {
+      await platform.updatePr({
+        number: pr.number,
+        prTitle: pr.title,
+        addLabels: [automergeLabel!],
+      });
+    }
     return { automerged: true, branchRemoved: false };
   }
   // Let's merge this

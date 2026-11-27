@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { isScheduledNow } from './schedule.ts';
@@ -19,6 +20,7 @@ export type AutomergeResult =
 
 export async function tryBranchAutomerge(
   config: RenovateConfig,
+  branchPr: Pr | null,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
@@ -27,11 +29,7 @@ export async function tryBranchAutomerge(
   if (!isScheduledNow(config, 'automergeSchedule')) {
     return 'off schedule';
   }
-  const existingPr = await platform.getBranchPr(
-    config.branchName!,
-    config.baseBranch,
-  );
-  if (existingPr) {
+  if (branchPr) {
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(

@@ -152,6 +152,11 @@ export function getAuthenticationRules(
   return authenticationRules;
 }
 
+function hasCredentials(rule: HostRule): boolean {
+  const basicAuth = rule.username && rule.password;
+  return !!(rule.token ?? basicAuth);
+}
+
 /**
  * Appends Git authentication for the repository `url` from the credentials registered from URL credentials for it with `hostType`, a username without a password as a percent-encoded token; configured host rules come through `getAll()` instead.
  * @returns a new environment without modifying the input
@@ -207,7 +212,7 @@ export function getGitEnvironmentVariables(
 
   // filter rules without `matchHost` and `token` or username and password and github api github rules
   const hostRules = getAll()
-    .filter((r) => r.matchHost && (r.token ?? (r.username && r.password)))
+    .filter((r) => r.matchHost && hasCredentials(r))
     .filter((r) => !gitHubHostRule || !githubApiUrls.has(r.matchHost!));
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables

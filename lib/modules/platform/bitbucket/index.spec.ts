@@ -1612,6 +1612,10 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
+  it('returns the maximum PR body length', () => {
+    expect(bitbucket.maxBodyLength()).toBe(100000);
+  });
+
   describe('massageMarkdown()', () => {
     it('removes html tags', () => {
       const prBody =

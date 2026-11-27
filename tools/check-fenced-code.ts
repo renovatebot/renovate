@@ -13,6 +13,7 @@ import MarkdownIt from 'markdown-it';
 import { GlobalConfig } from '../lib/config/global.ts';
 import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
+import { presets as globalPresets } from '../lib/config/presets/internal/global.preset.ts';
 import type { RenovateConfig } from '../lib/config/types.ts';
 import { validateConfig } from '../lib/config/validation.ts';
 import { init } from '../lib/logger/index.ts';
@@ -126,10 +127,13 @@ async function checkValidJs(
 }
 
 function isJsCheckAllowed(file: string): boolean {
+  const relativeFile = path.relative(process.cwd(), file);
+  if (relativeFile.startsWith(`docs${path.sep}`)) {
+    return true;
+  }
   return (
-    file.startsWith('docs/') ||
-    (file.startsWith('lib/') &&
-      path.basename(file).toLowerCase() === 'readme.md')
+    relativeFile.startsWith(`lib${path.sep}`) &&
+    path.basename(relativeFile).toLowerCase() === 'readme.md'
   );
 }
 
@@ -187,9 +191,11 @@ async function processFile(file: string): Promise<void> {
 
     const lang = token.info.trim().split(/\s+/)[0];
     const isJsFamily = lang === 'js' || lang === 'javascript';
+    if (isJsFamily && !isJsCheckAllowed(file)) {
+      continue;
+    }
     if (
       !['json', 'jsonc', 'js', 'javascript'].includes(lang) ||
-      (isJsFamily && !isJsCheckAllowed(file)) ||
       tokens.at(index - 2)?.content === fenceCheckDisableComment
     ) {
       continue;
@@ -256,16 +262,24 @@ void (async () => {
   GlobalConfig.set({
     // any environment vars that any repository configuration in the documentation references
     allowedEnv: [
+      // In a real deployment, we'd use `globalExtends: ['global:safeEnv']`, but when validating like this, `GlobalConfig.set()` does not resolve presets, so we need to inline the `allowedEnv` values
+      ...globalPresets.safeEnv.allowedEnv!,
       'SOME_ENV_VARIABLE',
-      'GONOSUMDB',
       'SOME_ENV_*',
       'EXTRA_ENV_NAME',
     ],
   });
 
-  const files = await glob(markdownGlob);
+  let files = process.argv.slice(2);
+  if (files.length === 0) {
+    files = await glob(markdownGlob);
+  }
 
   for (const file of files) {
+    if (path.extname(file).toLowerCase() !== '.md') {
+      throw new Error(`Expected a Markdown (.md) file: ${file}`);
+    }
+
     await processFile(file);
   }
 

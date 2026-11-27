@@ -9,14 +9,7 @@ import { testShards } from './tools/test/shards.ts';
 import { normalizePattern } from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
-const agentHook = !!process.env.RENOVATE_AGENT_HOOK;
-
-let reporters: string[] = ['default'];
-if (ci) {
-  reporters = ['default', 'github-actions', 'junit'];
-} else if (agentHook) {
-  reporters = ['minimal'];
-}
+const reporters = ci ? ['default', 'github-actions', 'junit'] : ['default'];
 
 /**
  * Generates Vitest config for sharded test run.
@@ -92,6 +85,10 @@ export default defineConfig(() =>
         reporters,
         mockReset: true,
         unstubEnvs: true,
+        deps: {
+          // Import CommonJS packages like Node does, without copying default exports onto namespaces
+          interopDefault: false,
+        },
         // Inlined so specs can mock `node:fs/promises` for these packages
         server: {
           deps: { inline: ['@renovatebot/base-image', '@containerbase/base'] },

@@ -3,6 +3,7 @@ import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
 import { logger } from '../../../logger/index.ts';
+import { getToolSettingsOptions } from '../../../util/exec/index.ts';
 import {
   localPathExists,
   readLocalFile,
@@ -14,6 +15,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { isPackageManagerDepType } from './dep-types.ts';
 import type { NpmManagerData } from './types.ts';
 import { updateDependency } from './update/dependency/index.ts';
 
@@ -65,8 +67,7 @@ async function handlePackageManagerUpdates(
     updateArtifactsConfig;
   const packageManagerUpdates = updatedDeps.filter(
     (dep) =>
-      (dep.depType === 'packageManager' ||
-        dep.depType === 'devEngines.packageManager') &&
+      isPackageManagerDepType(dep.depType) &&
       dep.currentValue &&
       regEx(versionWithHashRegString).test(dep.currentValue),
   );
@@ -162,6 +163,15 @@ async function updatePnpmWorkspace(
     return null;
   }
 
+  const { pnpmMinimumReleaseAgeExcludeSecurityUpdates } =
+    getToolSettingsOptions(updateArtifactsConfig.config.toolSettings);
+  if (!pnpmMinimumReleaseAgeExcludeSecurityUpdates) {
+    logger.debug(
+      'toolSettings.pnpmMinimumReleaseAgeExcludeSecurityUpdates is disabled, not attempting to update pnpm-workspace.yaml',
+    );
+    return null;
+  }
+
   const pnpmLockFile = upgrades[0].managerData?.pnpmLockFile;
   if (!isString(pnpmLockFile)) {
     logger.debug(
@@ -177,10 +187,12 @@ async function updatePnpmWorkspace(
   }
 
   // use already-updated content when updating the workspace file itself
-  const packageFileContent =
-    updateArtifactsConfig.packageFileName === pnpmWorkspaceFilePath
-      ? updateArtifactsConfig.newPackageFileContent
-      : (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
+  let packageFileContent: string;
+  if (updateArtifactsConfig.packageFileName === pnpmWorkspaceFilePath) {
+    packageFileContent = updateArtifactsConfig.newPackageFileContent;
+  } else {
+    packageFileContent = (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
+  }
   const doc = parseDocument(packageFileContent);
 
   if (!doc.get('minimumReleaseAge')) {

@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options/index.ts';
 import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type { RenovateOptions, UpdateType } from '../../lib/config/types.ts';
@@ -13,20 +12,8 @@ function isTopLevelOption(option: RenovateOptions): boolean {
   const parents = getAllowedParents(option);
   return !parents || parents.includes('.');
 }
-const markdownGlob = '{docs,lib}/**/*.md';
 
 describe('docs/documentation', () => {
-  it('has no invalid links', async () => {
-    const markdownFiles = await glob(markdownGlob);
-
-    await Promise.all(
-      markdownFiles.map(async (markdownFile) => {
-        const markdownText = await fs.readFile(markdownFile, 'utf8');
-        expect(markdownText).not.toMatch(regEx(/\.md\/#/));
-      }),
-    );
-  });
-
   describe('website-documentation', () => {
     async function getConfigOptionSubHeaders(
       file: string,

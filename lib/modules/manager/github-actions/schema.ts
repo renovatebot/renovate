@@ -63,6 +63,8 @@ const Actions = z.object({
   runs: z.object({
     using: z.string(),
     steps: Steps.optional().catch([]),
+    // a Docker container action: either a `Dockerfile` path, or a `docker://` image
+    image: z.string().optional().catch(undefined),
   }),
 });
 export const Workflow = Yaml.pipe(

@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extractPackageFile } from './index.ts';
@@ -134,6 +135,141 @@ describe('modules/manager/mix/extract', () => {
           packageName: 'floki',
         },
       ]);
+      expect(res?.extractedConstraints).toEqual({
+        elixir: '>=1.0.0 <2.0.0-0',
+      });
+    });
+
+    it.each`
+      requirement                 | constraint
+      ${'~> 1.13'}                | ${'>=1.13.0 <2.0.0-0'}
+      ${'~> 1.15.0'}              | ${'>=1.15.0 <1.16.0-0'}
+      ${'1.18.4'}                 | ${'1.18.4'}
+      ${'== 1.18.4'}              | ${'1.18.4'}
+      ${'>= 1.14.0 and < 2.0.0'}  | ${'>=1.14.0 <2.0.0'}
+      ${'~> 1.14.0 or ~> 1.15.0'} | ${'>=1.14.0 <1.15.0-0||>=1.15.0 <1.16.0-0'}
+    `(
+      'extracts the elixir requirement $requirement as $constraint',
+      async ({
+        requirement,
+        constraint,
+      }: {
+        requirement: string;
+        constraint: string;
+      }) => {
+        const content = codeBlock`
+          defmodule MyProject.MixProject do
+            use Mix.Project
+
+            def project do
+              [
+                app: :my_project,
+                elixir: "${requirement}",
+                deps: deps()
+              ]
+            end
+
+            defp deps do
+              [
+                {:plug, "~> 1.0"},
+              ]
+            end
+          end
+        `;
+
+        const res = await extractPackageFile(content, 'mix.exs');
+
+        expect(res?.extractedConstraints).toEqual({ elixir: constraint });
+      },
+    );
+
+    it.each`
+      requirement
+      ${'invalid'}
+      ${'> 1.0.0 or *'}
+    `(
+      'skips the unsupported elixir requirement $requirement',
+      async ({ requirement }: { requirement: string }) => {
+        const content = codeBlock`
+          defmodule MyProject.MixProject do
+            use Mix.Project
+
+            def project do
+              [app: :my_project, elixir: "${requirement}", deps: deps()]
+            end
+
+            defp deps do
+              [{:plug, "~> 1.0"}]
+            end
+          end
+        `;
+
+        const res = await extractPackageFile(content, 'mix.exs');
+
+        expect(res?.extractedConstraints).toBeUndefined();
+      },
+    );
+
+    it('extracts the elixir requirement from a trailing project definition', async () => {
+      const content = codeBlock`
+        defmodule MyProject.MixProject do
+          use Mix.Project
+
+          defp deps do
+            [{:plug, "~> 1.0"}]
+          end
+
+          def project do
+            [app: :my_project, elixir: "~> 1.18", deps: deps()]
+          end
+        end
+      `;
+
+      const res = await extractPackageFile(content, 'mix.exs');
+
+      expect(res?.extractedConstraints).toEqual({
+        elixir: '>=1.18.0 <2.0.0-0',
+      });
+    });
+
+    it('ignores elixir keys outside the project definition', async () => {
+      const content = codeBlock`
+        defmodule MyProject.MixProject do
+          use Mix.Project
+
+          def project do
+            [app: :my_project, deps: deps()]
+          end
+
+          def application do
+            [elixir: "~> 1.18"]
+          end
+
+          defp deps do
+            [{:plug, "~> 1.0"}]
+          end
+        end
+      `;
+
+      const res = await extractPackageFile(content, 'mix.exs');
+
+      expect(res?.extractedConstraints).toBeUndefined();
+    });
+
+    it('skips the elixir requirement without a project definition', async () => {
+      const content = codeBlock`
+        defmodule MyProject.MixProject do
+          use Mix.Project
+
+          defp deps do
+            [{:plug, "~> 1.0"}]
+          end
+        end
+      `;
+
+      const res = await extractPackageFile(content, 'mix.exs');
+
+      expect(res?.extractedConstraints).toBeUndefined();
     });
 
     it('extracts all dependencies and adds the locked version if lockfile present', async () => {

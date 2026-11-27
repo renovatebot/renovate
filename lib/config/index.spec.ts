@@ -36,6 +36,28 @@ describe('config/index', () => {
       });
     });
 
+    it('merges `onboardingConfig` with the defaults', () => {
+      const config = mergeChildConfig(defaultConfig, {
+        onboardingConfig: { minimumReleaseAge: '1 day' },
+      });
+      expect(config.onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['config:recommended'],
+        minimumReleaseAge: '1 day',
+      });
+    });
+
+    it('allows `onboardingConfig.extends` to override the default preset', () => {
+      const config = mergeChildConfig(defaultConfig, {
+        onboardingConfig: { extends: [], minimumReleaseAge: '1 day' },
+      });
+      expect(config.onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: [],
+        minimumReleaseAge: '1 day',
+      });
+    });
+
     it('merges packageRules', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
@@ -77,6 +99,27 @@ describe('config/index', () => {
         node: '<15',
         npm: '^6.0.0',
       });
+    });
+
+    it('merges toolSettings', () => {
+      const parentConfig = {
+        ...defaultConfig,
+        toolSettings: { jvmMaxMemory: 1024, nodeMaxMemory: 1024 },
+      };
+      const childConfig = { toolSettings: { nodeMaxMemory: 2048 } };
+      const config = mergeChildConfig(parentConfig, childConfig);
+      expect(config.toolSettings).toStrictEqual({
+        jvmMaxMemory: 1024,
+        nodeMaxMemory: 2048,
+      });
+    });
+
+    it('does not merge toolSettings with any defaults', () => {
+      const config = mergeChildConfig(
+        { ...defaultConfig },
+        { toolSettings: { jvmMaxMemory: 1024 } },
+      );
+      expect(config.toolSettings).toStrictEqual({ jvmMaxMemory: 1024 });
     });
 
     it('merges forced options', () => {
@@ -129,6 +172,22 @@ describe('config/index', () => {
       const config = mergeChildConfig(parentConfig, undefined);
       expect(config).toMatchObject(parentConfig);
     });
+
+    it.each`
+      toolSettings | expected
+      ${{}}        | ${{ nodeMaxMemory: 1024 }}
+      ${null}      | ${null}
+    `(
+      'merges inherited toolSettings with $toolSettings',
+      ({ toolSettings, expected }) => {
+        const parentConfig = {
+          ...defaultConfig,
+          toolSettings: { nodeMaxMemory: 1024 },
+        };
+        const config = mergeChildConfig(parentConfig, { toolSettings });
+        expect(config.toolSettings).toStrictEqual(expected);
+      },
+    );
 
     it('getManagerConfig()', () => {
       const parentConfig = { ...defaultConfig };

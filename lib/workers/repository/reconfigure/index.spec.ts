@@ -167,9 +167,56 @@ describe('workers/repository/reconfigure/index', () => {
     );
   });
 
-  it('skips pr comment if error during deps extraction', async () => {
+  it('keeps secrets and variables for resolving the reconfigure config', async () => {
+    await checkReconfigureBranch(config, {
+      secrets: { SECRET: 'secret-value' },
+      variables: { VARIABLE: 'variable-value' },
+    });
+
+    expect(inherited.mergeInheritedConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        secrets: { SECRET: 'secret-value' },
+        variables: { VARIABLE: 'variable-value' },
+      }),
+    );
+  });
+
+  it('applies secrets and variables after merging the reconfigure config', async () => {
+    const secretsAndVariables: AllConfig = {
+      secrets: { SECRET: 'secret-value' },
+      variables: { VARIABLE: 'variable-value' },
+    };
+    const resolvedConfig = {
+      ...config,
+      ...secretsAndVariables,
+      labels: ['{{ secrets.SECRET }}-{{ variables.VARIABLE }}'],
+    };
+    inherited.mergeInheritedConfig.mockResolvedValueOnce(resolvedConfig);
+    merge.mergeRenovateConfig.mockResolvedValueOnce(resolvedConfig);
+
+    await checkReconfigureBranch(config, secretsAndVariables);
+
+    expect(process.extractDependencies).toHaveBeenCalledWith(
+      expect.objectContaining({ labels: ['secret-value-variable-value'] }),
+      false,
+    );
+  });
+
+  it('skips pr comment and fails the status check if error during deps extraction', async () => {
     process.extractDependencies.mockRejectedValue(new Error());
+
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+
     expect(prComment.ensureReconfigurePrComment).not.toHaveBeenCalled();
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err: expect.any(Error) },
+      'Error while extracting dependencies using the reconfigure config',
+    );
+    expect(utils.setBranchStatus).toHaveBeenCalledWith(
+      'prefix/reconfigure',
+      'Failed to extract dependencies using the new config',
+      'red',
+      'config-validation',
+    );
   });
 });

@@ -9,7 +9,7 @@ The freshness period is equal to the TTL of the entire cache, and this allows fo
 In most cases, only one page of releases will need to be fetched during a Renovate run.
 While it is possible to reduce this to zero for most runs, the practical implementation is complex and prone to errors.
 
-# Components overview
+## Components overview
 
 ```
 lib/util/github/graphql
@@ -46,11 +46,11 @@ The files in `query-adapters/` directory allow for GitHub releases and tags to b
 For cached items, only `version` and `releaseTimestamp` fields are mandatory.
 Other fields are specific to GitHub tags or GitHub releases.
 
-# Process overview
+## Process overview
 
-## Initial fetch
+### Initial fetch
 
-Let's suppose we perform fetching for the first time.
+Suppose we perform fetching for the first time.
 For simplicity, this example assumes that we are retrieving items in small batches of 5 at a time.
 The cache TTL is assumed to be 30 days.
 
@@ -110,7 +110,7 @@ Internally, we index each release by version name for quicker access.
 When the fetch process is complete, we return the values of the items object.
 If the repository is public, we also persist this data structure in a long-term cache for future use.
 
-## Recurring fetches
+### Recurring fetches
 
 In the case where we already have items stored in the cache, we can model the fetch process as follows.
 Suppose we have a new release that changes the pagination of our items.

@@ -418,9 +418,12 @@ describe('config/presets/index', () => {
           '/\\btslint\\b/',
           '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
+          'rumdl',
           'standard',
         ],
       });
@@ -432,7 +435,7 @@ describe('config/presets/index', () => {
       expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(24);
+      expect(rule.matchPackageNames).toHaveLength(27);
     });
 
     it('migrates automerge in presets', async () => {
@@ -1480,6 +1483,12 @@ describe('config/presets/index', () => {
       expect(packageCache.get).not.toHaveBeenCalled();
     });
 
+    it('ignores Mise-generated lock directories in the default preset', async () => {
+      const res = await presets.getPreset(':ignoreModulesAndTests', {});
+      expect(res.ignorePaths).toContain('**/.mise/locks/**');
+      expect(res.ignorePaths).toContain('**/.config/mise/locks/**');
+    });
+
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
@@ -1570,9 +1579,12 @@ describe('config/presets/index', () => {
         matchPackageNames: [
           '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
+          'rumdl',
           'standard',
         ],
       });

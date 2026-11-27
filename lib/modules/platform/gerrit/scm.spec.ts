@@ -43,6 +43,44 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
+    it('fetches the target branch before pushing', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      await pushForReview({
+        sourceRef: 'renovate/feat',
+        targetBranch: 'main',
+        files: [],
+      });
+      expect(git.fetchRevSpec).toHaveBeenCalledExactlyOnceWith(
+        '--no-tags',
+        '--refmap=',
+        'refs/heads/main',
+      );
+      expect(git.fetchRevSpec).toHaveBeenCalledBefore(git.pushCommit);
+    });
+
+    it('pushes even when fetching the target branch fails', async () => {
+      const err = new Error('fetch failed');
+      git.fetchRevSpec.mockRejectedValueOnce(err);
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+        }),
+      ).resolves.toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err },
+        'gerrit: failed to fetch target branch before push',
+      );
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready'],
+      });
+    });
+
     it('adds hashtag push options for each label', async () => {
       git.pushCommit.mockResolvedValueOnce(true);
       await expect(
@@ -364,6 +402,17 @@ describe('modules/platform/gerrit/scm', () => {
         'renovate/dependency-1.x',
         'refs/changes/56/123456/3',
         commitSha,
+      );
+    });
+  });
+
+  describe('mergeToLocal()', () => {
+    it('merges the local branch if it is not a virtual branch', async () => {
+      await gerritScm.mergeToLocal('renovate/configure');
+
+      expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+        'renovate/configure',
+        { localBranch: true },
       );
     });
   });
