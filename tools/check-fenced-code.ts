@@ -127,11 +127,13 @@ async function checkValidJs(
 }
 
 function isJsCheckAllowed(file: string): boolean {
-  if (file.startsWith('docs/')) {
+  const relativeFile = path.relative(process.cwd(), file);
+  if (relativeFile.startsWith(`docs${path.sep}`)) {
     return true;
   }
   return (
-    file.startsWith('lib/') && path.basename(file).toLowerCase() === 'readme.md'
+    relativeFile.startsWith(`lib${path.sep}`) &&
+    path.basename(relativeFile).toLowerCase() === 'readme.md'
   );
 }
 
@@ -268,9 +270,16 @@ void (async () => {
     ],
   });
 
-  const files = await glob(markdownGlob);
+  let files = process.argv.slice(2);
+  if (files.length === 0) {
+    files = await glob(markdownGlob);
+  }
 
   for (const file of files) {
+    if (path.extname(file).toLowerCase() !== '.md') {
+      throw new Error(`Expected a Markdown (.md) file: ${file}`);
+    }
+
     await processFile(file);
   }
 

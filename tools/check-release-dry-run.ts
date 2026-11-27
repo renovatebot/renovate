@@ -1,6 +1,7 @@
 import { argv, env } from 'node:process';
 import { pathToFileURL } from 'node:url';
 import semanticRelease from 'semantic-release';
+import { exec } from './utils/exec.ts';
 
 // Release types that introduce a new major version. `premajor` is what the
 // `next` prerelease branch reports for the same breaking change.
@@ -78,6 +79,24 @@ function runDryRun(
   );
 }
 
+/**
+ * Run the dry-run again for the PR's base commit, to tell whether the major
+ * release is already pending without this PR.
+ */
+export async function isMajorPendingOnBase(
+  repositoryUrl: string,
+  baseRef: string,
+): Promise<boolean> {
+  const baseSha = env.BASE_SHA;
+  if (!baseSha) {
+    return false;
+  }
+  await exec('git', ['branch', '-f', baseRef, baseSha]);
+  await exec('git', ['checkout', '--quiet', '--detach', baseSha]);
+  return evaluateResult(await runDryRun(repositoryUrl, baseRef, baseSha))
+    .isMajor;
+}
+
 async function main(): Promise<void> {
   const [repositoryUrl, baseRef, headSha] = argv.slice(2);
   if (!repositoryUrl || !baseRef || !headSha) {
@@ -101,6 +120,21 @@ async function main(): Promise<void> {
 
   if (!isMajor) {
     console.log('✓ Not a new major version.');
+    return;
+  }
+
+  if (env.ALLOW_MAJOR === 'true') {
+    console.log(
+      `✓ New major version ${version} is allowed on this branch; not failing.`,
+    );
+    return;
+  }
+
+  // A major that is already pending on the base branch is not introduced by this PR
+  if (await isMajorPendingOnBase(repositoryUrl, baseRef)) {
+    console.log(
+      `✓ New major version ${version} is already pending on the base branch; not failing.`,
+    );
     return;
   }
 

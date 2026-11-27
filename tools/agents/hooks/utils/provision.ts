@@ -1,8 +1,7 @@
-import type { Options } from 'execa';
-import { exec } from './exec.ts';
+import { exec } from '../../../utils/exec.ts';
 
 export async function provision(cwd?: string): Promise<void> {
-  const opts: Options = cwd ? { cwd } : {};
+  const opts = { cwd, stdout: process.stderr, stderr: process.stderr };
 
   try {
     await exec('mise', ['install'], opts);

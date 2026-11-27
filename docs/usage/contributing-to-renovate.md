@@ -9,7 +9,7 @@ The [`docs/development/` directory of the `renovatebot/renovate` repository](htt
 
 1. [Contributing guide](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md)
 1. [Best practices](https://github.com/renovatebot/renovate/blob/main/docs/development/best-practices.md)
-1. [Local Development](https://github.com/renovatebot/renovate/blob/main/docs/development/local-development.md) or [Remote Development](https://github.com/renovatebot/renovate/blob/main/docs/development/remote-development.md)
+1. [Development setup](https://github.com/renovatebot/renovate/blob/main/docs/development/setup.md)
 
 ### Creating/editing Renovate preset
 

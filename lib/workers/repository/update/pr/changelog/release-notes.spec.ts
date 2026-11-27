@@ -15,6 +15,7 @@ import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { getChangeLogSourceFor } from './index.ts';
 import {
   addReleaseNotes as addReleaseNotesRaw,
+  getCachedReleaseList,
   getReleaseList as getReleaseListRaw,
   getReleaseNotesMd as getReleaseNotesMdRaw,
   getReleaseNotes as getReleaseNotesRaw,
@@ -1037,6 +1038,60 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: '1.0.1',
         url: 'https://github.com/some/other-repository/releases/1.0.1',
       });
+    });
+
+    it('does not mutate the cached release list across lookups', async () => {
+      memCache.init();
+      try {
+        const description = codeBlock`
+        ## Features
+
+        - some feature
+      `;
+        githubReleasesMock.mockResolvedValueOnce([
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2020-01-01' as Timestamp,
+            id: 2,
+            url: 'https://github.com/some/other-repository/releases/1.0.1',
+            name: 'some release name',
+            description,
+          },
+        ]);
+        const project = {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'other',
+        };
+        const release = partial<ChangeLogRelease>({
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        });
+
+        const first = await getReleaseNotes(
+          project,
+          release,
+          partial<BranchUpgradeConfig>(),
+        );
+        const second = await getReleaseNotes(
+          project,
+          release,
+          partial<BranchUpgradeConfig>(),
+        );
+
+        expect(first?.body).toBe('#### Features\n\n- some feature\n');
+        expect(second).toEqual(first);
+        expect(githubReleasesMock).toHaveBeenCalledOnce();
+
+        const [cachedRelease] = await getCachedReleaseList(
+          project,
+          release,
+          getChangeLogSourceFor(project.type)!,
+        );
+        expect(cachedRelease.body).toBe(description);
+      } finally {
+        memCache.reset();
+      }
     });
 
     it('gets release notes with name ""', async () => {

@@ -122,8 +122,6 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       ${'minimumReleaseAge: 60\n'}                              | ${{ minimumReleaseAge: 60 }}
       ${'minimumReleaseAge: 0\nminimumReleaseAgeStrict: false'} | ${{ minimumReleaseAge: 0, minimumReleaseAgeStrict: false }}
       ${'minimumReleaseAgeStrict: false\n'}                     | ${{ minimumReleaseAgeStrict: false }}
-      ${'minimumReleaseAgeExclude:\n  - foo\n'}                 | ${{ hasMinimumReleaseAgeExclude: true }}
-      ${'minimumReleaseAgeExclude: []\n'}                       | ${{}}
       ${'packages: []\n'}                                       | ${{}}
     `(
       'keeps the pnpm-workspace.yaml settings $workspace in managerData',

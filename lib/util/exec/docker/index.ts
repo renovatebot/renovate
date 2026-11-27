@@ -13,9 +13,14 @@ import type {
   VolumeOption,
   VolumesPair,
 } from '../types.ts';
-import { isCommandWithOptions } from '../utils.ts';
+import { getChildEnv, isCommandWithOptions } from '../utils.ts';
 
 const prefetchedImages = new Map<string, string>();
+
+// rawExec does not inherit the environment, so pass the allowed variables such as PATH and DOCKER_HOST.
+function dockerExec(cmd: string): ReturnType<typeof rawExec> {
+  return rawExec(cmd, { env: getChildEnv() });
+}
 
 const digestRegex = regEx('Digest: (.*?)\n');
 
@@ -30,7 +35,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    const res = await rawExec(`docker pull ${taggedImage}`, {});
+    const res = await dockerExec(`docker pull ${taggedImage}`);
     const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
     logger.debug(
       `Finished fetching Docker image ${taggedImage}@${imageDigest}`,
@@ -87,12 +92,12 @@ export async function removeDockerContainer(
   const containerName = getContainerName(sideCarName, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {});
+    const res = await dockerExec(cmd);
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
       logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {});
+      await dockerExec(cmd);
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
@@ -116,9 +121,8 @@ export async function removeDanglingContainers(): Promise<void> {
     logger.debug(
       `Removing dangling child containers with label ${containerLabel}`,
     );
-    const res = await rawExec(
+    const res = await dockerExec(
       `docker ps --filter label=${containerLabel} -aq`,
-      {},
     );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
@@ -127,7 +131,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(isTruthy);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
+      await dockerExec(`docker rm -f ${containerIds.join(' ')}`);
     } else {
       logger.debug('No dangling containers to remove');
     }

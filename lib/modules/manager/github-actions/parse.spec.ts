@@ -79,6 +79,13 @@ describe('modules/manager/github-actions/parse', () => {
           path: '../other/action',
         });
       });
+
+      it('parses $/ local reference', () => {
+        expect(parseActionReference('$/.github/actions/setup-node')).toEqual({
+          kind: 'local',
+          path: '$/.github/actions/setup-node',
+        });
+      });
     });
 
     describe('repository references', () => {

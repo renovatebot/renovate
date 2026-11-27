@@ -1,8 +1,8 @@
 [tools]
-node = "24.22.3"
-pnpm = "11.28.11"
-uv   = "0.13.9"
-vale = "3.27.0"
+node = "26.13.1"
+pnpm = "11.28.13"
+uv   = "0.13.10"
+vale = "3.29.0"
 
 [hooks]
 postinstall = '''

@@ -124,12 +124,6 @@ async function pnpmEnforcesMinimumReleaseAge(
     );
     return false;
   }
-  if (settings.hasMinimumReleaseAgeExclude) {
-    logger.debug(
-      `${pnpmLockFile}: minimumReleaseAgeExclude lets pnpm install versions which are too new`,
-    );
-    return false;
-  }
 
   // Renovate passes the larger of its own value and the pnpm value,
   // otherwise pnpm applies its own value. The pnpm v11 default does not

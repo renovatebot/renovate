@@ -826,7 +826,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.172.2',
+    default: 'ghcr.io/renovatebot/base-image:14.1.1',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -882,7 +882,10 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Configuration to use for onboarding PRs.',
     stage: 'repository',
     type: 'object',
-    default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
+    default: {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      extends: ['config:recommended'],
+    },
     globalOnly: true,
     inheritConfigSupport: true,
     mergeable: true,
@@ -1294,6 +1297,14 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'allowCustomCrateGitRegistries',
     description:
       'Set this to `true` to allow cloning custom Cargo `git` registries. This only restricts non-sparse registries.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'allowCustomJuliaRegistries',
+    description:
+      'Set this to `true` to allow cloning Julia registries other than General.',
     globalOnly: true,
     type: 'boolean',
     default: false,
@@ -3230,7 +3241,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
-    default: { ghActionsLock: 'v0.4.1' },
+    default: { ghActionsLock: 'v0.5.1' },
     mergeable: true,
     cli: false,
     supportedManagers: [
@@ -3387,19 +3398,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: 'Bearer',
     cli: false,
     env: false,
-  },
-  {
-    name: 'dnsCache',
-    description: 'Enable got DNS cache.',
-    type: 'boolean',
-    default: false,
-    stage: 'repository',
-    parents: ['hostRules'],
-    cli: false,
-    env: false,
-    experimental: true,
-    deprecationMsg:
-      'This option is deprecated and will be removed in a future release.',
   },
   {
     name: 'keepAlive',
@@ -4048,10 +4046,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Tool specific configuration. Global self-hosted configuration takes precedence.',
     type: 'object',
-    default: {
-      jvmMaxMemory: 512,
-      jvmMemory: 512,
-    },
+    mergeable: true,
     additionalProperties: false,
     cli: false,
   },
@@ -4060,6 +4055,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Maximum JVM memory in MB to use for updates that use a Java VM, like the Gradle Wrapper, defaults to 512. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.jvmMaxMemory`',
     type: 'integer',
+    default: 512,
     parents: ['toolSettings'],
     supportedManagers: ['gradle-wrapper'],
     cli: false,
@@ -4080,6 +4076,17 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Maximum memory in MiB for Node child processes invoked by Renovate. If unset, the Node process will automagically determine the memory limit to use. Repo configuration for this value will be ignored if it exceeds the global configuration for `toolSettings.nodeMaxMemory`',
     type: 'integer',
+    parents: ['toolSettings'],
+    supportedManagers: ['npm'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'pnpmMinimumReleaseAgeExcludeSecurityUpdates',
+    description:
+      'Whether security updates add their versions to the `minimumReleaseAgeExclude` setting of the `pnpm-workspace.yaml`. Repo configuration can change this value, unless the global configuration sets it to `false`.',
+    type: 'boolean',
+    default: false,
     parents: ['toolSettings'],
     supportedManagers: ['npm'],
     cli: false,

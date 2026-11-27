@@ -96,7 +96,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   elixir: {
     datasource: 'github-releases',
     packageName: 'elixir-lang/elixir',
-    versioning: 'semver',
+    versioning: 'semver-extended',
   },
   flux: {
     datasource: 'github-releases',

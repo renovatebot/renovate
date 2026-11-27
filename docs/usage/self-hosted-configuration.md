@@ -26,6 +26,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## `allowCustomCrateGitRegistries`
 
+## `allowCustomJuliaRegistries`
+
 ## `allowPlugins`
 
 ## `allowScripts`
@@ -1238,6 +1240,22 @@ If you have an existing Renovate installation and you change `onboardingBranch` 
 If `commitMessagePrefix` or `semanticCommits` values are set then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## `onboardingConfig`
+
+By default, the onboarding config extends the `config:recommended` preset.
+
+Renovate will merge your configured `onboardingConfig` with its defaults, so if you would prefer to not use this preset, you will need configuration like so:
+
+```js
+module.exports = {
+  onboardingConfig: {
+    // ensure that the default `onboardingConfig` does not merge with ours
+    extends: [],
+
+    // custom configuration
+    minimumReleaseAge: '1 day',
+  },
+};
+```
 
 ## `onboardingConfigFileName`
 
