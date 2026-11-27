@@ -17,7 +17,8 @@ vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 vi.mock('./util.ts');
 
-const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
+const { getDefaultRegistries, findGlobalJson, getConfiguredRegistries } =
+  vi.mocked(util);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -587,5 +588,40 @@ describe('modules/manager/nuget/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeEmptyArray();
+  });
+
+  it('passes config with nugetConfig to getConfiguredRegistries', async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    getConfiguredRegistries.mockResolvedValueOnce([
+      { url: 'https://custom.nuget.org/v3/index.json', name: 'custom' },
+    ]);
+    const customConfig: UpdateArtifactsConfig = {
+      nugetConfig: '<configuration />',
+      nugetConfigMerge: true,
+    };
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: customConfig,
+      }),
+    ).resolves.not.toBeNull();
+    expect(getConfiguredRegistries).toHaveBeenCalledWith(
+      'project.csproj',
+      customConfig,
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
   });
 });

@@ -814,6 +814,26 @@ describe('modules/manager/nuget/extract', () => {
 
         expect(applyRegistriesSpy).toHaveBeenCalled();
       });
+
+      it('passes config with nugetConfig to getConfiguredRegistries', async () => {
+        const packageFile = 'sample.csproj';
+        const contents =
+          '<Project><ItemGroup><PackageReference Include="Autofac" Version="4.5.0" /></ItemGroup></Project>';
+        const getConfiguredRegistriesSpy = vi.spyOn(
+          nugetExtractUtil,
+          'getConfiguredRegistries',
+        );
+
+        await extractPackageFile(contents, packageFile, {
+          nugetConfig: '<configuration />',
+          nugetConfigMerge: true,
+        });
+
+        expect(getConfiguredRegistriesSpy).toHaveBeenCalledWith(packageFile, {
+          nugetConfig: '<configuration />',
+          nugetConfigMerge: true,
+        });
+      });
     });
   });
 });

@@ -159,11 +159,11 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig,
+  config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
 
-  const registries = await getConfiguredRegistries(packageFile);
+  const registries = await getConfiguredRegistries(packageFile, config);
 
   if (packageFile.endsWith('dotnet-tools.json')) {
     const deps: PackageDependency[] = [];

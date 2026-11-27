@@ -36,6 +36,8 @@ export interface ExtractConfig
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
+  nugetConfig?: string;
+  nugetConfigMerge?: boolean;
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
@@ -93,6 +95,8 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  nugetConfig?: string;
+  nugetConfigMerge?: boolean;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
@@ -467,6 +471,8 @@ export interface UpdateLockedResult {
 export interface GlobalManagerConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
+  nugetConfig?: string;
+  nugetConfigMerge?: boolean;
 }
 
 export interface DepTypeMetadata {

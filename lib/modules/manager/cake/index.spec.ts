@@ -157,4 +157,19 @@ describe('modules/manager/cake/index', () => {
       undefined,
     );
   });
+
+  it('passes config to getConfiguredRegistries', async () => {
+    const getConfiguredRegistriesSpy = vi.spyOn(
+      nugetExtractUtil,
+      'getConfiguredRegistries',
+    );
+    const content = codeBlock`#addin nuget:?package=Contoso.SomePackage&version=1.2.3`;
+    await extractPackageFile(content, 'build.cake', {
+      nugetConfig: '<configuration />',
+    });
+
+    expect(getConfiguredRegistriesSpy).toHaveBeenCalledWith('build.cake', {
+      nugetConfig: '<configuration />',
+    });
+  });
 });
