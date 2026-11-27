@@ -4,11 +4,12 @@ import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   getSiblingFileName,
   readLocalFile,
+  statLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
-import { getRepoStatus } from '../../../util/git/index.ts';
+import { getRepoStatus, isFileModeEnabled } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
@@ -18,6 +19,28 @@ import {
 } from '../util.ts';
 
 const gitExec = withGitEnvironment();
+const ownerExecutePermission = 0o100;
+
+async function detectExecutable(
+  path: string,
+  canReadFileMode: boolean,
+): Promise<true | undefined> {
+  if (!canReadFileMode) {
+    return undefined;
+  }
+
+  const fileStats = await statLocalFile(path);
+  if (!fileStats?.isFile()) {
+    return undefined;
+  }
+
+  if ((fileStats.mode & ownerExecutePermission) === 0) {
+    return undefined;
+  }
+
+  // Git derives its executable flag from the owner's execute permission.
+  return true;
+}
 
 export async function updateArtifacts({
   packageFileName,
@@ -71,9 +94,13 @@ export async function updateArtifacts({
     logger.debug("Adding Sync'd files to git");
     const status = await getRepoStatus();
     if (status) {
-      fileChanges.push(
-        ...fileChangesToArtifactResults(await collectFileChanges(status)),
-      );
+      const canReadFileMode = await isFileModeEnabled();
+      const changes = await collectFileChanges(status, {
+        additionMetadata: async (f) => ({
+          isExecutable: await detectExecutable(f, canReadFileMode),
+        }),
+      });
+      fileChanges.push(...fileChangesToArtifactResults(changes));
     } else {
       logger.error('Failed to get git status');
     }
