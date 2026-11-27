@@ -271,5 +271,323 @@ describe('modules/manager/buildkite/extract', () => {
       };
       expect(res).toEqual([singleQuotesDependency, doubleQuotesDependency]);
     });
+
+    it('extracts image from pipeline-level agents', () => {
+      const fileContent = codeBlock`
+        agents:
+          image: "docker.elastic.co/ci-agent-images/thumbnails4j-buildkite-agent"
+          ephemeralStorage: "20G"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          depName:
+            'docker.elastic.co/ci-agent-images/thumbnails4j-buildkite-agent',
+          packageName:
+            'docker.elastic.co/ci-agent-images/thumbnails4j-buildkite-agent',
+          depType: 'docker',
+          replaceString:
+            'docker.elastic.co/ci-agent-images/thumbnails4j-buildkite-agent',
+        },
+      ]);
+    });
+
+    it('extracts image from step-level agents', () => {
+      const fileContent = codeBlock`
+        steps:
+          - command: .buildkite/scripts/trigger-if-java-ea-new-build.sh
+            agents:
+              image: "docker.elastic.co/ci-agent-images/eck-region/buildkite-agent:1.15"
+              memory: "4G"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.15',
+          datasource: 'docker',
+          depName:
+            'docker.elastic.co/ci-agent-images/eck-region/buildkite-agent',
+          packageName:
+            'docker.elastic.co/ci-agent-images/eck-region/buildkite-agent',
+          depType: 'docker',
+          replaceString:
+            'docker.elastic.co/ci-agent-images/eck-region/buildkite-agent:1.15',
+        },
+      ]);
+    });
+
+    it('extracts image from agents given as an array of key=value tags', () => {
+      const fileContent = codeBlock`
+        agents:
+          - "queue=default"
+          - "image=some/image:1.0"
+        steps:
+          - command: test.sh
+            agents:
+              - "image=other/image:2.0"
+              - "queue=deploy"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.0',
+          datasource: 'docker',
+          depName: 'some/image',
+          packageName: 'some/image',
+          depType: 'docker',
+          replaceString: 'some/image:1.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '2.0',
+          datasource: 'docker',
+          depName: 'other/image',
+          packageName: 'other/image',
+          depType: 'docker',
+          replaceString: 'other/image:2.0',
+        },
+      ]);
+    });
+
+    it('extracts image from pipeline-level and step-level image fields', () => {
+      const fileContent = codeBlock`
+        image: "node:18-alpine"
+        steps:
+          - command: npm test
+            image: "python:3.11"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '18-alpine',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          depType: 'docker',
+          replaceString: 'node:18-alpine',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '3.11',
+          datasource: 'docker',
+          depName: 'python',
+          packageName: 'python',
+          depType: 'docker',
+          replaceString: 'python:3.11',
+        },
+      ]);
+    });
+
+    it('extracts image from agents nested inside a group step', () => {
+      const fileContent = codeBlock`
+        steps:
+          - group: "Build"
+            steps:
+              - command: build.sh
+                agents:
+                  image: "golang:1.21"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+          replaceString: 'golang:1.21',
+        },
+      ]);
+    });
+
+    it('does not extract an image when agents has no image tag', () => {
+      const fileContent = codeBlock`
+        agents:
+          queue: "default"
+        steps:
+          - command: test.sh
+            agents:
+              queue: "deploy"
+      `;
+      expect(extractPackageFile(fileContent)).toBeNull();
+    });
+
+    it('does not extract an image from an agents array with no image tag', () => {
+      const fileContent = codeBlock`
+        agents:
+          - "solo-tag"
+          - "queue=default"
+      `;
+      expect(extractPackageFile(fileContent)).toBeNull();
+    });
+
+    it('does not re-extract a plugin reachable via more than one YAML alias', () => {
+      const fileContent = codeBlock`
+        plugins: &shared
+          docker-compose#v1.3.2:
+            run: app
+        steps:
+          - plugins: *shared
+          - plugins: *shared
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not throw on invalid YAML', () => {
+      const fileContent = codeBlock`
+        steps: []
+        steps: []
+      `;
+      expect(extractPackageFile(fileContent)).toBeNull();
+    });
+
+    it('extracts both images and plugins from the same file, images first', () => {
+      const fileContent = codeBlock`
+        agents:
+          image: "node:18"
+        steps:
+          - plugins:
+              docker-compose#v1.3.2:
+                run: app
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '18',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          depType: 'docker',
+          replaceString: 'node:18',
+        },
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the image embedded in the docker plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              - docker#v5.14.0:
+                  image: "golang"
+              - docker#v5.14.0:
+                  image: "goreleaser/goreleaser:v2.17.1"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+          replaceString: 'golang',
+        },
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v2.17.1',
+          datasource: 'docker',
+          depName: 'goreleaser/goreleaser',
+          packageName: 'goreleaser/goreleaser',
+          depType: 'docker',
+          replaceString: 'goreleaser/goreleaser:v2.17.1',
+        },
+      ]);
+    });
+
+    it('does not extract an image from the docker plugin when none is configured', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker#v5.14.0:
+                workdir: /app
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not treat a namespaced docker plugin as the known docker plugin', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              myorg/docker#v1.0.0:
+                image: "golang"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'myorg/docker',
+          packageName: 'myorg/docker-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not look up a known plugin for an empty depName from a malformed git plugin', () => {
+      const fileContent = codeBlock`
+        steps:
+          - ssh://git@github.company.com/#v3.2.7:
+              image: "golang"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.2.7',
+          datasource: 'github-tags',
+          depName: '',
+          registryUrls: ['https://github.company.com'],
+        },
+      ]);
+    });
   });
 });
