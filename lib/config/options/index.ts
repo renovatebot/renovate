@@ -3498,7 +3498,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     default: {
       Package:
-        '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
+        '{{#if packageNameLinked}}{{{packageNameLinked}}} (aliased as `{{{depName}}}`){{else}}{{{depNameLinked}}}{{/if}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
       Type: '{{{depType}}}',
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
