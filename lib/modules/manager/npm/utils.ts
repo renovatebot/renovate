@@ -46,14 +46,15 @@ export async function updateNpmrcContent(
   dir: string,
   originalContent: string | null,
   additionalLines: string[],
+  baseContent: string | null = originalContent,
 ): Promise<void> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
-  const newNpmrc = originalContent
-    ? [originalContent, ...additionalLines]
+  const newNpmrc = baseContent
+    ? [baseContent, ...additionalLines]
     : additionalLines;
   try {
     const newContent = newNpmrc.length ? newNpmrc.join('\n') : null;
-    if (newContent !== originalContent) {
+    if (newContent && newContent !== originalContent) {
       logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeLocalFile(npmrcFilePath, `${newContent}\n`);
     }
@@ -85,15 +86,23 @@ export async function resetNpmrcContent(
 /**
  * Add the host-rule lines to the `.npmrc` in `dir`, run `fn`, and restore the original `.npmrc` afterwards.
  *
+ * When `baseContent` is given, it replaces the original `.npmrc` content as the base the host-rule lines are appended to.
+ *
  * The restore runs in a `finally`, so a package manager that throws cannot leave the injected credentials behind in the working tree.
  */
 export async function withNpmrcHostRules<T>(
   dir: string,
   additionalLines: string[],
   fn: (originalNpmrcContent: string | null) => Promise<T>,
+  baseContent?: string,
 ): Promise<T> {
   const originalContent = await getNpmrcContent(dir);
-  await updateNpmrcContent(dir, originalContent, additionalLines);
+  await updateNpmrcContent(
+    dir,
+    originalContent,
+    additionalLines,
+    baseContent ?? originalContent,
+  );
   try {
     return await fn(originalContent);
   } finally {
