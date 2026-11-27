@@ -49,6 +49,13 @@ Renovate stops the search after it finds the first match.
 Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
 Renovate does not read/override the config from within each base branch if present.
 
+## Manager-specific options
+
+### `mix.hexRepositories`
+
+Maps literal `repo:` names in `mix.exs` to Hex registry base URLs and pinned SHA256 public key fingerprints.
+Keep authentication in `hostRules`. See [private Hex repositories](modules/manager/mix/index.md#private-hex-repositories) for an example.
+
 ---
 
 ## `abandonmentThreshold`

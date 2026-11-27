@@ -38,7 +38,10 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
           (massagedConfig[key] as unknown[]).push(item);
         }
       });
-    } else if (isObject(val) && key !== 'encrypted') {
+    } else if (
+      isObject(val) &&
+      !['encrypted', 'hexRepositories'].includes(key)
+    ) {
       // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = massageConfig(val);
     }

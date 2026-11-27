@@ -319,7 +319,7 @@ export async function resolveConfigPresets(
     keyof AllConfig,
     unknown,
   ][]) {
-    const ignoredKeys = ['content', 'onboardingConfig'];
+    const ignoredKeys = ['content', 'onboardingConfig', 'hexRepositories'];
     if (isArray(val)) {
       // Resolve nested objects inside arrays
       config[key] = [] as never; // type can't be narrowed

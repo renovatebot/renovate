@@ -39,15 +39,9 @@ describe('docs/documentation', () => {
     describe('docs/usage/configuration-options.md', () => {
       async function getConfigHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
-        return matches
-          .map((match) =>
-            match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
-          )
-          .filter((header) => header !== 'managerFilePatterns')
-          .filter(
-            (header) => header !== 'Locations for configuration filenames',
-          );
+        return Array.from(content.matchAll(/\n## `(?<name>[^`]+)`\n/g))
+          .map((match) => match.groups!.name)
+          .filter((header) => header !== 'managerFilePatterns');
       }
 
       function getRequiredConfigOptions(): string[] {

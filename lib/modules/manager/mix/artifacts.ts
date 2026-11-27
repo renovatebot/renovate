@@ -1,6 +1,9 @@
+import { validateHeaderValue } from 'node:http';
+import { join } from 'node:path';
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
+import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -9,13 +12,23 @@ import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
+  ensureDir,
   findLocalSiblingOrParent,
   getSiblingFileName,
   localPathExists,
+  outputCacheFile,
+  privateCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import {
+  HexRepositories,
+  type HexRepository,
+  preflightHexRepository,
+  resolveHexPublicKey,
+} from '../../../util/hex-repository.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 
 import type {
@@ -59,6 +72,8 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`mix.getArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
+  const hasPrivateRepositories =
+    Object.keys(coerceObject(config.hexRepositories)).length > 0;
 
   if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated mix deps');
@@ -112,7 +127,7 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
+    if (isLockFileMaintenance && !hasPrivateRepositories) {
       await deleteLocalFile(lockFileName);
     }
   } catch (err) {
@@ -197,9 +212,47 @@ export async function updateArtifacts({
     ].join(' ');
   }
 
+  let cleanup: (() => Promise<void>) | undefined;
+  let lockFileDeleted = false;
   try {
-    await exec(command, execOptions);
+    if (hasPrivateRepositories) {
+      checkHexHomeAccess();
+      const repositories = HexRepositories.parse(config.hexRepositories);
+      const cacheDir = privateCacheDir();
+      await ensureDir(cacheDir);
+      const hexHome = await tmp.dir({
+        tmpdir: cacheDir,
+        unsafeCleanup: true,
+        mode: 0o700,
+      });
+      cleanup = hexHome.cleanup;
+      const repoCommands = await prepareHexRepositories(
+        hexHome.path,
+        repositories,
+      );
+      const hexEnv = {
+        HEX_HOME: hexHome.path,
+        HEX_NO_VERIFY_REPO_ORIGIN: '0',
+        HEX_UNSAFE_REGISTRY: '0',
+      };
+      if (isLockFileMaintenance) {
+        await deleteLocalFile(lockFileName);
+        lockFileDeleted = true;
+      }
+      await exec([...repoCommands, ...preCommands, command], {
+        ...execOptions,
+        preCommands: [],
+        extraEnv: { ...execOptions.extraEnv, ...hexEnv },
+        env: hexEnv,
+        redactOutput: true,
+      });
+    } else {
+      await exec(command, execOptions);
+    }
   } catch (err) {
+    if (lockFileDeleted) {
+      await writeLocalFile(lockFileName, existingLockFileContent);
+    }
     /* v8 ignore if -- defensive rethrow of TEMPORARY_ERROR from exec, not reproduced in mix specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -211,6 +264,10 @@ export async function updateArtifacts({
     );
 
     return artifactErrorResult(lockFileName, err);
+  } finally {
+    if (cleanup) {
+      await cleanup();
+    }
   }
 
   const newMixLockContent = await readLocalFile(lockFileName, 'utf8');
@@ -220,6 +277,45 @@ export async function updateArtifacts({
   }
   logger.debug('Returning updated mix.lock');
   return [fileAddition(lockFileName, newMixLockContent)];
+}
+
+function checkHexHomeAccess(): void {
+  const { binarySource, dockerUser } = GlobalConfig.get();
+  if (binarySource === 'docker') {
+    const uid = dockerUser?.split(':')[0];
+    const canAccess = uid === '0' || uid === process.getuid?.().toString();
+    if (!canAccess || !uid) {
+      throw new Error(
+        "Private Hex repositories require dockerUser to be Renovate's numeric UID or 0 so Mix can access its private HEX_HOME.",
+      );
+    }
+  }
+}
+
+async function prepareHexRepositories(
+  hexHome: string,
+  repositories: Record<string, HexRepository>,
+): Promise<string[]> {
+  const commands: string[] = [];
+  for (const [name, repository] of Object.entries(repositories)) {
+    const authorization = await preflightHexRepository(repository);
+    const publicKey = await resolveHexPublicKey(name, repository);
+    const publicKeyPath = join(hexHome, `${name}.pem`);
+    await outputCacheFile(publicKeyPath, publicKey);
+    const register = `mix hex.repo add ${quote(name)} ${quote(repository.url)} --public-key ${quote(publicKeyPath)}`;
+    if (authorization === undefined) {
+      commands.push(register);
+    } else {
+      validateHeaderValue('authorization', authorization);
+      const authFile = join(hexHome, `${name}.auth`);
+      await outputCacheFile(authFile, authorization, { mode: 0o600 });
+      // Read the secret inside the execution environment so it stays out of
+      // Renovate's command line, environment, and logs.
+      const script = `auth_key=$(cat ${quote(authFile)}) && ${register} --auth-key="$auth_key" && rm ${quote(authFile)}`;
+      commands.push(`sh -c ${quote(script)}`);
+    }
+  }
+  return commands;
 }
 
 /**

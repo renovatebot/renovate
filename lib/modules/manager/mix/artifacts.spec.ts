@@ -1,6 +1,11 @@
+import dns from 'node:dns/promises';
+import { access, readFile, stat } from 'node:fs/promises';
+import { join } from 'node:path';
+import { isString } from '@sindresorhus/is';
+import tmp from 'tmp-promise';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { envMock, exec, mockExecAll } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
 import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -9,6 +14,7 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
+import * as hexRepository from '../../../util/hex-repository.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -36,6 +42,11 @@ const constraints: Partial<Record<ConstraintName, string>> = {
   elixir: 'v1.13.4',
 };
 
+function mockDnsAddress(address: string): void {
+  // Vitest takes the single-address overload; preflight asks for every address.
+  vi.spyOn(dns, 'lookup').mockResolvedValue([{ address, family: 4 }] as never);
+}
+
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
@@ -44,6 +55,330 @@ describe('modules/manager/mix/artifacts', () => {
 
   afterEach(() => {
     GlobalConfig.reset();
+  });
+
+  describe('named Hex repositories', () => {
+    const url = 'https://repo.example.com/hex';
+    const repository = {
+      url,
+      publicKeyFingerprint:
+        'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+    };
+    const hexRepositories = { company: repository };
+
+    beforeEach(async () => {
+      const cache = await tmp.dir({ unsafeCleanup: true });
+      const realFs = await vi.importActual<
+        typeof import('../../../util/fs/index.ts')
+      >('../../../util/fs/index.ts');
+      GlobalConfig.set({ ...adminConfig, cacheDir: cache.path });
+      fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
+      fs.ensureDir.mockImplementation(realFs.ensureDir);
+      fs.outputCacheFile.mockImplementation(realFs.outputCacheFile);
+      mockDnsAddress('93.184.216.34');
+      return cache.cleanup;
+    });
+
+    it.each`
+      authType        | authorization
+      ${'Token-Only'} | ${'literal-token'}
+      ${'Bearer'}     | ${'Bearer literal-token'}
+      ${undefined}    | ${undefined}
+    `(
+      'stages verified keys and effective authorization for the entire solve ($authType)',
+      async ({ authType, authorization }) => {
+        fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+        fs.readLocalFile
+          .mockResolvedValueOnce('Old mix.lock')
+          .mockResolvedValueOnce('New mix.lock');
+        if (authType) {
+          hostRules.add({
+            hostType: 'hex',
+            matchHost: `${url}/`,
+            token: 'literal-token',
+            authType,
+          });
+        }
+        const resolve = vi
+          .spyOn(hexRepository, 'resolveHexPublicKey')
+          .mockResolvedValue('verified key');
+        let hexHome: string | undefined;
+        let stagedKey: string | undefined;
+        let stagedAuth: string | undefined;
+        const execResult = { stdout: '', stderr: '' };
+        exec
+          .mockImplementationOnce(async (_cmd, opts) => {
+            hexHome = opts.env?.HEX_HOME;
+            stagedKey = await readFile(join(hexHome!, 'company.pem'), 'utf8');
+            stagedAuth = await readFile(
+              join(hexHome!, 'company.auth'),
+              'utf8',
+            ).catch(() => undefined);
+            return execResult;
+          })
+          .mockResolvedValue(execResult);
+
+        const result = await updateArtifacts({
+          packageFileName: 'mix.exs',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: { hexRepositories, isLockFileMaintenance: true },
+        });
+
+        expect(result).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'mix.lock',
+              contents: 'New mix.lock',
+            },
+          },
+        ]);
+        expect(resolve).toHaveBeenCalledExactlyOnceWith('company', repository);
+        expect(exec).toHaveBeenCalledTimes(2);
+        const [[register, opts], [solve]] = exec.mock.calls;
+        expect(register).toContain(
+          `mix hex.repo add company ${url} --public-key`,
+        );
+        expect(isString(register) && register.includes('--auth-key')).toBe(
+          authorization !== undefined,
+        );
+        expect(JSON.stringify(exec.mock.calls)).not.toContain('literal-token');
+        expect(opts.env).toMatchObject({
+          HEX_UNSAFE_REGISTRY: '0',
+          HEX_NO_VERIFY_REPO_ORIGIN: '0',
+        });
+        expect(solve).toBe('mix deps.get');
+        expect(stagedKey).toBe('verified key');
+        expect(stagedAuth).toBe(authorization);
+        await expect(access(hexHome!)).rejects.toThrow('ENOENT');
+      },
+    );
+
+    it.each([url, `${url}/packages/blocked_package`])(
+      'fails before fetching the key or starting Mix when %s is disabled',
+      async (matchHost) => {
+        fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+        fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+        hostRules.add({ hostType: 'hex', matchHost, enabled: false });
+        const resolve = vi.spyOn(hexRepository, 'resolveHexPublicKey');
+
+        const result = await updateArtifacts({
+          packageFileName: 'mix.exs',
+          updatedDeps: [{ depName: 'public_dep' }],
+          newPackageFileContent: '{}',
+          config: { hexRepositories },
+        });
+
+        expect(result).toMatchObject([
+          { artifactError: { fileName: 'mix.lock', stderr: 'host-disabled' } },
+        ]);
+        expect(resolve).not.toHaveBeenCalled();
+        expect(exec).not.toHaveBeenCalled();
+      },
+    );
+
+    it('blocks a registry hostname that resolves to a private address', async () => {
+      GlobalConfig.set({ ...GlobalConfig.get(), internalHostAccess: 'block' });
+      mockDnsAddress('10.0.0.2');
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+
+      const result = await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'company_dep' }],
+        newPackageFileContent: '{}',
+        config: { hexRepositories },
+      });
+
+      expect(result).toMatchObject([
+        { artifactError: { fileName: 'mix.lock', stderr: 'host-blocked' } },
+      ]);
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('honors an internal-host veto scoped to registry packages', async () => {
+      GlobalConfig.set({ ...GlobalConfig.get(), internalHostAccess: 'block' });
+      mockDnsAddress('10.0.0.2');
+      hostRules.add(
+        { hostType: 'hex', matchHost: url, allowInternal: true },
+        { trusted: true },
+      );
+      hostRules.add(
+        {
+          hostType: 'hex',
+          matchHost: `${url}/packages/`,
+          allowInternal: false,
+        },
+        { trusted: true },
+      );
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+
+      const result = await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'company_dep' }],
+        newPackageFileContent: '{}',
+        config: { hexRepositories },
+      });
+
+      expect(result).toMatchObject([
+        { artifactError: { fileName: 'mix.lock', stderr: 'host-blocked' } },
+      ]);
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('fails before Mix when Docker has a different nonroot UID', async () => {
+      GlobalConfig.set({
+        ...GlobalConfig.get(),
+        binarySource: 'docker',
+        dockerUser: `${(process.getuid?.() ?? 0) + 1}:12021`,
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+
+      const result = await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'company_dep' }],
+        newPackageFileContent: '{}',
+        config: { hexRepositories },
+      });
+
+      expect(result).toMatchObject([
+        {
+          artifactError: {
+            fileName: 'mix.lock',
+            stderr: expect.stringContaining('require dockerUser'),
+          },
+        },
+      ]);
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('leaves ordinary artifact calls without updates as no-ops for private projects', async () => {
+      const result = await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { hexRepositories },
+      });
+
+      expect(result).toBeNull();
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('cleans the private home on failure and restores a maintenance lockfile for retry', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+      vi.spyOn(hexRepository, 'resolveHexPublicKey').mockResolvedValue(
+        'verified key',
+      );
+      const calls = mockExecAll(new Error('Hex setup failed'));
+
+      const result = await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { hexRepositories, isLockFileMaintenance: true },
+      });
+
+      expect(result).toMatchObject([
+        { artifactError: { fileName: 'mix.lock', stderr: 'Hex setup failed' } },
+      ]);
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'mix.lock',
+        'Old mix.lock',
+      );
+      await expect(access(calls[0].options!.env!.HEX_HOME!)).rejects.toThrow(
+        'ENOENT',
+      );
+    });
+
+    it('stages the verified key and Bearer token inside the Docker cache mount for an umbrella solve', async () => {
+      const cacheDir = GlobalConfig.get('cacheDir');
+      GlobalConfig.set({
+        ...adminConfig,
+        cacheDir,
+        binarySource: 'docker',
+        dockerUser: String(process.getuid?.() ?? 0),
+        allowedHeaders: ['Authorization'],
+      });
+      const pem = 'verified key';
+      vi.spyOn(hexRepository, 'resolveHexPublicKey').mockResolvedValue(pem);
+      const artifactoryUrl =
+        'https://repo.example.com/artifactory/api/hex/team-hex';
+      hostRules.add({
+        hostType: 'hex',
+        matchHost: artifactoryUrl,
+        token: 'fallback-token',
+        headers: { Authorization: 'Bearer artifactory-token' },
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('apps/child/mix.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('Old mix.lock')
+        .mockResolvedValueOnce('New mix.lock');
+      let stagedKey: string | undefined;
+      let stagedAuth: string | undefined;
+      let authMode: number | undefined;
+      exec.mockImplementation(async (cmd, opts) => {
+        if (isString(cmd) && cmd.startsWith('docker run')) {
+          stagedKey = await readFile(
+            join(opts.env!.HEX_HOME!, 'team-hex.pem'),
+            'utf8',
+          );
+          stagedAuth = await readFile(
+            join(opts.env!.HEX_HOME!, 'team-hex.auth'),
+            'utf8',
+          );
+          authMode =
+            (await stat(join(opts.env!.HEX_HOME!, 'team-hex.auth'))).mode &
+            0o777;
+        }
+        return { stdout: '', stderr: '' };
+      });
+
+      const result = await updateArtifacts({
+        packageFileName: 'apps/child/mix.exs',
+        updatedDeps: [{ depName: 'private_package' }],
+        newPackageFileContent: '{}',
+        config: {
+          constraints: { erlang: '26.0.0', elixir: '1.14.5' },
+          hexRepositories: {
+            'team-hex': { ...repository, url: artifactoryUrl },
+          },
+        },
+      });
+
+      const [dockerRun, opts] = exec.mock.calls.find(
+        ([cmd]) => isString(cmd) && cmd.startsWith('docker run'),
+      )!;
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'mix.lock',
+            contents: 'New mix.lock',
+          },
+        },
+      ]);
+      expect(dockerRun).toContain(`-v "${cacheDir}":"${cacheDir}"`);
+      expect(dockerRun).toContain('-e HEX_HOME');
+      expect(dockerRun).toContain(
+        `mix hex.repo add team-hex ${artifactoryUrl} --public-key`,
+      );
+      expect(dockerRun).toContain('&& mix deps.update private_package');
+      expect(dockerRun).not.toContain('artifactory-token');
+      expect(stagedKey).toBe(pem);
+      expect(stagedAuth).toBe('Bearer artifactory-token');
+      expect(opts.env!.HEX_HOME).toContain('__renovate-private-cache');
+      // Windows does not expose POSIX permission bits.
+      expect(process.platform === 'win32' || authMode === 0o600).toBeTrue();
+      expect(opts.cwd).toBe(adminConfig.localDir);
+      await expect(access(opts.env!.HEX_HOME!)).rejects.toThrow('ENOENT');
+    });
   });
 
   it('returns null if no mix.lock found', async () => {

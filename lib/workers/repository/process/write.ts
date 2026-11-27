@@ -48,6 +48,9 @@ export function generateCommitFingerprintConfig(
     if (toolConstraints.length) {
       filteredUpgrade.constraints = Object.fromEntries(toolConstraints);
     }
+    if (upgrade.hexRepositories) {
+      filteredUpgrade.hexRepositories = upgrade.hexRepositories;
+    }
     if (upgrade.postUpgradeTasks) {
       filteredUpgrade.postUpgradeTasks = {
         commands: upgrade.postUpgradeTasks.commands,

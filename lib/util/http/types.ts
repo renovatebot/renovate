@@ -88,6 +88,7 @@ export interface HttpOptions {
   noAuth?: boolean;
 
   throwHttpErrors?: boolean;
+  followRedirect?: boolean;
 
   token?: string;
   memCache?: boolean;

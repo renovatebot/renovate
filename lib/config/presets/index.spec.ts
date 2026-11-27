@@ -51,6 +51,28 @@ describe('config/presets/index', () => {
   describe('resolveConfigPresets', () => {
     let config: AllConfig;
 
+    it('preserves literal Mix repository names from hosted presets', async () => {
+      const repository = {
+        url: 'https://registry.example.com/hex',
+        publicKeyFingerprint:
+          'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+      };
+      const hexRepositories = {
+        docker: repository,
+        node: repository,
+        force: repository,
+        extends: repository,
+      };
+      gitHub.getPreset.mockResolvedValueOnce({ mix: { hexRepositories } });
+
+      const result = await presets.resolveConfigPresets({
+        extends: ['github>example/renovate-config'],
+      });
+
+      expect(result.config).toEqual({ mix: { hexRepositories } });
+      expect(gitHub.getPreset).toHaveBeenCalledOnce();
+    });
+
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();

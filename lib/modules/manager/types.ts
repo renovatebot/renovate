@@ -2,6 +2,7 @@ import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
   PackageRule,
+  RenovateConfig,
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -22,6 +23,7 @@ import type {
   ToolName,
 } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
+import type { HexRepositoryPackage } from '../../util/hex-repository.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 import type { RegistryStrategy } from '../datasource/index.ts';
@@ -32,7 +34,10 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig
-  extends CustomExtractConfig, Pick<ToolConstraintsConfig, 'constraints'> {
+  extends
+    CustomExtractConfig,
+    Pick<ToolConstraintsConfig, 'constraints'>,
+    Pick<RenovateConfig, 'hexRepositories'> {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
@@ -80,7 +85,8 @@ export interface ToolConstraintsConfig {
   sharedConstraints?: Partial<Record<ConstraintName, string>> | null;
 }
 
-export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
+export interface UpdateArtifactsConfig
+  extends ToolConstraintsConfig, Pick<RenovateConfig, 'hexRepositories'> {
   isLockFileMaintenance?: boolean;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
@@ -251,6 +257,7 @@ export interface PackageDependency<
   sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
+  hexRepository?: HexRepositoryPackage;
   target?: string;
   versioning?: string;
   dataType?: string;

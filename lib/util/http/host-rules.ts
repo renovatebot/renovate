@@ -7,6 +7,7 @@ import type { CombinedHostRuleWithTrustedHeaders } from '../host-rules.ts';
 import * as hostRules from '../host-rules.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { parseUrl } from '../url.ts';
+import { getAuthorizationHeader } from './auth.ts';
 import type { InternalHttpOptions } from './http.ts';
 import { keepAliveAgents } from './keep-alive.ts';
 import type { GotOptions } from './types.ts';
@@ -189,7 +190,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    isNonEmptyString(options.headers?.authorization) ||
+    getAuthorizationHeader(options.headers) ||
     isNonEmptyString(options.password) ||
     isNonEmptyString(options.token)
   ) {

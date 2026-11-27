@@ -23,6 +23,7 @@ import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
+import { HexRepositories } from '../util/hex-repository.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -409,10 +410,14 @@ export async function validateConfig(
                 ? 'at the top level of a config'
                 : `in "${parent}"`;
             const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
-            warnings.push({
-              topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
-              message,
-            });
+            if (key === 'hexRepositories') {
+              errors.push({ topic: ConfigValidationTopic.Error, message });
+            } else {
+              warnings.push({
+                topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
+                message,
+              });
+            }
           }
 
           // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
@@ -905,6 +910,16 @@ export async function validateConfig(
                         message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: value must be one of "always", "never", or "failed".`,
                       });
                       continue;
+                    }
+                  }
+                } else if (key === 'hexRepositories') {
+                  const result = HexRepositories.safeParse(val);
+                  if (!result.success) {
+                    for (const issue of result.error.issues) {
+                      errors.push({
+                        topic: ConfigValidationTopic.Error,
+                        message: `Invalid \`${[currentPath, ...issue.path].join('.')}\` configuration: ${issue.message}`,
+                      });
                     }
                   }
                 } else if (key === 'customDatasources') {

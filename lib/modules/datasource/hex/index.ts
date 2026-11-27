@@ -4,7 +4,9 @@ import { gunzip } from 'node:zlib';
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { resolveHexPublicKey } from '../../../util/hex-repository.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -29,6 +31,7 @@ J1i2xWFndWa6nfFnRxZmCStCOZWYYPlaxr+FZceFbpMwzTNs4g3d4tLNUcbKAIH4
 0wIDAQAB
 -----END PUBLIC KEY-----`;
 const gunzipAsync = promisify(gunzip);
+const hexPackageNamePattern = regEx(/^[a-z][a-z0-9_]*$/);
 
 interface ParsedPackageName {
   hexPackageName: string;
@@ -145,6 +148,7 @@ export class HexDatasource extends Datasource {
   private async getReleasesViaV2Protocol({
     packageName,
     registryUrl,
+    hexRepository,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore if -- should never happen */
     if (!registryUrl) {
@@ -153,17 +157,32 @@ export class HexDatasource extends Datasource {
 
     const { hexPackageName, organizationName, organizationUrlPrefix } =
       parsePackageName(packageName);
+    let publicKey: string | null = null;
+    if (hexRepository) {
+      if (!hexPackageNamePattern.test(packageName)) {
+        return null;
+      }
+      publicKey = await resolveHexPublicKey(hexRepository.name, hexRepository);
+    }
 
     const url = joinUrlParts(
       registryUrl,
       `/${organizationUrlPrefix}packages/${hexPackageName}`,
     );
 
-    const { body } = await this.http.getBuffer(url);
+    const { body, statusCode } = await this.http.getBuffer(
+      url,
+      hexRepository ? { followRedirect: false, memCache: false } : undefined,
+    );
+    if (hexRepository && statusCode !== 200) {
+      return null;
+    }
     const decompressed = await gunzipAsync(body);
     const signed = Signed.decode(decompressed);
 
-    const publicKey = await this.getPublicKey(registryUrl);
+    if (!hexRepository) {
+      publicKey = await this.getPublicKey(registryUrl);
+    }
     if (publicKey && !isSignedPayloadValid(signed, publicKey, packageName)) {
       return null;
     }
@@ -183,10 +202,9 @@ export class HexDatasource extends Datasource {
       return null;
     }
 
-    const expectedRepositoryName = getExpectedRepositoryName(
-      registryUrl,
-      organizationName,
-    );
+    const expectedRepositoryName =
+      hexRepository?.name ??
+      getExpectedRepositoryName(registryUrl, organizationName);
     if (expectedRepositoryName && pkg.repository !== expectedRepositoryName) {
       logger.warn(
         {
@@ -206,7 +224,7 @@ export class HexDatasource extends Datasource {
       return null;
     }
 
-    return { releases };
+    return hexRepository ? { releases, isPrivate: true } : { releases };
   }
 
   private async getPublicKey(registryUrl: string): Promise<string | null> {
@@ -240,7 +258,10 @@ export class HexDatasource extends Datasource {
   private async _getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    if (HexDatasource.isDefaultRegistry(config.registryUrl)) {
+    if (
+      !config.hexRepository &&
+      HexDatasource.isDefaultRegistry(config.registryUrl)
+    ) {
       return this.getReleasesViaJsonApi(config);
     }
 
@@ -264,6 +285,10 @@ export class HexDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    if (config.hexRepository) {
+      const { url: registryUrl, packageName } = config.hexRepository;
+      return this._getReleases({ ...config, registryUrl, packageName });
+    }
     const isDefault = HexDatasource.isDefaultRegistry(config.registryUrl);
     const registryUrl = isDefault ? defaultRegistryUrl : config.registryUrl;
 

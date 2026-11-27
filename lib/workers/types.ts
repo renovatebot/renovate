@@ -289,7 +289,10 @@ export interface SelectAllConfig extends RenovateConfig {
   dependencyDashboardAllAwaitingSchedule?: boolean;
 }
 
-export interface UpgradeFingerprintConfig {
+export interface UpgradeFingerprintConfig extends Pick<
+  RenovateConfig,
+  'hexRepositories'
+> {
   autoReplaceStringTemplate?: string;
   currentDigest?: string;
   currentValue?: string;

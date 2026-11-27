@@ -1,4 +1,9 @@
-import { generateKeyPair, sign as signPayload } from 'node:crypto';
+import {
+  createHash,
+  createPublicKey,
+  generateKeyPair,
+  sign as signPayload,
+} from 'node:crypto';
 import { promisify } from 'node:util';
 import { gzip as _gzip } from 'node:zlib';
 import protobuf from 'protobufjs';
@@ -6,8 +11,12 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import { extractPackageFile } from '../../manager/mix/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { HexDatasource } from './index.ts';
 import type { Package } from './v2/package.ts';
@@ -104,6 +113,257 @@ describe('modules/datasource/hex/index', () => {
 
   afterEach(() => {
     memCache.reset();
+    GlobalConfig.reset();
+  });
+
+  describe('named Mix repository', () => {
+    const host = 'https://repo.example.com';
+    const url = `${host}/hex/private`;
+    const { n } = createPublicKey(testPublicKey).export({ format: 'jwk' });
+    // SSH strings for "ssh-rsa", exponent 65537, and 2048-bit modulus
+    // (prefixed with a zero byte to preserve the unsigned value).
+    const sshWirePrefix = Buffer.from(
+      '000000077373682d727361000000030100010000010100',
+      'hex',
+    );
+    const digest = createHash('sha256')
+      .update(sshWirePrefix)
+      .update(Buffer.from(n!, 'base64url'))
+      .digest('base64');
+    const repository = {
+      url,
+      publicKeyFingerprint: `SHA256:${digest.slice(0, -1)}`,
+    };
+    const pkg = PackageCodec.fromJSON({
+      name: 'real_package',
+      repository: 'company',
+      releases: [{ version: '1.2.3' }],
+    });
+
+    it.each`
+      authType        | authorization
+      ${'Token-Only'} | ${'abc'}
+      ${'Bearer'}     | ${'Bearer abc'}
+      ${undefined}    | ${undefined}
+    `(
+      'verifies the selected repository and ignores package rule overrides ($authType)',
+      async ({ authType, authorization }) => {
+        GlobalConfig.set({ localDir: '' });
+        if (authType) {
+          hostRules.add({
+            hostType: 'hex',
+            matchHost: `${url}/`,
+            token: 'abc',
+            authType,
+          });
+        }
+        const signed = await makeV2Response(pkg, {
+          privateKey: testPrivateKey,
+        });
+        const scope = httpMock.scope(
+          host,
+          authorization
+            ? { reqheaders: { authorization } }
+            : { badheaders: ['authorization'] },
+        );
+        scope.get('/hex/private/public_key').reply(200, testPublicKey);
+        scope.get('/hex/private/packages/real_package').reply(200, signed);
+
+        const extracted = await extractPackageFile(
+          'defp deps do\n[{:app, "~> 1.0", repo: "company", hex: :real_package}]\nend',
+          'mix.exs',
+          { hexRepositories: { company: repository } },
+        );
+        const dep = extracted!.deps[0];
+        const config = await applyPackageRules({
+          hexRepository: dep.hexRepository,
+          datasource: dep.datasource!,
+          packageName: dep.packageName!,
+          registryUrls: dep.registryUrls,
+          registryStrategy: 'merge' as const,
+          packageRules: [
+            {
+              matchRegistryUrls: [url],
+              overrideDatasource: 'npm',
+              overridePackageName: 'wrong_package',
+              registryUrls: ['https://wrong.example.com'],
+            },
+          ],
+        });
+        const [first, second] = await Promise.all([
+          getPkgReleases(config),
+          getPkgReleases(config),
+        ]);
+
+        expect(config).toMatchObject({
+          datasource: 'npm',
+          packageName: 'wrong_package',
+          registryUrls: ['https://wrong.example.com'],
+        });
+        expect(first).toMatchObject({
+          registryUrl: url,
+          isPrivate: true,
+          releases: [{ version: '1.2.3' }],
+        });
+        expect(second).toEqual(first);
+      },
+    );
+
+    it.each`
+      name               | repositoryName | signed
+      ${'wrong_package'} | ${'company'}   | ${true}
+      ${'real_package'}  | ${'wrong'}     | ${true}
+      ${'real_package'}  | ${'company'}   | ${false}
+    `(
+      'rejects invalid signed metadata or unsigned data ($name, $repositoryName, $signed)',
+      async ({ name, repositoryName, signed }) => {
+        const response = await makeV2Response(
+          { ...pkg, name, repository: repositoryName },
+          signed
+            ? { privateKey: testPrivateKey }
+            : { signature: Buffer.alloc(0) },
+        );
+        const scope = httpMock.scope(host);
+        scope.get('/hex/private/public_key').reply(200, testPublicKey);
+        scope.get('/hex/private/packages/real_package').reply(200, response);
+
+        await expect(
+          getPkgReleases({
+            datasource,
+            packageName: 'real_package',
+            hexRepository: {
+              ...repository,
+              name: 'company',
+              packageName: 'real_package',
+            },
+          }),
+        ).resolves.toBeNull();
+      },
+    );
+
+    it('bypasses both persistent caches and keeps distinct pins out of its in-memory hit', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+      const get = vi
+        .spyOn(packageCache, 'get')
+        .mockResolvedValue({ releases: [{ version: '9.9.9' }] });
+      const set = vi.spyOn(packageCache, 'set');
+      const signed = await makeV2Response(pkg, { privateKey: testPrivateKey });
+      const scope = httpMock.scope(host);
+      scope.get('/hex/private/public_key').twice().reply(200, testPublicKey);
+      scope.get('/hex/private/packages/real_package').reply(200, signed);
+      const hexRepository = {
+        ...repository,
+        name: 'company',
+        packageName: 'real_package',
+      };
+      const config = { datasource, packageName: 'real_package', hexRepository };
+
+      await expect(getPkgReleases(config)).resolves.toMatchObject({
+        releases: [{ version: '1.2.3' }],
+      });
+      await expect(
+        getPkgReleases({
+          ...config,
+          hexRepository: {
+            ...hexRepository,
+            publicKeyFingerprint:
+              'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+          },
+        }),
+      ).resolves.toBeNull();
+
+      expect(get).not.toHaveBeenCalled();
+      expect(set).not.toHaveBeenCalled();
+    });
+
+    it('does not fall back when the public key is unavailable', async () => {
+      httpMock.scope(host).get('/hex/private/public_key').reply(404);
+
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'real_package',
+          hexRepository: {
+            ...repository,
+            name: 'company',
+            packageName: 'real_package',
+          },
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('uses a configured Authorization header for requests to the repository', async () => {
+      const path = '/artifactory/api/hex/company';
+      const artifactoryUrl = `${host}${path}`;
+      GlobalConfig.set({ allowedHeaders: ['Authorization'] });
+      hostRules.add({
+        hostType: 'hex',
+        matchHost: artifactoryUrl,
+        token: 'fallback-token',
+        headers: { Authorization: 'Bearer artifactory-token' },
+      });
+      const signed = await makeV2Response(pkg, { privateKey: testPrivateKey });
+      const scope = httpMock.scope(host, {
+        reqheaders: { authorization: 'Bearer artifactory-token' },
+      });
+      scope.get(`${path}/public_key`).reply(200, testPublicKey);
+      scope.get(`${path}/packages/real_package`).reply(200, signed);
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'real_package',
+        hexRepository: {
+          url: artifactoryUrl,
+          publicKeyFingerprint: repository.publicKeyFingerprint,
+          name: 'company',
+          packageName: 'real_package',
+        },
+      });
+
+      expect(result).toMatchObject({
+        registryUrl: artifactoryUrl,
+        releases: [{ version: '1.2.3' }],
+      });
+    });
+
+    it('rejects package redirects after verifying the fingerprint', async () => {
+      httpMock
+        .scope(host)
+        .get('/hex/private/public_key')
+        .reply(200, testPublicKey);
+      httpMock
+        .scope(host)
+        .get('/hex/private/packages/real_package')
+        .reply(302, undefined, {
+          location: 'https://other.example.com/packages/real_package',
+        });
+
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'real_package',
+          hexRepository: {
+            ...repository,
+            name: 'company',
+            packageName: 'real_package',
+          },
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('does not look up an invalid package name', async () => {
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'missing',
+          hexRepository: {
+            ...repository,
+            name: 'company',
+            packageName: 'wrong/name',
+          },
+        }),
+      ).resolves.toBeNull();
+    });
   });
 
   describe('getReleases', () => {

@@ -54,6 +54,7 @@ function getFilteredManagerConfig(
     includePaths: coerceArray(config.includePaths),
     skipInstalls: config.skipInstalls,
     registryAliases: config.registryAliases,
+    ...(config.hexRepositories && { hexRepositories: config.hexRepositories }),
     fileList: [],
   };
 }

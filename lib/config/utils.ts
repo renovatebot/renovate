@@ -35,7 +35,7 @@ export function mergeChildConfig<
     ) {
       logger.trace(`mergeable option: ${option.name}`);
 
-      if (option.name === 'constraints') {
+      if (option.name === 'constraints' || option.name === 'hexRepositories') {
         config[option.name] = {
           ...parentConfig[option.name],
           ...childConfig[option.name],

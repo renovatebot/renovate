@@ -9,6 +9,105 @@ describe('modules/manager/mix/extract', () => {
   });
 
   describe('extractPackageFile()', () => {
+    it('extracts literal declared repos, Hex.pm and organizations without mixing package names', async () => {
+      const privateRepo = {
+        url: 'https://example.com/artifact/hex/',
+        publicKeyFingerprint:
+          'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+      };
+
+      const res = await extractPackageFile(
+        codeBlock`
+          defp deps do
+            [
+              {:local_app, "~> 1.0", system_env: [{"FLAG}#", "1"}], hex: :upstream, repo: "acme.private"},
+              {:public_app, "~> 1.0", repo: "hexpm"},
+              {:default_nil, "~> 1.0", repo: nil},
+              {:default_false, "~> 1.0", repo: false},
+              {:bracketed, "~> 1.0", [repo: "acme.private"],},
+              {:keyword_tuple, "~> 1.0", [{:repo, "acme.private"}]},
+              {:opaque_options, "~> 1.0", @private_options},
+              {:org_app, "~> 1.0", repo: "hexpm:acme", hex: "org_pkg"},
+              {:org_option_app, "~> 1.0", organization: "acme"},
+              {:unknown, "~> 1.0", repo: "acme-private"},
+              {:dynamic, "~> 1.0", repo: get_repo()}
+            ]
+          end
+        `,
+        'mix.exs',
+        { hexRepositories: { 'acme.private': privateRepo } },
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'local_app',
+          packageName: 'upstream',
+          registryUrls: ['https://example.com/artifact/hex'],
+          hexRepository: {
+            name: 'acme.private',
+            packageName: 'upstream',
+            url: 'https://example.com/artifact/hex',
+            publicKeyFingerprint: privateRepo.publicKeyFingerprint,
+          },
+        },
+        { packageName: 'public_app' },
+        { packageName: 'default_nil' },
+        { packageName: 'default_false' },
+        {
+          packageName: 'bracketed',
+          registryUrls: ['https://example.com/artifact/hex'],
+        },
+        {
+          packageName: 'keyword_tuple',
+          registryUrls: ['https://example.com/artifact/hex'],
+        },
+        { packageName: 'opaque_options', skipReason: 'no-repository' },
+        { packageName: 'org_pkg:acme' },
+        { packageName: 'org_option_app:acme' },
+        { packageName: 'unknown', skipReason: 'no-repository' },
+        { packageName: 'dynamic', skipReason: 'no-repository' },
+      ]);
+      expect(res?.deps.slice(1, 4)).toEqual(
+        ['public_app', 'default_nil', 'default_false'].map((name) => ({
+          depName: name,
+          packageName: name,
+          currentValue: '~> 1.0',
+          depType: 'prod',
+          datasource: 'hex',
+        })),
+      );
+    });
+
+    it('does not treat an incomplete tuple or a computed repository option list as public', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          defp deps do
+            [
+              {:computed, "~> 1.0", [only: :dev] ++ [repo: "company"]},
+              {:truncated, "~> 1.0", system_env: [{"FLAG", "1"}]
+            ]
+          end
+        `,
+        'mix.exs',
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('skips computed app names and tuples without a closing brace', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          defp deps do
+            [{:prefix |> app_name(), "~> 1.0"},
+             {:incomplete, "~> 1.0", repo: "company"
+          end
+        `,
+        'mix.exs',
+      );
+
+      expect(result).toBeNull();
+    });
+
     it('returns empty for invalid dependency file', async () => {
       const res = await extractPackageFile('nothing here', 'mix.exs');
       expect(res).toBeNull();
