@@ -22,7 +22,8 @@ Custom managers are named `custom.<customType>` in `packageRules`, so a regex ma
 ```json
 {
   "packageRules": [
-    {
+      "matchManagers": ["custom.regex"],
+      "matchDatasources": ["nuget"],
       "matchManagers": ["custom.regex"],
       "rangeStrategy": "bump"
     }
