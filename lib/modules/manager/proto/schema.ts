@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isPlainObject, isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
@@ -24,7 +24,29 @@ export const ProtoToolsFile = Toml.pipe(
         versions[key] = value;
       }
     }
-    return { versions };
+
+    const plugins: Record<string, string> = {};
+    collectStringValues(data.plugins, plugins);
+    if (isPlainObject(data.plugins)) {
+      // `[plugins.tools]` (v0.52+) takes precedence over legacy `[plugins]`.
+      collectStringValues(data.plugins.tools, plugins);
+    }
+
+    return { versions, plugins };
   }),
 );
 export type ProtoToolsFile = z.infer<typeof ProtoToolsFile>;
+
+function collectStringValues(
+  value: unknown,
+  target: Record<string, string>,
+): void {
+  if (!isPlainObject(value)) {
+    return;
+  }
+  for (const [key, entry] of Object.entries(value)) {
+    if (isString(entry)) {
+      target[key] = entry;
+    }
+  }
+}
