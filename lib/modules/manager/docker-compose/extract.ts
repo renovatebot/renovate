@@ -1,5 +1,6 @@
-import { isString, isTruthy } from '@sindresorhus/is';
+import { isPlainObject, isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -50,6 +51,10 @@ export function extractPackageFile(
   }
   try {
     const lineMapper = new LineMapper(content, regEx(/^\s*image:/));
+    const volumeSourceLineMapper = new LineMapper(
+      content,
+      regEx(/^\s*source:/),
+    );
 
     // docker-compose v1 places the services at the top level,
     // docker-compose v2+ places the services within a 'services' key
@@ -75,7 +80,33 @@ export function extractPackageFile(
         }
         return dep;
       })
-      .filter(isTruthy);
+      .filter(isTruthy)
+      // https://docs.docker.com/engine/storage/image-mounts/
+      // volume.type=image uses the same format as service level `image` values
+      .concat(
+        Object.values(services)
+          .flatMap((service) => coerceArray(service.volumes))
+          .filter(
+            (volume): volume is { type: string; source: string } =>
+              isPlainObject(volume) &&
+              volume.type === 'image' &&
+              isString(volume.source),
+          )
+          .map((volume) => {
+            const dep = getDep(volume.source, {
+              registryAliases: extractConfig.registryAliases,
+            });
+            const lineNumber = volumeSourceLineMapper.pluckLineNumber(
+              volume.source,
+            );
+            // istanbul ignore if
+            if (!lineNumber) {
+              return null;
+            }
+            return dep;
+          })
+          .filter(isTruthy),
+      );
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };
