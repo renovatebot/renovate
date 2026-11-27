@@ -1,3 +1,4 @@
+import { fs } from '~test/util.ts';
 import {
   getConfigType,
   getLockFileName,
@@ -5,6 +6,8 @@ import {
   getSidecarDir,
 } from './lockfile.ts';
 import type { MiseLockFile } from './schema.ts';
+
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/mise/lockfile', () => {
   describe('getConfigType()', () => {
@@ -38,8 +41,19 @@ describe('modules/manager/mise/lockfile', () => {
       ${'subdir/mise.prod.toml'}    | ${'subdir/mise.prod.lock'}
       ${'conf.d/python.toml'}       | ${'mise.lock'}
       ${'project/conf.d/node.toml'} | ${'project/mise.lock'}
-    `('returns $expected for $configPath', ({ configPath, expected }) => {
-      expect(getLockFileName(configPath)).toBe(expected);
+    `('returns $expected for $configPath', async ({ configPath, expected }) => {
+      await expect(getLockFileName(configPath)).resolves.toBe(expected);
+    });
+
+    it('returns the monorepo root lock file when no colocated lock file exists', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('mise.lock');
+      await expect(getLockFileName('packages/a/mise.toml')).resolves.toBe(
+        'mise.lock',
+      );
+      expect(fs.findLocalSiblingOrParent).toHaveBeenCalledWith(
+        'packages/a/mise.lock',
+        'mise.lock',
+      );
     });
   });
 
@@ -90,6 +104,35 @@ describe('modules/manager/mise/lockfile', () => {
 
     it('returns first version when multiple versions exist', () => {
       expect(getLockedVersion(lockFileData, 'python')).toBe('3.10.17');
+    });
+
+    describe('with specifiers', () => {
+      const rootLockFileData: MiseLockFile = {
+        tools: {
+          node: [
+            { version: '24.21.0', specifiers: ['24.21.0'] },
+            { version: '22.19.0', specifiers: ['22'] },
+            { version: '20.11.0' },
+          ],
+          pnpm: [{ version: '11.25.0' }],
+        },
+      };
+
+      it.each`
+        depName        | currentValue | expected
+        ${'node'}      | ${'22'}      | ${'22.19.0'}
+        ${'core:node'} | ${'24.21.0'} | ${'24.21.0'}
+        ${'node'}      | ${'20'}      | ${undefined}
+        ${'node'}      | ${undefined} | ${'24.21.0'}
+        ${'pnpm'}      | ${'11'}      | ${'11.25.0'}
+      `(
+        'returns $expected for $depName = $currentValue',
+        ({ depName, currentValue, expected }) => {
+          expect(
+            getLockedVersion(rootLockFileData, depName, currentValue),
+          ).toBe(expected);
+        },
+      );
     });
 
     it('handles tools with bracket options in name', () => {
