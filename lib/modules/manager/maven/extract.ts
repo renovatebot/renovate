@@ -18,10 +18,14 @@ import {
 import { getDep as getDockerDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
-  PackageDependency,
-  PackageFile,
+  PackageDependency as GenericPackageDependency,
+  PackageFile as GenericPackageFile,
 } from '../types.ts';
-import type { MavenProp } from './types.ts';
+import type { MavenManagerData, MavenProp } from './types.ts';
+import { getXmlPaths } from './xml.ts';
+
+type PackageDependency = GenericPackageDependency<MavenManagerData>;
+type PackageFile = GenericPackageFile<MavenManagerData>;
 
 const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.0.0',
@@ -319,6 +323,7 @@ function applyPropsInternal(
   const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
+  let managerData = dep.managerData;
   let propSource = dep.propSource;
   let sharedVariableName: string | null = null;
   let currentValue: string | null = null;
@@ -332,6 +337,7 @@ function applyPropsInternal(
       if (propValue) {
         sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
+        managerData = { xmlPath: propValue.xmlPath };
         propSource = propValue.packageFile;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
@@ -350,6 +356,7 @@ function applyPropsInternal(
     depName,
     registryUrls,
     fileReplacePosition,
+    managerData,
     propSource,
     currentValue,
   };
@@ -412,6 +419,11 @@ export function extractPackage(
     result.deps.push(...CNBDependencies);
   }
 
+  const xmlPaths = getXmlPaths(project);
+  for (const dep of result.deps) {
+    dep.managerData = { xmlPath: xmlPaths.get(dep.fileReplacePosition!)! };
+  }
+
   const propsNode = project.childNamed('properties');
   const props: Record<string, MavenProp> = {};
   if (propsNode?.children) {
@@ -420,7 +432,12 @@ export function extractPackage(
       const val = propNode?.val?.trim();
       if (key && val && propNode.position) {
         const fileReplacePosition = propNode.position;
-        props[key] = { val, fileReplacePosition, packageFile };
+        props[key] = {
+          val,
+          fileReplacePosition,
+          packageFile,
+          xmlPath: xmlPaths.get(fileReplacePosition)!,
+        };
       }
     }
   }
@@ -641,6 +658,10 @@ export function extractExtensions(
   };
 
   result.deps = deepExtract(extensions);
+  const xmlPaths = getXmlPaths(extensions);
+  for (const dep of result.deps) {
+    dep.managerData = { xmlPath: xmlPaths.get(dep.fileReplacePosition!)! };
+  }
 
   return result;
 }
