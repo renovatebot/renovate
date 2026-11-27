@@ -24,7 +24,7 @@ maven.install(
     ],
 )
 
-The `boms` attribute is parsed alongside `artifacts`, and each BOM inherits the enclosing `maven.install(...)` call's `repositories` as its registry URLs.
+The `boms` attribute is parsed alongside `artifacts`, and each BOM inherits the enclosing `maven.install()` call's `repositories` as its registry URLs.
 
 maven.artifact(
     artifact = "javapoet",
