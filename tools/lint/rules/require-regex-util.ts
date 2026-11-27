@@ -1,6 +1,25 @@
 import type { ESTree } from '@oxlint/plugins';
 import { defineRule } from '@oxlint/plugins';
 
+const globalObjects = new Set(['globalThis', 'window', 'self']);
+
+/**
+ * Matches `RegExp` as well as `globalThis.RegExp`, `window.RegExp` and `self.RegExp`.
+ */
+function isRegExpConstructor(callee: ESTree.Node): boolean {
+  if (callee.type === 'Identifier') {
+    return callee.name === 'RegExp';
+  }
+  return (
+    callee.type === 'MemberExpression' &&
+    !callee.computed &&
+    callee.object.type === 'Identifier' &&
+    globalObjects.has(callee.object.name) &&
+    callee.property.type === 'Identifier' &&
+    callee.property.name === 'RegExp'
+  );
+}
+
 export default defineRule({
   meta: {
     type: 'problem',
@@ -29,14 +48,15 @@ export default defineRule({
         wrappedLiterals = new Set();
       },
       NewExpression(node) {
-        if (
-          node.callee.type === 'Identifier' &&
-          node.callee.name === 'RegExp'
-        ) {
+        if (isRegExpConstructor(node.callee)) {
           context.report({ node, messageId: 'requireRegexUtil' });
         }
       },
       CallExpression(node) {
+        // RegExp(...) without `new` constructs a RegExp too
+        if (isRegExpConstructor(node.callee)) {
+          context.report({ node, messageId: 'requireRegexUtil' });
+        }
         if (
           node.callee.type === 'Identifier' &&
           node.callee.name === 'regEx' &&

@@ -1,4 +1,8 @@
+import { randomUUID } from 'node:crypto';
+import { isNonEmptyString } from '@sindresorhus/is';
+import semver from 'semver';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type {
@@ -7,7 +11,10 @@ import type {
 } from '../../../../util/exec/types.ts';
 import {
   getSiblingFileName,
+  outputCacheFile,
+  privateCacheDir,
   readLocalFile,
+  rmCache,
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { Result } from '../../../../util/result.ts';
@@ -29,6 +36,8 @@ import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
+// `pdm update --override` was added in pdm 2.17.0
+const overrideMinVersion = '>=2.17.0';
 const gitExec = withGitEnvironment(['pep621']);
 
 export class PdmProcessor extends BasePyProjectProcessor {
@@ -54,7 +63,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
 
   async extractLockedVersions(
     project: PyProject,
-    deps: PackageDependency[],
+    deps: PackageDependency<Pep621ManagerData>[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
     if (
@@ -75,7 +84,14 @@ export class PdmProcessor extends BasePyProjectProcessor {
       for (const dep of deps) {
         const packageName = dep.packageName;
         if (packageName && packageName in lockFileMapping) {
-          dep.lockedVersion = lockFileMapping[packageName];
+          const locked = lockFileMapping[packageName];
+          dep.lockedVersion = locked.version;
+          if (locked.hasMultipleEntries) {
+            dep.managerData = {
+              ...dep.managerData,
+              hasMultipleLockedEntries: true,
+            };
+          }
         }
       }
     }
@@ -121,17 +137,45 @@ export class PdmProcessor extends BasePyProjectProcessor {
 
       // on lockFileMaintenance do not specify any packages and update the complete lock file
       // else only update specific packages
-      const cmds: string[] = [];
       if (isLockFileMaintenance) {
-        cmds.push(pdmUpdateCMD);
-      } else {
-        cmds.push(...generateCMDs(updatedDeps));
+        return await updateLockFile({
+          lockFileName,
+          existingLockFileContent,
+          run: () => gitExec(pdmUpdateCMD, execOptions),
+        });
       }
-      return await updateLockFile({
-        lockFileName,
-        existingLockFileContent,
-        run: () => gitExec(cmds, execOptions),
-      });
+
+      const { packagesByCMD, pins } = groupUpdates(updatedDeps);
+      let overrideFile: string | null = null;
+      if (pins.length) {
+        if (supportsOverride(pdmConstraint.constraint)) {
+          overrideFile = upath.join(
+            privateCacheDir(),
+            `pdm-override-${randomUUID()}.txt`,
+          );
+          await outputCacheFile(overrideFile, `${pins.join('\n')}\n`);
+        } else {
+          logger.debug(
+            { constraint: pdmConstraint.constraint },
+            `pdm may not support --override, which needs ${overrideMinVersion}: updating without pinning versions`,
+          );
+        }
+      }
+      const cmds = generateCMDs(
+        packagesByCMD,
+        overrideFile ? `--override ${quote(overrideFile)}` : '',
+      );
+      try {
+        return await updateLockFile({
+          lockFileName,
+          existingLockFileContent,
+          run: () => gitExec(cmds, execOptions),
+        });
+      } finally {
+        if (overrideFile) {
+          await rmCache(overrideFile);
+        }
+      }
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
         throw err;
@@ -142,9 +186,48 @@ export class PdmProcessor extends BasePyProjectProcessor {
   }
 }
 
-function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
-  const cmds: string[] = [];
+/**
+ * Whether `pdm update` of the version selected by `constraint` supports `--override`.
+ */
+function supportsOverride(constraint: string | null | undefined): boolean {
+  if (!constraint) {
+    return true;
+  }
+  const range = semver.validRange(constraint);
+  return !!range && semver.subset(range, overrideMinVersion);
+}
+
+/**
+ * The pip-requirements line which pins `dep` to its new version on a
+ * lock-file-only update of a PyPI package which the lock file holds at one
+ * version, else `null`.
+ */
+function getPin(dep: Upgrade<Pep621ManagerData>): string | null {
+  // An override applies to every lock target, so it would move the entries
+  // of the other targets to the pinned version as well.
+  if (dep.managerData?.hasMultipleLockedEntries) {
+    return null;
+  }
+  // The range in `pyproject.toml` still allows newer versions than the one
+  // looked up, so an unpinned update would resolve to the newest of them.
+  if (
+    dep.isLockfileUpdate &&
+    dep.datasource === PypiDatasource.id &&
+    dep.newVersion
+  ) {
+    return `${dep.packageName!}==${dep.newVersion}`;
+  }
+  return null;
+}
+
+interface PdmUpdates {
+  packagesByCMD: Record<string, string[]>;
+  pins: string[];
+}
+
+function groupUpdates(updatedDeps: Upgrade<Pep621ManagerData>[]): PdmUpdates {
   const packagesByCMD: Record<string, string[]> = {};
+  const pins: string[] = [];
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
@@ -156,9 +239,9 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
           continue;
         }
         addPackageToCMDRecord(
-          packagesByCMD,
-          `${pdmUpdateCMD} -G ${quote(dep.managerData.depGroup)}`,
-          dep.packageName!,
+          { packagesByCMD, pins },
+          `-G ${quote(dep.managerData.depGroup)}`,
+          dep,
         );
         break;
       }
@@ -172,9 +255,9 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
           continue;
         }
         addPackageToCMDRecord(
-          packagesByCMD,
-          `${pdmUpdateCMD} -dG ${quote(dep.managerData.depGroup)}`,
-          dep.packageName!,
+          { packagesByCMD, pins },
+          `-dG ${quote(dep.managerData.depGroup)}`,
+          dep,
         );
         break;
       }
@@ -183,27 +266,38 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         // Reference: https://github.com/pdm-project/pdm/discussions/2869
         break;
       default: {
-        addPackageToCMDRecord(packagesByCMD, pdmUpdateCMD, dep.packageName!);
+        addPackageToCMDRecord({ packagesByCMD, pins }, '', dep);
       }
     }
   }
 
-  for (const commandPrefix in packagesByCMD) {
-    const packageList = packagesByCMD[commandPrefix].map(quote).join(' ');
-    const cmd = `${commandPrefix} ${packageList}`;
-    cmds.push(cmd);
-  }
+  return { packagesByCMD, pins };
+}
 
-  return cmds;
+/**
+ * The `pdm update` commands for `packagesByCMD`, each with `args` after the
+ * base command.
+ */
+function generateCMDs(
+  packagesByCMD: Record<string, string[]>,
+  args: string,
+): string[] {
+  return Object.entries(packagesByCMD).map(([groupArgs, packages]) =>
+    [pdmUpdateCMD, args, groupArgs, packages.map(quote).join(' ')]
+      .filter(isNonEmptyString)
+      .join(' '),
+  );
 }
 
 function addPackageToCMDRecord(
-  packagesByCMD: Record<string, string[]>,
-  commandPrefix: string,
-  packageName: string,
+  { packagesByCMD, pins }: PdmUpdates,
+  groupArgs: string,
+  dep: Upgrade<Pep621ManagerData>,
 ): void {
-  if (!packagesByCMD[commandPrefix]) {
-    packagesByCMD[commandPrefix] = [];
+  packagesByCMD[groupArgs] ??= [];
+  packagesByCMD[groupArgs].push(dep.packageName!);
+  const pin = getPin(dep);
+  if (pin) {
+    pins.push(pin);
   }
-  packagesByCMD[commandPrefix].push(packageName);
 }

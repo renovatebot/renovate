@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { Result } from '../../../util/result.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
@@ -509,6 +509,57 @@ describe('modules/manager/github-actions/integration', () => {
         updateType: 'digest',
       },
     ]);
+  });
+
+  it('warns about a missing `v` prefix when the digest cannot be determined for a SHA-pinned comment', async () => {
+    const workflow = codeBlock`
+      on: push
+      jobs:
+        build:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@0000000000000000000000000000000000000000 # 1.0.0
+    `;
+
+    const extracted = await extractPackageFile(
+      workflow,
+      '.github/workflows/ci-pinning-no-v.yml',
+      {},
+    );
+    const dep = extracted!.deps.find((d) => d.depName === 'actions/checkout');
+    expect(dep).toBeDefined();
+
+    getGithubTags.mockResolvedValueOnce({
+      releases: [
+        {
+          version: 'v1.0.0',
+          newDigest: 'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeee11111111',
+        },
+      ],
+    });
+    getGithubDigest.mockResolvedValue(null);
+
+    const { updates, warnings } = await Result.wrap(
+      lookup.lookupUpdates(makeConfig(dep!)),
+    ).unwrapOrThrow();
+
+    expect(updates).toBeEmpty();
+    expect(warnings).toEqual([
+      {
+        message:
+          'Could not determine new digest for update (github-tags package actions/checkout)',
+        topic: 'actions/checkout',
+      },
+    ]);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      {
+        packageName: 'actions/checkout',
+        datasource: GithubTagsDatasource.id,
+        newValue: '1.0.0',
+        suggestedValue: 'v1.0.0',
+      },
+      'Could not determine new digest for update. Check the tag in the `newValue` - did you maybe mean the `suggestedValue`, with a `v` prefix?',
+    );
   });
 
   it('proposes minor and major updates for floating minor tag', async () => {

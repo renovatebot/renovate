@@ -156,7 +156,7 @@ export class GoDirectDatasource extends Datasource {
       {
         namespace: `datasource-${GoDirectDatasource.id}`,
         key: config.packageName,
-        cacheable: isPublicGoPackage(config.packageName),
+        public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

@@ -145,9 +145,11 @@ export async function getPreset(
     const cacheKey = buildCacheKey('preset', preset);
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');
 
-    const packageCache = presetCachePersistence
-      ? await import('../../util/cache/package/index.ts')
-      : undefined;
+    let packageCache:
+      typeof import('../../util/cache/package/index.ts') | undefined;
+    if (presetCachePersistence) {
+      packageCache = await import('../../util/cache/package/index.ts');
+    }
 
     if (packageCache) {
       presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);

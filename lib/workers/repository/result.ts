@@ -14,6 +14,7 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
 
+import { addRepositoryStatus } from '../../instrumentation/reporting.ts';
 import { logger } from '../../logger/index.ts';
 
 export type ProcessStatus =
@@ -124,5 +125,6 @@ export function processResult(
     // TODO: types (#22198)
     `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`,
   );
+  addRepositoryStatus(config, status);
   return { res, status, enabled, onboarded, exitCode: getExitCode(res) };
 }

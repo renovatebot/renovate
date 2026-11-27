@@ -1,19 +1,25 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isBoolean, isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoToolSettingsOptions } from '../../config/types.ts';
+import { configOptionDefaults } from '../../config-option-defaults.generated.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { coerceArray } from '../array.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
-import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
+import {
+  generateInstallCommands,
+  invalidateActiveTools,
+  isDynamicInstall,
+} from './containerbase.ts';
 import {
   generateDockerCommand,
   removeDockerContainer,
 } from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
@@ -55,11 +61,24 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
     env: childEnv,
     maxBuffer,
     timeout,
+    ...(opts.redactOutput !== undefined && {
+      redactOutput: opts.redactOutput,
+    }),
+    ...(opts.input !== undefined && { input: opts.input }),
     ...(opts.shell !== undefined && { shell: opts.shell }),
     stdin: 'pipe',
     stdout: opts.ignoreStdout ? 'ignore' : 'pipe',
     stderr: 'pipe',
   };
+}
+
+function withoutInput(options: RawExecOptions): RawExecOptions {
+  const result = { ...options };
+  if (result.input !== undefined) {
+    delete result.input;
+    result.stdin = 'ignore';
+  }
+  return result;
 }
 
 function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
@@ -69,6 +88,7 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
 interface RawExecArguments {
   rawCommands: (string | CommandWithOptions)[];
   rawOptions: RawExecOptions;
+  installCommandCount: number;
 }
 
 async function prepareRawExec(
@@ -92,6 +112,7 @@ async function prepareRawExec(
   let rawOptions = getRawExecOptions(opts);
 
   let rawCommands = isString(cmd) ? [cmd] : cmd;
+  let installCommandCount = 0;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
@@ -117,17 +138,19 @@ async function prepareRawExec(
       ],
       dockerOptions,
       sideCarImage,
+      opts.input !== undefined,
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
     logger.debug('Using containerbase dynamic installs');
-    rawCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints, true)),
-      ...preCommands,
-      ...rawCommands,
-    ];
+    const installCommands = await generateInstallCommands(
+      opts.toolConstraints,
+      true,
+    );
+    installCommandCount = installCommands.length;
+    rawCommands = [...installCommands, ...preCommands, ...rawCommands];
   } else if (isHermit()) {
-    const hermitEnvVars = await getHermitEnvs(rawOptions);
+    const hermitEnvVars = await getHermitEnvs(withoutInput(rawOptions));
     logger.debug(
       { hermitEnvVars },
       'merging hermit environment variables into the execution options',
@@ -147,11 +170,11 @@ async function prepareRawExec(
   ) {
     logger.once.debug(
       { toolConstraints: opts.toolConstraints },
-      'Ignoring tool contraints because of `binarySource=global`',
+      'Ignoring tool constraints because of `binarySource=global`',
     );
   }
 
-  return { rawCommands, rawOptions };
+  return { rawCommands, rawOptions, installCommandCount };
 }
 
 export async function exec(
@@ -163,7 +186,7 @@ export async function exec(
   const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
   const sideCarImage = GlobalConfig.get('dockerSidecarImage');
 
-  const { rawCommands, rawOptions } = await prepareRawExec(
+  const { rawCommands, rawOptions, installCommandCount } = await prepareRawExec(
     cmd,
     opts,
     sideCarImage,
@@ -171,8 +194,12 @@ export async function exec(
   const useDocker = isDocker(docker);
 
   let res: ExecResult = { stdout: '', stderr: '' };
-  for (const rawCmd of rawCommands) {
+  for (const [index, rawCmd] of rawCommands.entries()) {
     const startTime = Date.now();
+    const isFinalCommand = index === rawCommands.length - 1;
+    const commandOptions = isFinalCommand
+      ? rawOptions
+      : withoutInput(rawOptions);
     if (useDocker) {
       await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
@@ -180,12 +207,24 @@ export async function exec(
       { command: rawCmd, env: Object.keys(coerceObject(rawOptions.env)) },
       'Executing command',
     );
-    logger.trace({ commandOptions: rawOptions }, 'Command options');
+    const { input, ...loggedOptions } = commandOptions;
+    logger.trace(
+      { commandOptions: loggedOptions, hasInput: input !== undefined },
+      'Command options',
+    );
     try {
-      res = await rawExec(rawCmd, rawOptions);
+      res = await rawExec(rawCmd, commandOptions);
     } catch (err) {
+      if (index < installCommandCount) {
+        invalidateActiveTools(opts.toolConstraints);
+      }
       const durationMs = Math.round(Date.now() - startTime);
-      logger.debug({ err, durationMs }, 'rawExec err');
+      const redactedErrorFields =
+        err instanceof ExecError
+          ? { exitCode: err.exitCode, signal: err.signal }
+          : {};
+      const errorFields = opts.redactOutput ? redactedErrorFields : { err };
+      logger.debug({ ...errorFields, durationMs }, 'rawExec err');
       if (useDocker) {
         await removeDockerContainer(sideCarImage, dockerChildPrefix).catch(
           (removeErr: Error) => {
@@ -198,7 +237,7 @@ export async function exec(
       }
       if (err.signal === `SIGTERM`) {
         logger.debug(
-          { err },
+          errorFields,
           'exec interrupted by SIGTERM - run needs to be aborted',
         );
         throw new Error(TEMPORARY_ERROR);
@@ -206,11 +245,16 @@ export async function exec(
       throw err;
     }
     const durationMs = Math.round(Date.now() - startTime);
+    const outputFields = opts.redactOutput
+      ? {
+          stdoutBytes: Buffer.byteLength(res.stdout),
+          stderrBytes: Buffer.byteLength(res.stderr),
+        }
+      : { stdout: res.stdout, stderr: res.stderr };
     logger.debug(
       {
         durationMs,
-        stdout: res.stdout,
-        stderr: res.stderr,
+        ...outputFields,
       },
       'exec completed',
     );
@@ -232,17 +276,17 @@ type ResolvedToolSettingsOptions = Required<
 export function getToolSettingsOptions(
   repoConfig?: RepoToolSettingsOptions,
 ): ResolvedToolSettingsOptions {
-  let defaults = GlobalConfig.get('toolSettings');
-  defaults ??= {
-    jvmMaxMemory: 512,
-    jvmMemory: 512,
-  };
+  const defaults = configOptionDefaults.repoConfig;
+  const globalConfig = coerceObject(GlobalConfig.get('toolSettings'));
 
-  const jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
+  const jvmMaxMemory = globalConfig.jvmMaxMemory ?? defaults.jvmMaxMemory;
   const options: ResolvedToolSettingsOptions = {
     jvmMaxMemory,
-    jvmMemory: defaults?.jvmMemory ?? jvmMaxMemory,
-    nodeMaxMemory: defaults?.nodeMaxMemory,
+    jvmMemory: globalConfig.jvmMemory ?? jvmMaxMemory,
+    nodeMaxMemory: globalConfig.nodeMaxMemory,
+    pnpmMinimumReleaseAgeExcludeSecurityUpdates:
+      globalConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates ??
+      defaults.pnpmMinimumReleaseAgeExcludeSecurityUpdates,
   };
 
   if (repoConfig !== undefined) {
@@ -273,6 +317,20 @@ export function getToolSettingsOptions(
         );
       } else {
         options.nodeMaxMemory = repoConfig.nodeMaxMemory;
+      }
+    }
+
+    if (isBoolean(repoConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates)) {
+      if (
+        globalConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates === false &&
+        repoConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates
+      ) {
+        logger.once.debug(
+          'Enabling pnpmMinimumReleaseAgeExcludeSecurityUpdates is not permitted when the global configuration disables it. Using global configuration instead',
+        );
+      } else {
+        options.pnpmMinimumReleaseAgeExcludeSecurityUpdates =
+          repoConfig.pnpmMinimumReleaseAgeExcludeSecurityUpdates;
       }
     }
   }

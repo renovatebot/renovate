@@ -42,7 +42,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
         packageName: 'some/dep2',
       });
       expect(res).toEqual({
-        registryUrl: 'https://gitlab.company.com/api/v4',
+        registryUrl: 'https://gitlab.company.com',
         releases: [
           {
             gitRef: 'v1.0.0',
@@ -116,6 +116,47 @@ describe('modules/datasource/gitlab-tags/index', () => {
       });
     });
 
+    it('shares the cache between the instance URL and the API URL', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'abc100', created_at: '' } },
+        ]);
+      const expected = {
+        registryUrl: 'https://gitlab.company.com',
+        releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
+        sourceUrl: 'https://gitlab.company.com/some/dep2',
+      };
+
+      const viaApiUrl = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4'],
+        packageName: 'some/dep2',
+      });
+      const viaInstanceUrl = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://gitlab.company.com'],
+        packageName: 'some/dep2',
+      });
+
+      expect(viaApiUrl).toEqual(expected);
+      expect(viaInstanceUrl).toEqual(expected);
+      expect([...cache.keys()]).toEqual([
+        'datasource-gitlab-tags|cache-decorator:https://gitlab.company.com:some/dep2:tags:',
+      ]);
+    });
+
     it('returns tags with default registry', async () => {
       const body = [
         { name: 'v1.0.0', commit: { id: 'abc100', created_at: '' } },
@@ -162,6 +203,18 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const res = await getDigest({
         datasource,
         registryUrls: ['https://gitlab.company.com/api/v4/'],
+        packageName: 'some/dep2',
+      });
+      expect(res).toBe(digest);
+    });
+
+    it('returns commits from the default registry without a registry URL', async () => {
+      const digest = 'abcd00001234';
+      httpMock
+        .scope('https://gitlab.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(200, [{ id: digest, created_at: '2020-03-04T12:01:37.000Z' }]);
+      const res = await new GitlabTagsDatasource().getDigest({
         packageName: 'some/dep2',
       });
       expect(res).toBe(digest);

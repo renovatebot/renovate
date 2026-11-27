@@ -77,10 +77,13 @@
     "no-else-return": ["error", { "allowElseIf": false }],
     "unicorn/no-lonely-if": "error",
 
+    "renovate/cached-response-headers": "error",
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-complex-conditional-expression": "error",
+    "renovate/no-nested-logical-expressions": ["error", { "max": 1 }],
     "renovate/no-number-constructor": "error",
-    "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
+    "renovate/prefer-parser-pipe": "error",
     "renovate/require-regex-util": "error",
     "renovate/v8-ignore-no-count": "error",
     "renovate/v8-ignore-reason": "error",
@@ -229,7 +232,8 @@
         "renovate/prefer-coerce-array": "error",
         "renovate/prefer-coerce-object": "error",
         "renovate/prefer-is-helpers": "error",
-        "renovate/prefer-is-object": "error"
+        "renovate/prefer-is-object": "error",
+        "renovate/prefer-strip-version-prefix": "error"
       }
     },
     {
@@ -260,10 +264,17 @@
     },
     {
       "files": ["lib/**"],
+      "excludeFiles": ["**/*.spec.ts", "lib/modules/versioning/**"],
+      "rules": {
+        "renovate/prefer-versioning-helpers": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
         "renovate/require-build-cache-key": "error",
-        "renovate/require-cacheable": "error"
+        "renovate/require-cache-privacy": "error"
       }
     },
     {
@@ -323,7 +334,7 @@
         "lib/modules/manager/terraform/lockfile/hash.ts"
       ],
       "rules": {
-        "renovate/require-cacheable": "warn"
+        "renovate/require-cache-privacy": "warn"
       }
     },
     {

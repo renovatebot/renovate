@@ -23,18 +23,18 @@ Renovate will:
 Only the latest version of Renovate is supported by the Renovate maintainers.
 The Renovate team only fixes bugs in an older version if:
 
-- the Mend Renovate App needs to stay on that older major version for a short time, or
+- the Mend Renovate app needs to stay on that older major version for a short time, or
 - some critical bug needs to be fixed and the new major is blocked
 
-If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
-If you're self hosting Renovate, use the latest release if possible.
+If you are using the Mend Renovate app, you do not need to do anything, as the Renovate maintainers update it regularly.
+If you are self hosting Renovate, use the latest release if possible.
 
 ## Renovate core features not supported on all platforms
 
-| Feature               | Platforms which lack feature                                 |
-| --------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard  | Bitbucket, Bitbucket Server, Gerrit, SCM-Manager             |
-| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab, SCM-Manager |
+| Feature               | Platforms which lack feature                     |
+| --------------------- | ------------------------------------------------ |
+| Dependency Dashboard  | Bitbucket, Bitbucket Server, Gerrit, SCM-Manager |
+| The Mend Renovate app | Bitbucket Server, Forgejo, Gitea, SCM-Manager    |
 
 ## Major platform features not supported by Renovate
 
@@ -52,11 +52,11 @@ When you create a new repository with Git, Git creates a base branch for you.
 The default branch name that Git uses is `master` (this will be changed to `main` later).
 
 The Git-hosting ecosystem decided to use `main` instead of `master`.
-When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
+When you create a new repository on say GitHub or GitLab, you will get a `main` branch as your base branch.
 
 We replaced `master` with `main` in our documentation where possible.
 
-A branch name has no special meaning within the Git program, it's only a name.
+A branch name has no special meaning within the Git program, it is only a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
@@ -67,7 +67,7 @@ If you have problems with Renovate, or want to know where Renovate keeps the log
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 
-By default, Renovate creates a pull request right away whenever there's an update.
+By default, Renovate creates a pull request right away whenever there is an update.
 But maybe you want Renovate to ask for your approval _before_ it creates a pull request.
 Use the "Dependency Dashboard approval" workflow to get updates for certain packages - or certain types of updates - only after you give approval via the Dependency Dashboard.
 
@@ -113,7 +113,7 @@ Read our documentation on the [dependencyDashboardApproval](./configuration-opti
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
 You can configure the PR target branch via the `baseBranchPatterns` option.
 
-Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
+Add this line to the `renovate.json` file that is in the _default_ branch (`main` in this example).
 
 ```json
 {
@@ -147,7 +147,7 @@ Set configuration option `separateMajorMinor` to `false`.
 
 Set configuration option `rangeStrategy` to `"replace"`.
 
-### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
+### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` has not changed
 
 By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 4am on monday"]`.
 If you want to update the lock file more often, set the `schedule` field inside the `lockFileMaintenance` object.
@@ -237,9 +237,9 @@ Nest it inside a `patch` or `minor` object if you only want to automerge certain
 
 By default, Renovate separates major and minor releases.
 Patch releases are treated as "minor".
-Here's an example:
+Here is an example:
 
-Say you're using version `0.8.0` of the `foo` package.
+Say you are using version `0.8.0` of the `foo` package.
 The `foo` maintainers release the following versions:
 
 - `0.8.1` (patch)
@@ -259,7 +259,7 @@ To learn more read the section below.
 
 #### Overriding the default behavior for major/minor releases
 
-You can see in the example above that Renovate won't normally create a PR for the `foo` patch release.
+You can see in the example above that Renovate will not normally create a PR for the `foo` patch release.
 
 You can tell Renovate to create a separate PR for the patch release by setting `separateMinorPatch` to `true`.
 
@@ -269,15 +269,15 @@ In both cases, Renovate will open 3 PRs:
 - Update dependency `foo` to `0.9.0` (minor)
 - Update dependency `foo` to `1.0.0` (major)
 
-Usually you don't want more PRs though.
-It can be nice to get patch PRs when you're using automerge:
+Usually you do not want more PRs though.
+It can be nice to get patch PRs when you are using automerge:
 
 - Get daily patch updates which are automerged once tests pass
 - Get weekly updates for minor and major updates
 
 This means you barely notice Renovate during the week, while you still get the benefits of patch level updates.
 
-## What's the difference between `depName` and `packageName`?
+## What is the difference between `depName` and `packageName`?
 
 Renovate uses two important config options to define a dependency's name: `depName` and `packageName`.
 

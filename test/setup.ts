@@ -13,6 +13,20 @@ afterEach(async () => {
   hostRules.clear();
 });
 
+declare global {
+  // set by the canary `config.js` in the repository root, see .github/workflows/build.yml
+  var __RENOVATE_CONFIG_JS_CANARY__: boolean | undefined;
+}
+
+afterEach(() => {
+  if (globalThis.__RENOVATE_CONFIG_JS_CANARY__) {
+    globalThis.__RENOVATE_CONFIG_JS_CANARY__ = undefined;
+    throw new Error(
+      "A test imported the repository's config.js. Tests must not depend on files in the working directory; use a temporary directory instead.",
+    );
+  }
+});
+
 vi.mock('../lib/modules/platform/index.ts', () => ({
   platform: mockDeep<Platform>(),
   initPlatform: vi.fn(),

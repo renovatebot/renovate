@@ -38,9 +38,9 @@ For example:
 2. The `docker` datasource looks for versions and finds: `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
 3. The `docker` versioning returns `python:3.11-alpine`, because that version is compatible with `python:3.10-alpine`
 
-# Workflow
+## Workflow
 
-Here's an overview of the workflow:
+Here is an overview of the workflow:
 
 ```mermaid
 flowchart TB

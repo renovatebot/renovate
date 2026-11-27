@@ -91,7 +91,7 @@ export class GalaxyDatasource extends Datasource {
       {
         namespace: 'datasource-galaxy',
         key: config.packageName,
-        cacheable: true,
+        public: true,
         fallback: true,
       },
       () => this._getReleases(config),

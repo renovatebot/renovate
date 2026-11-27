@@ -36,11 +36,11 @@ use [packageRules](../configuration-options.md#packagerules) to override the `fe
 
 Set to `off` if changelog fetching is causing a problem.
 
-Set to `branch` if you have an advanced use case where you're embedding changelogs in the Git commit itself, we don't recommend this due to its potential size.
+Set to `branch` if you have an advanced use case where you are embedding changelogs in the Git commit itself, we do not recommend this due to its potential size.
 
 ### [`changelogUrl`](../configuration-options.md#packageruleschangelogurl)
 
-This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
+This does not help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
 
 ## Platforms that Renovate can fetch changelogs from
 
@@ -62,9 +62,9 @@ Follow these steps to find out why Renovate does not find a changelog:
 1. The datasource for this package does not support sourceUrls.
    - If the registry fundamentally does not provide this data, then the only possibility is for it to be manually populated through PRs to Renovate's source code
    - If the registry provides source URLs in its response but Renovate does not understand the required fields, then raise a feature request with examples, or better yet a Pull Request to implement support for the source URL parsing/mapping yourself
-   - Sometimes self-hosted versions of registries don't include the full metadata compared to what the public registries do
+   - Sometimes self-hosted versions of registries do not include the full metadata compared to what the public registries do
 1. The package was published without source URL information being included.
-   - For example, occasionally `npm` packages don't have `repository` fields included
+   - For example, occasionally `npm` packages do not have `repository` fields included
    - For example, Docker images regularly do not have the required `LABEL` entry
 1. Renovate cannot access the source repository
    - This is typically a concern for private repositories only
@@ -81,7 +81,7 @@ If none of this helps, search the Renovate issues and discussions to see if this
 
 This section is for package maintainers that want to make sure Renovate can see their changelogs.
 
-There isn't much information to add other than what's already written above.
+There is not much information to add other than what is already written above.
 
 Make sure that you have the required source URL in your package metadata, not just in your repository but also in the final data which the registry returns.
 For example, we have seen cases where the `repository` field in npm's `package.json` is populated correctly in the repository, but stripped out as part of the publishing process.
