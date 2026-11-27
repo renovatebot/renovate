@@ -4899,6 +4899,7 @@ This feature works with the following managers:
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`jsonata`](modules/manager/jsonata/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`mix`](modules/manager/mix/index.md)
 - [`regex`](modules/manager/regex/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
