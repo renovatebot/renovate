@@ -10,6 +10,17 @@ import { coerceArray } from '../../util/array.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
 
+function formatVersionWithLockedVersion(
+  version: string,
+  lockedVersion?: string,
+): string {
+  if (!lockedVersion || version === lockedVersion) {
+    return version;
+  }
+
+  return `${version} (locked: ${lockedVersion})`;
+}
+
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
 
@@ -147,15 +158,38 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
+            const hasVersionOrDigest = isTruthy(ver) || isTruthy(digest);
+            const hasLockfileUpdate = dep.updates?.some(
+              (update) => update.isLockfileUpdate,
+            );
+            if (lock && hasVersionOrDigest && hasLockfileUpdate) {
+              version = formatVersionWithLockedVersion(version, lock);
+            }
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
                 // A lock file only dep has no value to update, only a version
-                dep.updates?.map((update) =>
-                  update.isLockfileUpdate && update.newVersion
-                    ? `\`lock file @ ${update.newVersion}\``
-                    : `\`${update.newValue ?? update.newVersion}\``,
-                ),
+                dep.updates?.map((update) => {
+                  const hasOnlyResolvedLockfileVersion =
+                    update.isLockfileUpdate &&
+                    update.newValue === undefined &&
+                    update.newVersion !== undefined;
+                  const hasNoCurrentVersion =
+                    !dep.currentValue && !dep.currentDigest;
+                  if (hasOnlyResolvedLockfileVersion && hasNoCurrentVersion) {
+                    return `\`lock file @ ${update.newVersion}\``;
+                  }
+
+                  const version = update.isLockfileUpdate
+                    ? formatVersionWithLockedVersion(
+                        update.newValue ??
+                          update.newVersion ??
+                          'unknown version',
+                        update.newVersion,
+                      )
+                    : (update.newValue ?? update.newVersion);
+                  return `\`${version}\``;
+                }),
               ),
             ];
             if (uniqueUpdates.length > 0) {
