@@ -35,7 +35,10 @@ export const HelmRelease = KubernetesResource.extend({
   apiVersion: z.string().startsWith('helm.toolkit.fluxcd.io/'),
   kind: z.literal('HelmRelease'),
   spec: z.object({
-    chart: OCIRepositoryTemplate.or(HelmChartTemplate).optional(),
+    // an invalid chart template must not drop the `values` of the HelmRelease
+    chart: OCIRepositoryTemplate.or(HelmChartTemplate)
+      .optional()
+      .catch(undefined),
     chartRef: z
       .object({
         kind: z.string().optional(),

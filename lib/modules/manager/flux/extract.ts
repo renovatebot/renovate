@@ -193,8 +193,6 @@ interface OCIRefLocator {
   kind: 'OCIRepository' | 'HelmRelease';
   /** `metadata.name` of the documents to search */
   name: string;
-  /** `metadata.namespace` of the documents to search */
-  namespace: string | undefined;
 }
 
 const ociRefPaths: Record<OCIRefLocator['kind'], string[]> = {
@@ -203,14 +201,15 @@ const ociRefPaths: Record<OCIRefLocator['kind'], string[]> = {
 };
 
 /**
- * Returns all OCI `ref` map nodes of the documents matching `locator`, those in its namespace first.
+ * Returns all OCI `ref` map nodes of the documents matching `locator`, those holding the values of `ref` first.
  */
 function findOCIRefNodes(
   docs: Document.Parsed[],
   locator: OCIRefLocator,
+  ref: OCIRef,
 ): YAMLMap[] {
   const refNodes: YAMLMap[] = [];
-  const otherNamespaceRefNodes: YAMLMap[] = [];
+  const otherRefNodes: YAMLMap[] = [];
   for (const doc of docs) {
     const docContents = doc.contents;
     if (!isMap(docContents)) {
@@ -228,26 +227,28 @@ function findOCIRefNodes(
     if (!isMap(refNode)) {
       continue;
     }
-    const namespaceNode = docContents.getIn(['metadata', 'namespace'], true);
-    const namespace = isScalar(namespaceNode) ? namespaceNode.value : undefined;
-    if (namespace === locator.namespace) {
+    if (
+      refNode.get('tag') === ref.tag &&
+      refNode.get('digest') === ref.digest
+    ) {
       refNodes.push(refNode);
     } else {
-      otherNamespaceRefNodes.push(refNode);
+      otherRefNodes.push(refNode);
     }
   }
 
-  // `locator.namespace` was parsed from template-stripped content, and templates,
-  // aliases or merge keys can make the raw namespace differ, so other namespaces stay as a fallback
-  return [...refNodes, ...otherNamespaceRefNodes];
+  // `ref` was parsed from template-stripped content, so the raw values of its
+  // own node can differ, and nodes with other values stay as a fallback
+  return [...refNodes, ...otherRefNodes];
 }
 
 function extractOCIRefTagAndDigestRange(
   docs: Document.Parsed[],
   content: string,
   locator: OCIRefLocator,
+  ref: OCIRef,
 ): { replaceString: string; tagFirst: boolean } | null {
-  for (const refNode of findOCIRefNodes(docs, locator)) {
+  for (const refNode of findOCIRefNodes(docs, locator, ref)) {
     let tagKey: Scalar | undefined;
     let tagValue: Scalar | undefined;
     let digestKey: Scalar | undefined;
@@ -289,8 +290,9 @@ function extractOCIRefTagRange(
   docs: Document.Parsed[],
   content: string,
   locator: OCIRefLocator,
+  ref: OCIRef,
 ): { replaceString: string; indentation: string } | null {
-  for (const refNode of findOCIRefNodes(docs, locator)) {
+  for (const refNode of findOCIRefNodes(docs, locator, ref)) {
     for (const item of refNode.items) {
       if (
         isPair(item) &&
@@ -348,6 +350,7 @@ function resolveOCIRef({
       getDocs(),
       content,
       locator,
+      ref,
     );
     if (refRange) {
       combinedDep.replaceString = refRange.replaceString;
@@ -385,7 +388,7 @@ function resolveOCIRef({
       registryAliases,
       depType,
     });
-    const refTagRange = extractOCIRefTagRange(getDocs(), content, locator);
+    const refTagRange = extractOCIRefTagRange(getDocs(), content, locator, ref);
     if (refTagRange) {
       dep.replaceString = refTagRange.replaceString;
       const newline = content.includes('\r\n') ? '\r\n' : '\n';
@@ -440,7 +443,6 @@ function resolveResourceManifest(
               locator: {
                 kind: 'HelmRelease',
                 name: resource.metadata.name,
-                namespace: resource.metadata.namespace,
               },
               manifest,
               registryAliases,
@@ -566,7 +568,6 @@ function resolveResourceManifest(
             locator: {
               kind: 'OCIRepository',
               name: resource.metadata.name,
-              namespace: resource.metadata.namespace,
             },
             manifest,
             registryAliases,
