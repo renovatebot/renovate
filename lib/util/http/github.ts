@@ -148,7 +148,7 @@ export class GithubRateLimitError extends Error {
   constructor(url: string | URL, opts: GithubBaseHttpOptions) {
     super(PLATFORM_RATE_LIMIT_EXCEEDED);
     const { origin, pathname } = new URL(url, opts.baseUrl ?? baseUrl);
-    // ponytail: GHE serves its API under `/api/`, github.com and ghe.com from the root
+    // GHE serves its API under `/api/`, github.com and ghe.com from the root
     this.apiBaseUrl = pathname.startsWith('/api/')
       ? `${origin}/api/v3/`
       : `${origin}/`;
