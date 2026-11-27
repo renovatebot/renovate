@@ -129,7 +129,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newMajor: 4,
         newMinor: 1,
         newPatch: 0,
@@ -180,7 +180,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newMajor: 4,
         newMinor: 1,
         newPatch: 0,
@@ -245,7 +245,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newMajor: 4,
         newMinor: 1,
         newPatch: 0,
@@ -348,7 +348,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newDigest: 'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeee11111111',
         newMajor: 6,
         newMinor: 1,
@@ -422,7 +422,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newDigest: 'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeee11111111',
         newMajor: 6,
         newMinor: 1,
@@ -494,7 +494,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newDigest: 'ffffffffffffffffffffffffffffffffffffffff22222222',
         newMajor: 8,
         newMinor: 0,
@@ -615,7 +615,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newMajor: 8,
         newMinor: 1,
         newPatch: 0,
@@ -704,7 +704,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newDigest: 'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeee11111111',
         newMajor: 8,
         newMinor: 1,
@@ -795,7 +795,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newMajor: 8,
         newMinor: 1,
         newPatch: 0,
@@ -979,7 +979,7 @@ describe('modules/manager/github-actions/integration', () => {
           {
             bucket: 'major',
             hasAttestation: undefined,
-            isBreaking: false,
+            isBreaking: true,
             newMajor: 4,
             newMinor: 0,
             newPatch: 0,
@@ -995,7 +995,7 @@ describe('modules/manager/github-actions/integration', () => {
           {
             bucket: 'major',
             hasAttestation: undefined,
-            isBreaking: false,
+            isBreaking: true,
             newMajor: 4,
             newMinor: 0,
             newPatch: 0,
@@ -1060,7 +1060,7 @@ describe('modules/manager/github-actions/integration', () => {
       {
         bucket: 'major',
         hasAttestation: undefined,
-        isBreaking: false,
+        isBreaking: true,
         newMajor: 6,
         newMinor: 0,
         newPatch: 0,
