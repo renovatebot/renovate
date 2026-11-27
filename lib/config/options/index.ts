@@ -793,15 +793,20 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'hexRepositories',
     parents: ['mix'],
     description:
-      'Named Hex repositories used by Mix dependencies, with a pinned public key fingerprint.',
+      'Named Hex repositories used by Mix dependencies, with a pinned public key fingerprint or PEM public key.',
     type: 'object',
     additionalProperties: {
       type: 'object',
       properties: {
         url: { type: 'string' },
         publicKeyFingerprint: { type: 'string' },
+        publicKey: { type: 'string' },
       },
-      required: ['url', 'publicKeyFingerprint'],
+      required: ['url'],
+      oneOf: [
+        { required: ['publicKeyFingerprint'] },
+        { required: ['publicKey'] },
+      ],
       additionalProperties: false,
     },
     mergeable: true,

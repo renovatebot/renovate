@@ -38,16 +38,30 @@ describe('util/hex-repository', () => {
     expect(pem).toStartWith('-----BEGIN PUBLIC KEY-----');
   });
 
-  it('accepts CRLF in the downloaded public key', async () => {
-    httpMock
-      .scope(url)
-      .get('/public_key')
-      .reply(200, publicKey.replaceAll('\n', '\r\n'));
-    const pem = await resolveHexPublicKey('oban', {
-      url,
-      publicKeyFingerprint,
+  it('uses a configured RSA public key directly without an HTTP request', async () => {
+    const repository = { url, publicKey: publicKey.replaceAll('\n', '\r\n') };
+
+    const pem = await resolveHexPublicKey('oban', repository);
+
+    expect(HexRepositories.parse({ oban: repository })).toEqual({
+      oban: repository,
     });
     expect(pem).toStartWith('-----BEGIN PUBLIC KEY-----');
+  });
+
+  it.each`
+    trust
+    ${{ publicKey, publicKeyFingerprint }}
+    ${{}}
+  `('requires exactly one trust input', async ({ trust }) => {
+    const repository = { url, ...trust };
+
+    expect(() => HexRepositories.parse({ oban: repository })).toThrow(
+      'Set exactly one',
+    );
+    await expect(resolveHexPublicKey('oban', repository)).rejects.toThrow(
+      'Set exactly one',
+    );
   });
 
   it.each`
@@ -57,10 +71,14 @@ describe('util/hex-repository', () => {
     ${'invalid DER'}     | ${'-----BEGIN RSA PUBLIC KEY-----\nAAAA\n-----END RSA PUBLIC KEY-----'}
     ${'mismatched type'} | ${publicKey.replace('END RSA PUBLIC KEY', 'END PUBLIC KEY')}
   `('rejects $description', async ({ pem }) => {
-    httpMock.scope(url).get('/public_key').reply(200, pem);
-    await expect(
-      resolveHexPublicKey('oban', { url, publicKeyFingerprint }),
-    ).rejects.toThrow('Expected a single RSA public key');
+    const repository = { url, publicKey: pem };
+
+    expect(() => HexRepositories.parse({ oban: repository })).toThrow(
+      'Expected a single RSA public key',
+    );
+    await expect(resolveHexPublicKey('oban', repository)).rejects.toThrow(
+      'Expected a single RSA public key',
+    );
   });
 
   it('rejects an actual RSA private key and a non-RSA public key', async () => {
@@ -76,14 +94,11 @@ describe('util/hex-repository', () => {
       .export({ format: 'pem', type: 'spki' })
       .toString();
 
-    const scope = httpMock.scope(url);
-    scope.get('/public_key').reply(200, rsaPrivatePem);
-    scope.get('/public_key').reply(200, ecPublicPem);
     await expect(
-      resolveHexPublicKey('oban', { url, publicKeyFingerprint }),
+      resolveHexPublicKey('oban', { url, publicKey: rsaPrivatePem }),
     ).rejects.toThrow('Expected a single RSA public key');
     await expect(
-      resolveHexPublicKey('oban', { url, publicKeyFingerprint }),
+      resolveHexPublicKey('oban', { url, publicKey: ecPublicPem }),
     ).rejects.toThrow('Expected a single RSA public key');
   });
 

@@ -53,8 +53,9 @@ Renovate does not read/override the config from within each base branch if prese
 
 ### `mix.hexRepositories`
 
-Maps literal `repo:` names in `mix.exs` to Hex registry base URLs and pinned SHA256 public key fingerprints.
-Keep authentication in `hostRules`. See [private Hex repositories](modules/manager/mix/index.md#private-hex-repositories) for an example.
+Maps literal `repo:` names in `mix.exs` to Hex registry base URLs.
+Each repository must specify exactly one trust input: `publicKeyFingerprint` (a SHA256 fingerprint) or `publicKey` (the RSA public key in PEM format).
+Keep authentication in `hostRules`. See [private Hex repositories](modules/manager/mix/index.md#private-hex-repositories) for examples.
 
 ---
 

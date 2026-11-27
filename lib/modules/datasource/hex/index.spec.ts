@@ -292,7 +292,7 @@ describe('modules/datasource/hex/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('uses a configured Authorization header for requests to the repository', async () => {
+    it('looks up an Artifactory-style repository with a PEM key and a Bearer token', async () => {
       const path = '/artifactory/api/hex/company';
       const artifactoryUrl = `${host}${path}`;
       GlobalConfig.set({ allowedHeaders: ['Authorization'] });
@@ -303,18 +303,19 @@ describe('modules/datasource/hex/index', () => {
         headers: { Authorization: 'Bearer artifactory-token' },
       });
       const signed = await makeV2Response(pkg, { privateKey: testPrivateKey });
-      const scope = httpMock.scope(host, {
-        reqheaders: { authorization: 'Bearer artifactory-token' },
-      });
-      scope.get(`${path}/public_key`).reply(200, testPublicKey);
-      scope.get(`${path}/packages/real_package`).reply(200, signed);
+      httpMock
+        .scope(host, {
+          reqheaders: { authorization: 'Bearer artifactory-token' },
+        })
+        .get(`${path}/packages/real_package`)
+        .reply(200, signed);
 
       const result = await getPkgReleases({
         datasource,
         packageName: 'real_package',
         hexRepository: {
           url: artifactoryUrl,
-          publicKeyFingerprint: repository.publicKeyFingerprint,
+          publicKey: testPublicKey,
           name: 'company',
           packageName: 'real_package',
         },
@@ -326,11 +327,7 @@ describe('modules/datasource/hex/index', () => {
       });
     });
 
-    it('rejects package redirects after verifying the fingerprint', async () => {
-      httpMock
-        .scope(host)
-        .get('/hex/private/public_key')
-        .reply(200, testPublicKey);
+    it('rejects package redirects even when given a PEM key', async () => {
       httpMock
         .scope(host)
         .get('/hex/private/packages/real_package')
@@ -343,7 +340,8 @@ describe('modules/datasource/hex/index', () => {
           datasource,
           packageName: 'real_package',
           hexRepository: {
-            ...repository,
+            url,
+            publicKey: testPublicKey,
             name: 'company',
             packageName: 'real_package',
           },
@@ -357,7 +355,8 @@ describe('modules/datasource/hex/index', () => {
           datasource,
           packageName: 'missing',
           hexRepository: {
-            ...repository,
+            url,
+            publicKey: testPublicKey,
             name: 'company',
             packageName: 'wrong/name',
           },

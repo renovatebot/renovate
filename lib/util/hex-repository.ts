@@ -21,6 +21,7 @@ import {
 const hostType = 'hex';
 const http = new Http(hostType);
 const invalidPublicKey = 'Expected a single RSA public key in PEM format';
+const invalidTrust = 'Set exactly one of publicKeyFingerprint or publicKey';
 const publicKeyPem = regEx(
   /^-----BEGIN (?<begin>(?:RSA )?PUBLIC KEY)-----\r?\n(?<base64>[A-Za-z0-9+/=\r\n]+)\r?\n-----END (?<end>(?:RSA )?PUBLIC KEY)-----$/,
 );
@@ -60,10 +61,20 @@ const fingerprint = z
     'Expected an unpadded SHA256 SSH public key fingerprint',
   );
 
-const HexRepository = z.strictObject({
-  url: baseUrl,
-  publicKeyFingerprint: fingerprint,
-});
+const HexRepository = z
+  .strictObject({
+    url: baseUrl,
+    publicKeyFingerprint: fingerprint.optional(),
+    publicKey: z
+      .string()
+      .refine((pem) => parseRsaPublicKey(pem) !== null, invalidPublicKey)
+      .optional(),
+  })
+  .refine(
+    ({ publicKey, publicKeyFingerprint }) =>
+      hasOneTrustInput(publicKey, publicKeyFingerprint),
+    invalidTrust,
+  );
 
 export const HexRepositories = z.record(repoName, HexRepository);
 
@@ -72,6 +83,13 @@ export type HexRepository = z.infer<typeof HexRepository>;
 export interface HexRepositoryPackage extends HexRepository {
   name: string;
   packageName: string;
+}
+
+function hasOneTrustInput(
+  publicKey: string | undefined,
+  publicKeyFingerprint: string | undefined,
+): boolean {
+  return (publicKey === undefined) !== (publicKeyFingerprint === undefined);
 }
 
 function parseRsaPublicKey(pem: string): KeyObject | null {
@@ -134,19 +152,30 @@ export async function resolveHexPublicKey(
   name: string,
   repo: HexRepository,
 ): Promise<string> {
-  const { body, statusCode } = await http.getText(
-    joinUrlParts(repo.url, 'public_key'),
-    { followRedirect: false, memCache: false },
-  );
-  if (statusCode !== 200) {
-    throw new Error(`Could not fetch public key for Hex repository ${name}`);
+  let { publicKey } = repo;
+  const { publicKeyFingerprint } = repo;
+  if (!hasOneTrustInput(publicKey, publicKeyFingerprint)) {
+    throw new Error(invalidTrust);
+  }
+  if (publicKey === undefined) {
+    const { body, statusCode } = await http.getText(
+      joinUrlParts(repo.url, 'public_key'),
+      { followRedirect: false, memCache: false },
+    );
+    if (statusCode !== 200) {
+      throw new Error(`Could not fetch public key for Hex repository ${name}`);
+    }
+    publicKey = body;
   }
 
-  const key = parseRsaPublicKey(body);
+  const key = parseRsaPublicKey(publicKey);
   if (!key) {
     throw new Error(`${invalidPublicKey} for Hex repository ${name}`);
   }
-  if (getFingerprint(key) !== repo.publicKeyFingerprint) {
+  if (
+    publicKeyFingerprint !== undefined &&
+    getFingerprint(key) !== publicKeyFingerprint
+  ) {
     throw new Error(
       `Public key fingerprint mismatch for Hex repository ${name}`,
     );

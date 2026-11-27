@@ -1,6 +1,8 @@
+import { generateKeyPair } from 'node:crypto';
 import dns from 'node:dns/promises';
 import { access, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
+import { promisify } from 'node:util';
 import { isString } from '@sindresorhus/is';
 import tmp from 'tmp-promise';
 import upath from 'upath';
@@ -295,7 +297,7 @@ describe('modules/manager/mix/artifacts', () => {
       );
     });
 
-    it('stages the verified key and Bearer token inside the Docker cache mount for an umbrella solve', async () => {
+    it('stages an Artifactory PEM and Bearer token inside the Docker cache mount for an umbrella solve', async () => {
       const cacheDir = GlobalConfig.get('cacheDir');
       GlobalConfig.set({
         ...adminConfig,
@@ -304,8 +306,10 @@ describe('modules/manager/mix/artifacts', () => {
         dockerUser: String(process.getuid?.() ?? 0),
         allowedHeaders: ['Authorization'],
       });
-      const pem = 'verified key';
-      vi.spyOn(hexRepository, 'resolveHexPublicKey').mockResolvedValue(pem);
+      const { publicKey } = await promisify(generateKeyPair)('rsa', {
+        modulusLength: 2048,
+      });
+      const pem = publicKey.export({ format: 'pem', type: 'spki' }).toString();
       const artifactoryUrl =
         'https://repo.example.com/artifactory/api/hex/team-hex';
       hostRules.add({
@@ -347,7 +351,7 @@ describe('modules/manager/mix/artifacts', () => {
         config: {
           constraints: { erlang: '26.0.0', elixir: '1.14.5' },
           hexRepositories: {
-            'team-hex': { ...repository, url: artifactoryUrl },
+            'team-hex': { url: artifactoryUrl, publicKey: pem },
           },
         },
       });
