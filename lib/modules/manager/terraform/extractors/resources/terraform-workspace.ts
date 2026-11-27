@@ -1,6 +1,6 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types.ts';
-import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { TerraformDefinitionFile } from '../../hcl/schema.ts';
 import { TerraformVersionExtractor } from '../terraform-block/terraform-version.ts';
 
 export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
