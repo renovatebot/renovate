@@ -275,6 +275,32 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
 
+    it('skips workspace processing when workspaces is null', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: null,
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+        },
+      ]);
+    });
+
     it('processes workspace package files when workspaces is an object with packages property', async () => {
       vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
 
