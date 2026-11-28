@@ -1,12 +1,13 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, type XmlElement } from 'xmldoc';
 import {
   HOST_BLOCKED,
   HOST_DISABLED,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
@@ -518,6 +519,65 @@ export async function createUrlForDependencyPom(
   return `${version}/${dependency.name}-${version}.pom`;
 }
 
+interface PomReference {
+  dependency: MavenDependency;
+  version: string;
+}
+
+function getPomReference(element: XmlElement | undefined): PomReference | null {
+  if (!element) {
+    return null;
+  }
+
+  const [groupId, artifactId, version] = [
+    'groupId',
+    'artifactId',
+    'version',
+  ].map((k) => element.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
+  if (!groupId || !artifactId || !version) {
+    return null;
+  }
+
+  return {
+    dependency: getDependencyParts(`${groupId}:${artifactId}`),
+    version,
+  };
+}
+
+function getGradlePluginImplementation(
+  dependency: MavenDependency,
+  pomContent: XmlDocument,
+): PomReference | null {
+  if (!dependency.display.endsWith('.gradle.plugin')) {
+    return null;
+  }
+
+  const dependencies = coerceArray(
+    pomContent.childNamed('dependencies')?.childrenNamed('dependency'),
+  );
+  if (dependencies.length !== 1) {
+    return null;
+  }
+
+  return getPomReference(dependencies[0]);
+}
+
+function isMissingInfo(info: DependencyInfo): boolean {
+  return !info.sourceUrl || !info.homepage;
+}
+
+function mergeMissingInfo(result: DependencyInfo, other: DependencyInfo): void {
+  if (other.isPrivate) {
+    result.isPrivate = true;
+  }
+  if (!result.sourceUrl && other.sourceUrl) {
+    result.sourceUrl = other.sourceUrl;
+  }
+  if (!result.homepage && other.homepage) {
+    result.homepage = other.homepage;
+  }
+}
+
 export async function getDependencyInfo(
   http: Http,
   dependency: MavenDependency,
@@ -587,36 +647,34 @@ export async function getDependencyInfo(
         result.packageScope = groupId;
       }
 
-      const parent = pomContent.childNamed('parent');
-      const isMissingInfo = !result.sourceUrl || !result.homepage;
-      if (recursionLimit > 0 && parent && isMissingInfo) {
+      const parent = getPomReference(pomContent.childNamed('parent'));
+      if (recursionLimit > 0 && parent && isMissingInfo(result)) {
         // if we found a parent and are missing some information
         // trying to get the scm/homepage information from it
-        const [parentGroupId, parentArtifactId, parentVersion] = [
-          'groupId',
-          'artifactId',
-          'version',
-        ].map((k) => parent.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
-        if (parentGroupId && parentArtifactId && parentVersion) {
-          const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
-          const parentDependency = getDependencyParts(parentDisplayId);
-          const parentInformation = await getDependencyInfo(
-            http,
-            parentDependency,
-            repoUrl,
-            parentVersion,
-            recursionLimit - 1,
-          );
-          if (parentInformation.isPrivate) {
-            result.isPrivate = true;
-          }
-          if (!result.sourceUrl && parentInformation.sourceUrl) {
-            result.sourceUrl = parentInformation.sourceUrl;
-          }
-          if (!result.homepage && parentInformation.homepage) {
-            result.homepage = parentInformation.homepage;
-          }
-        }
+        const parentInformation = await getDependencyInfo(
+          http,
+          parent.dependency,
+          repoUrl,
+          parent.version,
+          recursionLimit - 1,
+        );
+        mergeMissingInfo(result, parentInformation);
+      }
+
+      // The Gradle Plugin Portal generates plugin marker POMs without scm or url
+      const pluginImplementation = getGradlePluginImplementation(
+        dependency,
+        pomContent,
+      );
+      if (recursionLimit > 0 && pluginImplementation && isMissingInfo(result)) {
+        const implementationInformation = await getDependencyInfo(
+          http,
+          pluginImplementation.dependency,
+          repoUrl,
+          pluginImplementation.version,
+          recursionLimit - 1,
+        );
+        mergeMissingInfo(result, implementationInformation);
       }
 
       return result;
