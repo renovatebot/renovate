@@ -90,7 +90,7 @@ DEPENDENCY     CURRENT  NEW      FILE
 -------------  -------  -------  ------------------
 some-dep       1.2.3    1.2.4    kustomization.yaml
 
-$ # Run agains the Remote to view PR titles
+$ # Run agains the remote to view PR titles
 $ export RENOVATE_TOKEN=$(gh auth token)
 $ renovate-preview --config ./renovate.json @owner/repo
 DEPENDENCY     CURRENT  NEW    PR TITLE
