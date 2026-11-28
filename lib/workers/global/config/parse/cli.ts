@@ -1,6 +1,5 @@
 import { isPlainObject } from '@sindresorhus/is';
 import { Command, Option } from 'commander';
-import { flatDependencyDashboardOptions } from '../../../../config/migrations/custom/dependency-dashboard-migration.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { pkg } from '../../../../expose.ts';
@@ -8,6 +7,7 @@ import { logger } from '../../../../logger/index.ts';
 import { coerceObject } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { coersions } from './coersions.ts';
+import { type FlatOptions, flatOptionsByObject } from './flat-options.ts';
 import type { ParseConfigOptions } from './types.ts';
 
 export function getCliName(option: ParseConfigOptions): string {
@@ -38,16 +38,16 @@ function createProgram(): Command<[string[]]> {
     }
   });
 
-  // still accept the flags of the flat Dependency Dashboard options, which `getConfig` migrates
-  for (const [name, { type }] of Object.entries(
-    flatDependencyDashboardOptions,
-  )) {
-    const param = `<${type}>`.replace('<boolean>', '[boolean]');
-    program = program.addOption(
-      new Option(`${getCliName({ name })} ${param}`)
-        .hideHelp()
-        .argParser(coersions[type]),
-    );
+  // still accept the flags of the flat options which moved into an object, which `getConfig` migrates
+  for (const flatOptions of Object.values(flatOptionsByObject)) {
+    for (const [name, { type }] of Object.entries(flatOptions)) {
+      const param = `<${type}>`.replace('<boolean>', '[boolean]');
+      program = program.addOption(
+        new Option(`${getCliName({ name })} ${param}`)
+          .hideHelp()
+          .argParser(coersions[type]),
+      );
+    }
   }
 
   /* oxlint-disable no-console -- intentional: CLI help output */
@@ -168,7 +168,11 @@ export function getConfig(input: string[]): AllConfig {
         }
       }
 
-      migrateDependencyDashboardFlags(opts, config);
+      for (const [objectName, flatOptions] of Object.entries(
+        flatOptionsByObject,
+      )) {
+        migrateFlatOptionsFlags(opts, config, objectName, flatOptions);
+      }
     })
     .parse(argv);
 
@@ -176,19 +180,19 @@ export function getConfig(input: string[]): AllConfig {
 }
 
 /**
- * Moves the flags of the flat Dependency Dashboard options into `dependencyDashboard`, where fields it already sets take precedence.
+ * Moves the flags of the flat options into the flag of the object they moved into, where fields it already sets take precedence.
  *
  * e.g. --dependency-dashboard-footer=... -> --dependency-dashboard='{"footer":...}'
  */
-function migrateDependencyDashboardFlags(
+function migrateFlatOptionsFlags(
   opts: Record<string, unknown>,
   config: Record<string, unknown>,
+  objectName: string,
+  flatOptions: FlatOptions,
 ): void {
   const migrated: Record<string, unknown> = {};
   const oldFlags: string[] = [];
-  for (const [name, { field }] of Object.entries(
-    flatDependencyDashboardOptions,
-  )) {
+  for (const [name, { field }] of Object.entries(flatOptions)) {
     if (opts[name] !== undefined) {
       migrated[field] = opts[name];
       oldFlags.push(getCliName({ name }));
@@ -198,17 +202,18 @@ function migrateDependencyDashboardFlags(
     return;
   }
 
-  const existing = coerceObject(config.dependencyDashboard);
+  const objectFlag = getCliName({ name: objectName });
+  const existing = coerceObject(config[objectName]);
   if (!isPlainObject(existing)) {
     logger.warn(
-      { oldFlags },
-      'Could not migrate cli config into --dependency-dashboard, as it is not an object',
+      { objectFlag, oldFlags },
+      'Could not migrate cli config into a grouped option, as it is not an object',
     );
     return;
   }
-  config.dependencyDashboard = { ...migrated, ...existing };
+  config[objectName] = { ...migrated, ...existing };
   logger.warn(
-    { oldFlags },
-    'cli config has been migrated into --dependency-dashboard',
+    { objectFlag, oldFlags },
+    'cli config has been migrated into a grouped option',
   );
 }
