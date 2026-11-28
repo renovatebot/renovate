@@ -656,6 +656,66 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('resolves tools through backend aliases', async () => {
+      const content = codeBlock`
+      [tool_alias]
+      renovate = "npm:renovate"
+      dhall-json = "github:dhall-lang/dhall-haskell"
+
+      [tool_alias.node.versions]
+      project-lts = "24"
+
+      [tools]
+      renovate = "44.50.3"
+      dhall-json = { version = "v1.42.2", matching = "dhall-json" }
+      node = "project-lts"
+
+      [tasks.lint]
+      tools = { renovate = "44.50.3" }
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'renovate',
+          currentValue: '44.50.3',
+          packageName: 'renovate',
+          datasource: 'npm',
+        },
+        {
+          depName: 'dhall-json',
+          currentValue: 'v1.42.2',
+          packageName: 'dhall-lang/dhall-haskell',
+          datasource: 'github-releases',
+        },
+        {
+          depName: 'node',
+          currentValue: 'project-lts',
+          packageName: 'node',
+          datasource: 'node-version',
+        },
+        {
+          depName: 'renovate',
+          depType: 'task-lint-tools',
+          packageName: 'renovate',
+          datasource: 'npm',
+        },
+      ]);
+    });
+
+    it('resolves tools through the deprecated alias section', async () => {
+      const content = codeBlock`
+      [alias]
+      renovate = "npm:renovate"
+
+      [tools]
+      renovate = "44.50.3"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        { depName: 'renovate', packageName: 'renovate', datasource: 'npm' },
+      ]);
+    });
+
     it('extracts pipx backend tools', async () => {
       const content = codeBlock`
       [tools]

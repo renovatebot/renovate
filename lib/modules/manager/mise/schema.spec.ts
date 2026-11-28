@@ -11,11 +11,19 @@ describe('modules/manager/mise/schema', () => {
         tools: {},
         tasks: {},
         include: [],
+        tool_alias: {},
+        alias: {},
       });
     });
 
     it('defaults tools to empty object for empty TOML', () => {
-      expect(MiseFile.parse('')).toEqual({ tools: {}, tasks: {}, include: [] });
+      expect(MiseFile.parse('')).toEqual({
+        tools: {},
+        tasks: {},
+        include: [],
+        tool_alias: {},
+        alias: {},
+      });
     });
 
     it('parses [tools] when present', () => {
@@ -27,6 +35,8 @@ describe('modules/manager/mise/schema', () => {
         tools: { node: '20' },
         tasks: {},
         include: [],
+        tool_alias: {},
+        alias: {},
       });
     });
   });
