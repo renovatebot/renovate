@@ -619,7 +619,8 @@
       "https://github.com/nuxt/nuxt.js",
       "https://github.com/nuxt/nuxt"
     ],
-    "okhttp": "https://github.com/square/okhttp",
+    "okhttp": "https://github.com/lysine-dev/okhttp",
+    "okio": "https://github.com/lysine-dev/okio",
     "openapi-dotnet": "https://github.com/microsoft/OpenAPI.NET",
     "opencost": [
       "https://github.com/opencost/opencost",
@@ -699,7 +700,7 @@
     "reg-suit": "https://github.com/reg-viz/reg-suit",
     "remark": "https://github.com/remarkjs/remark",
     "remix": "https://github.com/remix-run/remix",
-    "retrofit": "https://github.com/square/retrofit",
+    "retrofit": "https://github.com/lysine-dev/retrofit",
     "river": "https://github.com/riverqueue/river",
     "rjsf": "https://github.com/rjsf-team/react-jsonschema-form",
     "router5": "https://github.com/router5/router5",
