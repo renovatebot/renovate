@@ -4,6 +4,7 @@ import prettier from 'prettier';
 import { quickStringify } from '../../lib/util/stringify.ts';
 import { exec } from '../utils/exec.ts';
 import { distroInfo } from './sources/distro-info.ts';
+import { githubActionsLockfile } from './sources/github-actions-lockfile.ts';
 import { javaLtsVersions } from './sources/java-lts-versions.ts';
 import { lambdaNodeSchedule } from './sources/lambda-node-schedule.ts';
 import { miseRegistry } from './sources/mise-registry.ts';
@@ -13,6 +14,7 @@ import type { StaticDataSource } from './types.ts';
 const sources: StaticDataSource<unknown, object>[] = [
   distroInfo('ubuntu'),
   distroInfo('debian'),
+  githubActionsLockfile,
   javaLtsVersions,
   lambdaNodeSchedule,
   miseRegistry,
