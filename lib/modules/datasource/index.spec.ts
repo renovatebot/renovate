@@ -24,6 +24,7 @@ import {
   getPkgReleases,
   supportsDigests,
 } from './index.ts';
+import { setNpmrc } from './npm/npmrc.ts';
 import type {
   DigestConfig,
   GetPkgReleasesConfig,
@@ -778,6 +779,53 @@ describe('modules/datasource/index', () => {
           expect(secondRegistry).toHaveBeenCalledTimes(1);
         },
       );
+
+      describe('npm', () => {
+        const npmrc = 'registry=https://npm.example.com/';
+
+        beforeEach(() => {
+          vi.spyOn(datasources.get('npm')!, 'getReleases').mockImplementation(
+            ({ registryUrl }) =>
+              Promise.resolve({
+                releases: [{ version: '1.0.0' }],
+                registryUrl,
+              }),
+          );
+        });
+
+        afterEach(() => setNpmrc());
+
+        it('keeps releases separate for different npmrc', async () => {
+          const res = await Promise.all([
+            getPkgReleases({
+              datasource: 'npm',
+              packageName: 'left-pad',
+              npmrc,
+            }),
+            getPkgReleases({ datasource: 'npm', packageName: 'left-pad' }),
+          ]);
+
+          expect(res.map((r) => r?.registryUrl)).toEqual([
+            'https://npm.example.com',
+            'https://registry.npmjs.org',
+          ]);
+        });
+
+        it('does not use the npmrc of a previous lookup', async () => {
+          await getPkgReleases({
+            datasource: 'npm',
+            packageName: 'left-pad',
+            npmrc,
+          });
+
+          const res = await getPkgReleases({
+            datasource: 'npm',
+            packageName: 'is-odd',
+          });
+
+          expect(res?.registryUrl).toBe('https://registry.npmjs.org');
+        });
+      });
     });
 
     it('supports defaultRegistryUrls parameter', async () => {

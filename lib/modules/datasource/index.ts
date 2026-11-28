@@ -18,6 +18,7 @@ import { buildCacheKey } from '../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
+import { toSha256 } from '../../util/hash.ts';
 import { detachUrlCredentials } from '../../util/host-rules.ts';
 import {
   isForbidden,
@@ -450,9 +451,8 @@ async function fetchReleases(
     return null;
   }
   if (datasourceName === 'npm') {
-    if (isString(config.npmrc)) {
-      setNpmrc(config.npmrc);
-    }
+    // without an npmrc this resets the one of the previous lookup
+    setNpmrc(config.npmrc);
     // v8 ignore else -- npm lookups here never arrive with explicit registryUrls
     if (!isNonEmptyArray(config.registryUrls)) {
       registryUrlsConfig = {
@@ -536,6 +536,10 @@ function fetchCachedReleases(
       config.defaultRegistryUrls,
       config.additionalRegistryUrls,
     ]),
+    // npm resolves the registry from the npmrc, which may carry credentials
+    datasource === 'npm' && isString(config.npmrc)
+      ? toSha256(config.npmrc)
+      : undefined,
   );
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
