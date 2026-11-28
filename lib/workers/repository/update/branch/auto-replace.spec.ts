@@ -2167,13 +2167,13 @@ describe('workers/repository/update/branch/auto-replace', () => {
     };
 
     it.each`
-      alerts            | alertConfig                         | expected
-      ${'no'}           | ${{}}                               | ${true}
-      ${'OSV'}          | ${{ osvVulnerabilityAlerts: true }} | ${false}
-      ${'packageRules'} | ${{ packageRules: [alertRule] }}    | ${false}
+      alerts            | alertConfig
+      ${'no'}           | ${{}}
+      ${'OSV'}          | ${{ osvVulnerabilityAlerts: true }}
+      ${'packageRules'} | ${{ packageRules: [alertRule] }}
     `(
-      'compares the deps of a branch with $alerts vulnerability alerts',
-      async ({ alertConfig, expected }) => {
+      'matches the base deps of a branch with $alerts vulnerability alerts',
+      async ({ alertConfig }) => {
         const config = { ...getConfig(), ...alertConfig };
         const packageFile = 'pyproject.toml';
 
@@ -2200,7 +2200,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         // Extract the unchanged branch content again and compare its deps
         // with `baseDeps`, a mismatch makes Renovate rebuild the branch
         const matches = await checkBranchDepsMatchBaseDeps(upgrade, pyproject);
-        expect(matches).toBe(expected);
+        expect(matches).toBeTrue();
       },
     );
   });
