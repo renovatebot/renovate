@@ -6,6 +6,10 @@ export const knownDepTypes = [
     description: 'CircleCI orb reference',
   },
   {
+    depType: 'function',
+    description: 'CircleCI function reference',
+  },
+  {
     depType: 'docker',
     description: 'Docker image in executor/job configuration',
   },

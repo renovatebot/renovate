@@ -7,10 +7,107 @@ const file2 = Fixtures.get('config2.yml');
 const file3 = Fixtures.get('config3.yml');
 const file4 = Fixtures.get('config4.yml');
 
+const functionVersioning =
+  'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[0-9A-Za-z.-]+))?$';
+
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
+    });
+
+    it('extracts functions', () => {
+      const src = codeBlock`
+        version: 2.1
+        orbs:
+          node: circleci/node@7.2.1
+        functions:
+          setup-go: github.com/circleci-functions/setup-go@v0.7.0
+          setup-node: 'github.com/circleci-functions/setup-node@v0.3.0'
+          not-a-string: 123
+      `;
+
+      const res = extractPackageFile(src);
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '7.2.1',
+          datasource: 'orb',
+          depName: 'node',
+          depType: 'orb',
+          packageName: 'circleci/node',
+          versioning: 'npm',
+        },
+        {
+          currentValue: 'v0.7.0',
+          datasource: 'github-releases',
+          depName: 'setup-go',
+          depType: 'function',
+          packageName: 'circleci-functions/setup-go',
+          versioning: functionVersioning,
+        },
+        {
+          currentValue: 'v0.3.0',
+          datasource: 'github-releases',
+          depName: 'setup-node',
+          depType: 'function',
+          packageName: 'circleci-functions/setup-node',
+          versioning: functionVersioning,
+        },
+      ]);
+    });
+
+    it.each`
+      reference                                               | packageName                                 | currentValue     | skipReason
+      ${'github.com/circleci-functions/setup-go'}             | ${'github.com/circleci-functions/setup-go'} | ${undefined}     | ${'unspecified-version'}
+      ${'github.example.com/my-org/setup-go@v0.7.0'}          | ${'github.example.com/my-org/setup-go'}     | ${'v0.7.0'}      | ${'unsupported-url'}
+      ${'my-org.ghe.com/my-org/setup-go@v0.7.0'}              | ${'my-org.ghe.com/my-org/setup-go'}         | ${'v0.7.0'}      | ${'unsupported-url'}
+      ${'github.com/circleci-functions/setup-go@0.7.0'}       | ${'circleci-functions/setup-go'}            | ${'0.7.0'}       | ${'invalid-version'}
+      ${'github.com/circleci-functions/setup-go@v0.7'}        | ${'circleci-functions/setup-go'}            | ${'v0.7'}        | ${'invalid-version'}
+      ${'github.com/circleci-functions/setup-go@v0.7.1-rc.1'} | ${'circleci-functions/setup-go'}            | ${'v0.7.1-rc.1'} | ${undefined}
+    `(
+      'extracts function $reference',
+      ({ reference, packageName, currentValue, skipReason }) => {
+        const src = codeBlock`
+          functions:
+            setup-go: ${reference}
+        `;
+
+        const res = extractPackageFile(src);
+
+        expect(res?.deps).toEqual([
+          {
+            currentValue,
+            datasource: 'github-releases',
+            depName: 'setup-go',
+            depType: 'function',
+            packageName,
+            skipReason,
+            versioning: functionVersioning,
+          },
+        ]);
+      },
+    );
+
+    it('extracts functions from a file without other dependencies', () => {
+      const src = codeBlock`
+        version: 2.1
+        functions:
+          setup-go: github.com/circleci-functions/setup-go@v0.7.0
+      `;
+
+      const res = extractPackageFile(src);
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'v0.7.0',
+          datasource: 'github-releases',
+          depName: 'setup-go',
+          depType: 'function',
+          packageName: 'circleci-functions/setup-go',
+          versioning: functionVersioning,
+        },
+      ]);
     });
 
     it('handles registry alias', () => {
