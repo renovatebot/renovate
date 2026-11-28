@@ -6,13 +6,34 @@ import { isNotFound } from '../../../util/http/status.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { ReleaseResult } from '../types.ts';
 import { MiseJavaRelease } from './schema.ts';
-import type { PackageConfig } from './types.ts';
+import type { GraalvmVendor, PackageConfig } from './types.ts';
 
 export const graalvmRegistryUrl = 'https://mise-java.jdx.dev/';
 
+interface MiseJavaVendor {
+  /** Vendor name used in the mise-java metadata */
+  vendor: string;
+  homepage: string;
+  sourceUrl: string;
+}
+
+const miseJavaVendors: Record<GraalvmVendor, MiseJavaVendor> = {
+  'oracle-graalvm': {
+    vendor: 'oracle-graalvm',
+    homepage: 'https://www.oracle.com/java/graalvm/',
+    sourceUrl: 'https://github.com/oracle/graal',
+  },
+  // GraalVM CE before GraalVM for JDK 17, e.g. `22.3.3+java17`
+  'graalvm-ce': {
+    vendor: 'graalvm',
+    homepage: 'https://www.graalvm.org/',
+    sourceUrl: 'https://github.com/graalvm/graalvm-ce-builds',
+  },
+};
+
 export async function getGraalvmReleases(
   http: Http,
-  pkgConfig: PackageConfig,
+  pkgConfig: PackageConfig<GraalvmVendor>,
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
   logger.trace({ pkgConfig, registryUrl }, 'fetching GraalVM releases');
@@ -37,9 +58,10 @@ export async function getGraalvmReleases(
     `${pkgConfig.architecture}.json`,
   );
 
+  const { vendor, homepage, sourceUrl } = miseJavaVendors[pkgConfig.vendor];
   const result: ReleaseResult = {
-    homepage: 'https://www.oracle.com/java/graalvm/',
-    sourceUrl: 'https://github.com/oracle/graal',
+    homepage,
+    sourceUrl,
     registryUrl,
     releases: [],
   };
@@ -51,12 +73,15 @@ export async function getGraalvmReleases(
     const filteredReleases = response.body
       .filter((release) => {
         return (
-          release.vendor === pkgConfig.vendor &&
+          release.vendor === vendor &&
           release.image_type === pkgConfig.imageType
         );
       })
-      .map((release) => ({
-        version: release.version,
+      .map(({ version, created_at }) => ({
+        version,
+        // `created_at` is when mise-java first indexed the build, which is
+        // never earlier than the actual release
+        ...(created_at && { releaseTimestamp: created_at }),
       }));
 
     result.releases.push(...filteredReleases);
