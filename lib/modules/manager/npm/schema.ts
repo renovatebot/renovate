@@ -204,15 +204,27 @@ export const PackageJson = Json.pipe(
 
 export type PackageJson = z.infer<typeof PackageJson>;
 
+const PackageLockPackages = LooseRecord(
+  z
+    .string()
+    .transform((x) => x.replace(regEx(/^node_modules\//), ''))
+    .refine((x) => x.trim() !== ''),
+  z.object({ version: z.string() }),
+);
+
 export const PackageLockV3 = z.object({
   lockfileVersion: z.literal(3),
-  packages: LooseRecord(
-    z
-      .string()
-      .transform((x) => x.replace(regEx(/^node_modules\//), ''))
-      .refine((x) => x.trim() !== ''),
-    z.object({ version: z.string() }),
-  ),
+  packages: PackageLockPackages,
+});
+
+/**
+ * Version 2 lockfiles carry both the `packages` section of v3 and the legacy
+ * `dependencies` section. Only `packages` keys a workspace's own copy by its
+ * path (`packages/a/node_modules/b`), so read it when it is present.
+ */
+export const PackageLockV2 = z.object({
+  lockfileVersion: z.literal(2),
+  packages: PackageLockPackages,
 });
 
 export const PackageLockPreV3 = z
@@ -226,7 +238,7 @@ export const PackageLockPreV3 = z
   }));
 
 export const PackageLock = Json.pipe(
-  z.union([PackageLockV3, PackageLockPreV3]),
+  z.union([PackageLockV3, PackageLockV2, PackageLockPreV3]),
 ).transform(({ packages, lockfileVersion }) => {
   const lockedVersions: Record<string, string> = {};
   for (const [entry, val] of Object.entries(packages)) {

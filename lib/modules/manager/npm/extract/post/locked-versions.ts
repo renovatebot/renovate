@@ -121,15 +121,24 @@ export async function getLockedVersions(
           continue;
         }
 
-        // TODO: types (#22198)
-        let lockedDepName = dep.depName!;
-        if (relativeDir && relativeDir !== '.') {
-          lockedDepName = `${relativeDir}/node_modules/${dep.depName}`;
+        // Resolve like Node does: the workspace's own node_modules first, then
+        // each parent directory's, then the root. npm hoists most workspace
+        // dependencies to the root, so reading only `<workspace>/node_modules`
+        // leaves them without a locked version.
+        const { lockedVersions } = lockFileCache[npmLock];
+        let lockedVersion: string | undefined;
+        for (
+          let dir = relativeDir;
+          !lockedVersion && dir && dir !== '.';
+          dir = upath.dirname(dir)
+        ) {
+          lockedVersion =
+            lockedVersions?.[`${dir}/node_modules/${dep.depName}`];
         }
+        // TODO: types (#22198)
+        lockedVersion ??= lockedVersions?.[dep.depName!];
 
-        dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions?.[lockedDepName],
-        )!;
+        dep.lockedVersion = semver.valid(lockedVersion)!;
       }
     } else if (pnpmLockFile) {
       logger.debug('Found pnpm lock-file');

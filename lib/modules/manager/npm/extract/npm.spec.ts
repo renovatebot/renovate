@@ -66,6 +66,34 @@ describe('modules/manager/npm/extract/npm', () => {
       });
     });
 
+    it('keeps workspace paths from the packages section of a v2 lockfile', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          lockfileVersion: 2,
+          packages: {
+            '': { name: 'root', workspaces: ['packages/*'] },
+            'node_modules/abbrev': { version: '1.1.1' },
+            'node_modules/a': { resolved: 'packages/a', link: true },
+            'packages/a': { name: 'a', version: '1.0.0' },
+            'packages/a/node_modules/abbrev': { version: '1.0.4' },
+          },
+          dependencies: {
+            abbrev: { version: '1.1.1' },
+            a: { version: 'file:packages/a' },
+          },
+        }),
+      );
+      const res = await getNpmLock('package-lock.json');
+      expect(res).toEqual({
+        lockedVersions: {
+          abbrev: '1.1.1',
+          'packages/a': '1.0.0',
+          'packages/a/node_modules/abbrev': '1.0.4',
+        },
+        lockfileVersion: 2,
+      });
+    });
+
     it('returns null if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getNpmLock('package.json');

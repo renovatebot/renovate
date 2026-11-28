@@ -414,6 +414,50 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
+    it('uses the hoisted root version for a workspace dependency without its own copy', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          ms: '2.0.0',
+          'packages/other/node_modules/ms': '2.1.3',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [{ depName: 'ms', currentValue: '^2.0.0' }],
+          packageFile: 'packages/app/package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles[0].deps).toEqual([
+        { depName: 'ms', currentValue: '^2.0.0', lockedVersion: '2.0.0' },
+      ]);
+    });
+
+    it('uses the nearest parent workspace copy for a nested workspace', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          ms: '2.0.0',
+          'packages/a/node_modules/ms': '2.1.1',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [{ depName: 'ms', currentValue: '^2.1.0' }],
+          packageFile: 'packages/a/sub/package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles[0].deps).toEqual([
+        { depName: 'ms', currentValue: '^2.1.0', lockedVersion: '2.1.1' },
+      ]);
+    });
+
     it('does not set locked versions for engines, packageManager, volta, and devEngines deps', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
