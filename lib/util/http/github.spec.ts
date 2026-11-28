@@ -784,6 +784,194 @@ describe('util/http/github', () => {
     });
   });
 
+  describe('IP allow list fallback', () => {
+    const ipAllowListMessage =
+      'Although you appear to have the correct authorization credentials, the `some` organization has an IP allow list enabled, and 203.0.113.1 is not permitted to access this resource.';
+    const ipAllowListError = `Request failed with status code 403 (${ipAllowListMessage}): `;
+
+    beforeEach(() => {
+      hostRules.add({ hostType: 'github', token: 'abc' });
+      GlobalConfig.set({ githubIpAllowListFallback: true });
+    });
+
+    function denyToken(
+      path = '/repos/some/repo/tags',
+      method: 'get' | 'post' = 'get',
+    ): void {
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: { authorization: 'token abc' },
+        })
+        [method](path)
+        .reply(
+          403,
+          // nock's reply callback binds `this.req` to the request object, requires regular function
+          // eslint-disable-next-line prefer-arrow-callback
+          function reply() {
+            // https://github.com/nock/nock/issues/1979
+            (this.req as any).response.statusMessage = ipAllowListMessage;
+            return { message: ipAllowListMessage };
+          },
+        );
+    }
+
+    describe('REST', () => {
+      it('retries a refused read without credentials', async () => {
+        denyToken();
+        httpMock
+          .scope(githubApiHost, { badheaders: ['authorization'] })
+          .get('/repos/some/repo/tags')
+          .reply(200, [{ name: 'v1.0.0' }]);
+
+        const res = await githubApi.getJsonUnchecked('/repos/some/repo/tags');
+
+        expect(res.body).toEqual([{ name: 'v1.0.0' }]);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not retry a refused read unless enabled', async () => {
+        GlobalConfig.set({ githubIpAllowListFallback: false });
+        denyToken();
+
+        await expect(
+          githubApi.getJsonUnchecked('/repos/some/repo/tags'),
+        ).rejects.toThrow(ipAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('retries a refused read of text', async () => {
+        denyToken('/repos/some/repo/contents/file.txt');
+        httpMock
+          .scope(githubApiHost, { badheaders: ['authorization'] })
+          .get('/repos/some/repo/contents/file.txt')
+          .reply(200, 'content');
+
+        const res = await githubApi.getText(
+          '/repos/some/repo/contents/file.txt',
+        );
+
+        expect(res.body).toBe('content');
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not send credentials passed in the options when retrying', async () => {
+        httpMock
+          .scope(githubApiHost)
+          .get('/repos/some/repo/tags')
+          .reply(403, { message: ipAllowListMessage });
+        httpMock
+          .scope(githubApiHost, { badheaders: ['authorization'] })
+          .get('/repos/some/repo/tags')
+          .reply(200, []);
+
+        const res = await githubApi.getJsonUnchecked('/repos/some/repo/tags', {
+          token: 'explicit',
+          username: 'user',
+          password: 'pass',
+          headers: { Authorization: 'Bearer explicit' },
+        });
+
+        expect(res.body).toEqual([]);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('retries a refused read request with a body', async () => {
+        denyToken('/search', 'post');
+        httpMock
+          .scope(githubApiHost, { badheaders: ['authorization'] })
+          .post('/search')
+          .reply(200, { items: [] });
+
+        const res = await githubApi.postJson('/search', {
+          body: { query: 'renovate' },
+          readOnly: true,
+        });
+
+        expect(res.body).toEqual({ items: [] });
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not retry GraphQL, which needs a token', async () => {
+        denyToken('/graphql', 'post');
+
+        await expect(
+          githubApi.postJson('/graphql', {
+            body: { query: 'query {}' },
+            readOnly: true,
+          }),
+        ).rejects.toThrow(ipAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('rethrows the original error when the retry is rate limited', async () => {
+        denyToken();
+        httpMock
+          .scope(githubApiHost)
+          .get('/repos/some/repo/tags')
+          .reply(403, { message: 'API rate limit exceeded for 203.0.113.1.' });
+
+        await expect(
+          githubApi.getJsonUnchecked('/repos/some/repo/tags'),
+        ).rejects.toThrow(ipAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('rethrows the original error when the repository is not public', async () => {
+        denyToken();
+        httpMock.scope(githubApiHost).get('/repos/some/repo/tags').reply(404);
+
+        await expect(
+          githubApi.getJsonUnchecked('/repos/some/repo/tags'),
+        ).rejects.toThrow(ipAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not retry a write', async () => {
+        denyToken('/repos/some/repo/issues', 'post');
+
+        await expect(
+          githubApi.postJson('/repos/some/repo/issues', { body: {} }),
+        ).rejects.toThrow(ipAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not retry a read which is not marked read-only', async () => {
+        denyToken();
+
+        await expect(
+          githubApi.getJsonUnchecked('/repos/some/repo/tags', {
+            readOnly: false,
+          }),
+        ).rejects.toThrow(ipAllowListError);
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it.each`
+        status | body                                                     | error
+        ${403} | ${{ message: 'Resource not accessible by integration' }} | ${'integration-unauthorized'}
+        ${403} | ${{ message: 'Repository access blocked' }}              | ${'status code 403'}
+        ${403} | ${'Repository access blocked'}                           | ${'status code 403'}
+        ${403} | ${undefined}                                             | ${'status code 403'}
+        ${404} | ${{ message: ipAllowListMessage }}                       | ${'status code 404'}
+      `(
+        'does not retry $status with body $body',
+        async ({ status, body, error }) => {
+          httpMock
+            .scope(githubApiHost, {
+              reqheaders: { authorization: 'token abc' },
+            })
+            .get('/repos/some/repo/tags')
+            .reply(status, body);
+
+          await expect(
+            githubApi.getJsonUnchecked('/repos/some/repo/tags'),
+          ).rejects.toThrow(error);
+          expect(httpMock.allUsed()).toBeTrue();
+        },
+      );
+    });
+  });
+
   describe('isPrAlreadyExistsError', () => {
     const prExists = { errors: [{ message: 'A pull request already exists' }] };
 

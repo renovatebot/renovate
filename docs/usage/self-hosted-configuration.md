@@ -871,6 +871,18 @@ Possible values:
   `ssh` uses the repository's `sshUrl` and authenticates via SSH key.
   In fork mode (`forkToken` set with `forkCreation`), `ssh` applies to both the fork's working URL and the upstream URL.
 
+## `githubIpAllowListFallback`
+
+Some GitHub organizations use an IP allow list.
+GitHub refuses a token that is used from an address outside of the allow list, even if the repository is public and can be read without a token.
+
+If you set `githubIpAllowListFallback` to `true`, Renovate reads public data without a token after GitHub refuses the token and names the IP allow list in its refusal.
+By default, Renovate does not repeat a refused request without a token.
+
+Requests without a token have a much lower hourly rate limit, per IP address, than requests with a token.
+Enable this option only if you can accept that limit, for example on a dedicated IP address.
+For details, see [GitHub organizations with an IP allow list](./getting-started/running.md#github-organizations-with-an-ip-allow-list).
+
 ## `githubTokenWarn`
 
 By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.

@@ -263,6 +263,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   gitTimeout?: number;
+  githubIpAllowListFallback?: boolean;
   githubTokenWarn?: boolean;
   goEnvFromHostRules?: boolean;
   includeMirrors?: boolean;
