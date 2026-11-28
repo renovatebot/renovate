@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import { Fixtures } from '~test/fixtures.ts';
@@ -32,13 +34,66 @@ describe('modules/datasource/deb/checksum', () => {
           fixtureInRelease,
           'contrib/binary-amd64/Packages.gz',
         ),
-      ).toBe(expectedHash);
+      ).toEqual({ algorithm: 'sha256', hash: expectedHash });
 
       expect(
         parseChecksumsFromInRelease(
           fixtureInRelease,
           'non-existing/binary-amd64/Packages.gz',
         ),
+      ).toBeNull();
+    });
+
+    it('parses a SHA512-only release file', () => {
+      const hash = 'a'.repeat(128);
+      const content = codeBlock`
+        Suite: resolute
+        MD5Sum:
+         ${'b'.repeat(32)} 1234 main/binary-amd64/Packages.gz
+        SHA512:
+         ${hash} 1234 main/binary-amd64/Packages.gz
+         ${'c'.repeat(128)} 99 main/binary-amd64/Packages.xz
+      `;
+      expect(
+        parseChecksumsFromInRelease(content, 'main/binary-amd64/Packages.gz'),
+      ).toEqual({ algorithm: 'sha512', hash });
+    });
+
+    it('prefers SHA512 over SHA256', () => {
+      const hash = 'a'.repeat(128);
+      const content = codeBlock`
+        SHA256:
+         ${'b'.repeat(64)} 1234 main/binary-amd64/Packages.gz
+        SHA512:
+         ${hash} 1234 main/binary-amd64/Packages.gz
+      `;
+      expect(
+        parseChecksumsFromInRelease(content, 'main/binary-amd64/Packages.gz'),
+      ).toEqual({ algorithm: 'sha512', hash });
+    });
+
+    it('falls back to SHA256 when SHA512 does not list the path', () => {
+      const hash = 'b'.repeat(64);
+      const content = codeBlock`
+        SHA256:
+         ${hash} 1234 main/binary-amd64/Packages.gz
+        SHA512:
+         ${'a'.repeat(128)} 1234 main/binary-amd64/Packages.xz
+      `;
+      expect(
+        parseChecksumsFromInRelease(content, 'main/binary-amd64/Packages.gz'),
+      ).toEqual({ algorithm: 'sha256', hash });
+    });
+
+    it('ignores unsupported sections and unrelated path suffixes', () => {
+      const content = codeBlock`
+        SHA1:
+         ${'d'.repeat(40)} 1234 main/binary-amd64/Packages.gz
+        SHA256:
+         ${'b'.repeat(64)} 1234 other/main/binary-amd64/Packages.gz
+      `;
+      expect(
+        parseChecksumsFromInRelease(content, 'main/binary-amd64/Packages.gz'),
       ).toBeNull();
     });
   });
@@ -51,6 +106,14 @@ describe('modules/datasource/deb/checksum', () => {
         'fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9';
 
       await expect(computeFileChecksum('file.txt')).resolves.toBe(expectedHash);
+    });
+
+    it('computes the checksum with the given algorithm', async () => {
+      await outputCacheFile('file.txt', 'bar');
+
+      await expect(computeFileChecksum('file.txt', 'sha512')).resolves.toBe(
+        createHash('sha512').update('bar').digest('hex'),
+      );
     });
 
     it('should fail if there is an error in the stream', async () => {

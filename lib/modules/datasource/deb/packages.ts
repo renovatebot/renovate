@@ -123,15 +123,25 @@ export async function downloadPackageFile(
   }
 
   if (inReleaseContent) {
-    const actualChecksum = await computeFileChecksum(compressedFile);
-    const expectedChecksum = parseChecksumsFromInRelease(
+    const packagePath = packageUrl.replace(`${baseSuiteUrl}/`, '');
+    const expected = parseChecksumsFromInRelease(
       inReleaseContent,
       // path to the Package.gz file
-      packageUrl.replace(`${baseSuiteUrl}/`, ''),
+      packagePath,
     );
-    if (actualChecksum !== expectedChecksum) {
+    if (!expected) {
       await fs.rmCache(compressedFile);
-      throw new Error('SHA256 checksum validation failed');
+      throw new Error(`No supported checksum found for ${packagePath}`);
+    }
+    const actualChecksum = await computeFileChecksum(
+      compressedFile,
+      expected.algorithm,
+    );
+    if (actualChecksum !== expected.hash) {
+      await fs.rmCache(compressedFile);
+      throw new Error(
+        `${expected.algorithm.toUpperCase()} checksum validation failed`,
+      );
     }
   }
 
