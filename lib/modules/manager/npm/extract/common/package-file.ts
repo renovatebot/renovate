@@ -99,7 +99,7 @@ export function extractPackageJson(
           }
           // v8 ignore else -- TODO: add test #40625
           if (depType === 'overrides' && !isString(val)) {
-            deps.push(...extractOverrideDepsRec([depName], val));
+            deps.push(...extractOverrideDepsRec([key], val));
           } else if (depType === 'pnpm' && depName === 'overrides') {
             // pnpm overrides
             // https://pnpm.io/package_json#pnpmoverrides

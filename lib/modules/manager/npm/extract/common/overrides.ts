@@ -2,7 +2,7 @@ import { isEmptyObject, isString } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import type { OverrideDependency } from '../types.ts';
-import { extractDependency } from './dependency.ts';
+import { extractDependency, parseDepName } from './dependency.ts';
 import { setNodeCommitTopic } from './node.ts';
 
 /**
@@ -23,16 +23,20 @@ export function extractOverrideDepsRec(
     if (isString(versionValue)) {
       // special handling for "." override dependency name
       // "." means the constraint is applied to the parent dep
-      const currDepName = overrideName === '.' ? parents.at(-1)! : overrideName;
+      const key = overrideName === '.' ? parents.at(-1)! : overrideName;
+      const depName = parseDepName('overrides', key);
       const dep: PackageDependency<NpmManagerData> = {
-        depName: currDepName,
+        depName,
         depType: 'overrides',
-        managerData: { parents: parents.slice() }, // set parents for dependency
+        managerData: {
+          parents: parents.slice(), // set parents for dependency
+          ...(depName !== key && { key }),
+        },
       };
       setNodeCommitTopic(dep);
       deps.push({
         ...dep,
-        ...extractDependency('overrides', currDepName, versionValue),
+        ...extractDependency('overrides', depName, versionValue),
       });
     } else {
       // versionValue is an object, run recursively.

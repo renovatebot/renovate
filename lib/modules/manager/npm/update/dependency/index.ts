@@ -275,7 +275,12 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    const isNameUnchanged = !upgrade.newName || upgrade.newName === depName;
+    // keep the version selector of an overrides key, e.g. `foo@^2` becomes `bar@^2`
+    const newName =
+      upgrade.newName && depType === 'overrides' && depName !== upgrade.depName
+        ? `${upgrade.newName}${depName.slice(upgrade.depName!.length)}`
+        : upgrade.newName;
+    const isNameUnchanged = !newName || newName === depName;
     if (oldVersion === newValue && isNameUnchanged) {
       logger.trace('Version is already updated');
       return fileContent;
@@ -303,14 +308,14 @@ export function updateDependency({
         newValue!,
         overrideDepParents,
       );
-      if (upgrade.newName && upgrade.newName !== depName) {
+      if (newName && newName !== depName) {
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
           depType as NpmDepType,
           depName,
           depName,
-          upgrade.newName,
+          newName,
           overrideDepParents,
         );
       }

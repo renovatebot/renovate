@@ -1607,6 +1607,58 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('extracts dependencies from overrides with version selectors', async () => {
+      const content = codeBlock`
+        {
+          "overrides": {
+            "which@^2": "^4.0.0",
+            "@types/react@18.0.5": "18.3.0",
+            "cross-spawn@7": {
+              ".": "7.0.6",
+              "which@2.0.2": "^4.0.0"
+            }
+          }
+        }
+      `;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depType: 'overrides',
+          depName: 'which',
+          managerData: { key: 'which@^2' },
+          currentValue: '^4.0.0',
+          datasource: 'npm',
+          prettyDepType: 'overrides',
+        },
+        {
+          depType: 'overrides',
+          depName: '@types/react',
+          managerData: { key: '@types/react@18.0.5' },
+          currentValue: '18.3.0',
+          datasource: 'npm',
+          prettyDepType: 'overrides',
+        },
+        {
+          depType: 'overrides',
+          depName: 'cross-spawn',
+          managerData: { parents: ['cross-spawn@7'], key: 'cross-spawn@7' },
+          currentValue: '7.0.6',
+          datasource: 'npm',
+        },
+        {
+          depType: 'overrides',
+          depName: 'which',
+          managerData: { parents: ['cross-spawn@7'], key: 'which@2.0.2' },
+          currentValue: '^4.0.0',
+          datasource: 'npm',
+        },
+      ]);
+    });
+
     it('extracts dependencies from pnpm.overrides', async () => {
       const content = codeBlock`
         {

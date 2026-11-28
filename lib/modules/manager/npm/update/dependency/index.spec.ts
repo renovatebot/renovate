@@ -523,6 +523,59 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(expected);
     });
 
+    it('handles override dependency with a version selector', () => {
+      const upgrade = {
+        depType: 'overrides',
+        depName: 'which',
+        newValue: '^5.0.0',
+        managerData: { key: 'which@^2' },
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent:
+          '{ "overrides": { "which@^2": "^4.0.0", "which": "^4.0.0" } }',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!)).toEqual({
+        overrides: { 'which@^2': '^5.0.0', which: '^4.0.0' },
+      });
+    });
+
+    it('handles override dependency object with a version selector', () => {
+      const upgrade = {
+        depType: 'overrides',
+        depName: 'cross-spawn',
+        newValue: '7.0.7',
+        managerData: { parents: ['cross-spawn@7'], key: 'cross-spawn@7' },
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: '{ "overrides": { "cross-spawn@7": { ".": "7.0.6" } } }',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!)).toEqual({
+        overrides: { 'cross-spawn@7': { '.': '7.0.7' } },
+      });
+    });
+
+    it('keeps the version selector when replacing an override dependency', () => {
+      const upgrade = {
+        depType: 'overrides',
+        depName: 'which',
+        newName: 'which-new',
+        newValue: '^5.0.0',
+        managerData: { key: 'which@^2' },
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: '{ "overrides": { "which@^2": "^4.0.0" } }',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!)).toEqual({
+        overrides: { 'which-new@^2': '^5.0.0' },
+      });
+    });
+
     it('handles pnpm.override dependency', () => {
       const upgrade = {
         depType: 'pnpm.overrides',
