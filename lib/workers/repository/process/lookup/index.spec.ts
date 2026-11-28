@@ -3125,6 +3125,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '1.4.5',
           newVersion: '1.4.5',
           pendingVersions: ['1.4.6'],
+          pendingVersionTimestamps: { '1.4.6': yesterday.toISOString() },
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
