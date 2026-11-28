@@ -1,6 +1,6 @@
 import * as httpMock from '~test/http-mock.ts';
 import type { GithubDigestFile } from '../../../util/github/types.ts';
-import { toSha256 } from '../../../util/hash.ts';
+import { hash, toSha256 } from '../../../util/hash.ts';
 import { GithubReleaseAttachmentsDatasource } from './index.ts';
 import { GitHubReleaseAttachmentMocker } from './test/index.ts';
 
@@ -63,6 +63,32 @@ describe('modules/datasource/github-release-attachments/digest', () => {
       expect(digestAsset?.assetName).toBe('asset.zip');
       expect(digestAsset?.digestedFileName).toBeUndefined();
     });
+
+    it.each(['a'.repeat(64), 'A'.repeat(64)])(
+      'finds asset by the digest GitHub recorded, without downloading it: %s',
+      async (pinnedDigest) => {
+        const recordedDigest = 'a'.repeat(64);
+        const release = releaseMock.release('v1.0.0');
+        release.assets.push({
+          name: 'asset.zip',
+          size: 10 * 1024,
+          url: 'https://api.github.com/repos/some/dep/releases/assets/1',
+          browser_download_url:
+            'https://github.com/some/dep/releases/download/v1.0.0/asset.zip',
+          digest: `sha256:${recordedDigest}`,
+        });
+
+        const digestAsset = await githubReleaseAttachments.findDigestAsset(
+          release,
+          pinnedDigest,
+        );
+        expect(digestAsset).toEqual({
+          assetName: 'asset.zip',
+          currentVersion: 'v1.0.0',
+          currentDigest: pinnedDigest,
+        });
+      },
+    );
 
     it('returns null when no assets available', async () => {
       const release = releaseMock.release('v1.0.0');
@@ -173,6 +199,58 @@ describe('modules/datasource/github-release-attachments/digest', () => {
           release,
         );
         expect(digest).toEqual(contentDigest);
+      });
+
+      it('maps asset names with the given versions', async () => {
+        const updatedContent = 'new content';
+        const release = releaseMock.withAssets('v.0.9.8.1', {
+          'USBip-0.9.8.1-x64.exe': updatedContent,
+        });
+
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
+          {
+            assetName: 'USBip-0.9.8.0-x64.exe',
+            currentVersion: 'v.0.9.8.0',
+            currentDigest: '0'.repeat(64),
+          },
+          release,
+          '0.9.8.0',
+          '0.9.8.1',
+        );
+        expect(digest).toEqual(toSha256(updatedContent));
+      });
+
+      it('uses the SHA-256 GitHub recorded, without downloading the asset', async () => {
+        const recordedDigest = 'b'.repeat(64);
+        const release = releaseMock.release('v1.0.1');
+        release.assets.push({
+          name: 'asset.zip',
+          size: 10 * 1024,
+          url: 'https://api.github.com/repos/some/dep/releases/assets/2',
+          browser_download_url:
+            'https://github.com/some/dep/releases/download/v1.0.1/asset.zip',
+          digest: `sha256:${recordedDigest}`,
+        });
+
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
+          digestAsset,
+          release,
+        );
+        expect(digest).toBe(recordedDigest);
+      });
+
+      it('downloads the asset when a SHA-512 is pinned', async () => {
+        const updatedContent = 'new content';
+        const release = releaseMock.withAssets('v1.0.1', {
+          'asset.zip': updatedContent,
+        });
+        release.assets[0].digest = `sha256:${toSha256(updatedContent)}`;
+
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
+          { ...digestAsset, currentDigest: '0'.repeat(128) },
+          release,
+        );
+        expect(digest).toBe(hash(updatedContent, 'sha512'));
       });
 
       it('returns null when not found', async () => {

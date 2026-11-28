@@ -10,6 +10,7 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { CustomDatasource } from '../../../../modules/datasource/custom/index.ts';
 import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
+import { GithubReleaseAttachmentsDatasource } from '../../../../modules/datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags/index.ts';
 import { GoDatasource } from '../../../../modules/datasource/go/index.ts';
@@ -3459,6 +3460,47 @@ describe('workers/repository/process/lookup/index', () => {
           topic: 'angular/angular',
         },
       ]);
+    });
+
+    it('passes the release tags to getDigest when extractVersion is used', async () => {
+      config.currentValue = '1.0.0';
+      config.currentDigest = 'old-digest';
+      config.packageName = 'some/dep';
+      config.datasource = GithubReleaseAttachmentsDatasource.id;
+      config.extractVersion = '^v\\.(?<version>.+)$';
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'v.1.0.0', gitRef: 'v.1.0.0' },
+          { version: 'v.1.0.1', gitRef: 'v.1.0.1' },
+        ],
+      });
+      const getDigest = vi
+        .spyOn(GithubReleaseAttachmentsDatasource.prototype, 'getDigest')
+        .mockResolvedValue('new-digest');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        { newValue: '1.0.1', newDigest: 'new-digest' },
+        { newValue: '1.0.0', newDigest: 'new-digest', updateType: 'digest' },
+      ]);
+      expect(getDigest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentValue: '1.0.0',
+          currentGitRef: 'v.1.0.0',
+          newGitRef: 'v.1.0.1',
+        }),
+        '1.0.1',
+      );
+      expect(getDigest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentGitRef: 'v.1.0.0',
+          newGitRef: 'v.1.0.0',
+        }),
+        '1.0.0',
+      );
     });
 
     it('removes URL credentials of the package name from the digest warning', async () => {
