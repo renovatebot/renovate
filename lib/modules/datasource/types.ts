@@ -4,10 +4,7 @@ import type {
 } from '../../config/types.ts';
 import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type { ModuleApi } from '../../types/index.ts';
-import type {
-  AdditionalConstraintName,
-  ConstraintName,
-} from '../../util/exec/types.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 
 /**
@@ -54,7 +51,7 @@ export interface GetReleasesConfig {
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
-  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  constraintsVersioning?: Partial<Record<ConstraintName, string>>;
   constraintsFiltering?: ConstraintsFilter;
 }
 
