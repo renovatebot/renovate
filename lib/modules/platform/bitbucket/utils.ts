@@ -63,6 +63,9 @@ export function prInfo(pr: PrResponse): Pr {
 }
 
 export const prFieldsFilter = [
+  // `fields` is exclusive in the Bitbucket API: without `next` the paginated
+  // request stops after the first page and older open PRs go missing.
+  'next',
   'values.id',
   'values.title',
   'values.state',

@@ -138,6 +138,34 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     });
   });
 
+  it('follows pagination so an older open PR stays visible', async () => {
+    // Bitbucket only returns `next` when the request's `fields` filter asks for it,
+    // so a filter without `next` silently caps the sync at the first page.
+    httpMock
+      .scope('https://api.bitbucket.org')
+      .get(`/2.0/repositories/some-workspace/some-repo/pullrequests`)
+      .query((q) => String(q.fields).split(',').includes('next'))
+      .reply(200, {
+        values: [pr2],
+        next: 'https://api.bitbucket.org/2.0/repositories/some-workspace/some-repo/pullrequests?page=2',
+      })
+      .get(`/2.0/repositories/some-workspace/some-repo/pullrequests?page=2`)
+      .reply(200, {
+        values: [pr1],
+      });
+
+    const res = await BitbucketPrCache.getPrs(
+      http,
+      'some-workspace/some-repo',
+      null,
+    );
+
+    expect(res).toMatchObject([
+      { number: 2, title: 'title' },
+      { number: 1, title: 'title' },
+    ]);
+  });
+
   it('syncs cache', async () => {
     cache.platform = {
       bitbucket: {
