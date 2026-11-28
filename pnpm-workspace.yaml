@@ -12,6 +12,7 @@ allowBuilds:
   protobufjs: false
   unrs-resolver: false
   re2: true
+  lzma-native: true
 
 dedupePeers: true
 
