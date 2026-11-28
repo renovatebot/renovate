@@ -32,6 +32,7 @@ import { id as rezVersioningId } from '../../../../modules/versioning/rez/index.
 import { id as semverVersioningId } from '../../../../modules/versioning/semver/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
+import * as githubRepository from '../../../../util/github/repository.ts';
 import * as McApi from '../../../../util/merge-confidence/index.ts';
 import {
   initConfig,
@@ -189,6 +190,32 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
 
       expect(() => res.unwrapOrThrow()).toThrow('external-host-error');
+    });
+
+    it('marks an abandoned dependency whose GitHub repository is archived', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'some/dep';
+      config.datasource = GithubTagsDatasource.id;
+      config.versioning = semverVersioningId;
+      config.abandonmentThreshold = '1 year';
+      vi.spyOn(githubRepository, 'isRepositoryArchived').mockResolvedValueOnce(
+        true,
+      );
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
+          },
+        ],
+        sourceUrl: 'https://github.com/some/dep',
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toMatchObject({ isAbandoned: true, isSourceArchived: true });
     });
 
     it('returns rollback for pinned version', async () => {
