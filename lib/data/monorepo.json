@@ -350,6 +350,7 @@
     "deck-gl": "https://github.com/visgl/deck.gl",
     "deno": "https://github.com/denoland/deno",
     "devextreme-reactive": "https://github.com/DevExpress/devextreme-reactive",
+    "diesel": "https://github.com/diesel-rs/diesel",
     "dnd-kit": "https://github.com/clauderic/dnd-kit",
     "docusaurus": "https://github.com/facebook/docusaurus",
     "dot-swashbuckle": "https://github.com/Havunen/DotSwashbuckle",
