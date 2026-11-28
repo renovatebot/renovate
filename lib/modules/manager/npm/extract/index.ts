@@ -194,6 +194,15 @@ export async function extractPackageFile(
     }
   }
 
+  if (lockFiles.npmLock) {
+    for (const dep of res.deps) {
+      if (dep.depType === 'overrides') {
+        // `getRangeStrategy` only sees the dependency's own `managerData`
+        dep.managerData = { ...dep.managerData, npmLock: lockFiles.npmLock };
+      }
+    }
+  }
+
   const extractedConstraints = getExtractedConstraints(res.deps);
 
   if (yarnrcConfig) {
