@@ -5,7 +5,10 @@ In addition to standard dependencies, these toolsets are also supported:
 - `pdm` (including `pdm.lock` files)
 - `uv` (including `uv.lock` files and `uv` workspaces)
 - `hatch`
-- `pixi` (including `pixi.lock` files)
+- `pixi` (including `pixi.lock` files and `pixi` workspaces)
+
+When a `pyproject.toml` has no sibling `pixi.lock`, Renovate updates the nearest `pixi.lock` in a parent directory, but only if that workspace's manifest installs the package as a `path` pypi-dependency.
+Lock file maintenance of such a parent `pixi.lock` is left to the `pixi` manager.
 
 ### Trust model for pixi lock file updates
 

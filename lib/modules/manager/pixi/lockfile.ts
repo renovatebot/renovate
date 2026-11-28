@@ -16,12 +16,13 @@ import type { UpdatePixiLockfile } from './types.ts';
 export const commandLock = 'pixi lock --no-progress --color=never --quiet';
 
 /**
- * Regenerate the sibling `pixi.lock` of a package file by running `pixi lock`.
+ * Regenerate a `pixi.lock` by running `pixi lock` in its directory.
  *
  * Shared by the standalone `pixi` manager and the `pep621` pixi processor.
  */
 export async function updatePixiLockfile({
   packageFileName,
+  lockFileName = getSiblingFileName(packageFileName, 'pixi.lock'),
   updatedDeps,
   isLockFileMaintenance,
   constraint,
@@ -32,7 +33,6 @@ export async function updatePixiLockfile({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'pixi.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No pixi.lock found');
@@ -67,7 +67,9 @@ export async function updatePixiLockfile({
         };
 
         const execOptions: ExecOptions = {
-          cwdFile: packageFileName,
+          // Run from the workspace root, which may be a parent directory of a
+          // `pep621` package file that is a member of the workspace.
+          cwdFile: lockFileName,
           extraEnv,
           docker: {},
           toolConstraints: [{ toolName: 'pixi', constraint }],
