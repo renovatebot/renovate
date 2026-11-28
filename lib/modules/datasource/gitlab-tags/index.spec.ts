@@ -46,15 +46,18 @@ describe('modules/datasource/gitlab-tags/index', () => {
         releases: [
           {
             gitRef: 'v1.0.0',
+            newDigest: 'abc100',
             releaseTimestamp: '2020-03-04T18:01:37.000Z',
             version: 'v1.0.0',
           },
           {
             gitRef: 'v1.1.0',
+            newDigest: 'abc110',
             version: 'v1.1.0',
           },
           {
             gitRef: 'v1.1.1',
+            newDigest: 'abc111',
             version: 'v1.1.1',
           },
         ],
@@ -100,15 +103,18 @@ describe('modules/datasource/gitlab-tags/index', () => {
         releases: [
           {
             gitRef: 'v1.0.0',
+            newDigest: 'abc100',
             releaseTimestamp: '2020-03-04T18:01:37.000Z',
             version: 'v1.0.0',
           },
           {
             gitRef: 'v1.1.0',
+            newDigest: 'abc110',
             version: 'v1.1.0',
           },
           {
             gitRef: 'v1.1.1',
+            newDigest: 'abc111',
             version: 'v1.1.1',
           },
         ],
@@ -135,7 +141,9 @@ describe('modules/datasource/gitlab-tags/index', () => {
         ]);
       const expected = {
         registryUrl: 'https://gitlab.company.com',
-        releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
+        releases: [
+          { gitRef: 'v1.0.0', newDigest: 'abc100', version: 'v1.0.0' },
+        ],
         sourceUrl: 'https://gitlab.company.com/some/dep2',
       };
 
@@ -175,10 +183,12 @@ describe('modules/datasource/gitlab-tags/index', () => {
         releases: [
           {
             gitRef: 'v1.0.0',
+            newDigest: 'abc100',
             version: 'v1.0.0',
           },
           {
             gitRef: 'v1.1.0',
+            newDigest: 'abc110',
             version: 'v1.1.0',
           },
         ],

@@ -62,6 +62,7 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
 
     return gitlabTags.map(({ name, commit }) => ({
       version: name,
+      newDigest: commit.id,
       releaseTimestamp: asTimestamp(commit.created_at),
     }));
   }

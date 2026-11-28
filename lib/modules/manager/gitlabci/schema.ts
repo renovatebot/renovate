@@ -48,27 +48,3 @@ export const Job = z.object({
 export const Jobs = LooseRecord(z.string(), Job)
   .catch({})
   .transform((x) => Object.values(x));
-
-const GitlabInclude = z
-  .object({ component: z.string() })
-  .transform(({ component }) => component);
-
-const GitlabIncludes = z
-  .union([LooseArray(GitlabInclude), GitlabInclude.transform(toArray)])
-  .catch([]);
-
-export const GitlabDocument = z
-  .record(z.string(), z.unknown())
-  .transform((obj) => {
-    const { include, ...rest } = obj;
-    const children = Object.values(rest);
-    return { include, children };
-  })
-  .transform(({ include, children }): string[] => [
-    ...GitlabDocumentArray.parse(children),
-    ...GitlabIncludes.parse(include),
-  ]);
-
-const GitlabDocumentArray = LooseArray(GitlabDocument).transform((x) =>
-  x.flat(),
-);
