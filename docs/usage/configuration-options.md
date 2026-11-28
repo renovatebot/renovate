@@ -4965,7 +4965,19 @@ In case there is a need to configure them manually, it can be done using this `r
 }
 ```
 
-The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
+The field supports multiple URLs.
+How they are used depends on the datasource's registry strategy, listed in the "Registry strategy" row of each [datasource](modules/datasource/index.md) page:
+
+- `first`: only the first URL is used
+- `hunt`: URLs are tried in order until one returns a result
+- `merge`: results from all URLs are merged
+
+Each datasource's strategy is set in code to match how its package manager uses multiple registries, so you cannot configure it.
+For example:
+
+- `docker` uses `first`, because an image name points to a single registry
+- `packagist` uses `hunt`, because Composer takes a package from the first repository that has it
+- `maven` and `pypi` use `merge`, because Maven and pip look for versions in all configured repositories
 
 In some situations managers can not derive which registry a given dependency comes from.
 In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
