@@ -43,6 +43,14 @@ function prepareParticipants(
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 
+function removeExcluded(
+  users: string[],
+  excluded: string[] | undefined,
+): string[] {
+  const excludedUsers = new Set(coerceArray(excluded).map(noLeadingAtSymbol));
+  return users.filter((user) => !excludedUsers.has(user));
+}
+
 export async function addParticipants(
   config: RenovateConfig,
   pr: Pr,
@@ -55,6 +63,7 @@ export async function addParticipants(
   if (assignees.length > 0) {
     try {
       assignees = await prepareParticipants(config, assignees);
+      assignees = removeExcluded(assignees, config.excludeAssignees);
       if (isNumber(config.assigneesSampleSize)) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -93,6 +102,7 @@ export async function addParticipants(
   if (reviewers.length > 0) {
     try {
       reviewers = await prepareParticipants(config, reviewers);
+      reviewers = removeExcluded(reviewers, config.excludeReviewers);
       if (isNumber(config.reviewersSampleSize)) {
         logger.debug(
           `Sampling reviewersSampleSize=${config.reviewersSampleSize} reviewers`,
