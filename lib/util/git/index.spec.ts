@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { execa } from 'execa';
@@ -310,6 +311,13 @@ describe('util/git/index', { timeout: 30000 }, () => {
           'The remote end hung up unexpectedly',
         );
         expect(gitFunc).toHaveBeenCalledTimes(6);
+        expect(vi.mocked(setTimeout).mock.calls).toEqual([
+          [3000],
+          [6000],
+          [12000],
+          [24000],
+          [48000],
+        ]);
       });
 
       it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {

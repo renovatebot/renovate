@@ -181,9 +181,11 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
       }
     }
 
-    const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
-    logger.trace({ nextDelay }, `Delay next round`);
-    await setTimeout(1000 * nextDelay);
+    if (round < retryCount) {
+      const nextDelay = delaySeconds * delayFactor ** round;
+      logger.trace({ nextDelay }, `Delay next round`);
+      await setTimeout(1000 * nextDelay);
+    }
 
     round++;
   }
