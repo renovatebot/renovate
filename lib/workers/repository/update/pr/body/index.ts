@@ -1,7 +1,12 @@
 import type { RenovateConfig } from '../../../../../config/types.ts';
 import { PLATFORM_FAMILIES } from '../../../../../constants/index.ts';
+import { logger } from '../../../../../logger/index.ts';
 import type { PrDebugData } from '../../../../../modules/platform/index.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
+import {
+  fitSections,
+  getBodyLength,
+} from '../../../../../modules/platform/utils/pr-body.ts';
 import { detectPlatform } from '../../../../../util/common.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import { toBase64 } from '../../../../../util/string.ts';
@@ -95,7 +100,10 @@ interface PrBodyConfig {
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
-type PrBodyContent = Record<string, string>;
+interface PrBodyContent extends Record<string, string> {
+  notes: string;
+  changelogs: string;
+}
 
 function compilePrBody(
   prBodyTemplate: string,
@@ -123,6 +131,36 @@ function massagePrBody(
     );
   }
   return prBody;
+}
+
+/**
+ * Cuts the `changelogs` and `notes` sections, changelogs first, until the rendered body is short enough for the platform. All other sections are kept.
+ */
+function fitContentToLimit(
+  prBodyTemplate: string,
+  content: PrBodyContent,
+  prBodyConfig: PrBodyConfig,
+  rebaseLabel: string | undefined,
+): PrBodyContent {
+  const maxLength = platform.maxBodyLength();
+  const fitted = fitSections(
+    content,
+    ['notes', 'changelogs'],
+    (sections) =>
+      getBodyLength(
+        compilePrBody(prBodyTemplate, sections, prBodyConfig.debugData),
+        (compiledBody) =>
+          massagePrBody(compiledBody, prBodyConfig, rebaseLabel),
+        maxLength,
+      ),
+    maxLength,
+  );
+  if (fitted !== content) {
+    logger.debug(
+      `Truncated PR body sections due to platform limitation of ${maxLength} characters`,
+    );
+  }
+  return fitted;
 }
 
 // TODO: `branchConfig` and `config`are the same object
@@ -155,8 +193,14 @@ export function getPrBody(
   let prBody = '';
   if (branchConfig.prBodyTemplate) {
     const { prBodyTemplate } = branchConfig;
+    const fittedContent = fitContentToLimit(
+      prBodyTemplate,
+      content,
+      prBodyConfig,
+      config.rebaseLabel,
+    );
     prBody = massagePrBody(
-      compilePrBody(prBodyTemplate, content, prBodyConfig.debugData),
+      compilePrBody(prBodyTemplate, fittedContent, prBodyConfig.debugData),
       prBodyConfig,
       config.rebaseLabel,
     );
