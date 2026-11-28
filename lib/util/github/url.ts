@@ -32,3 +32,15 @@ export function getSourceUrl(
   const sourceUrlBase = getSourceUrlBase(registryUrl);
   return `${sourceUrlBase}${packageName}`;
 }
+
+/**
+ * Returns the API base URL of the GitHub host that serves the request `url`.
+ */
+export function getApiBaseUrlFromRequestUrl(
+  url: string | URL,
+  baseUrl?: string,
+): string {
+  const { origin, pathname } = new URL(url, baseUrl);
+  // GHE serves its API under `/api/`, github.com and ghe.com from the root
+  return pathname.startsWith('/api/') ? `${origin}/api/v3/` : `${origin}/`;
+}

@@ -17,6 +17,7 @@ import {
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { getCache } from '../cache/repository/index.ts';
+import { getApiBaseUrlFromRequestUrl } from '../github/url.ts';
 import { getEnv } from '../env.ts';
 import * as hostRules from '../host-rules.ts';
 import { maskToken } from '../mask.ts';
@@ -147,11 +148,7 @@ export class GithubRateLimitError extends Error {
 
   constructor(url: string | URL, opts: GithubBaseHttpOptions) {
     super(PLATFORM_RATE_LIMIT_EXCEEDED);
-    const { origin, pathname } = new URL(url, opts.baseUrl ?? baseUrl);
-    // GHE serves its API under `/api/`, github.com and ghe.com from the root
-    this.apiBaseUrl = pathname.startsWith('/api/')
-      ? `${origin}/api/v3/`
-      : `${origin}/`;
+    this.apiBaseUrl = getApiBaseUrlFromRequestUrl(url, opts.baseUrl ?? baseUrl);
     this.#token = opts.token;
   }
 
