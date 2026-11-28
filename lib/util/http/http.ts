@@ -1,6 +1,7 @@
 import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, OptionsInit, RetryObject } from 'got';
+import { HTTPError } from 'got';
 import type { SetRequired } from 'type-fest';
 import type { z } from 'zod/v4';
 import { ZodType } from 'zod/v4';
@@ -27,7 +28,7 @@ import { applyHostGuard } from './host-guard.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
-import { isNotModified } from './status.ts';
+import { isNotModified, isRateLimited } from './status.ts';
 import { getThrottle } from './throttle.ts';
 import type {
   GotOptions,
@@ -296,8 +297,24 @@ export abstract class HttpBase<
       const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
-      function httpTask(): Promise<HttpResponse<unknown>> {
-        return wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
+      async function httpTask(): Promise<HttpResponse<unknown>> {
+        try {
+          return await wrapWithRetry(
+            queuedTask,
+            url,
+            getRetryAfter,
+            maxRetryAfter,
+          );
+        } catch (err) {
+          if (
+            options.throwHttpErrors === false &&
+            err instanceof HTTPError &&
+            isRateLimited(err)
+          ) {
+            return err.response;
+          }
+          throw err;
+        }
       }
 
       // cached responses don't hit the server, so they skip the throttle and queue
