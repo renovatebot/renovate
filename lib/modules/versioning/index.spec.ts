@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { getOptions } from '../../config/options/index.ts';
+import { getOption } from '../../config/options/index.ts';
 import { isVersioningApiConstructor } from './common.ts';
 import * as allVersioning from './index.ts';
 import * as semverCoercedVersioning from './semver-coerced/index.ts';
@@ -59,7 +59,7 @@ describe('modules/versioning/index', () => {
         }),
       );
 
-    const config = getOptions().find(({ name }) => name === 'versioning');
+    const config = getOption('versioning');
 
     const ValidVersioning = z
       .object({ allowedValues: z.string().array() })

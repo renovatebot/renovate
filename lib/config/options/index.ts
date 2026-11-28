@@ -1,4 +1,5 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import type { ConfigOptionName } from '../../config-option-names.generated.ts';
 import { Categories } from '../../constants/category.ts';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { AllDatasourcesListLiteral } from '../../datasource-list.generated.ts';
@@ -4112,6 +4113,15 @@ export function getOptions(): Readonly<RenovateOptions>[] {
   return options;
 }
 
+/**
+ * Returns the config option with the given name, or `undefined` for a name which is not a config option.
+ */
+export function getOption(name: ConfigOptionName): Readonly<RenovateOptions>;
+export function getOption(name: string): Readonly<RenovateOptions> | undefined;
+export function getOption(name: string): Readonly<RenovateOptions> | undefined {
+  return optionsByName.get(name);
+}
+
 function loadManagerOptions(): void {
   for (const [name, { displayName, defaultConfig }] of Object.entries(
     managerDefaultConfigs,
@@ -4155,3 +4165,5 @@ function freezeConfigOptions(): void {
 
 loadManagerOptions();
 freezeConfigOptions();
+
+const optionsByName = new Map(options.map((option) => [option.name, option]));

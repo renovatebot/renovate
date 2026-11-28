@@ -3,7 +3,7 @@ import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
 import { MigrationsService } from '../../lib/config/migrations/index.ts';
 import { getEnvName } from '../../lib/config/options/env.ts';
-import { getOptions } from '../../lib/config/options/index.ts';
+import { getOption, getOptions } from '../../lib/config/options/index.ts';
 import {
   allManagersList,
   getManagers,
@@ -315,8 +315,8 @@ function generateInheritConfigSupportList(): string {
 }
 
 function generateStatusCheckWhenTable(): string {
-  const option = options.find((o) => o.name === 'statusCheckWhen');
-  const defaults = coerceObject<Record<string, string>>(option?.default);
+  const option = getOption('statusCheckWhen');
+  const defaults = coerceObject<Record<string, string>>(option.default);
 
   const reasoning: Record<string, string> = {
     artifactError: 'Legacy behavior — only reports artifact failures',

@@ -7,7 +7,7 @@ import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { StringOrStringArrayOption } from '../../util/schema-utils/index.ts';
 import { migrateConfig } from '../migration.ts';
-import { getOptions } from './index.ts';
+import { getOption, getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform/index.ts');
 
@@ -34,8 +34,7 @@ describe('config/options/index', () => {
       getManagers: vi.fn(() => new Map().set('testManager', {})),
     }));
 
-    const opts = getOptions();
-    expect(opts.filter((o) => o.name === 'testManager')).toEqual([]);
+    expect(getOption('testManager')).toBeUndefined();
   });
 
   it('supportedManagers should have valid names', () => {
@@ -91,8 +90,8 @@ describe('config/options/index', () => {
   });
 
   it('customDatasources `format` allows every format that has a fetcher', () => {
-    const format = getOptions().find((o) => o.name === 'format');
-    expect(format?.allowedValues).toIncludeSameMembers(Object.keys(fetchers));
+    const format = getOption('format');
+    expect(format.allowedValues).toIncludeSameMembers(Object.keys(fetchers));
   });
 
   it('should not contain duplicate option names', () => {
@@ -155,7 +154,7 @@ describe('config/options/index', () => {
       let match;
       while ((match = directPattern.exec(content)) !== null) {
         const name = match.groups!.name;
-        const option = allOptions.find((o) => o.name === name);
+        const option = getOption(name);
         // Only include string or array-of-string options (not objects like userStrings)
         if (StringOrStringArrayOption.safeParse(option).success) {
           detectedOptions.add(name);
@@ -198,11 +197,11 @@ describe('config/options/index', () => {
             expect(optionNames).toContain(prop.property);
           });
 
-          const foundOption = opts.filter((o) => o.name === prop.property);
+          const foundOption = getOption(prop.property);
           // oxlint-disable-next-line vitest/no-conditional-tests -- TODO: fix me
-          if (foundOption?.length && foundOption[0].allowedValues) {
+          if (foundOption?.allowedValues) {
             it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
-              expect(foundOption[0].allowedValues).toContain(prop.value);
+              expect(foundOption.allowedValues).toContain(prop.value);
             });
           }
         }

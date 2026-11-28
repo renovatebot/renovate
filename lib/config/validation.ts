@@ -45,7 +45,7 @@ import {
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
-import { getOptions } from './options/index.ts';
+import { getOption, getOptions } from './options/index.ts';
 import {
   describeAllowedLocations,
   getAllowedParents,
@@ -89,7 +89,6 @@ let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
 let optionSupportsTemplating: Set<string>;
-let optionsByName: Map<string, RenovateOptions>;
 
 const managerList: readonly string[] = AllManagersListLiteral;
 
@@ -136,7 +135,7 @@ function getDeprecationMessage(option: string): string | undefined {
     return deprecatedOptions[option];
   }
 
-  const found = options.find((o) => o.name === option);
+  const found = getOption(option);
   if (!found) {
     return undefined;
   }
@@ -173,12 +172,9 @@ function initOptions(): void {
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
   optionSupportsTemplating = new Set();
-  optionsByName = new Map();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
-
-    optionsByName.set(option.name, option);
 
     const parents = getAllowedParents(option);
     /* an option which can be used anywhere is valid in any object, even one which `any` doesn't (yet) expand to */
@@ -1380,7 +1376,7 @@ function validateStringArray(
   currentPath: string | undefined,
   errors: ValidationMessage[],
 ): void {
-  const option = optionsByName.get(key);
+  const option = getOption(key);
   if (
     option?.type === 'array' &&
     option.subType === 'string' &&
@@ -1436,7 +1432,7 @@ function validateAllowedValues(
   currentPath: string | undefined,
   errors: ValidationMessage[],
 ): void {
-  const option = optionsByName.get(key);
+  const option = getOption(key);
   if (!option) {
     return;
   }
