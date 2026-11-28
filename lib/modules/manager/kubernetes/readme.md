@@ -45,9 +45,12 @@ For the exact regexes used by this manager, refer to the [source code](https://g
 First, the manager looks for container images defined in the Kubernetes resource definitions.
 This operates on the raw text line by line using a regex.
 It matches all lines that start with `image:` (single leading dash and whitespace before the key are allowed, but whitespace before the colon is not allowed)
-followed by a docker image string (whitespace and quotes around the image are allowed).
+followed by any string without whitespace and quotes (whitespace and quotes around the image are allowed).
 
-The match of the image string is extracted as a docker image dependency.
+The validity of each image string is checked against a docker image regex after resolving any `registryAlias` and other docker-specific transformations,
+thus allowing registry aliases that do not represent valid domain names (e.g. variable substitution patterns).
+
+If that validity check is successful, the respective match is reported as a docker image dependency.
 
 #### Type 2: Extract ImageVolumes
 

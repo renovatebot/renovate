@@ -7,6 +7,7 @@ const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
 const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
 const underscoreTagFile = Fixtures.get('underscore-tag.yaml');
 const kubernetesRegistryAlias = Fixtures.get('kubernetes.registry-alias.yaml');
+const kubernetesVariableFile = Fixtures.get('kubernetes.variable.yaml');
 const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 
 describe('modules/manager/kubernetes/extract', () => {
@@ -214,6 +215,33 @@ kind: ConfigMap
             depName: 'busybox',
             packageName: 'busybox',
             replaceString: 'busybox',
+          },
+        ],
+      });
+    });
+
+    it('does not extract images with variables if no registry alias exists', () => {
+      const res = extractPackageFile(kubernetesVariableFile, 'file.yaml', {});
+      expect(res).toBeNull();
+    });
+
+    it('extracts images with variables if registry alias exists', () => {
+      const res = extractPackageFile(kubernetesVariableFile, 'file.yaml', {
+        registryAliases: {
+          '${CONTAINER_REGISTRY}/quayio': 'quay.io',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '${CONTAINER_REGISTRY}/quayio/node:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: '${CONTAINER_REGISTRY}/quayio/node',
+            packageName: 'quay.io/node',
+            replaceString: '${CONTAINER_REGISTRY}/quayio/node:0.0.1',
           },
         ],
       });
