@@ -6,6 +6,20 @@ import { setYarnMinimumReleaseAge } from '../yarn-minimum-release-age.ts';
 import { getLockedVersions } from './locked-versions.ts';
 import { detectMonorepos } from './monorepo.ts';
 
+// A dep's own managerData (e.g. nested override parents) replaces the package
+// file's when upgrades are flattened, so merge the package file's in here.
+function inheritPackageFileManagerData(
+  packageFiles: PackageFile<NpmManagerData>[],
+): void {
+  for (const { managerData, deps } of packageFiles) {
+    for (const dep of deps) {
+      if (dep.managerData) {
+        dep.managerData = { ...managerData, ...dep.managerData };
+      }
+    }
+  }
+}
+
 export async function postExtract(
   packageFiles: PackageFile<NpmManagerData>[],
   config: ExtractConfig,
@@ -15,4 +29,5 @@ export async function postExtract(
   setNpmrcMinimumReleaseAge(packageFiles);
   await setPnpmMinimumReleaseAge(packageFiles, config);
   await setYarnMinimumReleaseAge(packageFiles, config);
+  inheritPackageFileManagerData(packageFiles);
 }
