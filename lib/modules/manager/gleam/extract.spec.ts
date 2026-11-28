@@ -62,6 +62,81 @@ describe('modules/manager/gleam/extract', () => {
     ]);
   });
 
+  it('should extract table dependencies and skip path and git ones', async () => {
+    const gleamTomlString = codeBlock`
+      name = "test_gleam_toml"
+      version = "1.0.0"
+
+      [dependencies]
+      gleam_stdlib = { version = ">= 0.44.0 and < 2.0.0" }
+      local_dep = { path = "../local_dep" }
+      git_dep = { git = "https://github.com/example/git_dep.git", ref = "main" }
+      odd_dep = {}
+
+      [dev-dependencies]
+      gleeunit = ">= 1.0.0 and < 2.0.0"
+    `;
+    const lockFileContent = codeBlock`
+      packages = [
+        { name = "git_dep", version = "1.0.0", build_tools = ["gleam"], requirements = [], source = "git", repo = "https://github.com/example/git_dep.git", commit = "4ee2a4c0d1b6b3ae4b0ca4e1cd8f68eadbd36a94" },
+        { name = "gleam_stdlib", version = "1.2.0", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "93D27B978967D61211E06BB1F1062BCF36B6E546F67A575EFA928605F467AF65" },
+        { name = "gleeunit", version = "1.11.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "EC31ABA74256AEA531EDF8169931D775BBB384FED0A8A1BDC4DD9354E3E21826" },
+        { name = "local_dep", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], source = "local", path = "../local_dep" },
+      ]
+
+      [requirements]
+      git_dep = { git = "https://github.com/example/git_dep.git", ref = "main" }
+      gleam_stdlib = { version = ">= 0.44.0 and < 2.0.0" }
+      gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
+      local_dep = { path = "../local_dep" }
+    `;
+
+    fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+    fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+    fs.localPathExists.mockResolvedValueOnce(true);
+    const extracted = await gleamManager.extractPackageFile(
+      gleamTomlString,
+      'gleam.toml',
+    );
+    expect(extracted).toEqual({
+      deps: [
+        {
+          currentValue: '>= 0.44.0 and < 2.0.0',
+          datasource: 'hex',
+          depName: 'gleam_stdlib',
+          depType: 'dependencies',
+          lockedVersion: '1.2.0',
+        },
+        {
+          datasource: 'hex',
+          depName: 'local_dep',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          datasource: 'hex',
+          depName: 'git_dep',
+          depType: 'dependencies',
+          skipReason: 'git-dependency',
+        },
+        {
+          datasource: 'hex',
+          depName: 'odd_dep',
+          depType: 'dependencies',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '>= 1.0.0 and < 2.0.0',
+          datasource: 'hex',
+          depName: 'gleeunit',
+          depType: 'devDependencies',
+          lockedVersion: '1.11.0',
+        },
+      ],
+      lockFiles: ['manifest.toml'],
+    });
+  });
+
   it('should return null when no dependencies are found', async () => {
     const gleamTomlString = codeBlock`
       name = "test_gleam_toml"

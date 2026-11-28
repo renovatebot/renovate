@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
@@ -6,6 +7,7 @@ import { HexDatasource } from '../../datasource/hex/index.ts';
 import { api as versioning } from '../../versioning/hex/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { extractLockFileVersions } from './locked-version.ts';
+import type { GleamDependency } from './schema.ts';
 import { GleamToml } from './schema.ts';
 
 const dependencySections = ['dependencies', 'dev-dependencies'] as const;
@@ -24,29 +26,40 @@ function mapSectionKey(sectionKey: string): string {
 function toPackageDep({
   name,
   sectionKey,
-  version,
+  requirement,
 }: {
   name: string;
   sectionKey: string;
-  version: string;
+  requirement: GleamDependency;
 }): PackageDependency {
-  return {
+  const dep: PackageDependency = {
     depName: name,
     depType: mapSectionKey(sectionKey),
     datasource: HexDatasource.id,
-    currentValue: version,
   };
+  if (isString(requirement)) {
+    dep.currentValue = requirement;
+  } else if (isString(requirement.version)) {
+    dep.currentValue = requirement.version;
+  } else if (isString(requirement.path)) {
+    dep.skipReason = 'path-dependency';
+  } else if (isString(requirement.git)) {
+    dep.skipReason = 'git-dependency';
+  } else {
+    dep.skipReason = 'unspecified-version';
+  }
+  return dep;
 }
 
 function toPackageDeps({
   deps,
   sectionKey,
 }: {
-  deps?: Record<string, string>;
+  deps?: Record<string, GleamDependency>;
   sectionKey: string;
 }): PackageDependency[] {
-  return Object.entries(coerceObject(deps)).map(([name, version]) =>
-    toPackageDep({ name, sectionKey, version }),
+  return Object.entries(coerceObject(deps)).map(([name, requirement]) =>
+    toPackageDep({ name, sectionKey, requirement }),
   );
 }
 
@@ -95,6 +108,9 @@ export async function extractPackageFile(
   packageFileContent.lockFiles = [lockFileName];
 
   for (const dep of packageFileContent.deps) {
+    if (dep.skipReason) {
+      continue;
+    }
     const packageName = dep.depName!;
     const versions = coerceArray(versionsByPackage.get(packageName));
     const lockedVersion = versioning.getSatisfyingVersion(

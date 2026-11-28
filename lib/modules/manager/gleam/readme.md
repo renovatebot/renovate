@@ -4,6 +4,18 @@ Renovate can update `gleam.toml` and/or `manifest.toml` files.
 
 The `gleam` manager extracts dependencies for the `hex` datasource, and uses Renovate's implementation of Hex SemVer to evaluate `gleam.toml` updates.
 
+Renovate updates dependencies whose requirement is a version range, either as a string or as a `version` table:
+
+```toml
+[dependencies]
+gleam_stdlib = ">= 0.44.0 and < 2.0.0"
+gleam_json = { version = ">= 3.0.0 and < 4.0.0" }
+local_package = { path = "../local_package" }
+git_package = { git = "https://github.com/example/git_package.git", ref = "main" }
+```
+
+Renovate skips `path` and `git` dependencies, and still updates the rest of the file.
+
 ### How Renovate updates `manifest.toml` files
 
 The `gleam` manager uses the `gleam` program to update `manifest.toml` files.
