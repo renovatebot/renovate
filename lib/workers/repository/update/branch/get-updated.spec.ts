@@ -2089,6 +2089,37 @@ describe('workers/repository/update/branch/get-updated', () => {
       );
     });
 
+    it('ignores a skipped re-extracted dep that shares the upgraded dep name', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: '',
+        depName: 'some-dep',
+        newVersion: '1.2.3',
+        pendingVersions: ['1.3.0'],
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'composer.lock',
+            contents: 'some lock contents',
+          },
+        },
+      ]);
+      composer.extractPackageFile.mockResolvedValueOnce({
+        deps: [
+          { depName: 'some-dep', lockedVersion: '1.2.3' },
+          { depName: 'some-dep', skipReason: 'unspecified-version' },
+        ],
+      });
+
+      const res = await getUpdatedPackageFiles(config);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
     // should never happen, but our types allow this
     it('rejects when upgrade has no depName', async () => {
       config.upgrades.push({
