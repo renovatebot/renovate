@@ -1032,6 +1032,53 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.getBranchStatus('renovate/dependency-1.x'),
       ).resolves.toBe('red');
     });
+
+    it('getBranchStatus() - change found with rejected but not blocking label => red', async () => {
+      const change = partial<GerritChange>({
+        submittable: false,
+        problems: [],
+        labels: {
+          Verified: {
+            rejected: partial<GerritAccountInfo>({ username: 'jenkins' }),
+          },
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      await expect(
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
+      ).resolves.toBe('red');
+    });
+
+    it('getBranchStatus() - change found with label rejected by Renovate itself and not submittable => yellow', async () => {
+      const change = partial<GerritChange>({
+        submittable: false,
+        problems: [],
+        labels: {
+          'renovate-stability': {
+            rejected: partial<GerritAccountInfo>({ username: 'user' }),
+          },
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      await expect(
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
+      ).resolves.toBe('yellow');
+    });
+
+    it('getBranchStatus() - change found with labels neither rejected nor blocking and not submittable => yellow', async () => {
+      const change = partial<GerritChange>({
+        submittable: false,
+        problems: [],
+        labels: {
+          'Code-Review': { approved: partial<GerritAccountInfo>({}) },
+          Verified: {},
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      await expect(
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
+      ).resolves.toBe('yellow');
+    });
   });
 
   describe('getBranchStatusCheck()', () => {
