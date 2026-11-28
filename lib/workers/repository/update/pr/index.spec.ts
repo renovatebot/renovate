@@ -20,7 +20,7 @@ import { embedChangelogs } from '../../changelog/index.ts';
 import * as _statusChecks from '../branch/status-checks.ts';
 import * as _prBody from './body/index.ts';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
-import { ensurePr, updatePrDebugData } from './index.ts';
+import { ensurePr, getPlatformPrOptions, updatePrDebugData } from './index.ts';
 import * as _participants from './participants.ts';
 import * as _prCache from './pr-cache.ts';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
@@ -46,6 +46,36 @@ vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
+  describe('getPlatformPrOptions', () => {
+    const automergeConfig = {
+      automerge: true,
+      automergeType: 'pr',
+      platformAutomerge: true,
+    } as const;
+
+    it('uses platform automerge for an automerge branch', () => {
+      expect(
+        getPlatformPrOptions(automergeConfig).usePlatformAutomerge,
+      ).toBeTrue();
+    });
+
+    it('does not use platform automerge when artifacts failed to update', () => {
+      expect(
+        getPlatformPrOptions({
+          ...automergeConfig,
+          artifactErrors: [{ fileName: 'package-lock.json', stderr: 'err' }],
+        }).usePlatformAutomerge,
+      ).toBeFalse();
+    });
+
+    it('uses platform automerge when the artifact error list is empty', () => {
+      expect(
+        getPlatformPrOptions({ ...automergeConfig, artifactErrors: [] })
+          .usePlatformAutomerge,
+      ).toBeTrue();
+    });
+  });
+
   describe('updatePrDebugData', () => {
     it('records labels for a new pr', () => {
       const res = updatePrDebugData('base', ['dep'], undefined);

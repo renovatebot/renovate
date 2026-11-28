@@ -59,12 +59,20 @@ import {
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 export function getPlatformPrOptions(
-  config: RenovateConfig & PlatformPrOptions,
+  config: RenovateConfig &
+    PlatformPrOptions &
+    Pick<BranchUpgradeConfig, 'artifactErrors'>,
 ): PlatformPrOptions {
   const isPrOrBranchAutomerge =
     config.automergeType === 'pr' || config.automergeType === 'branch';
+  // The platform could merge on a passing pipeline even though the lock files
+  // failed to update. Renovate's own automerge still checks the artifacts status.
+  const hasArtifactErrors = isNonEmptyArray(config.artifactErrors);
   const usePlatformAutomerge = Boolean(
-    config.automerge && isPrOrBranchAutomerge && config.platformAutomerge,
+    config.automerge &&
+    isPrOrBranchAutomerge &&
+    config.platformAutomerge &&
+    !hasArtifactErrors,
   );
 
   return {
