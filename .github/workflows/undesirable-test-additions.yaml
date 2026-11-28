@@ -152,3 +152,12 @@ jobs:
             core.setFailed(
               `Remove or update TODOs that reference issues or discussions resolved by this pull request:\n${result.stdout}`,
             );
+
+      - name: Add files to the sparse checkout
+        run: git sparse-checkout add tools lib/data
+
+      - name: Check monorepo source URLs are extended, not replaced
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          node tools/check-monorepo-urls.ts "$BASE_SHA"
