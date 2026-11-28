@@ -269,15 +269,47 @@ The resulting onboarding config will be:
 }
 ```
 
-Alternatively if you follow Renovate's naming convention for shared presets then it can automatically detect those instead.
-If the repository `{{parentOrg}}/renovate-config` has a `default.json` file then this will be treated as the organization's default preset and included in the Onboarding config.
-Additionally for platforms which support nested Organization/Group hierarchies, Renovate will "hunt" up such hierarchies for a `renovate-config` repository with default config and stop when it finds the first.
+Alternatively, if you follow Renovate's naming convention for shared presets, Renovate detects the preset automatically.
+
+Renovate uses the first of these it finds as the default preset for newly onboarded repositories:
+
+1. A `renovate-config` repository containing `default.json`: the repository's parent group first, then each group above it, up to the top-level group.
+2. A `.{{platform}}` repository in the top-level group, containing `renovate-config.json`: only if step 1 finds nothing.
+
+For example, when onboarding `acme/app` on GitHub, Renovate checks in this order:
+
+1. `acme/renovate-config`
+2. `acme/.github`
+
+On GitLab, which has nested groups, onboarding `acme/team/app` checks in this order:
+
+1. `acme/team/renovate-config`
+2. `acme/renovate-config`
+3. `acme/.gitlab`
+
+The first match wins and nothing is merged.
+If Renovate finds a preset, it becomes the only entry in `extends` in the onboarding config, and any `onboardingConfig` you set is ignored.
+For example, if Renovate finds the `acme/.github` preset, the onboarding config is:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>acme/.github:renovate-config"]
+}
+```
+
+If Renovate finds none, it uses your `onboardingConfig`, or the built-in default.
 
 !!! note
-  Renovate will also check for a `renovate.json` file if it cannot find a `default.json` file in a preset, however this option is deprecated and not recommended.
+  Within a `renovate-config` repository, Renovate falls back to `renovate.json` when `default.json` is missing.
+  This fallback is deprecated, so use `default.json`.
 
-If a default config is not found in a `renovate-config` repository within the Organization, Renovate will also check for the presence of a `renovate-config.json` file within a `.{{platform}}` repository parallel to the current repository.
-For example if the repository being onboarded is `abc/def` on a GitHub platform then Renovate will look for the existence of an `abc/.github` repository containing a `renovate-config.json` file.
+To choose where to put your default preset:
+
+- **One default for the whole organization:** use a `renovate-config` repository in the top-level group, or a `.{{platform}}` repository.
+- **Different defaults per subgroup:** use a `renovate-config` repository in each subgroup. The nearest one wins, so extend the parent preset from it if you want both.
+
+For how to create the preset repository and name its files, see [Group/Organization level presets](./config-presets.md#grouporganization-level-presets).
 
 ### Changing default behavior
 
