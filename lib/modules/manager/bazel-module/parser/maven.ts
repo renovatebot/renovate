@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../../util/array.ts';
 import { MavenDatasource } from '../../../datasource/maven/index.ts';
 import { id as versioning } from '../../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../../types.ts';
@@ -47,33 +48,39 @@ const MavenArtifactTarget = ExtensionTagFragment.extend({
   ],
 );
 
+const ArtifactSpecFragment = StringArrayFragment.transform((array) => {
+  const result: ArtifactSpec[] = [];
+  for (const { value } of array.items) {
+    const [group, artifact, version] = value.split(':');
+    // v8 ignore else -- TODO: add test #40625
+    if (group && artifact && version) {
+      result.push({ group, artifact, version });
+    }
+  }
+
+  return result;
+});
+
 const MavenInstallTarget = ExtensionTagFragment.extend({
   extension: z.literal(mavenExtensionPrefix),
   tag: z.literal(installTag),
   children: z.object({
-    artifacts: StringArrayFragment.transform((artifacts) => {
-      const result: ArtifactSpec[] = [];
-      for (const { value } of artifacts.items) {
-        const [group, artifact, version] = value.split(':');
-        // v8 ignore else -- TODO: add test #40625
-        if (group && artifact && version) {
-          result.push({ group, artifact, version });
-        }
-      }
-
-      return result;
-    }),
+    artifacts: ArtifactSpecFragment.optional(),
+    boms: ArtifactSpecFragment.optional(),
     repositories: StringArrayFragment,
   }),
-}).transform(({ children: { artifacts, repositories } }): PackageDependency[] =>
-  artifacts.map(({ group, artifact, version: currentValue }) => ({
-    datasource: MavenDatasource.id,
-    versioning,
-    depName: `${group}:${artifact}`,
-    currentValue,
-    depType: depTypeByTag(installTag),
-    registryUrls: repositories.items.map((i) => i.value),
-  })),
+}).transform(
+  ({ children: { artifacts, boms, repositories } }): PackageDependency[] =>
+    [...coerceArray(artifacts), ...coerceArray(boms)].map(
+      ({ group, artifact, version: currentValue }) => ({
+        datasource: MavenDatasource.id,
+        versioning,
+        depName: `${group}:${artifact}`,
+        currentValue,
+        depType: depTypeByTag(installTag),
+        registryUrls: repositories.items.map((i) => i.value),
+      }),
+    ),
 );
 
 export const RuleToMavenPackageDep = z.union([

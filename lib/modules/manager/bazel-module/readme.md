@@ -19,7 +19,12 @@ maven.install(
     artifacts = [
         "org.seleniumhq.selenium:selenium-java:4.4.0",
     ],
+    boms = [
+        "org.seleniumhq.selenium:selenium-bom:4.4.0",
+    ],
 )
+
+The `boms` attribute is parsed alongside `artifacts`, and each BOM inherits the enclosing `maven.install()` call's `repositories` as its registry URLs.
 
 maven.artifact(
     artifact = "javapoet",
