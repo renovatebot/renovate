@@ -19,7 +19,7 @@ workflows:
         - 'astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d'
         - 'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5'
         - 'docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1'
-        - 'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
+        - 'jdx/jactionlint@1342457921f4894b882889c5beaa42ff39d417e4'
         - 'jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78'
         - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
@@ -194,9 +194,9 @@ dependencies:
         commit: 'sha1-5bee595fdb9765d4a0bd35724b6302fa15569158'
         owner_id: 6157540
         repo_id: 306380934
-    'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e':
-        ref: 'v2.6.0'
-        commit: 'sha1-72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
+    'jdx/jactionlint@1342457921f4894b882889c5beaa42ff39d417e4':
+        ref: 'v2.7.0'
+        commit: 'sha1-1342457921f4894b882889c5beaa42ff39d417e4'
         owner_id: 216188
         repo_id: 1404951382
         uses:
