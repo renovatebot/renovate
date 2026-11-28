@@ -210,6 +210,37 @@ const options: Readonly<RenovateOptions>[] = [
     supportsTemplating: true,
   },
   {
+    name: 'urlReplacements',
+    description:
+      "Rules which rewrite the URL prefix of Renovate's own HTTP requests to Maven registries, for example to use a Maven Central mirror.",
+    type: 'array',
+    subType: 'object',
+    default: [],
+    globalOnly: true,
+    cli: false,
+    experimental: true,
+    advancedUse: true,
+    supportedDatasources: ['maven'],
+  },
+  {
+    name: 'matchUrlPrefix',
+    description: 'The URL prefix to match against the request URL.',
+    type: 'string',
+    parents: ['urlReplacements'],
+    globalOnly: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replaceUrlPrefix',
+    description: 'The URL prefix which replaces the matched `matchUrlPrefix`.',
+    type: 'string',
+    parents: ['urlReplacements'],
+    globalOnly: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'allowedCommands',
     description:
       'A list of regular expressions that decide which commands are allowed in post-upgrade tasks.',

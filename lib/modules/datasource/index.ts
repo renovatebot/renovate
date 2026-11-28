@@ -24,6 +24,7 @@ import {
   isNotFound,
   isUnauthorized,
 } from '../../util/http/status.ts';
+import { getRegistryUrlReplacements } from '../../util/http/url-replacements.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
 import { DatasourceCacheStats } from '../../util/stats.ts';
 import { safeStringify } from '../../util/stringify.ts';
@@ -108,13 +109,35 @@ function logError(datasource: string, packageName: string, err: any): void {
   }
 }
 
+/**
+ * Returns the releases cache key of a registry, which starts with the mirror URLs when `urlReplacements` rewrite requests to the registry.
+ */
+function getRegistryReleasesCacheKey(
+  datasource: DatasourceApi,
+  registryUrl: string,
+  packageName: string,
+): string {
+  const mirrorUrls = getRegistryUrlReplacements(
+    registryUrl,
+    getDatasourceHostType(datasource.id),
+  );
+  if (mirrorUrls.length) {
+    return buildCacheKey('mirror', ...mirrorUrls, registryUrl, packageName);
+  }
+  return buildCacheKey(registryUrl, packageName);
+}
+
 async function getRegistryReleases(
   datasource: DatasourceApi,
   config: GetPkgReleasesConfig,
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
   const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
-  const cacheKey = buildCacheKey(registryUrl, config.packageName);
+  const cacheKey = getRegistryReleasesCacheKey(
+    datasource,
+    registryUrl,
+    config.packageName,
+  );
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
   const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config

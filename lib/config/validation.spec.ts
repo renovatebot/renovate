@@ -4449,6 +4449,414 @@ describe('config/validation', () => {
       });
     });
 
+    describe('urlReplacements', () => {
+      it('allows valid rules', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/maven2/',
+              replaceUrlPrefix: 'http://mirror.example.com/maven-public/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
+      it.each`
+        matchUrlPrefix                    | replaceUrlPrefix
+        ${'repo.example.com/maven2/'}     | ${'file:///tmp/maven/'}
+        ${'https://repo.example.com'}     | ${'https://mirror.example.com'}
+        ${'https://repo.example.com/foo'} | ${'https://mirror.example.com/foo'}
+      `(
+        'errors for prefixes $matchUrlPrefix and $replaceUrlPrefix',
+        async ({ matchUrlPrefix, replaceUrlPrefix }) => {
+          const config: AllConfig = {
+            urlReplacements: [{ matchUrlPrefix, replaceUrlPrefix }],
+          };
+
+          const { errors, warnings } = await configValidation.validateConfig(
+            'global',
+            config,
+          );
+
+          expect(warnings).toBeEmptyArray();
+          expect(errors).toEqual([
+            {
+              message:
+                'Configuration option `urlReplacements[0].matchUrlPrefix` must be an absolute http or https URL ending with `/`.',
+              topic: 'Configuration Error',
+            },
+            {
+              message:
+                'Configuration option `urlReplacements[0].replaceUrlPrefix` must be an absolute http or https URL ending with `/`.',
+              topic: 'Configuration Error',
+            },
+          ]);
+        },
+      );
+
+      it.each`
+        matchUrlPrefix                        | matchParts                  | replaceUrlPrefix                     | replaceParts
+        ${'https://repo.example.com/?a/'}     | ${'a query'}                | ${'https://u@mirror.example.com/'}   | ${'a username'}
+        ${'https://repo.example.com/#a/'}     | ${'a fragment'}             | ${'https://u:p@mirror.example.com/'} | ${'a username and a password'}
+        ${'https://repo.example.com/?a=1#b/'} | ${'a query and a fragment'} | ${'https://:p@mirror.example.com/'}  | ${'a password'}
+      `(
+        'errors for $matchParts in $matchUrlPrefix and $replaceParts in $replaceUrlPrefix',
+        async ({
+          matchUrlPrefix,
+          matchParts,
+          replaceUrlPrefix,
+          replaceParts,
+        }) => {
+          const config: AllConfig = {
+            urlReplacements: [{ matchUrlPrefix, replaceUrlPrefix }],
+          };
+
+          const { errors, warnings } = await configValidation.validateConfig(
+            'global',
+            config,
+          );
+
+          expect(warnings).toBeEmptyArray();
+          expect(errors).toEqual([
+            {
+              message: `Configuration option \`urlReplacements[0].matchUrlPrefix\` must not contain ${matchParts}.`,
+              topic: 'Configuration Error',
+            },
+            {
+              message: `Configuration option \`urlReplacements[0].replaceUrlPrefix\` must not contain ${replaceParts}.`,
+              topic: 'Configuration Error',
+            },
+          ]);
+        },
+      );
+
+      it('allows prefixes with secrets and variables', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: '{{ variables.ORIGIN }}',
+              replaceUrlPrefix: '{{ secrets.MIRROR }}',
+            },
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: '{{ variables.MIRROR }}',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('errors for prefixes which are not strings', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            { matchUrlPrefix: 1, replaceUrlPrefix: ['https://a.b/'] },
+          ] as never,
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0].matchUrlPrefix` should be a string.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[0].replaceUrlPrefix` should be a string.',
+            topic: 'Configuration Error',
+          },
+        ]);
+        expect(errors).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0].matchUrlPrefix` must be a string.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[0].replaceUrlPrefix` must be a string.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it.each`
+        matchUrlPrefix                      | normalized
+        ${'https://Repo.example.com/'}      | ${'https://repo.example.com/'}
+        ${'https://repo.example.com:443/'}  | ${'https://repo.example.com/'}
+        ${'https://repo.example.com/a/../'} | ${'https://repo.example.com/'}
+      `(
+        'errors with the normalized prefix for $matchUrlPrefix',
+        async ({ matchUrlPrefix, normalized }) => {
+          const config: AllConfig = {
+            urlReplacements: [
+              {
+                matchUrlPrefix,
+                replaceUrlPrefix: 'https://mirror.example.com/',
+              },
+            ],
+          };
+
+          const { errors, warnings } = await configValidation.validateConfig(
+            'global',
+            config,
+          );
+
+          expect(warnings).toBeEmptyArray();
+          expect(errors).toEqual([
+            {
+              message: `Configuration option \`urlReplacements[0].matchUrlPrefix\` must be normalized, use \`${normalized}\` instead.`,
+              topic: 'Configuration Error',
+            },
+          ]);
+        },
+      );
+
+      it.each`
+        option
+        ${'matchUrlPrefix'}
+        ${'replaceUrlPrefix'}
+      `('errors for $option outside of urlReplacements', async ({ option }) => {
+        const config: AllConfig = {
+          [option]: 'https://a.b/',
+          packageRules: [
+            {
+              matchPackageNames: ['foo'],
+              [option]: 'https://a.b/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message: `"${option}" can't be used at the top level of a config, as it can only be used in \`urlReplacements\`.`,
+            topic: 'Configuration Error',
+          },
+          {
+            message: `"${option}" can't be used in "packageRules[0]", as it can only be used in \`urlReplacements\`.`,
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('errors for a rule whose replaceUrlPrefix another rule rewrites', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: 'https://a.example.com/',
+            },
+            {
+              matchUrlPrefix: 'https://a.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/',
+            },
+            {
+              matchUrlPrefix: 'https://mirror.example.com',
+              replaceUrlPrefix: 'https://other.example.com/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0].replaceUrlPrefix` overlaps the `matchUrlPrefix` of another rule, but a rewritten URL cannot be rewritten again.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[2].matchUrlPrefix` must be an absolute http or https URL ending with `/`.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('warns about rules whose matchUrlPrefix starts with that of an earlier rule', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/a/',
+            },
+            {
+              matchUrlPrefix: 'https://repo.example.com/maven2/',
+              replaceUrlPrefix: 'https://mirror.example.com/b/',
+            },
+            {
+              matchUrlPrefix: 'https://other.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/c/',
+            },
+            {
+              matchUrlPrefix: 'https://other.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/d/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(errors).toBeEmptyArray();
+        expect(warnings).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[1].matchUrlPrefix` starts with the `matchUrlPrefix` of an earlier rule, so this rule never applies.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[3].matchUrlPrefix` starts with the `matchUrlPrefix` of an earlier rule, so this rule never applies.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('does not warn about an earlier rule with a longer matchUrlPrefix', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/maven2/',
+              replaceUrlPrefix: 'https://mirror.example.com/b/',
+            },
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/a/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(errors).toBeEmptyArray();
+        expect(warnings).toBeEmptyArray();
+      });
+
+      it('errors for null prefixes', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: null,
+              replaceUrlPrefix: null,
+            },
+          ] as never,
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0]` requires `matchUrlPrefix`.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[0]` requires `replaceUrlPrefix`.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('errors for missing prefixes and invalid entries', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            { matchUrlPrefix: 'https://repo.example.com/' },
+            { replaceUrlPrefix: 'https://mirror.example.com/' },
+            'https://repo.example.com/',
+          ] as never,
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              'Configuration option `urlReplacements[0]` requires `replaceUrlPrefix`.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[1]` requires `matchUrlPrefix`.',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Configuration option `urlReplacements[2]` should be a JSON object.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('is not allowed in repository config', async () => {
+        const config: AllConfig = {
+          urlReplacements: [
+            {
+              matchUrlPrefix: 'https://repo.example.com/',
+              replaceUrlPrefix: 'https://mirror.example.com/',
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+
+        expect(errors).toBeEmptyArray();
+        expect(warnings).toEqual([
+          {
+            message:
+              'The "urlReplacements" option is a global option reserved only for Renovate\'s global configuration and cannot be configured within a repository\'s config file.',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+    });
+
     describe('repositories', () => {
       it('is validated', async () => {
         const config: AllConfig = {
@@ -4471,6 +4879,36 @@ describe('config/validation', () => {
           {
             message:
               'Configuration option `repositories[0].dependencyDashboardCategory` should be a string',
+          },
+        ]);
+      });
+
+      it('rejects urlReplacements in a repository object entry', async () => {
+        const config: AllConfig = {
+          repositories: [
+            {
+              repository: 'valid/name',
+              urlReplacements: [
+                {
+                  matchUrlPrefix: 'https://repo.example.com/',
+                  replaceUrlPrefix: 'https://mirror.example.com/',
+                },
+              ],
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            message:
+              "repositories[0]: `urlReplacements` can't be set in a repository object entry, only in the global config",
+            topic: 'Configuration Error',
           },
         ]);
       });

@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import type { Http } from '../../../util/http/index.ts';
+import { getRegistryUrlReplacements } from '../../../util/http/url-replacements.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
@@ -19,6 +20,7 @@ import type {
 import { MAVEN_CENTRAL_URLS, MAVEN_REPO } from './common.ts';
 import type { MavenDependency, MetadataResults } from './types.ts';
 import {
+  MIRROR_NOT_FOUND_TTL_MINUTES,
   createUrlForDependencyPom,
   downloadMaven,
   downloadMavenXml,
@@ -187,13 +189,19 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = buildCacheKey(
-      'postprocessRelease',
-      registryUrl,
-      packageName,
-      versionOrig,
-      version,
-    );
+    // results of a mirror are cached apart from those of the original registry
+    const mirrorUrls = registryUrl
+      ? getRegistryUrlReplacements(registryUrl, this.http.hostType)
+      : [];
+    const releaseKey = [registryUrl, packageName, versionOrig, version];
+    const cacheKey = mirrorUrls.length
+      ? buildCacheKey(
+          'postprocessRelease',
+          'mirror',
+          ...mirrorUrls,
+          ...releaseKey,
+        )
+      : buildCacheKey('postprocessRelease', ...releaseKey);
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven:postprocess-reject',
       cacheKey,
@@ -222,17 +230,17 @@ export class MavenDatasource extends Datasource {
     const { val, err } = fetchResult.unwrap();
 
     if (err) {
-      const result: PostprocessReleaseResult =
-        err.type === 'not-found' ? 'reject' : release;
-      if (result === 'reject') {
-        await packageCache.set(
-          'datasource-maven:postprocess-reject',
-          cacheKey,
-          result,
-          24 * 60,
-        );
+      if (err.type !== 'not-found') {
+        return release;
       }
-      return result;
+      const ttlMinutes = err.isMirror ? MIRROR_NOT_FOUND_TTL_MINUTES : 24 * 60;
+      await packageCache.set(
+        'datasource-maven:postprocess-reject',
+        cacheKey,
+        'reject',
+        ttlMinutes,
+      );
+      return 'reject';
     }
 
     if (val.lastModified) {

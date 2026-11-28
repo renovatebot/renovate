@@ -12,6 +12,8 @@ import type { EmptyResultError } from './errors.ts';
 
 export type GotContextOptions = {
   authType?: string;
+  /** Whether `urlReplacements` rewrote the request URL. */
+  urlReplaced?: boolean;
 } & Record<string, unknown>;
 
 // TODO: Move options to context

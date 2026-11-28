@@ -150,6 +150,24 @@ export function isHttpUrl(url: unknown): boolean {
   return protocol === 'https:' || protocol === 'http:';
 }
 
+/**
+ * Returns whether `value` is a normalized absolute http or https URL ending with `/`, without credentials, search or hash.
+ */
+export function isHttpUrlPrefix(value: unknown): value is string {
+  if (!isString(value) || !value.endsWith('/')) {
+    return false;
+  }
+  const url = parseUrl(value);
+  return (
+    isHttpUrl(url) &&
+    url!.href === value &&
+    url!.search === '' &&
+    url!.hash === '' &&
+    url!.username === '' &&
+    url!.password === ''
+  );
+}
+
 export function parseUrl(url: URL | string | undefined | null): URL | null {
   if (!url) {
     return null;
