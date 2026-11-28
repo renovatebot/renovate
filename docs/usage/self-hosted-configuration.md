@@ -303,6 +303,14 @@ For example:
 }
 ```
 
+## `azureLegacyPrAuthorIds`
+
+Azure DevOps only. Set this to the Azure DevOps identity IDs of former Renovate accounts during an account migration.
+If the current account has no active PR for an existing branch and target, Renovate can reuse an active PR for that exact branch pair from an explicitly listed account.
+Use dedicated automation identities where possible: an author match does not establish that Renovate originally created the PR.
+Remove the setting after the migration is complete.
+This setting has no effect when `ignorePrAuthor` is enabled.
+
 ## `baseDir`
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.

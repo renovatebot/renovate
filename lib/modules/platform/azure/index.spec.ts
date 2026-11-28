@@ -789,55 +789,155 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('getBranchPr(branchName, targetBranch)', () => {
-    it('should return null if no PR exists', async () => {
-      await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockResolvedValue(
-        partial<IGitApi>({
-          getPullRequests: vi.fn().mockResolvedValueOnce([]),
-        }),
-      );
-      const pr = await azure.getBranchPr('somebranch');
-      expect(pr).toBeNull();
-    });
+    it.each([
+      ['legacy-author', 'refs/heads/main', PullRequestStatus.Active, true],
+      ['other-author', 'refs/heads/main', PullRequestStatus.Active, false],
+      ['legacy-author', 'refs/heads/another', PullRequestStatus.Active, false],
+      ['legacy-author', 'refs/heads/main', PullRequestStatus.Abandoned, false],
+    ])(
+      'reuses only allowlisted active PRs for the exact branch pair (%s, %s, %s)',
+      async (author, targetRefName, status, expectedMatch) => {
+        GlobalConfig.set({ azureLegacyPrAuthorIds: ['legacy-author'] });
+        azureApi.getAuthenticatedUserId.mockResolvedValue('current-author');
+        await azure.initPlatform({
+          endpoint: 'https://azure.test',
+          token: 'token',
+        });
+        await initRepo();
 
-    it('should return the pr', async () => {
-      await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockResolvedValue(
-        partial<IGitApi>({
-          getPullRequests: vi
-            .fn()
-            .mockResolvedValueOnce([
-              {
-                pullRequestId: 1,
-                sourceRefName: 'refs/heads/branch-a',
-                targetRefName: 'refs/heads/branch-b',
-                title: 'branch a pr',
-                status: 1,
-              },
-            ])
-            .mockResolvedValueOnce([]),
-          getPullRequestById: vi.fn().mockResolvedValue({}),
-          getPullRequestLabels: vi.fn().mockResolvedValue([]),
-        }),
-      );
-      const pr = await azure.getBranchPr('branch-a', 'branch-b');
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: undefined,
-        labels: [],
-        number: 1,
-        pullRequestId: 1,
-        sourceBranch: 'branch-a',
-        sourceRefName: 'refs/heads/branch-a',
-        state: 'open',
-        status: 1,
-        targetBranch: 'branch-b',
-        targetRefName: 'refs/heads/branch-b',
-        title: 'branch a pr',
-      });
-    });
+        const getPullRequests = vi
+          .fn()
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([
+            {
+              pullRequestId: 123,
+              sourceRefName: 'refs/heads/renovate/update',
+              targetRefName,
+              status,
+              createdBy: { id: author },
+            },
+          ]);
+        const getPullRequestById = vi
+          .fn()
+          .mockResolvedValue({ description: 'Complete description' });
+        const getPullRequestLabels = vi
+          .fn()
+          .mockResolvedValue([{ active: true, name: 'dependency' }]);
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({
+            getPullRequests,
+            getPullRequestById,
+            getPullRequestLabels,
+          }),
+        );
+
+        const pr = await azure.getBranchPr('renovate/update', 'main');
+
+        expect(getPullRequests).toHaveBeenCalledTimes(2);
+        expect(getPullRequests.mock.calls[0][1]).toMatchObject({
+          creatorId: 'current-author',
+          status: PullRequestStatus.All,
+        });
+        expect(getPullRequests.mock.calls[1].slice(1)).toEqual([
+          {
+            sourceRefName: 'refs/heads/renovate/update',
+            targetRefName: 'refs/heads/main',
+            sourceRepositoryId: getPullRequests.mock.calls[0][0],
+            status: PullRequestStatus.Active,
+          },
+          expect.any(String),
+          0,
+          0,
+          1,
+        ]);
+        const hydratedPr = expect.objectContaining({
+          number: 123,
+          labels: ['dependency'],
+        });
+        const hydrationCall = [123, expect.any(String)];
+        expect(pr).toEqual(expectedMatch ? hydratedPr : null);
+        expect(getPullRequestById.mock.calls).toEqual(
+          expectedMatch ? [hydrationCall] : [],
+        );
+      },
+    );
+
+    it.each([
+      { legacyAuthors: [], targetBranch: 'main', branchExists: true },
+      {
+        legacyAuthors: ['legacy-author'],
+        targetBranch: undefined,
+        branchExists: true,
+      },
+      {
+        legacyAuthors: ['legacy-author'],
+        targetBranch: 'main',
+        branchExists: false,
+      },
+    ])(
+      'skips the legacy lookup for $legacyAuthors, $targetBranch, $branchExists',
+      async ({ legacyAuthors, targetBranch, branchExists }) => {
+        GlobalConfig.set({ azureLegacyPrAuthorIds: legacyAuthors });
+        azureApi.getAuthenticatedUserId.mockResolvedValue('current-author');
+        await azure.initPlatform({
+          endpoint: 'https://azure.test',
+          token: 'token',
+        });
+        await initRepo({ repository: 'some/repo' });
+        git.branchExists.mockReturnValue(branchExists);
+        const getPullRequests = vi.fn().mockResolvedValue([]);
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({ getPullRequests }),
+        );
+        const pr = await azure.getBranchPr('somebranch', targetBranch);
+        expect(pr).toBeNull();
+        expect(getPullRequests).toHaveBeenCalledOnce();
+      },
+    );
+
+    it.each(['branch-b', 'other-base'])(
+      'preserves existing PR lookup for target %s when legacy lookup is disabled',
+      async (targetBranch) => {
+        await initRepo({ repository: 'some/repo' });
+        const getPullRequests = vi
+          .fn()
+          .mockResolvedValueOnce([
+            {
+              pullRequestId: 1,
+              sourceRefName: 'refs/heads/branch-a',
+              targetRefName: 'refs/heads/branch-b',
+              title: 'branch a pr',
+              status: 1,
+            },
+          ])
+          .mockResolvedValueOnce([]);
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({
+            getPullRequests,
+            getPullRequestById: vi.fn().mockResolvedValue({}),
+            getPullRequestLabels: vi.fn().mockResolvedValue([]),
+          }),
+        );
+        const pr = await azure.getBranchPr('branch-a', targetBranch);
+        expect(getPullRequests).toHaveBeenCalledTimes(2);
+        expect(pr).toEqual({
+          bodyStruct: {
+            hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          },
+          createdAt: undefined,
+          labels: [],
+          number: 1,
+          pullRequestId: 1,
+          sourceBranch: 'branch-a',
+          sourceRefName: 'refs/heads/branch-a',
+          state: 'open',
+          status: 1,
+          targetBranch: 'branch-b',
+          targetRefName: 'refs/heads/branch-b',
+          title: 'branch a pr',
+        });
+      },
+    );
   });
 
   describe('getBranchStatusCheck(branchName, context)', () => {

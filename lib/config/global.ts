@@ -22,6 +22,7 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'azureLegacyPrAuthorIds',
     'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
