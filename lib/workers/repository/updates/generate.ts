@@ -6,6 +6,7 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { SharedConstraints } from '../../../modules/manager/types.ts';
+import * as allVersioning from '../../../modules/versioning/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -21,6 +22,7 @@ import {
   updateSharedConstraints,
 } from '../extract/shared-constraints.ts';
 import { CommitMessage } from '../model/commit-message.ts';
+import { classifyRelease } from '../process/lookup/update-type.ts';
 
 function prettifyVersion(version: string): string {
   if (regEx(/^\d/).test(version)) {
@@ -226,8 +228,232 @@ function appendCommitBodyTable(config: BranchConfig): void {
   }
 }
 
+function updateRisk(
+  updateType: BranchUpgradeConfig['updateType'],
+): number | undefined {
+  switch (updateType) {
+    case 'pin':
+    case 'pinDigest':
+    case 'digest':
+      return 0;
+    case 'patch':
+      return 1;
+    case 'minor':
+      return 2;
+    case 'major':
+      return 3;
+    default:
+      return undefined;
+  }
+}
+
 // Sorted by priority, from low to high
 const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
+
+function combineSemanticCommits(config: BranchConfig): void {
+  // Enable `semanticCommits` if one of the branches has it enabled
+  if (
+    config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
+  ) {
+    config.semanticCommits = 'enabled';
+    // Calculate the highest priority `semanticCommitType`
+    let highestIndex = -1;
+    for (const upgrade of config.upgrades) {
+      if (upgrade.semanticCommits === 'enabled' && upgrade.semanticCommitType) {
+        const priorityIndex = semanticCommitTypeByPriority.indexOf(
+          upgrade.semanticCommitType,
+        );
+
+        if (priorityIndex > highestIndex) {
+          highestIndex = priorityIndex;
+        }
+      }
+    }
+
+    if (highestIndex > -1) {
+      config.semanticCommitType = semanticCommitTypeByPriority[highestIndex];
+    }
+  }
+}
+
+export function refreshBranchConfig(
+  config: BranchConfig,
+  previousTargets: ReadonlyMap<
+    BranchUpgradeConfig,
+    Pick<
+      BranchUpgradeConfig,
+      'newValue' | 'newVersion' | 'updateType' | 'isBreaking' | 'automerge'
+    >
+  >,
+): void {
+  const upgradesRemoved = previousTargets.size !== config.upgrades.length;
+  let changed = upgradesRemoved;
+  for (const upgrade of config.upgrades) {
+    const previous = previousTargets.get(upgrade);
+    if (
+      previous?.newValue === upgrade.newValue &&
+      previous?.newVersion === upgrade.newVersion
+    ) {
+      continue;
+    }
+    changed = true;
+    const versioningApi = allVersioning.get(upgrade.versioning);
+    const { currentVersion, newVersion } = upgrade;
+    let unclassified = true;
+    if (newVersion && versioningApi.isVersion(newVersion)) {
+      upgrade.newMajor = versioningApi.getMajor(newVersion)!;
+      upgrade.newMinor = versioningApi.getMinor(newVersion)!;
+      upgrade.newPatch = versioningApi.getPatch(newVersion)!;
+      if (currentVersion && versioningApi.isVersion(currentVersion)) {
+        unclassified = false;
+        if (versioningApi.equals(currentVersion, newVersion)) {
+          upgrade.updateType = 'pin';
+        } else if (versioningApi.isGreaterThan(currentVersion, newVersion)) {
+          upgrade.updateType = 'rollback';
+        } else {
+          upgrade.updateType = classifyRelease(
+            versioningApi,
+            currentVersion,
+            newVersion,
+          );
+        }
+        upgrade.isBreaking = versioningApi.isBreaking
+          ? versioningApi.isBreaking(currentVersion, newVersion)
+          : upgrade.updateType === 'major';
+      }
+    }
+    const previousRisk = updateRisk(previous?.updateType);
+    const reconciledRisk = updateRisk(upgrade.updateType);
+    const becameBreaking = upgrade.isBreaking && !previous?.isBreaking;
+    // without valid current and new versions, updateType is still lookup's and does not describe the new target
+    if (
+      unclassified ||
+      previousRisk === undefined ||
+      reconciledRisk === undefined ||
+      reconciledRisk > previousRisk ||
+      becameBreaking
+    ) {
+      upgrade.automerge = false;
+    }
+    if (upgrade.isLockfileUpdate) {
+      upgrade.displayTo = upgrade.newVersion;
+    } else if (
+      !upgrade.isDigest &&
+      !upgrade.isPinDigest &&
+      !upgrade.isLockFileMaintenance
+    ) {
+      upgrade.displayTo = upgrade.newValue;
+    }
+    upgrade.isMajor = upgrade.updateType === 'major';
+    upgrade.isMinor = upgrade.updateType === 'minor';
+    upgrade.isPatch = upgrade.updateType === 'patch';
+    upgrade.isPin = upgrade.updateType === 'pin';
+    upgrade.prettyNewVersion = upgrade.newVersion
+      ? prettifyVersion(upgrade.newVersion)
+      : undefined;
+    upgrade.prettyNewMajor =
+      upgrade.newMajor === undefined ? undefined : `v${upgrade.newMajor}`;
+  }
+  // Includes upgrades removed as no-ops, whose artifacts may still carry an alignment.
+  const automergeDisabled = [...previousTargets].some(
+    ([upgrade, previous]) => previous.automerge && !upgrade.automerge,
+  );
+  if (changed || automergeDisabled) {
+    config.automerge =
+      Boolean(config.automerge) &&
+      !automergeDisabled &&
+      config.upgrades.every((upgrade) => upgrade.automerge);
+  }
+  if (!changed) {
+    return;
+  }
+
+  if (upgradesRemoved) {
+    // generateBranchConfig combines these from all upgrades, including the removed ones
+    config.labels = uniq(
+      config.upgrades.flatMap((upgrade) => coerceArray(upgrade.labels)),
+    );
+    config.addLabels = uniq(
+      config.upgrades.flatMap((upgrade) => coerceArray(upgrade.addLabels)),
+    );
+    config.additionalReviewers = uniq(
+      config.upgrades
+        .flatMap((upgrade) => coerceArray(upgrade.additionalReviewers))
+        .filter(isNonEmptyString),
+    );
+    config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
+    combineSemanticCommits(config);
+    let releaseTimestamp: Timestamp | undefined;
+    for (const upgrade of config.upgrades) {
+      if (!upgrade.releaseTimestamp) {
+        continue;
+      }
+      if (
+        !releaseTimestamp ||
+        DateTime.fromISO(upgrade.releaseTimestamp) >
+          DateTime.fromISO(releaseTimestamp)
+      ) {
+        releaseTimestamp = upgrade.releaseTimestamp;
+      }
+    }
+    config.releaseTimestamp = releaseTimestamp;
+  }
+
+  const [firstUpgrade] = config.upgrades;
+  Object.assign(config, {
+    depName: firstUpgrade.depName,
+    packageName: firstUpgrade.packageName,
+    currentValue: firstUpgrade.currentValue,
+    currentVersion: firstUpgrade.currentVersion,
+    newValue: firstUpgrade.newValue,
+    newVersion: firstUpgrade.newVersion,
+    newMajor: firstUpgrade.newMajor,
+    newMinor: firstUpgrade.newMinor,
+    newPatch: firstUpgrade.newPatch,
+    prettyNewVersion: firstUpgrade.prettyNewVersion,
+    prettyNewMajor: firstUpgrade.prettyNewMajor,
+    displayFrom: firstUpgrade.displayFrom,
+    displayTo: firstUpgrade.displayTo,
+    updateType: config.upgrades.some(
+      (upgrade) => upgrade.updateType === 'major',
+    )
+      ? 'major'
+      : firstUpgrade.updateType,
+    isBreaking: config.upgrades.some((upgrade) => upgrade.isBreaking),
+    commitMessage: firstUpgrade.commitMessage,
+    commitMessagePrefix: firstUpgrade.commitMessagePrefix,
+    commitMessageAction: firstUpgrade.commitMessageAction,
+    commitMessageTopic: firstUpgrade.commitMessageTopic,
+    commitMessageExtra: firstUpgrade.commitMessageExtra,
+    prTitle: firstUpgrade.prTitle,
+  } satisfies Partial<BranchConfig>);
+  config.isMajor = config.updateType === 'major';
+  config.isMinor = config.updateType === 'minor';
+  config.isPatch = config.updateType === 'patch';
+  config.isPin = config.updateType === 'pin';
+
+  const versions = new Set(
+    config.upgrades.map((upgrade) => upgrade.newVersion),
+  );
+  const values = new Set(config.upgrades.map((upgrade) => upgrade.newValue));
+  const extras = new Set(
+    config.upgrades.map((upgrade) =>
+      template.compile(upgrade.commitMessageExtra ?? '', upgrade),
+    ),
+  );
+  if (
+    versions.size > 1 &&
+    values.size > 1 &&
+    extras.size > 1 &&
+    !isTypesGroup(config.upgrades)
+  ) {
+    delete config.commitMessageExtra;
+  }
+
+  const commitMessage = compileCommitMessage(config);
+  compilePrTitle(config, commitMessage);
+  appendCommitBodyTable(config);
+}
 
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
@@ -439,29 +665,7 @@ export function generateBranchConfig(
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
 
-  // Enable `semanticCommits` if one of the branches has it enabled
-  if (
-    config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
-  ) {
-    config.semanticCommits = 'enabled';
-    // Calculate the highest priority `semanticCommitType`
-    let highestIndex = -1;
-    for (const upgrade of config.upgrades) {
-      if (upgrade.semanticCommits === 'enabled' && upgrade.semanticCommitType) {
-        const priorityIndex = semanticCommitTypeByPriority.indexOf(
-          upgrade.semanticCommitType,
-        );
-
-        if (priorityIndex > highestIndex) {
-          highestIndex = priorityIndex;
-        }
-      }
-    }
-
-    if (highestIndex > -1) {
-      config.semanticCommitType = semanticCommitTypeByPriority[highestIndex];
-    }
-  }
+  combineSemanticCommits(config);
 
   // Use templates to generate strings
   const commitMessage = compileCommitMessage(config);
