@@ -1,8 +1,55 @@
+import { type DirectoryResult, dir } from 'tmp-promise';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { Unity3dPackagesDatasource } from './index.ts';
 
 describe('modules/datasource/unity3d-packages/index', () => {
+  describe('public cache boundary', () => {
+    let cacheDir: DirectoryResult;
+
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cachePrivatePackages: false });
+      memCache.init();
+      await packageCache.init({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      vi.restoreAllMocks();
+      await packageCache.cleanup({});
+      memCache.reset();
+      GlobalConfig.reset();
+      await cacheDir.cleanup();
+    });
+
+    it.each`
+      registryUrl                      | cachePrivatePackages | writes
+      ${'https://packages.unity.com'}  | ${false}             | ${1}
+      ${'https://custom.registry.com'} | ${false}             | ${0}
+      ${'https://custom.registry.com'} | ${true}              | ${1}
+    `(
+      'writes $registryUrl to the package cache $writes time(s) with cachePrivatePackages=$cachePrivatePackages',
+      async ({ registryUrl, cachePrivatePackages, writes }) => {
+        GlobalConfig.set({ cachePrivatePackages });
+        httpMock
+          .scope(registryUrl)
+          .get('/com.unity.xr.openxr')
+          .reply(200, { versions: {}, time: {} });
+        const setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+
+        await new Unity3dPackagesDatasource().getReleases({
+          packageName: 'com.unity.xr.openxr',
+          registryUrl,
+        });
+
+        expect(setCache).toHaveBeenCalledTimes(writes);
+      },
+    );
+  });
+
   it(`package with no versions`, async () => {
     const data = `
       {

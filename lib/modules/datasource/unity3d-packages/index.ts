@@ -66,6 +66,8 @@ export class Unity3dPackagesDatasource extends Datasource {
         namespace: `datasource-${Unity3dPackagesDatasource.id}`,
         key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
+        public:
+          config.registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl,
       },
       () => this._getReleases(config),
     );
