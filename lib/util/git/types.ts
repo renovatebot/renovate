@@ -104,6 +104,8 @@ export interface CommitFilesConfig {
   /** Structured git trailers (`Key: value` lines) to add in the final block of the commit message */
   trailers?: string[];
   force?: boolean;
+  /** Skip the commit when its changes equal the changes of the existing branch since its merge base */
+  keepBranchIfSameChanges?: boolean;
   platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */
   prTitle?: string;

@@ -51,6 +51,7 @@ describe('workers/repository/update/branch/commit', () => {
               },
             ],
             force: false,
+            keepBranchIfSameChanges: false,
             message: 'some commit message',
             platformCommit: 'auto',
           },
@@ -74,6 +75,21 @@ describe('workers/repository/update/branch/commit', () => {
         expect.objectContaining({
           trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
         }),
+      );
+    });
+
+    it('passes keepBranchIfSameChanges', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.keepBranchIfSameChanges = true;
+
+      await commitFilesToBranch(config);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ keepBranchIfSameChanges: true }),
       );
     });
 

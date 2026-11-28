@@ -1392,6 +1392,49 @@ export async function hasDiff(
   }
 }
 
+/**
+ * Returns the sorted raw `git diff-tree` lines between two refs, without rename detection.
+ */
+async function getTreeChanges(fromRef: string, toRef: string): Promise<string> {
+  const output = await git.raw([
+    'diff-tree',
+    '-r',
+    '--no-renames',
+    '--no-commit-id',
+    fromRef,
+    toRef,
+  ]);
+  return output.split(newlineRegex).filter(isTruthy).sort().join('\n');
+}
+
+/**
+ * Returns whether the changes of `HEAD` on top of its parent equal the changes of `origin/<branchName>` since its merge base with `origin/<baseBranch>`.
+ * Returns `false` on any error.
+ */
+async function hasSameChangesAsBranch(
+  baseBranch: string,
+  branchName: string,
+): Promise<boolean> {
+  try {
+    const mergeBase = (
+      await git.raw([
+        'merge-base',
+        `origin/${baseBranch}`,
+        `origin/${branchName}`,
+      ])
+    ).trim();
+    const branchChanges = await getTreeChanges(
+      mergeBase,
+      `origin/${branchName}`,
+    );
+    const newChanges = await getTreeChanges('HEAD^', 'HEAD');
+    return branchChanges === newChanges;
+  } catch (err) {
+    logger.debug({ branchName, err }, 'Failed to compare branch changes');
+    return false;
+  }
+}
+
 async function handleCommitAuth(localDir: string): Promise<void> {
   if (!privateKeySet) {
     await writePrivateKey();
@@ -1419,6 +1462,7 @@ export async function prepareCommit({
   message,
   trailers,
   force = false,
+  keepBranchIfSameChanges = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
   await syncGit();
@@ -1524,6 +1568,19 @@ export async function prepareCommit({
           'No file changes detected. Skipping commit',
         );
         return null;
+      }
+      if (keepBranchIfSameChanges) {
+        const sameChanges = await hasSameChangesAsBranch(
+          config.currentBranch,
+          branchName,
+        );
+        if (sameChanges) {
+          logger.debug(
+            { branchName },
+            'Existing branch has the same changes. Skipping commit',
+          );
+          return null;
+        }
       }
     }
 
