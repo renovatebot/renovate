@@ -139,6 +139,96 @@ describe('workers/repository/process/vulnerabilities', () => {
       config.packageRules = [];
     });
 
+    it('includes advisories affecting the proposed fixed version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'tmp',
+                packageName: 'tmp',
+                currentValue: '0.0.28',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-ph9p-34f9-6g65',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '0.2.6' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-7c78-jf6q-g5cm',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.2.6' }, { fixed: '0.2.7' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-aaaa-bbbb-cccc',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.2.7' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'tmp',
+          depVersion: '0.0.28',
+          fixedVersion: '>= 0.2.6',
+          vulnerability: { id: 'GHSA-ph9p-34f9-6g65' },
+        },
+        {
+          packageName: 'tmp',
+          depVersion: '0.0.28',
+          fixedVersion: '>= 0.2.7',
+          vulnerability: { id: 'GHSA-7c78-jf6q-g5cm' },
+        },
+        {
+          packageName: 'tmp',
+          depVersion: '0.0.28',
+          fixedVersion: null,
+          vulnerability: { id: 'GHSA-aaaa-bbbb-cccc' },
+        },
+      ]);
+    });
+
     it('return list of Vulnerabilities', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         poetry: [
@@ -2147,6 +2237,262 @@ describe('workers/repository/process/vulnerabilities', () => {
           isVulnerabilityAlert: true,
         },
       ]);
+    });
+
+    it('raises the fix past advisories affecting the fixed version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'tmp',
+                packageName: 'tmp',
+                currentValue: '0.0.28',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-52f5-9888-hmc6',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '0.2.4' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-ph9p-34f9-6g65',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '0.2.6' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-aaaa-bbbb-cccc',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.2.6' }, { fixed: '0.2.8' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-7c78-jf6q-g5cm',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.2.6' }, { fixed: '0.2.7' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-wwww-dddd-rrrr',
+          modified: '',
+          withdrawn: '2026-01-01T00:00:00Z',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.2.6' }, { fixed: '0.2.9' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(4);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['tmp'],
+          matchCurrentVersion: '0.0.28',
+          allowedVersions: '>= 0.2.4',
+          isVulnerabilityAlert: true,
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['tmp'],
+          matchCurrentVersion: '0.0.28',
+          allowedVersions: '>= 0.2.6',
+          isVulnerabilityAlert: true,
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['tmp'],
+          matchCurrentVersion: '0.0.28',
+          allowedVersions: '>= 0.2.7',
+          isVulnerabilityAlert: true,
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['tmp'],
+          matchCurrentVersion: '0.0.28',
+          allowedVersions: '>= 0.2.8',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-7c78-jf6q-g5cm affects tmp 0.2.6, the version proposed to fix tmp 0.0.28',
+      );
+    });
+
+    it('keeps the fix when the advisory affecting it has no fixed version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'tmp',
+                packageName: 'tmp',
+                currentValue: '0.0.28',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-ph9p-34f9-6g65',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '0.2.6' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+        {
+          id: 'GHSA-aaaa-bbbb-cccc',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.2.6' }],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['tmp'],
+          matchCurrentVersion: '0.0.28',
+          allowedVersions: '>= 0.2.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-aaaa-bbbb-cccc affects tmp 0.2.6, the version proposed to fix tmp 0.0.28',
+      );
+    });
+
+    it('stops following the fix after ten steps', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'tmp',
+                packageName: 'tmp',
+                currentValue: '1.0.0',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      const chain: Osv.Vulnerability[] = [];
+      for (let major = 1; major <= 12; major += 1) {
+        chain.push({
+          id: `GHSA-chain-${major}`,
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [
+                    { introduced: `${major}.0.0` },
+                    { fixed: `${major + 1}.0.0` },
+                  ],
+                },
+              ],
+              package: { name: 'tmp', ecosystem: 'npm' },
+            },
+          ],
+        });
+      }
+      getVulnerabilitiesMock.mockResolvedValueOnce(chain);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(11);
+      expect(config.packageRules?.[10]).toMatchObject({
+        matchCurrentVersion: '1.0.0',
+        allowedVersions: '>= 12.0.0',
+      });
     });
 
     it('returns packageRules for Hackage', async () => {
