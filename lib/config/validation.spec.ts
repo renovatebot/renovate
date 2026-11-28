@@ -3470,7 +3470,7 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            topic: 'managerFilePatterns',
+            topic: 'force.managerFilePatterns',
             message: expect.toStartWith(
               `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
@@ -3845,7 +3845,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('validates `registryUrls`/`defaultRegistryUrls` within `force` in `packageRules`', async () => {
+    it('only warns about `registryUrls`/`defaultRegistryUrls` within a top-level `force`', async () => {
       const config: AllConfig = {
         force: { registryUrls: ['https://registry.example.com/top-level'] },
         packageRules: [
@@ -3867,25 +3867,13 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Warning',
           message: expect.toStartWith(
-            'Setting `defaultRegistryUrls` at the top level of your config',
-          ),
-        },
-        {
-          topic: 'Configuration Warning',
-          message: expect.toStartWith(
-            'Setting `registryUrls` at the top level of your config',
-          ),
-        },
-        {
-          topic: 'Configuration Warning',
-          message: expect.toStartWith(
             'Setting `registryUrls` at the top level of your config',
           ),
         },
       ]);
     });
 
-    it('validates `force` within `packageRules`', async () => {
+    it('validates `force` within `packageRules` as if it was set in that rule', async () => {
       const config: AllConfig = {
         packageRules: [
           {
@@ -3909,17 +3897,12 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'matchDepNames: matchDepNames should be inside a `packageRule` only',
+            'The "npm" object can only be configured at the top level of a config but was found inside "packageRules[0].force"',
         },
         {
-          topic: 'allowedVersions',
+          topic: 'packageRules[0].force.hostRules',
           message:
-            '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
-        },
-        {
-          topic: 'matchDepNames',
-          message:
-            '"matchDepNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
+            '"hostRules" can\'t be used in "packageRules[0].force", as it can only be used at the top level of a config.',
         },
       ]);
     });
@@ -3941,9 +3924,15 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toEqual([
         {
-          topic: 'Config security error',
+          // not a security error, as `env` is only applied at the top level
+          topic: 'Configuration Error',
           message:
             "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "packageRules[0].force"',
         },
       ]);
     });
@@ -3972,9 +3961,15 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toEqual([
         {
-          topic: 'Config security error',
+          // not a security error, as `hostRules` are only applied at the top level
+          topic: 'Configuration Error',
           message:
             "hostRules header `X-Not-Allowed` is not allowed by this Renovate instance's `allowedHeaders`.",
+        },
+        {
+          topic: 'packageRules[0].force.hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules[0].force", as it can only be used at the top level of a config.',
         },
       ]);
     });
@@ -3987,6 +3982,7 @@ describe('config/validation', () => {
             force: {
               // @ts-expect-error -- `force` is typed without `packageRules`-only options
               allowedVersions: '<2',
+              // like `registryUrls` set directly in a `repositories[]` entry, this isn't reported
               registryUrls: ['https://registry.example.com/npm-virtual'],
             },
           },
@@ -3999,13 +3995,7 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toEqual([
         {
-          topic: 'Configuration Warning',
-          message: expect.toStartWith(
-            'Setting `registryUrls` at the top level of your config',
-          ),
-        },
-        {
-          topic: 'allowedVersions',
+          topic: 'repositories[0].force.allowedVersions',
           message:
             '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
