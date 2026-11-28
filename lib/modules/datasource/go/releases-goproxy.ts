@@ -244,9 +244,28 @@ export class GoProxyDatasource extends Datasource {
     const repository = trimTrailingSlash(
       trimLeadingSlash(parsedUrl.pathname),
     ).replace(regEx(/\.git$/), '');
+
+    // For a Go module in a subdirectory of its repo (e.g.
+    // github.com/aws/aws-sdk-go-v2/config), the versions are tagged with the
+    // subdirectory as a prefix (`config/v1.2.3`). Forward that prefix to the
+    // GitHub refs query so it is filtered server-side via `refs(query: ...)`.
+    // This is a pure optimization - it returns the same tags without GitHub
+    // traversing the whole (possibly very large) tag set, which otherwise times
+    // out with a 502 on monorepos such as aws-sdk-go-v2 (tens of thousands of
+    // tags). The root
+    // module has no sub-path, so no filter is set and the query is unchanged.
+    const modulePath = packageName.replace(regEx(/\/v\d+$/), '');
+    const repoHostPath = `${parsedUrl.host}${parsedUrl.pathname}`
+      .replace(regEx(/\.git$/), '')
+      .replace(regEx(/\/$/), '');
+    const subPath = modulePath.startsWith(`${repoHostPath}/`)
+      ? modulePath.slice(repoHostPath.length + 1)
+      : '';
+
     const githubConfig = {
       packageName: repository,
       registryUrl: parsedUrl.origin,
+      ...(subPath ? { refQuery: `${subPath}/` } : {}),
     };
 
     const [githubTags, githubReleases] = await Promise.all([
@@ -257,7 +276,10 @@ export class GoProxyDatasource extends Datasource {
         );
         return [];
       }),
-      queryReleases(githubConfig, this.githubHttp).catch((err) => {
+      queryReleases(
+        { packageName: repository, registryUrl: parsedUrl.origin },
+        this.githubHttp,
+      ).catch((err) => {
         logger.debug(
           { err, packageName },
           'Error fetching GitHub Releases for Go module',

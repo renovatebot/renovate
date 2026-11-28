@@ -465,6 +465,121 @@ describe('modules/datasource/go/releases-direct', () => {
       ]);
     });
 
+    it('scopes the GitHub tag lookup by submodule prefix', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'aws/aws-sdk-go-v2',
+        registryUrl: 'https://github.com',
+      });
+      githubGetTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'service/s3/v1.0.0', gitRef: 'service/s3/v1.0.0' },
+        ],
+      });
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/aws/aws-sdk-go-v2/service/s3',
+      });
+
+      expect(githubGetTags).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'github-tags',
+        packageName: 'aws/aws-sdk-go-v2',
+        registryUrl: 'https://github.com',
+        refQuery: 'service/s3/',
+      });
+      expect(res?.releases).toEqual([
+        { version: 'v1.0.0', gitRef: 'service/s3/v1.0.0' },
+      ]);
+    });
+
+    it('does not scope the GitHub tag lookup for a root module', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+      });
+      githubGetTags.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0', gitRef: 'v1.0.0' }],
+      });
+
+      await datasource.getReleases({ packageName: 'github.com/x/text/v2' });
+
+      expect(githubGetTags).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+      });
+    });
+
+    it('does not scope the GitHub tag lookup without a registry URL', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+      });
+      githubGetTags.mockResolvedValueOnce({
+        releases: [{ version: 'a/v1.0.0', gitRef: 'a/v1.0.0' }],
+      });
+
+      await datasource.getReleases({ packageName: 'github.com/x/text/a' });
+
+      expect(githubGetTags).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+      });
+    });
+
+    it('falls back to the unscoped GitHub tag lookup when no prefixed tag is found', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+      });
+      githubGetTags.mockResolvedValueOnce({
+        releases: [{ version: 'other-a/v9.0.0', gitRef: 'other-a/v9.0.0' }],
+      });
+      githubGetTags.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0', gitRef: 'v1.0.0' }],
+      });
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/x/text/a',
+      });
+
+      expect(githubGetTags).toHaveBeenNthCalledWith(1, {
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+        refQuery: 'a/',
+      });
+      expect(githubGetTags).toHaveBeenNthCalledWith(2, {
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+      });
+      expect(res?.releases).toEqual([{ version: 'v1.0.0', gitRef: 'v1.0.0' }]);
+    });
+
+    it('falls back to the unscoped GitHub tag lookup when the scoped lookup returns null', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+      });
+      githubGetTags.mockResolvedValueOnce(null);
+      githubGetTags.mockResolvedValueOnce({
+        releases: [{ version: 'a/v1.0.0', gitRef: 'a/v1.0.0' }],
+      });
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/x/text/a',
+      });
+
+      expect(githubGetTags).toHaveBeenCalledTimes(2);
+      expect(res?.releases).toEqual([
+        { version: 'v1.0.0', gitRef: 'a/v1.0.0' },
+      ]);
+    });
+
     describe('package cache', () => {
       let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
 

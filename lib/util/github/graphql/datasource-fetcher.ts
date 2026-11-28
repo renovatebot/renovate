@@ -78,6 +78,7 @@ export class GithubGraphqlDatasourceFetcher<
   private readonly baseUrl: string;
   private readonly repoOwner: string;
   private readonly repoName: string;
+  private readonly refQuery: string | undefined;
 
   private itemsPerQuery: PageSize = pageSizes[0];
 
@@ -99,8 +100,9 @@ export class GithubGraphqlDatasourceFetcher<
   ) {
     this.http = http;
     this.datasourceAdapter = datasourceAdapter;
-    const { packageName, registryUrl } = packageConfig;
+    const { packageName, registryUrl, refQuery } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
+    this.refQuery = refQuery;
     this.baseUrl = getApiBaseUrl(registryUrl).replace(regEx(/\/v3\/$/), '/'); // Replace for GHE
   }
 
@@ -109,7 +111,11 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   private getCacheKey(): string {
-    return buildCacheKey(this.baseUrl, this.repoOwner, this.repoName);
+    const repoKey = buildCacheKey(this.baseUrl, this.repoOwner, this.repoName);
+    if (this.refQuery === undefined) {
+      return repoKey;
+    }
+    return buildCacheKey(repoKey, `refQuery=${this.refQuery}`);
   }
 
   private getRawQueryOptions(): GithubHttpOptions {
@@ -122,6 +128,11 @@ export class GithubGraphqlDatasourceFetcher<
       count: this.itemsPerQuery,
       cursor: this.cursor,
     };
+    // Only forwarded for adapters that declare `$query` (tags). When undefined,
+    // no `query` variable is sent and the request is unchanged.
+    if (this.refQuery !== undefined) {
+      variables.query = this.refQuery;
+    }
 
     return {
       baseUrl,

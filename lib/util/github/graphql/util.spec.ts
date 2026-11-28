@@ -36,6 +36,34 @@ describe('util/github/graphql/util', () => {
         'Syntax Error: Expected Name, found "!".',
       );
     });
+
+    it('does not declare $query by default', () => {
+      const payloadQuery = codeBlock`
+        items {
+          nodes {
+            version
+            releaseTimestamp
+          }
+        }
+      `;
+      const result = prepareQuery(payloadQuery);
+      expect(result).not.toContain('$query');
+      expect(() => graphqlParse(result)).not.toThrow();
+    });
+
+    it('declares $query when withRefQuery is set', () => {
+      const payloadQuery = codeBlock`
+        refs(query: $query) {
+          nodes {
+            version
+            releaseTimestamp
+          }
+        }
+      `;
+      const result = prepareQuery(payloadQuery, { withRefQuery: true });
+      expect(result).toContain('$query: String');
+      expect(() => graphqlParse(result)).not.toThrow();
+    });
   });
 
   it.each`

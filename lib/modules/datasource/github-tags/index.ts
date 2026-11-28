@@ -10,7 +10,8 @@ import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
-import type { GetReleasesConfig, GitHostTag } from '../types.ts';
+import type { GitHostTag, ReleaseResult } from '../types.ts';
+import type { GithubTagsReleasesConfig } from './types.ts';
 
 export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp> {
   static readonly id = 'github-tags';
@@ -47,6 +48,12 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
     super(GithubTagsDatasource.id, new GithubHttp(GithubTagsDatasource.id));
   }
 
+  override getReleases(
+    config: GithubTagsReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    return super.getReleases(config);
+  }
+
   protected fetchTagCommit(
     registryUrl: string | undefined,
     repo: string,
@@ -76,7 +83,9 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
     return digest;
   }
 
-  protected async fetchTags(config: GetReleasesConfig): Promise<GitHostTag[]> {
+  protected async fetchTags(
+    config: GithubTagsReleasesConfig,
+  ): Promise<GitHostTag[]> {
     const tagsResult = await queryTags(config, this.http);
     const releases: GitHostTag[] = tagsResult.map(
       ({ version, releaseTimestamp, hash }) => ({
@@ -87,8 +96,12 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
     );
 
     try {
-      // Fetch additional data from releases endpoint when possible
-      const releasesResult = await queryReleases(config, this.http);
+      // Fetch additional data from releases endpoint when possible.
+      // The releases query does not support `refQuery`, so it is not forwarded.
+      const releasesResult = await queryReleases(
+        { packageName: config.packageName, registryUrl: config.registryUrl },
+        this.http,
+      );
       const releasesMap = new Map<string, GithubReleaseItem>();
       for (const release of releasesResult) {
         releasesMap.set(release.version, release);
