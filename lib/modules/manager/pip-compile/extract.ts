@@ -4,6 +4,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { extractPackageFile as extractPep621File } from '../pep621/extract.ts';
+import { depTypes } from '../pep621/utils.ts';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract.ts';
 import type { PipRequirementsManagerData } from '../pip_requirements/types.ts';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup/index.ts';
@@ -187,6 +188,13 @@ export async function extractAllPackageFiles(
           }
         }
         for (const dep of packageFileContent.deps) {
+          if (
+            dep.depType === 'requires-python' ||
+            dep.depType === depTypes.buildSystemRequires
+          ) {
+            // the Python version constraint and the build requirements are never written to the lock file
+            continue;
+          }
           const lockedVersion = lockedDeps?.find(
             (lockedDep) => lockedDep.packageName === dep.packageName,
           )?.currentVersion;
