@@ -8,7 +8,7 @@ Renovate supports [Gitea](https://gitea.io).
 
 ## Authentication
 
-First, [create a Personal Access Token (PAT)](https://docs.gitea.io/en-us/api-usage/#authentication) for the Renovate account.
+First, [create a Personal Access Token (PAT)](https://docs.gitea.com/development/api-usage#authentication) for the Renovate account.
 The Renovate account should have full name and email address configured.
 Then let Renovate use your PAT by doing _one_ of the following:
 
@@ -35,7 +35,7 @@ If you use Gitea packages, add the `read:packages` scope.
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
 - **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 do not support required branch autodelete for automerge.
-- **Git upload filters**: If you are using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
+- **Git upload filters**: If you are using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.com/usage/repository/clone-filters/).
 
 ## Features awaiting implementation
 
@@ -52,7 +52,7 @@ Repositories are ignored when one of the following conditions is met:
 
 You can change the default server-side sort method and order for autodiscover API.
 Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
-Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.
+Read the [Gitea swagger docs](https://gitea.com/api/swagger#/repository/repoSearch) for more details.
 
 ## Merge style
 
