@@ -357,6 +357,13 @@ export async function getRegistryCredVarsFromPackageFiles(
   return allCreds;
 }
 
+// PEP 751 names: `pylock.toml` or `pylock.<name>.toml`
+const pylockFileRegex = regEx(/^pylock(?:\.[^.]+)?\.toml$/);
+
+export function isPylockFile(fileName: string): boolean {
+  return pylockFileRegex.test(upath.basename(fileName));
+}
+
 export function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
     return 'pip_setup';

@@ -38,6 +38,10 @@ The following files are currently supported:
 |       `setup.py` | `pip_setup`        |
 |           `*.in` | `pip_requirements` |
 
+`uv pip compile --format=pylock.toml` output files ([PEP 751](https://packaging.python.org/en/latest/specifications/pylock-toml/) `pylock.toml`) are supported too.
+Add the file to `managerFilePatterns`, for example `"/(^|/)pylock\\.toml$/"`.
+The `uv pip compile` header comment must be present in the file.
+
 Example header:
 
 ```
