@@ -11,6 +11,7 @@ import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
+import { setBunLockedVersions } from './locked-versions.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -111,5 +112,6 @@ export async function extractAllPackageFiles(
     }
   }
 
+  await setBunLockedVersions(packageFiles);
   return packageFiles;
 }

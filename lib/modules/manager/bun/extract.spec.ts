@@ -75,6 +75,7 @@ describe('modules/manager/bun/extract', () => {
             packageFileVersion: '0.0.1',
           },
         ]);
+        expect(fs.readLocalFile).toHaveBeenCalledOnce();
       });
     });
 
@@ -141,10 +142,113 @@ describe('modules/manager/bun/extract', () => {
           },
         ]);
       });
+
+      it('extracts locked versions from bun.lock', async () => {
+        fs.getSiblingFileName.mockReturnValueOnce('package.json');
+        fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+          if (fileName === 'package.json') {
+            return Promise.resolve(
+              JSON.stringify({
+                name: 'test',
+                dependencies: {
+                  dep1: '^1.0.0',
+                },
+              }),
+            );
+          }
+          if (fileName === 'bun.lock') {
+            return Promise.resolve(
+              JSON.stringify({
+                lockfileVersion: 2,
+                workspaces: {
+                  '': {
+                    name: 'test',
+                    dependencies: { dep1: '^1.0.0' },
+                  },
+                },
+                packages: {
+                  dep1: ['dep1@1.2.3'],
+                },
+              }),
+            );
+          }
+          return Promise.resolve(null);
+        });
+
+        await expect(
+          extractAllPackageFiles({}, ['bun.lock', 'package.json']),
+        ).resolves.toMatchObject([
+          {
+            deps: [
+              {
+                depName: 'dep1',
+                lockedVersion: '1.2.3',
+              },
+            ],
+          },
+        ]);
+      });
     });
   });
 
   describe('workspaces', () => {
+    it('extracts workspace-specific locked versions', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.getParentDir.mockReturnValueOnce('');
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'package.json') {
+          return Promise.resolve(
+            JSON.stringify({
+              name: '@demo/root',
+              workspaces: ['packages/*'],
+              dependencies: { dep: '^1.0.0' },
+            }),
+          );
+        }
+        if (fileName === 'packages/app/package.json') {
+          return Promise.resolve(
+            JSON.stringify({
+              name: '@demo/app',
+              dependencies: { dep: '2.0.0' },
+            }),
+          );
+        }
+        if (fileName === 'bun.lock') {
+          return Promise.resolve(
+            JSON.stringify({
+              lockfileVersion: 2,
+              workspaces: {
+                '': {
+                  name: '@demo/root',
+                  dependencies: { dep: '^1.0.0' },
+                },
+                'packages/app': {
+                  name: '@demo/app',
+                  dependencies: { dep: '2.0.0' },
+                },
+              },
+              packages: {
+                dep: ['dep@1.2.3'],
+                '@demo/app/dep': ['dep@2.0.0'],
+              },
+            }),
+          );
+        }
+        return Promise.resolve(null);
+      });
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/app/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        { deps: [{ depName: 'dep', lockedVersion: '1.2.3' }] },
+        { deps: [{ depName: 'dep', lockedVersion: '2.0.0' }] },
+      ]);
+    });
+
     it('processes workspace package files when workspaces are detected', async () => {
       vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
 
