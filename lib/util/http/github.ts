@@ -17,6 +17,7 @@ import {
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { getCache } from '../cache/repository/index.ts';
+import { getApiBaseUrlFromRequestUrl } from '../github/url.ts';
 import { getEnv } from '../env.ts';
 import * as hostRules from '../host-rules.ts';
 import { maskToken } from '../mask.ts';
@@ -121,6 +122,55 @@ export function isPrAlreadyExistsError(err: any): boolean {
   );
 }
 
+const GithubRateLimit = z
+  .object({
+    resources: z.record(
+      z.string(),
+      z.object({
+        limit: z.number(),
+        used: z.number(),
+        remaining: z.number(),
+        reset: z.number(),
+      }),
+    ),
+  })
+  .transform(({ resources }) => resources);
+type GithubRateLimit = z.infer<typeof GithubRateLimit>;
+
+/**
+ * A GitHub rate limit error, which remembers the host and credential that were
+ * rate limited, as they may not be the configured platform's.
+ */
+export class GithubRateLimitError extends Error {
+  readonly apiBaseUrl: string;
+  // a private field, so the token never ends up in logs
+  readonly #token: string | undefined;
+
+  constructor(url: string | URL, opts: GithubBaseHttpOptions) {
+    super(PLATFORM_RATE_LIMIT_EXCEEDED);
+    this.apiBaseUrl = getApiBaseUrlFromRequestUrl(url, opts.baseUrl ?? baseUrl);
+    this.#token = opts.token;
+  }
+
+  /**
+   * Fetches the current rate limits of the rate limited host and credential.
+   * `GET /rate_limit` does not count against the rate limit.
+   */
+  async getRateLimit(): Promise<GithubRateLimit | null> {
+    try {
+      const { body } = await new GithubHttp().getJson(
+        'rate_limit',
+        { baseUrl: this.apiBaseUrl, token: this.#token, memCache: false },
+        GithubRateLimit,
+      );
+      return body;
+    } catch (err) {
+      logger.debug({ err }, 'Failed to fetch GitHub rate limit');
+      return null;
+    }
+  }
+}
+
 function handleGotError(
   err: GotLegacyError,
   url: string | URL,
@@ -155,14 +205,14 @@ function handleGotError(
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
-    return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+    return new GithubRateLimitError(url, opts);
   }
   if (
     isForbidden(err) &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
     logger.warn({ err }, 'GitHub failure: secondary rate limit');
-    return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+    return new GithubRateLimitError(url, opts);
   }
   if (isForbidden(err) && message.includes('Upgrade to GitHub Pro')) {
     logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
@@ -194,7 +244,7 @@ function handleGotError(
       }
     }
 
-    return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+    return new GithubRateLimitError(url, opts);
   }
   if (
     isForbidden(err) &&
@@ -631,7 +681,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     }
 
     if (isGraphqlRateLimited(response?.errors)) {
-      throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+      throw new GithubRateLimitError(path, opts);
     }
 
     return response;

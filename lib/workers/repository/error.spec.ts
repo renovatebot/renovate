@@ -1,3 +1,4 @@
+import * as httpMock from '~test/http-mock.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
 import {
@@ -34,6 +35,7 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { GithubRateLimitError } from '../../util/http/github.ts';
 import handleError from './error.ts';
 
 vi.mock('./error-config.ts');
@@ -114,6 +116,45 @@ describe('workers/repository/error', () => {
       );
       const res = await handleError(config, gitError);
       expect(res).toEqual(TEMPORARY_ERROR);
+    });
+
+    it('logs the rate limit of the GitHub host that was rate limited', async () => {
+      const rateLimit = {
+        core: { limit: 5000, used: 5000, remaining: 0, reset: 1 },
+      };
+      httpMock
+        .scope('https://api.github.com')
+        .get('/rate_limit')
+        .reply(200, { resources: rateLimit });
+      const res = await handleError(
+        config,
+        new GithubRateLimitError('https://api.github.com/repos/a/b', {}),
+      );
+      expect(res).toEqual(PLATFORM_RATE_LIMIT_EXCEEDED);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { apiBaseUrl: 'https://api.github.com/', rateLimit },
+        'Rate limit exceeded - aborting',
+      );
+    });
+
+    it('logs only the GitHub host when its rate limit is unavailable', async () => {
+      httpMock.scope('https://api.github.com').get('/rate_limit').reply(500);
+      await handleError(
+        config,
+        new GithubRateLimitError('https://api.github.com/repos/a/b', {}),
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { apiBaseUrl: 'https://api.github.com/' },
+        'Rate limit exceeded - aborting',
+      );
+    });
+
+    it('omits rate limit info when it is unavailable', async () => {
+      await handleError(config, new Error(PLATFORM_RATE_LIMIT_EXCEEDED));
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {},
+        'Rate limit exceeded - aborting',
+      );
     });
 
     it('handles unknown error', async () => {

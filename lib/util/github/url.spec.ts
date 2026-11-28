@@ -1,4 +1,8 @@
-import { getApiBaseUrl, getSourceUrlBase } from './url.ts';
+import {
+  getApiBaseUrl,
+  getApiBaseUrlFromRequestUrl,
+  getSourceUrlBase,
+} from './url.ts';
 
 describe('util/github/url', () => {
   describe('getSourceUrlBase', () => {
@@ -26,6 +30,27 @@ describe('util/github/url', () => {
       expect(getApiBaseUrl('https://gh.my-company.com/api/v3/')).toBe(
         'https://gh.my-company.com/api/v3/',
       );
+    });
+  });
+
+  describe('getApiBaseUrlFromRequestUrl', () => {
+    it.each`
+      url                                                 | expected
+      ${'https://api.github.com/repos/foo/bar'}           | ${'https://api.github.com/'}
+      ${'https://gh.my-company.com/api/v3/repos/foo/bar'} | ${'https://gh.my-company.com/api/v3/'}
+      ${'https://gh.my-company.com/api/graphql'}          | ${'https://gh.my-company.com/api/v3/'}
+      ${'https://api.my-company.ghe.com/repos/foo/bar'}   | ${'https://api.my-company.ghe.com/'}
+    `('returns $expected for $url', ({ url, expected }) => {
+      expect(getApiBaseUrlFromRequestUrl(url)).toBe(expected);
+    });
+
+    it('resolves relative URLs against the base URL', () => {
+      expect(
+        getApiBaseUrlFromRequestUrl(
+          'repos/foo/bar',
+          'https://gh.my-company.com/api/v3/',
+        ),
+      ).toBe('https://gh.my-company.com/api/v3/');
     });
   });
 });
