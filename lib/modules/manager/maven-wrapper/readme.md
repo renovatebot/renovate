@@ -25,3 +25,22 @@ Example `hostRules` configuration:
 ```
 
 To learn more about how to securely provide credentials, see [Private package support](../../../getting-started/private-packages.md).
+
+### Registry aliases
+
+Use `registryAliases` to redirect Maven distribution and wrapper JAR checksum downloads to a mirror:
+
+```json
+{
+  "maven-wrapper": {
+    "registryAliases": {
+      "https://repo.maven.apache.org/maven2": "https://mirror.example.com/repository"
+    }
+  }
+}
+```
+
+Aliases replace a matching repository URL prefix at a path boundary.
+Renovate also passes the aliased wrapper repository to the wrapper command through `MVNW_REPOURL`.
+The URLs committed in the wrapper properties remain unchanged.
+Checksum download failures are reported as artifact update errors.
