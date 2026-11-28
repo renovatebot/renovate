@@ -73,7 +73,7 @@ and summarizes the results as a table of dependencies and available updates (tex
 It facilitates debugging Renovate configurations on local repository checkouts,
 and also allows to preview Renovate runs on remote repositories, to see PR titles for example.
 
-Renovate is run using `podman` or `docker`, and `renovate-preview` is written in Python with no dependencies.
+Renovate executes in a `podman` or `docker` container, and `renovate-preview` is written in Python with no dependencies.
 
 ```console
 $ # Install renovate-preview and pull the Renovate image
