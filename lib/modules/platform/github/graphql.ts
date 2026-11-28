@@ -102,6 +102,9 @@ query(
         title
         body
         updatedAt
+        author {
+          login
+        }
       }
     }
   }

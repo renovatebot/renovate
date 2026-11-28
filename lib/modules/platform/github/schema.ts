@@ -212,5 +212,15 @@ const GithubRestIssue = GithubIssueBase.extend({
   return { number, state, title, body, lastModified, node_id };
 });
 
+/**
+ * The author of an issue node returned by the GraphQL API.
+ *
+ * Only used by the fallback for GitHub App logins, where
+ * `filterBy: { createdBy }` returns nothing on GitHub Enterprise Cloud.
+ */
+export const GithubGraphqlIssueAuthor = z.object({
+  author: Nullish(z.object({ login: z.string() })),
+});
+
 export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
 export type GithubIssue = z.infer<typeof GithubIssue>;

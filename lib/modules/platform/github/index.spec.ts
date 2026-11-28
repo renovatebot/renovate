@@ -3054,6 +3054,130 @@ describe('modules/platform/github/index', () => {
         lastModified: '2023-01-01T00:00:00Z',
       });
     });
+
+    describe('GitHub App author fallback', () => {
+      function node(
+        number: number,
+        updatedAt: string,
+        author: { login: string } | null,
+      ) {
+        return {
+          number,
+          state: 'open',
+          title: 'title-2',
+          body: `body-${number}`,
+          updatedAt,
+          author,
+        };
+      }
+      function issuesResponse(nodes: unknown[]) {
+        return {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes,
+              },
+            },
+          },
+        };
+      }
+      function restIssue(number: number, updated_at: string) {
+        return {
+          number,
+          state: 'open',
+          title: 'title-2',
+          body: `body-${number}`,
+          updated_at,
+        };
+      }
+      function hasUser(body: { variables: Record<string, unknown> }) {
+        return 'user' in body.variables;
+      }
+
+      it('refetches without the filter and matches the author in code', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'my-app[bot]',
+        });
+        scope
+          .post('/graphql', hasUser)
+          .reply(200, issuesResponse([]))
+          .post('/graphql', (body) => !hasUser(body))
+          .reply(
+            200,
+            issuesResponse([
+              node(3, '2023-01-01T00:00:00Z', { login: 'someone-else' }),
+              node(2, '2022-01-01T00:00:00Z', { login: 'my-app' }),
+              node(1, '2021-01-01T00:00:00Z', null),
+            ]),
+          )
+          .get('/repos/some/repo/issues/2')
+          .reply(200, restIssue(2, '2022-01-01T00:00:00Z'));
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toMatchObject({ number: 2, body: 'body-2' });
+      });
+
+      it('does not refetch when the filtered query returns issues', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'my-app[bot]',
+        });
+        scope
+          .post('/graphql', hasUser)
+          .reply(
+            200,
+            issuesResponse([node(2, '2022-01-01T00:00:00Z', { login: 'x' })]),
+          )
+          .get('/repos/some/repo/issues/2')
+          .reply(200, restIssue(2, '2022-01-01T00:00:00Z'));
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toMatchObject({ number: 2 });
+      });
+
+      it('does not refetch when ignorePrAuthor is set', async () => {
+        GlobalConfig.set({ ignorePrAuthor: true });
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'my-app[bot]',
+        });
+        scope
+          .post('/graphql', (body) => !hasUser(body))
+          .reply(200, issuesResponse([]));
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toBeNull();
+      });
+
+      it('does not refetch for a username without the bot suffix', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-user',
+        });
+        scope.post('/graphql', hasUser).reply(200, issuesResponse([]));
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toBeNull();
+      });
+    });
   });
 
   describe('ensureIssue()', () => {

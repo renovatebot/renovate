@@ -116,6 +116,7 @@ import {
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
+  GithubGraphqlIssueAuthor,
   GithubPullRequestAutoMergeState,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
@@ -1413,19 +1414,30 @@ export async function setBranchStatus({
 
 // Issue
 
-async function getIssues(): Promise<Issue[]> {
-  const result = await githubApi.queryRepoField<unknown>(
-    getIssuesQuery,
-    'issues',
-    {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
-      },
-      readOnly: true,
+async function queryIssues(user?: string): Promise<unknown[]> {
+  return await githubApi.queryRepoField<unknown>(getIssuesQuery, 'issues', {
+    variables: {
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      ...(user && { user }),
     },
-  );
+    readOnly: true,
+  });
+}
+
+async function getIssues(): Promise<Issue[]> {
+  const user = config.ignorePrAuthor ? undefined : config.renovateUsername;
+  let result = await queryIssues(user);
+
+  // `filterBy: { createdBy }` does not match GitHub App bot logins on GitHub
+  // Enterprise Cloud, so retry without it and match the author in code.
+  // GraphQL returns the login without the `[bot]` suffix.
+  if (result.length === 0 && user?.endsWith('[bot]')) {
+    const login = user.replace(regEx(/\[bot\]$/), '');
+    result = (await queryIssues()).filter(
+      (issue) => GithubGraphqlIssueAuthor.parse(issue).author?.login === login,
+    );
+  }
 
   logger.debug(`Retrieved ${result.length} issues`);
   return Issue.array().parse(result);
