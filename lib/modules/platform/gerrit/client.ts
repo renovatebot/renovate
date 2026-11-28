@@ -283,13 +283,19 @@ class GerritClient {
     }
   }
 
-  async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
+  async addReviewers(
+    changeNumber: number,
+    reviewers: string[],
+    options: { ignoreAutomaticAttentionSetRules: boolean },
+  ): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
       {
         body: {
           reviewers: reviewers.map((r) => ({ reviewer: r })),
           notify: 'OWNER_REVIEWERS', // Avoids notifying cc's
+          ignore_automatic_attention_set_rules:
+            options.ignoreAutomaticAttentionSetRules,
         },
       },
     );
