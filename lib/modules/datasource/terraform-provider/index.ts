@@ -346,7 +346,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   private async fetchProviderPackages(
     repository: string,
     version: string,
-  ): Promise<string[] | null> {
+  ): Promise<OpenTofuProviderPackagesResponse> {
     const baseUrl = joinUrlParts(
       TerraformProviderDatasource.openTofuRegistryUrl,
       'v1/providers',
@@ -388,7 +388,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   private async fetchProviderPackagesForAvailablePlatform(
     baseUrl: string,
     version: string,
-  ): Promise<string[] | null> {
+  ): Promise<OpenTofuProviderPackagesResponse> {
     const { body: versionsResponse } = await this.http.getJson(
       `${baseUrl}/versions`,
       TerraformRegistryVersions,
@@ -399,20 +399,20 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (!platform) {
       return null;
     }
-    const { body: hashes } = await this.http.getJson(
+    const { body } = await this.http.getJson(
       `${baseUrl}/${version}/download/${platform.os}/${platform.arch}`,
       OpenTofuProviderPackagesResponse,
     );
-    return hashes;
+    return body;
   }
 
   getProviderPackages(
     repository: string,
     version: string,
-  ): Promise<string[] | null> {
+  ): Promise<OpenTofuProviderPackagesResponse> {
     return this.cached(
       {
-        key: buildCacheKey('getProviderPackages', repository, version),
+        key: buildCacheKey('getProviderPackagesResponse', repository, version),
       },
       () => this.fetchProviderPackages(repository, version),
     );
