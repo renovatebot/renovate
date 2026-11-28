@@ -5,6 +5,7 @@ import { DefaultGitScm } from './default-scm.ts';
 import { GerritScm } from './gerrit/scm.ts';
 import { GithubScm } from './github/scm.ts';
 import { LocalFs } from './local/scm.ts';
+import { OciScm } from './oci/scm.ts';
 import type { PlatformScm } from './types.ts';
 
 export const platformScmImpls = new Map<PlatformId, Constructor<PlatformScm>>();
@@ -18,6 +19,7 @@ platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);
 platformScmImpls.set('gitlab', DefaultGitScm);
 platformScmImpls.set('local', LocalFs);
+platformScmImpls.set('oci', OciScm);
 platformScmImpls.set('scm-manager', DefaultGitScm);
 
 let _scm: PlatformScm | undefined;

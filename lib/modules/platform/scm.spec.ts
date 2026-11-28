@@ -26,6 +26,7 @@ describe('modules/platform/scm', () => {
     'gitea',
     'github',
     'gitlab',
+    'oci',
   ] as PlatformId[])(
     'use util/git module as default implementation for platform %s',
     async (platform: PlatformId) => {
