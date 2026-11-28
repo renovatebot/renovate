@@ -1,6 +1,7 @@
 import { dir as tmpDir } from 'tmp-promise';
 import { type MockInstance, expectTypeOf } from 'vitest';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as mutex from '../../mutex.ts';
 import * as memCache from '../memory/index.ts';
 import * as packageCache from './index.ts';
 import type { CacheContext, CachedOptions } from './with-cache.ts';
@@ -240,6 +241,40 @@ describe('util/cache/package/with-cache', () => {
 
     expect(results.toSorted((a, b) => a - b)).toEqual([1, 2, 2]);
     expect(callCount).toBe(2);
+  });
+
+  it('continues without the lock when waiting for it times out', async () => {
+    vi.useFakeTimers();
+    const options = {
+      namespace: '_test-namespace',
+      key: 'slow',
+      public: true,
+    } as const;
+    const { promise: slowLookup, resolve: finishSlowLookup } =
+      Promise.withResolvers<string>();
+
+    const first = withCache(options, () => slowLookup);
+    const second = withCache(options, () => 'fresh');
+
+    await vi.advanceTimersByTimeAsync(2 * 60 * 1000);
+    await expect(second).resolves.toBe('fresh');
+
+    finishSlowLookup('slow');
+    await expect(first).resolves.toBe('slow');
+
+    // the timed-out waiter must not leave the lock held
+    await expect(withCache(options, () => 'unused')).resolves.toBe('slow');
+  });
+
+  it('rethrows lock errors other than a timeout', async () => {
+    const error = new Error('lock failed');
+    vi.spyOn(mutex, 'acquireLock').mockRejectedValueOnce(error);
+    const callback = vi.fn();
+
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'lock-error' }, callback),
+    ).rejects.toBe(error);
+    expect(callback).not.toHaveBeenCalled();
   });
 
   it('releases the lock after a callback error', async () => {
