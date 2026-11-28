@@ -3845,6 +3845,173 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('validates `registryUrls`/`defaultRegistryUrls` within `force` in `packageRules`', async () => {
+      const config: AllConfig = {
+        force: { registryUrls: ['https://registry.example.com/top-level'] },
+        packageRules: [
+          {
+            matchDatasources: ['maven'],
+            force: {
+              registryUrls: ['https://registry.example.com/maven-virtual'],
+              defaultRegistryUrls: ['https://registry.example.com/maven'],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Warning',
+          message: expect.toStartWith(
+            'Setting `defaultRegistryUrls` at the top level of your config',
+          ),
+        },
+        {
+          topic: 'Configuration Warning',
+          message: expect.toStartWith(
+            'Setting `registryUrls` at the top level of your config',
+          ),
+        },
+        {
+          topic: 'Configuration Warning',
+          message: expect.toStartWith(
+            'Setting `registryUrls` at the top level of your config',
+          ),
+        },
+      ]);
+    });
+
+    it('validates `force` within `packageRules`', async () => {
+      const config: AllConfig = {
+        packageRules: [
+          {
+            matchDatasources: ['npm'],
+            force: {
+              // @ts-expect-error -- `force` is typed without `packageRules`-only options
+              allowedVersions: '<2', // only applied within `packageRules`
+              matchDepNames: ['foo'], // only applied within `packageRules`
+              npm: { enabled: false }, // only applied at the top level
+              hostRules: [{ matchHost: 'https://registry.example.com' }], // only applied at the top level
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'matchDepNames: matchDepNames should be inside a `packageRule` only',
+        },
+        {
+          topic: 'allowedVersions',
+          message:
+            '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
+        },
+        {
+          topic: 'matchDepNames',
+          message:
+            '"matchDepNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
+        },
+      ]);
+    });
+
+    it('reports `env` within `force` in `packageRules` outside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        packageRules: [
+          {
+            matchDatasources: ['npm'],
+            force: { env: { NOT_ALLOWED: 'value' } },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Config security error',
+          message:
+            "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+        },
+      ]);
+    });
+
+    it('reports hostRules `headers` within `force` in `packageRules` outside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        packageRules: [
+          {
+            matchDatasources: ['npm'],
+            force: {
+              hostRules: [
+                {
+                  matchHost: 'https://registry.example.com',
+                  headers: { 'X-Not-Allowed': 'value' },
+                },
+              ],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Config security error',
+          message:
+            "hostRules header `X-Not-Allowed` is not allowed by this Renovate instance's `allowedHeaders`.",
+        },
+      ]);
+    });
+
+    it('validates `force` within `repositories[]` entries', async () => {
+      const config: AllConfig = {
+        repositories: [
+          {
+            repository: 'owner/repo',
+            force: {
+              // @ts-expect-error -- `force` is typed without `packageRules`-only options
+              allowedVersions: '<2',
+              registryUrls: ['https://registry.example.com/npm-virtual'],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Warning',
+          message: expect.toStartWith(
+            'Setting `registryUrls` at the top level of your config',
+          ),
+        },
+        {
+          topic: 'allowedVersions',
+          message:
+            '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
+        },
+      ]);
+    });
+
     it('allows hostRules `headers` within `force` inside the global `allowedHeaders`', async () => {
       const config: AllConfig = {
         allowedHeaders: ['X-Custom-*'],
@@ -3863,6 +4030,32 @@ describe('config/validation', () => {
       );
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
+    });
+
+    it('reports hostRules `headers` within `force` outside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        force: {
+          hostRules: [
+            {
+              matchHost: 'https://registry.example.com',
+              headers: { 'X-Not-Allowed': 'value' },
+            },
+          ],
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Config security error',
+          message:
+            "hostRules header `X-Not-Allowed` is not allowed by this Renovate instance's `allowedHeaders`.",
+        },
+      ]);
     });
 
     it('allows hostRules `headers` on repositories[] entries within the global `allowedHeaders`', async () => {
