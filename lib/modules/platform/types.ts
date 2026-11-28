@@ -359,6 +359,16 @@ export interface Platform {
   labelCharLimit?(): number;
 }
 
+/**
+ * A local commit created by `PlatformScm.prepareCommit()` that is not pushed yet.
+ */
+export interface PreparedCommit {
+  /** SHA of the prepared local commit */
+  sha: LongCommitSha;
+  /** Pushes the prepared commit and returns the SHA of the pushed commit, or `null` if nothing was pushed */
+  push(): Promise<LongCommitSha | null>;
+}
+
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
   isBranchModified(branchName: string, baseBranch: string): Promise<boolean>;
@@ -368,6 +378,11 @@ export interface PlatformScm {
   getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
   getAllBranchUpdateDates(): Promise<Record<string, DateTime>>;
   deleteBranch(branchName: string): Promise<void>;
+  /** Creates a local commit, or returns `null` if there is nothing to commit */
+  prepareCommit(
+    commitConfig: CommitFilesConfig,
+  ): Promise<PreparedCommit | null>;
+  /** Creates a local commit and pushes it, returning the pushed commit SHA or `null` */
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<LongCommitSha | null>;
