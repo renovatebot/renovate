@@ -90,6 +90,25 @@ function getCurrentVersionFromReleases(
 }
 
 /**
+ * Check whether `value` is a release which is either a single version, or a
+ * deprecated plain version.
+ */
+function isExactRelease(
+  value: string,
+  versioningApi: VersioningApi,
+  releases: Release[],
+): boolean {
+  const release = releases.find((r) => r.version === value);
+  if (!release) {
+    return false;
+  }
+  if (versioningApi.isSingleVersion(value)) {
+    return true;
+  }
+  return !!release.isDeprecated && versioningApi.isVersion(value);
+}
+
+/**
  * Resolve the version `currentValue` is treated as being at, preferring
  * non-deprecated releases and falling back to all of them.
  */
@@ -106,8 +125,7 @@ export function resolveCurrentVersion(
     currentVersion = lockedVersion;
   } else if (
     compareValue &&
-    versioningApi.isSingleVersion(compareValue) &&
-    releases.some((release) => release.version === compareValue)
+    isExactRelease(compareValue, versioningApi, releases)
   ) {
     currentVersion = compareValue;
   }
