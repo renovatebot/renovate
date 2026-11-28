@@ -46,6 +46,7 @@ import {
 } from '../utils.ts';
 import * as npm from './npm.ts';
 import * as pnpm from './pnpm.ts';
+import { renamePnpmCatalogReferences } from './pnpm-catalog.ts';
 import { processHostRules } from './rules.ts';
 import type {
   AdditionalPackageFiles,
@@ -473,6 +474,9 @@ async function getAdditionalFilesInner(
   logger.trace({ dirs }, 'lock file dirs');
   await writeExistingFiles(config, packageFiles, originalNpmrcFiles);
   await writeUpdatedPackageFiles(config);
+  updatedArtifacts.push(
+    ...(await renamePnpmCatalogReferences(config, packageFiles)),
+  );
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 

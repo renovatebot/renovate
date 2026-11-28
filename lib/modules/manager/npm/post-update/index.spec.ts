@@ -1042,6 +1042,84 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
 
+    it('renames pnpm catalog references before generating the pnpm lock file', async () => {
+      const pnpmLockFile = 'pnpm-lock.yaml';
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> =>
+        Promise.resolve(
+          fileName === 'packages/a/package.json'
+            ? '{"devDependencies":{"foo":"catalog:"}}'
+            : null,
+        ),
+      );
+      spyPnpm.mockImplementationOnce(() => {
+        expect(fs.writeLocalFile).toHaveBeenCalledWith(
+          'packages/a/package.json',
+          '{"devDependencies":{"bar":"catalog:"}}',
+        );
+        return Promise.resolve({ error: false, lockFile: 'new-lock:' });
+      });
+
+      await expect(
+        getAdditionalFiles(
+          {
+            ...baseConfig,
+            upgrades: [
+              {
+                depName: 'foo',
+                depType: 'pnpm.catalog.default',
+                newName: 'bar',
+                newValue: '2.0.0',
+                updateType: 'replacement',
+                packageFile: 'pnpm-workspace.yaml',
+                managerData: { pnpmLockFile },
+              },
+            ],
+            updatedPackageFiles: [
+              {
+                type: 'addition',
+                path: 'pnpm-workspace.yaml',
+                contents: 'catalog:\n  bar: 2.0.0\n',
+              },
+            ],
+          },
+          {
+            npm: [
+              {
+                packageFile: 'pnpm-workspace.yaml',
+                managerData: { pnpmLockFile },
+              },
+              {
+                packageFile: 'packages/a/package.json',
+                managerData: { pnpmLockFile },
+                deps: [
+                  {
+                    depName: 'foo',
+                    depType: 'devDependencies',
+                    currentValue: 'catalog:',
+                  },
+                ],
+              },
+            ],
+          },
+        ),
+      ).resolves.toStrictEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'packages/a/package.json',
+            contents: '{"devDependencies":{"bar":"catalog:"}}',
+          },
+          {
+            type: 'addition',
+            path: pnpmLockFile,
+            contents: 'new-lock:',
+          },
+        ],
+      });
+    });
+
     it('adds artifact notice on pnpm minimumReleaseAgeNotice', async () => {
       spyPnpm.mockResolvedValueOnce({
         error: false,
