@@ -15,6 +15,7 @@ function oldCacheData(): DockerHubCacheData {
         name: '1',
         tag_last_pushed: '2022-01-01',
         digest: 'sha256:111',
+        media_type: null,
         images: [],
       },
       2: {
@@ -23,9 +24,20 @@ function oldCacheData(): DockerHubCacheData {
         name: '2',
         tag_last_pushed: '2022-01-02',
         digest: 'sha256:222',
+        media_type: null,
         images: [
-          { architecture: 'amd64', digest: 'sha256:222-amd64' },
-          { architecture: 'arm64', digest: 'sha256:222-arm64' },
+          {
+            architecture: 'amd64',
+            digest: 'sha256:222-amd64',
+            os: null,
+            variant: null,
+          },
+          {
+            architecture: 'arm64',
+            digest: 'sha256:222-arm64',
+            os: null,
+            variant: null,
+          },
         ],
       },
       3: {
@@ -34,6 +46,7 @@ function oldCacheData(): DockerHubCacheData {
         name: '3',
         tag_last_pushed: '2022-01-03',
         digest: 'sha256:333',
+        media_type: null,
         images: [],
       },
     },
@@ -48,6 +61,7 @@ function newItem(): DockerHubTag {
     name: '4',
     tag_last_pushed: '2022-01-04',
     digest: 'sha256:444',
+    media_type: null,
     images: [],
   };
 }

@@ -4783,6 +4783,7 @@ describe('workers/repository/process/lookup/index', () => {
             currentValue: '18.10.0-alpine',
             packageName: 'node',
             registryUrl: 'https://index.docker.io',
+            requiredPlatforms: [],
           },
           '18.19.0-alpine',
         ],
@@ -4792,6 +4793,7 @@ describe('workers/repository/process/lookup/index', () => {
             currentValue: '18.10.0-alpine',
             packageName: 'node',
             registryUrl: 'https://index.docker.io',
+            requiredPlatforms: [],
           },
           '18.10.0-alpine',
         ],
@@ -6462,6 +6464,7 @@ describe('workers/repository/process/lookup/index', () => {
           lookupName: undefined,
           packageName: 'eclipse-temurin',
           registryUrl: 'https://index.docker.io',
+          requiredPlatforms: [],
         },
         '17.0.0',
       );
@@ -6529,6 +6532,7 @@ describe('workers/repository/process/lookup/index', () => {
           lookupName: 'mirror-some-org/library/openjdk',
           packageName: 'mirror-some-org/library/openjdk',
           registryUrl: 'https://index.docker.io',
+          requiredPlatforms: [],
         },
         '17.0.1',
       );
@@ -6540,6 +6544,7 @@ describe('workers/repository/process/lookup/index', () => {
           lookupName: undefined,
           packageName: 'new.registry.io/library/openjdk',
           registryUrl: 'https://index.docker.io',
+          requiredPlatforms: [],
         },
         '19.0.0',
       );
@@ -6551,6 +6556,7 @@ describe('workers/repository/process/lookup/index', () => {
           lookupName: 'mirror-some-org/library/openjdk',
           packageName: 'mirror-some-org/library/openjdk',
           registryUrl: 'https://index.docker.io',
+          requiredPlatforms: [],
         },
         '17.0.0',
       );

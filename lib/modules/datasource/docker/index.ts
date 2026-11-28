@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -57,8 +58,10 @@ import { DockerHubCache } from './dockerhub-cache.ts';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr.ts';
 import type {
   DistributionManifest,
+  DockerHubTagImage,
   Manifest,
   OciImageManifest,
+  OciPlatform,
 } from './schema.ts';
 import {
   DockerHubTagsPage,
@@ -92,6 +95,21 @@ const defaultConfig = {
     },
   },
 };
+
+function getMissingPlatforms(
+  requiredPlatforms: string[],
+  platforms: (DockerHubTagImage | OciPlatform)[],
+): string[] {
+  return requiredPlatforms.filter((requiredPlatform) => {
+    const [os, architecture, variant] = requiredPlatform.split('/');
+    return !platforms.some((platform) => {
+      if (platform?.os !== os || platform.architecture !== architecture) {
+        return false;
+      }
+      return !variant || platform.variant === variant;
+    });
+  });
+}
 
 export class DockerDatasource extends Datasource {
   static readonly id = dockerDatasourceId;
@@ -955,7 +973,13 @@ export class DockerDatasource extends Datasource {
    *  - Return the digest as a string
    */
   private async _getDigest(
-    { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
+    {
+      registryUrl,
+      lookupName,
+      packageName,
+      currentDigest,
+      requiredPlatforms = [],
+    }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     let registryHost: string;
@@ -993,6 +1017,22 @@ export class DockerDatasource extends Datasource {
         if (registryHost === DOCKER_HUB) {
           const cache = await DockerHubCache.init(dockerRepository);
           const cachedDigest = cache.getDigestForTag(newTag);
+          if (cachedDigest && requiredPlatforms.length) {
+            const tag = cache.getItems().find((item) => item.name === newTag);
+            const isManifestList =
+              tag?.media_type === 'application/vnd.oci.image.index.v1+json' ||
+              tag?.media_type ===
+                'application/vnd.docker.distribution.manifest.list.v2+json';
+            const missingPlatforms = isManifestList
+              ? getMissingPlatforms(requiredPlatforms, tag.images)
+              : [];
+            if (missingPlatforms.length) {
+              logger.debug(
+                `Docker digest ${cachedDigest} of ${dockerRepository}:${newTag} lacks platforms ${missingPlatforms.join(', ')}`,
+              );
+              return null;
+            }
+          }
           if (cachedDigest) {
             return cachedDigest;
           }
@@ -1106,9 +1146,31 @@ export class DockerDatasource extends Datasource {
             registryUrl,
             packageName: `library/${packageName}`,
             currentDigest,
+            requiredPlatforms,
           },
           newValue,
         );
+      }
+
+      if (requiredPlatforms.length && digest && !architecture) {
+        const manifest = await this.getManifestDocument(
+          registryHost,
+          dockerRepository,
+          digest,
+        );
+        const missingPlatforms =
+          manifest && 'manifests' in manifest
+            ? getMissingPlatforms(
+                requiredPlatforms,
+                manifest.manifests.map(({ platform }) => platform),
+              )
+            : [];
+        if (missingPlatforms.length) {
+          logger.debug(
+            `Docker digest ${digest} of ${dockerRepository}:${newTag} lacks platforms ${missingPlatforms.join(', ')}`,
+          );
+          return null;
+        }
       }
 
       if (manifestResponse) {
@@ -1148,6 +1210,7 @@ export class DockerDatasource extends Datasource {
           dockerRepository,
           newTag,
           config.currentDigest,
+          ...coerceArray(config.requiredPlatforms),
         ),
         fallback: true,
       },

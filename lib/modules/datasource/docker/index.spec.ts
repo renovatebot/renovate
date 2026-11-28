@@ -1748,6 +1748,119 @@ describe('modules/datasource/docker/index', () => {
 
       expect(res).toBe(newDigest);
     });
+
+    it.each`
+      mediaType                                                      | requiredPlatforms  | expected
+      ${'application/vnd.oci.image.index.v1+json'}                   | ${['linux/amd64']} | ${null}
+      ${'application/vnd.docker.distribution.manifest.list.v2+json'} | ${['linux/arm64']} | ${'sha256:cached-digest'}
+      ${'application/vnd.oci.image.manifest.v1+json'}                | ${['linux/amd64']} | ${'sha256:cached-digest'}
+    `(
+      'checks requiredPlatforms $requiredPlatforms against the Docker Hub tag cache for $mediaType',
+      async ({ mediaType, requiredPlatforms, expected }) => {
+        vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
+          partial<DockerHubCache>({
+            getDigestForTag: vi.fn().mockReturnValue('sha256:cached-digest'),
+            getItems: vi.fn().mockReturnValue([
+              {
+                name: 'some-tag',
+                media_type: mediaType,
+                images: [{ os: 'linux', architecture: 'arm64', variant: 'v8' }],
+              },
+            ]),
+          }),
+        );
+
+        const res = await getDigest(
+          { datasource: 'docker', packageName: 'some-dep', requiredPlatforms },
+          'some-tag',
+        );
+
+        expect(res).toBe(expected);
+      },
+    );
+
+    it.each`
+      requiredPlatforms                 | expected
+      ${['linux/amd64', 'linux/arm64']} | ${'sha256:new-digest'}
+      ${['linux/arm/v7']}               | ${'sha256:new-digest'}
+      ${['linux/arm/v6']}               | ${null}
+      ${['linux/s390x']}                | ${null}
+      ${['windows/amd64']}              | ${null}
+    `(
+      'checks requiredPlatforms $requiredPlatforms against the manifest list of the new digest',
+      async ({ requiredPlatforms, expected }) => {
+        httpMock
+          .scope('https://registry.company.com/v2')
+          .get('/')
+          .twice()
+          .reply(200)
+          .head('/some-dep/manifests/some-tag')
+          .reply(200, '', { 'docker-content-digest': 'sha256:new-digest' })
+          .get('/some-dep/manifests/sha256:new-digest')
+          .reply(200, {
+            schemaVersion: 2,
+            mediaType: 'application/vnd.oci.image.index.v1+json',
+            manifests: [
+              {
+                digest: 'sha256:amd64',
+                mediaType: 'application/vnd.oci.image.manifest.v1+json',
+                platform: { os: 'linux', architecture: 'amd64' },
+              },
+              {
+                digest: 'sha256:arm64',
+                mediaType: 'application/vnd.oci.image.manifest.v1+json',
+                platform: { os: 'linux', architecture: 'arm64', variant: 'v8' },
+              },
+              {
+                digest: 'sha256:arm',
+                mediaType: 'application/vnd.oci.image.manifest.v1+json',
+                platform: { os: 'linux', architecture: 'arm', variant: 'v7' },
+              },
+            ],
+          });
+
+        const res = await getDigest(
+          {
+            datasource: 'docker',
+            packageName: 'registry.company.com/some-dep',
+            requiredPlatforms,
+          },
+          'some-tag',
+        );
+
+        expect(res).toBe(expected);
+      },
+    );
+
+    it('does not check requiredPlatforms for a new digest of a single-platform image', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .twice()
+        .reply(200)
+        .head('/some-dep/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'sha256:new-digest' })
+        .get('/some-dep/manifests/sha256:new-digest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'sha256:config',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'registry.company.com/some-dep',
+          requiredPlatforms: ['linux/amd64'],
+        },
+        'some-tag',
+      );
+
+      expect(res).toBe('sha256:new-digest');
+    });
   });
 
   describe('getImageArchitecture', () => {

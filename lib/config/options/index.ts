@@ -2148,6 +2148,15 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'requiredPlatforms',
+    scopes: lookupScopes,
+    description:
+      'Platforms, like `linux/amd64`, that a Docker manifest list must contain before Renovate uses its digest.',
+    type: 'array',
+    subType: 'string',
+    supportedDatasources: ['docker'],
+  },
+  {
     name: 'separateMajorMinor',
     scopes: lookupScopes,
     description:

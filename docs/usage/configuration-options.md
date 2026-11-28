@@ -4985,6 +4985,32 @@ For `npm` manager when `replacementApproach=alias` then instead of replacing `"f
 }
 ```
 
+## `requiredPlatforms`
+
+Use this option to hold back a Docker digest until its manifest list has an image for each platform that you need.
+Some images, like Docker Official Images, publish a new tag before the images for all of its platforms are pushed.
+Without this option, Renovate may use a digest that your builds cannot pull yet.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "requiredPlatforms": ["linux/amd64"]
+    }
+  ]
+}
+```
+
+Write each platform as `os/architecture` or `os/architecture/variant`, like `linux/amd64` or `linux/arm/v7`.
+If you leave out the variant, Renovate accepts any variant of that architecture.
+
+If the new digest is a manifest list without one of these platforms, Renovate skips that update and checks again on its next run.
+If the dependency is already pinned to a digest, Renovate also reports a lookup warning while it skips the update.
+
+Renovate only checks the platforms when it looks up a new digest, so this option only affects dependencies that are pinned to a digest, or that Renovate pins with [`pinDigests`](#pindigests).
+Renovate does not check single-platform images, or updates where the current digest is a single-platform image.
+
 ## `respectLatest`
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
