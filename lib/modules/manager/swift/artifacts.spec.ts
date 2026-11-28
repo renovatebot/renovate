@@ -1314,5 +1314,56 @@ describe('modules/manager/swift/artifacts', () => {
       const { contents } = result![0].file as { contents: string };
       expect(contents).toContain('"version": "1.5.0"');
     });
+
+    it('keeps earlier pin edits when several Package.swift files share one Package.resolved', async () => {
+      // Renovate calls updateArtifacts once per Package.swift and keeps only the
+      // last result for a file, so each call must start from the previous edit.
+      let resolved = registryFixture;
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockImplementation(() => Promise.resolve(resolved));
+      fs.writeLocalFile.mockImplementation((_path, contents) => {
+        resolved = contents.toString();
+        return Promise.resolve();
+      });
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      await updateArtifacts({
+        packageFileName: 'ModuleA/Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+      const result = await updateArtifacts({
+        packageFileName: 'ModuleB/Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.other',
+            packageName: 'acme.other',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '2.5.0',
+            newValue: 'from: "2.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'Package.resolved',
+        expect.any(String),
+      );
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+      expect(contents).toContain('"version": "2.5.0"');
+    });
   });
 });
