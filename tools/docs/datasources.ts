@@ -28,6 +28,8 @@ export async function generateDatasources(
       releaseTimestampNote,
       sourceUrlSupport,
       sourceUrlNote,
+      constraintsFilteringSupport,
+      constraintsFilteringNote,
     } = definition;
     const customRegistrySupport = definition.supportsCustomRegistry(id);
     const displayName = getDisplayName(datasource, definition);
@@ -60,6 +62,7 @@ export async function generateDatasources(
     tableContent += `| Custom registry support | ${customRegistrySupport ? 'Yes' : 'No'} | \n`;
     tableContent += `| Release timestamp support | ${releaseTimestampSupport ? 'Yes' : 'No'} | ${releaseTimestampNote ?? ''} |\n`;
     tableContent += `| Source URL support | ${sourceUrlSupport === 'none' ? 'No' : 'Yes'} | ${sourceUrlNote ?? ''} |\n`;
+    tableContent += `| [Constraints filtering](../../../configuration-options.md#constraintsfiltering) support | ${constraintsFilteringSupport ? 'Yes' : 'No'} | ${constraintsFilteringNote ?? ''} |\n`;
 
     md += `${tableContent}\n`;
     md += formatUrls(urls);

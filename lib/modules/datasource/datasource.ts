@@ -78,6 +78,9 @@ export abstract class Datasource<
   sourceUrlSupport: SourceUrlSupport = 'none';
   sourceUrlNote?: string | undefined;
 
+  constraintsFilteringSupport = false;
+  constraintsFilteringNote?: string | undefined;
+
   protected readonly http: H;
 
   abstract getReleases(
