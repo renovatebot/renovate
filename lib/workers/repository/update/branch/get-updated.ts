@@ -6,6 +6,7 @@ import { extractPackageFile, get } from '../../../../modules/manager/index.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
+  ExtractConfig,
   PackageFile,
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -408,6 +409,7 @@ export async function getUpdatedPackageFiles(
     contents: updatedFileContents[name],
   }));
   const updatedArtifacts: FileChange[] = [];
+  const pendingVersionChecks: PendingVersionCheck[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
   if (isNonEmptyArray(updatedPackageFiles)) {
@@ -424,6 +426,11 @@ export async function getUpdatedPackageFiles(
       sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
         const updatedDeps = packageFileUpdatedDeps[packageFile.path];
+        const artifactConfig = patchConfigForArtifactsUpdate(
+          config,
+          manager,
+          packageFile.path,
+        );
         const results = await managerUpdateArtifacts(manager, {
           packageFileName: packageFile.path,
           updatedDeps,
@@ -433,11 +440,7 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             updatedFileContents,
           ),
-          config: patchConfigForArtifactsUpdate(
-            config,
-            manager,
-            packageFile.path,
-          ),
+          config: artifactConfig,
         });
         if (manager === 'mise') {
           const removedLockFiles = removeUnrefreshedLockfileOnlyChanges(
@@ -462,16 +465,13 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (isNonEmptyArray(results)) {
-          await checkForPendingVersions(
-            manager,
-            packageFile.path,
-            packageFile.contents!.toString(),
-            updatedDeps,
-            artifactErrors,
-            config,
-          );
-        }
+        addPendingVersionCheck(pendingVersionChecks, {
+          manager,
+          packageFile,
+          updatedDeps,
+          lockFiles: artifactConfig.lockFiles,
+          results,
+        });
       }
     }
   }
@@ -496,6 +496,11 @@ export async function getUpdatedPackageFiles(
       sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
         const updatedDeps = packageFileUpdatedDeps[packageFile.path];
+        const artifactConfig = patchConfigForArtifactsUpdate(
+          config,
+          manager,
+          packageFile.path,
+        );
         const results = await managerUpdateArtifacts(manager, {
           packageFileName: packageFile.path,
           updatedDeps,
@@ -505,11 +510,7 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             updatedFileContents,
           ),
-          config: patchConfigForArtifactsUpdate(
-            config,
-            manager,
-            packageFile.path,
-          ),
+          config: artifactConfig,
         });
         processUpdateArtifactResults(
           results,
@@ -519,15 +520,14 @@ export async function getUpdatedPackageFiles(
         );
         if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
-          await checkForPendingVersions(
-            manager,
-            packageFile.path,
-            packageFile.contents!.toString(),
-            updatedDeps,
-            artifactErrors,
-            config,
-          );
         }
+        addPendingVersionCheck(pendingVersionChecks, {
+          manager,
+          packageFile,
+          updatedDeps,
+          lockFiles: artifactConfig.lockFiles,
+          results,
+        });
       }
     }
   }
@@ -573,6 +573,24 @@ export async function getUpdatedPackageFiles(
           );
         }
       }
+    }
+  }
+  if (isNonEmptyArray(pendingVersionChecks)) {
+    // A later workspace update can rewrite a lockfile produced by an earlier one.
+    // Validate against the final artifact contents that will be committed.
+    const fileContents = Object.fromEntries(
+      updatedArtifacts.map((file) => [
+        file.path,
+        file.type === 'addition' ? file.contents : null,
+      ]),
+    );
+    for (const check of pendingVersionChecks) {
+      await checkForPendingVersions(
+        check,
+        fileContents,
+        artifactErrors,
+        config,
+      );
     }
   }
   return {
@@ -658,43 +676,95 @@ function processUpdateArtifactResults(
   }
 }
 
+interface PendingUpgradeInfo {
+  pendingVersions: Set<string>;
+  newVersion: string | undefined;
+}
+
+interface PendingVersionCheck {
+  manager: string;
+  packageFileName: string;
+  packageFileContent: string;
+  lockFiles: string[] | undefined;
+  dependencyToUpgradeInfo: Map<string, PendingUpgradeInfo>;
+  hadArtifactResults: boolean;
+}
+
+/**
+ * Queues a pending-version check for a package file whose upgrades have pending versions.
+ * The check runs after all artifact updates, so that it sees the final lockfile contents.
+ */
+function addPendingVersionCheck(
+  pendingVersionChecks: PendingVersionCheck[],
+  {
+    manager,
+    packageFile,
+    updatedDeps,
+    lockFiles,
+    results,
+  }: {
+    manager: string;
+    packageFile: FileAddition;
+    updatedDeps: BranchUpgradeConfig[];
+    lockFiles: string[] | undefined;
+    results: UpdateArtifactsResult[] | null;
+  },
+): void {
+  const dependencyToUpgradeInfo = new Map<string, PendingUpgradeInfo>();
+  for (const dep of updatedDeps) {
+    if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
+      dependencyToUpgradeInfo.set(
+        JSON.stringify([dep.depName, dep.packageName ?? dep.depName]),
+        {
+          pendingVersions: new Set(dep.pendingVersions),
+          newVersion: dep.newVersion,
+        },
+      );
+    }
+  }
+  if (dependencyToUpgradeInfo.size) {
+    pendingVersionChecks.push({
+      manager,
+      packageFileName: packageFile.path,
+      packageFileContent: packageFile.contents!.toString(),
+      lockFiles,
+      dependencyToUpgradeInfo,
+      hadArtifactResults: isNonEmptyArray(results),
+    });
+  }
+}
+
 /**
  * When using Minimum Release Age, and a package manager that doesn't support being told an explicit version to update to (#41624) it is possible that an artifact update leads to a different version of a dependency being used compared to what Renovate is expecting.
  *
  * We should report these cases more explicitly with an Artifact Error, to allow the reviewers to decide what to do with the changes.
  */
 async function checkForPendingVersions(
-  manager: string,
-  packageFileName: string,
-  packageFileContent: string,
-  updatedDeps: BranchUpgradeConfig[],
+  check: PendingVersionCheck,
+  fileContents: NonNullable<ExtractConfig['fileContents']>,
   artifactErrors: ArtifactError[],
   config: BranchConfig,
 ): Promise<void> {
-  const depNameToUpgradeInfo = new Map<
-    string,
-    {
-      pendingVersions: Set<string>;
-      newVersion: string | undefined;
-    }
-  >();
-  for (const dep of updatedDeps) {
-    if (dep.depName && isNonEmptyArray(dep.pendingVersions)) {
-      depNameToUpgradeInfo.set(dep.depName, {
-        pendingVersions: new Set(dep.pendingVersions),
-        newVersion: dep.newVersion,
-      });
-    }
-  }
-  if (!depNameToUpgradeInfo.size) {
+  const {
+    manager,
+    packageFileName,
+    packageFileContent,
+    lockFiles,
+    dependencyToUpgradeInfo,
+    hadArtifactResults,
+  } = check;
+
+  const hasUpdatedLockFile = lockFiles?.some((path) =>
+    Object.hasOwn(fileContents, path),
+  );
+  if (!hadArtifactResults && !hasUpdatedLockFile) {
     return;
   }
-
   const extracted = await extractPackageFile(
     manager,
     packageFileContent,
     packageFileName,
-    config,
+    { ...config, lockFiles, fileContents },
   );
   if (!extracted) {
     logger.warn(
@@ -722,7 +792,9 @@ async function checkForPendingVersions(
       throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
 
-    const upgradeInfo = depNameToUpgradeInfo.get(depName);
+    const upgradeInfo = dependencyToUpgradeInfo.get(
+      JSON.stringify([depName, dep.packageName]),
+    );
     if (!upgradeInfo) {
       continue;
     }
