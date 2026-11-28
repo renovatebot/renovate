@@ -3324,6 +3324,29 @@ const options: Readonly<RenovateOptions>[] = [
     advancedUse: true,
   },
   {
+    name: 'registryType',
+    description:
+      'The provider software of a self-hosted Docker registry, used to fetch release timestamps from its API.',
+    type: 'string',
+    stage: 'repository',
+    parents: ['hostRules'],
+    allowedValues: ['gitlab'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'registryApiUrl',
+    description:
+      'Overrides the base URL of the API used to fetch release timestamps for `registryType`.',
+    type: 'string',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'allowInternal',
     description:
       "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration, or from inherited config when `inheritConfigTrusted=true`.",

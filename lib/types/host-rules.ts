@@ -1,9 +1,13 @@
+export type RegistryType = 'gitlab';
+
 export interface HostRule {
   authType?: string;
   token?: string;
   username?: string;
   password?: string;
   insecureRegistry?: boolean;
+  registryType?: RegistryType;
+  registryApiUrl?: string;
   timeout?: number;
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
