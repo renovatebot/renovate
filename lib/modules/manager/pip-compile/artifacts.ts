@@ -3,7 +3,6 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
 import {
   deleteLocalFile,
   readLocalFile,
@@ -22,9 +21,10 @@ import {
   extractHeaderCommand,
   extractPythonVersion,
   getExecOptions,
-  getRegistryCredVarsFromPackageFiles,
+  getRegistryUrlsFromPackageFiles,
   matchManager,
 } from './common.ts';
+import { execPipCompile } from './pip-tools.ts';
 import type { PipCompileArgs } from './types.ts';
 import { inferCommandExecDir } from './utils.ts';
 
@@ -138,21 +138,15 @@ export async function updateArtifacts({
         }
       }
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
-      const registryCredVars =
-        await getRegistryCredVarsFromPackageFiles(packageFiles);
+      const registryUrls = getRegistryUrlsFromPackageFiles(packageFiles);
       const execOptions = await getExecOptions(
         config,
         compileArgs.commandType,
         cwd,
-        registryCredVars,
         pythonVersion,
       );
-      // only the variable names: the values are registry credentials
-      logger.trace(
-        { cwd, cmd, registryCredVars: Object.keys(registryCredVars) },
-        'pip-compile command',
-      );
-      await exec(cmd, execOptions);
+      logger.trace({ cwd, cmd }, 'pip-compile command');
+      await execPipCompile(cmd, execOptions, registryUrls);
       const status = await getRepoStatus();
       if (status?.modified.includes(outputFileName)) {
         result.push({
