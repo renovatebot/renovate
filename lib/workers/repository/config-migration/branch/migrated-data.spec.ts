@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import detectIndent from 'detect-indent';
 import { weave } from 'jsonc-weaver';
 import { Fixtures } from '~test/fixtures.ts';
@@ -26,9 +27,9 @@ vi.mock('jsonc-weaver', async (importOriginal) => {
 });
 
 const migratedData = Fixtures.getJson('./migrated-data.json');
-const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJsonc('./migrated.json');
 const renovateJson = Fixtures.get('./renovate.json');
+const renovateJson5 = Fixtures.get('./renovate.json5');
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );
@@ -107,13 +108,76 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
     });
 
-    it('Migrate a JSON5 config file', async () => {
+    it('Migrate a JSON5 config file, keeping its comments', async () => {
       vi.mocked(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json5',
       });
+      platform.getRawFile.mockResolvedValueOnce(renovateJson5);
       MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedDataJson5,
+
+      const res = await MigratedDataFactory.getAsync();
+
+      expect(res?.filename).toBe('renovate.json5');
+      expect(res?.content).toBe(
+        `${codeBlock`
+          {
+            extends: [
+              ':separateMajorReleases',
+              ':prImmediately',
+              ':renovatePrefix',
+              ':semanticPrefixFixDepsChoreOthers',
+              ':updateNotScheduled',
+              ':automergeDisabled',
+              ':maintainLockFilesDisabled',
+              'group:monorepos'
+            ],
+            // a comment that is kept
+            onboarding: false,
+            "rangeStrategy": "replace",
+            semanticCommits: "enabled",
+            timezone: "US/Central",
+            "baseBranches": [
+              "main"
+            ]
+          }
+        `}\n`,
+      );
+    });
+
+    it('Falls back to JSON5.stringify for a JSON5 config file when weave fails', async () => {
+      vi.mocked(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json5',
+      });
+      platform.getRawFile.mockResolvedValueOnce(renovateJson5);
+      vi.mocked(weave).mockImplementationOnce(() => {
+        throw new Error('weave error');
+      });
+      MigratedDataFactory.reset();
+
+      const res = await MigratedDataFactory.getAsync();
+
+      expect(res?.content).toBe(
+        `${codeBlock`
+          {
+            extends: [
+              ':separateMajorReleases',
+              ':prImmediately',
+              ':renovatePrefix',
+              ':semanticPrefixFixDepsChoreOthers',
+              ':updateNotScheduled',
+              ':automergeDisabled',
+              ':maintainLockFilesDisabled',
+              'group:monorepos',
+            ],
+            onboarding: false,
+            rangeStrategy: 'replace',
+            semanticCommits: 'enabled',
+            timezone: 'US/Central',
+            baseBranches: [
+              'main',
+            ],
+          }
+        `}\n`,
       );
     });
 
@@ -128,7 +192,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
-        'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
+        'Error weaving config to preserve comments, falling back to rewriting the whole file',
       );
       expect(res?.content).toBe(
         `${JSON.stringify(migratedConfigObj, undefined, 2)}\n`,
