@@ -64,3 +64,42 @@ It runs Renovate's own code in the browser, so the config never leaves the page.
 
 The project is maintained by Renovate maintainer Sebastian Poxhofer ( @secustor ).
 The blog post [Renovate: It was a packageRule all along](https://secustor.dev/blog/renovate_config_debugger/) walks through debugging a config with it.
+
+## Renovate preview
+
+The command-line utility [renovate-preview](https://github.com/kwentine/renovate-preview) performs Renovate dry-runs,
+and summarizes the results as a table of dependencies and available updates (text, or HTML-formatted).
+
+It facilitates debugging Renovate configurations on local repository checkouts,
+and also allows to preview Renovate runs on remote repositories, to see PR titles for example.
+
+Renovate executes in a `podman` or `docker` container, and `renovate-preview` is written in Python with no dependencies.
+
+```console
+$ # Install renovate-preview and pull the Renovate image
+$ uv tool install renovate-preview
+$ podman pull ghcr.io/renovatebot/renovate
+
+$ # Work on a local Renovate config
+$ cd path/to/repo
+$ $EDITOR renovate.json
+
+$ # Preview the results
+$ renovate-preview .
+DEPENDENCY     CURRENT  NEW      FILE
+-------------  -------  -------  ------------------
+some-dep       1.2.3    1.2.4    kustomization.yaml
+
+$ # Run agains the remote to view PR titles
+$ export RENOVATE_TOKEN=$(gh auth token)
+$ renovate-preview --config ./renovate.json @owner/repo
+DEPENDENCY     CURRENT  NEW    PR TITLE
+-------------  -------  ---    --------
+some-dep       1.2.3    1.2.4  chore(deps): Update some-dep to version 1.2.4
+```
+
+Many options are available, such as performing only dependency extraction,
+limiting the files to consider, getting raw logs (for perusal with, e.g. `renovate-pretty-log`),
+or viewing the table as a pretty HTLM page in the browser.
+
+For details, see: [README.md](https://github.com/kwentine/renovate-preview/blob/main/README.md)
