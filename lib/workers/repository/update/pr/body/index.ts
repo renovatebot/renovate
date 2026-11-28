@@ -95,6 +95,36 @@ interface PrBodyConfig {
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
+type PrBodyContent = Record<string, string>;
+
+function compilePrBody(
+  prBodyTemplate: string,
+  content: PrBodyContent,
+  debugData: PrDebugData,
+): string {
+  let prBody = template.compile(prBodyTemplate, content, false);
+  prBody = prBody.trim();
+  prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
+  const prDebugData64 = toBase64(JSON.stringify(debugData));
+  return `${prBody}\n<!--renovate-debug:${prDebugData64}-->\n`;
+}
+
+function massagePrBody(
+  compiledBody: string,
+  prBodyConfig: PrBodyConfig,
+  rebaseLabel: string | undefined,
+): string {
+  let prBody = platform.massageMarkdown(compiledBody, rebaseLabel);
+
+  if (prBodyConfig.rebasingNotice) {
+    prBody = prBody.replace(
+      rebasingRegex,
+      `**Rebasing**: ${prBodyConfig.rebasingNotice}`,
+    );
+  }
+  return prBody;
+}
+
 // TODO: `branchConfig` and `config`are the same object
 export function getPrBody(
   branchConfig: BranchConfig,
@@ -124,20 +154,12 @@ export function getPrBody(
 
   let prBody = '';
   if (branchConfig.prBodyTemplate) {
-    const prBodyTemplate = branchConfig.prBodyTemplate;
-    prBody = template.compile(prBodyTemplate, content, false);
-    prBody = prBody.trim();
-    prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
-    const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
-    prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
-    prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
-
-    if (prBodyConfig?.rebasingNotice) {
-      prBody = prBody.replace(
-        rebasingRegex,
-        `**Rebasing**: ${prBodyConfig.rebasingNotice}`,
-      );
-    }
+    const { prBodyTemplate } = branchConfig;
+    prBody = massagePrBody(
+      compilePrBody(prBodyTemplate, content, prBodyConfig.debugData),
+      prBodyConfig,
+      config.rebaseLabel,
+    );
   }
   return prBody;
 }

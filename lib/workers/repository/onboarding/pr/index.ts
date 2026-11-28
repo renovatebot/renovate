@@ -256,59 +256,48 @@ export async function ensureOnboardingPr(
   const baseBranchDesc = getBaseBranchDesc(config);
   const prList = getExpectedPrList(config, branches);
 
-  let prBody = finalizeOnboardingPrBody(
-    fillOnboardingPrBody(
-      buildOnboardingPrTemplate(
-        config,
-        configFile,
-        rebaseCheckBox,
-        FULL_SECTION_ORDER,
+  let sectionOrder: readonly string[] = FULL_SECTION_ORDER;
+  let sections: OnboardingPrSections = {
+    packageFiles: packageFilesDesc,
+    config: configDesc,
+    baseBranch: baseBranchDesc,
+    prList,
+    warnings,
+    errors,
+  };
+  function render(prSections: OnboardingPrSections): string {
+    return finalizeOnboardingPrBody(
+      fillOnboardingPrBody(
+        buildOnboardingPrTemplate(
+          config,
+          configFile,
+          rebaseCheckBox,
+          sectionOrder,
+        ),
+        prSections,
       ),
-      {
-        packageFiles: packageFilesDesc,
-        config: configDesc,
-        baseBranch: baseBranchDesc,
-        prList,
-        warnings,
-        errors,
-      },
-    ),
-    config,
-    onboardingConfigHashComment,
-  );
+      config,
+      onboardingConfigHashComment,
+    );
+  }
+
+  let prBody = render(sections);
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
       'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    const prListSummary = getExpectedPrListSummary(config, branches);
+    sections = {
+      ...sections,
+      prList: getExpectedPrListSummary(config, branches),
+    };
     if (packageFilesDesc) {
-      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
       // "What to Expect" should render before "Detected Package Files" in the summary view,
       // so rebuild from a template with that section order rather than reordering the rendered body.
-      prBody = finalizeOnboardingPrBody(
-        fillOnboardingPrBody(
-          buildOnboardingPrTemplate(
-            config,
-            configFile,
-            rebaseCheckBox,
-            SUMMARY_SECTION_ORDER,
-          ),
-          {
-            packageFiles: packageFilesSummary,
-            config: configDesc,
-            baseBranch: baseBranchDesc,
-            prList: prListSummary,
-            warnings,
-            errors,
-          },
-        ),
-        config,
-        onboardingConfigHashComment,
-      );
-    } else {
-      prBody = prBody.replace(prList, prListSummary);
+      sectionOrder = SUMMARY_SECTION_ORDER;
+      sections.packageFiles = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
     }
+    prBody = render(sections);
   }
 
   await ensureConfigPr({
