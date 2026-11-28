@@ -41,9 +41,17 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    // Renovate runs every child process with `CI=true`, and APM 0.37.0+ then
+    // installs as `--frozen`, which refuses the manifest Renovate just updated.
+    // `--no-frozen` would opt out, but older APM versions reject that flag.
+    // `extraEnv` forwards the variable into the Docker sidecar, and `env`
+    // keeps the hardcoded `CI=true` from winning.
+    const ciEnv = { CI: 'false' };
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
+      extraEnv: ciEnv,
+      env: ciEnv,
       toolConstraints: [
         {
           toolName: 'apm',
