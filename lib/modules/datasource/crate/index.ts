@@ -26,6 +26,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
+import { getPathInVcs } from './crate-zip.ts';
 import type { CrateMetadata } from './schema.ts';
 import {
   CrateMetadataResponse,
@@ -59,7 +60,7 @@ export class CrateDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source URL is determined from the `repository` field in the results.';
+    'The source URL is determined from the `repository` field in the results. For crates.io, the source directory is determined from the `path_in_vcs` field of the `.cargo_vcs_info.json` file in the most recently published version.';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -143,6 +144,14 @@ export class CrateDatasource extends Datasource {
       .filter((release) => release.version);
     if (!result.releases.length) {
       return null;
+    }
+
+    const latest = lines.at(-1);
+    if (latest && CrateDatasource.isCratesIo(registryUrl)) {
+      const pathInVcs = await getPathInVcs(this.http, latest.name, latest.vers);
+      if (pathInVcs) {
+        result.sourceDirectory = pathInVcs;
+      }
     }
 
     return result;
