@@ -8,6 +8,138 @@ As end user, you can choose from these ways to run Renovate:
 
 If you are using the Mend Renovate app, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
+## Choosing how to run Renovate
+
+When you are looking at getting started with Renovate, it can be a little overwhelming trying to work you actually want to run it.
+The breadth of options for how to run Renovate comes out of its flexibility, and has grown out of the many different ways that users want to run Renovate.
+
+All of the options below - including Mend's products - runs the Open Source codebase end-to-end.
+
+Depending on which [Platform](../modules/platform/index.md) you are running Renovate against, you have a different set of choices, which we have broken down by the tab view below.
+Each option links to the section that describes it in more detail.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable MD007 -->
+
+=== "GitHub"
+
+  ```mermaid
+  flowchart TD
+      deployment{"Which GitHub do you use?"}
+      deployment -->|"github.com"| cloud{"Do you want a<br/>cloud-hosted offering?"}
+      deployment -->|"GitHub Enterprise Cloud"| ci
+      deployment -->|"GitHub Enterprise Cloud<br/><a href='https://docs.github.com/en/enterprise-cloud@latest/admin/overview/about-github-enterprise-cloud'>(with data residency)</a>"| ci
+      deployment -->|"GitHub Enterprise Server"| webhooks
+      cloud -->|"Yes"| app["<a href='../installing-onboarding/#hosted-githubcom-app'>Mend Renovate app</a><br/>(or <a href='#forking-renovate-app'>Forking Renovate</a>, for public repos)"]
+      cloud -->|"No"| webhooks{"Do you want real-time<br/>events via webhooks?"}
+      webhooks -->|"Yes"| ce["<a href='#mend-renovate-self-hosted-community-edition-enterprise-edition'>Mend Renovate Self-Hosted</a>"]
+      webhooks -->|"No"| ci{"Do you want it to run<br/>natively in your CI?"}
+      ci -->|"Yes"| action["<a href='#github-action'>GitHub Action</a>"]
+      ci -->|"No"| k8s{"Do you run Renovate<br/>on Kubernetes?"}
+      k8s -->|"Yes"| helm["<a href='#helm-chart'>Helm chart</a>"]
+      k8s -->|"No"| cli["Renovate CLI<br/>(<a href='#npm-package-cli'>npm package</a>, <a href='#docker-images'>Docker image</a>)"]
+  ```
+
+  The Mend Renovate app is only available for repositories on github.com, so it is not available for GitHub Enterprise Cloud (with or without data residency) or GitHub Enterprise Server.
+  Mend Renovate Self-Hosted supports github.com and GitHub Enterprise Server, but not GitHub Enterprise Cloud (with or without data residency).
+
+  - [Mend Renovate app](./installing-onboarding.md#hosted-githubcom-app)
+  - [Forking Renovate app](#forking-renovate-app)
+  - [Mend Renovate Self-Hosted](#mend-renovate-self-hosted-community-edition-enterprise-edition) <!-- markdownlint-disable-line MD051 as markdownlint gets to a different decision than MkDocs on what this fragment should be -->
+  - [GitHub Action](#github-action)
+  - [npm package](#npm-package-cli) / [Docker images](#docker-images)
+  - [Helm chart](#helm-chart)
+
+  If you use GitHub Enterprise Server, and are a Mend commercial customer, you can also use [Mend Remediate](#mend-remediate).
+
+=== "GitLab"
+
+  ```mermaid
+  flowchart TD
+      deployment{"Are your repositories<br/>on gitlab.com?"}
+      deployment -->|"Yes"| cloud{"Do you want a<br/>cloud-hosted offering?"}
+      deployment -->|"No, self-managed GitLab"| webhooks
+      cloud -->|"Yes"| app["<a href='../installing-onboarding/#hosted-gitlabcom-app'>Mend Renovate app</a>"]
+      cloud -->|"No"| webhooks{"Do you want real-time<br/>events via webhooks?"}
+      webhooks -->|"Yes"| ce["<a href='#mend-renovate-self-hosted-community-edition-enterprise-edition'>Mend Renovate Self-Hosted</a>"]
+      webhooks -->|"No"| ci{"Do you want it to run<br/>natively in your CI?"}
+      ci -->|"Yes"| runner["<a href='#gitlab-runner'>GitLab Runner</a>"]
+      ci -->|"No"| k8s{"Do you run Renovate<br/>on Kubernetes?"}
+      k8s -->|"Yes"| helm["<a href='#helm-chart'>Helm chart</a>"]
+      k8s -->|"No"| cli["Renovate CLI<br/>(<a href='#npm-package-cli'>npm package</a>, <a href='#docker-images'>Docker image</a>)"]
+  ```
+
+  The Mend Renovate app is only available for repositories on gitlab.com.
+
+  - [Mend Renovate app](./installing-onboarding.md#hosted-gitlabcom-app)
+  - [Mend Renovate Self-Hosted](#mend-renovate-self-hosted-community-edition-enterprise-edition) <!-- markdownlint-disable-line MD051 as markdownlint gets to a different decision than MkDocs on what this fragment should be -->
+  - [GitLab Runner](#gitlab-runner)
+  - [npm package](#npm-package-cli) / [Docker images](#docker-images)
+  - [Helm chart](#helm-chart)
+
+  If you use self-managed GitLab, and are a Mend commercial customer, you can also use [Mend Remediate](#mend-remediate).
+
+=== "Bitbucket"
+
+  ```mermaid
+  flowchart TD
+      deployment{"Are your repositories<br/>on bitbucket.org?"}
+      deployment -->|"Yes"| cloud{"Do you want a<br/>cloud-hosted offering?"}
+      deployment -->|"No, Bitbucket Data Center"| webhooks{"Do you want real-time<br/>events via webhooks?"}
+      cloud -->|"Yes"| app["<a href='../installing-onboarding/'>Mend Renovate app</a>"]
+      cloud -->|"No"| k8s{"Do you run Renovate<br/>on Kubernetes?"}
+      k8s -->|"Yes"| helm["<a href='#helm-chart'>Helm chart</a>"]
+      k8s -->|"No"| cli["Renovate CLI<br/>(<a href='#npm-package-cli'>npm package</a>, <a href='#docker-images'>Docker image</a>)"]
+      webhooks -->|"Yes"| ce["<a href='#mend-renovate-self-hosted-community-edition-enterprise-edition'>Mend Renovate Self-Hosted</a>"]
+      webhooks -->|"No"| k8s
+  ```
+
+  The Mend Renovate app is only available for repositories on bitbucket.org.
+
+  - [Mend Renovate app](./installing-onboarding.md)
+  - [Mend Renovate Self-Hosted](#mend-renovate-self-hosted-community-edition-enterprise-edition) <!-- markdownlint-disable-line MD051 as markdownlint gets to a different decision than MkDocs on what this fragment should be -->
+  - [npm package](#npm-package-cli) / [Docker images](#docker-images)
+  - [Helm chart](#helm-chart)
+
+  If you use Bitbucket Data Center, and are a Mend commercial customer, you can also use [Mend Remediate](#mend-remediate).
+
+=== "Azure DevOps"
+
+  ```mermaid
+  flowchart TD
+      deployment{"Are your repositories<br/>on dev.azure.com?"}
+      deployment -->|"Yes"| cloud{"Do you want a<br/>cloud-hosted offering?"}
+      deployment -->|"No, Azure DevOps Server"| k8s{"Do you run Renovate<br/>on Kubernetes?"}
+      k8s -->|"Yes"| helm["<a href='#helm-chart'>Helm chart</a>"]
+      k8s -->|"No"| cli["Renovate CLI<br/>(<a href='#npm-package-cli'>npm package</a>, <a href='#docker-images'>Docker image</a>)"]
+      cloud -->|"Yes"| region{"Which Mend region<br/>are you in?"}
+      cloud -->|"No"| k8s
+      region -->|"US"| app["<a href='../installing-onboarding/'>Mend Renovate app</a><br/>(developer.mend.io)"]
+      region -->|"EU"| appEu["<a href='../installing-onboarding/'>Mend Renovate app</a><br/>(developer-eu.mend.io)"]
+  ```
+
+  The Mend Renovate app is only available for repositories on dev.azure.com.
+
+  There are separate US (`developer.mend.io`) and EU (`developer-eu.mend.io`) deployments of the app, and you must onboard against the one for your Mend region.
+  The EU deployment is only available for Azure DevOps.
+
+  - [Mend Renovate app](./installing-onboarding.md)
+  - [npm package](#npm-package-cli) / [Docker images](#docker-images)
+  - [Helm chart](#helm-chart)
+
+=== "Other platforms"
+
+  Forgejo, Gitea, Gerrit, SCM-Manager and other platforms can be used with the Renovate CLI:
+
+  - [npm package](#npm-package-cli)
+  - [Docker images](#docker-images)
+  - [Helm chart](#helm-chart)
+
+  If you are not the one hosting Renovate, skip to [installing & onboarding](./installing-onboarding.md).
+
+<!-- markdownlint-enable MD007 -->
+<!-- prettier-ignore-end -->
+
 ## Self-Hosting Renovate
 
 When self-hosting Renovate you are the "administrator" of that deployment, this means you:
