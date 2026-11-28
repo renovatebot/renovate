@@ -11,6 +11,7 @@ import {
   BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
   getExtraCloneOpts,
   getInvalidReviewers,
+  getMergeStrategyId,
   getRepoGitUrl,
 } from './utils.ts';
 
@@ -338,6 +339,19 @@ describe('modules/platform/bitbucket-server/utils', () => {
         ),
       ).toThrow('Invalid Bitbucket Server endpoint: not-a-valid-url');
     });
+  });
+
+  it.each`
+    value             | expected
+    ${'auto'}         | ${undefined}
+    ${undefined}      | ${undefined}
+    ${'fast-forward'} | ${'ff-only'}
+    ${'merge-commit'} | ${'no-ff'}
+    ${'rebase'}       | ${'rebase-ff-only'}
+    ${'rebase-merge'} | ${'rebase-no-ff'}
+    ${'squash'}       | ${'squash'}
+  `('getMergeStrategyId("$value") == "$expected"', ({ value, expected }) => {
+    expect(getMergeStrategyId(value)).toBe(expected);
   });
 
   describe('getExtraCloneOpts', () => {
