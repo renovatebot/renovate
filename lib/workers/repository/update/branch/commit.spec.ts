@@ -7,11 +7,7 @@ import {
   clearRepoSanitizedSecretsList,
 } from '../../../../util/sanitize.ts';
 import type { BranchConfig } from '../../../types.ts';
-import {
-  commitFilesToBranch,
-  prepareBranchCommit,
-  pushBranchCommit,
-} from './commit.ts';
+import { prepareBranchCommit, pushBranchCommit } from './commit.ts';
 
 describe('workers/repository/update/branch/commit', () => {
   let config: BranchConfig;
@@ -70,6 +66,54 @@ describe('workers/repository/update/branch/commit', () => {
       });
     });
 
+    it('returns null if the platform has nothing to commit', async () => {
+      scm.prepareCommit.mockResolvedValueOnce(null);
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+
+      await expect(prepareBranchCommit(config)).resolves.toBeNull();
+
+      expect(scm.prepareCommit).toHaveBeenCalledOnce();
+    });
+
+    it('passes commit trailers', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.commitTrailers = [
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      ];
+
+      await prepareBranchCommit(config);
+
+      expect(scm.prepareCommit).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
+    it('logs the commit in dry-run mode without preparing it', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+
+      await expect(prepareBranchCommit(config)).resolves.toBeNull();
+
+      expect(scm.prepareCommit).not.toHaveBeenCalled();
+      expect(logger.logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would commit files to branch renovate/some-branch. See debug logs for raw commit information',
+      );
+    });
+
     it('logs deleted files in dry-run mode without preparing a commit', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.updatedPackageFiles?.push({
@@ -114,93 +158,6 @@ describe('workers/repository/update/branch/commit', () => {
         fakeSha('123test'),
       );
       expect(push).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('commitFilesToBranch', () => {
-    it('handles empty files', async () => {
-      await expect(commitFilesToBranch(config)).resolves.toBeNull();
-      expect(scm.prepareCommit).toHaveBeenCalledTimes(0);
-      expect(push).not.toHaveBeenCalled();
-    });
-
-    it('returns null if there is nothing to commit', async () => {
-      scm.prepareCommit.mockResolvedValueOnce(null);
-      config.updatedPackageFiles?.push({
-        type: 'addition',
-        path: 'package.json',
-        contents: 'some contents',
-      });
-
-      await expect(commitFilesToBranch(config)).resolves.toBeNull();
-      expect(push).not.toHaveBeenCalled();
-    });
-
-    it('commits files', async () => {
-      config.updatedPackageFiles?.push({
-        type: 'addition',
-        path: 'package.json',
-        contents: 'some contents',
-      });
-
-      await expect(commitFilesToBranch(config)).resolves.toBe(
-        fakeSha('123test'),
-      );
-
-      expect(scm.prepareCommit).toHaveBeenCalledTimes(1);
-      expect(scm.prepareCommit.mock.calls).toEqual([
-        [
-          {
-            baseBranch: 'base-branch',
-            branchName: 'renovate/some-branch',
-            files: [
-              {
-                contents: 'some contents',
-                path: 'package.json',
-                type: 'addition',
-              },
-            ],
-            force: false,
-            message: 'some commit message',
-            platformCommit: 'auto',
-          },
-        ],
-      ]);
-      expect(push).toHaveBeenCalledTimes(1);
-    });
-
-    it('passes commit trailers', async () => {
-      config.updatedPackageFiles?.push({
-        type: 'addition',
-        path: 'package.json',
-        contents: 'some contents',
-      });
-      config.commitTrailers = [
-        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
-      ];
-
-      await commitFilesToBranch(config);
-
-      expect(scm.prepareCommit).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
-        }),
-      );
-    });
-
-    it('dry runs', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
-      config.updatedPackageFiles?.push({
-        type: 'addition',
-        path: 'package.json',
-        contents: 'some contents',
-      });
-      await commitFilesToBranch(config);
-      expect(scm.prepareCommit).toHaveBeenCalledTimes(0);
-      expect(push).not.toHaveBeenCalled();
-      expect(logger.logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would commit files to branch renovate/some-branch. See debug logs for raw commit information',
-      );
     });
   });
 });
