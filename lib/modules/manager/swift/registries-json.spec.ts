@@ -77,6 +77,13 @@ describe('modules/manager/swift/registries-json', () => {
   });
 
   describe('discoverRegistryUrls', () => {
+    beforeEach(async () => {
+      const { getSiblingFileName } = await vi.importActual<
+        typeof import('../../../util/fs/index.ts')
+      >('../../../util/fs/index.ts');
+      fs.getSiblingFileName.mockImplementation(getSiblingFileName);
+    });
+
     it('returns an empty list when no registries.json file exists', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       const urls = await discoverRegistryUrls('Package.swift');

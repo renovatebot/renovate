@@ -239,6 +239,13 @@ describe('modules/manager/swift/index', () => {
       version: 1,
     });
 
+    beforeEach(async () => {
+      const { getSiblingFileName } = await vi.importActual<
+        typeof import('../../../util/fs/index.ts')
+      >('../../../util/fs/index.ts');
+      fs.getSiblingFileName.mockImplementation(getSiblingFileName);
+    });
+
     it('returns null when no Package.swift files supplied', async () => {
       await expect(extractAllPackageFiles({}, [])).resolves.toBeNull();
     });
