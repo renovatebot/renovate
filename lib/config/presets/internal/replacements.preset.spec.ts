@@ -1,5 +1,7 @@
 import semver from 'semver';
+import { logger } from '~test/util.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import type { PackageRule } from '../../types.ts';
 import { presets } from './replacements.preset.ts';
 
@@ -110,6 +112,45 @@ describe('config/presets/internal/replacements.preset', () => {
       );
 
       expect(overlapping).toBeEmptyArray();
+    },
+  );
+
+  const unconditionalCases = rules.flatMap(({ presetName, rule }) =>
+    !rule.matchCurrentVersion && !rule.matchCurrentValue && rule.replacementName
+      ? coerceArray(rule.matchPackageNames)
+          .filter(isLiteralName)
+          .map((packageName) => ({
+            presetName,
+            packageName,
+            datasource: coerceArray(rule.matchDatasources)[0],
+            replacementName: rule.replacementName,
+            replacementVersion: rule.replacementVersion,
+          }))
+      : [],
+  );
+
+  it.each(unconditionalCases)(
+    'replacements:$presetName replaces $packageName with only its own fields when all rules are applied',
+    async ({
+      packageName,
+      datasource,
+      replacementName,
+      replacementVersion,
+    }) => {
+      const res = await applyPackageRules({
+        depName: packageName,
+        packageName,
+        datasource,
+        packageRules: rules.map(({ rule }) => rule),
+      });
+
+      const { replacementName: name, replacementVersion: version } =
+        res as ReplacementRule;
+      expect({ replacementName: name, replacementVersion: version }).toEqual({
+        replacementName,
+        replacementVersion,
+      });
+      expect(logger.logger.once.warn).not.toHaveBeenCalled();
     },
   );
 });
