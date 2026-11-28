@@ -69,6 +69,7 @@ export interface BranchUpgradeConfig
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+  hasVulnerabilityAlertsRules?: boolean;
 
   isDigest?: boolean;
   isGroup?: boolean;

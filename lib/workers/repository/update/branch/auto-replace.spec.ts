@@ -1,15 +1,20 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile as extractGemspec } from '../../../../modules/manager/gemspec/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
+import { extractPackageFile as extractPep621PackageFile } from '../../../../modules/manager/pep621/index.ts';
 import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
 import { api as rubyVersioning } from '../../../../modules/versioning/ruby/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
-import { doAutoReplace } from './auto-replace.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
+import { hasVulnerabilityAlertsRules } from '../../extract/vulnerability-alerts.ts';
+import { flattenUpdates } from '../../updates/flatten.ts';
+import { checkBranchDepsMatchBaseDeps, doAutoReplace } from './auto-replace.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
@@ -17,6 +22,7 @@ const sampleHtml = Fixtures.get(
 );
 
 vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../util/git/semantic.ts');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -2115,5 +2121,87 @@ describe('workers/repository/update/branch/auto-replace', () => {
         }
       `);
     });
+  });
+
+  describe('checkBranchDepsMatchBaseDeps()', () => {
+    const pyproject = codeBlock`
+      [project]
+      name = "app"
+      version = "0.1.0"
+      dependencies = ["attrs>=24.1.0"]
+    `;
+
+    beforeEach(() => {
+      // `idna` is only in the lock file, so it is a transitive dependency
+      fs.findLocalSiblingOrParent.mockImplementation((_, otherFileName) =>
+        Promise.resolve(otherFileName === 'uv.lock' ? 'uv.lock' : null),
+      );
+      fs.readLocalFile.mockResolvedValue(codeBlock`
+        version = 1
+
+        [[package]]
+        name = "app"
+        version = "0.1.0"
+        source = { virtual = "." }
+        dependencies = [
+            { name = "attrs" },
+        ]
+
+        [[package]]
+        name = "attrs"
+        version = "24.2.0"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "idna"
+        version = "3.10"
+        source = { registry = "https://pypi.org/simple" }
+      `);
+    });
+
+    // Platform alerts are turned into rules of this shape during init
+    const alertRule = {
+      matchPackageNames: ['idna'],
+      matchCurrentVersion: '< 3.11',
+      isVulnerabilityAlert: true,
+    };
+
+    it.each`
+      alerts            | alertConfig
+      ${'no'}           | ${{}}
+      ${'OSV'}          | ${{ osvVulnerabilityAlerts: true }}
+      ${'packageRules'} | ${{ packageRules: [alertRule] }}
+    `(
+      'matches the base deps of a branch with $alerts vulnerability alerts',
+      async ({ alertConfig }) => {
+        const config = { ...getConfig(), ...alertConfig };
+        const packageFile = 'pyproject.toml';
+
+        // Extract the base branch the way `extractAllDependencies()` does,
+        // which includes `idna` only when vulnerability alerts are on
+        const extracted = (await extractPep621PackageFile(
+          pyproject,
+          packageFile,
+          { hasVulnerabilityAlertsRules: hasVulnerabilityAlertsRules(config) },
+        ))!;
+        extracted.deps.forEach(normalizeDepNames);
+
+        // Simulate the lookup, which finds an update for `attrs` only
+        for (const dep of extracted.deps) {
+          dep.updates = dep.depName === 'attrs' ? [{ newValue: '>=25' }] : [];
+        }
+
+        // Turn the update into the upgrade config of its branch, which
+        // records the extracted deps as `baseDeps`
+        const [upgrade] = await flattenUpdates(config, {
+          pep621: [{ ...extracted, packageFile }],
+        });
+
+        // Extract the unchanged branch content again and compare its deps
+        // with `baseDeps`, a mismatch makes Renovate rebuild the branch
+        const matches = await checkBranchDepsMatchBaseDeps(upgrade, pyproject);
+        expect(matches).toBeTrue();
+      },
+    );
   });
 });

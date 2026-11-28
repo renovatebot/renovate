@@ -17,6 +17,7 @@ import * as template from '../../../util/template/index.ts';
 import { parseUrl, withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { replacementAlreadyExists } from '../common.ts';
+import { hasVulnerabilityAlertsRules } from '../extract/vulnerability-alerts.ts';
 import { generateBranchName } from './branch-name.ts';
 
 function upper(str: string): string {
@@ -120,6 +121,7 @@ export async function flattenUpdates(
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<BranchUpgradeConfig[]> {
   const updates = [];
+  const hasAlertRules = hasVulnerabilityAlertsRules(config);
   const updateTypes = [
     'major',
     'minor',
@@ -211,6 +213,11 @@ export async function flattenUpdates(
             applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
+            // A reused branch is extracted again with this flag, so its deps
+            // can match `baseDeps` from the extraction of the base branch
+            if (hasAlertRules) {
+              updateConfig.hasVulnerabilityAlertsRules = true;
+            }
             update.branchName = updateConfig.branchName;
 
             // make sure that we use the dependency's current state of attestation, rather than using the new update's value
