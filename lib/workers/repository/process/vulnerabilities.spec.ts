@@ -2137,6 +2137,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['lodash'],
           matchCurrentVersion: '4.17.10',
           allowedVersions: '>= 4.17.11',
+          vulnerabilityFixVersions: ['4.17.11', '4.17.20'],
           isVulnerabilityAlert: true,
         },
         {
@@ -2144,7 +2145,60 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['lodash'],
           matchCurrentVersion: '4.17.10',
           allowedVersions: '>= 4.17.20',
+          vulnerabilityFixVersions: ['4.17.11', '4.17.20'],
           isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('shares the fixed versions across the rules of a dependency', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability,
+        {
+          id: 'GHSA-p6mc-m468-83gw',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { last_affected: '4.17.15' }],
+                },
+              ],
+              package: { name: 'lodash', ecosystem: 'npm' },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toMatchObject([
+        {
+          allowedVersions: '>= 4.17.11',
+          vulnerabilityFixVersions: ['4.17.11'],
+        },
+        {
+          allowedVersions: '> 4.17.15',
+          vulnerabilityFixVersions: ['4.17.11'],
         },
       ]);
     });
