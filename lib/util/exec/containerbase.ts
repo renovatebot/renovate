@@ -26,6 +26,11 @@ import {
  * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
  */
 export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
+  apko: {
+    datasource: 'github-releases',
+    packageName: 'chainguard-dev/apko',
+    versioning: 'semver',
+  },
   apm: {
     datasource: 'github-releases',
     packageName: 'microsoft/apm',

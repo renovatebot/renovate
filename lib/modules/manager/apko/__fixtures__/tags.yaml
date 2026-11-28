@@ -1,0 +1,14 @@
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+    - '@edge https://dl-cdn.alpinelinux.org/alpine/edge/main'
+    - https://dl-cdn.alpinelinux.org/alpine/v3.22/community
+    - '@local /packages'
+  packages:
+    - bash=5.2.37-r2
+    - nodejs@edge=22.13.1-r0
+    - libpcap=1.9.1-r0@local
+    - busybox@missing=1.36.1-r0
+archs:
+  - amd64
+  - arm64

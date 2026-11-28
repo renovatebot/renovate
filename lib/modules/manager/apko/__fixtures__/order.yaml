@@ -1,0 +1,12 @@
+contents:
+  repositories:
+    - https://dl-cdn.alpinelinux.org/alpine/v3.22/main
+    - https://mirror.example.com/os?token=secret
+    - https://dl-cdn.alpinelinux.org/alpine/v3.22/community
+  build_repositories:
+    - https://packages.wolfi.dev/os
+  packages:
+    - bash=5.2.37-r2
+archs:
+  - arm64
+  - amd64

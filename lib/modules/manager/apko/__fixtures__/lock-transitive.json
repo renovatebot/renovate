@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "contents": {
+    "packages": [
+      {
+        "name": "bash",
+        "version": "5.2.37-r2",
+        "architecture": "x86_64",
+        "url": "https://example.com/bash.apk",
+        "checksum": "a"
+      },
+      {
+        "name": "nginx",
+        "version": "1.24.0-r0",
+        "architecture": "x86_64",
+        "url": "https://example.com/nginx.apk",
+        "checksum": "c"
+      }
+    ]
+  }
+}
