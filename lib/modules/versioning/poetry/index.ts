@@ -185,9 +185,17 @@ function handleShort(
 }
 
 function getNewValue(config: NewValueConfig): string | null {
-  const { currentValue, rangeStrategy, currentVersion, newVersion } = config;
+  const { currentValue, currentVersion, newVersion } = config;
+  let { rangeStrategy } = config;
   if (!isPoetryRange(currentValue)) {
     return pep440.getNewValue(config);
+  }
+
+  if (rangeStrategy === 'update-lockfile') {
+    if (matches(newVersion, currentValue)) {
+      return currentValue;
+    }
+    rangeStrategy = 'replace';
   }
 
   if (rangeStrategy === 'replace') {
