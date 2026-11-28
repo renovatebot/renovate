@@ -3643,6 +3643,8 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'master',
           description: 'the-body',
         })
+        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
+        .reply(200, { user_has_approved: false, approved_by: [] })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .reply(200);
       await expect(
@@ -3663,6 +3665,77 @@ describe('modules/platform/gitlab/index', () => {
       });
     });
 
+    it('skips auto-approve when already approved', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
+        .reply(200, {
+          user_has_approved: true,
+          approved_by: [{ user: { id: 1, username: 'renovate-bot' } }],
+        });
+      await expect(
+        gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            autoApprove: true,
+          },
+        }),
+      ).resolves.toMatchObject({ number: 12345 });
+    });
+
+    it('auto-approves when fetching approvals fails', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
+        .replyWithError('some error')
+        .post('/api/v4/projects/undefined/merge_requests/12345/approve')
+        .reply(200);
+      await expect(
+        gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            autoApprove: true,
+          },
+        }),
+      ).resolves.toMatchObject({ number: 12345 });
+    });
+
     it('auto-approve with different user', async () => {
       await initPlatform('13.3.6-ee');
       vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', 'some-token');
@@ -3681,6 +3754,9 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'master',
           description: 'the-body',
         })
+        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
+        .matchHeader('Authorization', 'Bearer some-token')
+        .reply(200, { user_has_approved: false, approved_by: [] })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .matchHeader('Authorization', 'Bearer some-token')
         .reply(200);
@@ -3719,6 +3795,8 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'master',
           description: 'the-body',
         })
+        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
+        .reply(200, { user_has_approved: false, approved_by: [] })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .replyWithError('some error');
       await expect(
@@ -4106,6 +4184,8 @@ describe('modules/platform/gitlab/index', () => {
           state: 'opened',
           created_at: '2025-05-19T12:00:00.000Z',
         })
+        .get('/api/v4/projects/undefined/merge_requests/1/approvals')
+        .reply(200, { user_has_approved: false, approved_by: [] })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);
       await expect(

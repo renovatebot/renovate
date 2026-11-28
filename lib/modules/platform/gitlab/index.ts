@@ -79,7 +79,11 @@ import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
 import { getRoleAccessLevel } from './roles.ts';
 import type { GitLabMergeRequest } from './schema.ts';
-import { LastPipelineId, MergeTrainCarStatus } from './schema.ts';
+import {
+  LastPipelineId,
+  MergeRequestApprovals,
+  MergeTrainCarStatus,
+} from './schema.ts';
 import type {
   GitlabComment,
   GitlabIssue,
@@ -788,6 +792,27 @@ async function tryPrAutomerge(
   }
 }
 
+/**
+ * Whether the user owning the token in `opts` has already approved the MR.
+ * https://docs.gitlab.com/api/merge_request_approvals/#retrieve-approval-state-for-a-merge-request
+ */
+async function hasApprovedMr(
+  mrNumber: number,
+  opts: GitlabHttpOptions,
+): Promise<boolean> {
+  try {
+    const { body } = await gitlabApi.getJson(
+      `projects/${config.repository}/merge_requests/${mrNumber}/approvals`,
+      { ...opts, memCache: false },
+      MergeRequestApprovals,
+    );
+    return body.user_has_approved;
+  } catch (err) {
+    logger.debug({ err }, 'GitLab: Error fetching merge request approvals');
+    return false;
+  }
+}
+
 async function approveMr(mrNumber: number): Promise<void> {
   const env = getEnv();
   const opts: GitlabHttpOptions = {};
@@ -795,6 +820,10 @@ async function approveMr(mrNumber: number): Promise<void> {
     opts.token = env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
   }
   logger.debug(`approveMr(${mrNumber})`);
+  if (await hasApprovedMr(mrNumber, opts)) {
+    logger.debug(`MR !${mrNumber} already approved, skipping approval`);
+    return;
+  }
   try {
     await gitlabApi.postJson(
       `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
