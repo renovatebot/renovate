@@ -21,6 +21,7 @@ import * as p from '../../../util/promises.ts';
 import { Result } from '../../../util/result.ts';
 import { LookupStats } from '../../../util/stats.ts';
 import { withoutUrlCredentials } from '../../../util/url.ts';
+import { mayMatchVulnerabilityAlert } from '../extract/vulnerability-alerts.ts';
 import { PackageFiles } from '../package-files.ts';
 import { lookupUpdates } from './lookup/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
@@ -84,6 +85,18 @@ async function lookup(
 
   if (!isNonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
+    return Result.ok(dep);
+  }
+
+  // Most lock file only deps match no alert, and applying the package rules
+  // to each of them costs far more than ruling them out by name
+  if (
+    mayBeAVulnerabilityAlert &&
+    !mayMatchVulnerabilityAlert(packageFileConfig, {
+      packageName: dep.packageName,
+      datasource: dep.datasource,
+    })
+  ) {
     return Result.ok(dep);
   }
 
