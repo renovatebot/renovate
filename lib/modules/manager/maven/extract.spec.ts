@@ -18,6 +18,105 @@ const childPomContent = Fixtures.get('child.pom.xml');
 const profileSettingsContent = Fixtures.get('profile.settings.xml');
 
 describe('modules/manager/maven/extract', () => {
+  describe('java.version constraints', () => {
+    it.each`
+      value     | expected
+      ${'1.8'}  | ${'1.8'}
+      ${'17'}   | ${'17'}
+      ${' 21 '} | ${'21'}
+    `(
+      'extracts a direct Java constraint from $value',
+      async ({ value, expected }) => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <properties><java.version>${value}</java.version></properties>
+        </project>
+      `);
+
+        const result = await extractAllPackageFiles({}, ['pom.xml']);
+
+        expect(result[0].extractedConstraints).toEqual({ java: expected });
+      },
+    );
+
+    it.each`
+      properties                                            | expected
+      ${''}                                                 | ${'11'}
+      ${'<java.version />'}                                 | ${undefined}
+      ${'<java.version>   </java.version>'}                 | ${undefined}
+      ${'<java.version>17</java.version>'}                  | ${'17'}
+      ${'<java.version>${runtime.version}</java.version>'}  | ${undefined}
+      ${'<java.version>{{runtime_version}}</java.version>'} | ${undefined}
+    `(
+      'resolves local parent constraints for $properties',
+      async ({ properties, expected }) => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <groupId>org.example</groupId><artifactId>parent</artifactId><version>1.0.0</version>
+          <properties>
+            <java.version>11</java.version>
+            <dependency.version>1.2.3</dependency.version>
+          </properties>
+        </project>
+      `).mockResolvedValueOnce(codeBlock`
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <parent>
+            <groupId>org.example</groupId><artifactId>parent</artifactId><version>1.0.0</version>
+          </parent>
+          <properties>
+            ${properties}
+            <dependency.version />
+            <runtime.version>21</runtime.version>
+          </properties>
+          <dependencies><dependency>
+            <groupId>org.example</groupId><artifactId>dependency</artifactId>
+            <version>\${dependency.version}</version>
+          </dependency></dependencies>
+        </project>
+      `);
+
+        const result = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'child/pom.xml',
+        ]);
+
+        expect(result[0].extractedConstraints).toEqual({ java: '11' });
+        expect(result[1].extractedConstraints).toEqual(
+          expected ? { java: expected } : undefined,
+        );
+        expect(result[0].deps).toContainEqual(
+          expect.objectContaining({
+            depName: 'org.example:dependency',
+            currentValue: '1.2.3',
+            editFile: 'pom.xml',
+          }),
+        );
+      },
+    );
+
+    it.each`
+      properties
+      ${''}
+      ${'<java.version />'}
+      ${'<java.version> </java.version>'}
+      ${'<java.version>${runtime.version}</java.version><runtime.version>21</runtime.version>'}
+      ${'<maven.compiler.release>21</maven.compiler.release>'}
+    `(
+      'omits an unsupported direct Java constraint for $properties',
+      async ({ properties }) => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <properties>${properties}</properties>
+        </project>
+      `);
+
+        const result = await extractAllPackageFiles({}, ['pom.xml']);
+
+        expect(result[0].extractedConstraints).toBeUndefined();
+      },
+    );
+  });
+
   describe('extractPackage', () => {
     it('returns null for invalid XML', () => {
       expect(extractPackage('', 'some-file', {})).toBeNull();

@@ -3,6 +3,26 @@ import { Fixtures } from '~test/fixtures.ts';
 import { CachedMavenXml } from './schema.ts';
 
 describe('modules/datasource/maven/schema', () => {
+  it('preserves java.version while trimming unused POM properties', () => {
+    const input = codeBlock`
+      <project>
+        <groupId>org.example</groupId>
+        <artifactId>package</artifactId>
+        <description>Unused package description</description>
+        <properties>
+          <java.version>17</java.version>
+          <unused.property>unused</unused.property>
+        </properties>
+      </project>
+    `;
+
+    const result = CachedMavenXml.parse(input);
+
+    expect(result).toContain('<java.version>17</java.version>');
+    expect(result).not.toContain('unused.property');
+    expect(result.length).toBeLessThan(input.length);
+  });
+
   it('trims release metadata to the fields used by Renovate', () => {
     const input = Fixtures.get('metadata.xml');
 
