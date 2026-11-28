@@ -50,6 +50,7 @@ import type { PnpmWorkspaceMinimumReleaseAge } from '../schema.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
 import {
+  getInheritedPackageManagerVersion,
   getInstalledPackageName,
   getNodeOptions,
   getPackageManagerVersion,
@@ -274,7 +275,7 @@ export async function generateLockFile(
   });
   const isSyncEnabled = syncAgeMs !== null;
   try {
-    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     // if pnpm is being upgraded, it comes first
     let pnpmConstraint: string | null | undefined =
       getPnpmConstraintFromUpgrades(upgrades);
@@ -282,9 +283,18 @@ export async function generateLockFile(
       pnpmConstraint = await resolvePnpmConstraint(
         config,
         lockFileName,
-        // look in package.json > packageManager or engines, then use the lockfileVersion
-        async () =>
-          getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()),
+        // look in package.json > packageManager or engines, then walk up to an
+        // inherited packageManager (mirrors corepack), then use the lockfileVersion
+        async () => {
+          const pnpmVersion = getPackageManagerVersion(
+            'pnpm',
+            await lazyPkgJson.getValue(),
+          );
+          if (!isNullOrUndefined(pnpmVersion)) {
+            return pnpmVersion;
+          }
+          return await getInheritedPackageManagerVersion('pnpm', lockFileDir);
+        },
       );
     }
     const pnpmToolConstraint: ToolConstraint = {
@@ -316,7 +326,7 @@ export async function generateLockFile(
       extraEnv,
       docker: {},
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
         pnpmToolConstraint,
       ],
     };
