@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { extractPackageFile as extractGemfile } from '../../../../modules/manager/bundler/index.ts';
 import { extractPackageFile as extractGemspec } from '../../../../modules/manager/gemspec/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
@@ -541,6 +542,29 @@ describe('workers/repository/update/branch/auto-replace', () => {
           .replace(upgrade.depName, upgrade.newName)
           .replace(upgrade.currentValue, upgrade.newValue),
       );
+    });
+
+    it('pins a quoted bundler range', async () => {
+      const gemfile = codeBlock`
+        source "https://rubygems.org"
+
+        gem "importmap-rails", "~> 2.2"
+      `;
+      const deps = (await extractGemfile(gemfile, 'Gemfile'))!.deps;
+      upgrade.manager = 'bundler';
+      upgrade.baseDeps = deps;
+      upgrade.depName = deps[0].depName;
+      upgrade.currentValue = deps[0].currentValue!;
+      upgrade.newValue = rubyVersioning.getPinnedValue!(
+        '2.2.3',
+        deps[0].currentValue!,
+      );
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'Gemfile';
+
+      const res = await doAutoReplace(upgrade, gemfile, reuseExistingBranch);
+
+      expect(res).toBe(gemfile.replace('"~> 2.2"', '"2.2.3"'));
     });
 
     it('bumps a simple gemspec constraint', async () => {
