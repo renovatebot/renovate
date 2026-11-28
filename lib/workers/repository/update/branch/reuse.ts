@@ -25,6 +25,7 @@ export interface BranchReuseDecisionInput {
   config: BranchConfig;
   branchPr: Pr | null;
   branchExists: boolean;
+  branchIsModified: boolean;
   dependencyDashboardCheck: string | undefined;
   forceRebase: boolean;
 }
@@ -38,6 +39,7 @@ export function decideBranchReuse({
   config,
   branchPr,
   branchExists,
+  branchIsModified,
   dependencyDashboardCheck,
   forceRebase,
 }: BranchReuseDecisionInput): BranchReuseDecision {
@@ -93,7 +95,7 @@ export function decideBranchReuse({
   }
 
   // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
-  // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+  // an edited branch only gets here when the user ticked it on the dashboard or requested a rebase
   if (branchPr?.targetBranch && branchPr.targetBranch !== config.baseBranch) {
     logger.debug(
       'Base branch changed by user, rebasing the branch onto new base',
@@ -104,6 +106,22 @@ export function decideBranchReuse({
   if (config.cacheFingerprintMatch === 'no-match') {
     logger.debug(
       'Cache fingerprint does not match, cannot reuse existing branch',
+    );
+    return { action: 'no-reuse', userRebaseRequested };
+  }
+
+  // without a cached fingerprint, fall back to the one kept in the PR, so a branch whose upgrades shrank is rebuilt
+  // debug data proves the platform keeps it, so a PR without a fingerprint predates it and is rebuilt once
+  // an edited branch is left to the existing checks, so its user commits are kept
+  const debugData = branchPr?.bodyStruct?.debugData;
+  if (
+    !branchIsModified &&
+    config.cacheFingerprintMatch === 'no-fingerprint' &&
+    debugData &&
+    debugData.upgradesFingerprint !== config.upgradesFingerprint
+  ) {
+    logger.debug(
+      'PR upgrades fingerprint is missing or changed, cannot reuse existing branch',
     );
     return { action: 'no-reuse', userRebaseRequested };
   }
