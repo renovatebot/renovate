@@ -216,3 +216,7 @@ plugins:
 # https://3os.org/utilities/markdown-cheatsheet/awesome-pages/
 # We now use the awesome-pages plugin, which uses `.pages` files inside the renovate docs/ folder to set the navigation structure.
 # The source `.pages` file(s) are in the renovatebot/renovate repository.
+
+exclude_docs: |
+  apps/renovate.md
+  apps/forking-renovate.md
