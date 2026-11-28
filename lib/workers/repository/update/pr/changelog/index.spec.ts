@@ -123,9 +123,20 @@ describe('workers/repository/update/pr/changelog/index', () => {
       await expect(
         getChangeLogJSON({
           ...upgrade,
-          sourceUrl: 'https://dev.azure.com/unknown-repo',
+          sourceUrl: 'https://unsupported-source.com/unknown-repo',
         }),
       ).resolves.toBeNull();
+    });
+
+    it('handles known platform with no changelog source', async () => {
+      const saved = api.get('github')!;
+      api.delete('github');
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+        }),
+      ).resolves.toBeNull();
+      api.set('github', saved);
     });
 
     it('returns null if no currentVersion', async () => {

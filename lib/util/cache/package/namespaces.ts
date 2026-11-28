@@ -9,6 +9,8 @@ import { AllDatasourcesListLiteral } from '../../../datasource-list.generated.ts
 
 export const packageCacheNamespaces = [
   '_test-namespace',
+  'changelog-azure-release',
+  'changelog-azure-notes@v2',
   'changelog-bitbucket-notes@v2',
   'changelog-bitbucket-release',
   'changelog-bitbucket-server-notes@v2',
