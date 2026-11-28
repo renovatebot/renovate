@@ -8,7 +8,7 @@ export function getBaseBranchDesc(config: RenovateConfig): string {
   if (config.baseBranchPatterns.length > 1) {
     return `You have configured Renovate to use the following baseBranchPatterns: ${config.baseBranchPatterns
       .map((branch) => `\`${branch}\``)
-      .join(', ')}.`;
+      .join(', ')}.\n\n`;
   }
   return `You have configured Renovate to use branch \`${config.baseBranchPatterns[0]}\` as base branch.\n\n`;
 }
