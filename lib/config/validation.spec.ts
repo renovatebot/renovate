@@ -7,6 +7,71 @@ import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
+    describe('Mix Hex repositories', () => {
+      const repository = {
+        url: 'https://repo.example.com/hex',
+        publicKeyFingerprint:
+          'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+      };
+
+      it('allows literal repository names inside Mix config', async () => {
+        const config = {
+          mix: { hexRepositories: { 'example.repo': repository } },
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+
+        expect(errors).toBeEmptyArray();
+        expect(warnings).toBeEmptyArray();
+      });
+
+      it.each`
+        name               | definition                                               | error
+        ${'hexpm'}         | ${repository}                                            | ${'mix.hexRepositories.hexpm'}
+        ${'hexpm:example'} | ${repository}                                            | ${'mix.hexRepositories'}
+        ${'example'}       | ${{ ...repository, url: 'https://user:pass@repo.test' }} | ${'without credentials'}
+        ${'example'}       | ${{ ...repository, url: 'https://repo.test?secret' }}    | ${'without credentials'}
+        ${'example'}       | ${{ ...repository, publicKeyFingerprint: 'invalid' }}    | ${'Expected an unpadded SHA256'}
+        ${'example'}       | ${{ ...repository, token: 'secret' }}                    | ${'Unrecognized key'}
+      `(
+        'rejects an invalid repository definition ($name: $error)',
+        async ({ name, definition, error }) => {
+          const config = { mix: { hexRepositories: { [name]: definition } } };
+
+          const { errors, warnings } = await configValidation.validateConfig(
+            'repo',
+            config,
+          );
+
+          expect(errors).toEqual([
+            expect.objectContaining({
+              message: expect.stringContaining(error),
+            }),
+          ]);
+          expect(warnings).toBeEmptyArray();
+        },
+      );
+
+      it('rejects repositories at the top level', async () => {
+        const { errors, warnings } = await configValidation.validateConfig(
+          'repo',
+          {
+            hexRepositories: { example: repository },
+          },
+        );
+
+        expect(errors).toEqual([
+          expect.objectContaining({
+            message: expect.stringContaining('only be used in'),
+          }),
+        ]);
+        expect(warnings).toBeEmptyArray();
+      });
+    });
+
     it.each([
       [
         'branchName',

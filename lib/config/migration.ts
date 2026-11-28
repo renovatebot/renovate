@@ -47,6 +47,10 @@ export function migrateConfig(
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
 
     for (const [key, val] of Object.entries(newConfig)) {
+      if (key === 'hexRepositories') {
+        // The keys are literal Mix repository names, not Renovate options.
+        continue;
+      }
       if (isString(val) && val.includes('{{baseDir}}')) {
         // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(

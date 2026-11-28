@@ -8,6 +8,7 @@ import type {
   AdditionalConstraintName,
   ConstraintName,
 } from '../../util/exec/types.ts';
+import type { HexRepositoryPackage } from '../../util/hex-repository.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
 
 /**
@@ -51,6 +52,7 @@ export interface GetReleasesConfig {
   registryUrl?: string;
   currentValue?: string;
   constraints?: Partial<Record<ConstraintName, string>>;
+  hexRepository?: HexRepositoryPackage;
   /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */

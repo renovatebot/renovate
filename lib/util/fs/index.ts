@@ -338,9 +338,10 @@ export function readCacheFile(
 export function outputCacheFile(
   file: string,
   data: string | NodeJS.ArrayBufferView,
+  options?: { mode: number },
 ): Promise<void> {
   const filePath = ensureCachePath(file);
-  return fs.outputFile(filePath, data);
+  return fs.outputFile(filePath, data, options);
 }
 
 export async function readSystemFile(fileName: string): Promise<Buffer>;

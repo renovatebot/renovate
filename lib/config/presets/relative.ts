@@ -75,7 +75,9 @@ export function canonicalizeRelativePresets(
       continue;
     }
 
-    canonicalizeRelativePresets(val, parent);
+    if (key !== 'hexRepositories') {
+      canonicalizeRelativePresets(val, parent);
+    }
   }
 }
 

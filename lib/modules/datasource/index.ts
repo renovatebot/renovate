@@ -78,6 +78,7 @@ function toGetReleasesConfig(
     constraints,
     constraintsVersioning,
     constraintsFiltering,
+    hexRepository,
   } = config;
   return {
     customDatasources,
@@ -88,6 +89,7 @@ function toGetReleasesConfig(
     constraints,
     constraintsVersioning,
     constraintsFiltering,
+    ...(hexRepository && { hexRepository }),
   };
 }
 
@@ -116,8 +118,10 @@ async function getRegistryReleases(
   const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
   const cacheKey = buildCacheKey(registryUrl, config.packageName);
 
-  const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
-  const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
+  // Named Hex lookups must verify the configured key before using any releases.
+  const cacheEnabled = !config.hexRepository && !!datasource.caching;
+  const cacheForced =
+    !config.hexRepository && GlobalConfig.get('cachePrivatePackages');
 
   if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
@@ -467,11 +471,9 @@ async function fetchReleases(
     logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
-  const registryUrls = resolveRegistryUrls(
-    datasource,
-    config.packageName,
-    registryUrlsConfig,
-  );
+  const registryUrls = config.hexRepository
+    ? [config.hexRepository.url]
+    : resolveRegistryUrls(datasource, config.packageName, registryUrlsConfig);
   let dep: ReleaseResult | null = null;
   const registryStrategy =
     config.registryStrategy ?? datasource.registryStrategy;
@@ -530,12 +532,14 @@ function fetchCachedReleases(
     'releases',
     datasource,
     packageName,
-    config.registryStrategy,
-    safeStringify([
-      registryUrls,
-      config.defaultRegistryUrls,
-      config.additionalRegistryUrls,
-    ]),
+    config.hexRepository ? 'named-hex' : config.registryStrategy,
+    safeStringify(
+      config.hexRepository ?? [
+        registryUrls,
+        config.defaultRegistryUrls,
+        config.additionalRegistryUrls,
+      ],
+    ),
   );
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
@@ -549,11 +553,19 @@ function fetchCachedReleases(
 }
 
 export function getRawPkgReleases(
-  config: GetPkgReleasesConfig,
+  requestedConfig: GetPkgReleasesConfig,
 ): AsyncResult<
   ReleaseResult,
   Error | 'no-datasource' | 'no-package-name' | 'no-result'
 > {
+  const { hexRepository } = requestedConfig;
+  const config = hexRepository
+    ? {
+        ...requestedConfig,
+        datasource: 'hex',
+        packageName: hexRepository.packageName,
+      }
+    : requestedConfig;
   if (!config.datasource) {
     logger.warn('No datasource found');
     return AsyncResult.err('no-datasource');

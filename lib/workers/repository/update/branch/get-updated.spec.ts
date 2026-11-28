@@ -9,6 +9,7 @@ import * as _gitSubmodules from '../../../../modules/manager/git-submodules/inde
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
 import * as _mise from '../../../../modules/manager/mise/index.ts';
+import * as _mix from '../../../../modules/manager/mix/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
 import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
@@ -29,6 +30,7 @@ const gitSubmodules = vi.mocked(_gitSubmodules);
 const gomod = vi.mocked(_gomod);
 const helmv3 = vi.mocked(_helmv3);
 const mise = vi.mocked(_mise);
+const mix = vi.mocked(_mix);
 const npm = vi.mocked(_npm);
 const batectWrapper = vi.mocked(_batectWrapper);
 const autoReplace = vi.mocked(_autoReplace);
@@ -40,6 +42,7 @@ vi.mock('../../../../modules/manager/bundler/index.ts');
 vi.mock('../../../../modules/manager/composer/index.ts');
 vi.mock('../../../../modules/manager/helmv3/index.ts');
 vi.mock('../../../../modules/manager/mise/index.ts');
+vi.mock('../../../../modules/manager/mix/index.ts');
 vi.mock('../../../../modules/manager/npm/index.ts');
 vi.mock('../../../../modules/manager/git-submodules/index.ts');
 vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
@@ -586,6 +589,34 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('passes the Mix repository set to a lockfile maintenance solve', async () => {
+      const hexRepositories = {
+        company: {
+          url: 'https://repo.example.com/hex',
+          publicKeyFingerprint:
+            'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+        },
+      };
+      config.upgrades.push({
+        manager: 'mix',
+        packageFile: 'apps/myapp/mix.exs',
+        updateType: 'lockFileMaintenance',
+        branchName: 'some-branch',
+        hexRepositories,
+      });
+      mix.updateArtifacts.mockResolvedValueOnce(null);
+
+      await getUpdatedPackageFiles(config);
+
+      expect(mix.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'apps/myapp/mix.exs',
+          updatedDeps: [],
+          config: expect.objectContaining({ hexRepositories }),
+        }),
+      );
     });
 
     it('for updatedArtifacts passes proper lockFiles', async () => {

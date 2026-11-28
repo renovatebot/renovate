@@ -4,6 +4,26 @@ import { allManagersList } from '../../../modules/manager/index.ts';
 import { generateFingerprintConfig } from './extract-fingerprint-config.ts';
 
 describe('workers/repository/extract/extract-fingerprint-config', () => {
+  it('includes the named Mix repositories in the extraction fingerprint', () => {
+    const hexRepositories = {
+      company: {
+        url: 'https://repo.example.com/hex',
+        publicKeyFingerprint:
+          'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+      },
+    };
+    const config = mergeChildConfig(getConfig(), {
+      enabledManagers: ['mix'],
+      mix: { hexRepositories },
+    });
+
+    const fingerprintConfig = generateFingerprintConfig(config);
+
+    expect(fingerprintConfig.managers).toMatchObject([
+      { manager: 'mix', hexRepositories },
+    ]);
+  });
+
   it('filter with enabledManagers', () => {
     const config = mergeChildConfig(getConfig(), {
       registryAliases: {

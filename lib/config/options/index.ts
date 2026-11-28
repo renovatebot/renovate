@@ -790,6 +790,28 @@ const options: Readonly<RenovateOptions>[] = [
     requiresCheckAtTrustBoundary: true,
   },
   {
+    name: 'hexRepositories',
+    parents: ['mix'],
+    description:
+      'Named Hex repositories used by Mix dependencies, with a pinned public key fingerprint or PEM public key.',
+    type: 'object',
+    additionalProperties: {
+      type: 'object',
+      properties: {
+        url: { type: 'string' },
+        publicKeyFingerprint: { type: 'string' },
+        publicKey: { type: 'string' },
+      },
+      required: ['url'],
+      oneOf: [
+        { required: ['publicKeyFingerprint'] },
+        { required: ['publicKey'] },
+      ],
+      additionalProperties: false,
+    },
+    mergeable: true,
+  },
+  {
     name: 'customDatasources',
     scopes: lookupScopes,
     description: 'Defines custom datasources for usage by managers.',

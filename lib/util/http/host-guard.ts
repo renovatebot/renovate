@@ -357,11 +357,12 @@ export function checkUrl(
  *
  * A proxy agent connects to the proxy and hands it the target hostname, so the target is resolved by the proxy and Renovate's `dnsLookup` guard never runs. Resolving here instead is best-effort only: the proxy re-resolves the hostname itself, so a DNS-rebinding or split-horizon answer can still differ from what we saw. Pair it with egress controls on the proxy.
  */
-async function preflightHostname(
+export async function preflightHostname(
   url: URL,
   decision: HostGuardDecision,
   hostType: string | undefined,
-  responseBecomesConfig: boolean | undefined,
+  responseBecomesConfig?: boolean,
+  allowUnresolved = false,
 ): Promise<void> {
   const hostname = unbracketHostname(url.hostname);
   if (net.isIP(hostname) !== 0) {
@@ -372,8 +373,11 @@ async function preflightHostname(
   let addresses: dns.LookupAddress[];
   try {
     addresses = await dnsPromises.lookup(hostname, { all: true });
-  } catch {
-    // fail open: a locked-down proxy environment often has no resolver which can answer for public names at all, and failing closed would break every such deployment
+  } catch (err) {
+    if (!allowUnresolved) {
+      throw err;
+    }
+    // Locked-down proxy environments may not have a local resolver.
     logger.once.debug(
       `Host guard could not resolve ${hostname} - relying on the proxy for this request`,
     );
@@ -416,6 +420,7 @@ function makeBeforeRequest(
       checkUrl(url, hostType, grant, responseBecomesConfig),
       hostType,
       responseBecomesConfig,
+      true,
     );
   };
 }

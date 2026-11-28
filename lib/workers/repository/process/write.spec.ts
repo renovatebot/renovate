@@ -431,6 +431,25 @@ describe('workers/repository/process/write', () => {
   });
 
   describe('generateCommitFingerprintConfig()', () => {
+    it('includes Mix repositories in the artifact fingerprint', () => {
+      const hexRepositories = {
+        company: {
+          url: 'https://repo.example.com/hex',
+          publicKeyFingerprint:
+            'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+        },
+      };
+      const branch = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({ manager: 'mix', hexRepositories }),
+        ],
+      });
+
+      const [result] = generateCommitFingerprintConfig(branch);
+
+      expect(result.hexRepositories).toEqual(hexRepositories);
+    });
+
     it('does not include postUpgradeTasks when not set', () => {
       const branch = partial<BranchConfig>({
         upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],

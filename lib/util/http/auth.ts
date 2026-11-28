@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { PLATFORM_FAMILIES } from '../../constants/index.ts';
+import { coerceObject } from '../object.ts';
 import type { GotOptions } from './types.ts';
 
 export type AuthGotOptions = Pick<
@@ -13,12 +14,21 @@ export type AuthGotOptions = Pick<
   | 'password'
 >;
 
+export function getAuthorizationHeader(
+  headers: AuthGotOptions['headers'],
+): string | undefined {
+  const header = Object.entries(coerceObject(headers)).findLast(
+    ([name]) => name.toLowerCase() === 'authorization',
+  )?.[1];
+  return isNonEmptyString(header) ? header : undefined;
+}
+
 export function applyAuthorization<GotOptions extends AuthGotOptions>(
   inOptions: GotOptions,
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (isNonEmptyString(options.headers?.authorization) || options.noAuth) {
+  if (getAuthorizationHeader(options.headers) || options.noAuth) {
     return options;
   }
 

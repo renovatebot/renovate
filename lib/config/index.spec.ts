@@ -114,6 +114,33 @@ describe('config/index', () => {
       });
     });
 
+    it('replaces each Mix repo definition as a unit when switching trust inputs', () => {
+      const url = 'https://repo.example.com/hex';
+      const fingerprint = {
+        url,
+        publicKeyFingerprint:
+          'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+      };
+      const pem = { url, publicKey: 'RSA public key contents' };
+
+      const config = mergeChildConfig(
+        {
+          mix: {
+            hexRepositories: {
+              hexRepositories: fingerprint,
+              other: fingerprint,
+            },
+          },
+        },
+        { mix: { hexRepositories: { hexRepositories: pem } } },
+      );
+
+      expect(config.mix.hexRepositories).toEqual({
+        hexRepositories: pem,
+        other: fingerprint,
+      });
+    });
+
     it('does not merge toolSettings with any defaults', () => {
       const config = mergeChildConfig(
         { ...defaultConfig },

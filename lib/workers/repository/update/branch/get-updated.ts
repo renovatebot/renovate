@@ -593,6 +593,11 @@ function patchConfigForArtifactsUpdate(
   // drop any lockFiles that happen to be defined on the branch config
   const updatedConfig = { ...config };
   delete updatedConfig.lockFiles;
+  if (manager === 'mix') {
+    updatedConfig.hexRepositories = config.upgrades.find(
+      (upgrade) => upgrade.manager === manager,
+    )?.hexRepositories;
+  }
   if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];

@@ -29,6 +29,30 @@ describe('config/migrate-validate', () => {
       });
     });
 
+    it('preserves Mix repository names through repository config migration and validation', async () => {
+      const repository = {
+        url: 'https://registry.example.com/hex',
+        publicKeyFingerprint:
+          'SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc',
+      };
+      const hexRepositories = {
+        docker: repository,
+        node: repository,
+        force: repository,
+        extends: repository,
+      };
+
+      const result = await migrateAndValidate(config, {
+        mix: { hexRepositories },
+      });
+
+      expect(result).toEqual({
+        mix: { hexRepositories },
+        errors: [],
+        warnings: [],
+      });
+    });
+
     it('handles invalid', async () => {
       // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };

@@ -24,6 +24,7 @@ import type {
   ToolName,
 } from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
+import type { HexRepository } from '../util/hex-repository.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
@@ -470,6 +471,8 @@ export interface RenovateConfig
   vulnerabilitySeverity?: string;
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
+  mix?: RenovateConfig;
+  hexRepositories?: Record<string, HexRepository>;
 
   fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;

@@ -113,6 +113,7 @@ function applyManagerScopedOptions(
     managerConfig.minimumReleaseAgePackageManager;
   updateConfig.minimumReleaseAgePackageManagerSync =
     managerConfig.minimumReleaseAgePackageManagerSync;
+  updateConfig.hexRepositories = managerConfig.hexRepositories;
 }
 
 export async function flattenUpdates(
