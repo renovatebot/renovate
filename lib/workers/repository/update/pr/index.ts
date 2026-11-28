@@ -203,7 +203,7 @@ export async function ensurePr(
       if (validatePrCache(prCache, prBodyFingerprint) && !config.autoApprove) {
         return { type: 'with-pr', pr: existingPr };
       }
-    } else if (config.repositoryCache === 'enabled') {
+    } else if (GlobalConfig.get('repositoryCache') === 'enabled') {
       logger.debug('PR cache not found');
     }
   }
