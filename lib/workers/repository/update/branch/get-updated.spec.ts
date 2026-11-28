@@ -185,6 +185,163 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('passes already updated files to updateArtifacts for Vite+ reconciliation', async () => {
+      config.reuseExistingBranch = true;
+      config.postUpdateOptions = ['vitePlusSyncVersions'];
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      npm.updateDependency.mockReturnValue('existing content');
+      npm.updateArtifacts.mockResolvedValueOnce(null);
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(npm.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'package.json',
+          newPackageFileContent: 'existing content',
+        }),
+      );
+    });
+
+    it('does not run other managers for already updated files with Vite+ reconciliation', async () => {
+      config.reuseExistingBranch = true;
+      config.postUpdateOptions = ['vitePlusSyncVersions'];
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        branchName: 'some-branch',
+      });
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+      });
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(gitSubmodules.updateArtifacts).not.toHaveBeenCalled();
+    });
+
+    it.each(['notice', 'file', 'artifactError'] as const)(
+      'only marks reused manifests updated for file changes or errors: %s',
+      async (kind) => {
+        config.reuseExistingBranch = true;
+        config.postUpdateOptions = ['vitePlusSyncVersions'];
+        config.upgrades.push({
+          packageFile: 'package.json',
+          manager: 'npm',
+          branchName: 'some-branch',
+        });
+        npm.updateDependency.mockReturnValue('existing content');
+        const notice = {
+          file: 'package.json',
+          message: 'Dynamic installation is required',
+        };
+        const artifactError = {
+          fileName: 'package.json',
+          stderr: 'Planner failed',
+        };
+        const file = {
+          type: 'addition' as const,
+          path: 'package.json',
+          contents: 'aligned',
+        };
+        const result = {
+          notice: { notice },
+          file: { file },
+          artifactError: { artifactError },
+        }[kind];
+        npm.updateArtifacts.mockResolvedValueOnce([result]);
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res.updatedPackageFiles).toHaveLength(kind === 'notice' ? 0 : 1);
+        expect(res.artifactNotices).toEqual(kind === 'notice' ? [notice] : []);
+        expect(res.artifactErrors).toEqual(
+          kind === 'artifactError' ? [artifactError] : [],
+        );
+      },
+    );
+
+    it('skips updateArtifacts for already updated files without Vite+ reconciliation', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      npm.updateDependency.mockReturnValue('existing content');
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(npm.updateArtifacts).not.toHaveBeenCalled();
+    });
+
+    it('passes merged lookup contents to updated and unchanged artifact calls', async () => {
+      config.upgrades = [
+        {
+          manager: 'npm',
+          packageFile: 'package.json',
+          branchName: 'some-branch',
+        },
+        {
+          manager: 'npm',
+          packageFile: 'packages/test/package.json',
+          branchName: 'some-branch',
+          isLockfileUpdate: true,
+        },
+      ];
+      git.getFile.mockResolvedValue('existing content');
+      npm.updateDependency.mockReturnValue('updated root');
+      npm.updateLockedDependency.mockResolvedValue({ status: 'unsupported' });
+      npm.updateArtifacts.mockResolvedValue(null);
+
+      await getUpdatedPackageFiles(config);
+
+      expect(npm.updateArtifacts).toHaveBeenCalledTimes(2);
+      for (const [call] of npm.updateArtifacts.mock.calls) {
+        expect(call.config).toMatchObject({
+          packageFileContents: {
+            'package.json': 'updated root',
+            'packages/test/package.json': 'existing content',
+          },
+        });
+      }
+    });
+
+    it('collects each compatibility notice once across artifact calls', async () => {
+      config.upgrades = ['package.json', 'packages/test/package.json'].map(
+        (packageFile) => ({
+          manager: 'npm',
+          packageFile,
+          branchName: 'some-branch',
+        }),
+      );
+      git.getFile.mockResolvedValue('existing content');
+      npm.updateDependency.mockReturnValue('updated content');
+      const notice = {
+        file: 'package.json',
+        message: 'Vite+ aligned coverage to 4.1.11 for compatibility.',
+      };
+      const otherFile = { ...notice, file: 'packages/test/package.json' };
+      const otherMessage = { ...notice, message: 'Another alignment' };
+      npm.updateArtifacts
+        .mockResolvedValueOnce([{ notice }])
+        .mockResolvedValueOnce([
+          { notice },
+          { notice: otherFile },
+          { notice: otherMessage },
+        ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.artifactNotices).toEqual([notice, otherFile, otherMessage]);
+    });
+
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -687,6 +844,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         }),
       );
       expect(git.getFile).toHaveBeenCalledTimes(1);
+      for (const [call] of npm.updateArtifacts.mock.calls) {
+        expect(call.config).toMatchObject({
+          packageFileContents: { 'package.json': 'updated content' },
+        });
+      }
     });
 
     it('for lockFileMaintenance passes proper lockFiles', async () => {

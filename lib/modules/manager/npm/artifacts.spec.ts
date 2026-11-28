@@ -5,8 +5,10 @@ import type { FileAddition } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
+import { reconcileVitePlusVersions } from './vite-plus.ts';
 
 vi.mock('../../../util/fs/index.ts');
+vi.mock('./vite-plus.ts');
 
 // 32-byte digest, as used by sha256
 const sha256HexDigest = 'abcdef0123456789'.repeat(4);
@@ -29,6 +31,39 @@ const validDepUpdate = {
 } satisfies Upgrade<Record<string, unknown>>;
 
 describe('modules/manager/npm/artifacts', () => {
+  beforeEach(() => {
+    vi.mocked(reconcileVitePlusVersions).mockResolvedValue([]);
+  });
+
+  it('reconciles versions after the existing artifact handlers', async () => {
+    const input = {
+      packageFileName: 'package.json',
+      newPackageFileContent: '{"packageManager":"pnpm@8.15.6"}',
+      updatedDeps: [validDepUpdate],
+      config,
+    };
+    const reconciliation = [
+      { notice: { file: 'package.json', message: 'Aligned' } },
+    ];
+    vi.mocked(reconcileVitePlusVersions).mockResolvedValueOnce(reconciliation);
+
+    const result = await updateArtifacts(input);
+
+    expect(reconcileVitePlusVersions).toHaveBeenCalledExactlyOnceWith(input, [
+      {
+        file: {
+          type: 'addition',
+          path: 'package.json',
+          contents: `{"packageManager":"pnpm@8.15.6+sha512.${sha512HexDigest}"}`,
+        },
+      },
+    ]);
+    expect(result).toEqual([
+      expect.objectContaining({ file: expect.any(Object) }),
+      ...reconciliation,
+    ]);
+  });
+
   describe('devEngines.packageManager hashes', () => {
     const generatedVersion = `8.15.6+sha512.${sha512HexDigest}`;
     const devEnginesUpdate = {

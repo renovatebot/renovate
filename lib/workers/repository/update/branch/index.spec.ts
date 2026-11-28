@@ -10,6 +10,7 @@ import type {
 } from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
   PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
@@ -21,6 +22,7 @@ import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/p
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import type {
   EnsureCommentConfig,
+  Platform,
   Pr,
   PrBodyStruct,
   PrDebugData,
@@ -39,6 +41,7 @@ import type {
   CacheFingerprintMatchResult,
 } from '../../../types.ts';
 import * as _changelog from '../../changelog/index.ts';
+import { generateBranchConfig } from '../../updates/generate.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
@@ -147,7 +150,9 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
-        upgrades: partial<BranchUpgradeConfig>([{ depName: 'some-dep-name' }]),
+        upgrades: partial<BranchUpgradeConfig>([
+          { depName: 'some-dep-name', automerge: true },
+        ]),
         baseBranch: 'base-branch',
         manager: 'some-manager',
         major: undefined,
@@ -168,6 +173,10 @@ describe('workers/repository/update/branch/index', () => {
       });
       prWorker.getPlatformPrOptions.mockReturnValue({
         usePlatformAutomerge: true,
+      });
+      platform.cancelPlatformAutomerge.mockResolvedValue({
+        cancelled: false,
+        reason: 'unchanged',
       });
       GlobalConfig.set(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input!);
@@ -990,6 +999,855 @@ describe('workers/repository/update/branch/index', () => {
         prNo: 5,
         result: 'done',
         commitSha,
+      });
+    });
+
+    describe('artifact reconciliation', () => {
+      beforeEach(async () => {
+        const actualPrWorker =
+          await vi.importActual<typeof _prWorker>('../pr/index.ts');
+        prWorker.getPlatformPrOptions.mockImplementation(
+          actualPrWorker.getPlatformPrOptions,
+        );
+        npmPostExtract.getAdditionalFiles.mockResolvedValue({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        config = {
+          ...config,
+          ...generateBranchConfig([
+            {
+              ...getConfig(),
+              major: undefined,
+              manager: 'npm',
+              versioning: 'npm',
+              branchName: 'renovate/vitest-5.x',
+              baseBranch: config.baseBranch,
+              depName: 'vitest',
+              packageName: 'vitest',
+              packageFile: 'package.json',
+              datasource: 'npm',
+              currentValue: '4.1.0',
+              currentVersion: '4.1.0',
+              newValue: '5.0.0',
+              newVersion: '5.0.0',
+              newMajor: 5,
+              newMinor: 0,
+              newPatch: 0,
+              updateType: 'major',
+              isMajor: true,
+              isSingleVersion: true,
+              isBreaking: true,
+              automerge: true,
+              postUpdateOptions: ['vitePlusSyncVersions'],
+            },
+          ]),
+          cacheFingerprintMatch: 'no-match',
+          prCreation: 'immediate',
+        };
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+          updatedPackageFiles: [
+            {
+              type: 'addition',
+              path: 'package.json',
+              contents: '{"devDependencies":{"vitest":"5.0.0"}}',
+            },
+          ],
+        });
+      });
+
+      it('refreshes versions, classification, commit text and PR title', async () => {
+        config.commitBody = 'Selected {{{newVersion}}}';
+        config.upgrades[0].prTitle = 'Align {{{depName}}} to {{{newVersion}}}';
+        config.prTitle = 'Align vitest to 5.0.0';
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementationOnce((branch) => {
+            Object.assign(branch.upgrades[0], {
+              newValue: '4.1.11',
+              newVersion: '4.1.11',
+            });
+            branch.updatedPackageFiles = [
+              {
+                type: 'addition',
+                path: 'package.json',
+                contents: '{"devDependencies":{"vitest":"4.1.11"}}',
+              },
+            ];
+            return Promise.resolve({
+              updatedPackageFiles: branch.updatedPackageFiles,
+              artifactErrors: [],
+              artifactNotices: [{ file: 'package.json', message: 'Aligned' }],
+              updatedArtifacts: [
+                {
+                  type: 'addition',
+                  path: 'pnpm-lock.yaml',
+                  contents: 'aligned',
+                },
+              ],
+            });
+          });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('pr-created');
+        const expected = expect.objectContaining({
+          branchName: 'renovate/vitest-5.x',
+          baseBranch: 'base-branch',
+          cacheFingerprintMatch: 'no-match',
+          newValue: '4.1.11',
+          newVersion: '4.1.11',
+          newMajor: 4,
+          newMinor: 1,
+          newPatch: 11,
+          prettyNewVersion: 'v4.1.11',
+          prettyNewMajor: 'v4',
+          displayTo: '4.1.11',
+          updateType: 'patch',
+          isMajor: false,
+          isMinor: false,
+          isPatch: true,
+          isBreaking: false,
+          automerge: true,
+          commitMessage:
+            'Update dependency vitest to v4.1.11\n\nSelected 4.1.11',
+          prTitle: 'Align vitest to 4.1.11',
+          artifactNotices: [{ file: 'package.json', message: 'Aligned' }],
+          updatedArtifacts: [
+            { type: 'addition', path: 'pnpm-lock.yaml', contents: 'aligned' },
+          ],
+        });
+        expect(commit.commitFilesToBranch).toHaveBeenCalledWith(expected);
+        expect(prWorker.ensurePr).toHaveBeenCalledWith(expected);
+        expect(
+          commit.commitFilesToBranch.mock.calls[0][0].upgrades[0],
+        ).toMatchObject({
+          newVersion: '4.1.11',
+          isMajor: false,
+          isMinor: false,
+          isPatch: true,
+          isPin: false,
+          automerge: true,
+        });
+        expect(config.upgrades[0]).toMatchObject({
+          newVersion: '5.0.0',
+          isMajor: true,
+          automerge: true,
+        });
+      });
+
+      it('refreshes metadata again after retrying an artifact update', async () => {
+        config.reuseExistingBranch = true;
+        config.cacheFingerprintMatch = 'no-fingerprint';
+        config.commitBody = 'Selected {{{newVersion}}}';
+        const originalUpgrades = structuredClone(config.upgrades);
+        const selectedVersions: (string | undefined)[] = [];
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValue(
+          partial<Pr>({ number: 5, state: 'open' }),
+        );
+        platform.cancelPlatformAutomerge.mockResolvedValue({ cancelled: true });
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockResolvedValueOnce({ ...updatedPackageFiles })
+          .mockResolvedValueOnce({
+            ...updatedPackageFiles,
+            updatedPackageFiles: [
+              {
+                type: 'addition',
+                path: 'package.json',
+                contents: '{"devDependencies":{"vitest":"5.0.0"}}',
+              },
+            ],
+          });
+        npmPostExtract.getAdditionalFiles.mockImplementation((branch) => {
+          selectedVersions.push(branch.upgrades[0].newVersion);
+          Object.assign(branch.upgrades[0], {
+            newValue: '4.1.11',
+            newVersion: '4.1.11',
+          });
+          branch.updatedPackageFiles = [
+            {
+              type: 'addition',
+              path: 'package.json',
+              contents: '{"devDependencies":{"vitest":"4.1.11"}}',
+            },
+          ];
+          return Promise.resolve({
+            artifactErrors: [],
+            updatedArtifacts: [
+              { type: 'addition', path: 'pnpm-lock.yaml', contents: 'aligned' },
+            ],
+          });
+        });
+
+        await branchWorker.processBranch(config);
+
+        expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
+        expect(commit.commitFilesToBranch.mock.calls[0][0]).toMatchObject({
+          branchName: 'renovate/vitest-5.x',
+          newValue: '4.1.11',
+          newVersion: '4.1.11',
+          updateType: 'patch',
+          isMajor: false,
+          isPatch: true,
+          isBreaking: false,
+          automerge: true,
+          commitMessage:
+            'Update dependency vitest to v4.1.11\n\nSelected 4.1.11',
+          prTitle: 'Update dependency vitest to v4.1.11',
+        });
+        expect(selectedVersions).toEqual(['5.0.0', '5.0.0']);
+        expect(config.upgrades).toEqual(originalUpgrades);
+        expect(platform.cancelPlatformAutomerge).toHaveBeenCalledTimes(1);
+        expect(
+          platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
+        ).toBeLessThan(commit.commitFilesToBranch.mock.invocationCallOrder[0]);
+        expect(prWorker.ensurePr).toHaveBeenCalledWith(
+          expect.objectContaining({
+            newVersion: '4.1.11',
+            automerge: true,
+            prTitle: 'Update dependency vitest to v4.1.11',
+          }),
+        );
+      });
+
+      it('restarts artifact generation with untouched upgrade objects', async () => {
+        config.reuseExistingBranch = true;
+        config.cacheFingerprintMatch = 'no-fingerprint';
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValue(
+          partial<Pr>({ number: 5, state: 'open' }),
+        );
+        platform.cancelPlatformAutomerge.mockResolvedValue({ cancelled: true });
+        const originalUpgrades = structuredClone(config.upgrades);
+        const selectedVersions: (string | undefined)[] = [];
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementation((branch) => {
+            selectedVersions.push(branch.upgrades[0].newVersion);
+            expect(branch.upgrades[0]).not.toBe(config.upgrades[0]);
+            Object.assign(branch.upgrades[0], {
+              newVersion: '4.1.11',
+              newValue: '4.1.11',
+            });
+            return Promise.resolve({
+              ...updatedPackageFiles,
+              updatedPackageFiles: [
+                {
+                  type: 'addition',
+                  path: 'package.json',
+                  contents: '{"devDependencies":{"vitest":"5.0.0"}}',
+                },
+              ],
+              updatedArtifacts: [
+                {
+                  type: 'addition',
+                  path: 'package.json',
+                  contents: '{"devDependencies":{"vitest":"4.1.11"}}',
+                },
+              ],
+            });
+          });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('done');
+        expect(selectedVersions).toEqual(['5.0.0', '5.0.0']);
+        expect(config.upgrades).toEqual(originalUpgrades);
+        expect(npmPostExtract.getAdditionalFiles).toHaveBeenCalledTimes(1);
+        expect(commit.commitFilesToBranch).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ newVersion: '4.1.11', automerge: true }),
+        );
+      });
+
+      describe('platform automerge cancellation', () => {
+        beforeEach(() => {
+          config.upgrades[0].updateType = 'pin';
+          config.upgrades[0].isBreaking = false;
+          config.upgrades[0].depType = 'devDependencies';
+          git.getFile.mockImplementation((path, branchName) =>
+            Promise.resolve(
+              path === 'package.json' && branchName === config.branchName
+                ? '{"devDependencies":{"vitest":"4.1.10"}}'
+                : null,
+            ),
+          );
+          scm.branchExists.mockResolvedValue(true);
+          platform.getBranchPr.mockResolvedValue(
+            partial<Pr>({ number: 5, state: 'open' }),
+          );
+          npmPostExtract.getAdditionalFiles.mockImplementation((branch) => {
+            Object.assign(branch.upgrades[0], {
+              newValue: '4.1.11',
+              newVersion: '4.1.11',
+            });
+            branch.updatedPackageFiles = [
+              {
+                type: 'addition',
+                path: 'package.json',
+                contents: '{"devDependencies":{"vitest":"4.1.11"}}',
+              },
+            ];
+            return Promise.resolve({
+              artifactErrors: [],
+              updatedArtifacts: [
+                {
+                  type: 'addition',
+                  path: 'pnpm-lock.yaml',
+                  contents: 'aligned',
+                },
+              ],
+            });
+          });
+        });
+
+        it.each(['unconfirmed', 'unchanged'] as const)(
+          'does not push after %s cancellation',
+          async (reason) => {
+            platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+              cancelled: false,
+              reason,
+            });
+
+            const result = await branchWorker.processBranch(config);
+
+            expect(result).toEqual({
+              branchExists: true,
+              prNo: 5,
+              result: 'error',
+            });
+            expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+            expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+          },
+        );
+
+        it.each(['cancelled', 'not-enabled', 'enabled-by-other'] as const)(
+          'continues after %s cancellation without restoring disabled automerge',
+          async (reason) => {
+            platform.cancelPlatformAutomerge.mockResolvedValueOnce(
+              reason === 'cancelled'
+                ? { cancelled: true }
+                : { cancelled: false, reason },
+            );
+            commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+            const result = await branchWorker.processBranch(config);
+
+            expect(result.result).toBe('done');
+            expect(
+              platform.cancelPlatformAutomerge,
+            ).toHaveBeenCalledExactlyOnceWith({
+              number: 5,
+              platformPrOptions: expect.objectContaining({
+                usePlatformAutomerge: false,
+              }),
+            });
+            expect(
+              platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
+            ).toBeLessThan(
+              commit.commitFilesToBranch.mock.invocationCallOrder[0],
+            );
+            for (const [options] of platform.reattemptPlatformAutomerge.mock
+              .calls) {
+              expect(
+                options.platformPrOptions?.usePlatformAutomerge,
+              ).toBeFalse();
+            }
+          },
+        );
+
+        it.each([true, false])(
+          'continues without a cancellation API, automerge=%s',
+          async (automerge) => {
+            config.automerge = automerge;
+            const optionalPlatform: Platform = platform;
+            const cancel = platform.cancelPlatformAutomerge;
+            optionalPlatform.cancelPlatformAutomerge = undefined;
+            try {
+              const result = await branchWorker.processBranch(config);
+
+              expect(result.result).toBe('done');
+              expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
+              expect(cancel).not.toHaveBeenCalled();
+            } finally {
+              optionalPlatform.cancelPlatformAutomerge = cancel;
+            }
+          },
+        );
+
+        it('cancels platform automerge when only an alignment disabled automerge', async () => {
+          npmPostExtract.getAdditionalFiles
+            .mockReset()
+            .mockImplementation((branch) => {
+              branch.upgrades[0].automerge = false;
+              return Promise.resolve({
+                artifactErrors: [],
+                updatedArtifacts: [],
+              });
+            });
+          platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+            cancelled: false,
+            reason: 'unconfirmed',
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result.result).toBe('error');
+          expect(
+            platform.cancelPlatformAutomerge,
+          ).toHaveBeenCalledExactlyOnceWith({
+            number: 5,
+            platformPrOptions: expect.objectContaining({
+              usePlatformAutomerge: false,
+            }),
+          });
+          expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+        });
+
+        it('does not cancel when platform automerge was already disabled', async () => {
+          config.automerge = false;
+
+          await branchWorker.processBranch(config);
+
+          expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
+          expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(1);
+        });
+
+        it('preserves automerge across repeated reconciliation with ranged workspace targets', async () => {
+          getUpdated.getUpdatedPackageFiles
+            .mockReset()
+            .mockResolvedValue({ ...updatedPackageFiles });
+          config.upgrades[0].updateType = 'major';
+          config.upgrades[0].isBreaking = true;
+          config.upgrades.push({
+            ...config.upgrades[0],
+            packageFile: 'other/package.json',
+            currentValue: '^4',
+            newValue: '^4.2.0',
+            newVersion: '4.2.0',
+          });
+          git.getFile.mockResolvedValue('{"devDependencies":{"vitest":"^4"}}');
+
+          await branchWorker.processBranch(config);
+          await branchWorker.processBranch(config);
+
+          expect(prWorker.ensurePr).toHaveBeenCalledTimes(2);
+          expect(prWorker.ensurePr).toHaveBeenLastCalledWith(
+            expect.objectContaining({ automerge: true }),
+          );
+          expect(git.getFile).not.toHaveBeenCalled();
+        });
+
+        it('reconciles when the branch fingerprint matches', async () => {
+          config.reuseExistingBranch = true;
+          config.cacheFingerprintMatch = 'matched';
+          getUpdated.getUpdatedPackageFiles
+            .mockReset()
+            .mockResolvedValue({ ...updatedPackageFiles });
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce(
+            async (branch) => {
+              Object.assign(branch.upgrades[0], {
+                newValue: '4.1.11',
+                newVersion: '4.1.11',
+              });
+              return Promise.resolve({
+                artifactErrors: [],
+                updatedArtifacts: [],
+              });
+            },
+          );
+
+          await branchWorker.processBranch(config);
+
+          expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(1);
+          expect(
+            platform.cancelPlatformAutomerge,
+          ).toHaveBeenCalledExactlyOnceWith({
+            number: 5,
+            platformPrOptions: expect.objectContaining({
+              usePlatformAutomerge: false,
+            }),
+          });
+        });
+
+        it('does not cancel or push in dry-run', async () => {
+          GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+          const actualCommit =
+            await vi.importActual<typeof import('./commit.ts')>('./commit.ts');
+          commit.commitFilesToBranch.mockImplementationOnce(
+            actualCommit.commitFilesToBranch,
+          );
+
+          await branchWorker.processBranch(config);
+
+          expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
+          expect(scm.commitAndPush).not.toHaveBeenCalled();
+          expect(logger.info).toHaveBeenCalledWith(
+            'DRY-RUN: Would check platform automerge for PR #5',
+          );
+        });
+      });
+
+      it.each`
+        branchExists | dashboardCheck | expectedResult                  | expectedCommits
+        ${false}     | ${undefined}   | ${'minimum-group-size-not-met'} | ${0}
+        ${false}     | ${'rebase'}    | ${'pr-created'}                 | ${1}
+        ${true}      | ${undefined}   | ${'done'}                       | ${1}
+      `(
+        'enforces minimumGroupSize after pruning with branchExists=$branchExists and dashboardCheck=$dashboardCheck',
+        async ({
+          branchExists,
+          dashboardCheck,
+          expectedResult,
+          expectedCommits,
+        }) => {
+          config.minimumGroupSize = 2;
+          config.upgrades[0].minimumGroupSize = 2;
+          config.upgrades.push({
+            ...config.upgrades[0],
+            depName: '@vitest/coverage-v8',
+            packageName: '@vitest/coverage-v8',
+          });
+          if (dashboardCheck) {
+            config.dependencyDashboardChecks = {
+              [config.branchName]: dashboardCheck,
+            };
+          }
+          scm.branchExists.mockResolvedValue(branchExists);
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+            branch.upgrades[1].newValue = branch.upgrades[1].currentValue!;
+            branch.upgrades[1].newVersion = branch.upgrades[1].currentVersion;
+            return Promise.resolve({
+              artifactErrors: [],
+              updatedArtifacts: [],
+            });
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result.result).toBe(expectedResult);
+          expect(commit.commitFilesToBranch).toHaveBeenCalledTimes(
+            expectedCommits,
+          );
+          expect(prWorker.ensurePr).toHaveBeenCalledTimes(expectedCommits);
+        },
+      );
+
+      it('checks minimumGroupSize against the remaining upgrades', async () => {
+        config.minimumGroupSize = 3;
+        config.upgrades[0].minimumGroupSize = 2;
+        config.upgrades.push(
+          {
+            ...config.upgrades[0],
+            depName: '@vitest/coverage-v8',
+            packageName: '@vitest/coverage-v8',
+          },
+          {
+            ...config.upgrades[0],
+            depName: '@vitest/ui',
+            packageName: '@vitest/ui',
+            minimumGroupSize: 3,
+          },
+        );
+        scm.branchExists.mockResolvedValue(false);
+        npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+          branch.upgrades[2].newValue = branch.upgrades[2].currentValue!;
+          branch.upgrades[2].newVersion = branch.upgrades[2].currentVersion;
+          return Promise.resolve({ artifactErrors: [], updatedArtifacts: [] });
+        });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('pr-created');
+        expect(prWorker.ensurePr).toHaveBeenCalledWith(
+          expect.objectContaining({
+            minimumGroupSize: 2,
+            upgrades: [
+              expect.objectContaining({ depName: 'vitest' }),
+              expect.objectContaining({ depName: '@vitest/coverage-v8' }),
+            ],
+          }),
+        );
+      });
+
+      it.each`
+        change                       | fields                                                         | expectedResult
+        ${'a new digest'}            | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:bbb' }}    | ${'pr-created'}
+        ${'a new package name'}      | ${{ newName: '@vitest/core' }}                                 | ${'pr-created'}
+        ${'a replacement'}           | ${{ isReplacement: true }}                                     | ${'pr-created'}
+        ${'the current digest'}      | ${{ currentDigest: 'sha256:aaa', newDigest: 'sha256:aaabbb' }} | ${'no-work'}
+        ${'an empty current digest'} | ${{ currentDigest: '', newDigest: 'sha256:aaabbb' }}           | ${'no-work'}
+      `(
+        'checks $change when a target returns to its current value',
+        async ({ fields, expectedResult }) => {
+          Object.assign(config.upgrades[0], fields);
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+            branch.upgrades[0].newValue = branch.upgrades[0].currentValue!;
+            branch.upgrades[0].newVersion = branch.upgrades[0].currentVersion;
+            return Promise.resolve({
+              artifactErrors: [],
+              updatedArtifacts: [],
+            });
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result.result).toBe(expectedResult);
+        },
+      );
+
+      it.each([false, true])(
+        'returns no work when reconciliation removes all upgrades, branchExists=%s',
+        async (branchExists) => {
+          config.commitBody = 'Selected {{{newVersion}}}';
+          scm.branchExists
+            .mockResolvedValue(false)
+            .mockResolvedValueOnce(branchExists);
+          if (branchExists) {
+            const pr = partial<Pr>({
+              number: 5,
+              state: 'open',
+              title: 'Update dependency vitest to v5',
+            });
+            platform.getBranchPr.mockResolvedValueOnce(pr);
+            platform.findPr.mockResolvedValueOnce(pr);
+            platform.getPr.mockResolvedValueOnce(pr);
+          }
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+            for (const upgrade of branch.upgrades) {
+              upgrade.newValue = upgrade.currentValue!;
+              upgrade.newVersion = upgrade.currentVersion;
+            }
+            branch.updatedPackageFiles = [];
+            return Promise.resolve({
+              artifactErrors: [],
+              updatedArtifacts: [],
+            });
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result).toEqual({
+            branchExists: false,
+            prNo: undefined,
+            result: 'no-work',
+          });
+          expect(platform.updatePr.mock.calls).toEqual(
+            branchExists
+              ? [
+                  [
+                    {
+                      number: 5,
+                      prTitle: 'Update dependency vitest to v5 - autoclosed',
+                      state: 'closed',
+                    },
+                  ],
+                ]
+              : [],
+          );
+          expect(scm.deleteBranch.mock.calls).toEqual(
+            branchExists ? [['renovate/vitest-5.x']] : [],
+          );
+          expect(scm.isBranchModified.mock.calls).toEqual(
+            branchExists
+              ? [
+                  ['renovate/vitest-5.x', 'base-branch'],
+                  ['renovate/vitest-5.x', 'base-branch'],
+                ]
+              : [],
+          );
+          expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+          expect(prWorker.ensurePr).not.toHaveBeenCalled();
+          expect(platform.refreshPr).not.toHaveBeenCalled();
+          expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+          expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
+          expect(changelog.embedChangelogs).not.toHaveBeenCalled();
+        },
+      );
+
+      it('keeps an unchanged no-op target while dropping a reconciled no-op', async () => {
+        config.upgrades[0].currentValue = '5.0.0';
+        config.upgrades.push({
+          ...config.upgrades[0],
+          depName: '@vitest/coverage-v8',
+          currentValue: '4.1.0',
+        });
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementationOnce((branch) => {
+            branch.upgrades[1].newValue = '4.1.0';
+            branch.upgrades[1].newVersion = '4.1.0';
+            return Promise.resolve({ ...updatedPackageFiles });
+          });
+
+        await branchWorker.processBranch(config);
+
+        expect(prWorker.ensurePr).toHaveBeenCalledWith(
+          expect.objectContaining({
+            upgrades: [
+              expect.objectContaining({
+                depName: 'vitest',
+                currentValue: '5.0.0',
+                newValue: '5.0.0',
+              }),
+            ],
+          }),
+        );
+      });
+
+      it('drops a no-op target without a current version', async () => {
+        Object.assign(config.upgrades[0], {
+          currentValue: 'latest',
+          currentVersion: undefined,
+        });
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementationOnce((branch) => {
+            branch.upgrades[0].newValue = 'latest';
+            branch.upgrades[0].newVersion = '4.1.0';
+            return Promise.resolve({ ...updatedPackageFiles });
+          });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('no-work');
+        expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+      });
+
+      it('keeps a lock file update whose version changed', async () => {
+        Object.assign(config.upgrades[0], {
+          currentValue: '^4.1.0',
+          newValue: '^4.1.0',
+          newVersion: '4.2.0',
+          isLockfileUpdate: true,
+        });
+        getUpdated.getUpdatedPackageFiles
+          .mockReset()
+          .mockImplementationOnce((branch) => {
+            branch.upgrades[0].newVersion = '4.1.3';
+            return Promise.resolve({ ...updatedPackageFiles });
+          });
+
+        const result = await branchWorker.processBranch(config);
+
+        expect(result.result).toBe('pr-created');
+        expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            upgrades: [
+              expect.objectContaining({
+                newValue: '^4.1.0',
+                newVersion: '4.1.3',
+              }),
+            ],
+          }),
+        );
+      });
+
+      it.each(['dry-run', 'pruning-disabled', 'branch-modified'])(
+        'preserves existing cleanup policy for a no-op with %s',
+        async (policy) => {
+          const pr = partial<Pr>({
+            number: 5,
+            state: 'open',
+            title: 'Update dependency vitest to v5',
+          });
+          scm.branchExists.mockResolvedValue(true);
+          platform.getBranchPr.mockResolvedValueOnce(pr);
+          platform.findPr.mockResolvedValueOnce(pr);
+          platform.getPr.mockResolvedValueOnce(pr);
+          if (policy === 'dry-run') {
+            GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+          } else if (policy === 'pruning-disabled') {
+            config.pruneStaleBranches = false;
+          } else {
+            scm.isBranchModified
+              .mockResolvedValueOnce(false)
+              .mockResolvedValueOnce(true);
+          }
+          npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+            for (const upgrade of branch.upgrades) {
+              upgrade.newValue = upgrade.currentValue!;
+              upgrade.newVersion = upgrade.currentVersion;
+            }
+            branch.updatedPackageFiles = [];
+            return Promise.resolve({
+              artifactErrors: [],
+              updatedArtifacts: [],
+            });
+          });
+
+          const result = await branchWorker.processBranch(config);
+
+          expect(result).toEqual({
+            branchExists: true,
+            prNo: 5,
+            result: 'no-work',
+          });
+          expect(scm.deleteBranch).not.toHaveBeenCalled();
+          expect(platform.updatePr).not.toHaveBeenCalledWith(
+            expect.objectContaining({ state: 'closed' }),
+          );
+          expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+          expect(prWorker.ensurePr).not.toHaveBeenCalled();
+        },
+      );
+
+      it('keeps the chosen group when only one upgrade remains', async () => {
+        config = {
+          ...config,
+          ...generateBranchConfig(
+            ['@vitest/coverage-v8', 'vitest'].map((depName) => ({
+              ...getConfig(),
+              major: undefined,
+              manager: 'npm',
+              versioning: 'npm',
+              branchName: 'renovate/vitest-group',
+              baseBranch: 'base-branch',
+              groupName: 'Vitest packages',
+              depName,
+              packageName: depName,
+              packageFile: 'package.json',
+              currentValue: '4.1.0',
+              currentVersion: '4.1.0',
+              newValue: '4.2.0',
+              newVersion: '4.2.0',
+              updateType: 'minor',
+              isMinor: true,
+              isSingleVersion: true,
+              automerge: true,
+              group: {
+                commitMessageTopic: '{{{groupName}}}',
+                prTitle: 'Align {{{groupName}}} to {{{newVersion}}}',
+              },
+            })),
+          ),
+          automerge: false,
+          prCreation: 'immediate',
+          commitBody: '{{{depName}}}: {{{newValue}}}',
+        };
+        npmPostExtract.getAdditionalFiles.mockImplementationOnce((branch) => {
+          branch.upgrades[0].newValue = branch.upgrades[0].currentValue!;
+          branch.upgrades[0].newVersion = branch.upgrades[0].currentVersion;
+          return Promise.resolve({ artifactErrors: [], updatedArtifacts: [] });
+        });
+
+        await branchWorker.processBranch(config);
+
+        expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            branchName: 'renovate/vitest-group',
+            groupName: 'Vitest packages',
+            isGroup: true,
+            depName: 'vitest',
+            automerge: false,
+            commitMessage: 'Update Vitest packages to v4.2.0\n\nvitest: 4.2.0',
+            prTitle: 'Align Vitest packages to 4.2.0',
+            upgrades: [expect.objectContaining({ depName: 'vitest' })],
+          }),
+        );
+        expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -4133,6 +4991,211 @@ describe('workers/repository/update/branch/index', () => {
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
     });
 
+    describe('cancelPlatformAutomerge', () => {
+      const platformPrOptions = { usePlatformAutomerge: true };
+
+      beforeEach(() => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            number: 123,
+            state: 'open',
+          }),
+        );
+        prWorker.getPlatformPrOptions.mockReturnValue(platformPrOptions);
+      });
+
+      it('cancels platform automerge before the push', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          platform.cancelPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+        expect(
+          platform.cancelPlatformAutomerge.mock.invocationCallOrder[0],
+        ).toBeLessThan(commit.commitFilesToBranch.mock.invocationCallOrder[0]);
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({
+          number: 123,
+          platformPrOptions,
+          sha: commitSha,
+        });
+      });
+
+      it('pushes and leaves platform automerge of someone else as it is', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: false,
+          reason: 'enabled-by-other',
+        });
+        commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+        await branchWorker.processBranch(config);
+
+        expect(commit.commitFilesToBranch).toHaveBeenCalledOnce();
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+      });
+
+      it.each`
+        description               | error                                                         | expected
+        ${'rate limit'}           | ${new Error(PLATFORM_RATE_LIMIT_EXCEEDED)}                    | ${PLATFORM_RATE_LIMIT_EXCEEDED}
+        ${'repository change'}    | ${new Error(REPOSITORY_CHANGED)}                              | ${REPOSITORY_CHANGED}
+        ${'missing branch or PR'} | ${Object.assign(new Error('Not found'), { statusCode: 404 })} | ${REPOSITORY_CHANGED}
+      `(
+        'does not re-enable platform automerge after a $description',
+        async ({ error, expected }) => {
+          platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+            cancelled: true,
+          });
+          scm.checkoutBranch
+            .mockResolvedValueOnce(commitSha)
+            .mockRejectedValueOnce(error);
+
+          await expect(branchWorker.processBranch(config)).rejects.toThrow(
+            expected,
+          );
+
+          expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+        },
+      );
+
+      it('re-enables platform automerge when nothing was pushed', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+        commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+      });
+
+      it('does not enable platform automerge which was not enabled', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: false,
+          reason: 'not-enabled',
+        });
+        commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+        await branchWorker.processBranch(config);
+
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+      });
+
+      it('re-enables platform automerge when a later step throws', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(new Error('checkout failed'));
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'error', prNo: 123 });
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+      });
+
+      it('does not re-enable platform automerge again when a step after it throws', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+        platform.refreshPr.mockRejectedValueOnce(new Error('refresh failed'));
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'error', prNo: 123 });
+        expect(platform.reattemptPlatformAutomerge).toHaveBeenCalledOnce();
+      });
+
+      it('does not re-enable platform automerge on errors when it was not cancelled', async () => {
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(new Error('checkout failed'));
+
+        await branchWorker.processBranch(config);
+
+        expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+      });
+
+      it('handles the original error when re-enabling throws', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+        const reattemptErr = new Error('unknown');
+        platform.reattemptPlatformAutomerge.mockRejectedValueOnce(reattemptErr);
+        const checkoutErr = new Error('checkout failed');
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(checkoutErr);
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'error', prNo: 123 });
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: reattemptErr },
+          'Error re-enabling platform automerge',
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: checkoutErr },
+          'Error updating branch',
+        );
+      });
+
+      it('passes a rate limit from re-enabling up after handling the original error', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+        const reattemptErr = new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+        platform.reattemptPlatformAutomerge.mockRejectedValueOnce(reattemptErr);
+        const checkoutErr = new Error('checkout failed');
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(checkoutErr);
+
+        await expect(branchWorker.processBranch(config)).rejects.toBe(
+          reattemptErr,
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: checkoutErr },
+          'Error updating branch',
+        );
+      });
+
+      it('passes the original error up when it is passed up itself', async () => {
+        platform.cancelPlatformAutomerge.mockResolvedValueOnce({
+          cancelled: true,
+        });
+        platform.reattemptPlatformAutomerge.mockRejectedValueOnce(
+          new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+        );
+        const checkoutErr = new Error(MANAGER_LOCKFILE_ERROR);
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(checkoutErr);
+
+        await expect(branchWorker.processBranch(config)).rejects.toBe(
+          checkoutErr,
+        );
+      });
+    });
+
     it('should not reattempt platform automerge in dry run', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -4153,8 +5216,12 @@ describe('workers/repository/update/branch/index', () => {
       });
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await branchWorker.processBranch(config);
+      expect(platform.cancelPlatformAutomerge).not.toHaveBeenCalled();
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
 
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would check platform automerge for PR #123',
+      );
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );

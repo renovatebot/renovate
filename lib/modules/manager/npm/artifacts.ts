@@ -18,6 +18,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { isPackageManagerDepType } from './dep-types.ts';
 import type { NpmManagerData } from './types.ts';
 import { updateDependency } from './update/dependency/index.ts';
+import { reconcileVitePlusVersions } from './vite-plus.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
@@ -40,6 +41,7 @@ export async function updateArtifacts(
   res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
+  res = res.concat(await reconcileVitePlusVersions(updateArtifactsConfig, res));
   if (res.length === 0) {
     return null;
   }

@@ -397,9 +397,21 @@ export async function getUpdatedPackageFiles(
       } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
+      } else if (
+        reuseExistingBranch &&
+        manager === 'npm' &&
+        !updatedFileContents[packageFile] &&
+        config.postUpdateOptions?.includes('vitePlusSyncVersions')
+      ) {
+        // Vite+ reconciliation runs in updateArtifacts, so it must also see files the branch already updated.
+        nonUpdatedFileContents[packageFile] = newContent;
       }
     }
   }
+  const packageFileContents = {
+    ...nonUpdatedFileContents,
+    ...updatedFileContents,
+  };
   const updatedPackageFiles: FileAddition[] = Object.keys(
     updatedFileContents,
   ).map((name) => ({
@@ -437,6 +449,7 @@ export async function getUpdatedPackageFiles(
             config,
             manager,
             packageFile.path,
+            packageFileContents,
           ),
         });
         if (manager === 'mise') {
@@ -509,6 +522,7 @@ export async function getUpdatedPackageFiles(
             config,
             manager,
             packageFile.path,
+            packageFileContents,
           ),
         });
         processUpdateArtifactResults(
@@ -517,7 +531,7 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (isNonEmptyArray(results)) {
+        if (results?.some((result) => result.file ?? result.artifactError)) {
           updatedPackageFiles.push(packageFile);
           await checkForPendingVersions(
             manager,
@@ -563,6 +577,7 @@ export async function getUpdatedPackageFiles(
               config,
               manager,
               packageFile.path,
+              packageFileContents,
             ),
           });
           processUpdateArtifactResults(
@@ -589,9 +604,10 @@ function patchConfigForArtifactsUpdate(
   config: BranchConfig,
   manager: string,
   packageFileName: string,
+  packageFileContents: Record<string, string>,
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
-  const updatedConfig = { ...config };
+  const updatedConfig = { ...config, packageFileContents };
   delete updatedConfig.lockFiles;
   if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
@@ -652,7 +668,14 @@ function processUpdateArtifactResults(
       }
 
       if (notice) {
-        artifactNotices.push(notice);
+        const alreadyReported = artifactNotices.some(
+          (existing) =>
+            existing.file === notice.file &&
+            existing.message === notice.message,
+        );
+        if (!alreadyReported) {
+          artifactNotices.push(notice);
+        }
       }
     }
   }
