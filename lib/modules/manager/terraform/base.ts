@@ -24,11 +24,13 @@ export abstract class DependencyExtractor {
    * Extract dependencies from a HCL object
    * @param hclRoot HCL parsing artifact.
    * @param locks currently existing locks
+   * @param siblings parsed contents of the other Terraform files of the same directory
    */
   abstract extract(
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
     config: ExtractConfig,
+    siblings?: TerraformDefinitionFile[],
   ): PackageDependency[];
 }
 
