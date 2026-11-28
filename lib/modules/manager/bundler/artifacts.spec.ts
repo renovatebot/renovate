@@ -250,6 +250,102 @@ describe('modules/manager/bundler/artifacts', () => {
       ]);
     });
 
+    it('commits vendored gems when vendored cache exists', async () => {
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0'); // .ruby-version
+      fs.getSiblingFileName.mockReturnValueOnce('vendor/cache');
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['Gemfile.lock'],
+          not_added: ['vendor/cache/foo-1.0.1.gem'],
+          deleted: ['vendor/cache/foo-1.0.0.gem'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('foo-1.0.1 gem content');
+      const res = await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [{ depName: 'foo' }],
+        newPackageFileContent: 'Updated Gemfile content',
+        config,
+      });
+      expect(res).toEqual([
+        updatedGemfileLock,
+        {
+          file: {
+            type: 'addition',
+            path: 'vendor/cache/foo-1.0.1.gem',
+            contents: 'foo-1.0.1 gem content',
+          },
+        },
+        { file: { type: 'deletion', path: 'vendor/cache/foo-1.0.0.gem' } },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'bundler lock --update foo' },
+        { cmd: 'bundler cache --no-install --all-platforms' },
+      ]);
+    });
+
+    it('commits vendored gems on subdirectories when vendored cache exists', async () => {
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0'); // .ruby-version
+      fs.getSiblingFileName.mockReturnValueOnce('teamA/vendor/cache');
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['teamA/Gemfile.lock'],
+          not_added: [
+            'teamA/vendor/cache/foo-1.0.1.gem',
+            'vendor/cache/foo-1.0.1.gem', // should be ignored
+          ],
+          deleted: ['teamA/vendor/cache/foo-1.0.0.gem'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('foo-1.0.1 gem content');
+      const res = await updateArtifacts({
+        packageFileName: 'teamA/Gemfile',
+        updatedDeps: [{ depName: 'foo' }],
+        newPackageFileContent: 'Updated Gemfile content',
+        config,
+      });
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'teamA/Gemfile.lock',
+            contents: 'Updated Gemfile.lock',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'teamA/vendor/cache/foo-1.0.1.gem',
+            contents: 'foo-1.0.1 gem content',
+          },
+        },
+        {
+          file: {
+            type: 'deletion',
+            path: 'teamA/vendor/cache/foo-1.0.0.gem',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'bundler lock --update foo',
+          options: { cwd: '/tmp/github/some/repo/teamA' },
+        },
+        {
+          cmd: 'bundler cache --no-install --all-platforms',
+          options: { cwd: '/tmp/github/some/repo/teamA' },
+        },
+      ]);
+    });
+
     describe('Docker', () => {
       beforeEach(() => {
         GlobalConfig.set({
